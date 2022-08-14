@@ -69,18 +69,57 @@ void Server::AddCandidateFutures( fAddCandidateFutures_t&& f ) {
   }
 }
 
-void Server::Start(
-    const std::string& sSessionId, const std::string& sUnderlyingFuture,
-    fUpdateUnderlyingInfo_t&& fUpdateUnderlyingInfo,
-    fUpdateUnderlyingPrice_t&& fUpdateUnderlyingPrice,
-    fUpdateOptionExpiries_t&& fUpdateOptionExpiries,
-    fUpdateOptionExpiriesDone_t&& fUpdateOptionExpiriesDone
+void Server::Underlying(
+  const std::string& sSessionId, const std::string& sIQFeedUnderlying,
+  fUpdateUnderlyingInfo_t&& fUpdateUnderlyingInfo,
+  fUpdateUnderlyingPrice_t&& fUpdateUnderlyingPrice
 ) {
+
   assert( fUpdateUnderlyingInfo );
   m_fUpdateUnderlyingInfo = std::move( fUpdateUnderlyingInfo );
 
   assert( fUpdateUnderlyingPrice );
   m_fUpdateUnderlyingPrice = std::move( fUpdateUnderlyingPrice );
+
+  m_implServer->Underlying(
+  sIQFeedUnderlying,
+  [this,sSessionId](const std::string& sName, int multiplier ) { // fUpdateUnderlyingInfo_t
+    post(
+      sSessionId,
+      [this, sName_=std::move(sName), multiplier ]() {
+        std::string sMultiplier = boost::lexical_cast<std::string>( multiplier );
+        m_fUpdateUnderlyingInfo( sName_, sMultiplier );
+      }
+    );
+  },
+  [this,sSessionId]( double price, int precision, double dblPortfolioPnL ) mutable { // fUpdateUnderlyingPrice_t
+    assert( 20 > precision );  // seems, on some random startup,
+                                // caller sends correct value, but precision is stopmped on, will need a valgrind session
+                                // may have to do with screen changing, is this in the timer?
+                                // maybe only startup timer after chain/expiry selected
+                                // otherwise implement the post below again
+    boost::format formatPrice( "%0." + boost::lexical_cast<std::string>( precision ) + "f" );
+    formatPrice % price;
+    const std::string sPrice( formatPrice.str() );
+
+    boost::format formatPnL( sFormatUSD );
+    formatPnL % dblPortfolioPnL;
+    const std::string sPortfolioPnL( formatPnL.str() );
+    //post(
+    //  sSessionId,
+    //  [this,sPrice_=std::move(sPrice)](){
+        m_fUpdateUnderlyingPrice( sPrice, sPortfolioPnL );
+    //  }
+    //);
+  }
+  );
+}
+
+void Server::ChainSelection(
+    const std::string& sSessionId,
+    fUpdateOptionExpiries_t&& fUpdateOptionExpiries,
+    fUpdateOptionExpiriesDone_t&& fUpdateOptionExpiriesDone
+) {
 
   assert( fUpdateOptionExpiries );
   m_fUpdateOptionExpiries = std::move( fUpdateOptionExpiries );
@@ -88,39 +127,7 @@ void Server::Start(
   assert( fUpdateOptionExpiriesDone );
   m_fUpdateOptionExpiriesDone = std::move( fUpdateOptionExpiriesDone );
 
-  //boost::format format( sFormatFloat );
-
-  m_implServer->Start(
-    sUnderlyingFuture,
-    [this,sSessionId](const std::string& sName, int multiplier ) { // fUpdateUnderlyingInfo_t
-      post(
-        sSessionId,
-        [this, sName_=std::move(sName), multiplier ]() {
-          std::string sMultiplier = boost::lexical_cast<std::string>( multiplier );
-          m_fUpdateUnderlyingInfo( sName_, sMultiplier );
-        }
-      );
-    },
-    [this,sSessionId]( double price, int precision, double dblPortfolioPnL ) mutable { // fUpdateUnderlyingPrice_t
-      assert( 20 > precision );  // seems, on some random startup,
-                                 // caller sends correct value, but precision is stopmped on, will need a valgrind session
-                                 // may have to do with screen changing, is this in the timer?
-                                 // maybe only startup timer after chain/expiry selected
-                                 // otherwise implement the post below again
-      boost::format formatPrice( "%0." + boost::lexical_cast<std::string>( precision ) + "f" );
-      formatPrice % price;
-      const std::string sPrice( formatPrice.str() );
-
-      boost::format formatPnL( sFormatUSD );
-      formatPnL % dblPortfolioPnL;
-      const std::string sPortfolioPnL( formatPnL.str() );
-      //post(
-      //  sSessionId,
-      //  [this,sPrice_=std::move(sPrice)](){
-          m_fUpdateUnderlyingPrice( sPrice, sPortfolioPnL );
-      //  }
-      //);
-    },
+  m_implServer->ChainSelection(
     [this,sSessionId]( boost::gregorian::date date ){ // fAddExpiry_t
       post(
         sSessionId,

@@ -81,10 +81,10 @@ private:
   // listed in rough order of usage on page
   Wt::WContainerWidget* m_pContainerDataEntry;
   Wt::WContainerWidget* m_pContainerDataEntryButtons;
-  Wt::WContainerWidget* m_pContainerLiveData;
-  Wt::WContainerWidget* m_pContainerTableEntry;
-  Wt::WContainerWidget* m_pContainerTableEntryButtons;
-  Wt::WContainerWidget* m_pContainerNotifications;
+  Wt::WContainerWidget* m_pContainerLiveData; // underlying only
+  Wt::WContainerWidget* m_pContainerTableEntry; // put this and next in ContainerTableEntry
+  //Wt::WContainerWidget* m_pContainerTableEntryButtons;
+  //Wt::WContainerWidget* m_pContainerNotifications;
   Wt::WContainerWidget* m_pContainerControl;
 
   using pButtonGroup_t = std::shared_ptr<Wt::WButtonGroup>;
@@ -115,10 +115,17 @@ private:
   void HomeRoot( Wt::WContainerWidget* );
   void Home( Wt::WContainerWidget* );
 
-  void TemplatePage( Wt::WContainerWidget*, fTemplate_t );
+  void Page_Template( Wt::WContainerWidget*, fTemplate_t ); // used for l
+
+  void ClearContainers(); // tbd
+
+  void Container_Primary( Wt::WContainerWidget* ); // primary class containers
+  void Container_UnderlyingPortfolio( Wt::WContainerWidget*, const std::string& sIQfeedUnderlyingName );
 
   void Page_Login( Wt::WContainerWidget* );
-  void Page_SelectUndelrying( Wt::WContainerWidget* );
+  void Page_SelectUnderlying( Wt::WContainerWidget* );
+  void Page_SelectChainExpiry( Wt::WContainerWidget* ); // has Container_UnderlyingPortfolio
+  void Page_TableTrader( Wt::WContainerWidget*, const std::string& sDate ); // has Container_UnderlyingPortfolio
 
   std::string ComposeOrderType(
     int ixOrderType,

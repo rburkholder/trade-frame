@@ -64,10 +64,13 @@ public:
   void SessionAttach( const std::string& sSessionId );
   void SessionDetach( const std::string& sSessionId );
 
-  void Start(
-    const std::string& sUnderlyingFuture,
+  void Underlying(
+    const std::string& sIQFeedUnderlying,
     fUpdateUnderlyingInfo_t&&,
-    fUpdateUnderlyingPrice_t&&,
+    fUpdateUnderlyingPrice_t&&
+  );
+
+  void ChainSelection(
     fAddExpiry_t&&,
     fAddExpiryDone_t&&
     );

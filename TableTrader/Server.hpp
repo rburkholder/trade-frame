@@ -63,13 +63,17 @@ public:
   void SessionAttach( const std::string& sSessionId );
   void SessionDetach( const std::string& sSessionId );
 
-  void Start(
-    const std::string& sSessionId, const std::string& sUnderlyingFuture,
+  void Underlying(
+    const std::string& sSessionId, const std::string& sIQFeedUnderlying,
     fUpdateUnderlyingInfo_t&&,
-    fUpdateUnderlyingPrice_t&&,
+    fUpdateUnderlyingPrice_t&&
+  );
+
+  void ChainSelection(
+    const std::string& sSessionId,
     fUpdateOptionExpiries_t&&,
     fUpdateOptionExpiriesDone_t&&
-    );
+  );
 
   void ChangeInvestment( const std::string& );
 

@@ -162,13 +162,10 @@ void Server_impl::SessionDetach( const std::string& sSessionId ) {
   m_mapSession.erase( iter );
 }
 
-
-void Server_impl::Start(
+void Server_impl::Underlying(
   const std::string& sUnderlyingFuture,
   fUpdateUnderlyingInfo_t&& fUpdateUnderlyingInfo,
-  fUpdateUnderlyingPrice_t&& fUpdateUnderlyingPrice,
-  fAddExpiry_t&& fAddExpiry,
-  fAddExpiryDone_t&& fAddExpiryDone
+  fUpdateUnderlyingPrice_t&& fUpdateUnderlyingPrice
 ) {
 
   assert( fUpdateUnderlyingInfo );
@@ -177,17 +174,24 @@ void Server_impl::Start(
   assert( fUpdateUnderlyingPrice );
   m_fUpdateUnderlyingPrice = std::move( fUpdateUnderlyingPrice );
 
+  m_pBuildInstrumentBoth->Queue(
+    sUnderlyingFuture,
+    [this]( pInstrument_t pInstrument ){
+      UnderlyingInitialize( pInstrument );
+    } );
+}
+
+void Server_impl::ChainSelection(
+  fAddExpiry_t&& fAddExpiry,
+  fAddExpiryDone_t&& fAddExpiryDone
+) {
+
   assert( fAddExpiry );
   m_fAddExpiry = std::move( fAddExpiry );
 
   assert( fAddExpiryDone );
   m_fAddExpiryDone = std::move( fAddExpiryDone );
 
-  m_pBuildInstrumentBoth->Queue(
-    sUnderlyingFuture,
-    [this]( pInstrument_t pInstrument ){
-      UnderlyingInitialize( pInstrument );
-    } );
 }
 
 void Server_impl::UnderlyingInitialize( pInstrument_t pInstrument ) {
