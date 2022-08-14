@@ -92,7 +92,7 @@ void Server::Underlying(
       }
     );
   },
-  [this,sSessionId]( double price, int precision, double dblPortfolioPnL ) mutable { // fUpdateUnderlyingPrice_t
+  [this,sSessionId]( double price, int precision, double dblPortfolioPnL ) { // fUpdateUnderlyingPrice_t
     assert( 20 > precision );  // seems, on some random startup,
                                 // caller sends correct value, but precision is stopmped on, will need a valgrind session
                                 // may have to do with screen changing, is this in the timer?
@@ -105,12 +105,14 @@ void Server::Underlying(
     boost::format formatPnL( sFormatUSD );
     formatPnL % dblPortfolioPnL;
     const std::string sPortfolioPnL( formatPnL.str() );
-    //post(
-    //  sSessionId,
-    //  [this,sPrice_=std::move(sPrice)](){
-        m_fUpdateUnderlyingPrice( sPrice, sPortfolioPnL );
-    //  }
-    //);
+    /*
+    post(
+      sSessionId,
+      [this,sPrice_=std::move(sPrice),sPortfolioPnL_=std::move(sPortfolioPnL)](){
+        m_fUpdateUnderlyingPrice( sPrice_, sPortfolioPnL_ );
+      }
+    ); */
+    m_fUpdateUnderlyingPrice( sPrice, sPortfolioPnL );
   }
   );
 }
