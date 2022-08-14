@@ -69,6 +69,14 @@ void Server::AddCandidateFutures( fAddCandidateFutures_t&& f ) {
   }
 }
 
+void Server::BtnChooseUnderlying() {
+  // will have problems with this as the portfolio manager has a series of portfolios already loaded (from m_db loading)
+  // will need to take care of multiple underlyings within m_implServer
+  // therefore will probably need multiple underlyings, each with separate expiry session
+  //m_implServer = nullptr;
+  //m_implServer = std::make_unique<Server_impl>( m_choices.ib_client_id );
+}
+
 void Server::Underlying(
   const std::string& sSessionId, const std::string& sIQFeedUnderlying,
   fUpdateUnderlyingInfo_t&& fUpdateUnderlyingInfo,
@@ -112,6 +120,10 @@ void Server::Underlying(
     m_fUpdateUnderlyingPrice( sPrice, sPortfolioPnL );
   }
   );
+}
+
+void Server::BtnChooseExpiry() {
+  m_implServer->ResetForChainSelection();
 }
 
 void Server::ChainSelection(

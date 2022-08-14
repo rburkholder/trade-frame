@@ -66,6 +66,9 @@ public:
   void SessionAttach( const std::string& sSessionId );
   void SessionDetach( const std::string& sSessionId );
 
+  void BtnChooseUnderlying();
+  void BtnChooseExpiry();
+
   void Underlying(
     const std::string& sSessionId, const std::string& sIQFeedUnderlying,
     fUpdateUnderlyingInfo_t&&,

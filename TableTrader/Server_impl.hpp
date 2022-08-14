@@ -73,6 +73,8 @@ public:
     fUpdateUnderlyingPrice_t&&
   );
 
+  void ResetForChainSelection();
+
   void ChainSelection(
     fOptionLoadingState_t&&,
     fAddExpiry_t&&,

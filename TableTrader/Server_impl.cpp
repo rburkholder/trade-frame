@@ -115,7 +115,16 @@ Server_impl::~Server_impl() {
     m_pOptionChainQuery.reset();
   }
   m_pProviderTWS->Disconnect();
+  m_pProviderTWS->OnConnected.Remove( MakeDelegate( this, &Server_impl::Connected_TWS ) );
+  m_pProviderTWS->OnDisconnected.Remove( MakeDelegate( this, &Server_impl::Disconnected_TWS ) );
+
   m_pProviderIQFeed->Disconnect();
+  m_pProviderIQFeed->OnConnected.Remove( MakeDelegate( this, &Server_impl::Connected_IQFeed ) );
+  m_pProviderIQFeed->OnDisconnected.Remove( MakeDelegate( this, &Server_impl::Disconnected_IQFeed ) );
+
+  ou::tf::ProviderManager& providers( ou::tf::ProviderManager::GlobalInstance() );
+  providers.Release( m_pProviderTWS->GetName() );
+  providers.Release( m_pProviderIQFeed->GetName() );
 }
 
 void Server_impl::Connected_TWS( int n ) {
@@ -182,6 +191,9 @@ void Server_impl::Underlying(
     [this]( pInstrument_t pInstrument ){
       UnderlyingInitialize( pInstrument );
     } );
+}
+
+void Server_impl::ResetForChainSelection() {
 }
 
 void Server_impl::ChainSelection(

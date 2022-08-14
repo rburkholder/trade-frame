@@ -326,7 +326,7 @@ void AppTableTrader::Container_UnderlyingPortfolio( Wt::WContainerWidget* pcw, c
 
   Wt::WLabel* pLabelUnderlyingLabel = pcw->addWidget( std::make_unique<Wt::WLabel>( "Underlying: " ) );
   Wt::WLabel* pLabelUnderlyingName  = pcw->addWidget( std::make_unique<Wt::WLabel>() );
-  Wt::WLabel* pLabelMultiplierLabel = pcw->addWidget( std::make_unique<Wt::WLabel>( "Multiplier: " ) );
+  Wt::WLabel* pLabelMultiplierLabel = pcw->addWidget( std::make_unique<Wt::WLabel>( "- Multiplier: " ) );
   Wt::WLabel* pLabelMultiplierValue = pcw->addWidget( std::make_unique<Wt::WLabel>() );
 
   pLabelUnderlyingLabel->addStyleClass( "w_label" );
@@ -334,14 +334,14 @@ void AppTableTrader::Container_UnderlyingPortfolio( Wt::WContainerWidget* pcw, c
   pLabelMultiplierLabel->addStyleClass( "w_label" );
   pLabelMultiplierValue->addStyleClass( "w_label" );
 
-  Wt::WLabel* pLabel     = pcw->addWidget( std::make_unique<Wt::WLabel>( "Current: " ) );
+  Wt::WLabel* pLabel     = pcw->addWidget( std::make_unique<Wt::WLabel>( "- Current: " ) );
   Wt::WLabel* pLivePrice = pcw->addWidget( std::make_unique<Wt::WLabel>( "" ) );
 
   pLabel->addStyleClass( "w_label" );
   pLivePrice->addStyleClass( "w_label" );
   pLivePrice->addStyleClass( "fld_price" );
 
-  Wt::WLabel* pLabelPortfolioPLLabel = pcw->addWidget( std::make_unique<Wt::WLabel>( "Portfolio P/L: " ) );
+  Wt::WLabel* pLabelPortfolioPLLabel = pcw->addWidget( std::make_unique<Wt::WLabel>( "- Portfolio P/L: " ) );
   Wt::WLabel* pLabelPortfolioPLValue = pcw->addWidget( std::make_unique<Wt::WLabel>() );
 
   pLabelPortfolioPLLabel->addStyleClass( "w_label" );
@@ -408,10 +408,12 @@ void AppTableTrader::Page_SelectChainExpiry( Wt::WContainerWidget* pcw ) {
     Wt::WContainerWidget* pContainerLoadingStatus = pContainerSelectExpiries->addWidget( std::make_unique<Wt::WContainerWidget>() );
       Wt::WLabel* pLabelBackgroundLoading = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>( "Loading (may take a few minutes) ..." ) );
       pLabelBackgroundLoading->addStyleClass( "w_label" );
-      Wt::WLabel* pLabelNumberOptionNames = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>() );
-      pLabelNumberOptionNames->addStyleClass( "w_label" );
-      Wt::WLabel* pLabelNumberOptionsLoaded  = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>() );
+      Wt::WLabel* pLabelNumberOptionsLoaded  = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>( "-") );
       pLabelNumberOptionsLoaded->addStyleClass( "w_label" );
+      Wt::WLabel* pLabelLoadOptionsOf = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>( "of") );
+      pLabelLoadOptionsOf->addStyleClass( "w_label" );
+      Wt::WLabel* pLabelNumberOptionNames = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>( "-") );
+      pLabelNumberOptionNames->addStyleClass( "w_label" );
 
     Wt::WSelectionBox* pSelectExpiry = pContainerSelectExpiries->addWidget( std::make_unique<Wt::WSelectionBox>() );
     pSelectExpiry->addStyleClass( "w_combo_box" );
@@ -438,8 +440,9 @@ void AppTableTrader::Page_SelectChainExpiry( Wt::WContainerWidget* pcw ) {
       pSelectExpiry->addItem( sDate );
       //triggerUpdate(); // is this needed, probably as this is asynchronous
     },
-    [this,pcw,pSelectExpiry](){ // fUpdateOptionExpiriesDone_t
+    [this,pcw,pSelectExpiry,pContainerLoadingStatus](){ // fUpdateOptionExpiriesDone_t
       // TODO: disable once filled
+      pContainerLoadingStatus->clear();
       pSelectExpiry->activated().connect(
         [this,pcw,pSelectExpiry](){
           pSelectExpiry->setEnabled( false );
@@ -460,36 +463,68 @@ void AppTableTrader::Page_TableTrader( Wt::WContainerWidget* pcw /* m_pContainer
 
   Wt::WContainerWidget* pContainerButtons = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
 
-    Wt::WPushButton* pBtnCancelAll = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Cancel All" ) );
-    pBtnCancelAll->setEnabled( false );
-    pBtnCancelAll->addStyleClass( "w_push_button" );
-    Wt::WPushButton* pBtnCloseAll = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Cancel/Close All" ) );
-    pBtnCloseAll->setEnabled( false );
-    pBtnCloseAll->addStyleClass( "w_push_button" );
-    Wt::WPushButton* pBtnPlaceOrders = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Place Orders" ) );
-    pBtnPlaceOrders->setEnabled( false );
+    Wt::WPushButton* pBtnChooseUnderlying = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Choose Underlying" ) );
 
-    pBtnCancelAll->clicked().connect(
-      [this,pBtnCancelAll](){
-        pBtnCancelAll->setEnabled( false );
-        m_pServer->CancelAll();
-      });
-    pBtnCloseAll->clicked().connect(
-      [this,pBtnCancelAll,pBtnCloseAll](){
-        pBtnCancelAll->setEnabled( false );
-        m_pServer->CancelAll();
-        pBtnCloseAll->setEnabled( false );
-        m_pServer->CloseAll();
-      });
-    pBtnPlaceOrders->clicked().connect(
-      [this,pBtnCancelAll,pBtnCloseAll,pBtnPlaceOrders](){
-        if ( m_pServer->PlaceOrders() ) {
-          //pSelectStrikes->setEnabled( false ); // do this some other way
-          pBtnCancelAll->setEnabled( true );
-          pBtnCloseAll->setEnabled( true );
-          pBtnPlaceOrders->setEnabled (false );
-        }
-      });
+      pBtnChooseUnderlying->setEnabled( false );
+      pBtnChooseUnderlying->addStyleClass( "w_push_button" );
+      pBtnChooseUnderlying->clicked().connect(
+        [this](){
+          m_pServer->BtnChooseUnderlying();
+          Page_Template(
+            root(),
+            [this](Wt::WContainerWidget* pcw){
+              Page_SelectUnderlying( pcw );
+            } );
+        });
+
+    Wt::WPushButton* pBtnChooseExpiry = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Choose Expiry" ) );
+
+      pBtnChooseExpiry->setEnabled( false );
+      pBtnChooseExpiry->addStyleClass( "w_push_button" );
+      pBtnChooseExpiry->clicked().connect(
+        [this](){
+          m_pServer->BtnChooseExpiry();
+          m_pContainerDataEntry->clear();
+          Page_SelectChainExpiry( m_pContainerDataEntry );
+          // TODO: will need to reset pSelectStrikes
+        });
+
+    Wt::WPushButton* pBtnCancelAll = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Cancel All" ) );
+
+      pBtnCancelAll->addStyleClass( "w_push_button" );
+      pBtnCancelAll->clicked().connect(
+        [this,pBtnCancelAll](){
+          pBtnCancelAll->setEnabled( false );
+          m_pServer->CancelAll();
+        });
+
+    Wt::WPushButton* pBtnCloseAll = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Cancel/Close All" ) );
+
+      pBtnCloseAll->setEnabled( false );
+      pBtnCloseAll->addStyleClass( "w_push_button" );
+
+      pBtnCloseAll->clicked().connect(
+        [this,pBtnCancelAll,pBtnCloseAll](){
+          pBtnCancelAll->setEnabled( false );
+          m_pServer->CancelAll();
+          pBtnCloseAll->setEnabled( false );
+          m_pServer->CloseAll();
+        });
+
+    Wt::WPushButton* pBtnPlaceOrders = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Place Orders" ) );
+
+      pBtnPlaceOrders->setEnabled( false );
+      pBtnPlaceOrders->addStyleClass( "w_push_button" );
+
+      pBtnPlaceOrders->clicked().connect(
+        [this,pBtnCancelAll,pBtnCloseAll,pBtnPlaceOrders](){
+          if ( m_pServer->PlaceOrders() ) {
+            //pSelectStrikes->setEnabled( false ); // do this some other way
+            pBtnCancelAll->setEnabled( true );
+            pBtnCloseAll->setEnabled( true );
+            pBtnPlaceOrders->setEnabled (false );
+          }
+        });
 
     Wt::WContainerWidget* pContainerTypeSideRange = pContainerData->addWidget( std::make_unique<Wt::WContainerWidget>() );
     pContainerTypeSideRange->addStyleClass( "inline_flex" );
