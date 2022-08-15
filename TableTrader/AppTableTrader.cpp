@@ -968,10 +968,10 @@ void AppTableTrader::Page_TableTrader( Wt::WContainerWidget* pcw /* m_pContainer
                 pPnL->addStyleClass( "fld_pnl" );
 
                 pEntryFillPrice->addStyleClass( "w_label" );
-                pEntryFillPrice->addStyleClass( "fld_price" );
+                //pEntryFillPrice->addStyleClass( "fld_price" );
 
                 pExitFillPrice->addStyleClass( "w_label" );
-                pExitFillPrice->addStyleClass( "fld_price" );
+                //pExitFillPrice->addStyleClass( "fld_price" );
 
                 pMessage->addStyleClass( "w_label" );
                 pMessage->addStyleClass( "fld_message_error" );
@@ -1007,11 +1007,12 @@ void AppTableTrader::Page_TableTrader( Wt::WContainerWidget* pcw /* m_pContainer
                     pPnL->setText( sPnL );
                   },
                   [this,pEntryFillPrice](const std::string& sFill ){ // fFill_t async
-                    if ( pEntryFillPrice->text().empty() ) {
+                    auto size = pEntryFillPrice->text().value().size();
+                    if ( 1 == size ) { // has '-' as an initial filler
                       pEntryFillPrice->setText( sFill );
                     }
                     else {
-                      pEntryFillPrice->text() += "," + sFill;
+                      pEntryFillPrice->setText( pEntryFillPrice->text() + "," + sFill);
                     }
                     triggerUpdate();
                   },
