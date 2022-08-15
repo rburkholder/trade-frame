@@ -77,7 +77,7 @@ body {
 
 .fld_ticker {
   display: inline-block;
-  width: 175px;
+  width: 180px;
 }
 
 .fld_side {
@@ -88,7 +88,7 @@ body {
 
 .fld_strike {
   display: inline-block;
-  width: 60px;
+  width: 65px;
   text-align:right;
 }
 
@@ -152,13 +152,13 @@ body {
 
 .fld_price {
   display: inline-block;
-  width: 60px;
+  width: 65px;
   text-align:right;
 }
 
 .fld_pnl {
   display: inline-block;
-  width: 50px;
+  width: 70px;
   text-align:right;
 }
 
