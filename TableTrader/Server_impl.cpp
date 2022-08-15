@@ -717,7 +717,7 @@ bool Server_impl::PlaceOrders( const std::string& sPortfolioTimeStamp ) {
                     pOrder = uio.m_pPosition->ConstructOrder(
                       ou::tf::OrderType::Limit,
                       uio.m_orderSide,
-                      uio.m_nInitialQuantity,
+                      nToOrder,
                       uio.m_dblScaleOrderPrice
                     );
                     pOrder->OnOrderFilled.Add( MakeDelegate( &uio, &UIOption::HandleOrderFilledEntryScaled ) );
