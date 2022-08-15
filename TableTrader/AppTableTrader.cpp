@@ -701,14 +701,14 @@ void AppTableTrader::Page_TableTrader( Wt::WContainerWidget* pcw /* m_pContainer
 
     struct columns {
       std::string name;
-      int width;
+      int width;  // TODO: convert this to use the .fld_ class
       columns( const std::string& name_, int width_ ): name( name_ ), width( width_ ) {}
     };
     using vColumns_t = std::vector<columns>;
     vColumns_t vColumns = {
-      {"ticker", 175}, {"side", 32}, {"strike", 60}, {"type",30}, {"oi",40},{"vol",50},{"bid",50},{"ask",50},
-      {"%alloc",40},{"",10},{"$alloc",60},{"ttl_q",40},{"order",80},
-      {"price",60},{"init_q",45},{"inc_q",45},{"inc_prc",60},{"p/l",60},{"fill_en",60},{"fill_ex",60}
+      {"ticker", 180}, {"side", 32}, {"strike", 65}, {"type",30}, {"oi",40},{"vol",50},{"bid",50},{"ask",50},
+      {"%alloc",40},{"",10},{"$alloc",60},{"ttl_q",60},{"order",80},
+      {"price",65},{"init_q",45},{"inc_q",45},{"inc_prc",60},{"p/l",70},{"fill_en",70},{"fill_ex",70}
     };
 
     for ( const vColumns_t::value_type& vt: vColumns ) {
