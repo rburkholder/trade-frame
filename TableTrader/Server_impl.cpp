@@ -305,7 +305,7 @@ void Server_impl::InstrumentToOption( pInstrument_t pInstrument ) {
 
   BuiltOption* pBuiltOption( nullptr );
   {
-    std::scoped_lock<std::mutex> lock( m_mutex );
+    std::scoped_lock<std::mutex> lock( m_mutexChainPopulate );
     m_nOptionsLoaded++;
     mapChains_t::iterator iterChain = ou::tf::option::GetChain( m_mapChains, pOption );
     pBuiltOption = ou::tf::option::UpdateOption<chain_t,BuiltOption>( iterChain->second, pOption );
@@ -423,7 +423,6 @@ void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
 
             };
           }
-
         }
 
         const auto& summary( uio.m_pOption->GetSummary() );  // look for open interest
@@ -440,7 +439,6 @@ void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
       }
     }
   }
-
 }
 
 void Server_impl::UnderlyingQuote( const ou::tf::Quote& quote ) {
@@ -826,5 +824,15 @@ void Server_impl::CloseAll() {
   catch (...) {
     BOOST_LOG_TRIVIAL(debug) << "Server_impl active=false did not work";
   }
+
+}
+
+void Server_impl::RestartWithNewUnderlying() {
+}
+
+void Server_impl::RestartWithNewExpiry() {
+}
+
+void Server_impl::RestartWithNewTable() {
 
 }

@@ -117,6 +117,10 @@ public:
   void CancelAll();
   void CloseAll();
 
+  void RestartWithNewUnderlying();
+  void RestartWithNewExpiry();
+  void RestartWithNewTable();
+
 protected:
 private:
 
@@ -134,8 +138,6 @@ private:
   enum EStateEngine {
     init, underlying_populate, underlying_acquire, chains_populate, strike_populate, table_populate, order_management
   } m_stateEngine;
-
-  std::mutex m_mutex;
 
   std::shared_ptr<ou::tf::ib::TWS> m_pProviderTWS;
   std::shared_ptr<ou::tf::iqfeed::IQFeedProvider> m_pProviderIQFeed;
@@ -179,6 +181,7 @@ private:
   using vRequestContract_t = std::vector<fRequestContract_t>;
   vRequestContract_t m_vRequestContract_Pending; // lifo of requests
 
+  std::mutex m_mutexChainPopulate;
   std::mutex m_mutexRequestContract; // play it safe with structure usage
 
   size_t m_nOptionsNames;
