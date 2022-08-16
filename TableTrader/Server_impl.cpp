@@ -55,7 +55,8 @@ namespace {
 }
 
 Server_impl::Server_impl( int ib_client_id )
-: m_state( EConnection::quiescent )
+: m_stateEngine( EStateEngine::init )
+, m_stateConnection( EStateConnection::quiescent )
 , m_nOptionsNames {}
 , m_nOptionsLoaded {}
 , m_dblInvestment {}
@@ -96,10 +97,10 @@ Server_impl::Server_impl( int ib_client_id )
 
   m_pdb = std::make_unique<ou::tf::db>( sDataBaseName );
 
+  m_stateConnection = EStateConnection::connecting;
+
   m_pProviderTWS->Connect();
   m_pProviderIQFeed->Connect();
-
-  m_state = EConnection::connecting;
 
 }
 
@@ -110,6 +111,9 @@ Server_impl::~Server_impl() {
     //m_pWatchUnderlying->OnQuote.Remove( MakeDelegate( this, &Server_impl::UnderlyingQuote ) );
     //m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &Server_impl::UnderlyingTrade ) );
   }
+
+  m_stateConnection = EStateConnection::disconnecting;
+
   if ( m_pOptionChainQuery ) {
     m_pOptionChainQuery->Disconnect();
     m_pOptionChainQuery.reset();
@@ -139,7 +143,7 @@ void Server_impl::Connected_IQFeed( int n ) {
 
 void Server_impl::Connected( int ) {
   if ( m_pProviderTWS->Connected() && m_pProviderIQFeed->Connected() ) {
-    m_state = EConnection::connected;
+    m_stateConnection = EStateConnection::connected;
     m_pBuildInstrumentBoth = std::make_unique<ou::tf::BuildInstrument>( m_pProviderIQFeed, m_pProviderTWS );
     m_pBuildInstrumentIQFeed = std::make_unique<ou::tf::BuildInstrument>( m_pProviderIQFeed );
     // TODO: generate signal or status to interface
@@ -158,7 +162,7 @@ void Server_impl::Disconnected_IQFeed( int n ) {
 
 void Server_impl::Disconnected( int ) {
   if ( !m_pProviderTWS->Connected() && !m_pProviderIQFeed->Connected() ) {
-    m_state = EConnection::disconnected;
+    m_stateConnection = EStateConnection::disconnected;
   }
 }
 
@@ -174,11 +178,17 @@ void Server_impl::SessionDetach( const std::string& sSessionId ) {
   m_mapSession.erase( iter );
 }
 
+void Server_impl::UnderlyingPopulation() {
+  m_stateEngine = EStateEngine::underlying_populate;
+}
+
 void Server_impl::Underlying(
   const std::string& sUnderlyingFuture,
   fUpdateUnderlyingInfo_t&& fUpdateUnderlyingInfo,
   fUpdateUnderlyingPrice_t&& fUpdateUnderlyingPrice
 ) {
+
+  m_stateEngine = EStateEngine::underlying_acquire;
 
   assert( fUpdateUnderlyingInfo );
   m_fUpdateUnderlyingInfo = std::move( fUpdateUnderlyingInfo );
@@ -194,23 +204,6 @@ void Server_impl::Underlying(
 }
 
 void Server_impl::ResetForChainSelection() {
-}
-
-void Server_impl::ChainSelection(
-  fOptionLoadingState_t&& fOptionLoadingState,
-  fAddExpiry_t&& fAddExpiry,
-  fAddExpiryDone_t&& fAddExpiryDone
-) {
-
-  assert( fOptionLoadingState );
-  m_fOptionLoadingState = std::move( fOptionLoadingState );
-
-  assert( fAddExpiry );
-  m_fAddExpiry = std::move( fAddExpiry );
-
-  assert( fAddExpiryDone );
-  m_fAddExpiryDone = std::move( fAddExpiryDone );
-
 }
 
 void Server_impl::UnderlyingInitialize( pInstrument_t pInstrument ) {
@@ -251,7 +244,7 @@ void Server_impl::UnderlyingFundamentals( const ou::tf::Watch::Fundamentals& fun
   m_nPrecision = fundamentals.nPrecision;
   m_fUpdateUnderlyingInfo( m_pWatchUnderlying->GetInstrumentName(), fundamentals.nContractSize );
 
-  m_state = EConnection::fundamentals;
+  m_stateConnection = EStateConnection::fundamentals;
 
   using vSymbol_t = ou::tf::iqfeed::OptionChainQuery::vSymbol_t;
   using OptionList = ou::tf::iqfeed::OptionChainQuery::OptionList;
@@ -335,6 +328,23 @@ void Server_impl::InstrumentToOption( pInstrument_t pInstrument ) {
   }
 }
 
+void Server_impl::ChainSelection(
+  fOptionLoadingState_t&& fOptionLoadingState,
+  fAddExpiry_t&& fAddExpiry,
+  fAddExpiryDone_t&& fAddExpiryDone
+) {
+
+  assert( fOptionLoadingState );
+  m_fOptionLoadingState = std::move( fOptionLoadingState );
+
+  assert( fAddExpiry );
+  m_fAddExpiry = std::move( fAddExpiry );
+
+  assert( fAddExpiryDone );
+  m_fAddExpiryDone = std::move( fAddExpiryDone );
+
+}
+
 void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
 
   mapSession_t::iterator iterSession = m_mapSession.find( sSessionId );
@@ -349,7 +359,7 @@ void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
     m_pPortfolioOptions->QueryStats( dblPortfolioUnRealized, dblPortfolioRealized, dblPortfolioCommissionsPaid, dblPortfolioTotal );
   }
 
-  if ( EConnection::fundamentals == m_state ) {
+  if ( EStateConnection::fundamentals == m_stateConnection ) {
 
     if ( m_fUpdateUnderlyingPrice ) m_fUpdateUnderlyingPrice( m_pWatchUnderlying->LastTrade().Price(), m_nPrecision, dblPortfolioTotal );
 
@@ -443,6 +453,9 @@ void Server_impl::UnderlyingTrade( const ou::tf::Trade& trade ) {
 }
 
 void Server_impl::PopulateExpiry() {
+
+  m_stateEngine = EStateEngine::chains_populate;
+
   for ( const mapChains_t::value_type& vt: m_mapChains ) {
     m_fAddExpiry( vt.first );
   }
@@ -455,6 +468,8 @@ void Server_impl::PopulateStrikes(
   fPopulateStrikeDone_t&& fPopulateStrikeDone
 ) {
 
+  m_stateEngine = EStateEngine::strike_populate;
+
   m_citerChains = m_mapChains.find( date );
   assert( m_mapChains.end() != m_citerChains );
 
@@ -463,6 +478,9 @@ void Server_impl::PopulateStrikes(
       fPopulateStrike_( dblStrike, m_nPrecision );
   } );
   fPopulateStrikeDone();
+
+  m_stateEngine = EStateEngine::table_populate;
+
 }
 
 const std::string& Server_impl::Ticker( double strike, ou::tf::OptionSide::EOptionSide side ) const {
@@ -621,6 +639,8 @@ std::string Server_impl::SetAsScale( double dblStrike, double dblLimit, uint32_t
 
 
 bool Server_impl::PlaceOrders( const std::string& sPortfolioTimeStamp ) {
+
+  m_stateEngine = EStateEngine:: order_management;
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
 

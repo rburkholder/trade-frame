@@ -67,6 +67,8 @@ public:
   void SessionAttach( const std::string& sSessionId );
   void SessionDetach( const std::string& sSessionId );
 
+  void UnderlyingPopulation();
+
   void Underlying(
     const std::string& sIQFeedUnderlying,
     fUpdateUnderlyingInfo_t&&,
@@ -125,8 +127,13 @@ private:
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
-  enum EConnection { quiescent, connecting, connected, fundamentals, disconnecting, disconnected };
-  EConnection m_state;
+  enum EStateConnection {
+    quiescent, connecting, connected, fundamentals, disconnecting, disconnected }
+    m_stateConnection;
+
+  enum EStateEngine {
+    init, underlying_populate, underlying_acquire, chains_populate, strike_populate, table_populate, order_management
+  } m_stateEngine;
 
   std::mutex m_mutex;
 
