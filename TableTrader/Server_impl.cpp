@@ -368,11 +368,22 @@ void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
       if ( uio.m_fRealTime ) {
 
         const ou::tf::Quote& quote( uio.m_pOption->LastQuote() );
-        double mid =  quote.Midpoint();
-        uio.UpdateContracts( mid );
+
+        double dblPriceForAlloc {};
+        switch ( uio.m_orderSide ) {
+          case ou::tf::OrderSide::Buy:
+            dblPriceForAlloc = quote.Ask();
+            break;
+          case ou::tf::OrderSide::Sell:
+            dblPriceForAlloc = quote.Bid();
+            break;
+          default:
+            assert( false );
+        }
+        uio.UpdateContracts( dblPriceForAlloc );
 
         if ( UIOption::IBContractState::unknown == uio.m_stateIBContract ) {
-          if ( 0.0 < mid ) { // simple way to identify fundamentals have arrived for symbol
+          if ( 0.0 < dblPriceForAlloc ) { // simple way to identify fundamentals have arrived for symbol
 
             uio.m_stateIBContract = UIOption::IBContractState::acquiring;
 
@@ -834,5 +845,4 @@ void Server_impl::RestartWithNewExpiry() {
 }
 
 void Server_impl::RestartWithNewTable() {
-
 }
