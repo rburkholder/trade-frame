@@ -75,10 +75,8 @@ target_link_libraries(
     TFHDF5TimeSeries
     OUSQL
     OUSqlite
-#      OUCharting
 #      TFIndicators
     TFIQFeed
-#    TFPhemex
     TFTimeSeries
     TFTrading
     OUCommon
@@ -86,7 +84,6 @@ target_link_libraries(
     dl
     z
 #      curl
-#      chartdir
 #      wx_gtk3u_adv-3.0
 #      wx_gtk3u_core-3.0
 #      wx_baseu-3.0

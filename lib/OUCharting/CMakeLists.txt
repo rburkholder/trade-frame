@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.13)
 
 PROJECT(OUCharting)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
+#set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 #set(CMAKE_EXE_LINKER_FLAGS "--trace --verbose")
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -59,8 +59,8 @@ set(
 
 add_library(
   ${PROJECT_NAME} STATIC
-  ${file_h}
-  ${file_cpp}
+    ${file_h}
+    ${file_cpp}
   )
 
 target_include_directories(
@@ -69,4 +69,9 @@ target_include_directories(
   )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_LOG_DYN_LINK )
+
+target_link_libraries(
+  ${PROJECT_NAME} PRIVATE
+    chartdir
+)
 

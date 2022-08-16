@@ -88,7 +88,6 @@ target_link_libraries(
       dl
       z
       curl
-      chartdir
       ${Boost_LIBRARIES}
 #      wx_gtk3u_xrc-3.0
 #      wx_gtk3u_html-3.0 

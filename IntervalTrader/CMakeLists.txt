@@ -82,7 +82,6 @@ target_link_libraries(
       wx_baseu-3.1
       z
       curl
-      chartdir
       pthread
       dl
   )
