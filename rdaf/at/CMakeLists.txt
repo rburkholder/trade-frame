@@ -85,9 +85,6 @@ target_link_libraries(
       OUCharting
       TFIndicators
       TFTimeSeries
-      hdf5_cpp
-      hdf5
-      sz
       dl
       z
       curl

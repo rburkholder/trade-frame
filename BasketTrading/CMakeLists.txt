@@ -109,9 +109,6 @@ target_link_libraries(
       OUFormulas
       TFTimeSeries
       ExcelFormat
-      hdf5_cpp
-      hdf5
-      sz
       dl
       z
       curl

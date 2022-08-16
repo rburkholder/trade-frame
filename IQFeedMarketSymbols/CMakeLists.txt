@@ -73,9 +73,6 @@ target_link_libraries(
       OUSQL
       OUSqlite
       ExcelFormat
-      hdf5_cpp
-      hdf5
-      sz
       dl
       z
       curl

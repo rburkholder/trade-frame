@@ -80,9 +80,6 @@ target_link_libraries(
       wx_gtk3u_adv-3.1
       wx_gtk3u_core-3.1
       wx_baseu-3.1
-      hdf5_cpp
-      hdf5
-      sz
       z
       curl
       chartdir

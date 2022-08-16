@@ -76,9 +76,6 @@ target_link_libraries(
       OUCommon
       OUSQL
       OUSqlite
-      hdf5_cpp
-      hdf5
-      sz
       dl
       z
       curl

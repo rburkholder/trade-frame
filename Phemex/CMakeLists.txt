@@ -82,9 +82,6 @@ target_link_libraries(
       TFTrading
       OUCommon
       TFTrading
-      hdf5_cpp
-      hdf5
-      sz
       dl
       z
 #      curl

@@ -3,8 +3,8 @@ cmake_minimum_required (VERSION 3.13)
 
 PROJECT(TFHDF5TimeSeries)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
+#set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 #set(CMAKE_EXE_LINKER_FLAGS "--trace --verbose")
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -34,6 +34,13 @@ add_library(
 target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_LOG_DYN_LINK )
 
 target_include_directories(
-  ${PROJECT_NAME} PUBLIC
+  ${PROJECT_NAME} PRIVATE
     ".."
   )
+
+target_link_libraries(
+  ${PROJECT_NAME} PRIVATE
+    hdf5_cpp
+    hdf5
+    sz
+)
