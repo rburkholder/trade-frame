@@ -139,6 +139,8 @@ private:
     init, underlying_populate, underlying_acquire, chains_populate, strike_populate, table_populate, order_management
   } m_stateEngine;
 
+  // EStateEngine::init
+
   std::shared_ptr<ou::tf::ib::TWS> m_pProviderTWS;
   std::shared_ptr<ou::tf::iqfeed::IQFeedProvider> m_pProviderIQFeed;
 
@@ -146,6 +148,22 @@ private:
 
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrumentBoth;
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrumentIQFeed;
+
+  struct Session {
+    //fUpdateUnderlyingPrice_t m_fUpdateUnderlyingPrice;
+    Session()
+    //: m_fUpdateUnderlyingPrice {}
+    {}
+  };
+
+  using mapSession_t = std::unordered_map<std::string,Session>;
+  mapSession_t m_mapSession;
+
+  // EStateEngine::underlying_acquire
+
+  size_t m_nOptionsNames;
+  size_t m_nOptionsLoaded;
+  size_t m_nOptionsLoadedReportingInterval;
 
   pWatch_t m_pWatchUnderlying;
 
@@ -157,11 +175,13 @@ private:
 
   fOptionLoadingState_t m_fOptionLoadingState;
 
-  fAddExpiry_t m_fAddExpiry;
-  fAddExpiryDone_t m_fAddExpiryDone;
-
   int m_nPrecision;
   unsigned int m_nMultiplier; // used to populate futures options multiplier (not supplied by iqf)
+
+  // EStateEngine::chains_populate
+
+  fAddExpiry_t m_fAddExpiry;
+  fAddExpiryDone_t m_fAddExpiryDone;
 
   struct BuiltOption: public ou::tf::option::chain::OptionName {
     pOption_t pOption;
@@ -184,22 +204,10 @@ private:
   std::mutex m_mutexChainPopulate;
   std::mutex m_mutexRequestContract; // play it safe with structure usage
 
-  size_t m_nOptionsNames;
-  size_t m_nOptionsLoaded;
-  size_t m_nOptionsLoadedReportingInterval;
+  // EStateEngine::table_populate
 
   double m_dblInvestment;
   double m_dblAllocated;
-
-  struct Session {
-    //fUpdateUnderlyingPrice_t m_fUpdateUnderlyingPrice;
-    Session()
-    //: m_fUpdateUnderlyingPrice {}
-    {}
-  };
-
-  using mapSession_t = std::unordered_map<std::string,Session>;
-  mapSession_t m_mapSession;
 
   struct UIOption {
 
@@ -210,8 +218,6 @@ private:
     uint32_t m_nContracts;
     pOption_t m_pOption;
     pPosition_t m_pPosition;
-    //pOrder_t m_pOrderEntry;
-    //pOrder_t m_pOrderExit;
 
     fRealTime_t m_fRealTime;
     fAllocated_t m_fAllocated;
