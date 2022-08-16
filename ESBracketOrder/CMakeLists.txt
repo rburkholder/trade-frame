@@ -71,8 +71,6 @@ target_link_libraries(
       OUFormulas
       TFBitsNPieces
       TFInteractiveBrokers
-      ib_client
-      bidgcc000
       TFSimulation
       TFVuTrading
       TFTrading

@@ -70,8 +70,6 @@ target_link_libraries(
 #      TFBitsNPieces
       TFTrading
       TFInteractiveBrokers
-      ib_client
-      bidgcc000
 #      TFSimulation
 #      TFVuTrading
 #      TFOptions

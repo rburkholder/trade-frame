@@ -32,6 +32,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_LOG_DYN_LINK )
 # need to figure out how to make this work
 #add_compile_options(`/usr/local/bin/wx-config --cxxflags`)
 # used in EventIBInstrument.cpp - redo this somehow?
+
 target_compile_definitions(${PROJECT_NAME} PUBLIC -D_FILE_OFFSET_BITS=64 )
 target_compile_definitions(${PROJECT_NAME} PUBLIC -DWXUSINGDLL )
 target_compile_definitions(${PROJECT_NAME} PUBLIC -D__WXGTK__ )
@@ -42,3 +43,9 @@ target_include_directories(
     "/usr/local/lib/wx/include/gtk3-unicode-3.1"
     "/usr/local/include/wx-3.1"
   )
+
+target_link_libraries(
+  ${PROJECT_NAME} 
+    ib_client
+    bidgcc000
+)

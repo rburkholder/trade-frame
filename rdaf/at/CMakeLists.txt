@@ -78,8 +78,6 @@ target_link_libraries(
       TFIQFeedLevel2
       TFAlpaca
       TFInteractiveBrokers
-      ib_client
-      bidgcc000
       TFHDF5TimeSeries
       OUCommon
       OUSQL

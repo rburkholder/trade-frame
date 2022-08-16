@@ -53,7 +53,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_LOG_DYN_LINK )
 # SYSTEM turns the include directory into a system include directory.
 # Compilers will not issue warnings from header files originating from there.
 target_include_directories(
-${PROJECT_NAME} SYSTEM PUBLIC
+  ${PROJECT_NAME} SYSTEM PUBLIC
     "../lib"
 #    "/usr/local/lib/wx/include/gtk3-unicode-3.0"
 #    "/usr/local/include/wx-3.0"
@@ -69,8 +69,6 @@ target_link_libraries(
 #      TFBitsNPieces
     TFTrading
     TFInteractiveBrokers
-    ib_client
-    bidgcc000
     TFSimulation
 #      TFVuTrading
     TFOptions
