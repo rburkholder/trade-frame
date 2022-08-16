@@ -43,3 +43,10 @@ if(EXISTS /usr/local/lib/libwt.so)
   add_subdirectory(TableTrader)
 endif()
 
+# https://kubasejdak.com/modern-cmake-is-like-inheritance:
+# include directories property is automatically added to the compilation flags when the target is being compiled. 
+# if other libraries call only target_link_libraries() to both get include paths and link with library, 
+#   then no private header will ever leak unintentionally outside the containing library.
+# target_link_libraries() means in Modern CMake two things: 
+#   use library (get its properties) at compilation stage and link with it at linking stage. 
+
