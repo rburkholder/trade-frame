@@ -289,6 +289,8 @@ TradeWithABuy::TradeWithABuy(
   uint32_t quantity = Quantity( pPosition, selectors );
   double priceBasis {}; // used by profit/stop calcs
 
+  std::string sCommentForTree = " buy";
+
   assert( selectors.m_bPositionEntryEnable );
   {
     switch ( selectors.m_ePositionEntryMethod ) {
@@ -298,6 +300,8 @@ TradeWithABuy::TradeWithABuy(
           boost::posix_time::ptime dtConstructed = m_pOrderEntry->GetDateTimeOrderCreated();
           m_ceBuySubmit.AddLabel( dtConstructed, quote.Midpoint(), boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) + " mkt buy send" );
           priceBasis = quote.Midpoint();
+
+          sCommentForTree += " mkt";
         }
         break;
       case EPositionEntryMethod::LimitOnly:
@@ -309,6 +313,8 @@ TradeWithABuy::TradeWithABuy(
           boost::posix_time::ptime dtConstructed = m_pOrderEntry->GetDateTimeOrderCreated();
 
           m_ceBuySubmit.AddLabel( dtConstructed, price, boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) + " lo buy send" );
+
+          sCommentForTree += " lmt";
         }
         break;
       case EPositionEntryMethod::LimitTimeOut:
@@ -403,7 +409,7 @@ TradeWithABuy::TradeWithABuy(
   m_pPosition->PlaceOrder( m_pOrderEntry );
   std::cout << "TradeWithABuy order " << m_pOrderEntry->GetOrderId() << " placed" << std::endl;
 
-  BuildTreeItem( pTreeItemParent, "order " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
+  BuildTreeItem( pTreeItemParent, "order " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) + sCommentForTree );
 
   if ( m_bWatchStop ) {
     StartWatch();
@@ -515,6 +521,8 @@ TradeWithASell::TradeWithASell(
   uint32_t quantity = Quantity( pPosition, selectors );
   double priceBasis {}; // used by profit/stop calcs
 
+  std::string sCommentForTree = " sell";
+
   assert( selectors.m_bPositionEntryEnable );
   {
     switch ( selectors.m_ePositionEntryMethod ) {
@@ -524,6 +532,7 @@ TradeWithASell::TradeWithASell(
           boost::posix_time::ptime dtConstructed = m_pOrderEntry->GetDateTimeOrderCreated();
           m_ceSellSubmit.AddLabel( dtConstructed, quote.Midpoint(), boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) + " mkt sell send");
           priceBasis = quote.Midpoint();
+          sCommentForTree += " mkt";
         }
         break;
       case EPositionEntryMethod::LimitOnly:
@@ -535,6 +544,8 @@ TradeWithASell::TradeWithASell(
           boost::posix_time::ptime dtConstructed = m_pOrderEntry->GetDateTimeOrderCreated();
 
           m_ceSellSubmit.AddLabel( dtConstructed, price, boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) + " lo sell send" );
+
+          sCommentForTree += " lmt";
         }
         break;
       case EPositionEntryMethod::LimitTimeOut:
@@ -629,7 +640,7 @@ TradeWithASell::TradeWithASell(
   m_pPosition->PlaceOrder( m_pOrderEntry );
   std::cout << "TradeWithASell order " << m_pOrderEntry->GetOrderId() << " placed" << std::endl;
 
-  BuildTreeItem( pTreeItemParent, "order " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) );
+  BuildTreeItem( pTreeItemParent, "order " + boost::lexical_cast<std::string>( m_pOrderEntry->GetOrderId() ) + sCommentForTree );
 
   if ( m_bWatchStop ) {
     StartWatch();
