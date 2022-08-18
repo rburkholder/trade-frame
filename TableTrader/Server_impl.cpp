@@ -166,9 +166,11 @@ void Server_impl::Disconnected( int ) {
   }
 }
 
-void Server_impl::SessionAttach( const std::string& sSessionId ) {
+void Server_impl::SessionAttach( const std::string& sSessionId, const std::string& sClientAddress ) {
   assert( m_mapSession.end() == m_mapSession.find( sSessionId ) );
-  m_mapSession.emplace( sSessionId, Session() );
+  auto pair = m_mapSession.emplace( sSessionId, Session() );
+  assert( pair.second );
+  pair.first->second.m_sClientAddress = sClientAddress;
 }
 
 void Server_impl::SessionDetach( const std::string& sSessionId ) {
@@ -182,13 +184,10 @@ void Server_impl::UnderlyingPopulation() {
   m_stateEngine = EStateEngine::underlying_populate;
 }
 
-void Server_impl::Underlying(
-  const std::string& sUnderlyingFuture,
+void Server_impl::Underlying_Updates(
   fUpdateUnderlyingInfo_t&& fUpdateUnderlyingInfo,
   fUpdateUnderlyingPrice_t&& fUpdateUnderlyingPrice
 ) {
-
-  m_stateEngine = EStateEngine::underlying_acquire;
 
   assert( fUpdateUnderlyingInfo );
   m_fUpdateUnderlyingInfo = std::move( fUpdateUnderlyingInfo );
@@ -196,14 +195,32 @@ void Server_impl::Underlying(
   assert( fUpdateUnderlyingPrice );
   m_fUpdateUnderlyingPrice = std::move( fUpdateUnderlyingPrice );
 
+}
+
+// Underlying_Acquire ->
+//  UnderlyingInitialize ->
+//   UnderlyingFundamentals ->
+//    InstrumentToOption
+
+void Server_impl::Underlying_Acquire(
+  const std::string& sIQFeedUnderlying
+, fOptionLoadingState_t&& fOptionLoadingState
+, fOptionLoadingDone_t&& fOptionLoadingDone
+) {
+
+  m_stateEngine = EStateEngine::underlying_acquire;
+
+  assert( fOptionLoadingState );
+  m_fOptionLoadingState = std::move( fOptionLoadingState );
+
+  assert( fOptionLoadingDone );
+  m_fOptionLoadingDone = std::move( fOptionLoadingDone );
+
   m_pBuildInstrumentBoth->Queue(
-    sUnderlyingFuture,
+    sIQFeedUnderlying,
     [this]( pInstrument_t pInstrument ){
       UnderlyingInitialize( pInstrument );
     } );
-}
-
-void Server_impl::ResetForChainSelection() {
 }
 
 void Server_impl::UnderlyingInitialize( pInstrument_t pInstrument ) {
@@ -226,11 +243,11 @@ void Server_impl::UnderlyingInitialize( pInstrument_t pInstrument ) {
   m_pWatchUnderlying = std::make_shared<ou::tf::Watch>( pInstrument, m_pProviderIQFeed );
   //m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &Server_impl::UnderlyingQuote ) );
   //m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &Server_impl::UnderlyingTrade ) );
+
+  // this causes a call to UnderlyingFundamentals(), which loads the option chains
   m_pWatchUnderlying->OnFundamentals.Add( MakeDelegate( this, &Server_impl::UnderlyingFundamentals ) );
   m_pWatchUnderlying->StartWatch();
 
-  // don't really need underlying position at this time, just a watch
-  //pPosition_t pPosition = ConstructPosition( pInstrument );
 }
 
 namespace {
@@ -250,7 +267,7 @@ void Server_impl::UnderlyingFundamentals( const ou::tf::Watch::Fundamentals& fun
   using OptionList = ou::tf::iqfeed::OptionChainQuery::OptionList;
 
   if ( m_pOptionChainQuery ) {
-    PopulateExpiry(); // TODO: may need to skip further ahead
+    PopulateExpiry(); // TODO: may need to skip further ahead, this may not be/probably not used
   }
   else {
     m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
@@ -298,7 +315,7 @@ void Server_impl::UnderlyingFundamentals( const ou::tf::Watch::Fundamentals& fun
   }
 }
 
-// arrival from two different threads
+// arrival from two different threads from UnderlyingFundamentals
 void Server_impl::InstrumentToOption( pInstrument_t pInstrument ) {
 
   pOption_t pOption = std::make_shared<ou::tf::option::Option>( pInstrument, m_pProviderIQFeed );
@@ -323,19 +340,16 @@ void Server_impl::InstrumentToOption( pInstrument_t pInstrument ) {
   }
 
   if ( m_nOptionsNames == m_nOptionsLoaded ) {
-    PopulateExpiry();
+    m_fOptionLoadingDone();
     m_fOptionLoadingState = nullptr;
+    m_fOptionLoadingDone = nullptr;
   }
 }
 
 void Server_impl::ChainSelection(
-  fOptionLoadingState_t&& fOptionLoadingState,
   fAddExpiry_t&& fAddExpiry,
   fAddExpiryDone_t&& fAddExpiryDone
 ) {
-
-  assert( fOptionLoadingState );
-  m_fOptionLoadingState = std::move( fOptionLoadingState );
 
   assert( fAddExpiry );
   m_fAddExpiry = std::move( fAddExpiry );
@@ -343,6 +357,7 @@ void Server_impl::ChainSelection(
   assert( fAddExpiryDone );
   m_fAddExpiryDone = std::move( fAddExpiryDone );
 
+  PopulateExpiry();
 }
 
 void Server_impl::TriggerUpdates( const std::string& sSessionId ) {
@@ -471,6 +486,18 @@ void Server_impl::PopulateExpiry() {
   m_fAddExpiryDone();
 }
 
+boost::gregorian::date Server_impl::Expiry() const { // used for state recovery
+  switch ( m_stateEngine ) {
+    case EStateEngine::strike_populate:
+    case EStateEngine::table_populate:
+    case EStateEngine::order_management_active:
+      return m_citerChains->first;
+      break;
+    default:
+      assert( false );
+  }
+}
+
 void Server_impl::PopulateStrikes(
   boost::gregorian::date date,
   fPopulateStrike_t&& fPopulateStrike,
@@ -552,10 +579,10 @@ void Server_impl::AddStrike(
 
   UIOption& uio( pair.first->second );
 
-  uio.m_fRealTime = std::move( fRealTime );
+  uio.m_fRealTime  = std::move( fRealTime );
   uio.m_fAllocated = std::move( fAllocated );
   uio.m_fFillEntry = std::move( fFillEntry );
-  uio.m_fFillExit = std::move( fFillExit );
+  uio.m_fFillExit  = std::move( fFillExit );
 
 }
 
@@ -570,6 +597,12 @@ void Server_impl::DelStrike( double dblStrike ) {
   m_mapUIOption.erase( iterUIOption );
 
   UpdateAllocations();
+}
+
+void Server_impl::SyncStrikeSelections( fSelectStrike_t&& fSelectStrike ) {
+  for ( const mapUIOption_t::value_type& vt: m_mapUIOption ) {
+    fSelectStrike( vt.first );
+  }
 }
 
 void Server_impl::ChangeInvestment( double dblInvestment ) {
@@ -649,7 +682,7 @@ std::string Server_impl::SetAsScale( double dblStrike, double dblLimit, uint32_t
 
 bool Server_impl::PlaceOrders( const std::string& sPortfolioTimeStamp ) {
 
-  m_stateEngine = EStateEngine:: order_management;
+  m_stateEngine = EStateEngine:: order_management_active;
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
 
@@ -838,11 +871,32 @@ void Server_impl::CloseAll() {
 
 }
 
-void Server_impl::RestartWithNewUnderlying() {
+void Server_impl::ResetForNewUnderlying() {
+
+  ResetForNewExpiry(); // clear detail first
+
+  m_fUpdateUnderlyingInfo = nullptr;
+  m_fUpdateUnderlyingPrice = nullptr;
+  m_fOptionLoadingState = nullptr;
+
+  m_nOptionsNames = m_nOptionsLoaded = 0;
+  m_pWatchUnderlying = nullptr;
+  m_pPortfolioUnderlying = nullptr;
+  m_pPortfolioOptions = nullptr;
+  m_nPrecision = m_nMultiplier = 0;
+  m_mapChains.clear();
+  m_citerChains = m_mapChains.end();
+
 }
 
-void Server_impl::RestartWithNewExpiry() {
+void Server_impl::ResetForNewExpiry() {
+  // TODO: will need to redraw the expiry list from which to choose
+  ResetForNewTable(); // clear detail first
+  // simply repopulate the ui from the chains
 }
 
-void Server_impl::RestartWithNewTable() {
+void Server_impl::ResetForNewTable() {
+  m_mapUIOption.clear();
+  UpdateAllocations();
 }
+

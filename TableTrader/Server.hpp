@@ -31,6 +31,8 @@ class Server_impl;
 class Server: public Wt::WServer {
 public:
 
+  enum EWhatToShow { blank, select_futures, chain_expiries, strike_selection };
+
   Server(
     int argc, char *argv[],
     const config::Choices&,
@@ -40,6 +42,9 @@ public:
 
   bool ValidateLogin( const std::string& sUserName, const std::string& sPassWord );
 
+  EWhatToShow WhereToStart();
+  std::string Expiry() const;
+
   using fAddCandidateFutures_t = std::function<void(const std::string&)>;
   void AddCandidateFutures( fAddCandidateFutures_t&& );
 
@@ -47,6 +52,7 @@ public:
   using fUpdateUnderlyingPrice_t = std::function<void(const std::string&,const std::string&)>; // price, portfolio pnl
 
   using fOptionLoadingStatus_t = std::function<void(const std::string&, const std::string&)>;
+  using fOptionLoadingDone_t = std::function<void()>;
 
   using fUpdateOptionExpiries_t = std::function<void(const std::string&)>;
   using fUpdateOptionExpiriesDone_t = std::function<void()>;
@@ -63,21 +69,27 @@ public:
     const std::string& pnl)>;
   using fFill_t = std::function<void(const std::string&)>; // #filled@price
 
-  void SessionAttach( const std::string& sSessionId );
+  void SessionAttach( const std::string& sSessionId, const std::string& sClientAddress );
   void SessionDetach( const std::string& sSessionId );
 
-  void BtnChooseUnderlying();
-  void BtnChooseExpiry();
+  void ResetForNewUnderlying();
+  void ResetForNewExpiry();
 
-  void Underlying(
-    const std::string& sSessionId, const std::string& sIQFeedUnderlying,
+  void Underlying_Updates(
+    const std::string& sSessionId,
     fUpdateUnderlyingInfo_t&&,
     fUpdateUnderlyingPrice_t&&
   );
 
+  void Underlying_Acquire(
+    const std::string& sIQFeedUnderlying
+  , const std::string& sSessionId
+  , fOptionLoadingStatus_t&&
+  , fOptionLoadingDone_t&&
+  );
+
   void ChainSelection(
     const std::string& sSessionId,
-    fOptionLoadingStatus_t&&,
     fUpdateOptionExpiries_t&&,
     fUpdateOptionExpiriesDone_t&&
   );
@@ -107,6 +119,9 @@ public:
     );
   void DelStrike( const std::string& ); // strike
 
+  using fSelectStrike_t = std::function<void(const std::string&)>;
+  void SyncStrikeSelections( fSelectStrike_t&& );
+
   void ChangeAllocation( const std::string& sStrike, const std::string& sPercent );
 
   enum class EOrderType { market, limit_manual, limit_ask, limit_bid, scale };
@@ -134,6 +149,7 @@ private:
   fUpdateUnderlyingPrice_t m_fUpdateUnderlyingPrice;
 
   fOptionLoadingStatus_t m_fOptionLoadingStatus;
+  fOptionLoadingDone_t m_fOptionLoadingDone;
 
   fUpdateOptionExpiries_t m_fUpdateOptionExpiries;
   fUpdateOptionExpiriesDone_t m_fUpdateOptionExpiriesDone;

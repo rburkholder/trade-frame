@@ -50,8 +50,8 @@ Server::Server(
 Server::~Server() {
 }
 
-void Server::SessionAttach( const std::string& sSessionId ) {
-  m_implServer->SessionAttach( sSessionId );
+void Server::SessionAttach( const std::string& sSessionId, const std::string& sClientAddress ) {
+  m_implServer->SessionAttach( sSessionId, sClientAddress );
 }
 
 void Server::SessionDetach( const std::string& sSessionId ) {
@@ -62,6 +62,41 @@ bool Server::ValidateLogin( const std::string& sUserName, const std::string& sPa
   return ( ( sUserName == m_choices.m_sUIUserName ) && ( sPassWord == m_choices.m_sUIPassWord ) );
 }
 
+// original entry, restart, state recovery -- transition matrix?
+// no... the selected button knows which to erase prior to migrating to the requested state
+//   new state can not be requested until orders/positions are cancelled/closed
+// NOTE: there are some session oriented posts which need to be cleared or over-written as the session attachment changes
+Server::EWhatToShow Server::WhereToStart() {
+  EWhatToShow what = EWhatToShow::blank;
+  Server_impl::EStateEngine stateEngine = m_implServer->StateEngine();
+  switch ( stateEngine ) {
+    case Server_impl::EStateEngine::init:
+      what = EWhatToShow::select_futures;
+      break;
+    case Server_impl::EStateEngine::underlying_populate:
+      what = EWhatToShow::select_futures;
+      break;
+    case Server_impl::EStateEngine::underlying_acquire:
+      what = EWhatToShow::blank;
+      break;
+    case Server_impl::EStateEngine::chains_populate:
+      what = EWhatToShow::chain_expiries;
+      break;
+    case Server_impl::EStateEngine::strike_populate:
+      what = EWhatToShow::chain_expiries; // ?
+      break;
+    case Server_impl::EStateEngine::table_populate:
+      what = EWhatToShow::strike_selection;
+      break;
+    case Server_impl::EStateEngine::order_management_active:
+      what = EWhatToShow::strike_selection;
+      break;
+    default:
+      assert( false );
+  }
+  return what;
+}
+
 void Server::AddCandidateFutures( fAddCandidateFutures_t&& f ) {
   m_implServer->UnderlyingPopulation();  // notify of current state,
   //TODO: need to query Server_impl to see if something in progress, if so, skip to the point of sync
@@ -70,16 +105,15 @@ void Server::AddCandidateFutures( fAddCandidateFutures_t&& f ) {
   }
 }
 
-void Server::BtnChooseUnderlying() {
-  // will have problems with this as the portfolio manager has a series of portfolios already loaded (from m_db loading)
-  // will need to take care of multiple underlyings within m_implServer
-  // therefore will probably need multiple underlyings, each with separate expiry session
-  //m_implServer = nullptr;
-  //m_implServer = std::make_unique<Server_impl>( m_choices.ib_client_id );
+void Server::ResetForNewUnderlying() {
+  // NOTE: the portfolio manager has a series of portfolios already loaded (from m_db loading)
+  //   in the future, may need to handle multiple underlyings within m_implServer - function tbd
+  //   therefore will probably need multiple underlyings, each with separate expiry session
+  m_implServer->ResetForNewUnderlying();
 }
 
-void Server::Underlying(
-  const std::string& sSessionId, const std::string& sIQFeedUnderlying,
+void Server::Underlying_Updates(
+  const std::string& sSessionId,
   fUpdateUnderlyingInfo_t&& fUpdateUnderlyingInfo,
   fUpdateUnderlyingPrice_t&& fUpdateUnderlyingPrice
 ) {
@@ -90,61 +124,54 @@ void Server::Underlying(
   assert( fUpdateUnderlyingPrice );
   m_fUpdateUnderlyingPrice = std::move( fUpdateUnderlyingPrice );
 
-  m_implServer->Underlying(
-  sIQFeedUnderlying,
-  [this,sSessionId](const std::string& sName, int multiplier ) { // fUpdateUnderlyingInfo_t
-    post(
-      sSessionId,
-      [this, sName_=std::move(sName), multiplier ]() {
-        std::string sMultiplier = boost::lexical_cast<std::string>( multiplier );
-        m_fUpdateUnderlyingInfo( sName_, sMultiplier );
-      }
-    );
-  },
-  [this,sSessionId]( double price, int precision, double dblPortfolioPnL ) { // fUpdateUnderlyingPrice_t
-    assert( 20 > precision );
-    assert(  0 < precision );
-    boost::format formatPrice( "%0." + boost::lexical_cast<std::string>( precision ) + "f" );
-    formatPrice % price;
-    const std::string sPrice( formatPrice.str() );
+  m_implServer->Underlying_Updates(
+    [this,sSessionId](const std::string& sName, int multiplier ) { // fUpdateUnderlyingInfo_t
+      post(
+        sSessionId,
+        [this, sName_=std::move(sName), multiplier ]() {
+          std::string sMultiplier = boost::lexical_cast<std::string>( multiplier );
+          m_fUpdateUnderlyingInfo( sName_, sMultiplier );
+        }
+      );
+    },
+    [this,sSessionId]( double price, int precision, double dblPortfolioPnL ) { // fUpdateUnderlyingPrice_t
+      assert( 20 > precision );
+      assert(  0 < precision );
+      boost::format formatPrice( "%0." + boost::lexical_cast<std::string>( precision ) + "f" );
+      formatPrice % price;
+      const std::string sPrice( formatPrice.str() );
 
-    boost::format formatPnL( sFormatUSD );
-    formatPnL % dblPortfolioPnL;
-    const std::string sPortfolioPnL( formatPnL.str() );
-    /*
-    post(
-      sSessionId,
-      [this,sPrice_=std::move(sPrice),sPortfolioPnL_=std::move(sPortfolioPnL)](){
-        m_fUpdateUnderlyingPrice( sPrice_, sPortfolioPnL_ );
-      }
-    ); */
-    m_fUpdateUnderlyingPrice( sPrice, sPortfolioPnL );
-  }
+      boost::format formatPnL( sFormatUSD );
+      formatPnL % dblPortfolioPnL;
+      const std::string sPortfolioPnL( formatPnL.str() );
+      /*
+      post(
+        sSessionId,
+        [this,sPrice_=std::move(sPrice),sPortfolioPnL_=std::move(sPortfolioPnL)](){
+          m_fUpdateUnderlyingPrice( sPrice_, sPortfolioPnL_ );
+        }
+      ); */
+      if ( m_fUpdateUnderlyingPrice ) m_fUpdateUnderlyingPrice( sPrice, sPortfolioPnL );
+    }
   );
 }
 
-void Server::BtnChooseExpiry() {
-  m_implServer->ResetForChainSelection();
-}
-
-void Server::ChainSelection(
-    const std::string& sSessionId,
-    fOptionLoadingStatus_t&& fOptionLoadingStatus,
-    fUpdateOptionExpiries_t&& fUpdateOptionExpiries,
-    fUpdateOptionExpiriesDone_t&& fUpdateOptionExpiriesDone
+void Server::Underlying_Acquire(
+  const std::string& sIQFeedUnderlying
+, const std::string& sSessionId
+, fOptionLoadingStatus_t&& fOptionLoadingStatus
+, fOptionLoadingDone_t&& fOptionLoadingDone
 ) {
 
   assert( fOptionLoadingStatus );
   m_fOptionLoadingStatus = std::move( fOptionLoadingStatus );
 
-  assert( fUpdateOptionExpiries );
-  m_fUpdateOptionExpiries = std::move( fUpdateOptionExpiries );
+  assert( fOptionLoadingDone );
+  m_fOptionLoadingDone = std::move( fOptionLoadingDone );
 
-  assert( fUpdateOptionExpiriesDone );
-  m_fUpdateOptionExpiriesDone = std::move( fUpdateOptionExpiriesDone );
-
-  m_implServer->ChainSelection(
-    [this,sSessionId](size_t nOptionNames, size_t nOptionsLoaded){
+  m_implServer->Underlying_Acquire(
+    sIQFeedUnderlying,
+    [this,sSessionId](size_t nOptionNames, size_t nOptionsLoaded){ // fOptionLoadingState_t
       post(
         sSessionId,
         [this,nOptionNames,nOptionsLoaded](){
@@ -154,6 +181,35 @@ void Server::ChainSelection(
         }
       );
     },
+    [this,sSessionId](){
+      post(
+        sSessionId,
+        [this](){
+          m_fOptionLoadingDone();
+        }
+      );
+
+    }
+    );
+}
+
+void Server::ResetForNewExpiry() {
+  m_implServer->ResetForNewExpiry();
+}
+
+void Server::ChainSelection(
+    const std::string& sSessionId,
+    fUpdateOptionExpiries_t&& fUpdateOptionExpiries,
+    fUpdateOptionExpiriesDone_t&& fUpdateOptionExpiriesDone
+) {
+
+  assert( fUpdateOptionExpiries );
+  m_fUpdateOptionExpiries = std::move( fUpdateOptionExpiries );
+
+  assert( fUpdateOptionExpiriesDone );
+  m_fUpdateOptionExpiriesDone = std::move( fUpdateOptionExpiriesDone );
+
+  m_implServer->ChainSelection(
     [this,sSessionId]( boost::gregorian::date date ){ // fAddExpiry_t
       post(
         sSessionId,
@@ -172,6 +228,11 @@ void Server::ChainSelection(
       );
     }
   );
+}
+
+std::string Server::Expiry() const {
+  boost::gregorian::date expiry( m_implServer->Expiry() );
+  return ou::tf::Instrument::BuildDate( expiry );
 }
 
 void Server::PrepareStrikeSelection(
@@ -349,6 +410,14 @@ void Server::AddStrike(
 void Server::DelStrike( const std::string& sStrike ) {
   double strike = boost::lexical_cast<double>( sStrike );
   m_implServer->DelStrike( strike );
+}
+
+void Server::SyncStrikeSelections( fSelectStrike_t&& fSelectStrike ) {
+  m_implServer->SyncStrikeSelections(
+    [this,fSelectStrike_=std::move(fSelectStrike)](double strike){
+      fSelectStrike_( FormatStrike( strike ) );
+    }
+  );
 }
 
 void Server::ChangeAllocation( const std::string& sStrike, const std::string& sPercent ) {

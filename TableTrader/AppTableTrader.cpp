@@ -43,8 +43,12 @@ namespace {
 // https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WApplication.html
 
 AppTableTrader::AppTableTrader( const Wt::WEnvironment& env )
-: Wt::WApplication( env ),
-  m_pServer( dynamic_cast<Server*>( env.server() ) )
+: Wt::WApplication( env )
+, m_pServer( dynamic_cast<Server*>( env.server() ) )
+, m_pContainerDataEntry( nullptr )
+, m_pContainerDataEntryButtons( nullptr )
+, m_pContainerUnderlyingLiveData( nullptr )
+, m_pContainerTableEntry( nullptr )
 {
 
   useStyleSheet("style/tt.css");
@@ -61,11 +65,41 @@ AppTableTrader::AppTableTrader( const Wt::WEnvironment& env )
 
   enableUpdates(); // enable updates of async data
 
+  // when starting:
+  //  a) engine is starting fresh, and all states start from beginning
+  //  b) engine is running, and ui needs to resync to the state
+  //  c) engine is running with attached ui session, new ui session takes over, old session goes blank with message
+  //        .. timer handles the state detection and change
+
+  // may need to turn use this as main page turner as states change
+
   Page_Template(
     root(),
     [this](Wt::WContainerWidget* pcw){
-      //Page_Login( pcw );
-      Page_SelectUnderlying( pcw ); // skip the login for now
+      // TODO: will need the various containers initialized
+      switch ( m_pServer->WhereToStart() ) {
+        case Server::EWhatToShow::blank:
+          Page_Blank( pcw );  // TODO: blank with ip and session
+          break;
+        case Server::EWhatToShow::select_futures:
+          if ( false ) { // skip the login for now
+            Page_Login( pcw );
+          }
+          else {
+            Page_SelectUnderlying( pcw );
+          }
+          break;
+        case Server::EWhatToShow::chain_expiries:
+          Page_SelectChainExpiry( m_pContainerDataEntry );
+          Container_UnderlyingPortfolio( m_pContainerUnderlyingLiveData );
+          break;
+        case Server::EWhatToShow::strike_selection:
+          Page_TableTrader( m_pContainerTableEntry, m_pServer->Expiry() );
+          Container_UnderlyingPortfolio( m_pContainerUnderlyingLiveData );
+          break;
+        default:
+          assert( false );
+      }
     } );
 
 }
@@ -74,7 +108,7 @@ AppTableTrader::~AppTableTrader( ) { }
 
 void AppTableTrader::initialize() {
   BOOST_LOG_TRIVIAL(info) << "AppTableTrader::initialize()";
-  m_pServer->SessionAttach( sessionId() );
+  m_pServer->SessionAttach( sessionId(), environment().clientAddress() );
   m_timerLiveRefresh = root()->addChild( std::make_unique<Wt::WTimer>() );
   m_timerLiveRefresh->timeout().connect( this, &AppTableTrader::HandleLiveRefresh );
   m_timerLiveRefresh->setInterval (std::chrono::seconds( 1 ) );
@@ -192,6 +226,8 @@ void AppTableTrader::Page_Template( Wt::WContainerWidget* pcw, fTemplate_t f) {
 
   pcw->clear();
 
+  Containers_PrimaryDefine( pcw );
+
   setTitle( sTitle );
 
   //auto title = pcw->addWidget( std::make_unique<Wt::WText>( sTitle ) );
@@ -212,8 +248,6 @@ void AppTableTrader::Page_Template( Wt::WContainerWidget* pcw, fTemplate_t f) {
 //    }
 
 //  }
-
-
 
   f( pcw );
 }
@@ -305,14 +339,16 @@ void AppTableTrader::Page_Login( Wt::WContainerWidget* pcw ) {
     });
 }
 
-void AppTableTrader::Container_Primary( Wt::WContainerWidget* pcw ) { // simply preps the containers
+void AppTableTrader::Page_Blank( Wt::WContainerWidget* pcw ) {
+  Wt::WLabel* pLabelUnderlyingLabel = pcw->addWidget( std::make_unique<Wt::WLabel>( "Unable to sync to engine at this time" ) );
+}
 
-  pcw->clear();
+void AppTableTrader::Containers_PrimaryDefine( Wt::WContainerWidget* pcw ) { // simply preps the containers
 
   m_pContainerDataEntry = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
   m_pContainerDataEntry->addStyleClass( "block" );
   m_pContainerDataEntryButtons = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
-  m_pContainerLiveData = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  m_pContainerUnderlyingLiveData = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
   m_pContainerTableEntry = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
   //m_pContainerTableEntryButtons = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
   //m_pContainerNotifications = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
@@ -320,9 +356,9 @@ void AppTableTrader::Container_Primary( Wt::WContainerWidget* pcw ) { // simply 
 
 }
 
-void AppTableTrader::Container_UnderlyingPortfolio( Wt::WContainerWidget* pcw, const std::string& sIQfeedUnderlyingName ) { // simply preps the containers
+void AppTableTrader::Container_UnderlyingPortfolio( Wt::WContainerWidget* pcw ) { // simply preps the containers
 
-  pcw->clear();  // pcw typically is m_pContainerLiveData
+  pcw->clear();  // pcw typically is m_pContainerUnderlyingLiveData
 
   Wt::WLabel* pLabelUnderlyingLabel = pcw->addWidget( std::make_unique<Wt::WLabel>( "Underlying: " ) );
   Wt::WLabel* pLabelUnderlyingName  = pcw->addWidget( std::make_unique<Wt::WLabel>() );
@@ -347,8 +383,8 @@ void AppTableTrader::Container_UnderlyingPortfolio( Wt::WContainerWidget* pcw, c
   pLabelPortfolioPLLabel->addStyleClass( "w_label" );
   pLabelPortfolioPLValue->addStyleClass( "w_label" );
 
-  m_pServer->Underlying(
-    sessionId(), sIQfeedUnderlyingName,
+  m_pServer->Underlying_Updates(
+    sessionId(),
       [this,pLabelUnderlyingName,pLabelMultiplierValue]( const std::string& sName, const std::string& sMultiplier ){ // fUpdateUnderlyingInfo_t
         pLabelUnderlyingName->setText( sName );
         pLabelMultiplierValue->setText( sMultiplier );
@@ -364,11 +400,6 @@ void AppTableTrader::Container_UnderlyingPortfolio( Wt::WContainerWidget* pcw, c
 }
 
 void AppTableTrader::Page_SelectUnderlying( Wt::WContainerWidget* pcw ) {
-
-  // TODO: will need to load pre-existing state
-  // NOTE: no dynamic data here
-
-  Container_Primary( pcw );
 
   Wt::WContainerWidget* pContainerUnderlying = m_pContainerDataEntry->addWidget( std::make_unique<Wt::WContainerWidget>() );
   pContainerUnderlying->addStyleClass( "block" );
@@ -386,15 +417,45 @@ void AppTableTrader::Page_SelectUnderlying( Wt::WContainerWidget* pcw ) {
 
   pSelectUnderlying->activated().connect(
     [this,pSelectUnderlying](){
-      pSelectUnderlying->setEnabled( false );
-      std::string sIQFeedUNderlying = pSelectUnderlying->valueText().toUTF8();
-
-      Container_UnderlyingPortfolio( m_pContainerLiveData, sIQFeedUNderlying );
+      //pSelectUnderlying->setEnabled( false );
+      std::string sIQfeedUnderlyingName = pSelectUnderlying->valueText().toUTF8();
 
       m_pContainerDataEntry->clear();
-      Page_SelectChainExpiry( m_pContainerDataEntry );
+      Page_LoadingUnderlyingAndChains_Load( m_pContainerDataEntry, sIQfeedUnderlyingName );
+      Container_UnderlyingPortfolio( m_pContainerUnderlyingLiveData ); // move into the page?
 
     } ); // pSelectUnderlying->activated()
+}
+
+void AppTableTrader::Page_LoadingUnderlyingAndChains_Load( Wt::WContainerWidget* pcw, const std::string& sIQfeedUnderlyingName ) {
+  // NOTE: page should have Container_UnderlyingPortfolio
+
+  Wt::WContainerWidget* pContainerLoadingStatus = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+    Wt::WLabel* pLabelBackgroundLoading = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>( "Loading underlying & option chains (may take a few minutes) ..." ) );
+    pLabelBackgroundLoading->addStyleClass( "w_label" );
+    Wt::WLabel* pLabelNumberOptionsLoaded  = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>( "-") );
+    pLabelNumberOptionsLoaded->addStyleClass( "w_label" );
+    Wt::WLabel* pLabelLoadOptionsOf = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>( "of") );
+    pLabelLoadOptionsOf->addStyleClass( "w_label" );
+    Wt::WLabel* pLabelNumberOptionNames = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>( "-") );
+    pLabelNumberOptionNames->addStyleClass( "w_label" );
+
+    m_pServer->Underlying_Acquire(
+      sIQfeedUnderlyingName,
+      sessionId(),
+      [pLabelNumberOptionNames,pLabelNumberOptionsLoaded](const std::string& sOptionsNames, const std::string& sOptionsLoaded){ // fOptionLoadingStatus_t
+        pLabelNumberOptionNames->setText( sOptionsNames );
+        pLabelNumberOptionsLoaded->setText( sOptionsLoaded );
+      },
+      [this](){ // fOptionLoadingDone_t
+        Page_Template(
+          root(),
+          [this](Wt::WContainerWidget* pcw){
+            Page_SelectChainExpiry( pcw );
+            Container_UnderlyingPortfolio( m_pContainerUnderlyingLiveData );
+          });
+      }
+      );
 }
 
 void AppTableTrader::Page_SelectChainExpiry( Wt::WContainerWidget* pcw ) {
@@ -404,16 +465,6 @@ void AppTableTrader::Page_SelectChainExpiry( Wt::WContainerWidget* pcw ) {
 
     Wt::WLabel* pLabelExpiries = pContainerSelectExpiries->addWidget( std::make_unique<Wt::WLabel>( "Option Chain Expiries: " ) );
     pContainerSelectExpiries->addWidget( std::make_unique<Wt::WBreak>() );
-
-    Wt::WContainerWidget* pContainerLoadingStatus = pContainerSelectExpiries->addWidget( std::make_unique<Wt::WContainerWidget>() );
-      Wt::WLabel* pLabelBackgroundLoading = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>( "Loading (may take a few minutes) ..." ) );
-      pLabelBackgroundLoading->addStyleClass( "w_label" );
-      Wt::WLabel* pLabelNumberOptionsLoaded  = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>( "-") );
-      pLabelNumberOptionsLoaded->addStyleClass( "w_label" );
-      Wt::WLabel* pLabelLoadOptionsOf = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>( "of") );
-      pLabelLoadOptionsOf->addStyleClass( "w_label" );
-      Wt::WLabel* pLabelNumberOptionNames = pContainerLoadingStatus->addWidget( std::make_unique<Wt::WLabel>( "-") );
-      pLabelNumberOptionNames->addStyleClass( "w_label" );
 
     Wt::WSelectionBox* pSelectExpiry = pContainerSelectExpiries->addWidget( std::make_unique<Wt::WSelectionBox>() );
     pSelectExpiry->addStyleClass( "w_combo_box" );
@@ -427,28 +478,26 @@ void AppTableTrader::Page_SelectChainExpiry( Wt::WContainerWidget* pcw ) {
 
   m_pServer->ChainSelection(
     sessionId(),
-    [pLabelNumberOptionNames,pLabelNumberOptionsLoaded](const std::string& sOptionsNames, const std::string& sOptionsLoaded){
-      pLabelNumberOptionNames->setText( sOptionsNames );
-      pLabelNumberOptionsLoaded->setText( sOptionsLoaded );
-    },
-    [pLabelBackgroundLoading,pSelectExpiry]( const std::string& sDate ){ // fUpdateOptionExpiries_t
+    [pSelectExpiry]( const std::string& sDate ){ // fUpdateOptionExpiries_t
       // TODO: implement timer to indicate duration
       if ( pSelectExpiry->isHidden() ) {
-        pLabelBackgroundLoading->setHidden( true );
         pSelectExpiry->setHidden( false );
       }
       pSelectExpiry->addItem( sDate );
       //triggerUpdate(); // is this needed, probably as this is asynchronous
     },
-    [this,pcw,pSelectExpiry,pContainerLoadingStatus](){ // fUpdateOptionExpiriesDone_t
+    [this,pcw,pSelectExpiry](){ // fUpdateOptionExpiriesDone_t
       // TODO: disable once filled
-      pContainerLoadingStatus->clear();
       pSelectExpiry->activated().connect(
         [this,pcw,pSelectExpiry](){
           pSelectExpiry->setEnabled( false );
           std::string sDate = pSelectExpiry->valueText().toUTF8();
-          pcw->clear();
-          Page_TableTrader( m_pContainerTableEntry, sDate );
+          Page_Template(
+            root(),
+            [this,sDate](Wt::WContainerWidget* pcw){
+              Page_TableTrader( m_pContainerTableEntry, sDate );
+              Container_UnderlyingPortfolio( m_pContainerUnderlyingLiveData );
+            });
         }
       );
       pSelectExpiry->setEnabled( true );
@@ -465,33 +514,50 @@ void AppTableTrader::Page_TableTrader( Wt::WContainerWidget* pcw /* m_pContainer
 
     Wt::WPushButton* pBtnChooseUnderlying = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Choose Underlying" ) );
 
-      pBtnChooseUnderlying->setEnabled( false );
+      pBtnChooseUnderlying->setEnabled( true );
       pBtnChooseUnderlying->addStyleClass( "w_push_button" );
+
       pBtnChooseUnderlying->clicked().connect(
-        [this](){
-          m_pServer->BtnChooseUnderlying();
+        [this,pBtnChooseUnderlying](){
+
+          pBtnChooseUnderlying->setEnabled( false );
+          //pBtnChooseExpiry->setEnabled( false );  // won't work
+
+          m_pServer->ResetForNewUnderlying();
           Page_Template(
             root(),
             [this](Wt::WContainerWidget* pcw){
               Page_SelectUnderlying( pcw );
             } );
+          triggerUpdate();
         });
 
     Wt::WPushButton* pBtnChooseExpiry = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Choose Expiry" ) );
 
-      pBtnChooseExpiry->setEnabled( false );
+      pBtnChooseExpiry->setEnabled( true );
       pBtnChooseExpiry->addStyleClass( "w_push_button" );
+
       pBtnChooseExpiry->clicked().connect(
-        [this](){
-          m_pServer->BtnChooseExpiry();
-          m_pContainerDataEntry->clear();
-          Page_SelectChainExpiry( m_pContainerDataEntry );
-          // TODO: will need to reset pSelectStrikes
+        [this,pBtnChooseUnderlying,pBtnChooseExpiry](){
+
+          pBtnChooseUnderlying->setEnabled( false );
+          pBtnChooseExpiry->setEnabled( false );
+
+          m_pServer->ResetForNewExpiry();
+          Page_Template(
+            root(),
+            [this](Wt::WContainerWidget* pcw){
+              Page_SelectChainExpiry( pcw );
+              Container_UnderlyingPortfolio( m_pContainerUnderlyingLiveData );
+            });
+          triggerUpdate();
         });
 
     Wt::WPushButton* pBtnCancelAll = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Cancel All" ) );
 
+      pBtnCancelAll->setEnabled( false );
       pBtnCancelAll->addStyleClass( "w_push_button" );
+
       pBtnCancelAll->clicked().connect(
         [this,pBtnCancelAll](){
           pBtnCancelAll->setEnabled( false );
@@ -504,11 +570,16 @@ void AppTableTrader::Page_TableTrader( Wt::WContainerWidget* pcw /* m_pContainer
       pBtnCloseAll->addStyleClass( "w_push_button" );
 
       pBtnCloseAll->clicked().connect(
-        [this,pBtnCancelAll,pBtnCloseAll](){
+        [this,pBtnChooseUnderlying,pBtnChooseExpiry,pBtnCancelAll,pBtnCloseAll](){
           pBtnCancelAll->setEnabled( false );
           m_pServer->CancelAll();
           pBtnCloseAll->setEnabled( false );
           m_pServer->CloseAll();
+
+          // TODO: better state management on these buttons
+          //   available only when no orders are in progress
+          pBtnChooseUnderlying->setEnabled( true );
+          pBtnChooseExpiry->setEnabled( true );
         });
 
     Wt::WPushButton* pBtnPlaceOrders = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Place Orders" ) );
@@ -517,12 +588,16 @@ void AppTableTrader::Page_TableTrader( Wt::WContainerWidget* pcw /* m_pContainer
       pBtnPlaceOrders->addStyleClass( "w_push_button" );
 
       pBtnPlaceOrders->clicked().connect(
-        [this,pBtnCancelAll,pBtnCloseAll,pBtnPlaceOrders](){
+        [this,pBtnChooseUnderlying,pBtnChooseExpiry,pBtnCancelAll,pBtnCloseAll,pBtnPlaceOrders](){
           if ( m_pServer->PlaceOrders() ) {
             //pSelectStrikes->setEnabled( false ); // do this some other way
             pBtnCancelAll->setEnabled( true );
             pBtnCloseAll->setEnabled( true );
             pBtnPlaceOrders->setEnabled (false );
+
+            // TODO: these will need better state management, particularly during state recovery
+            pBtnChooseUnderlying->setEnabled( false );
+            pBtnChooseExpiry->setEnabled( false );
           }
         });
 
@@ -1035,6 +1110,17 @@ void AppTableTrader::Page_TableTrader( Wt::WContainerWidget* pcw /* m_pContainer
 
       }
       ); // m_pServer->PrepareStrikeSelection
+
+  m_pServer->SyncStrikeSelections(
+    [pSelectStrikes](const std::string& sStrike ){
+      auto setIndexes = pSelectStrikes->selectedIndexes();
+      int ix = pSelectStrikes->findText( sStrike );
+      if ( 0 < ix ) {
+        setIndexes.insert( ix );
+      }
+      pSelectStrikes->setSelectedIndexes( setIndexes );
+    } );
+  //m_fUpdateStrikeSelection();
 }
 
 std::string AppTableTrader::ComposeOrderType(

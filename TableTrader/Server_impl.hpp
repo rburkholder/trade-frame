@@ -50,13 +50,15 @@ namespace ib {
 class Server_impl {
 public:
 
-  Server_impl( int ib_client_id );
-  ~Server_impl();
+  enum EStateEngine {
+    init, underlying_populate, underlying_acquire, chains_populate, strike_populate, table_populate, order_management_active
+  };
 
   using fUpdateUnderlyingInfo_t = std::function<void(const std::string&,int)>; // generic name, contract size
   using fUpdateUnderlyingPrice_t = std::function<void(double,int,double)>; // price,precision,portfolio
 
   using fOptionLoadingState_t = std::function<void(size_t,size_t)>;
+  using fOptionLoadingDone_t = std::function<void()>;
 
   using fAddExpiry_t = std::function<void(boost::gregorian::date)>;
   using fAddExpiryDone_t = std::function<void()>;
@@ -64,29 +66,36 @@ public:
   using fPopulateStrike_t = std::function<void(double,int)>; // strike, precision
   using fPopulateStrikeDone_t = std::function<void()>;
 
-  void SessionAttach( const std::string& sSessionId );
+  Server_impl( int ib_client_id );
+  ~Server_impl();
+
+  EStateEngine StateEngine() const { return m_stateEngine; }
+
+  void SessionAttach( const std::string& sSessionId, const std::string& sClientAddress );
   void SessionDetach( const std::string& sSessionId );
 
   void UnderlyingPopulation();
 
-  void Underlying(
-    const std::string& sIQFeedUnderlying,
-    fUpdateUnderlyingInfo_t&&,
-    fUpdateUnderlyingPrice_t&&
+  void Underlying_Acquire(
+    const std::string& sIQFeedUnderlying
+  , fOptionLoadingState_t&&
+  , fOptionLoadingDone_t&&
   );
 
-  void ResetForChainSelection();
+  void Underlying_Updates(
+    fUpdateUnderlyingInfo_t&&
+  , fUpdateUnderlyingPrice_t&&
+  );
 
   void ChainSelection(
-    fOptionLoadingState_t&&,
-    fAddExpiry_t&&,
-    fAddExpiryDone_t&&
-    );
+    fAddExpiry_t&&
+  , fAddExpiryDone_t&&
+  );
 
   void PopulateStrikes(
-    boost::gregorian::date,
-    fPopulateStrike_t&&,
-    fPopulateStrikeDone_t&&
+    boost::gregorian::date
+  , fPopulateStrike_t&&
+  , fPopulateStrikeDone_t&&
   );
 
   void TriggerUpdates( const std::string& sSessionId );
@@ -106,6 +115,9 @@ public:
     fFill_t&& fEntry, fFill_t&& fExit );
   void DelStrike( double strike );
 
+  using fSelectStrike_t = std::function<void(double)>;
+  void SyncStrikeSelections( fSelectStrike_t&& );
+
   void ChangeInvestment( double dblInvestment );
   void ChangeAllocation( double dblStrike, double dblRatio );
 
@@ -117,9 +129,11 @@ public:
   void CancelAll();
   void CloseAll();
 
-  void RestartWithNewUnderlying();
-  void RestartWithNewExpiry();
-  void RestartWithNewTable();
+  boost::gregorian::date Expiry() const;
+
+  void ResetForNewUnderlying();
+  void ResetForNewExpiry();
+  void ResetForNewTable();
 
 protected:
 private:
@@ -135,9 +149,7 @@ private:
     quiescent, connecting, connected, fundamentals, disconnecting, disconnected }
     m_stateConnection;
 
-  enum EStateEngine {
-    init, underlying_populate, underlying_acquire, chains_populate, strike_populate, table_populate, order_management
-  } m_stateEngine;
+  EStateEngine m_stateEngine;
 
   // EStateEngine::init
 
@@ -150,16 +162,26 @@ private:
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrumentIQFeed;
 
   struct Session {
-    //fUpdateUnderlyingPrice_t m_fUpdateUnderlyingPrice;
-    Session()
-    //: m_fUpdateUnderlyingPrice {}
-    {}
+    std::string m_sClientAddress;
+    Session() {}
   };
 
   using mapSession_t = std::unordered_map<std::string,Session>;
   mapSession_t m_mapSession;
 
+  using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
+  pOptionChainQuery_t m_pOptionChainQuery;
+
+  using fRequestContract_t = std::function<void()>;
+  fRequestContract_t m_fRequestContract_InProgress; // in transit to ib
+
+  using vRequestContract_t = std::vector<fRequestContract_t>;
+  vRequestContract_t m_vRequestContract_Pending; // lifo of requests
+
   // EStateEngine::underlying_acquire
+
+  int m_nPrecision;
+  unsigned int m_nMultiplier; // used to populate futures options multiplier (not supplied by iqf)
 
   size_t m_nOptionsNames;
   size_t m_nOptionsLoaded;
@@ -174,9 +196,7 @@ private:
   fUpdateUnderlyingPrice_t m_fUpdateUnderlyingPrice;
 
   fOptionLoadingState_t m_fOptionLoadingState;
-
-  int m_nPrecision;
-  unsigned int m_nMultiplier; // used to populate futures options multiplier (not supplied by iqf)
+  fOptionLoadingDone_t m_fOptionLoadingDone;
 
   // EStateEngine::chains_populate
 
@@ -191,15 +211,6 @@ private:
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
   mapChains_t m_mapChains;
   mapChains_t::const_iterator m_citerChains; // chosen date
-
-  using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
-  pOptionChainQuery_t m_pOptionChainQuery;
-
-  using fRequestContract_t = std::function<void()>;
-  fRequestContract_t m_fRequestContract_InProgress; // in transit to ib
-
-  using vRequestContract_t = std::vector<fRequestContract_t>;
-  vRequestContract_t m_vRequestContract_Pending; // lifo of requests
 
   std::mutex m_mutexChainPopulate;
   std::mutex m_mutexRequestContract; // play it safe with structure usage
