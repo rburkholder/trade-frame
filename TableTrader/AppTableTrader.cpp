@@ -516,13 +516,13 @@ void AppTableTrader::Page_TableTrader( Wt::WContainerWidget* pcw /* m_pContainer
 
     Wt::WPushButton* pBtnChooseUnderlying = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Choose Underlying" ) );
 
-      pBtnChooseUnderlying->setEnabled( true );
+      pBtnChooseUnderlying->setEnabled( false );
       pBtnChooseUnderlying->addStyleClass( "w_push_button" );
 
       pBtnChooseUnderlying->clicked().connect(
         [this,pBtnChooseUnderlying](){
 
-          pBtnChooseUnderlying->setEnabled( false );
+          //pBtnChooseUnderlying->setEnabled( false );
           //pBtnChooseExpiry->setEnabled( false );  // won't work
 
           m_pServer->ResetForNewUnderlying();
@@ -536,14 +536,14 @@ void AppTableTrader::Page_TableTrader( Wt::WContainerWidget* pcw /* m_pContainer
 
     Wt::WPushButton* pBtnChooseExpiry = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Choose Expiry" ) );
 
-      pBtnChooseExpiry->setEnabled( true );
+      pBtnChooseExpiry->setEnabled( false );
       pBtnChooseExpiry->addStyleClass( "w_push_button" );
 
       pBtnChooseExpiry->clicked().connect(
         [this,pBtnChooseUnderlying,pBtnChooseExpiry](){
 
-          pBtnChooseUnderlying->setEnabled( false );
-          pBtnChooseExpiry->setEnabled( false );
+          //pBtnChooseUnderlying->setEnabled( false );
+          //pBtnChooseExpiry->setEnabled( false );
 
           m_pServer->ResetForNewExpiry();
           Page_Template(
