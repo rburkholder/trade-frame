@@ -418,7 +418,9 @@ void AppTableTrader::Page_SelectUnderlying( Wt::WContainerWidget* pcw ) {
   pSelectUnderlying->activated().connect(
     [this,pSelectUnderlying](){
       //pSelectUnderlying->setEnabled( false );
-      std::string sIQfeedUnderlyingName = pSelectUnderlying->valueText().toUTF8();
+      //std::string sIQfeedUnderlyingName = pSelectUnderlying->valueText().toUTF8(); // creates an XSS error
+      std::string sIQfeedUnderlyingName = pSelectUnderlying->currentText().toUTF8();
+      //std::string sIQfeedUnderlyingName = "@ESU22";
 
       m_pContainerDataEntry->clear();
       Page_LoadingUnderlyingAndChains_Load( m_pContainerDataEntry, sIQfeedUnderlyingName );
