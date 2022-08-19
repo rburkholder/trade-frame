@@ -70,6 +70,10 @@ body {
   display: inline-block;
 }
 
+.fld_select_underlying {
+  width: 100px;
+}
+
 .fld_expiry {
   text-align:center;
   background-color: beige;

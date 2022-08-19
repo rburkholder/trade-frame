@@ -407,6 +407,7 @@ void AppTableTrader::Page_SelectUnderlying( Wt::WContainerWidget* pcw ) {
     Wt::WLabel* pLabelUnderlying = pContainerUnderlying->addWidget( std::make_unique<Wt::WLabel>( "Select Future: " ) );
     pContainerUnderlying->addWidget( std::make_unique<Wt::WBreak>() );
     Wt::WSelectionBox* pSelectUnderlying = pContainerUnderlying->addWidget( std::make_unique<Wt::WSelectionBox>() );
+    pSelectUnderlying->addStyleClass( "fld_select_underlying" );
     pSelectUnderlying->setSelectionMode( Wt::SelectionMode::Single );
     pSelectUnderlying->setVerticalSize( 2 );
     //pLabelUnderlying->setBuddy( pSelectUnderlying );
@@ -420,6 +421,7 @@ void AppTableTrader::Page_SelectUnderlying( Wt::WContainerWidget* pcw ) {
       //pSelectUnderlying->setEnabled( false );
       //std::string sIQfeedUnderlyingName = pSelectUnderlying->valueText().toUTF8(); // creates an XSS error
       std::string sIQfeedUnderlyingName = pSelectUnderlying->currentText().toUTF8();
+      //pSelectUnderlying->currentText().toXhtmlUTF8()
       //std::string sIQfeedUnderlyingName = "@ESU22";
 
       m_pContainerDataEntry->clear();
