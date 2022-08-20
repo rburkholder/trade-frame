@@ -10,7 +10,6 @@
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
-#include "stdafx.h"
 
 #include <sstream>
 #include <stdexcept>
