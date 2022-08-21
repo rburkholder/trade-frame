@@ -48,6 +48,14 @@
     lib/TFIQFeed/Symbol.h:57:    int nOpenInterest;
 */
 
+/*
+x64/debug/AppTableTrader/etc/wt_config.xml
+123             <!--<idle-timeout>900</idle-timeout>-->
+virtual void idleTimeout() override
+https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WApplication.html#a4e8020fca24d09661ee4bf13400354d9
+https://www.webtoolkit.eu/wt/doc/reference/html/overview.html#application_sec
+*/
+
 namespace {
   static const std::string sTWS( "tws" );
   static const std::string sIQFeed( "iqfeed" );

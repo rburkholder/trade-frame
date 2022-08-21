@@ -365,7 +365,7 @@
            that all (reverse) proxy servers also have explicit support
            for this protocol.
 	  -->
-	<web-sockets>false</web-sockets>
+	<web-sockets>true</web-sockets>
 
 	<!-- Enables the detection of webgl-capabilites.
 
