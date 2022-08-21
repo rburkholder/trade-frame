@@ -19,74 +19,28 @@
  * Created: April 1, 2022  19:09
  */
 
-#include <OUCommon/KeyWordMatch.h>
-
 #include <TFTrading/TradingEnumerations.h>
 
-#include <TFIQFeed/InMemoryMktSymbolList.h>
-
+#include "Config.hpp"
 #include "Process.hpp"
 
 int main( int argc, char* argv[] ) {
 
-  ou::tf::iqfeed::InMemoryMktSymbolList list;
+  const static std::string sConfigFileName( "dividend.cfg" );
 
-  std::cout << "loading started ..." << std::endl;
+  config::Choices choices;
 
-  list.LoadFromFile( "../symbols.ser" );
-
-  std::cout << "loading done" << std::endl;
-
-  using vExchanges_t = std::vector<std::string>;
-  vExchanges_t vExchanges;
-  vExchanges = {
-    "NYSE"
-  , "NYSE,NYSE_ARCA"
-  , "NYSE_AMERICAN"
-  , "NASDAQ"
-  , "NASDAQ,NCM"
-  , "NASDAQ,NGM"
-  , "NASDAQ,NGSM"
-  };
+  if ( Load( sConfigFileName, choices ) ) {
+  }
+  else {
+    return EXIT_FAILURE;
+  }
 
   using dividend_t = Process::dividend_t;
   using vSymbols_t = Process::vSymbols_t;
   vSymbols_t vSymbols;
 
-  ou::KeyWordMatch<bool> kwm( true, 20 ); // scan can't find these
-  kwm.AddPattern( "BSCE", false );
-  kwm.AddPattern( "DBBPF", false );
-  kwm.AddPattern( "ELMSW", false );
-  kwm.AddPattern( "ELSBF", false );
-  kwm.AddPattern( "GLMGF", false );
-  kwm.AddPattern( "GRZZU", false );
-  kwm.AddPattern( "HUICF", false );
-  kwm.AddPattern( "LIBC", false );
-  kwm.AddPattern( "LYPHF", false );
-  kwm.AddPattern( "ORPH", false );
-  kwm.AddPattern( "PB", false );
-  kwm.AddPattern( "PFH", false ); // this one works, bug somewhere?
-  kwm.AddPattern( "PGTRF", false );
-  kwm.AddPattern( "RTWRF", false );
-  kwm.AddPattern( "SSDT", false );
-  kwm.AddPattern( "SBEAU", false );
-  kwm.AddPattern( "UELMO", false );
-
-  list.SelectSymbolsByExchange(
-    vExchanges.begin(), vExchanges.end(),
-    [&vSymbols,&kwm](const ou::tf::iqfeed::InMemoryMktSymbolList::trd_t trd){
-      if ( ou::tf::iqfeed::ESecurityType::Equity == trd.sc ) {
-        if ( kwm.FindMatch( trd.sSymbol ) ) { // note the reverse logic in kwm
-          //std::cout << trd.sSymbol << std::endl;
-          vSymbols.push_back( dividend_t( trd.sSymbol ) );
-        }
-      }
-    }
-    );
-
-  std::cout << "#symbols=" << vSymbols.size() << std::endl;
-
-  Process process( vSymbols );
+  Process process( choices, vSymbols );
   process.Wait();
 
   std::cout
@@ -94,7 +48,7 @@ int main( int argc, char* argv[] ) {
     << std::endl;
 
   for ( vSymbols_t::value_type& vt: vSymbols ) {
-    if ( ( 7.0 < vt.yield ) && ( 5000 <= vt.nAverageVolume ) ) {
+    if ( ( choices.m_dblMinimumYield < vt.yield ) && ( choices.m_nMinimumVolume <= vt.nAverageVolume ) ) {
       std::cout
                << vt.sSymbol
         << "," << vt.sExchange
@@ -109,7 +63,7 @@ int main( int argc, char* argv[] ) {
     }
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 // https://dividendhistory.org

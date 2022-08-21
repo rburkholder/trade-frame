@@ -26,6 +26,8 @@
 
 #include <TFIQFeed/Provider.h>
 
+#include "Config.hpp"
+
 namespace ou {
 namespace tf {
   class AcquireFundamentals;
@@ -51,12 +53,14 @@ public:
   };
   using vSymbols_t = std::vector<dividend_t>;
 
-  Process( vSymbols_t& );
+  Process( const config::Choices& choices, vSymbols_t& );
 
   void Wait();
 
 protected:
 private:
+
+  const config::Choices& m_choices;
 
   using pIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
 

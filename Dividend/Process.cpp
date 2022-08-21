@@ -23,12 +23,8 @@
 
 #include "Process.hpp"
 
-namespace {
-  const size_t nMaxInTransit = 40;
-}
-
-Process::Process( vSymbols_t& vSymbols )
-: m_vSymbols( vSymbols ), m_bDone( false )
+Process::Process( const config::Choices& choices, vSymbols_t& vSymbols )
+: m_choices( choices ), m_vSymbols( vSymbols ), m_bDone( false )
 {
 
   m_piqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
@@ -40,10 +36,48 @@ Process::Process( vSymbols_t& vSymbols )
 
 void Process::HandleConnected( int ) {
 
-  m_iterSymbols = m_vSymbols.begin();
-  while ( ( nMaxInTransit > m_mapInProgress.size() ) && ( m_vSymbols.end() != m_iterSymbols ) ) {
-    Lookup();
+  using vName_t = config::vName_t;
+
+  using key_t = ou::tf::iqfeed::SymbolLookup::key_t;
+  using setNames_t = ou::tf::iqfeed::SymbolLookup::setNames_t;
+
+  setNames_t setListedMarket;
+
+  for ( const vName_t::value_type name: m_choices.m_vListedMarket ) {
+    setListedMarket.emplace( name );
   }
+
+  setNames_t setSecurityType;
+
+  for ( const vName_t::value_type type: m_choices.m_vSecurityType ) {
+    setSecurityType.emplace( type );
+  }
+
+  setNames_t setIgnoreName;
+
+  for ( const vName_t::value_type name: m_choices.m_vIgnoreNames ) {
+    setIgnoreName.emplace( name );
+  }
+
+  std::cout << "symbol retrieval started ..." << std::endl;
+
+  m_piqfeed->SymbolList(
+    setListedMarket, setSecurityType,
+    [this, setIgnoreName_=std::move(setIgnoreName)](const std::string& sSymbol, key_t keyListedMarket){
+      if ( setIgnoreName_.end() != setIgnoreName_.find( sSymbol ) ) {
+      }
+      else {
+        m_vSymbols.push_back( dividend_t( sSymbol ) );
+      }
+    },
+    [this](){
+      std::cout << "symbol retrieval done" << std::endl;
+      m_iterSymbols = m_vSymbols.begin();
+      while ( ( m_choices.m_nMaxInTransit > m_mapInProgress.size() ) && ( m_vSymbols.end() != m_iterSymbols ) ) {
+        Lookup();
+      }
+    }
+  );
 
 }
 
