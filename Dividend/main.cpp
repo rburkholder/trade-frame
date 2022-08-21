@@ -62,6 +62,7 @@ int main( int argc, char* argv[] ) {
   kwm.AddPattern( "GRZZU", false );
   kwm.AddPattern( "HUICF", false );
   kwm.AddPattern( "LIBC", false );
+  kwm.AddPattern( "LYPHF", false );
   kwm.AddPattern( "ORPH", false );
   kwm.AddPattern( "PB", false );
   kwm.AddPattern( "PFH", false ); // this one works, bug somewhere?
