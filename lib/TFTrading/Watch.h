@@ -52,7 +52,8 @@ public:
     int nOpenInterest;
     int nTotalVolume;
     double dblOpen;
-    Summary(): nOpenInterest{}, nTotalVolume{}, dblOpen{} {}
+    double dblTrade; // last trade?
+    Summary(): nOpenInterest{}, nTotalVolume{}, dblOpen{}, dblTrade {} {}
   };
 
   Watch( pInstrument_t pInstrument, pProvider_t pDataProvider );

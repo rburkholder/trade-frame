@@ -49,6 +49,7 @@ private:
   fDone_t  m_fDone;
 
   void HandleFundamentals( const Watch::Fundamentals& );
+  void HandleSummary( const Watch::Summary& );
   void HandleTrade( const Trade& );
 
 };

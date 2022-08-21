@@ -84,6 +84,7 @@ void Process::HandleConnected( int ) {
 void Process::Lookup() {
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
+  using Summary = ou::tf::Watch::Summary;
   using Fundamentals = ou::tf::Watch::Fundamentals;
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
@@ -105,8 +106,10 @@ void Process::Lookup() {
     = ou::tf::AcquireFundamentals::Factory (
       std::move( pWatch ),
       [this,iterInProgress,iterSymbols=m_iterSymbols]( pWatch_t pWatch ){
-        const Fundamentals& fundamentals( pWatch->GetFundamentals() );
         dividend_t& dividend( *iterSymbols );
+        const Summary& summary( pWatch->GetSummary() );
+        dividend.trade = summary.dblTrade;
+        const Fundamentals& fundamentals( pWatch->GetFundamentals() );
         dividend.sExchange = fundamentals.sExchange;
         dividend.rate = fundamentals.dblDividendRate;
         dividend.yield = fundamentals.dblDividendYield;

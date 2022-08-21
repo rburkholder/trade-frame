@@ -43,13 +43,14 @@ public:
     double yield;
     double rate;
     double amount;
+    double trade; // last trade
     int nAverageVolume;
     boost::gregorian::date datePayed;
     boost::gregorian::date dateExDividend;
     std::string sOptionRoots;
 
     dividend_t( const std::string& sSymbol_ )
-    : sSymbol( sSymbol_ ), yield {}, rate {} {}
+    : sSymbol( sSymbol_ ), yield {}, rate {}, trade {} {}
   };
   using vSymbols_t = std::vector<dividend_t>;
 

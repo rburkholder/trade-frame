@@ -38,17 +38,30 @@ void AcquireFundamentals::Start() {
   //std::cout << "AcquireFundamentals::Start(): " << m_pWatch->GetInstrumentName() << std::endl;
   m_pWatch->OnFundamentals.Add( MakeDelegate( this, &AcquireFundamentals::HandleFundamentals) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &AcquireFundamentals::HandleTrade ) );
+  m_pWatch->OnSummary.Add( MakeDelegate( this, &AcquireFundamentals::HandleSummary ) );
   m_pWatch->StartWatch();
 }
 
 void AcquireFundamentals::HandleFundamentals( const ou::tf::Watch::Fundamentals& fundamentals ) {
   // the watch will retain variables from the fundamentals message
   //std::cout << "AcquireFundamentals::HandleFundamentals() enter: " << m_pWatch->GetInstrumentName()  << std::endl;
+  //m_pWatch->StopWatch();
+  //m_pWatch->OnSummary.Remove( MakeDelegate( this, &AcquireFundamentals::HandleSummary ) );
+  //m_pWatch->OnTrade.Remove( MakeDelegate(this, &AcquireFundamentals::HandleTrade ) );
+  //m_pWatch->OnFundamentals.Remove( MakeDelegate( this, &AcquireFundamentals::HandleFundamentals) );
+  //m_fDone( m_pWatch );  // fundamentals reside in watch
+  //std::cout << "AcquireFundamentals::HandleFundamentals() exit: " << m_pWatch->GetInstrumentName() << std::endl;
+}
+
+void AcquireFundamentals::HandleSummary( const ou::tf::Watch::Summary& summary ) {
+  // summary comes after fundamentals, so this should ensure both are obtained
+  //std::cout << "AcquireFundamentals::HandleSummary() enter: " << m_pWatch->GetInstrumentName()  << std::endl;
   m_pWatch->StopWatch();
+  m_pWatch->OnSummary.Remove( MakeDelegate( this, &AcquireFundamentals::HandleSummary ) );
   m_pWatch->OnTrade.Remove( MakeDelegate(this, &AcquireFundamentals::HandleTrade ) );
   m_pWatch->OnFundamentals.Remove( MakeDelegate( this, &AcquireFundamentals::HandleFundamentals) );
   m_fDone( m_pWatch );  // fundamentals reside in watch
-  //std::cout << "AcquireFundamentals::HandleFundamentals() exit: " << m_pWatch->GetInstrumentName() << std::endl;
+  //std::cout << "AcquireFundamentals::HandleSummary() exit: " << m_pWatch->GetInstrumentName() << std::endl;
 }
 
 void AcquireFundamentals::HandleTrade( const ou::tf::Trade& trade ) {
