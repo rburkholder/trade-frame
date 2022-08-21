@@ -22,7 +22,6 @@
 #include <TFTrading/AcquireFundamentals.h>
 
 #include "Process.hpp"
-#include "TFTrading/Watch.h"
 
 namespace {
   const size_t nMaxInTransit = 40;
@@ -81,6 +80,7 @@ void Process::Lookup() {
         dividend.nAverageVolume = fundamentals.nAverageVolume;
         dividend.datePayed = fundamentals.datePayed;
         dividend.dateExDividend = fundamentals.dateExDividend;
+        dividend.sOptionRoots = fundamentals.sOptionRoots;
         //if ( 10.0 < fundamentals.dblDividendYield ) {
         //  std::cout
         //    << fundamentals.sExchange

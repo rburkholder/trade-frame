@@ -27,6 +27,8 @@
 
 #include "Process.hpp"
 
+// https://dividendhistory.org/ for lookups
+
 int main( int argc, char* argv[] ) {
 
   ou::tf::iqfeed::InMemoryMktSymbolList list;
@@ -90,7 +92,7 @@ int main( int argc, char* argv[] ) {
   process.Wait();
 
   std::cout
-    << "exchange,symbol,yield,rate,amount,vol,exdiv,payed"
+    << "exchange,symbol,yield,rate,amount,vol,exdiv,payed,option"
     << std::endl;
 
   for ( vSymbols_t::value_type& vt: vSymbols ) {
@@ -104,6 +106,7 @@ int main( int argc, char* argv[] ) {
         << "," << vt.nAverageVolume
         << "," << vt.dateExDividend
         << "," << vt.datePayed
+        << "," << vt.sOptionRoots
         << std::endl;
     }
   }
