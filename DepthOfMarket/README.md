@@ -2,6 +2,11 @@
 
 * requires dom.cfg file with a symbol and dynamic indicator settings:
 
+* to trade, check 'Arm'.
+** left-click in yellow buy/sell column.  no more than one column at once, else IB complains about being both sides of market
+** right-click to cancel.  
+* currently need to watch IB for order confirmation and p/l - next step is on-dom p/l
+
 
 ```
 symbol = <symbol name>
