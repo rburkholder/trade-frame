@@ -732,7 +732,7 @@ void AppDoM::HandleArmedFlag( bool bArm ) {
           PriceLevelOrder& plo( pair.first->second );
           plo.Set(
             [this,price]( unsigned int quantity ){
-              m_pPanelTrade->SetBid( price, m_config.nBlockSize );
+              m_pPanelTrade->SetBid( price, quantity ); // set with plo instead
             }
           );
           plo = pOrder;
