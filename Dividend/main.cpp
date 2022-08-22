@@ -44,7 +44,7 @@ int main( int argc, char* argv[] ) {
   process.Wait();
 
   std::cout
-    << "exchange,symbol,yield,rate,amount,vol,exdiv,payed,trade,option"
+    << "symbol,exchange,last($),yield(%),rate,amount,vol,exdiv,payed,option"
     << std::endl;
 
   for ( vSymbols_t::value_type& vt: vSymbols ) {
@@ -52,13 +52,13 @@ int main( int argc, char* argv[] ) {
       std::cout
                << vt.sSymbol
         << "," << vt.sExchange
+        << "," << vt.trade
         << "," << vt.yield
         << "," << vt.rate
         << "," << vt.amount
         << "," << vt.nAverageVolume
         << "," << vt.dateExDividend
         << "," << vt.datePayed
-        << "," << vt.trade
         << "," << vt.sOptionRoots
         << std::endl;
     }
