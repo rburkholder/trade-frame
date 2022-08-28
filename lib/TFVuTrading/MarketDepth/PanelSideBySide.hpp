@@ -155,12 +155,15 @@ private:
     , m_dreImbalance( sFmtPrice, m_bChanged )
     {}
     void Update() {
-      m_dreImbalance.UpdateWinRowElement();
-      m_bChanged = false;
+      if ( m_bChanged ) {
+        m_dreImbalance.UpdateWinRowElement();
+        m_bChanged = false;
+      }
     }
   };
 
-  using vStatistics_t = std::vector<DataRow_Statistics>;
+  using pDataRow_Statistics_t = std::unique_ptr<DataRow_Statistics>;
+  using vStatistics_t = std::vector<pDataRow_Statistics_t>;
   vStatistics_t m_vStatistics;
 
   std::mutex m_mutexMaps;

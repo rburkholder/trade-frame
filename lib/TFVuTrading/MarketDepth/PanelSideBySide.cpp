@@ -19,6 +19,7 @@
  * Created: April 27, 2022 16:38
  */
 
+#include <memory>
 #include <thread>
 #include <algorithm>
 
@@ -221,7 +222,8 @@ void PanelSideBySide::CalculateStatistics() { // need to fix this, as cross thre
         DataRow_Book& bookAsk( iterMapAsk->second );
         DataRow_Book& bookBid( iterMapBid->second );
 
-        DataRow_Statistics& stats( m_vStatistics[ ix ] );
+        assert( ix < m_vStatistics.size() );
+        DataRow_Statistics& stats( *m_vStatistics[ ix ] );
         double imbalance = Imbalance( nVolumeAggregateBid, nVolumeAggregateAsk );
         stats.m_dreImbalance.Set( imbalance );
         stats.Update();
@@ -307,7 +309,9 @@ void PanelSideBySide::DrawWinRows() {
         pWinRow_t pWinRow = WinRow::Construct( this, vElement, wxPoint( BorderWidth, yOffset ), RowHeight, false );
         m_vWinRow[ ixWinRow ] = pWinRow;
 
-        m_vStatistics[ ixWinRow ].m_dreImbalance.SetWinRowElement( (*pWinRow)[ (int)EField::Imbalance ]);
+        pDataRow_Statistics_t pDataRow_Statistics = std::make_unique<DataRow_Statistics>();
+        pDataRow_Statistics->m_dreImbalance.SetWinRowElement( (*pWinRow)[ (int)EField::Imbalance ]);
+        m_vStatistics[ ixWinRow ] = std::move( pDataRow_Statistics );
 
         yOffset += RowHeight;
         ixWinRow++;
