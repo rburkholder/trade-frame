@@ -1,5 +1,5 @@
 {
-  "clangd.path": "/usr/lib/llvm-13/bin/clangd",
+  "clangd.path": "/usr/lib/llvm-14/bin/clangd",
   "clangd.arguments": [
     ],
   "C_Cpp.autocomplete": "Disabled",
