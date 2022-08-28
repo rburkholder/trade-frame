@@ -99,6 +99,8 @@ void BuildInstrument::Update() {
       m_mapInProgress.erase( m_iterToDelete );
     }
 
+    // 5 may not be important any more as IB manages queue
+    // but why is queue not being replenished?
     if ( 5 > m_mapInProgress.size() ) { // 5 is set in m_pIB
       if ( 0 != m_mapSymbol.size() ) {
 
@@ -156,12 +158,12 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
           }
 
           BOOST_LOG_TRIVIAL(info)
-            << "BuildInstrument: "
+            << "BuildInstrument start: "
+            << pInstrument->GetInstrumentName()
+            << fundamentals.sExchangeRoot << ","
             << m_mapSymbol.size() << ","
             << m_mapInProgress.size() << ","
-            << fundamentals.sExchangeRoot << ","
             //<< iterInProgress->first << ","
-            << pInstrument->GetInstrumentName()
             //<< sWaiting
             ;
 
@@ -191,11 +193,18 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
               },
               [this,iterInProgress]( bool bStatus ) {
                 if ( bStatus ) {
-                  //BOOST_LOG_TRIVIAL(debug) << "BuildInstrument::Build done: " << iterInProgress->first;
+                  //BOOST_LOG_TRIVIAL(debug)
+                  //  << "BuildInstrument::Build done: "
+                  //  << m_mapSymbol.size() << ","
+                  //  << m_mapInProgress.size() << ","
+                  //  << iterInProgress->first
+                  //;
                 }
                 else {
                   BOOST_LOG_TRIVIAL(warning)
                     << "BuildInstrument::Build failed: "
+                    << m_mapSymbol.size() << ","
+                    << m_mapInProgress.size() << ","
                     << iterInProgress->first;
                   iterInProgress->second.fInstrument( nullptr );
                 }
@@ -203,7 +212,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
                   std::lock_guard<std::mutex> lock( m_mutexMap );
                   m_mapInProgress.erase( iterInProgress );
                 }
-                Update();
+                Update(); // this should replenish queue
               }
               );
           }
