@@ -421,13 +421,17 @@ void AppIndicatorTrading::HandleMenuActionEmitChainsFull() {
 
 void AppIndicatorTrading::HandleMenuActionTestChordsUp() {
   CallAfter(
-    [this](){ m_pChords->Play( ou::music::Chords::EProgression::Up ); }
+    [this](){
+       //m_pChords->Play( ou::music::Chords::EProgression::Up );
+    }
   );
 }
 
 void AppIndicatorTrading::HandleMenuActionTestChordsDn() {
   CallAfter(
-    [this](){ m_pChords->Play( ou::music::Chords::EProgression::Down ); }
+    [this](){
+      //m_pChords->Play( ou::music::Chords::EProgression::Down );
+    }
   );
 }
 
@@ -574,15 +578,16 @@ void AppIndicatorTrading::OnConnected( int ) {
 
     CallAfter(
       [this](){
-        if ( m_pPortAudio ) {}
-        else {
-          m_pPortAudio = std::make_unique<ou::PortAudio>();
+        // need to put his in background higher priority thread
+        //if ( m_pPortAudio ) {}
+        //else {
+          //m_pPortAudio = std::make_unique<ou::PortAudio>();
           //m_pPortAudio->Enumerate();
-          if ( m_pChords ) {}
-          else {
-            m_pChords = std::make_unique<ou::music::Chords>( *m_pPortAudio );
-          }
-        }
+          //if ( m_pChords ) {}
+          //else {
+          //  m_pChords = std::make_unique<ou::music::Chords>( *m_pPortAudio );
+          //}
+        //}
       }
     );
 
