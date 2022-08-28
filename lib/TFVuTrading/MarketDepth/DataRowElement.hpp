@@ -37,9 +37,6 @@ class DataRowElement {
 public:
 
   DataRowElement( const std::string& sFormat, bool& bChanged );
-  //DataRowElement( const DataRowElement & ); // be aware of bChanged when the enclosing structure moves
-  //DataRowElement( DataRowElement && ); // be aware of bChanged when the enclosing structure moves
-  //DataRowElement& operator=( const DataRowElement& );
   virtual ~DataRowElement();
 
   void SetWinRowElement( WinRowElement* );
@@ -47,8 +44,8 @@ public:
 
   virtual void UpdateWinRowElement();
 
-  virtual void Set( T );
-  void Set( T, bool );
+  virtual void Set( const T );
+  void Set( const T, bool );
   void Inc();
   void Add( T );
   T Get() const;
@@ -86,16 +83,20 @@ DataRowElement<T>::~DataRowElement() {
 }
 
 template<typename T>
-void DataRowElement<T>::Set( T value ) {
-  m_value = value;
-  m_bChanged = true;
+void DataRowElement<T>::Set( const T value ) {
+  if ( m_value != value ) {
+    m_value = value;
+    m_bChanged = true;
+  }
 }
 
 template<typename T>
-void DataRowElement<T>::Set( T value, bool bHighlight ) {
-  m_value = value;
-  m_bHighlight = bHighlight;
-  m_bChanged = true;
+void DataRowElement<T>::Set( const T value, bool bHighlight ) {
+  if ( ( m_value != value ) || ( m_bHighlight != bHighlight ) ) {
+    m_value = value;
+    m_bHighlight = bHighlight;
+    m_bChanged = true;
+  }
 }
 
 template<typename T>
