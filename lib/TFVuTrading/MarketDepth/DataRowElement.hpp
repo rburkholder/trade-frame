@@ -37,6 +37,7 @@ class DataRowElement {
 public:
 
   DataRowElement( const std::string& sFormat, bool& bChanged );
+  DataRowElement( const DataRowElement& ) = delete; // can't be copied, &bChanged needs to be changed
   virtual ~DataRowElement();
 
   void SetWinRowElement( WinRowElement* );
