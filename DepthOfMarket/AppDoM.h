@@ -176,7 +176,7 @@ private:
 
   struct PriceLevelOrder {
 
-    using fUpdateQuantity_t = std::function<void(unsigned int)>;
+    using fUpdateQuantity_t = std::function<void(uint32_t)>;
 
     pOrder_t m_pOrder;
     fUpdateQuantity_t m_fUpdateQuantity;
