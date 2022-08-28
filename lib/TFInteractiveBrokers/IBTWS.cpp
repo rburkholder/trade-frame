@@ -96,7 +96,7 @@ TWS::TWS( const std::string &acctCode, const std::string &address, unsigned int 
 , m_osSignal( 1000 )
 , m_sAccountCode( acctCode ), m_sIPAddress( address ), m_nPort( port ), m_curTickerId( 0 )
 , m_idClient( 0 )
-, m_nxtReqId( 0 )
+, m_nxtReqId( 1 )
 , m_bEvictorStarted( false )
 {
   m_sName = "IB";
@@ -350,90 +350,138 @@ void TWS::RequestContractDetails(
   //std::cout << "Requesting " << pInstrument->GetInstrumentName() << std::endl;
 
   {
-    std::scoped_lock<std::mutex> lock( m_mutexContractRequest );
+    std::scoped_lock<std::mutex> lock( m_mutexActiveRequests );
 
     if ( 0 == m_vRequestRecycling.size() ) {
-      pRequest = new Request( m_nxtReqId++,std::move( fProcess ), std::move( fDone ), pInstrument );
+      pRequest = new Request();
     }
     else {
       pRequest = m_vRequestRecycling.back();
       m_vRequestRecycling.pop_back();
-      pRequest->id = m_nxtReqId++;
-      pRequest->contract = contract;
-      pRequest->fOnContractDetail = std::move( fProcess );
-      pRequest->fOnContractDetailDone = std::move( fDone );
-      pRequest->pInstrument = pInstrument;
     }
 
-    pRequest->submitted = std::chrono::system_clock::now();
+    pRequest->id = m_nxtReqId++;
+    pRequest->bIntransit = false;
+    pRequest->fOnContractDetail = std::move( fProcess );
+    pRequest->fOnContractDetailDone = std::move( fDone );
+    pRequest->pInstrument = pInstrument;
+    pRequest->contract = contract;
+    pRequest->dtSubmitted = std::chrono::system_clock::now();
 
     m_mapActiveRequests[ pRequest->id ] = pRequest;
 
-    size = m_mapActiveRequests.size();
     if ( !m_bEvictorStarted ) {
-      m_bEvictorStarted = true;
       bStartEvictor = true;
     }
-  }
+  } // end scoped_lock
 
   if ( bStartEvictor ) {
     //std::cout << "Evictor starting" << std::endl;
 
-    if ( m_thrdRequestEvictor.joinable() ) {
+    if ( m_thrdRequestEvictor.joinable() ) { // wait for previous thread to complete
       m_thrdRequestEvictor.join();
     }
 
+    m_bEvictorStarted = true;
+
+    // TODO: move this into UpdateActiveRequests()?
     m_thrdRequestEvictor = std::move( std::thread(
       [this](){
         bool bContinue( true );
         fOnContractDetailDone_t fOnContractDetailDone( nullptr );
         do {
           using namespace std::chrono_literals;
+          vRequest_t vRequestsForEvictionNotify;
           std::this_thread::sleep_for( 50ms );
+
           {
-            std::scoped_lock<std::mutex> lock( m_mutexContractRequest );
-            if ( 0 < m_mapActiveRequests.size() ) {
-              Request* pRequest = m_mapActiveRequests.begin()->second;
-              pRequest->cntEvictionType2++;
-              if ( 12 < pRequest->cntEvictionType2 ) {
-                //std::cout
-                //  << "IB details failed (2) on "
-                //  << pRequest->cntEvictionType2 << ","
-                //  << pRequest->id << ","
-                //  << pRequest->pInstrument->GetInstrumentName()
-                //  << "." << std::endl;
-                fOnContractDetailDone = std::move( pRequest->fOnContractDetailDone );
-                pRequest->Clear();
+            std::scoped_lock<std::mutex> lock( m_mutexActiveRequests );
+
+            for ( mapActiveRequests_t::value_type& vt: m_mapActiveRequests ) {
+              Request* pRequest = vt.second;
+              assert( 0 != pRequest->id );
+              if ( !pRequest->bIntransit ) break;
+
+              pRequest->cntEvictionByTimer++;
+              if ( 20 < pRequest->cntEvictionByTimer ) { // 20 x 50ms is 1 second
+                std::chrono::time_point<std::chrono::system_clock> finished
+                  = std::chrono::system_clock::now();
+                std::chrono::duration<double, std::milli> elapsed = finished - pRequest->dtSubmitted;
+                std::cout
+                  << "IB details failed (timed) id "
+                  << pRequest->id << ","
+                  << pRequest->cntEvictionByTimer << ","
+                  << pRequest->pInstrument->GetInstrumentName()
+                  << elapsed.count() << "ms"
+                  << std::endl;
                 m_mapActiveRequests.erase( pRequest->id );
-                m_vRequestRecycling.push_back( pRequest );
+                vRequestsForEvictionNotify.push_back( pRequest );
               }
             }
+
             bContinue = ( 0 < m_mapActiveRequests.size() );
             if ( !bContinue ) {
               m_bEvictorStarted = false;
             }
+          } // end scoped_lock
+
+          for ( vRequest_t::value_type pRequest: vRequestsForEvictionNotify ) {
+            fOnContractDetailDone = std::move( pRequest->fOnContractDetailDone );
+            if ( fOnContractDetailDone ) { // need to call endofcontract to clean this up
+              fOnContractDetailDone( false );
+              fOnContractDetailDone = nullptr;
+            }
           }
-          if ( fOnContractDetailDone ) {
-            fOnContractDetailDone( false );
-            fOnContractDetailDone = nullptr;
+
+          {
+            std::scoped_lock<std::mutex> lock( m_mutexActiveRequests );
+            for ( vRequest_t::value_type pRequest: vRequestsForEvictionNotify ) {
+              pRequest->Clear();
+              m_vRequestRecycling.push_back( pRequest );
+            }
           }
+
         }
         while ( bContinue );
         //std::cout << "Evictor stopping" << std::endl;
       }
-    ));
+    )); // end eviction thread definition
+  } // if bStartEvictor
+
+  UpdateActiveRequests();
+
+}
+
+void TWS::UpdateActiveRequests() {
+
+  vRequest_t vRequestsToSubmit;
+
+  {
+    std::scoped_lock<std::mutex> lock( m_mutexActiveRequests );
+
+    unsigned int cntInTransit {};
+
+    for ( mapActiveRequests_t::value_type& vt: m_mapActiveRequests ) {
+      Request* pRequest = vt.second;
+      assert( 0 != pRequest->id );
+      if ( pRequest->bIntransit ) {
+        cntInTransit++;
+      }
+      else {
+        if ( maxRequestsInTransit > cntInTransit ) {
+          vRequestsToSubmit.push_back( pRequest );
+          pRequest->bIntransit = true;
+          cntInTransit++;
+        }
+        else {
+          break;
+        }
+      }
+    }
   }
 
-  if ( maxRequestsInTransit < size ) {
-    std::cout
-      << pRequest->id << ": "
-      << "m_mapActiveRequests size=" << size
-      << ", " << pInstrument->GetInstrumentName( )
-      << " submission delayed"
-      << std::endl;
-  }
-  else {
-    m_pTWS->reqContractDetails( pRequest->id, contract );
+  for ( vRequest_t::value_type pRequest: vRequestsToSubmit ) {
+    m_pTWS->reqContractDetails( pRequest->id, pRequest->contract );
   }
 
 }
@@ -1056,7 +1104,7 @@ void TWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
 
   {
     mapActiveRequests_t::iterator iterRequest;
-    std::scoped_lock<std::mutex> lock( m_mutexContractRequest );  // locks map updates
+    std::scoped_lock<std::mutex> lock( m_mutexActiveRequests );  // locks map updates
     iterRequest = m_mapActiveRequests.find( reqId );  // entry removed with contractDetailsEnd
     if ( m_mapActiveRequests.end() == iterRequest ) {
       throw std::runtime_error( "contractDetails out of sync" );  // this means the requests are in sync, and so could use linked list instead
@@ -1213,93 +1261,59 @@ void TWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
 
 }
 
-void TWS::contractDetailsEnd( const reqId_t reqId ) { // not called when no symbol available
+void TWS::contractDetailsEnd( const reqId_t reqId ) {
+  // not called when symbol not available
+  // rely on timed evictor for clean up
 
   //std::cout << "contractDetailsEnd request " << reqId << std::endl;
 
   bool bFound( false );
-  vRequest_t vAbandonedRequests; // IB can't find the symbol
   fOnContractDetailDone_t fOnContractDetailDone = nullptr;
-  std::chrono::time_point<std::chrono::system_clock> submitted;
+  std::chrono::time_point<std::chrono::system_clock> dtSubmitted;
 
   {
-    std::scoped_lock<std::mutex> lock( m_mutexContractRequest );
+    std::scoped_lock<std::mutex> lock( m_mutexActiveRequests );
 
-    for ( mapActiveRequests_t::value_type& vt: m_mapActiveRequests ) {
-      if ( reqId > vt.first ) {
-        assert( vt.first == vt.second->id );
-        vt.second->cntEvictionType1++;
-        if ( ( maxRequestsInTransit - 1 ) <= vt.second->cntEvictionType1 ) {
-          std::cout
-            << "IB details failed (1) on "
-            << reqId << ","
-            << vt.first << ","
-            << vt.second->pInstrument->GetInstrumentName() << ","
-            << vt.second->cntEvictionType1
-            << "." << std::endl;
-          vAbandonedRequests.push_back( vt.second );
-          //m_mapActiveRequests.erase( vt.first );
-        }
-      }
-      else {
-        if ( reqId == vt.first ) {
-          //std::cout
-          //  << "contractDetailsEnd found "
-          //  << reqId << ","
-          //  << vt.first << ","
-          //  << vt.second->pInstrument->GetInstrumentName()
-          //  << std::endl;
-
-          submitted = vt.second->submitted;
-          fOnContractDetailDone = std::move( vt.second->fOnContractDetailDone );
-
-          vt.second->Clear();
-
-          m_vRequestRecycling.push_back( vt.second );
-          m_mapActiveRequests.erase( vt.first );
-
-          bFound = true;
-        }
-        else { // should be unreachable
-          std::cout
-            << "contractDetailsEnd remain "
-            << reqId << ","
-            << vt.first
-            << std::endl;
-        }
-        break; // clear out dead, process expected one
-      }
+    mapActiveRequests_t::iterator iterActiveRequests = m_mapActiveRequests.find( reqId );
+    if ( m_mapActiveRequests.end() ==  iterActiveRequests ) {
+      std::cout
+        << "IB request " << reqId << " early eviction **"
+        << std::endl;
     }
-  }
+    else {
 
-  if ( !bFound ) {
-    std::cout
-      << "contractDetailsEnd was evicted too early "
-      << reqId
-      << "?"
-      << std::endl;
-  }
+      Request& request( *iterActiveRequests->second );
 
-  for ( vRequest_t::value_type& vt: vAbandonedRequests ) {
-    if ( nullptr != vt->fOnContractDetailDone ) {
-      vt->fOnContractDetailDone( false ); // no response from IB
-    }
-    vt->Clear();
-    {
-      std::scoped_lock<std::mutex> lock( m_mutexContractRequest );
-      m_mapActiveRequests.erase( vt->id );
-      m_vRequestRecycling.push_back( vt );
-      vt = nullptr;
+      //std::cout
+      //  << "contractDetailsEnd found "
+      //  << reqId << ","
+      //  << vt.first << ","
+      //  << vt.second->pInstrument->GetInstrumentName()
+      //  << std::endl;
+
+      dtSubmitted = request.dtSubmitted;
+      fOnContractDetailDone = std::move( request.fOnContractDetailDone );
+
+      request.Clear();
+      m_vRequestRecycling.push_back( iterActiveRequests->second );
+      m_mapActiveRequests.erase( iterActiveRequests );
+
+      bFound = true;
     }
   }
 
   if ( nullptr != fOnContractDetailDone ) {
-    fOnContractDetailDone( true );
+    fOnContractDetailDone( bFound ); // TODO: ensure this is called only once
+  }
+
+  //if ( bFound ) {
+  if ( false ) {
     std::chrono::time_point<std::chrono::system_clock> finished
       = std::chrono::system_clock::now();
-    std::chrono::duration<double, std::milli> elapsed = finished - submitted;
-    // std::cout << "IB request roundtrip = " << elapsed.count() << std::endl;  // 250 - 650 ms (2022/05/24)
+    std::chrono::duration<double, std::milli> elapsed = finished - dtSubmitted;
+    std::cout << "IB request roundtrip for " << reqId << ": " << elapsed.count() << std::endl;  // 250 - 650 ms (2022/05/24)
   }
+
 }
 
 void TWS::bondContractDetails( int reqId, const ContractDetails& contractDetails ) {

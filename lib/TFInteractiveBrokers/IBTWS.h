@@ -230,28 +230,26 @@ private:
 
   struct Request {
     reqId_t id;
-    size_t cntEvictionType1;  // subsequent requests suggest to expire this one
-    size_t cntEvictionType2;  // last ditch timed eviction
+    bool bIntransit;
+    size_t cntEvictionByTimer;  // last ditch timed eviction
     pInstrument_t pInstrument;  // add info to existing pInstrument, future use with BuildInstrumentFromContract
     fOnContractDetail_t fOnContractDetail;
     fOnContractDetailDone_t fOnContractDetailDone;
     Contract contract; // used when having to resubmit
-    std::chrono::time_point<std::chrono::system_clock> submitted; // submission turn-around calculation
+    std::chrono::time_point<std::chrono::system_clock> dtSubmitted; // submission turn-around calculation
 
-    Request(
-      reqId_t id_, fOnContractDetail_t&& fProcess_, fOnContractDetailDone_t&& fDone_, pInstrument_t pInstrument_ )
-      : id( id_ )
-      , cntEvictionType1 {}
-      , cntEvictionType2 {}
-      , fOnContractDetail( std::move( fProcess_ ) )
-      , fOnContractDetailDone( std::move( fDone_ ) )
-      , pInstrument( pInstrument_ )
+    Request()
+      : id {}
+      , bIntransit( false )
+      , cntEvictionByTimer {}
+      , fOnContractDetail( nullptr )
+      , fOnContractDetailDone( nullptr )
       {};
 
     void Clear() {
-      // id = 0; // don't do this
-      cntEvictionType1 = 0;
-      cntEvictionType2 = 0;
+      id = 0;
+      bIntransit = false;
+      cntEvictionByTimer = 0;
       pInstrument.reset();
       fOnContractDetail = nullptr;
       fOnContractDetailDone = nullptr;
@@ -261,13 +259,15 @@ private:
   reqId_t m_nxtReqId;
   bool m_bEvictorStarted;
   std::thread m_thrdRequestEvictor;
-  std::mutex m_mutexContractRequest;
+  std::mutex m_mutexActiveRequests;
 
   using vRequest_t = std::vector<Request*>;
   vRequest_t m_vRequestRecycling;
 
   using mapActiveRequests_t = std::map<reqId_t, Request*>;
   mapActiveRequests_t m_mapActiveRequests;
+
+  void UpdateActiveRequests();
 
   // ====
 
