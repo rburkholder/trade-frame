@@ -441,6 +441,10 @@ void TWS::RequestContractDetails(
             }
           }
 
+          if ( bContinue ) {
+            UpdateActiveRequests();
+          }
+
         }
         while ( bContinue );
         //std::cout << "Evictor stopping" << std::endl;
@@ -1306,12 +1310,16 @@ void TWS::contractDetailsEnd( const reqId_t reqId ) {
     fOnContractDetailDone( bFound ); // TODO: ensure this is called only once
   }
 
-  //if ( bFound ) {
-  if ( false ) {
-    std::chrono::time_point<std::chrono::system_clock> finished
-      = std::chrono::system_clock::now();
-    std::chrono::duration<double, std::milli> elapsed = finished - dtSubmitted;
-    std::cout << "IB request roundtrip for " << reqId << ": " << elapsed.count() << std::endl;  // 250 - 650 ms (2022/05/24)
+  if ( bFound ) {
+
+    UpdateActiveRequests();
+
+    if ( false ) {
+      std::chrono::time_point<std::chrono::system_clock> finished
+        = std::chrono::system_clock::now();
+      std::chrono::duration<double, std::milli> elapsed = finished - dtSubmitted;
+      std::cout << "IB request roundtrip for " << reqId << ": " << elapsed.count() << std::endl;  // 250 - 650 ms (2022/05/24)
+    }
   }
 
 }
