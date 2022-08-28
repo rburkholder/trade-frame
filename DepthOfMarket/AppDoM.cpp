@@ -1038,67 +1038,75 @@ void AppDoM::LoadDailyHistory() {
           //m_pHistoryRequest.reset(); // TODO: surface the disconnect and make synchronous
         },
         [this](){
-          const ou::tf::Bar& bar( m_barsHistory.last() );
+          if ( 0 == m_barsHistory.Size() ) {
+            std::cout
+              << m_pWatch->GetInstrumentName()
+              << " not history"
+              << std::endl;
+          }
+          else {
+            const ou::tf::Bar& bar( m_barsHistory.last() );
 
-          std::cout
-            << m_pWatch->GetInstrumentName()
-            << ", bar=" << bar.DateTime()
-            << std::endl;
+            std::cout
+              << m_pWatch->GetInstrumentName()
+              << ", bar=" << bar.DateTime()
+              << std::endl;
 
-          m_setPivots.CalcPivots( bar );
-          const ou::tf::PivotSet& ps( m_setPivots );
-          using PS = ou::tf::PivotSet;
-          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::R2 ), "r2" );
-          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::R1 ), "r1" );
-          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::PV ), "pv" );
-          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::S1 ), "s1" );
-          m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::S2 ), "s2" );
+            m_setPivots.CalcPivots( bar );
+            const ou::tf::PivotSet& ps( m_setPivots );
+            using PS = ou::tf::PivotSet;
+            m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::R2 ), "r2" );
+            m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::R1 ), "r1" );
+            m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::PV ), "pv" );
+            m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::S1 ), "s1" );
+            m_pPanelTrade->AppendStaticIndicator( ps.GetPivotValue( PS::S2 ), "s2" );
 
-          std::cout
-            << "pivots"
-            <<  " r2=" << ps.GetPivotValue( PS::R2 )
-            << ", r1=" << ps.GetPivotValue( PS::R1 )
-            << ", pv=" << ps.GetPivotValue( PS::PV )
-            << ", s1=" << ps.GetPivotValue( PS::S1 )
-            << ", s2=" << ps.GetPivotValue( PS::S2 )
-            << std::endl;
+            std::cout
+              << "pivots"
+              <<  " r2=" << ps.GetPivotValue( PS::R2 )
+              << ", r1=" << ps.GetPivotValue( PS::R1 )
+              << ", pv=" << ps.GetPivotValue( PS::PV )
+              << ", s1=" << ps.GetPivotValue( PS::S1 )
+              << ", s2=" << ps.GetPivotValue( PS::S2 )
+              << std::endl;
 
-          double dblSum200 {};
-          double dblSum100 {};
-          double dblSum50 {};
-          int ix( 1 );
+            double dblSum200 {};
+            double dblSum100 {};
+            double dblSum50 {};
+            int ix( 1 );
 
-          m_barsHistory.ForEachReverse( [this,&ix,&dblSum200,&dblSum100,&dblSum50]( const ou::tf::Bar& bar ){
-            //std::cout
-            //  << "bar " << ix << " is " << bar.Close()
-            //  << std::endl;
-            if ( 200 >= ix ) {
-              std::string sIx = boost::lexical_cast<std::string>( ix );
-              m_pPanelTrade->AppendStaticIndicator( bar.High(), "hi-" + sIx );
-              m_pPanelTrade->AppendStaticIndicator( bar.Low(), "lo-" + sIx  );
-            }
-            if ( 200 >= ix ) {
-              dblSum200 += bar.Close() / 200.0;
-            }
-            if ( 100 >= ix ) {
-              dblSum100 += bar.Close() / 100.0;
-            }
-            if ( 50 >= ix ) {
-              dblSum50 += bar.Close() / 50;
-            }
-            ix++;
-          });
+            m_barsHistory.ForEachReverse( [this,&ix,&dblSum200,&dblSum100,&dblSum50]( const ou::tf::Bar& bar ){
+              //std::cout
+              //  << "bar " << ix << " is " << bar.Close()
+              //  << std::endl;
+              if ( 200 >= ix ) {
+                std::string sIx = boost::lexical_cast<std::string>( ix );
+                m_pPanelTrade->AppendStaticIndicator( bar.High(), "hi-" + sIx );
+                m_pPanelTrade->AppendStaticIndicator( bar.Low(), "lo-" + sIx  );
+              }
+              if ( 200 >= ix ) {
+                dblSum200 += bar.Close() / 200.0;
+              }
+              if ( 100 >= ix ) {
+                dblSum100 += bar.Close() / 100.0;
+              }
+              if ( 50 >= ix ) {
+                dblSum50 += bar.Close() / 50;
+              }
+              ix++;
+            });
 
-          std::cout
-            << "sma"
-            << " 50 day=" << dblSum50
-            << ", 100 day=" << dblSum100
-            << ", 200 day=" << dblSum200
-            << std::endl;
+            std::cout
+              << "sma"
+              << " 50 day=" << dblSum50
+              << ", 100 day=" << dblSum100
+              << ", 200 day=" << dblSum200
+              << std::endl;
 
-          m_pPanelTrade->AppendStaticIndicator( dblSum200, "200day" );
-          m_pPanelTrade->AppendStaticIndicator( dblSum100, "100day" );
-          m_pPanelTrade->AppendStaticIndicator( dblSum50, "50day" );
+            m_pPanelTrade->AppendStaticIndicator( dblSum200, "200day" );
+            m_pPanelTrade->AppendStaticIndicator( dblSum100, "100day" );
+            m_pPanelTrade->AppendStaticIndicator( dblSum50, "50day" );
+          }
         }
       );
       CallAfter(
