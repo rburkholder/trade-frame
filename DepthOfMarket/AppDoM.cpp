@@ -730,7 +730,7 @@ void AppDoM::HandleArmedFlag( bool bArm ) {
           auto pair = m_mapBidOrders.emplace( price, PriceLevelOrder() );
           assert( pair.second );
           PriceLevelOrder& plo( pair.first->second );
-          plo.Set(
+          plo.Set( // fUpdateQuantity_t
             [this,price]( unsigned int quantity ){
               m_pPanelTrade->SetBid( price, quantity ); // set with plo instead
             }
@@ -759,7 +759,7 @@ void AppDoM::HandleArmedFlag( bool bArm ) {
           auto pair = m_mapAskOrders.emplace( price, PriceLevelOrder() );
           assert( pair.second );
           PriceLevelOrder& plo( pair.first->second );
-          plo.Set(
+          plo.Set( // fUpdateQuantity_t
             [this,price]( unsigned int quantity ){
               m_pPanelTrade->SetAsk( price, quantity ); // set with plo instead
             }
