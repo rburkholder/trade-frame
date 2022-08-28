@@ -155,6 +155,8 @@ void Server_impl::Connected( int ) {
     m_pBuildInstrumentBoth = std::make_unique<ou::tf::BuildInstrument>( m_pProviderIQFeed, m_pProviderTWS );
     m_pBuildInstrumentIQFeed = std::make_unique<ou::tf::BuildInstrument>( m_pProviderIQFeed );
     // TODO: generate signal or status to interface
+    // start the timer for the web at this point
+    // ie, web needs to ensure connection prior showing the symbol selection.
   }
 }
 
@@ -249,6 +251,7 @@ void Server_impl::UnderlyingInitialize( pInstrument_t pInstrument ) {
   }
 
   m_pWatchUnderlying = std::make_shared<ou::tf::Watch>( pInstrument, m_pProviderIQFeed );
+  m_pWatchUnderlying->RecordSeries( false );
   //m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &Server_impl::UnderlyingQuote ) );
   //m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &Server_impl::UnderlyingTrade ) );
 

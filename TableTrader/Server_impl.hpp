@@ -268,6 +268,7 @@ private:
       //m_pOption->OnFundamentals.Add( MakeDelegate( this, &UIOption::HandleFundamentals ) );
       //m_pOption->OnQuote.Add( MakeDelegate( this, &UIOption::HandleQuote ) );
       //m_pOption->OnTrade.Add( MakeDelegate( this, &UIOption::HandleTrade ) );
+      m_pOption->RecordSeries( false );
       assert( m_pOption->StartWatch() );
     }
 
@@ -301,6 +302,7 @@ private:
       //m_pOption->OnQuote.Add( MakeDelegate( this, &UIOption::HandleQuote ) );
       //m_pOption->OnTrade.Add( MakeDelegate( this, &UIOption::HandleTrade ) );
       //m_pOption->OnFundamentals.Add( MakeDelegate( this, &UIOption::HandleFundamentals ) );
+      m_pOption->RecordSeries( false );
       assert( m_pOption->StartWatch() );
     }
 
