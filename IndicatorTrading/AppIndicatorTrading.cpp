@@ -363,8 +363,11 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
     },
     [this]( double value ) { // m_fClickRight
     },
-    [this]( const ou::tf::PanelOrderButtons_PositionData& data ){ // m_fUpdatePosition
-      m_pPanelOrderButtons->Update( data );
+    [this]( const ou::tf::PanelOrderButtons_MarketData& market_data ) { // m_fUpdateMarketData
+      m_pPanelOrderButtons->Update( market_data );
+    },
+    [this]( const ou::tf::PanelOrderButtons_PositionData& position_data ){ // m_fUpdatePosition
+      m_pPanelOrderButtons->Update( position_data );
     },
     m_pTreeItemRoot,
     m_cemReferenceLevels
