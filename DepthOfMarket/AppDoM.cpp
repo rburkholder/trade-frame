@@ -341,6 +341,7 @@ void AppDoM::StartDepthByOrder() {
     }
   );
 
+  // StartDepthByOrder
   m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
     [ this ](){
       m_FeatureSet.Set( m_config.nLevels );  // use this many levels in the order book for feature vector set
@@ -593,6 +594,7 @@ void AppDoM::StartDepthByOrderWithFVS() {
     }
   );
 
+  // StartDepthByOrderWithFVS
   m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
     [ this ](){
       m_FeatureSet.Set( m_config.nLevels );  // use this many levels in the order book for feature vector set
@@ -950,7 +952,7 @@ void AppDoM::InitializePosition( pInstrument_t pInstrument ) {
   LoadDailyHistory();
 
   m_pWatch->StartWatch();
-  std::cout << "Depth of Market connecting" << std::endl;
+  //std::cout << "Depth of Market connecting" << std::endl;
   m_pDispatch->Connect();
 
 }
