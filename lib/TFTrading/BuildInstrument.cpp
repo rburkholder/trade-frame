@@ -159,12 +159,12 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
 
           BOOST_LOG_TRIVIAL(info)
             << "BuildInstrument start: "
-            << pInstrument->GetInstrumentName()
+            << pInstrument->GetInstrumentName() << ","
             << fundamentals.sExchangeRoot << ","
-            << m_mapSymbol.size() << ","
             << m_mapInProgress.size() << ","
-            //<< iterInProgress->first << ","
-            //<< sWaiting
+            << m_mapSymbol.size()
+            //<< "," << iterInProgress->first
+            //<< "," << sWaiting
             ;
 
           if ( m_pIB ) {
@@ -202,10 +202,11 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
                 }
                 else {
                   BOOST_LOG_TRIVIAL(warning)
-                    << "BuildInstrument::Build failed: "
-                    << m_mapSymbol.size() << ","
-                    << m_mapInProgress.size() << ","
-                    << iterInProgress->first;
+                    << "BuildInstrument fail:  "
+                    << iterInProgress->first
+                    << "," << m_mapSymbol.size()
+                    << "," << m_mapInProgress.size()
+                    ;
                   iterInProgress->second.fInstrument( nullptr );
                 }
                 {
