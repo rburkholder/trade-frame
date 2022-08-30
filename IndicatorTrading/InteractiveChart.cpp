@@ -23,6 +23,8 @@
  //   indicate support/resistance as the day progresses
  // 2022/03/21 perform a roll down on put, roll up on call?
 
+ // 2022/08/20 use pivots to determine edge points for option entry
+
 #include <memory>
 
 #include <boost/format.hpp>
@@ -214,6 +216,7 @@ void InteractiveChart::SetPosition(
 , fBuildPosition_t&& fBuildPosition
 , fClick_t&& fClickLeft
 , fClick_t&& fClickRight
+, fUpdateMarketData_t&& fUpdateMarketData
 , fUpdatePosition_t&& fUpdatePosition
 , TreeItem* pTreeItemParent
 , ou::ChartEntryMark& cemReferenceLevels
@@ -231,6 +234,7 @@ void InteractiveChart::SetPosition(
 
   m_fClickLeft = std::move( fClickLeft );
   m_fClickRight = std::move( fClickRight );
+  m_fUpdateMarketData = std::move( fUpdateMarketData );
   m_fUpdatePosition = std::move( fUpdatePosition );
 
   m_pOptionChainQuery = pOptionChainQuery;
@@ -654,11 +658,12 @@ void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
   m_pPositionUnderlying->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 
+  boost::format format( "%0.2f" ); // TODO: refactor this
+
   if ( m_fUpdatePosition ) {
     ou::tf::PanelOrderButtons_PositionData data;
     data.m_sSymbol = m_pPositionUnderlying->GetInstrument()->GetInstrumentName();
 
-    boost::format format( "%0.2f" ); // TODO: refactor this
     format % dblTotal;
     data.m_sProfitLoss = format.str();
 
@@ -675,7 +680,19 @@ void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
           break;
       }
     }
-    m_fUpdatePosition( data );
+    //m_fUpdatePosition( data ); // need to cross over into display thread
+  }
+
+  if ( m_fUpdateMarketData ) {
+    ou::tf::PanelOrderButtons_MarketData data;
+    const ou::tf::Quote& quote( m_pPositionUnderlying->GetWatch()->LastQuote() );
+
+    format % quote.Ask();
+    data.m_sBaseAsk = format.str();
+    format % quote.Bid();
+    data.m_sBaseBid = format.str();
+
+    //m_fUpdateMarketData( data ); // need to cross over into display thread
   }
 
   //CheckOptions(); // do this differently
