@@ -409,12 +409,12 @@ void TWS::RequestContractDetails(
                 std::chrono::duration<double, std::milli> elapsed = finished - pRequest->dtSubmitted;
                 std::cout
                   << "IB details failed (timed) id "
-                  << pRequest->id << ","
-                  << pRequest->cntEvictionByTimer << ","
-                  << pRequest->pInstrument->GetInstrumentName()
-                  << elapsed.count() << "ms"
+                  <<        pRequest->id
+                  << "," << pRequest->cntEvictionByTimer
+                  << "," << pRequest->pInstrument->GetInstrumentName()
+                  << "," << elapsed.count() << "ms"
                   << std::endl;
-                m_mapActiveRequests.erase( pRequest->id );
+                //m_mapActiveRequests.erase( pRequest->id );
                 vRequestsForEvictionNotify.push_back( pRequest );
               }
             }
@@ -436,6 +436,7 @@ void TWS::RequestContractDetails(
           {
             std::scoped_lock<std::mutex> lock( m_mutexActiveRequests );
             for ( vRequest_t::value_type pRequest: vRequestsForEvictionNotify ) {
+              m_mapActiveRequests.erase( pRequest->id ); // comes prior to clear
               pRequest->Clear();
               m_vRequestRecycling.push_back( pRequest );
             }
