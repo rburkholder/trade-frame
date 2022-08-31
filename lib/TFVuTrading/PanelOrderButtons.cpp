@@ -106,13 +106,13 @@ void PanelOrderButtons::CreateControls() {
     wxStaticText* itemStaticText3 = new wxStaticText( itemPanel1, wxID_STATIC, _("Symbol:"), wxDefaultPosition, wxDefaultSize, 0 );
     sizerPosition->Add(itemStaticText3, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    m_txtSymbol = new wxTextCtrl( itemPanel1, ID_TXT_Symbol, wxEmptyString, wxDefaultPosition, wxSize(100, -1), wxTE_READONLY );
+    m_txtSymbol = new wxTextCtrl( itemPanel1, ID_TXT_Symbol, wxEmptyString, wxDefaultPosition, wxSize(110, -1), wxTE_READONLY );
     sizerPosition->Add(m_txtSymbol, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     wxStaticText* itemStaticText5 = new wxStaticText( itemPanel1, wxID_STATIC, _("Quantity:"), wxDefaultPosition, wxDefaultSize, 0 );
     sizerPosition->Add(itemStaticText5, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
-    m_txtQuantity = new wxTextCtrl( itemPanel1, ID_TXT_Quantity, wxEmptyString, wxDefaultPosition, wxSize(50, -1), wxTE_READONLY|wxTE_RIGHT );
+    m_txtQuantity = new wxTextCtrl( itemPanel1, ID_TXT_Quantity, wxEmptyString, wxDefaultPosition, wxSize(65, -1), wxTE_READONLY|wxTE_RIGHT );
     sizerPosition->Add(m_txtQuantity, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2);
 
     wxStaticText* itemStaticText7 = new wxStaticText( itemPanel1, wxID_STATIC, _("P/L:"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -252,17 +252,20 @@ void PanelOrderButtons::CreateControls() {
     sizerCombos->Add(sizerBase, 0, wxALIGN_TOP|wxLEFT|wxRIGHT|wxTOP, 1);
 
     sizerMDBase = new wxBoxSizer(wxVERTICAL);
-    sizerBase->Add(sizerMDBase, 1, wxALIGN_CENTER_HORIZONTAL, 2);
+    sizerBase->Add(sizerMDBase, 1, wxGROW, 2);
+
+    wxStaticText* itemStaticText1 = new wxStaticText( itemPanel1, wxID_STATIC, _(" "), wxDefaultPosition, wxDefaultSize, 0 );
+    sizerMDBase->Add(itemStaticText1, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5);
 
     m_radioBase = new wxRadioButton( itemPanel1, id_radioBase, _("base"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP );
     m_radioBase->SetValue(true);
     sizerMDBase->Add(m_radioBase, 0, wxALIGN_LEFT|wxALL, 2);
 
-    m_txtBaseAsk = new wxStaticText( itemPanel1, ID_TXT_BaseAsk, _("ask"), wxDefaultPosition, wxDefaultSize, 0 );
-    sizerMDBase->Add(m_txtBaseAsk, 0, wxALIGN_RIGHT|wxRIGHT, 2);
+    m_txtBaseAsk = new wxStaticText( itemPanel1, ID_TXT_BaseAsk, _("ask"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    sizerMDBase->Add(m_txtBaseAsk, 0, wxGROW|wxRIGHT, 2);
 
-    m_txtBaseBid = new wxStaticText( itemPanel1, ID_TXT_BaseBid, _("bid"), wxDefaultPosition, wxDefaultSize, 0 );
-    sizerMDBase->Add(m_txtBaseBid, 0, wxALIGN_RIGHT|wxRIGHT, 2);
+    m_txtBaseBid = new wxStaticText( itemPanel1, ID_TXT_BaseBid, _("bid"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    sizerMDBase->Add(m_txtBaseBid, 0, wxGROW|wxRIGHT, 2);
 
     wxStaticLine* itemStaticLine47 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL );
     sizerCombos->Add(itemStaticLine47, 0, wxGROW|wxLEFT|wxRIGHT, 1);
@@ -287,11 +290,11 @@ void PanelOrderButtons::CreateControls() {
     m_radioCallItm->SetValue(false);
     sizerMDCall1->Add(m_radioCallItm, 0, wxALIGN_LEFT|wxALL, 2);
 
-    m_txtCallItmAsk = new wxStaticText( itemPanel1, ID_TXT_Call1Ask, _("ask"), wxDefaultPosition, wxDefaultSize, 0 );
-    sizerMDCall1->Add(m_txtCallItmAsk, 0, wxALIGN_RIGHT|wxRIGHT, 2);
+    m_txtCallItmAsk = new wxStaticText( itemPanel1, ID_TXT_Call1Ask, _("ask"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    sizerMDCall1->Add(m_txtCallItmAsk, 0, wxGROW|wxRIGHT, 2);
 
-    m_txtCallItmBid = new wxStaticText( itemPanel1, ID_TXT_Call1Bid, _("bid"), wxDefaultPosition, wxDefaultSize, 0 );
-    sizerMDCall1->Add(m_txtCallItmBid, 0, wxALIGN_RIGHT|wxRIGHT, 2);
+    m_txtCallItmBid = new wxStaticText( itemPanel1, ID_TXT_Call1Bid, _("bid"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    sizerMDCall1->Add(m_txtCallItmBid, 0, wxGROW|wxRIGHT, 2);
 
     sizerMDPut1 = new wxBoxSizer(wxVERTICAL);
     itemBoxSizer51->Add(sizerMDPut1, 1, wxALIGN_CENTER_VERTICAL, 2);
@@ -300,11 +303,11 @@ void PanelOrderButtons::CreateControls() {
     m_radioPutOtm->SetValue(false);
     sizerMDPut1->Add(m_radioPutOtm, 0, wxALIGN_LEFT|wxALL, 2);
 
-    m_txtPutOtmAsk = new wxStaticText( itemPanel1, ID_TXT_Put1Ask, _("ask"), wxDefaultPosition, wxDefaultSize, 0 );
-    sizerMDPut1->Add(m_txtPutOtmAsk, 0, wxALIGN_RIGHT|wxRIGHT, 2);
+    m_txtPutOtmAsk = new wxStaticText( itemPanel1, ID_TXT_Put1Ask, _("ask"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    sizerMDPut1->Add(m_txtPutOtmAsk, 0, wxGROW|wxRIGHT, 2);
 
-    m_txtPutOtmBid = new wxStaticText( itemPanel1, ID_TXT_Put1Bid, _("bid"), wxDefaultPosition, wxDefaultSize, 0 );
-    sizerMDPut1->Add(m_txtPutOtmBid, 0, wxALIGN_RIGHT|wxRIGHT, 2);
+    m_txtPutOtmBid = new wxStaticText( itemPanel1, ID_TXT_Put1Bid, _("bid"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    sizerMDPut1->Add(m_txtPutOtmBid, 0, wxGROW|wxRIGHT, 2);
 
     wxStaticLine* itemStaticLine60 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL );
     sizerCombos->Add(itemStaticLine60, 0, wxGROW|wxLEFT|wxRIGHT, 1);
@@ -329,11 +332,11 @@ void PanelOrderButtons::CreateControls() {
     m_radioPutItm->SetValue(false);
     sizerMDPut2->Add(m_radioPutItm, 0, wxALIGN_LEFT|wxALL, 2);
 
-    m_txtPutItmAsk = new wxStaticText( itemPanel1, ID_TXT_Put2Ask, _("ask"), wxDefaultPosition, wxDefaultSize, 0 );
-    sizerMDPut2->Add(m_txtPutItmAsk, 0, wxALIGN_RIGHT|wxRIGHT, 2);
+    m_txtPutItmAsk = new wxStaticText( itemPanel1, ID_TXT_Put2Ask, _("ask"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    sizerMDPut2->Add(m_txtPutItmAsk, 0, wxGROW|wxRIGHT, 2);
 
-    m_txtPutItmBid = new wxStaticText( itemPanel1, ID_TXT_Put2Bid, _("bid"), wxDefaultPosition, wxDefaultSize, 0 );
-    sizerMDPut2->Add(m_txtPutItmBid, 0, wxALIGN_RIGHT|wxRIGHT, 2);
+    m_txtPutItmBid = new wxStaticText( itemPanel1, ID_TXT_Put2Bid, _("bid"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    sizerMDPut2->Add(m_txtPutItmBid, 0, wxGROW|wxRIGHT, 2);
 
     sizerMDCall2 = new wxBoxSizer(wxVERTICAL);
     itemBoxSizer64->Add(sizerMDCall2, 1, wxALIGN_CENTER_VERTICAL, 2);
@@ -342,11 +345,11 @@ void PanelOrderButtons::CreateControls() {
     m_radioCallOtm->SetValue(false);
     sizerMDCall2->Add(m_radioCallOtm, 0, wxALIGN_LEFT|wxALL, 2);
 
-    m_txtCallOtmAsk = new wxStaticText( itemPanel1, ID_TXT_Call2Ask, _("ask"), wxDefaultPosition, wxDefaultSize, 0 );
-    sizerMDCall2->Add(m_txtCallOtmAsk, 0, wxALIGN_RIGHT|wxRIGHT, 2);
+    m_txtCallOtmAsk = new wxStaticText( itemPanel1, ID_TXT_Call2Ask, _("ask"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    sizerMDCall2->Add(m_txtCallOtmAsk, 0, wxGROW|wxRIGHT, 2);
 
-    m_txtCallOtmBid = new wxStaticText( itemPanel1, ID_TXT_Call2Bid, _("bid"), wxDefaultPosition, wxDefaultSize, 0 );
-    sizerMDCall2->Add(m_txtCallOtmBid, 0, wxALIGN_RIGHT|wxRIGHT, 2);
+    m_txtCallOtmBid = new wxStaticText( itemPanel1, ID_TXT_Call2Bid, _("bid"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT|wxST_NO_AUTORESIZE );
+    sizerMDCall2->Add(m_txtCallOtmBid, 0, wxGROW|wxRIGHT, 2);
 
     wxStaticLine* itemStaticLine73 = new wxStaticLine( itemPanel1, wxID_STATIC, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
     sizerMain->Add(itemStaticLine73, 0, wxGROW|wxTOP|wxBOTTOM, 1);
@@ -448,32 +451,46 @@ void PanelOrderButtons::SetPriceAtFocus( const std::string& sText ) {
 
 void PanelOrderButtons::Update( const PanelOrderButtons_MarketData& data ) {
 
-  m_txtBase->SetLabel( data.m_sBase );
-  m_txtBaseAsk->SetLabel( data.m_sBaseAsk );
-  m_txtBaseBid->SetLabel( data.m_sBaseBid );
+  CallAfter(
+    [this,
+         //sBase = std::move( data.m_sBase ),
+         sBaseAsk = std::move(data.m_sBaseAsk ),
+         sBaseBid = std::move( data.m_sBaseBid )
+         ](){
+      //m_txtBase->SetLabel( sBase );
+      m_txtBaseAsk->SetLabel( std::move( sBaseAsk ) );
+      m_txtBaseBid->SetLabel( std::move( sBaseBid ) );
+    } );
 
-  m_txtCallItm->SetLabel( data.m_sCall1 );
-  m_txtCallItmAsk->SetLabel( data.m_sCall1Ask );
-  m_txtCallItmBid->SetLabel( data.m_sCall1Bid );
+  //m_txtCallItm->SetLabel( data.m_sCall1 );
+  //m_txtCallItmAsk->SetLabel( data.m_sCall1Ask );
+  //m_txtCallItmBid->SetLabel( data.m_sCall1Bid );
 
-  m_txtPutOtm->SetLabel( data.m_sPut1 );
-  m_txtPutOtmAsk->SetLabel( data.m_sPut1Ask );
-  m_txtPutOtmBid->SetLabel( data.m_sPut1Bid );
+  //m_txtPutOtm->SetLabel( data.m_sPut1 );
+  //m_txtPutOtmAsk->SetLabel( data.m_sPut1Ask );
+  //m_txtPutOtmBid->SetLabel( data.m_sPut1Bid );
 
-  m_txtCallOtm->SetLabel( data.m_sCall2 );
-  m_txtCallOtmAsk->SetLabel( data.m_sCall2Ask );
-  m_txtCallOtmBid->SetLabel( data.m_sCall2Bid );
+  //m_txtCallOtm->SetLabel( data.m_sCall2 );
+  //m_txtCallOtmAsk->SetLabel( data.m_sCall2Ask );
+  //m_txtCallOtmBid->SetLabel( data.m_sCall2Bid );
 
-  m_txtPutItm->SetLabel( data.m_sPut2 );
-  m_txtPutItmAsk->SetLabel( data.m_sPut2Ask );
-  m_txtPutItmBid->SetLabel( data.m_sPut2Bid );
+  //m_txtPutItm->SetLabel( data.m_sPut2 );
+  //m_txtPutItmAsk->SetLabel( data.m_sPut2Ask );
+  //m_txtPutItmBid->SetLabel( data.m_sPut2Bid );
 
 }
 
 void PanelOrderButtons::Update( const PanelOrderButtons_PositionData& data ) {
-  m_txtSymbol->SetValue( data.m_sSymbol );
-  m_txtQuantity->SetValue( data.m_sQuantity );
-  m_txtProfitLoss->SetValue( data.m_sProfitLoss );
+  CallAfter(
+    [this,
+         sSymbol = std::move( data.m_sSymbol ),
+         sQuantity = std::move(data.m_sQuantity ),
+         sProfitLoss = std::move( data.m_sProfitLoss )
+         ](){
+      m_txtSymbol->SetValue( std::move( sSymbol ) );
+      m_txtQuantity->SetValue( std::move( sQuantity ) );
+      m_txtProfitLoss->SetValue( std::move( sProfitLoss ) );
+    } );
 }
 
 bool PanelOrderButtons::ValidateFields() {

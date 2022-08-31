@@ -681,7 +681,7 @@ void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
           break;
       }
     }
-    //m_fUpdatePosition( data ); // need to cross over into display thread
+    m_fUpdatePosition( data );
   }
 
   if ( m_fUpdateMarketData ) {
@@ -693,7 +693,7 @@ void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
     format % quote.Bid();
     data.m_sBaseBid = format.str();
 
-    //m_fUpdateMarketData( data ); // need to cross over into display thread
+    m_fUpdateMarketData( data );
   }
 
   //CheckOptions(); // do this differently

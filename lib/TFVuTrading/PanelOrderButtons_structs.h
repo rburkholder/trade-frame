@@ -79,32 +79,38 @@ struct PanelOrderButtons_Order {
 
 struct PanelOrderButtons_MarketData {
 
-  std::string m_sBase;
+  // to facilitate cross thread update, strings are moved in Update
+
+  std::string m_sBase; //  // expiry only?  with popup of full iqf & custom?
   std::string m_sBaseAsk;
   std::string m_sBaseBid;
 
-  std::string m_sCall1;
+  std::string m_sCall1; // expiry & strike only?  with popup of full iqf & custom?
   std::string m_sCall1Ask;
   std::string m_sCall1Bid;
 
-  std::string m_sPut1;
+  std::string m_sPut1; // expiry & strike only?  with popup of full iqf & custom?
   std::string m_sPut1Ask;
   std::string m_sPut1Bid;
 
-  std::string m_sCall2;
+  std::string m_sCall2; // expiry & strike only?  with popup of full iqf & custom?
   std::string m_sCall2Ask;
   std::string m_sCall2Bid;
 
-  std::string m_sPut2;
+  std::string m_sPut2; // expiry & strike only?  with popup of full iqf & custom?
   std::string m_sPut2Ask;
   std::string m_sPut2Bid;
 
 };
 
 struct PanelOrderButtons_PositionData {
+
+  // to facilitate cross thread update, strings are moved in Update
+
   std::string m_sSymbol;
   std::string m_sQuantity;
   std::string m_sProfitLoss;
+
 };
 
 } // namespace tf
