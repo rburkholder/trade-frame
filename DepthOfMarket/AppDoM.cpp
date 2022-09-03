@@ -71,7 +71,7 @@ bool AppDoM::OnInit() {
   wxApp::SetVendorName( "One Unified Net Limited" );
   wxApp::SetVendorDisplayName( "(c)2022 One Unified Net Limited" );
 
-  m_bRecordDepths = false;
+  m_bRecordDepth = false;
   m_bTriggerFeatureSetDump = false;
 
   int code = true;
@@ -180,10 +180,10 @@ bool AppDoM::OnInit() {
     //wxMenu* pMenuSymbols = m_pFrameMain->AddDynamicMenu( "Utility", vItemsLoadSymbols );
 
     FrameMain::vpItems_t vItems;
-    vItems.push_back( new mi( "Start", MakeDelegate( this, &AppDoM::MenuItem_PersistMarketDepth_Start ) ) );
-    vItems.push_back( new mi( "Status", MakeDelegate( this, &AppDoM::MenuItem_PersistMarketDepth_Status ) ) );
-    vItems.push_back( new mi( "Stop", MakeDelegate( this, &AppDoM::MenuItem_PersistMarketDepth_Stop ) ) );
-    vItems.push_back( new mi( "Save", MakeDelegate( this, &AppDoM::MenuItem_PersistMarketDepth_Save ) ) );
+    vItems.push_back( new mi( "Start", MakeDelegate( this, &AppDoM::MenuItem_RecordWatch_Start ) ) );
+    vItems.push_back( new mi( "Status", MakeDelegate( this, &AppDoM::MenuItem_RecordWatch_Status ) ) );
+    vItems.push_back( new mi( "Stop", MakeDelegate( this, &AppDoM::MenuItem_RecordWatch_Stop ) ) );
+    vItems.push_back( new mi( "Save", MakeDelegate( this, &AppDoM::MenuItem_RecordWatch_Save ) ) );
     wxMenu* pMenu = m_pFrameMain->AddDynamicMenu( "Market Depth", vItems );
 
     if ( "order_fvs" == m_config.sDepthType ) {
@@ -350,7 +350,7 @@ void AppDoM::StartDepthByOrder() {
         m_config.sSymbolName,
         [this]( const ou::tf::DepthByOrder& depth ){
 
-          if ( m_bRecordDepths ) {
+          if ( m_bRecordDepth ) {
             m_depths_byorder.Append( depth );
           }
 
@@ -603,8 +603,8 @@ void AppDoM::StartDepthByOrderWithFVS() {
         m_config.sSymbolName,
         [this]( const ou::tf::DepthByOrder& depth ){
 
-          if ( m_bRecordDepths ) {
-            m_depths_byorder.Append( depth );
+          if ( m_bRecordDepth ) {
+            m_depths_byorder.Append( depth ); // is this in watch already, else send it there
           }
 
           switch ( depth.MsgType() ) {
@@ -663,21 +663,27 @@ void AppDoM::StartDepthByOrderWithFVS() {
 
 }
 
-void AppDoM::MenuItem_PersistMarketDepth_Start() {
-  if ( "order" == m_config.sDepthType ) {
-    m_bRecordDepths = true;
+void AppDoM::MenuItem_RecordWatch_Start() { // this is more of a series save enable
+  if ( ( "order" == m_config.sDepthType )
+    || ( "order_fvs" == m_config.sDepthType ) )
+  {
+    m_bRecordDepth = true;
+    if ( m_pWatch ) {
+      m_pWatch->RecordSeries( true );
+    }
+
     std::cout << "Depth recording enabled" << std::endl;
   }
   else {
-    std::cout << "depth recording available for 'depth by order' only" << std::endl;
+    std::cerr << "depth recording available for 'depth by order' only" << std::endl;
   }
 }
 
-void AppDoM::MenuItem_PersistMarketDepth_Status() {
+void AppDoM::MenuItem_RecordWatch_Status() {
   CallAfter(
     [this](){
       std::cout << "L2 Time Series: "
-        << ( m_bRecordDepths ? "is" : "not" ) << " being recorded, "
+        << ( m_bRecordDepth ? "is" : "not" ) << " being recorded, "
         << m_depths_byorder.Size() << " elements, "
         << sizeof( ou::tf::DepthsByOrder ) << " bytes each"
         << std::endl;
@@ -689,23 +695,34 @@ void AppDoM::MenuItem_PersistMarketDepth_Status() {
   );
 }
 
-void AppDoM::MenuItem_PersistMarketDepth_Stop() {
-  m_bRecordDepths = false;
-  std::cout << "Depth recording disabled" << std::endl;
+void AppDoM::MenuItem_RecordWatch_Stop() {
+  if ( m_bRecordDepth ) {
+    m_bRecordDepth = false;
+    if ( m_pWatch ) {
+      m_pWatch->RecordSeries( false );
+    }
+    std::cout << "Depth recording disabled" << std::endl;
+  }
+  else {
+    std::cerr << "depth recording wasn't started" << std::endl;
+  }
 }
 
-void AppDoM::MenuItem_PersistMarketDepth_Save() {
-  MenuItem_PersistMarketDepth_Status();
-  std::cout << "Saving collected values ... " << std::endl;
+void AppDoM::MenuItem_RecordWatch_Save() {
+  MenuItem_RecordWatch_Status();
+  std::cout << "  Saving collected values ... " << std::endl;
   CallAfter(
     [this](){
+      const std::string sPathName = sSaveValuesRoot + "/" + m_sTSDataStreamStarted;
+      m_pWatch->SaveSeries( sPathName );
+
+      // TODO: need to get the watch in pWatch_t operational
       if ( 0 != m_depths_byorder.Size() ) {
         ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
-        std::string sPathName = sSaveValuesRoot + "/" + m_sTSDataStreamStarted;
-        sPathName += ou::tf::DepthsByOrder::Directory() + m_pWatch->GetInstrumentName();
+        const std::string sPathNameDepth = sPathName + ou::tf::DepthsByOrder::Directory() + m_pWatch->GetInstrumentName();
         ou::tf::HDF5WriteTimeSeries<ou::tf::DepthsByOrder> wtsDepths( dm, true, true, 5, 256 );
-        wtsDepths.Write( sPathName, &m_depths_byorder );
-        ou::tf::HDF5Attributes attrDepths( dm, sPathName );
+        wtsDepths.Write( sPathNameDepth, &m_depths_byorder );
+        ou::tf::HDF5Attributes attrDepths( dm, sPathNameDepth );
         attrDepths.SetSignature( ou::tf::DepthByOrder::Signature() );
         //attrDepths.SetMultiplier( m_pInstrument->GetMultiplier() );
         //attrDepths.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
@@ -872,6 +889,8 @@ void AppDoM::InitializePosition( pInstrument_t pInstrument ) {
   m_pWatch->OnFundamentals.Add( MakeDelegate( this, &AppDoM::OnFundamentals ) );
   m_pWatch->OnQuote.Add( MakeDelegate( this, &AppDoM::OnQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &AppDoM::OnTrade ) );
+
+  m_pWatch->RecordSeries( m_bRecordDepth );
 
   assert( 0 < m_config.nPeriodWidth );
   time_duration td = time_duration( 0, 0, m_config.nPeriodWidth );

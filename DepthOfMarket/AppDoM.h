@@ -104,7 +104,7 @@ private:
 
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
 
-  bool m_bRecordDepths;
+  bool m_bRecordDepth;
   ou::tf::DepthsByOrder m_depths_byorder; // time series for persistence
 
   std::atomic_uint32_t m_nMarketOrdersAsk;
@@ -282,10 +282,10 @@ private:
 
   void LoadDailyHistory();
 
-  void MenuItem_PersistMarketDepth_Start();
-  void MenuItem_PersistMarketDepth_Status();
-  void MenuItem_PersistMarketDepth_Stop();
-  void MenuItem_PersistMarketDepth_Save();
+  void MenuItem_RecordWatch_Start();
+  void MenuItem_RecordWatch_Status();
+  void MenuItem_RecordWatch_Stop();
+  void MenuItem_RecordWatch_Save();
 
   void MenuItem_FeatureSet_Dump();
 
