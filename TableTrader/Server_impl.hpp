@@ -66,7 +66,7 @@ public:
   using fPopulateStrike_t = std::function<void(double,int)>; // strike, precision
   using fPopulateStrikeDone_t = std::function<void()>;
 
-  Server_impl( int ib_client_id );
+  Server_impl( int ib_client_id, unsigned int ib_client_port );
   ~Server_impl();
 
   EStateEngine StateEngine() const { return m_stateEngine; }

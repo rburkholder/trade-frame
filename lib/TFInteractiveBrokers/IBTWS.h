@@ -79,11 +79,12 @@ public:
     return std::dynamic_pointer_cast<TWS>( pProvider );
   }
 
+  void SetClientId( int idClient ) { m_idClient = idClient; }
+  void SetClientPort( unsigned int nPort ) { m_nPort = nPort; }
+
   // From ProviderInterface:
   virtual void Connect();
   virtual void Disconnect();
-
-  void SetClientId( int idClient ) { m_idClient = idClient; }
 
   // From ProviderInterface Execution Section
   void PlaceOrder( pOrder_t order );

@@ -30,6 +30,7 @@ struct Choices {
 
   // Interactive Brokers api instance
   int ib_client_id;
+  unsigned int ib_client_port;
 
   // simple auth
   std::string m_sUIUserName;

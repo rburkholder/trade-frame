@@ -31,6 +31,7 @@ namespace po = boost::program_options;
 
 namespace {
   static const std::string sChoice_IbClientId( "ib_client_id" );
+  static const std::string sChoice_IbClientPort( "ib_client_port" );
   static const std::string sChoice_UIUserName( "ui_username" );
   static const std::string sChoice_UIPassWord( "ui_password" );
   static const std::string sChoice_CandidateFuture( "candidate_future" );
@@ -70,7 +71,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
     po::options_description config( "config" );
     config.add_options()
-      ( sChoice_IbClientId.c_str(), po::value<int>( &choices.ib_client_id )->default_value( 1 ), "IB Client ID" )
+      ( sChoice_IbClientId.c_str(), po::value<int>( &choices.ib_client_id )->default_value( 1 ), "ib client id (1)" )
+      ( sChoice_IbClientPort.c_str(), po::value<unsigned int>( &choices.ib_client_port )->default_value( 7496 ), "ib client port (7496)" )
       ( sChoice_UIUserName.c_str(), po::value<std::string>( &choices.m_sUIUserName ), "ui username" )
       ( sChoice_UIPassWord.c_str(), po::value<std::string>( &choices.m_sUIPassWord ), "ui password" )
       ( sChoice_CandidateFuture.c_str(), po::value<Choices::vCandidateFutures_t>( &choices.m_vCandidateFutures ), "candidate future" )
@@ -87,6 +89,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       po::store( po::parse_config_file( ifs, config), vm );
 
       bOk &= parse<int>( sFileName, vm, sChoice_IbClientId, false, choices.ib_client_id );
+      bOk &= parse<unsigned int>( sFileName, vm, sChoice_IbClientPort, false, choices.ib_client_port );
 
       bOk &= parse<std::string>( sFileName, vm, sChoice_UIUserName, true, choices.m_sUIUserName );
       bOk &= ( 0 < choices.m_sUIUserName.size() );

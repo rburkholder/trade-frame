@@ -44,7 +44,7 @@ Server::Server(
 : Wt::WServer( argc, argv, wtConfigurationFile )
 , m_choices( choices )
 {
-  m_implServer = std::make_unique<Server_impl>( m_choices.ib_client_id );
+  m_implServer = std::make_unique<Server_impl>( m_choices.ib_client_id, m_choices.ib_client_port );
 }
 
 Server::~Server() {
@@ -382,7 +382,6 @@ void Server::AddStrike(
   }
 
   double strike = boost::lexical_cast<double>( sStrike );
-  // open interest will have to come during watch startup, and populate ticker again with real open interest, will need to use 'post' with session id for that
   switch ( type ) {
     case EOptionType::call:
       fPopulateOption( m_implServer->Ticker( strike, ou::tf::OptionSide::Call ) );
