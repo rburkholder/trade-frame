@@ -240,7 +240,7 @@
 	   Note debugging messages are only emitted when debugging
 	   has been enabled while building Wt.
 	  -->
-	<log-config>* -debug</log-config>
+	<log-config>* -debug -info</log-config>
 
 	<!-- Maximum HTTP request size (KiB)
 
