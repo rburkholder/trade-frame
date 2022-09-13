@@ -21,6 +21,8 @@
 
 #include <array>
 
+#include <TFOptions/Chains.h>
+
 #include <TFTrading/PortfolioManager.h>
 
 #include "LegDef.h"
@@ -135,7 +137,7 @@ Collar::CollarLeg& Collar::InitTracker(
 
   pPosition_t pPosition( m_mapLeg[type].GetPosition() );
   assert( pPosition );
-  citerChain_t citerChain = Combo::SelectChain( *pmapChains, date, days_to_expiry );
+  citerChain_t citerChain = SelectChain( *pmapChains, date, days_to_expiry );
   const chain_t& chain( citerChain->second );
 
   cleg.m_tracker.Initialize(
@@ -298,10 +300,10 @@ size_t /* static */ Collar::LegCount() {
 )
 {
 
-  citerChain_t citerChainSynthetic = Combo::SelectChain( chains, date, specs.nDaysBack );
+  citerChain_t citerChainSynthetic = SelectChain( chains, date, specs.nDaysBack );
   const chain_t& chainSynthetic( citerChainSynthetic->second );
 
-  citerChain_t citerChainFront = Combo::SelectChain( chains, date, specs.nDaysFront );
+  citerChain_t citerChainFront = SelectChain( chains, date, specs.nDaysFront );
   const chain_t& chainFront( citerChainFront->second );
 
   bool bOk( true );

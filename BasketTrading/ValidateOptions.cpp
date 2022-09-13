@@ -19,6 +19,8 @@
  * Created on July 4, 2019, 12:10 PM
  */
 
+#include <TFOptions/Exceptions.h>
+
 #include "ValidateOptions.h"
 
 ValidateOptions::ValidateOptions(

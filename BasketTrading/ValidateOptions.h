@@ -29,7 +29,6 @@
 #include <TFOptions/Chain.h>
 
 #include <TFOptionCombos/Leg.h>
-#include <TFOptionCombos/Exceptions.h>
 
 #include "LegSelected.h"
 

@@ -34,7 +34,6 @@
 #include "Leg.h"
 #include "LegNote.h"
 #include "SpreadSpecs.h"
-#include "Exceptions.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -131,8 +130,6 @@ public:
 
   bool AreOrdersActive() const;
   void SaveSeries( const std::string& sPrefix );
-
-  static citerChain_t SelectChain( const mapChains_t& mapChains, boost::gregorian::date date, boost::gregorian::days daysToExpiry );
 
 protected:
 
