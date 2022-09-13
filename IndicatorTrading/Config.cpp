@@ -33,6 +33,8 @@ namespace {
   static const std::string sOption_Symbol( "symbol" );
   static const std::string sOption_IbClientId( "ib_client_id" );
   static const std::string sOption_Threads( "threads" );
+  static const std::string sOption_DaysFront( "days_front" );
+  static const std::string sOption_DaysBack( "days_back" );
   static const std::string sOption_L2Levels( "l2_levels" );
   static const std::string sOption_PeriodWidth( "period_width" );
   static const std::string sOption_MA1Periods( "ma1_periods" );
@@ -70,7 +72,11 @@ bool Load( const std::string& sFileName, Options& options ) {
       ( sOption_Symbol.c_str(), po::value<std::string>( &options.sSymbol ), "symbol" )
       ( sOption_IbClientId.c_str(), po::value<int>( &options.ib_client_id )->default_value( 1 ), "IB Client ID" )
       ( sOption_Threads.c_str(), po::value<size_t>( &options.nThreads )->default_value( 1 ), "threads" )
-      ( sOption_L2Levels.c_str(), po::value<size_t>( & options.nL2Levels )->default_value( 10 ), "# L2 Levels" )
+
+      ( sOption_DaysFront.c_str(), po::value<boost::gregorian::days>(&options.nDaysFront), "minimum front month days in future")
+      ( sOption_DaysBack.c_str(), po::value<boost::gregorian::days>(&options.nDaysBack), "minimum back month days in future")
+
+      ( sOption_L2Levels.c_str(), po::value<size_t>( &options.nL2Levels )->default_value( 10 ), "# L2 Levels" )
 
       ( sOption_PeriodWidth.c_str(), po::value<int>( &options.nPeriodWidth ), "period width (sec)" )
 
@@ -99,6 +105,9 @@ bool Load( const std::string& sFileName, Options& options ) {
       bOk &= parse<int>( sFileName, vm, sOption_IbClientId, options.ib_client_id );
       bOk &= parse<size_t>( sFileName, vm, sOption_Threads, options.nThreads );
 
+      bOk &= parse<boost::gregorian::days>( sFileName, vm, sOption_DaysFront, options.nDaysFront );
+      bOk &= parse<boost::gregorian::days>( sFileName, vm, sOption_DaysFront, options.nDaysBack );
+
       bOk &= parse<size_t>( sFileName, vm, sOption_L2Levels, options.nL2Levels );
 
       bOk &= parse<int>( sFileName, vm, sOption_PeriodWidth, options.nPeriodWidth );
@@ -110,6 +119,7 @@ bool Load( const std::string& sFileName, Options& options ) {
       bOk &= parse<int>( sFileName, vm, sOption_Stochastic1Periods, options.nStochastic1Periods );
       bOk &= parse<int>( sFileName, vm, sOption_Stochastic2Periods, options.nStochastic2Periods );
       bOk &= parse<int>( sFileName, vm, sOption_Stochastic3Periods, options.nStochastic3Periods );
+
     }
 
   }

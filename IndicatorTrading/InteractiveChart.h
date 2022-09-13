@@ -203,6 +203,9 @@ private:
   bool m_bOptionsReady;
   bool m_bTriggerFeatureSetDump;
 
+  boost::gregorian::days m_nDaysFront;
+  boost::gregorian::days m_nDaysBack;
+
   ou::ChartDataView m_dvChart; // the data
 
   fClick_t m_fClickLeft;
@@ -445,6 +448,8 @@ private:
 
   void CheckOptions();
   pOptionTracker_t AddOptionTracker( double strike, pOption_t );
+
+  void CheckOptions_v2();
 
   void TrackCombo();
 

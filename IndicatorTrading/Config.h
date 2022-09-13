@@ -21,6 +21,8 @@
 
 #include <string>
 
+#include <boost/date_time/gregorian/gregorian.hpp>
+
 namespace config {
 
 struct Options {
@@ -31,6 +33,9 @@ struct Options {
   int ib_client_id;
 
   size_t nThreads; // iqfeed multiple symbols
+
+  boost::gregorian::days nDaysFront;
+  boost::gregorian::days nDaysBack;
 
   size_t nL2Levels;
 

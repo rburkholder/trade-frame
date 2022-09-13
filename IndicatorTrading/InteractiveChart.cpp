@@ -30,6 +30,7 @@
 #include <boost/format.hpp>
 
 //#include <TFOptions/Engine.h>
+#include <TFOptions/Chains.h>
 #include <TFOptions/GatherOptions.h>
 
 #include <TFVuTrading/TreeItem.hpp>
@@ -42,7 +43,7 @@
 #include "InteractiveChart.h"
 
 namespace {
-  static const size_t nBarSeconds = 3;
+  static const size_t nBarSeconds = 1;
   static const size_t nPeriods = 14;
 }
 
@@ -227,6 +228,9 @@ void InteractiveChart::SetPosition(
   Disconnect();
 
   // --
+
+  m_nDaysFront = config.nDaysFront;
+  m_nDaysBack = config.nDaysBack;
 
   m_dvChart.Add( EChartSlot::Price, &cemReferenceLevels );
 
@@ -697,6 +701,11 @@ void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
   }
 
   //CheckOptions(); // do this differently
+}
+
+void InteractiveChart::CheckOptions_v2() {
+  auto dt = ou::TimeSource::GlobalInstance().External();
+  mapChains_t::const_iterator iterFront = ou::tf::option::SelectChain( m_mapChains, dt.date(), m_nDaysFront );
 }
 
 void InteractiveChart::HandleBarCompletionPriceUp( const ou::tf::Bar& bar ) {
