@@ -126,7 +126,6 @@ static typename mapChains_t::const_iterator SelectChain( const mapChains_t& mapC
   return citerChain;
 }
 
-
 } // namespace option
 } // namespace tf
 } // namespace ou
