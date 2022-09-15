@@ -232,6 +232,9 @@ void InteractiveChart::SetPosition(
   m_nDaysFront = config.nDaysFront;
   m_nDaysBack = config.nDaysBack;
 
+  assert( boost::gregorian::days( 1 ) <= m_nDaysFront );
+  assert( boost::gregorian::days( 1 ) <= m_nDaysBack );
+
   m_dvChart.Add( EChartSlot::Price, &cemReferenceLevels );
 
   m_fBuildOption = std::move( fBuildOption );
@@ -377,6 +380,7 @@ void InteractiveChart::PopulateChains( const query_t::OptionList& list ) {
       });
   }
   std::cout << " .. option chains built." << std::endl;
+  SelectChains();
 }
 
 // started from menu after option chains have been loaded
@@ -429,11 +433,11 @@ void InteractiveChart::HandleQuote( const ou::tf::Quote& quote ) {
 
   ptime dt( quote.DateTime() );
 
+  m_quote = quote; // should refer to watch instead?
+
   m_ceQuoteAsk.Append( dt, quote.Ask() );
   m_ceQuoteBid.Append( dt, quote.Bid() );
   m_ceQuoteSpread.Append( dt, quote.Ask() - quote.Bid() );
-
-  m_quote = quote;
 
   for ( vMA_t::value_type& ma: m_vMA ) {
     ma.Update( dt );
@@ -701,11 +705,77 @@ void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
   }
 
   //CheckOptions(); // do this differently
+  CheckOptions_v2();
+}
+
+void InteractiveChart::SelectChains() {
+
+  auto dt = ou::TimeSource::GlobalInstance().External();
+
+  m_iterChainFront = ou::tf::option::SelectChain( m_mapChains, dt.date(), m_nDaysFront );
+  m_iterChainBack  = ou::tf::option::SelectChain( m_mapChains, dt.date(), m_nDaysBack );
+
+  assert( m_mapChains.end() != m_iterChainFront );
+  assert( m_mapChains.end() != m_iterChainBack  );
+
+  std::cout
+    << "front chain "
+    << m_iterChainFront->first
+    << ", back chain "
+    << m_iterChainBack->first
+    << std::endl;
+
+}
+
+void InteractiveChart::UpdateSynthetic( pOption_t& pCurrent, pOption_t pSelected ) {
+
+    if ( !pCurrent ) {
+      pCurrent = pSelected;
+    }
+    else {
+      if ( pCurrent->GetStrike() != pSelected->GetStrike() ) {
+        // stop current watch
+        pCurrent = pSelected;
+        // start watch
+      }
+    }
+
 }
 
 void InteractiveChart::CheckOptions_v2() {
-  auto dt = ou::TimeSource::GlobalInstance().External();
-  mapChains_t::const_iterator iterFront = ou::tf::option::SelectChain( m_mapChains, dt.date(), m_nDaysFront );
+
+  if ( m_bOptionsReady ) {
+
+    const double mid( m_quote.Midpoint() );
+
+    double strike;
+    pOption_t pOption;
+
+    chain_t& chainFront( const_cast<chain_t&>( m_iterChainFront->second ) );
+    chain_t& chainBack(  const_cast<chain_t&>( m_iterChainBack->second ) );
+
+    // long synth - long call
+    strike = chainBack.Call_Itm( mid );
+    pOption = chainBack.GetStrike( strike ).call.pOption;
+    UpdateSynthetic( m_synthLong.pBackBuy, pOption );
+
+    // long synth - short put
+    strike = chainFront.Put_Otm( mid );
+    pOption = chainFront.GetStrike( strike ).put.pOption;
+    UpdateSynthetic( m_synthLong.pFrontSell, pOption );
+
+    // short synth - long put
+    strike = chainBack.Put_Itm( mid );
+    pOption = chainBack.GetStrike( strike ).put.pOption;
+    UpdateSynthetic( m_synthShort.pBackBuy, pOption );
+
+    // short synth - short call
+    strike = chainFront.Call_Otm( mid );
+    pOption = chainFront.GetStrike( strike ).call.pOption;
+    UpdateSynthetic( m_synthShort.pFrontSell, pOption );
+
+    //if ( pOption ) { // iqfeed isn't filling strikes properly
+  }
 }
 
 void InteractiveChart::HandleBarCompletionPriceUp( const ou::tf::Bar& bar ) {

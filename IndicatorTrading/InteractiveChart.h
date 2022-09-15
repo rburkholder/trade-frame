@@ -203,9 +203,6 @@ private:
   bool m_bOptionsReady;
   bool m_bTriggerFeatureSetDump;
 
-  boost::gregorian::days m_nDaysFront;
-  boost::gregorian::days m_nDaysBack;
-
   ou::ChartDataView m_dvChart; // the data
 
   fClick_t m_fClickLeft;
@@ -364,6 +361,20 @@ private:
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
   mapChains_t m_mapChains;
 
+  boost::gregorian::days m_nDaysFront;
+  boost::gregorian::days m_nDaysBack;
+
+  mapChains_t::const_iterator m_iterChainFront;
+  mapChains_t::const_iterator m_iterChainBack;
+
+  struct Synthetic {
+    pOption_t pBackBuy;   // for the hedge
+    pOption_t pFrontSell; // for the premium
+  };
+
+  Synthetic m_synthLong;  // long call, short put - buy on bottom side
+  Synthetic m_synthShort; // long put, short call - buy on top side
+
   pOptionChainQuery_t m_pOptionChainQuery; // need to disconnect
 
   struct Expiry {
@@ -443,6 +454,9 @@ private:
 
   void OptionChainQuery( const std::string& );
   void PopulateChains( const query_t::OptionList& );
+  void SelectChains();
+
+  void UpdateSynthetic( pOption_t& pCurrent, pOption_t pSelected );
 
   LifeCycle_Position& Lookup_LifeCycle_Position();
 
