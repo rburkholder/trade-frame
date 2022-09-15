@@ -106,7 +106,7 @@ bool Load( const std::string& sFileName, Options& options ) {
       bOk &= parse<size_t>( sFileName, vm, sOption_Threads, options.nThreads );
 
       bOk &= parse<boost::gregorian::days>( sFileName, vm, sOption_DaysFront, options.nDaysFront );
-      bOk &= parse<boost::gregorian::days>( sFileName, vm, sOption_DaysFront, options.nDaysBack );
+      bOk &= parse<boost::gregorian::days>( sFileName, vm, sOption_DaysBack, options.nDaysBack );
 
       bOk &= parse<size_t>( sFileName, vm, sOption_L2Levels, options.nL2Levels );
 
