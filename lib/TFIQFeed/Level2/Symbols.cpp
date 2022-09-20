@@ -344,6 +344,7 @@ void OrderBased::LimitOrderAdd( const ou::tf::DepthByOrder& depth ) {
 
   mapOrder_t::iterator iter = m_mapOrder.find( depth.OrderID() );
   if ( m_mapOrder.end() != iter ) {
+    // TODO: reset the order book, this happens upon a disconnect/reconnect, can this state be found?
     BOOST_LOG_TRIVIAL(warning) << "LimitOrderAdd re-add order skipped: " << depth.OrderID();
   }
   else {

@@ -243,6 +243,13 @@ void Dispatcher<T>::OnNetworkLineBuffer( l2_linebuffer_t* pBuffer ) {
     case 'T':
       // ignore timestamp message
     case 'S':
+      {
+        std::string str( iter, end );
+        std::cout
+          << "debug system message for restart: "
+          << str
+          << std::endl;
+      }
       if ( !m_bInitialized ) {
         m_bInitialized = true;
         // make a message keyword parser? - from the spirit contribution repository
@@ -267,6 +274,12 @@ void Dispatcher<T>::OnNetworkLineBuffer( l2_linebuffer_t* pBuffer ) {
       {
         std::string str( iter, end );
         std::cout << "MarketDepth no depth available: '" << str << "'" << std::endl;
+      }
+      break;
+    case 'O':
+      {
+        std::string str( iter, end );
+        std::cout << "MarketDepth ignored: " << str << std::endl;
       }
       break;
     default:

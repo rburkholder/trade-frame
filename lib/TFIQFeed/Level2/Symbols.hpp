@@ -344,6 +344,7 @@ public:
   using idOrder_t = uint64_t;
   using pOrderBased_t = std::shared_ptr<OrderBased>;
 
+  // used to signal internal state to external message processors
   enum class EState { Ready, Add, Update, Delete };
 
   OrderBased();
