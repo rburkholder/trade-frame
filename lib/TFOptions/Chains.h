@@ -93,7 +93,7 @@ OptionEntry* UpdateOption( chain_t& chain, pOption_t pOption ) {
     }
   }
   catch ( std::runtime_error& e ) {
-    BOOST_LOG_TRIVIAL(error) << "PopulateOption error";
+    BOOST_LOG_TRIVIAL(error) << "option::UpdateOption error";
   }
   return pOptionEntry;
 }
@@ -121,7 +121,7 @@ static typename mapChains_t::const_iterator SelectChain( const mapChains_t& mapC
       return daysToExpiry <= ( vt.first - date );  // first chain where trading date less than expiry date
   } );
   if ( mapChains.end() == citerChain ) {
-    throw ou::tf::option::exception_chain_not_found( "Combo::SelectChain" );
+    throw ou::tf::option::exception_chain_not_found( "option::SelectChain" );
   }
   return citerChain;
 }
