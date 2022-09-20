@@ -163,6 +163,21 @@ void Dispatcher<T>::StopPriceLevel( const std::string& sName ) {
   ou::Network<Dispatcher<T> >::Send( "RPL," + sName + "\n" );
 }
 
+struct SystemStatus {
+  enum class ECmd { Unknown, ServerConnected, CurrentProtocol, ClearDepth };
+  ECmd cmd;
+  std::string param_a; // 6.2 or symbol_name
+  std::string param_b; // A or B
+  SystemStatus(): cmd( ECmd::Unknown ) {}
+  SystemStatus( ECmd cmd_ ): cmd( cmd_ ) {}
+  SystemStatus( ECmd cmd_, const std::string& a )
+    : cmd( cmd_ ), param_a ( a ) {}
+  SystemStatus( ECmd cmd_, const std::string& a, const std::string& b )
+    : cmd( cmd_ ), param_a ( a ), param_b( b ) {}
+};
+
+bool ParseSystemStatus( const std::string&, SystemStatus& );
+
 template <typename T>
 void Dispatcher<T>::OnNetworkLineBuffer( l2_linebuffer_t* pBuffer ) {
 
@@ -242,6 +257,7 @@ void Dispatcher<T>::OnNetworkLineBuffer( l2_linebuffer_t* pBuffer ) {
       break;
     case 'T':
       // ignore timestamp message
+      break;
     case 'S':
       {
         std::string str( iter, end );
@@ -249,18 +265,49 @@ void Dispatcher<T>::OnNetworkLineBuffer( l2_linebuffer_t* pBuffer ) {
           << "debug system message for restart: "
           << str
           << std::endl;
-      }
-      if ( !m_bInitialized ) {
-        m_bInitialized = true;
-        // make a message keyword parser? - from the spirit contribution repository
-        // TODO: for field comparisons, use spirit or the trie method
-        ou::Network<Dispatcher<T> >::Send( "S,TIMESTAMPSOFF\n" );  // TODO: maybe send on S,KEYOK, check that there are no listeners to the event
-        ou::Network<Dispatcher<T> >::Send( "S,SET PROTOCOL,6.2\n" );
-      }
-      else {
-        std::string str( iter, end );
-        if ( "S,CURRENT PROTOCOL,6.2," == str ) {
-          OnL2Initialized();
+        SystemStatus status;
+        bool bResult = ParseSystemStatus( str, status );
+        if ( bResult ) {
+          switch ( status.cmd ) {
+            case SystemStatus::ECmd::ServerConnected:
+              if ( !m_bInitialized ) {
+                m_bInitialized = true;
+                // make a message keyword parser? - from the spirit contribution repository
+                // TODO: for field comparisons, use spirit or the trie method
+                ou::Network<Dispatcher<T> >::Send( "S,TIMESTAMPSOFF\n" );  // TODO: maybe send on S,KEYOK, check that there are no listeners to the event
+                ou::Network<Dispatcher<T> >::Send( "S,SET PROTOCOL,6.2\n" );
+              }
+              break;
+            case SystemStatus::ECmd::CurrentProtocol:
+              if ( "6.2" == status.param_a ) {
+                OnL2Initialized();
+              }
+              else {
+                std::cout
+                  << "MarketDepth needs v6.2, found "
+                  << str
+                  << std::endl;
+              }
+              // nothing to do
+              break;
+            case SystemStatus::ECmd::ClearDepth:
+              //S,CLEAR DEPTH,@ESZ22,B,
+              //S,CLEAR DEPTH,@ESZ22,A,
+              // TODO: create an event
+              break;
+            case SystemStatus::ECmd::Unknown:
+              std::cout
+                << "MarketDepth unknown status: "
+                << str
+                << std::endl;
+              break;
+          }
+        }
+        else {
+          std::cout
+            << "MarketDepth unparsed status: "
+            << str
+            << std::endl;
         }
       }
       break;
