@@ -221,6 +221,9 @@ public:
     }
   }
 
+  void Clear( const ou::tf::Depth& depth ) {
+  }
+
 protected:
 
   mapLevelAggregate_t m_mapLevelAggregate;
@@ -269,12 +272,14 @@ protected:
   fMarketDepthByOrder_t m_fMarketDepthByOrder;
 
   // called from Symbols
+  virtual void OnMBOClear( const msg::OrderClear::decoded& ) = 0;
   virtual void OnMBOAdd( const msg::OrderArrival::decoded& ) = 0;
   virtual void OnMBOSummary( const msg::OrderArrival::decoded& ) = 0;
   virtual void OnMBOUpdate( const msg::OrderArrival::decoded& ) = 0;
   virtual void OnMBODelete( const msg::OrderDelete::decoded& ) = 0;
 
   // local bid / ask dispatch into proper book
+  void Clear( const ou::tf::Depth& depth );
   void Add( const ou::tf::Depth& );
   void Update( const ou::tf::Depth&, price_t oldp, volume_t oldv );
   void Delete( const ou::tf::Depth& );
@@ -295,6 +300,7 @@ public:
 
   static pMarketMaker_t Factory() { return std::make_shared<MarketMaker>(); }
 
+  virtual void OnMBOClear( const msg::OrderClear::decoded& ) { assert( false ); } // not sure if there is a clear message for market maker
   virtual void OnMBOAdd( const msg::OrderArrival::decoded& ) { assert( false ); }; // Equity doesn't have this message
   virtual void OnMBOSummary( const msg::OrderArrival::decoded& msg ) { OnMBOUpdate( msg ); }
   virtual void OnMBOUpdate( const msg::OrderArrival::decoded& );
@@ -345,13 +351,14 @@ public:
   using pOrderBased_t = std::shared_ptr<OrderBased>;
 
   // used to signal internal state to external message processors
-  enum class EState { Ready, Add, Update, Delete };
+  enum class EState { Ready, Add, Update, Delete, Clear };
 
   OrderBased();
   virtual ~OrderBased() {}
 
   static pOrderBased_t Factory() { return std::make_shared<OrderBased>(); }
 
+  virtual void OnMBOClear( const msg::OrderClear::decoded& msg );
   virtual void OnMBOSummary( const msg::OrderArrival::decoded& msg );
   virtual void OnMBOAdd( const msg::OrderArrival::decoded& msg );
   virtual void OnMBOUpdate( const msg::OrderArrival::decoded& msg );
@@ -399,6 +406,7 @@ private:
   idOrder_t m_idOrder;  // active when m_state other than Ready
 
    // interface for msg/depth
+  void LimitOrderClear( const ou::tf::DepthByOrder& );
   void LimitOrderAdd( const ou::tf::DepthByOrder& );
   void LimitOrderUpdate( const ou::tf::DepthByOrder& );
   void LimitOrderDelete( const ou::tf::DepthByOrder& );
@@ -463,6 +471,7 @@ protected:
   //void OnNetworkError( size_t e );
   void OnL2Initialized();
 
+  void OnMBOClear( const msg::OrderClear::decoded& );
   void OnMBOAdd( const msg::OrderArrival::decoded& );
   void OnMBOSummary( const msg::OrderArrival::decoded& );
   void OnMBOUpdate( const msg::OrderArrival::decoded& );

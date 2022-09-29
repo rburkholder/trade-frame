@@ -25,6 +25,7 @@
 
 #include <OUCommon/Network.h>
 
+#include <TFIQFeed/Level2/MsgOrderClear.h>
 #include <TFIQFeed/Level2/MsgOrderArrival.h>
 #include <TFIQFeed/Level2/MsgOrderDelete.h>
 
@@ -61,6 +62,7 @@ protected:
 
   void OnL2Initialized();
 
+  void OnMBOClear( const ou::tf::iqfeed::l2::msg::OrderClear::decoded& ) {}
   void OnMBOAdd( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& ) {}
   void OnMBOSummary( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& ) {}
   void OnMBOUpdate( const ou::tf::iqfeed::l2::msg::OrderArrival::decoded& ) {}
@@ -164,16 +166,19 @@ void Dispatcher<T>::StopPriceLevel( const std::string& sName ) {
 }
 
 struct SystemStatus {
-  enum class ECmd { Unknown, ServerConnected, CurrentProtocol, ClearDepth };
+  enum class ECmd { Unknown, ServerConnected, CurrentProtocol, ClearDepth, ServerDisconnected };
   ECmd cmd;
   std::string param_a; // 6.2 or symbol_name
-  std::string param_b; // A or B
-  SystemStatus(): cmd( ECmd::Unknown ) {}
-  SystemStatus( ECmd cmd_ ): cmd( cmd_ ) {}
-  SystemStatus( ECmd cmd_, const std::string& a )
-    : cmd( cmd_ ), param_a ( a ) {}
-  SystemStatus( ECmd cmd_, const std::string& a, const std::string& b )
-    : cmd( cmd_ ), param_a ( a ), param_b( b ) {}
+  char param_b; // A or B
+  SystemStatus(): cmd( ECmd::Unknown ), param_b( ' ' ) {}
+  //SystemStatus( ECmd cmd_ ): cmd( cmd_ ) {}
+  //SystemStatus( ECmd cmd_, const std::string& a )
+  //  : cmd( cmd_ ), param_a ( a ) {}
+  //SystemStatus( ECmd cmd_, const std::string& a, const std::string& b )
+  //  : cmd( cmd_ ), param_a ( a ), param_b( b ) {}
+  SystemStatus( SystemStatus&& rhs )
+    : cmd( rhs.cmd ),
+      param_a( std::move( rhs.param_a ) ), param_b( rhs.param_b ) {}
 };
 
 bool ParseSystemStatus( const std::string&, SystemStatus& );
@@ -294,6 +299,20 @@ void Dispatcher<T>::OnNetworkLineBuffer( l2_linebuffer_t* pBuffer ) {
               //S,CLEAR DEPTH,@ESZ22,B,
               //S,CLEAR DEPTH,@ESZ22,A,
               // TODO: create an event
+              // may need to inject null message for use in simulator
+              if ( &Dispatcher<T>::OnMBOClear != &T::OnMBOClear ) {
+                namespace OrderClear = ou::tf::iqfeed::l2::msg::OrderClear;
+                //assert( 1 == status.param_b.size() );
+                assert( ' ' != status.param_b );
+                OrderClear::decoded msg( status.param_a, status.param_b );
+                static_cast<T*>( this )->OnMBOClear( msg );
+              }
+              break;
+            case SystemStatus::ECmd::ServerDisconnected:
+              // should get a clear depth after this
+              std::cout
+                << "MarketDepth server disconnected, fix state"
+                << std::endl;
               break;
             case SystemStatus::ECmd::Unknown:
               std::cout

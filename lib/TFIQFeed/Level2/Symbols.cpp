@@ -37,6 +37,20 @@ L2Base::L2Base()
 , m_fMarketDepthByOrder( nullptr )
 {}
 
+void L2Base::Clear( const ou::tf::Depth& depth ) {
+  switch ( depth.Side() ) {
+    case 'A':
+      m_LevelAggregateAsk.Clear( depth );
+      break;
+    case 'B':
+      m_LevelAggregateBid.Clear( depth );
+      break;
+    default:
+      assert( false );
+      break;
+  }
+}
+
 void L2Base::Add( const ou::tf::Depth& depth ) {
   switch ( depth.Side() ) {
     case 'A':
@@ -267,6 +281,18 @@ OrderBased::OrderBased()
 
 // Live Messages
 
+void OrderBased::OnMBOClear( const msg::OrderClear::decoded& msg ) {
+  ptime dt( ou::TimeSource::GlobalInstance().External() );
+  ou::tf::DepthByOrder depth( dt, dt, 0, 0, msg.chMsgType, msg.chOrderSide, 0.0, msg.nQuantity );
+
+  if ( nullptr == m_fMarketDepthByOrder ) {
+    LimitOrderClear( depth );
+  }
+  else {
+    m_fMarketDepthByOrder( depth );
+  }
+}
+
 void OrderBased::OnMBOSummary( const msg::OrderArrival::decoded& msg ) {
   // TODO: will need to trigger order book reset to rebuild
   //   may require a state machine to track once summary messages complete
@@ -330,12 +356,25 @@ void OrderBased::MarketDepth( const ou::tf::DepthByOrder& depth ) {
     case '6': // Summary - will need to categorize this properly
       LimitOrderAdd( depth );
       break;
+    case 'C':
+      LimitOrderClear( depth );
+      break;
     default:
       assert( false );
   }
 }
 
 // Processing
+
+void OrderBased::LimitOrderClear( const ou::tf::DepthByOrder& depth ) {
+  m_state = EState::Clear;
+
+  // todo this properly, will need to only clear those entries for the side provided
+  m_mapOrder.clear();
+  Clear( depth );
+
+  m_state = EState::Ready;
+}
 
 void OrderBased::LimitOrderAdd( const ou::tf::DepthByOrder& depth ) {
   m_state = EState::Add;
@@ -496,6 +535,12 @@ void Symbols::WatchDel( const std::string& sSymbol ) {
   // equity, nasdaq l2:  '4,SPY,,NSDQ,B,451.4400,300,,4,11:33:27.030724,2022-04-01,'
 
 // used with futures, not equities
+void Symbols::OnMBOClear( const msg::OrderClear::decoded& msg ) {
+
+  assert( ( 'C' == msg.chMsgType ) );
+  Call( msg, &L2Base::OnMBOClear );
+}
+
 void Symbols::OnMBOAdd( const msg::OrderArrival::decoded& msg ) {
 
   assert( ( '3' == msg.chMsgType ) || ( '6' == msg.chMsgType ) );

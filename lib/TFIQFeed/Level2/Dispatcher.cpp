@@ -28,7 +28,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::l2::SystemStatus,
   (ou::tf::iqfeed::l2::SystemStatus::ECmd, cmd)
   (std::string, param_a)
-  (std::string, param_b)
+  (char, param_b)
 )
 
 namespace qi = boost::spirit::qi;
@@ -49,13 +49,22 @@ struct SystemStatusParser: qi::grammar<Iterator, ou::tf::iqfeed::l2::SystemStatu
       ( "SERVER CONNECTED", ECmd::ServerConnected )
       ( "CURRENT PROTOCOL", ECmd::CurrentProtocol )
       ( "CLEAR DEPTH", ECmd::ClearDepth )
+      ( "SERVER DISCONNECTED", ECmd::ServerDisconnected )
       ;
 
     ruleCmd = cmd;
-    ruleParam = +( qi::char_ - qi::char_( ',' ) );
+    ruleVersion = +( qi::char_( "0-9" ) | qi::char_( '.' ) );
+    ruleSymbol = +( qi::char_( "0-9" ) | qi::char_( "A-Z" ) | qi::char_( '@' ) );
+    ruleSide = qi::char_( 'A' ) | qi::char_( 'B' );
     ruleStart
       %=
-        qi::lit( 'S' ) >> qi::lit( ',' ) >> ruleCmd >> *( qi::lit( ',' ) >> ruleParam ) >> -qi::lit( ',' )
+         qi::lit( 'S' )
+      >> qi::lit( ',' ) > ruleCmd
+      >> -( ( qi::lit( ',' ) > ruleVersion )
+          | ( qi::lit( ',' ) > ruleSymbol > qi::lit( ',' ) > ruleSide )
+          )
+      >> -qi::lit( ',' )
+      //>> qi::eol
       ;
 
   }
@@ -63,7 +72,9 @@ struct SystemStatusParser: qi::grammar<Iterator, ou::tf::iqfeed::l2::SystemStatu
   qi::symbols<char, ECmd> cmd;
 
   qi::rule<Iterator, ECmd()> ruleCmd;
-  qi::rule<Iterator, std::string()> ruleParam;
+  qi::rule<Iterator, std::string()> ruleVersion;
+  qi::rule<Iterator, std::string()> ruleSymbol;
+  qi::rule<Iterator, char()> ruleSide;
   qi::rule<Iterator, ou::tf::iqfeed::l2::SystemStatus()> ruleStart;
 };
 

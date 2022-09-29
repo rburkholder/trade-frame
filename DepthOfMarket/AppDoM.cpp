@@ -400,6 +400,9 @@ void AppDoM::StartDepthByOrder() {
             case '6': // Summary - will need to categorize this properly
               m_valuesStatistics.nL2AddTtl++;
               break;
+            case 'C':
+              // to be implemented - reset statistics?
+              break;
             default:
               assert( false );
           }
@@ -652,6 +655,9 @@ void AppDoM::StartDepthByOrderWithFVS() {
               break;
             case '6': // Summary - will need to categorize this properly
               m_valuesStatistics.nL2AddTtl++;
+              break;
+            case 'C':
+              // to be implemented - reset statistics & vectors?
               break;
             default:
               assert( false );
