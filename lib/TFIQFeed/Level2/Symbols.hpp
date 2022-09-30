@@ -536,7 +536,7 @@ private:
   void SetCarrier( Carrier& carrier, const Msg& msg ) {
 
     pL2Base_t pL2Base;
-    if ( 0 != msg.nOrderId ) {
+    if ( ( 0 != msg.nOrderId ) || ( 'C' == msg.chMsgType ) ) {
       assert( 0 == msg.mmid.rch[0] );
       pL2Base = OrderBased::Factory();
     }

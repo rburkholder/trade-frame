@@ -47,7 +47,7 @@ struct decoded {
   uint32_t nQuantity;
   decoded(): nOrderId {}, nQuantity {} {}
   decoded( const std::string& sSymbolName_, char chOrderSide_ )
-  : sSymbolName( sSymbolName_ ), chOrderSide( chOrderSide_ )
+  : chMsgType( 'C' ), sSymbolName( sSymbolName_ ), chOrderSide( chOrderSide_ )
   , nOrderId {},nQuantity {} {}
 };
 
