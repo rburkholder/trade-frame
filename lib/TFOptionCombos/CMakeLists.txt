@@ -16,7 +16,6 @@ set(
     Collar.h
     Combo.h
 #    Condor.h
-    Exceptions.h
     Leg.h
     LegDef.h
     LegNote.h
