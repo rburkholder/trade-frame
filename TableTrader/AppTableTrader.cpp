@@ -77,6 +77,8 @@ AppTableTrader::AppTableTrader( const Wt::WEnvironment& env )
     root(),
     [this](Wt::WContainerWidget* pcw){
       // TODO: will need the various containers initialized
+      // TODO: need to add state to check for TWS/IQFeed successful connection.
+      //    server_impl.cpp:153 ::Connected()
       switch ( m_pServer->WhereToStart() ) {
         case Server::EWhatToShow::blank:
           Page_Blank( pcw );  // TODO: blank with ip and session
