@@ -168,17 +168,11 @@ void Dispatcher<T>::StopPriceLevel( const std::string& sName ) {
 struct SystemStatus {
   enum class ECmd { Unknown, ServerConnected, CurrentProtocol, ClearDepth, ServerDisconnected };
   ECmd cmd;
-  std::string param_a; // 6.2 or symbol_name
-  char param_b; // A or B
-  SystemStatus(): cmd( ECmd::Unknown ), param_b( ' ' ) {}
-  //SystemStatus( ECmd cmd_ ): cmd( cmd_ ) {}
-  //SystemStatus( ECmd cmd_, const std::string& a )
-  //  : cmd( cmd_ ), param_a ( a ) {}
-  //SystemStatus( ECmd cmd_, const std::string& a, const std::string& b )
-  //  : cmd( cmd_ ), param_a ( a ), param_b( b ) {}
+  using vString_t = std::vector<std::string>;
+  vString_t vString;
+  SystemStatus(): cmd( ECmd::Unknown ) {}
   SystemStatus( SystemStatus&& rhs )
-    : cmd( rhs.cmd ),
-      param_a( std::move( rhs.param_a ) ), param_b( rhs.param_b ) {}
+    : cmd( rhs.cmd ), vString( std::move( rhs.vString ) ) {}
 };
 
 bool ParseSystemStatus( const std::string&, SystemStatus& );
@@ -190,11 +184,6 @@ void Dispatcher<T>::OnNetworkLineBuffer( l2_linebuffer_t* pBuffer ) {
   typename l2_linebuffer_t::iterator end = (*pBuffer).end();
 
   BOOST_ASSERT( iter != end );
-
-  //std::string str( iter, end );
-  //if ( '5' == str[0] ) {
-  //  std::cout << "MarketDepth: '" << str << "'" << std::endl;
-  //}
 
   switch ( *iter ) {
     case '3': // Order Add
@@ -267,7 +256,7 @@ void Dispatcher<T>::OnNetworkLineBuffer( l2_linebuffer_t* pBuffer ) {
       {
         std::string str( iter, end );
         std::cout
-          << "debug system message for restart: "
+          << "system message: "
           << str
           << std::endl;
         SystemStatus status;
@@ -284,7 +273,7 @@ void Dispatcher<T>::OnNetworkLineBuffer( l2_linebuffer_t* pBuffer ) {
               }
               break;
             case SystemStatus::ECmd::CurrentProtocol:
-              if ( "6.2" == status.param_a ) {
+              if ( "6.2" == status.vString[0] ) {
                 OnL2Initialized();
               }
               else {
@@ -302,9 +291,9 @@ void Dispatcher<T>::OnNetworkLineBuffer( l2_linebuffer_t* pBuffer ) {
               // may need to inject null message for use in simulator
               if ( &Dispatcher<T>::OnMBOClear != &T::OnMBOClear ) {
                 namespace OrderClear = ou::tf::iqfeed::l2::msg::OrderClear;
-                //assert( 1 == status.param_b.size() );
-                assert( ' ' != status.param_b );
-                OrderClear::decoded msg( status.param_a, status.param_b );
+                assert( 2 == status.vString.size() );
+                assert( 1 == status.vString[0].size() );
+                OrderClear::decoded msg( status.vString[0], status.vString[1][0] );
                 static_cast<T*>( this )->OnMBOClear( msg );
               }
               break;

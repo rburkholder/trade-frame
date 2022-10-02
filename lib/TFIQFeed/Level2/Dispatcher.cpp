@@ -27,8 +27,7 @@
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::l2::SystemStatus,
   (ou::tf::iqfeed::l2::SystemStatus::ECmd, cmd)
-  (std::string, param_a)
-  (char, param_b)
+  (ou::tf::iqfeed::l2::SystemStatus::vString_t, vString)
 )
 
 namespace qi = boost::spirit::qi;
@@ -52,19 +51,14 @@ struct SystemStatusParser: qi::grammar<Iterator, ou::tf::iqfeed::l2::SystemStatu
       ( "SERVER DISCONNECTED", ECmd::ServerDisconnected )
       ;
 
-    ruleCmd = cmd;
-    ruleVersion = +( qi::char_( "0-9" ) | qi::char_( '.' ) );
-    ruleSymbol = +( qi::char_( "0-9" ) | qi::char_( "A-Z" ) | qi::char_( '@' ) );
-    ruleSide = qi::char_( 'A' ) | qi::char_( 'B' );
+    ruleCmd     = cmd;
+    ruleString  = +( qi::char_ - qi::char_( ',' ) );
     ruleStart
       %=
-         qi::lit( 'S' )
-      >> qi::lit( ',' ) > ruleCmd
-      >> -( ( qi::lit( ',' ) > ruleVersion )
-          | ( qi::lit( ',' ) > ruleSymbol > qi::lit( ',' ) > ruleSide )
-          )
+         qi::lit( 'S' ) >> qi::lit( ',' )
+      >> ruleCmd
+      >> -( qi::lit( ',' ) >> ruleString % ',' )
       >> -qi::lit( ',' )
-      //>> qi::eol
       ;
 
   }
@@ -72,15 +66,27 @@ struct SystemStatusParser: qi::grammar<Iterator, ou::tf::iqfeed::l2::SystemStatu
   qi::symbols<char, ECmd> cmd;
 
   qi::rule<Iterator, ECmd()> ruleCmd;
-  qi::rule<Iterator, std::string()> ruleVersion;
-  qi::rule<Iterator, std::string()> ruleSymbol;
-  qi::rule<Iterator, char()> ruleSide;
+  qi::rule<Iterator, std::string()> ruleString;
   qi::rule<Iterator, ou::tf::iqfeed::l2::SystemStatus()> ruleStart;
 };
 
 bool ParseSystemStatus( const std::string& src, SystemStatus& status ) {
+
   SystemStatusParser<std::string::const_iterator> grammarSystemStatus;
-  bool bOk = parse( src.begin(), src.end(), grammarSystemStatus, status );
+
+  bool bOk( false );
+  try {
+    bOk = parse( src.begin(), src.end(), grammarSystemStatus, status );
+  }
+  catch( const std::runtime_error& e) {
+    std::cout << e.what() << std::endl;
+  }
+  catch( const boost::exception& e) {
+    std::cout << boost::diagnostic_information(e) << std::endl;
+  }
+  catch(...) {
+    std::cerr << "error" << std::endl;
+  }
   return bOk;
 }
 
