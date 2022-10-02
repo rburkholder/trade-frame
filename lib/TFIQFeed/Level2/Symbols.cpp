@@ -366,16 +366,6 @@ void OrderBased::MarketDepth( const ou::tf::DepthByOrder& depth ) {
 
 // Processing
 
-void OrderBased::LimitOrderClear( const ou::tf::DepthByOrder& depth ) {
-  m_state = EState::Clear;
-
-  // todo this properly, will need to only clear those entries for the side provided
-  m_mapOrder.clear();
-  Clear( depth );
-
-  m_state = EState::Ready;
-}
-
 void OrderBased::LimitOrderAdd( const ou::tf::DepthByOrder& depth ) {
   m_state = EState::Add;
 
@@ -439,6 +429,31 @@ void OrderBased::LimitOrderDelete( const ou::tf::DepthByOrder& depth ) {
 
     m_mapOrder.erase( iter );
   }
+  m_state = EState::Ready;
+}
+
+void OrderBased::LimitOrderClear( const ou::tf::DepthByOrder& depth ) {
+  m_state = EState::Clear;
+
+  std::vector<uint64_t> vOrderId; // delete order ids at end of use
+
+  for ( mapOrder_t::value_type& vt: m_mapOrder ) {
+    // clear only those entries for the side provided
+    if ( depth.Side() == vt.second.chOrderSide ) {
+      m_state = EState::Delete;
+      m_idOrder = vt.first;
+      vOrderId.push_back( vt.first );
+      const Order& order( vt.second );
+      ou::tf::Depth depth_( depth.DateTime(), depth.Side(), order.dblPrice, order.nQuantity );
+      Delete(  depth_ );
+      m_state = EState::Clear;
+    }
+  }
+
+  for ( uint64_t id: vOrderId ) {
+    size_t num = m_mapOrder.erase( id );
+  }
+
   m_state = EState::Ready;
 }
 

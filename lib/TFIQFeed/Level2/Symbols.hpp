@@ -222,6 +222,7 @@ public:
   }
 
   void Clear( const ou::tf::Depth& depth ) {
+    // clear a single entry
   }
 
 protected:
@@ -231,18 +232,19 @@ protected:
 private:
   fBookChanges_t m_fBookChanges;
   fVolumeAtPrice_t m_fVolumeAtPrice;
-};
+}; // class MapLevelAggregate
 
 // ==== L2Base
+// ==== common code for MarketMaker, OrderBased
 
-class L2Base {  // TODO: convert to CRTP?
+class L2Base {  // TODO: convert to CRTP? template based upon DepthByMM/DepthByOrder?
   friend class Symbols;
 public:
 
   L2Base();
   virtual ~L2Base() {}
 
-  using fMarketDepthByMM_t = std::function<void(const DepthByMM&)>;
+  using fMarketDepthByMM_t    = std::function<void(const DepthByMM&)>;
   using fMarketDepthByOrder_t = std::function<void(const DepthByOrder&)>;
 
   void Set( fBookChanges_t&& fBid, fBookChanges_t&& fAsk ) {
@@ -262,8 +264,8 @@ public:
 
 protected:
 
-  using MapLevelAggregateAsk_t = MapLevelAggregate<std::less<double> >;
-  using MapLevelAggregateBid_t = MapLevelAggregate<std::greater<double> >;
+  using MapLevelAggregateAsk_t = MapLevelAggregate<std::less<double> >;    // top of book: lowest price
+  using MapLevelAggregateBid_t = MapLevelAggregate<std::greater<double> >; // top of book: highest price
 
   MapLevelAggregateAsk_t m_LevelAggregateAsk;
   MapLevelAggregateBid_t m_LevelAggregateBid;
