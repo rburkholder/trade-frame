@@ -276,6 +276,8 @@ void AppDoM::StartDepthByOrder() {
         case EState::Update:
           // simply a change, no interesting statistics
           break;
+        case EState::Clear:
+          break;
         case EState::Ready:
           assert( false ); // not allowed
           break;
@@ -322,6 +324,8 @@ void AppDoM::StartDepthByOrder() {
           break;
         case EState::Update:
           // simply a change, no interesting statistics
+          break;
+        case EState::Clear:
           break;
         case EState::Ready:
           assert( false ); // not allowed
@@ -487,6 +491,8 @@ void AppDoM::StartDepthByOrderWithFVS() {
         case EState::Update:
           // simply a change, no interesting statistics
           break;
+        case EState::Clear:
+          break;
         case EState::Ready:
           assert( false ); // not allowed
           break;
@@ -571,6 +577,8 @@ void AppDoM::StartDepthByOrderWithFVS() {
           break;
         case EState::Update:
           // simply a change, no interesting statistics
+          break;
+        case EState::Clear:
           break;
         case EState::Ready:
           assert( false ); // not allowed
