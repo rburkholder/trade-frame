@@ -20,6 +20,13 @@
  */
 
 #include <string>
+#include <sstream>
+
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
+#include <OUCommon/TimeSource.h>
+
+#include <TFTrading/Instrument.h>
 
 #include "Config.hpp"
 
@@ -27,12 +34,25 @@ int main( int argc, char* argv[] ) {
 
   const static std::string sConfigFileName( "collector.cfg" );
 
+  std::string sTSDataStreamStarted;
+
   config::Choices choices;
 
   if ( Load( sConfigFileName, choices ) ) {
   }
   else {
     return EXIT_FAILURE;
+  }
+
+  {
+    std::stringstream ss;
+    auto dt = ou::TimeSource::GlobalInstance().External();
+    ss
+      << ou::tf::Instrument::BuildDate( dt.date() )
+      << "-"
+      << dt.time_of_day()
+      ;
+    sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
 
   //Process process( choices, vSymbols );
