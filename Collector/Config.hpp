@@ -13,31 +13,22 @@
  ************************************************************************/
 
 /*
- * File:    Main.cpp
+ * File:    Config.hpp
  * Author:  raymond@burkholder.net
  * Project: Collector
- * Created: October 20, 2022 17:48:11
- */
+ * Created: October 20, 2022 20:37:22
+  */
+
+#pragma once
 
 #include <string>
 
-#include "Config.hpp"
+namespace config {
 
-int main( int argc, char* argv[] ) {
+struct Choices {
+  std::string m_sSymbolName;
+};
 
-  const static std::string sConfigFileName( "collector.cfg" );
+bool Load( const std::string& sFileName, Choices& );
 
-  config::Choices choices;
-
-  if ( Load( sConfigFileName, choices ) ) {
-  }
-  else {
-    return EXIT_FAILURE;
-  }
-
-  //Process process( choices, vSymbols );
-  //process.Wait();
-
-  return EXIT_SUCCESS;
-}
-
+} // namespace config
