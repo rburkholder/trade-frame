@@ -57,9 +57,9 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
   try {
 
-    po::options_description config( "phemex config" );
+    po::options_description config( "collector config" );
     config.add_options()
-      ( sChoice_SymbolName.c_str(),    po::value<std::string>( &choices.m_sSymbolName ), "symbol name" )
+      ( sChoice_SymbolName.c_str(), po::value<std::string>( &choices.m_sSymbolName ), "symbol name" )
       ;
     po::variables_map vm;
 
@@ -73,6 +73,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       po::store( po::parse_config_file( ifs, config), vm );
 
       bOk &= parse<std::string>( sFileName, vm, sChoice_SymbolName, true, choices.m_sSymbolName );
+      std::replace_if( choices.m_sSymbolName.begin(), choices.m_sSymbolName.end(), [](char ch)->bool{return '~' == ch;}, '#' );
 
     }
 
