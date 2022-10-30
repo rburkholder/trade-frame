@@ -24,15 +24,58 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
+//#include <boost/asio/post.hpp>
+#include <boost/asio/execution/context.hpp>
+//#include <boost/asio/executor_work_guard.hpp>
+
 #include <OUCommon/TimeSource.h>
 
 #include <TFTrading/Instrument.h>
 
 #include "Config.hpp"
+#include "Process.hpp"
+
+/*
+  * symbol from config file
+  * convert continuous name to specific
+  * auto start iqfeed
+  * level 1, level 2 data
+  * switch to new save date at 17:30 EST each day
+  * console based
+
+  * atomic variable[2]
+    * switching between: 0) filling, 1) writing to disk
+    * once a minute or so
+*/
+
+// ==========
+
+void clean_up() {
+}
+
+// ==========
+
+void signal_handler(
+  const boost::system::error_code& error_code,
+  int signal_number
+) {
+  if ( !error_code ) {
+  std::cout
+    << "signal(" << error_code << "): "
+    << error_code.message() << ", clean up"
+    << std::endl;
+  clean_up();
+  std::terminate(); // can this change into a conditional variable, and drop out the bottom?
+  }
+}
+
+// ==========
 
 int main( int argc, char* argv[] ) {
 
-  const static std::string sConfigFileName( "collector.cfg" );
+  const static std::string sConfigFileName( "futuresl1l2.cfg" );
+
+  boost::asio::io_context m_context;
 
   std::string sTSDataStreamStarted;
 
@@ -55,8 +98,12 @@ int main( int argc, char* argv[] ) {
     sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
 
-  //Process process( choices, vSymbols );
-  //process.Wait();
+  // https://www.boost.org/doc/libs/1_79_0/doc/html/boost_asio/reference/signal_set.html
+  boost::asio::signal_set signals( m_context, SIGINT, SIGTERM, SIGQUIT );
+  signals.async_wait( signal_handler ); // convert to method call in Process
+
+  Process process( choices );
+  process.Wait();
 
   return EXIT_SUCCESS;
 }
