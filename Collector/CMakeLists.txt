@@ -71,13 +71,13 @@ target_link_libraries(
   ${PROJECT_NAME}
 #      TFBitsNPieces
       TFTrading
-#      TFInteractiveBrokers
+      TFInteractiveBrokers
 #      TFSimulation
 #      TFVuTrading
 #      TFOptions
       TFHDF5TimeSeries
-#      OUSQL
-#      OUSqlite
+      OUSQL
+      OUSqlite
 #      OUCharting
 #      TFIndicators
       TFIQFeed
