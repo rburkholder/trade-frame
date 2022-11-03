@@ -36,9 +36,13 @@ Process::Process( const config::Choices& choices )
 }
 
 Process::~Process() {
+  m_pOptionChainQuery->Disconnect();
   m_pOptionChainQuery.reset();
+
   m_pBuildInstrumentIQFeed.reset();
   m_pInstrumentUnderlying.reset();
+
+  m_piqfeed->Disconnect();
   m_piqfeed.reset();
 }
 
@@ -93,12 +97,19 @@ void Process::ConstructUnderlying() {
         m_pOptionChainQuery->QueryFuturesChain(  // obtain a list of futures
           sBase, "", "234" /* 2022, 2023, 2024 */ , "4" /* 4 months */,
           [this,expiry]( const OptionChainQuery::FuturesList& list ){
+            m_cntInstrumentsProcessed = list.vSymbol.size();
             for ( const OptionChainQuery::vSymbol_t::value_type sSymbol: list.vSymbol ) {
               m_pBuildInstrumentIQFeed->Queue(
                 sSymbol,
                 [this,expiry]( pInstrument_t pInstrument ){
                   if ( expiry == pInstrument->GetExpiry() ) {
-                    StartWatch( pInstrument );
+                    m_pInstrumentUnderlying = pInstrument;
+                  }
+                  m_cntInstrumentsProcessed--;
+                  if ( 0 == m_cntInstrumentsProcessed ) {
+                    if ( m_pInstrumentUnderlying ) {
+                      StartWatch( m_pInstrumentUnderlying );
+                    }
                   }
                 } );
             }
@@ -111,14 +122,18 @@ void Process::ConstructUnderlying() {
     m_pBuildInstrumentIQFeed->Queue(
       sName,
       [this]( pInstrument_t pInstrument ){
-        StartWatch( pInstrument );
+        m_pInstrumentUnderlying = pInstrument;
+        StartWatch( m_pInstrumentUnderlying );
       } );
   }
 
 }
 
 void Process::StartWatch( pInstrument_t pInstrument ) {
-  std::cout << "future: " << pInstrument->GetInstrumentName() << std::endl;
+  std::cout << "future: "
+    << pInstrument->GetInstrumentName()
+    << ", " << pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF )
+    << std::endl;
   m_bDone = true;
   m_cvWait.notify_one();
 }

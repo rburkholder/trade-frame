@@ -68,6 +68,8 @@ private:
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
   pOptionChainQuery_t m_pOptionChainQuery; // need to disconnect
 
+  size_t m_cntInstrumentsProcessed;
+
   void StartIQFeed();
   void HandleIQFeedConnected( int );
   void StartChainQuery();
