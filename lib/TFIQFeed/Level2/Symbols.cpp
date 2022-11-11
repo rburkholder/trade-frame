@@ -425,7 +425,7 @@ void OrderBased::LimitOrderDelete( const ou::tf::DepthByOrder& depth ) {
     m_idOrder = depth.OrderID();
     const Order& order( iter->second );
     ou::tf::Depth depth_( depth.DateTime(), depth.Side(), order.dblPrice, order.nQuantity );
-    Delete(  depth_ );
+    Delete( depth_ );
 
     m_mapOrder.erase( iter );
   }
@@ -442,10 +442,10 @@ void OrderBased::LimitOrderClear( const ou::tf::DepthByOrder& depth ) {
     if ( depth.Side() == vt.second.chOrderSide ) {
       m_state = EState::Delete;
       m_idOrder = vt.first;
-      vOrderId.push_back( vt.first );
       const Order& order( vt.second );
       ou::tf::Depth depth_( depth.DateTime(), depth.Side(), order.dblPrice, order.nQuantity );
-      Delete(  depth_ );
+      Delete( depth_ );
+      vOrderId.push_back( vt.first );
       m_state = EState::Clear;
     }
   }
