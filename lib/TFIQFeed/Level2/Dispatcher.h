@@ -292,7 +292,7 @@ void Dispatcher<T>::OnNetworkLineBuffer( l2_linebuffer_t* pBuffer ) {
               if ( &Dispatcher<T>::OnMBOClear != &T::OnMBOClear ) {
                 namespace OrderClear = ou::tf::iqfeed::l2::msg::OrderClear;
                 assert( 2 == status.vString.size() );
-                assert( 1 == status.vString[0].size() );
+                assert( 1 == status.vString[1].size() );
                 OrderClear::decoded msg( status.vString[0], status.vString[1][0] );
                 static_cast<T*>( this )->OnMBOClear( msg );
               }
