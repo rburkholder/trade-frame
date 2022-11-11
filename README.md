@@ -78,6 +78,7 @@ cmake ..
 # us--e parallel to use more cpu cores
 cmake --build . --parallel 4 --config Debug
 # cmake --build . --parallel 4 --config Release   # alternate build flavour
+# cmake --build . --target clean  # clean for rebuild
 
 ```
 
