@@ -26,6 +26,8 @@
 #include <thread>
 
 #include <TFIQFeed/Provider.h>
+
+#include <TFTrading/Watch.h>
 #include <TFTrading/Instrument.h>
 
 #include "Config.hpp"
@@ -42,7 +44,7 @@ namespace iqfeed {
 class Process {
 public:
 
-  Process( const config::Choices& );
+  Process( const config::Choices&, const std::string& sTimeStamp );
   ~Process();
 
   void Abort();
@@ -51,14 +53,13 @@ public:
 protected:
 private:
 
+  const std::string& m_sTimeStamp;
+
   bool m_bDone; // required for the nature of the condition variable
   std::mutex m_mutexWait;
   std::condition_variable m_cvWait;
 
   const config::Choices& m_choices;
-
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-  pInstrument_t m_pInstrumentUnderlying;
 
   using pIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
   pIQFeed_t m_piqfeed;
@@ -69,6 +70,12 @@ private:
   pOptionChainQuery_t m_pOptionChainQuery; // need to disconnect
 
   size_t m_cntInstrumentsProcessed;
+
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  pInstrument_t m_pInstrumentUnderlying;
+
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  pWatch_t m_pWatchUnderlying;
 
   void StartIQFeed();
   void HandleIQFeedConnected( int );

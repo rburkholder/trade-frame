@@ -19,18 +19,22 @@
  * Created: October 20, 2022 21:07:40
  */
 
-// convert/lookup name
 // start watch on l1, l2
 // write on regular intervals
 
 #include <TFTrading/BuildInstrument.h>
 
 #include <TFIQFeed/OptionChainQuery.h>
+#include <TFTrading/Watch.h>
 
 #include "Process.hpp"
 
-Process::Process( const config::Choices& choices )
-: m_choices( choices ), m_bDone( false )
+namespace {
+  static const std::string sSaveValuesRoot( "/app/collector" );
+}
+
+Process::Process( const config::Choices& choices, const std::string& sTimeStamp )
+: m_choices( choices ), m_sTimeStamp( sTimeStamp ), m_bDone( false )
 {
   StartIQFeed();
 }
@@ -134,11 +138,18 @@ void Process::StartWatch( pInstrument_t pInstrument ) {
     << pInstrument->GetInstrumentName()
     << ", " << pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF )
     << std::endl;
-  m_bDone = true;
-  m_cvWait.notify_one();
+
+  m_pWatchUnderlying = std::make_shared<ou::tf::Watch>( m_pInstrumentUnderlying, m_piqfeed );
+  m_pWatchUnderlying->StartWatch();
+
+  //m_bDone = true;
+  //m_cvWait.notify_one();
 }
 
 void Process::Abort() {
+  std::cout << "handling abort" << std::endl;
+  m_bDone = true;
+  m_cvWait.notify_one();
 }
 
 void Process::Wait() {
@@ -146,4 +157,10 @@ void Process::Wait() {
   m_cvWait.wait( lock, [this]{
     return m_bDone;
     } );
+
+  if ( m_pWatchUnderlying ) {
+    const std::string sPathName = sSaveValuesRoot + "/" + m_sTimeStamp;
+    m_pWatchUnderlying->StopWatch();
+    m_pWatchUnderlying->SaveSeries( sPathName );
+  }
 }

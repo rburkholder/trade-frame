@@ -74,6 +74,7 @@ void signal_handler(
 int main( int argc, char* argv[] ) {
 
   const static std::string sConfigFileName( "futuresl1l2.cfg" );
+  static const std::string sSaveValuesRoot( "/app/collector" );
 
   boost::asio::io_context m_context;
 
@@ -102,8 +103,11 @@ int main( int argc, char* argv[] ) {
   boost::asio::signal_set signals( m_context, SIGINT, SIGTERM, SIGQUIT );
   signals.async_wait( signal_handler ); // convert to method call in Process
 
-  Process process( choices );
+  Process process( choices, sTSDataStreamStarted );
   process.Wait();
+
+  //signals.clear();
+  //signals.cancel();
 
   return EXIT_SUCCESS;
 }
