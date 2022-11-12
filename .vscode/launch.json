@@ -31,7 +31,6 @@
       "miDebuggerPath": "/usr/bin/gdb"
     },
 
-
     {
       "name": "(gdb) Phemex",
       "type": "cppdbg",
