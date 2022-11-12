@@ -25,6 +25,7 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 //#include <boost/asio/post.hpp>
+#include <boost/asio/signal_set.hpp>
 #include <boost/asio/execution/context.hpp>
 //#include <boost/asio/executor_work_guard.hpp>
 
@@ -59,13 +60,19 @@ void signal_handler(
   const boost::system::error_code& error_code,
   int signal_number
 ) {
-  if ( !error_code ) {
+
   std::cout
-    << "signal(" << error_code << "): "
+    << "signal"
+    << "(" << error_code.category().name()
+    << "," << error_code.value()
+    << "," << signal_number
+    << "): "
     << error_code.message() << ", clean up"
     << std::endl;
-  clean_up();
-  std::terminate(); // can this change into a conditional variable, and drop out the bottom?
+
+  if ( !error_code ) {
+    clean_up();
+    std::terminate(); // can this change into a conditional variable, and drop out the bottom?
   }
 }
 
@@ -74,9 +81,10 @@ void signal_handler(
 int main( int argc, char* argv[] ) {
 
   const static std::string sConfigFileName( "futuresl1l2.cfg" );
-  static const std::string sSaveValuesRoot( "/app/collector" );
 
   boost::asio::io_context m_context;
+  std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> > m_pWork
+    = std::make_unique<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> >( boost::asio::make_work_guard( m_context) );
 
   std::string sTSDataStreamStarted;
 
@@ -100,11 +108,18 @@ int main( int argc, char* argv[] ) {
   }
 
   // https://www.boost.org/doc/libs/1_79_0/doc/html/boost_asio/reference/signal_set.html
-  boost::asio::signal_set signals( m_context, SIGINT, SIGTERM, SIGQUIT );
+  boost::asio::signal_set signals( m_context, SIGINT ); // SIGINT is called
+  //signals.add( SIGKILL ); // not allowed here
+  signals.add( SIGHUP ); // use this as a day change?
+  //signals.add( SIGTERM );
+  //signals.add( SIGQUIT );
+  //signals.add( SIGABRT );
   signals.async_wait( signal_handler ); // convert to method call in Process
 
   Process process( choices, sTSDataStreamStarted );
-  process.Wait();
+  //boost::asio::post( m_context, [&process](){ process.Wait(); } );
+
+  m_context.run();
 
   //signals.clear();
   //signals.cancel();
