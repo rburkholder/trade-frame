@@ -33,13 +33,25 @@ namespace {
   static const std::string sSaveValuesRoot( "/app/collector" );
 }
 
-Process::Process( const config::Choices& choices, const std::string& sTimeStamp )
-: m_choices( choices ), m_sTimeStamp( sTimeStamp ), m_bDone( false )
+Process::Process(
+  const config::Choices& choices
+, const std::string& sTimeStamp
+)
+: m_choices( choices )
+, m_sTimeStamp( sTimeStamp )
 {
   StartIQFeed();
 }
 
 Process::~Process() {
+
+  if ( m_pWatchUnderlying ) {
+    m_pWatchUnderlying->StopWatch();
+    m_pWatchUnderlying.reset();
+  }
+
+  m_pInstrumentUnderlying.reset();
+
   m_pOptionChainQuery->Disconnect();
   m_pOptionChainQuery.reset();
 
@@ -112,7 +124,7 @@ void Process::ConstructUnderlying() {
                   m_cntInstrumentsProcessed--;
                   if ( 0 == m_cntInstrumentsProcessed ) {
                     if ( m_pInstrumentUnderlying ) {
-                      StartWatch( m_pInstrumentUnderlying );
+                      StartWatch();
                     }
                   }
                 } );
@@ -127,40 +139,38 @@ void Process::ConstructUnderlying() {
       sName,
       [this]( pInstrument_t pInstrument ){
         m_pInstrumentUnderlying = pInstrument;
-        StartWatch( m_pInstrumentUnderlying );
+        StartWatch();
       } );
   }
 
 }
 
-void Process::StartWatch( pInstrument_t pInstrument ) {
+void Process::StartWatch() {
+// TODO: watch built elsewhere, needs to be restartable for a new day?
+//       or, delete and rebuild for a new day?
+//             this, so that can handle when new front month started
+
+  assert( m_pInstrumentUnderlying );
+
   std::cout << "future: "
-    << pInstrument->GetInstrumentName()
-    << ", " << pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF )
+    << m_pInstrumentUnderlying->GetInstrumentName()
+    << ", " << m_pInstrumentUnderlying->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF )
     << std::endl;
 
   m_pWatchUnderlying = std::make_shared<ou::tf::Watch>( m_pInstrumentUnderlying, m_piqfeed );
   m_pWatchUnderlying->StartWatch();
 
-  //m_bDone = true;
-  //m_cvWait.notify_one();
 }
 
-void Process::Abort() {
-  std::cout << "handling abort" << std::endl;
-  m_bDone = true;
-  m_cvWait.notify_one();
+void Process::StopWatch() {
+  const std::string sPathName = sSaveValuesRoot + "/" + m_sTimeStamp;
+  m_pWatchUnderlying->StopWatch();
+  m_pWatchUnderlying->SaveSeries( sPathName );
 }
 
-void Process::Wait() {
-  std::unique_lock<std::mutex> lock( m_mutexWait );
-  m_cvWait.wait( lock, [this]{
-    return m_bDone;
-    } );
-
+void Process::Finish() {
   if ( m_pWatchUnderlying ) {
-    const std::string sPathName = sSaveValuesRoot + "/" + m_sTimeStamp;
-    m_pWatchUnderlying->StopWatch();
-    m_pWatchUnderlying->SaveSeries( sPathName );
+    StopWatch();
+    m_pWatchUnderlying.reset();
   }
 }

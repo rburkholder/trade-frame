@@ -23,8 +23,6 @@
 
 #pragma once
 
-#include <thread>
-
 #include <TFIQFeed/Provider.h>
 
 #include <TFTrading/Watch.h>
@@ -44,20 +42,18 @@ namespace iqfeed {
 class Process {
 public:
 
-  Process( const config::Choices&, const std::string& sTimeStamp );
+  Process(
+    const config::Choices&
+  , const std::string& sTimeStamp
+  );
   ~Process();
 
-  void Abort();
-  void Wait();
+  void Finish();
 
 protected:
 private:
 
   const std::string& m_sTimeStamp;
-
-  bool m_bDone; // required for the nature of the condition variable
-  std::mutex m_mutexWait;
-  std::condition_variable m_cvWait;
 
   const config::Choices& m_choices;
 
@@ -82,5 +78,6 @@ private:
   void StartChainQuery();
   void HandleChainQueryConnected( int );
   void ConstructUnderlying();
-  void StartWatch( pInstrument_t );
+  void StartWatch();
+  void StopWatch();
 };

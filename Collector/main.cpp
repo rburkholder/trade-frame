@@ -27,7 +27,7 @@
 //#include <boost/asio/post.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/execution/context.hpp>
-//#include <boost/asio/executor_work_guard.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 
 #include <OUCommon/TimeSource.h>
 
@@ -51,11 +51,6 @@
 
 // ==========
 
-void clean_up() {
-}
-
-// ==========
-
 void signal_handler(
   const boost::system::error_code& error_code,
   int signal_number
@@ -71,8 +66,7 @@ void signal_handler(
     << std::endl;
 
   if ( !error_code ) {
-    clean_up();
-    std::terminate(); // can this change into a conditional variable, and drop out the bottom?
+    //std::terminate(); // for testing only
   }
 }
 
@@ -114,15 +108,22 @@ int main( int argc, char* argv[] ) {
   //signals.add( SIGTERM );
   //signals.add( SIGQUIT );
   //signals.add( SIGABRT );
-  signals.async_wait( signal_handler ); // convert to method call in Process
 
   Process process( choices, sTSDataStreamStarted );
-  //boost::asio::post( m_context, [&process](){ process.Wait(); } );
+
+  signals.async_wait(
+    [&process,&m_pWork](const boost::system::error_code& error_code, int signal_number){
+      if ( SIGINT == signal_number) {
+        process.Finish();
+        m_pWork->reset();
+      }
+      signal_handler( error_code, signal_number );
+    } );
 
   m_context.run();
 
-  //signals.clear();
-  //signals.cancel();
+  signals.clear();
+  signals.cancel();
 
   return EXIT_SUCCESS;
 }
