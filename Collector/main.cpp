@@ -105,17 +105,19 @@ int main( int argc, char* argv[] ) {
   boost::asio::signal_set signals( m_context, SIGINT ); // SIGINT is called
   //signals.add( SIGKILL ); // not allowed here
   signals.add( SIGHUP ); // use this as a day change?
+  //signals.add( SIGINFO ); // control T - doesn't exist on linux
   //signals.add( SIGTERM );
   //signals.add( SIGQUIT );
   //signals.add( SIGABRT );
 
+  // unique ptr?  for daily start/stop?
   Process process( choices, sTSDataStreamStarted );
 
   signals.async_wait(
     [&process,&m_pWork](const boost::system::error_code& error_code, int signal_number){
       if ( SIGINT == signal_number) {
-        process.Finish();
         m_pWork->reset();
+        process.Finish();
       }
       signal_handler( error_code, signal_number );
     } );

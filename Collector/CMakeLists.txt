@@ -80,6 +80,7 @@ target_link_libraries(
       OUSqlite
 #      OUCharting
 #      TFIndicators
+      TFIQFeedLevel2
       TFIQFeed
       TFTimeSeries
       TFTrading

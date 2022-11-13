@@ -25,6 +25,8 @@
 
 #include <TFIQFeed/Provider.h>
 
+#include <TFIQFeed/Level2/Symbols.hpp>
+
 #include <TFTrading/Watch.h>
 #include <TFTrading/Instrument.h>
 
@@ -72,6 +74,10 @@ private:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
   pWatch_t m_pWatchUnderlying;
+
+  ou::tf::DepthsByOrder m_depths_byorder; // time series for persistence
+  ou::tf::iqfeed::l2::OrderBased m_OrderBased; // direct access
+  std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
 
   void StartIQFeed();
   void HandleIQFeedConnected( int );

@@ -22,6 +22,11 @@
 // start watch on l1, l2
 // write on regular intervals
 
+#include <TFHDF5TimeSeries/HDF5DataManager.h>
+#include <TFHDF5TimeSeries/HDF5WriteTimeSeries.h>
+//#include <TFHDF5TimeSeries/HDF5IterateGroups.h>
+#include <TFHDF5TimeSeries/HDF5Attribute.h>
+
 #include <TFTrading/BuildInstrument.h>
 
 #include <TFIQFeed/OptionChainQuery.h>
@@ -44,6 +49,10 @@ Process::Process(
 }
 
 Process::~Process() {
+
+  if ( m_pDispatch ) {
+    m_pDispatch->Disconnect();
+  }
 
   if ( m_pWatchUnderlying ) {
     m_pWatchUnderlying->StopWatch();
@@ -151,21 +160,62 @@ void Process::StartWatch() {
 //             this, so that can handle when new front month started
 
   assert( m_pInstrumentUnderlying );
+  const std::string& sIQFeedSymbolName( m_pInstrumentUnderlying->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
 
   std::cout << "future: "
     << m_pInstrumentUnderlying->GetInstrumentName()
-    << ", " << m_pInstrumentUnderlying->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF )
+    << ", " << sIQFeedSymbolName
     << std::endl;
 
   m_pWatchUnderlying = std::make_shared<ou::tf::Watch>( m_pInstrumentUnderlying, m_piqfeed );
-  m_pWatchUnderlying->StartWatch();
 
+  assert( !m_pDispatch );  // trigger on re-entry, need to fix
+  m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
+    [ this, sIQFeedSymbolName ](){
+      m_pDispatch->Single( true );
+      m_pDispatch->WatchAdd(
+        sIQFeedSymbolName,
+        [this]( const ou::tf::DepthByOrder& depth ){
+          m_depths_byorder.Append( depth );
+        }
+      );
+    }
+  );
+
+  m_pWatchUnderlying->StartWatch();
+  m_pDispatch->Connect();
 }
 
 void Process::StopWatch() {
+
   const std::string sPathName = sSaveValuesRoot + "/" + m_sTimeStamp;
+  const std::string& sIQFeedSymbolName( m_pInstrumentUnderlying->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+
+  std::cout << "  Saving collected values ... " << std::endl;
+
+  if ( m_pDispatch ) {
+    m_pDispatch->WatchDel( sIQFeedSymbolName );
+      // TODO: need to get the watch in pWatch_t operational
+      if ( 0 != m_depths_byorder.Size() ) {
+        ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
+        const std::string sPathNameDepth
+          = sPathName + ou::tf::DepthsByOrder::Directory()
+          + m_pInstrumentUnderlying->GetInstrumentName();
+        ou::tf::HDF5WriteTimeSeries<ou::tf::DepthsByOrder> wtsDepths( dm, true, true, 5, 256 );
+        wtsDepths.Write( sPathNameDepth, &m_depths_byorder );
+        ou::tf::HDF5Attributes attrDepths( dm, sPathNameDepth );
+        attrDepths.SetSignature( ou::tf::DepthByOrder::Signature() );
+        //attrDepths.SetMultiplier( m_pInstrument->GetMultiplier() );
+        //attrDepths.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
+        attrDepths.SetProviderType( m_pWatchUnderlying->GetProvider()->ID() );
+      }
+  }
+
   m_pWatchUnderlying->StopWatch();
   m_pWatchUnderlying->SaveSeries( sPathName );
+
+  std::cout << "  ... Done " << std::endl;
+
 }
 
 void Process::Finish() {
