@@ -26,7 +26,7 @@
 // add the following command line parameters:
 //   --docroot=web;/favicon.ico,/resources,/style,/image --http-address=0.0.0.0 --http-port=8082 --config=etc/wt_config.xml
 
-// http://www.webtoolkit.eu/wt/doc/reference/html/InstallationUnix.html
+// https://www.webtoolkit.eu/wt/doc/reference/html/InstallationUnix.html
 // https://www.webtoolkit.eu/wt/doc/reference/html/overview.html
 
 // cp -r ../libs-build/wt/resources web/
