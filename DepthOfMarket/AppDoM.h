@@ -249,7 +249,8 @@ private:
     void HandleOnOrderExecution( const std::pair<const ou::tf::Order&, const ou::tf::Execution&>& pair ) {
       std::cout << "Execution order#" << pair.first.GetOrderId() << " of " << pair.second.GetSize() << std::endl;
     }
-  };
+
+  }; // PriceLevelOrder
 
   using mapOrders_t = std::map<double,PriceLevelOrder>;
   // note only one side can have orders at any moment in time

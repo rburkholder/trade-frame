@@ -135,7 +135,6 @@ namespace msg { // message
 namespace OrderArrival {
 
   namespace qi = boost::spirit::qi;
-  namespace ascii = boost::spirit::ascii;
 
   template<typename Iterator>
   struct parser_decoded: qi::grammar<Iterator, decoded()> {

@@ -321,9 +321,9 @@ void OrderBased::OnMBOUpdate( const msg::OrderArrival::decoded& msg ) {
 
  if ( nullptr == m_fMarketDepthByOrder ) {
     LimitOrderUpdate( depth );
-  }
-  else {
-    m_fMarketDepthByOrder( depth );
+ }
+ else {
+   m_fMarketDepthByOrder( depth );
   }
 }
 
