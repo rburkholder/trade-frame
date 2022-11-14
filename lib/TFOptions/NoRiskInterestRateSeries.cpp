@@ -143,10 +143,10 @@ LiborFromIQFeed::LiborFromIQFeed(): NoRiskInterestRateSeries() {
   // also based upon that chart, the values here do correspond to USD libor
   vLibor +=
     structSymbol( time_duration( hours(   0 * 24 ) ),  "ONLIB.X" ), // overnight
-    structSymbol( time_duration( hours(   7 * 24 ) ),  "1WLIB.X" ), //  1 week
+    //structSymbol( time_duration( hours(   7 * 24 ) ),  "1WLIB.X" ), //  1 week - no longer present
     //structSymbol( time_duration( hours(  14 * 24 ) ),  "2WLIB.X" ), //  2 week
     structSymbol( time_duration( hours(  30 * 24 ) ),  "1MLIB.X" ), //  1 month
-    structSymbol( time_duration( hours(  60 * 24 ) ),  "2MLIB.X" ), //  2 month
+    //structSymbol( time_duration( hours(  60 * 24 ) ),  "2MLIB.X" ), //  2 month - no longer present
     structSymbol( time_duration( hours(  90 * 24 ) ),  "3MLIB.X" ), //  3 month
     //structSymbol( time_duration( hours( 120 * 24 ) ),  "4MLIB.X" ), //  4 month
     //structSymbol( time_duration( hours( 150 * 24 ) ),  "5MLIB.X" ), //  5 month
