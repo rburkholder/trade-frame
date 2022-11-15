@@ -34,10 +34,7 @@
 
 namespace ou {
 namespace tf {
-  class BuildInstrument;
-namespace iqfeed {
-  class OptionChainQuery;
-} // namespace iqfeed
+  class ComposeInstrument;
 } // namespace tf
 } // namespace ou
 
@@ -62,18 +59,15 @@ private:
   using pIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
   pIQFeed_t m_piqfeed;
 
-  std::shared_ptr<ou::tf::BuildInstrument> m_pBuildInstrumentIQFeed;
-
-  using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
-  pOptionChainQuery_t m_pOptionChainQuery; // need to disconnect
+  std::unique_ptr<ou::tf::ComposeInstrument> m_pComposeInstrumentIQFeed;
 
   size_t m_cntInstrumentsProcessed;
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-  pInstrument_t m_pInstrumentUnderlying;
+  pInstrument_t m_pInstrument;
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
-  pWatch_t m_pWatchUnderlying;
+  pWatch_t m_pWatch;
 
   ou::tf::DepthsByOrder m_depths_byorder; // time series for persistence
   ou::tf::iqfeed::l2::OrderBased m_OrderBased; // direct access
@@ -81,8 +75,6 @@ private:
 
   void StartIQFeed();
   void HandleIQFeedConnected( int );
-  void StartChainQuery();
-  void HandleChainQueryConnected( int );
   void ConstructUnderlying();
   void StartWatch();
   void StopWatch();
