@@ -15,23 +15,26 @@
 /*
  * File:    BuildInstrument.h
  * Author:  raymond@burkholder.net
- * Project: BasketTrading
- * Created on Sept 20, 2021, 21:52
+ * Project: TFTrading
+ * Created: Sept 20, 2021, 21:52
  */
+
+#pragma once
 
 #include <set>
 #include <map>
 #include <functional>
 
 #include <TFIQFeed/Provider.h>
+
 #include <TFInteractiveBrokers/IBTWS.h>
 
 #include "AcquireFundamentals.h"
 
-#pragma once
-
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+
+// can be run as shared_ptr, queues are thread safe
 
 class BuildInstrument {
 public:
@@ -39,16 +42,17 @@ public:
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
   using fInstrument_t = std::function<void(pInstrument_t)>;
-  using fDone_t = std::function<void()>;
 
   using pProviderIBTWS_t = ou::tf::ib::TWS::pProvider_t;
   using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
 
-  BuildInstrument( pProviderIQFeed_t, pProviderIBTWS_t );
   BuildInstrument( pProviderIQFeed_t );
+  BuildInstrument( pProviderIQFeed_t, pProviderIBTWS_t );
 
   void Queue( const std::string& sIQFeedSymbol, fInstrument_t&& );
   void Clear();
+
+  bool Active();
 
 protected:
 private:

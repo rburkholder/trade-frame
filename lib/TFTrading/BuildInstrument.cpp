@@ -15,16 +15,16 @@
 /*
  * File:    BuildInstrument.cpp
  * Author:  raymond@burkholder.net
- * Project: BasketTrading
- * Created on Sept 20, 2021, 21:52
+ * Project: TFTrading
+ * Created: Sept 20, 2021, 21:52
  */
 
 #include <boost/log/trivial.hpp>
 
+#include <TFIQFeed/BuildInstrument.h>
+
 #include <TFTrading/Watch.h>
 #include <TFTrading/InstrumentManager.h>
-
-#include <TFIQFeed/BuildInstrument.h>
 
 #include "BuildInstrument.h"
 
@@ -33,19 +33,22 @@ namespace tf { // TradeFrame
 
 using pWatch_t = Watch::pWatch_t;
 
-BuildInstrument::BuildInstrument( pProviderIQFeed_t pIQFeed, pProviderIBTWS_t pIB )
-: m_pIQ( std::move( pIQFeed ) ), m_pIB( std::move( pIB ) )
-, m_bDeleteIterator( false )
-{
-  assert( m_pIQ );
-  assert( m_pIB );
-}
-
+// basic instrument
 BuildInstrument::BuildInstrument( pProviderIQFeed_t pIQFeed )
 : m_pIQ( std::move( pIQFeed ) )
 , m_bDeleteIterator( false )
 {
   assert( m_pIQ );
+}
+
+// instrument with contract
+BuildInstrument::BuildInstrument( pProviderIQFeed_t pIQFeed, pProviderIBTWS_t pIB )
+: m_pIQ( std::move( pIQFeed ) )
+, m_pIB( std::move( pIB ) )
+, m_bDeleteIterator( false )
+{
+  assert( m_pIQ );
+  assert( m_pIB );
 }
 
 void BuildInstrument::Queue( const std::string& sIQFeedSymbol, fInstrument_t&& fInstrument ) {
@@ -118,7 +121,6 @@ void BuildInstrument::Update() {
 
         //BOOST_LOG_TRIVIAL(debug) << "BuildInstrument::Update erase " << iterSymbol->first;
         m_mapSymbol.erase( iterSymbol );
-
       }
     }
   }
@@ -237,6 +239,10 @@ void BuildInstrument::Clear() {
   std::lock_guard<std::mutex> lock( m_mutexMap );
   assert( 0 == m_mapInProgress.size() );
   m_mapSymbol.clear();
+}
+
+bool BuildInstrument::Active() {
+  return !( m_mapSymbol.empty() && m_mapInProgress.empty() );
 }
 
 } // namespace tf
