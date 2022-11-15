@@ -267,17 +267,17 @@ void TWS::Disconnect() {
 
 void TWS::DisconnectCommon( bool bSignalEnd ){
 
-    OnDisconnecting( 0 );
-    m_bConnected = false;
+  OnDisconnecting( 0 );
+  m_bConnected = false;
 
-    if ( bSignalEnd ) {
-      m_pTWS->eDisconnect();
-      m_thrdIBMessages.join();  // wait for message processing to exit
-    }
+  if ( bSignalEnd ) {
+    m_pTWS->eDisconnect();
+    m_thrdIBMessages.join();  // wait for message processing to exit
+  }
 
-    OnDisconnected( 0 );
-    m_ss.str("");
-    m_ss << "IB Disconnected " << std::endl;
+  OnDisconnected( 0 );
+  m_ss.str("");
+  m_ss << "IB Disconnected " << std::endl;
 
 }
 
@@ -315,7 +315,7 @@ void TWS::RequestContractDetails(
     contract.tradingClass = sSymbolBaseName;
     if ( "COMEX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC options, IQFeed supplied
     if ( "COMEX_GBX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC options, IQFeed supplied
-    if ( "CME" == pInstrument->GetExchangeName() ) contract.exchange = "GLOBEX";   // ES options, IQFeed supplied
+    //if ( "CME" == pInstrument->GetExchangeName() ) contract.exchange = "GLOBEX";   // ES options, IQFeed supplied
     break;
   case InstrumentType::FuturesOption:
     ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth(), pInstrument->GetExpiryDay() );
@@ -324,7 +324,7 @@ void TWS::RequestContractDetails(
     contract.right = pInstrument->GetOptionSide();
     if ( "COMEX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC, IQFeed supplied
     if ( "COMEX_GBX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC, IQFeed supplied
-    if ( "CME" == pInstrument->GetExchangeName() ) contract.exchange = "GLOBEX";   // ES?, IQFeed supplied
+    //if ( "CME" == pInstrument->GetExchangeName() ) contract.exchange = "GLOBEX";   // ES?, IQFeed supplied
     break;
   }
   RequestContractDetails( contract, std::move( fProcess ), std::move( fDone ), pInstrument );
