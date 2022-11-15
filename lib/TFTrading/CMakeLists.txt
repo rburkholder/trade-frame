@@ -20,6 +20,7 @@ set(
     CashAccount.h
     CashManager.h
     CashTransaction.h
+    ComposeInstrument.hpp
     Currency.h
     DailyTradeTimeFrames.h
     Database.h
@@ -65,6 +66,7 @@ set(
     CashAccount.cpp
     CashManager.cpp
     CashTransaction.cpp
+    ComposeInstrument.cpp
     Currency.cpp
     DailyTradeTimeFrames.cpp
     Database.cpp

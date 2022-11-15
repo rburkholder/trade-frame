@@ -56,6 +56,7 @@ namespace tf {
   class PanelLogging;
   class FrameControls;
   class BuildInstrument;
+  class ComposeInstrument;
   class PanelOrderButtons;
 namespace iqfeed {
   class OptionChainQuery;
@@ -100,7 +101,7 @@ private:
   wxSplitterWindow* m_splitterRow;
 
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
-  std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrumentIQFeed;
+  std::unique_ptr<ou::tf::ComposeInstrument> m_pComposeInstrument;
 
   std::unique_ptr<ou::tf::db> m_pdb;
 

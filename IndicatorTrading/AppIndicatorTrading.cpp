@@ -31,6 +31,7 @@
 #include <TFTrading/Watch.h>
 #include <TFTrading/Position.h>
 #include <TFTrading/BuildInstrument.h>
+#include <TFTrading/ComposeInstrument.hpp>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
@@ -65,6 +66,7 @@ bool AppIndicatorTrading::OnInit() {
   wxApp::SetVendorDisplayName( "(c)2022 " + sVendorName );
 
   wxApp::OnInit();
+
 
   if ( Load( sConfigFilename, m_config ) ) {
   }
@@ -246,44 +248,17 @@ void AppIndicatorTrading::StartChainQuery() {
 void AppIndicatorTrading::ConstructUnderlying() {
 
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
-
-  if ( '#' == m_config.sSymbol.back() ) { // assumes a general future, and need to find actual symbol
-    m_pBuildInstrumentIQFeed = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed );
-    m_pBuildInstrumentIQFeed->Queue(
-      m_config.sSymbol,
-      [this]( pInstrument_t pInstrument ){
-
-        // determine the specific future which matches the continuous generic contract
-        boost::gregorian::date expiry( pInstrument->GetExpiry() );
-        using OptionChainQuery = ou::tf::iqfeed::OptionChainQuery;
-        std::string sBase( m_config.sSymbol.substr( 0, m_config.sSymbol.size() - 1 ) );
-        m_pOptionChainQuery->QueryFuturesChain(  // obtain a list of futures
-          sBase, "", "234" /* 2022, 2023, 2024 */ , "4" /* 4 months */,
-          [this,expiry]( const OptionChainQuery::FuturesList& list ){
-
-            for ( const OptionChainQuery::vSymbol_t::value_type sSymbol: list.vSymbol ) {
-              m_pBuildInstrument->Queue(
-                sSymbol,
-                [this,expiry]( pInstrument_t pInstrument ){
-
-                  std::cout << "future: " << pInstrument->GetInstrumentName() << std::endl;
-                  if ( expiry == pInstrument->GetExpiry() ) {
-                    InitializeUnderlying( pInstrument );
-                  }
-                } );
-            }
-          }
-          );
-      }
-    );
-  }
-  else {
-    m_pBuildInstrument->Queue(
-      m_config.sSymbol,
-      [this]( pInstrument_t pInstrument ){
-        InitializeUnderlying( pInstrument );
-      } );
-  }
+  m_pComposeInstrument = std::make_unique<ou::tf::ComposeInstrument>(
+    m_iqfeed, m_tws,
+    [this](){
+      m_pComposeInstrument->Compose(
+        m_config.sSymbol,
+        [this]( pInstrument_t pInstrument ){
+          InitializeUnderlying( pInstrument );
+        }
+      );
+    }
+  );
 }
 
 void AppIndicatorTrading::InitializeUnderlying( pInstrument_t pInstrument ) {
@@ -512,6 +487,9 @@ void AppIndicatorTrading::LoadDailyHistory( pPosition_t pPosition ) {
 }
 
 int AppIndicatorTrading::OnExit() {
+  m_pBuildInstrument.reset();
+  m_pComposeInstrument.reset();
+
   // Exit Steps: #4
 //  DelinkFromPanelProviderControl();  generates stack errors
 
