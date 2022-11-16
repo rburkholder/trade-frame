@@ -60,7 +60,7 @@ TreeItem::TreeItem( wxTreeCtrl* tree, const std::string& sText )
   m_idSelf = m_pTreeCtrl->AddRoot( sText, -1, -1, new CustomItemData( this ) );
 }
 
-TreeItem::TreeItem( wxTreeCtrl* tree, wxTreeItemId idParent, const std::string& sText )
+TreeItem::TreeItem( wxTreeCtrl* tree, wxTreeItemId idParent, const std::string& sText ) // private constructor
 : m_pTreeCtrl( tree ), m_idParent( idParent )
 {
   assert( nullptr != tree );
@@ -69,10 +69,10 @@ TreeItem::TreeItem( wxTreeCtrl* tree, wxTreeItemId idParent, const std::string& 
 }
 
 TreeItem::~TreeItem() {
-    if ( m_pMenuPopup ) {
-      delete m_pMenuPopup;
-      m_pMenuPopup = nullptr;
-    }
+  if ( m_pMenuPopup ) {
+    delete m_pMenuPopup;
+    m_pMenuPopup = nullptr;
+  }
   //std::cout << m_idSelf << std::endl;
 }
 
