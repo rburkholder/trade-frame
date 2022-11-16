@@ -850,12 +850,14 @@ void InteractiveChart::UnBindEvents() {
   Unbind( wxEVT_CHAR, &InteractiveChart::OnChar, this );
 }
 
-void InteractiveChart::OnDestroy( wxWindowDestroyEvent& event ) {
-  SetChartDataView( nullptr );
-  m_pStrategy.reset();
+void InteractiveChart::ReleaseResources() {
   Disconnect();
-  m_bfPrice.SetOnBarComplete( nullptr );
+  SetChartDataView( nullptr );
   m_mapLifeCycle_Trade.clear();
+  m_pStrategy.reset();
+}
+
+void InteractiveChart::OnDestroy( wxWindowDestroyEvent& event ) {
   UnBindEvents();
   event.Skip();  // auto followed by Destroy();
 }

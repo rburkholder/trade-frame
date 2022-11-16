@@ -487,6 +487,7 @@ void AppIndicatorTrading::LoadDailyHistory( pPosition_t pPosition ) {
 }
 
 int AppIndicatorTrading::OnExit() {
+  m_pInteractiveChart->ReleaseResources();
   m_pBuildInstrument.reset();
   m_pComposeInstrument.reset();
 

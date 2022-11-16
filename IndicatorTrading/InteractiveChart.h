@@ -184,6 +184,8 @@ public:
   void EmitStatus();
   void FeatureSetDump();
 
+  void ReleaseResources(); // mostly release related to ou::tf::PanelOrderButtons_Order
+
   void Connect();
   void Disconnect();
 
