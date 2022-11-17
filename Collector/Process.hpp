@@ -23,6 +23,9 @@
 
 #pragma once
 
+#include <array>
+#include <atomic>
+
 #include <TFIQFeed/Provider.h>
 
 #include <TFIQFeed/Level2/Symbols.hpp>
@@ -47,12 +50,15 @@ public:
   );
   ~Process();
 
-  void Finish();
+  void Write(); // incremental write of l2
+  void Finish(); // stop and write l1 + remainder of l2
 
 protected:
 private:
 
-  const std::string& m_sTimeStamp;
+  const std::string m_sPathName;
+  std::string m_sIQFeedSymbolName;
+  std::string m_sPathName_Depth;
 
   const config::Choices& m_choices;
 
@@ -69,7 +75,13 @@ private:
   using pWatch_t = ou::tf::Watch::pWatch_t;
   pWatch_t m_pWatch;
 
-  ou::tf::DepthsByOrder m_depths_byorder; // time series for persistence
+  using rDepthsByOrder_t = std::array<ou::tf::DepthsByOrder,2>;
+  rDepthsByOrder_t m_rDepthsByOrder; // one writes while one collects
+  using ixDepthsByOrder_t = std::atomic<rDepthsByOrder_t::size_type>;
+  ixDepthsByOrder_t m_ixDepthsByOrder_Filling;
+  ixDepthsByOrder_t m_ixDepthsByOrder_Writing;
+
+  //ou::tf::DepthsByOrder m_depths_byorder; // time series for persistence
   ou::tf::iqfeed::l2::OrderBased m_OrderBased; // direct access
   std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
 

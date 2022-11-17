@@ -39,7 +39,9 @@ Process::Process(
 , const std::string& sTimeStamp
 )
 : m_choices( choices )
-, m_sTimeStamp( sTimeStamp )
+, m_ixDepthsByOrder_Filling( 0 )
+, m_ixDepthsByOrder_Writing( 1 )
+, m_sPathName( sSaveValuesRoot + "/" + sTimeStamp )
 {
   StartIQFeed();
 }
@@ -102,23 +104,28 @@ void Process::StartWatch() {
   //             this, so that can handle when new front month started
 
   assert( m_pInstrument );
-  const std::string& sIQFeedSymbolName( m_pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+
+  m_sIQFeedSymbolName = m_pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF );
 
   std::cout << "future: "
     << m_pInstrument->GetInstrumentName()
-    << ", " << sIQFeedSymbolName
+    << ", " << m_sIQFeedSymbolName
     << std::endl;
 
   m_pWatch = std::make_shared<ou::tf::Watch>( m_pInstrument, m_piqfeed );
 
+  m_sPathName_Depth
+    = m_sPathName + ou::tf::DepthsByOrder::Directory()
+    + m_pInstrument->GetInstrumentName();
+
   assert( !m_pDispatch );  // trigger on re-entry, need to fix
   m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
-    [ this, sIQFeedSymbolName ](){
+    [ this ](){
       m_pDispatch->Single( true );
       m_pDispatch->WatchAdd(
-        sIQFeedSymbolName,
+        m_sIQFeedSymbolName,
         [this]( const ou::tf::DepthByOrder& depth ){
-          m_depths_byorder.Append( depth );
+          m_rDepthsByOrder[m_ixDepthsByOrder_Filling].Append( depth );
         }
       );
     }
@@ -130,37 +137,49 @@ void Process::StartWatch() {
 
 void Process::StopWatch() {
 
-  const std::string sPathName = sSaveValuesRoot + "/" + m_sTimeStamp;
-  const std::string& sIQFeedSymbolName( m_pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
-
-  std::cout << "  Saving collected values ... " << std::endl;
-
-  if ( m_pDispatch ) {
-    m_pDispatch->WatchDel( sIQFeedSymbolName );
-      // TODO: need to get the watch in pWatch_t operational
-      if ( 0 != m_depths_byorder.Size() ) {
-        ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
-        const std::string sPathNameDepth
-          = sPathName + ou::tf::DepthsByOrder::Directory()
-          + m_pInstrument->GetInstrumentName();
-        ou::tf::HDF5WriteTimeSeries<ou::tf::DepthsByOrder> wtsDepths( dm, true, true, 5, 256 );
-        wtsDepths.Write( sPathNameDepth, &m_depths_byorder );
-        ou::tf::HDF5Attributes attrDepths( dm, sPathNameDepth );
-        attrDepths.SetSignature( ou::tf::DepthByOrder::Signature() );
-        //attrDepths.SetMultiplier( m_pInstrument->GetMultiplier() );
-        //attrDepths.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
-        attrDepths.SetProviderType( m_pWatch->GetProvider()->ID() );
-      }
-  }
-
   m_pWatch->StopWatch();
-  m_pWatch->SaveSeries( sPathName );
+  m_pWatch->SaveSeries( m_sPathName );
 
   std::cout << "  ... Done " << std::endl;
 
 }
 
+void Process::Write() {
+
+  assert( 0 == m_rDepthsByOrder[m_ixDepthsByOrder_Writing].Size() );
+
+  rDepthsByOrder_t::size_type ix {};
+  ix = m_ixDepthsByOrder_Writing.exchange( 2 ); // take the writing index
+  ix = m_ixDepthsByOrder_Filling.exchange( ix ); // and make it the new filling index
+  ix = m_ixDepthsByOrder_Writing.exchange( ix ); // and write what was being filled
+  assert( 2 == ix );
+
+  std::cout << "  Saving collected values ... " << std::endl;
+  if ( m_pDispatch ) {
+    // TODO: need to get the watch in pWatch_t operational
+    if ( 0 != m_rDepthsByOrder[m_ixDepthsByOrder_Writing].Size() ) {
+      ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
+      ou::tf::HDF5WriteTimeSeries<ou::tf::DepthsByOrder> wtsDepths( dm, true, true, 5, 256 );
+      wtsDepths.Write( m_sPathName_Depth, &m_rDepthsByOrder[m_ixDepthsByOrder_Writing] );
+      ou::tf::HDF5Attributes attrDepths( dm, m_sPathName_Depth );
+      attrDepths.SetSignature( ou::tf::DepthByOrder::Signature() );
+      //attrDepths.SetMultiplier( m_pInstrument->GetMultiplier() );
+      //attrDepths.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
+      attrDepths.SetProviderType( m_pWatch->GetProvider()->ID() );
+
+      m_rDepthsByOrder[m_ixDepthsByOrder_Writing].Clear();
+    }
+  }
+
+}
+
 void Process::Finish() {
+
+  if ( m_pDispatch ) {
+    m_pDispatch->WatchDel( m_sIQFeedSymbolName );
+    Write();
+  }
+
   if ( m_pWatch ) {
     StopWatch();
     m_pWatch.reset();
