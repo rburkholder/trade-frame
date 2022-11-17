@@ -80,8 +80,9 @@ int main( int argc, char* argv[] ) {
       ;
     sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
 
-    dtStop = boost::posix_time::ptime( dt.date(), choices.m_tdStopTime );
-    if ( dt.time_of_day() >= choices.m_tdStopTime ) {
+    dtStop = boost::posix_time::ptime( ou::TimeSource::GlobalInstance().Local().date(), choices.m_tdStopTime );
+    dtStop = ou::TimeSource::GlobalInstance().ConvertEasternToUtc( dtStop );
+    if ( dt >= dtStop ) {
       dtStop = dtStop + boost::gregorian::days( 1 );
     }
   }
