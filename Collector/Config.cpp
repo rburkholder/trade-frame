@@ -31,6 +31,7 @@ namespace po = boost::program_options;
 
 namespace {
   static const std::string sChoice_SymbolName("symbol_name" );
+  static const std::string sChoice_StopTime("stop_time" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bRequired, T& dest ) {
@@ -60,6 +61,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     po::options_description config( "collector config" );
     config.add_options()
       ( sChoice_SymbolName.c_str(), po::value<std::string>( &choices.m_sSymbolName ), "symbol name" )
+      ( sChoice_StopTime.c_str(),   po::value<std::string>( &choices.m_sStopTime ), "stop time HH:mm:ss UTC" )
       ;
     po::variables_map vm;
 
@@ -75,11 +77,18 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       bOk &= parse<std::string>( sFileName, vm, sChoice_SymbolName, true, choices.m_sSymbolName );
       std::replace_if( choices.m_sSymbolName.begin(), choices.m_sSymbolName.end(), [](char ch)->bool{return '~' == ch;}, '#' );
 
+      bOk &= parse<std::string>( sFileName, vm, sChoice_StopTime, true, choices.m_sStopTime );
+      choices.m_tdStopTime = boost::posix_time::duration_from_string( choices.m_sStopTime );
+
     }
 
   }
-  catch( std::exception& e ) {
-    BOOST_LOG_TRIVIAL(error) << sFileName << " parse error: " << e.what();
+  catch( const std::exception& e ) {
+    BOOST_LOG_TRIVIAL(error) << sFileName << " config parse error: " << e.what();
+    bOk = false;
+  }
+  catch(...) {
+    BOOST_LOG_TRIVIAL(error) << sFileName << " config unknown error";
     bOk = false;
   }
 

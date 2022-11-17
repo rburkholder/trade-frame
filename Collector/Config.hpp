@@ -23,10 +23,15 @@
 
 #include <string>
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 namespace config {
 
 struct Choices {
   std::string m_sSymbolName;
+
+  std::string m_sStopTime;
+  boost::posix_time::time_duration m_tdStopTime;
 };
 
 bool Load( const std::string& sFileName, Choices& );

@@ -24,7 +24,6 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-//#include <boost/asio/post.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/execution/context.hpp>
 #include <boost/asio/executor_work_guard.hpp>
@@ -51,27 +50,6 @@
 
 // ==========
 
-void signal_handler(
-  const boost::system::error_code& error_code,
-  int signal_number
-) {
-
-  std::cout
-    << "signal"
-    << "(" << error_code.category().name()
-    << "," << error_code.value()
-    << "," << signal_number
-    << "): "
-    << error_code.message() << ", clean up"
-    << std::endl;
-
-  if ( !error_code ) {
-    //std::terminate(); // for testing only
-  }
-}
-
-// ==========
-
 int main( int argc, char* argv[] ) {
 
   const static std::string sConfigFileName( "futuresl1l2.cfg" );
@@ -81,6 +59,8 @@ int main( int argc, char* argv[] ) {
     = std::make_unique<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> >( boost::asio::make_work_guard( m_context) );
 
   std::string sTSDataStreamStarted;
+
+  boost::posix_time::ptime dtStop;
 
   config::Choices choices;
 
@@ -92,14 +72,22 @@ int main( int argc, char* argv[] ) {
 
   {
     std::stringstream ss;
-    auto dt = ou::TimeSource::GlobalInstance().External();
+    const auto dt = ou::TimeSource::GlobalInstance().External();
     ss
       << ou::tf::Instrument::BuildDate( dt.date() )
       << "-"
       << dt.time_of_day()
       ;
     sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
+
+    dtStop = boost::posix_time::ptime( dt.date(), choices.m_tdStopTime );
+    if ( dt.time_of_day() >= choices.m_tdStopTime ) {
+      dtStop = dtStop + boost::gregorian::days( 1 );
+    }
   }
+
+  boost::asio::deadline_timer timerStop( m_context );
+  timerStop.expires_at( dtStop );
 
   // https://www.boost.org/doc/libs/1_79_0/doc/html/boost_asio/reference/signal_set.html
   boost::asio::signal_set signals( m_context, SIGINT ); // SIGINT is called
@@ -114,13 +102,38 @@ int main( int argc, char* argv[] ) {
   Process process( choices, sTSDataStreamStarted );
 
   signals.async_wait(
-    [&process,&m_pWork](const boost::system::error_code& error_code, int signal_number){
+    [&process,&timerStop,&m_pWork](const boost::system::error_code& error_code, int signal_number){
+      std::cout
+        << "signal"
+        << "(" << error_code.category().name()
+        << "," << error_code.value()
+        << "," << signal_number
+        << "): "
+        << error_code.message()
+        << std::endl;
+
       if ( SIGINT == signal_number) {
         m_pWork->reset();
         process.Finish();
+        timerStop.cancel();
       }
-      signal_handler( error_code, signal_number );
     } );
+
+  timerStop.async_wait(
+    [&process,&signals,&m_pWork]( const boost::system::error_code& error_code ){
+      std::cout
+        << "timer "
+        << "(" << error_code.category().name()
+        << "," << error_code.value()
+        << "): "
+        << error_code.message()
+        << std::endl;
+      if ( 0 == error_code.value() ) { // 125 is op canceled
+        m_pWork->reset();
+        process.Finish();
+        signals.cancel();
+      }
+    });
 
   m_context.run();
 
