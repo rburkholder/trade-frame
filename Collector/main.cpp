@@ -88,8 +88,8 @@ int main( int argc, char* argv[] ) {
     }
 
     std::cout
-      << "now=" << dt
-      << ",then=" << dtStop
+      << "now=" << dt << "(UTC)"
+      << ",then=" << dtStop << "(UTC)"
       << std::endl;
   }
 
