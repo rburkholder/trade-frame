@@ -490,9 +490,6 @@ void AppIndicatorTrading::LoadDailyHistory( pPosition_t pPosition ) {
 }
 
 int AppIndicatorTrading::OnExit() {
-  m_pInteractiveChart->ReleaseResources();
-  m_pBuildInstrument.reset();
-  m_pComposeInstrument.reset();
 
   // Exit Steps: #4
 //  DelinkFromPanelProviderControl();  generates stack errors
@@ -509,9 +506,15 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
 
   //m_pFrameControls->Close();
 
+  SaveState();
+
   m_DailyHistory.Close();
 
-  SaveState();
+  // may need this earlier?
+  m_pInteractiveChart->ReleaseResources();
+
+  m_pBuildInstrument.reset();
+  m_pComposeInstrument.reset();
 
   if ( m_pOptionChainQuery ) {
     m_pOptionChainQuery->Disconnect();
