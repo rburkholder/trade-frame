@@ -651,6 +651,7 @@ void PanelOrderButtons::OnCBPositionEntryClick( wxCommandEvent& event ) {
 }
 
 void PanelOrderButtons::OnTXTPositionEntryTextUpdated( wxCommandEvent& event ) {
+  m_eFocus = EFocus::None;
   m_order.m_sPositionEntryValue = m_txtPricePositionEntry->GetValue();
   event.Skip();
 }
@@ -684,6 +685,7 @@ void PanelOrderButtons::OnCBPositionExitProfitClick( wxCommandEvent& event ) {
 }
 
 void PanelOrderButtons::OnTXTPositionExitProfitTextUpdated( wxCommandEvent& event ) {
+  m_eFocus = EFocus::None;
   m_order.m_sPositionExitProfitValue = m_txtPriceProfitExit->GetValue();
   event.Skip();
 }
@@ -710,6 +712,7 @@ void PanelOrderButtons::OnCBPositionExitStopClick( wxCommandEvent& event ) {
 }
 
 void PanelOrderButtons::OnTXTPositionExitStopTextUpdated( wxCommandEvent& event ) {
+  m_eFocus = EFocus::None;
   m_order.m_sPositionExitStopValue = m_txtPriceStopExit->GetValue();
   event.Skip();
 }
