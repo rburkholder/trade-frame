@@ -80,6 +80,8 @@ public:
      fBtnOrder_t&&  // Cancel
    );
 
+   void Trigger( PanelOrderButtons_Order::EOrderMethod );
+
    void SetPriceAtFocus( const std::string& );
 
    void Update( const PanelOrderButtons_MarketData& );
@@ -118,7 +120,6 @@ private:
   enum EFocus { None, Price, Profit, Stop } m_eFocus;
 
   PanelOrderButtons_Order m_order;
-  PanelOrderButtons_MarketData m_data;
 
     wxTextCtrl* m_txtSymbol;
     wxTextCtrl* m_txtQuantity;
@@ -180,6 +181,9 @@ private:
   bool ShowToolTips() { return true; };
 
   bool ValidateFields();
+
+  void ClickBuy();
+  void ClickSell();
 
   void OnFocusChange( wxFocusEvent& event );
 
@@ -271,6 +275,8 @@ private:
 
     /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_CB_Stoch3
     void OnCBStoch3Click( wxCommandEvent& event );
+
+  void OnKillFocus( wxFocusEvent& event );
 
   void ClearInstrumentRadioButtons();
 

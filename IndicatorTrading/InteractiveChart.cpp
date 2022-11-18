@@ -218,6 +218,7 @@ void InteractiveChart::SetPosition(
 , fBuildPosition_t&& fBuildPosition
 , fClick_t&& fClickLeft
 , fClick_t&& fClickRight
+, fTriggerOrder_t&& fTriggerOrder
 , fUpdateMarketData_t&& fUpdateMarketData
 , fUpdatePosition_t&& fUpdatePosition
 , TreeItem* pTreeItemParent
@@ -242,6 +243,8 @@ void InteractiveChart::SetPosition(
 
   m_fClickLeft = std::move( fClickLeft );
   m_fClickRight = std::move( fClickRight );
+
+  m_fTriggerOrder = std::move( fTriggerOrder );
   m_fUpdateMarketData = std::move( fUpdateMarketData );
   m_fUpdatePosition = std::move( fUpdatePosition );
 
@@ -872,10 +875,14 @@ void InteractiveChart::OnChar( wxKeyEvent& event ) {
   switch ( event.GetKeyCode() ) {
     case 'l': // long
     case 'b': // buy
-      OrderBuy( ou::tf::PanelOrderButtons_Order() );
+      if ( m_fTriggerOrder ) {
+        m_fTriggerOrder(ou::tf::PanelOrderButtons_Order::EOrderMethod::Buy );
+      }
       break;
     case 's': // sell/short
-      OrderSell( ou::tf::PanelOrderButtons_Order() );
+      if ( m_fTriggerOrder ) {
+        m_fTriggerOrder(ou::tf::PanelOrderButtons_Order::EOrderMethod::Sell );
+      }
       break;
     case 'x':
       std::cout << "close out" << std::endl;
@@ -903,13 +910,14 @@ void InteractiveChart::OrderBuy( const ou::tf::PanelOrderButtons_Order& buttons 
   if ( m_pActiveInstrument ) { // need to fix the indicators so show on appropriate option - need access to option tracker
     LifeCycle_Position& lcp( Lookup_LifeCycle_Position() );
     pTradeLifeTime_t pTradeLifeTime
-      = std::make_shared<TradeWithABuy>( lcp.pPosition, lcp.pTreeItem, buttons, lcp.indicators
-      , [this]( TradeLifeTime& tlt ){ // fDone_t
-          CallAfter( [this,&tlt](){
-            mapLifeCycle_Trade_t::iterator iter = m_mapLifeCycle_Trade.find( tlt.Id() );
-            assert( m_mapLifeCycle_Trade.end() != iter );
-            m_mapLifeCycle_Trade.erase( iter );
-          } );
+      = std::make_shared<TradeWithABuy>(
+          lcp.pPosition, lcp.pTreeItem, buttons, lcp.indicators,
+          [this]( TradeLifeTime& tlt ){ // fDone_t
+            CallAfter( [this,&tlt](){
+              mapLifeCycle_Trade_t::iterator iter = m_mapLifeCycle_Trade.find( tlt.Id() );
+              assert( m_mapLifeCycle_Trade.end() != iter );
+              m_mapLifeCycle_Trade.erase( iter );
+            } );
       }
     );
     ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();
@@ -921,13 +929,14 @@ void InteractiveChart::OrderSell( const ou::tf::PanelOrderButtons_Order& buttons
   if ( m_pActiveInstrument ) { // need to fix the indicators so show on appropriate option - need access to option tracker
     LifeCycle_Position& lcp( Lookup_LifeCycle_Position() );
     pTradeLifeTime_t pTradeLifeTime
-      = std::make_shared<TradeWithASell>( lcp.pPosition, lcp.pTreeItem, buttons, lcp.indicators
-      , [this]( TradeLifeTime& tlt ){ // fDone_t
-          CallAfter( [this,&tlt](){
-            mapLifeCycle_Trade_t::iterator iter = m_mapLifeCycle_Trade.find( tlt.Id() );
-            assert( m_mapLifeCycle_Trade.end() != iter );
-            m_mapLifeCycle_Trade.erase( iter );
-          } );
+      = std::make_shared<TradeWithASell>(
+          lcp.pPosition, lcp.pTreeItem, buttons, lcp.indicators,
+          [this]( TradeLifeTime& tlt ){ // fDone_t
+            CallAfter( [this,&tlt](){
+              mapLifeCycle_Trade_t::iterator iter = m_mapLifeCycle_Trade.find( tlt.Id() );
+              assert( m_mapLifeCycle_Trade.end() != iter );
+              m_mapLifeCycle_Trade.erase( iter );
+            } );
       }
       );
     ou::tf::Order::idOrder_t id = pTradeLifeTime->Id();

@@ -370,8 +370,13 @@ void PanelOrderButtons::CreateControls() {
     sizerStochastic->Add(m_cbEnableStoch3, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 2);
 
   m_txtPricePositionEntry->Connect(ID_TXT_PositionEntry, wxEVT_SET_FOCUS, wxFocusEventHandler(PanelOrderButtons::OnSetFocus_PositionEntry), NULL, this);
+  m_txtPricePositionEntry->Connect(ID_TXT_PositionEntry, wxEVT_KILL_FOCUS, wxFocusEventHandler(PanelOrderButtons::OnKillFocus), NULL, this);
+
   m_txtPriceProfitExit->Connect(ID_TXT_PositionExitProfit, wxEVT_SET_FOCUS, wxFocusEventHandler(PanelOrderButtons::OnSetFocus_PositionExitProfit), NULL, this);
+  m_txtPriceProfitExit->Connect(ID_TXT_PositionExitProfit, wxEVT_KILL_FOCUS, wxFocusEventHandler(PanelOrderButtons::OnKillFocus), NULL, this);
+
   m_txtPriceStopExit->Connect(ID_TXT_PositionExitStop, wxEVT_SET_FOCUS, wxFocusEventHandler(PanelOrderButtons::OnSetFocus_PositionExitStop), NULL, this);
+  m_txtPriceStopExit->Connect(ID_TXT_PositionExitStop, wxEVT_KILL_FOCUS, wxFocusEventHandler(PanelOrderButtons::OnKillFocus), NULL, this);
 
   Bind( wxEVT_DESTROY, &PanelOrderButtons::OnDestroy, this );
 
@@ -423,6 +428,20 @@ void PanelOrderButtons::Set(
   m_fBtnOrderSell = std::move( fBtnOrderSell );
   m_fBtnOrderClose = std::move( fBtnOrderClose );
   m_fBtnOrderCancel = std::move( fBtnOrderCancel );
+}
+
+void PanelOrderButtons::Trigger( PanelOrderButtons_Order::EOrderMethod method ) {
+  switch ( method ) {
+    case PanelOrderButtons_Order::EOrderMethod::Buy:
+      ClickBuy();
+      break;
+    case PanelOrderButtons_Order::EOrderMethod::Sell:
+      ClickSell();
+      break;
+    case PanelOrderButtons_Order::EOrderMethod::Cancel:
+      assert( false );
+      break;
+  }
 }
 
 void PanelOrderButtons::SetPriceAtFocus( const std::string& sText ) {
@@ -548,7 +567,7 @@ bool PanelOrderButtons::ValidateFields() {
   return bOk;
 }
 
-void PanelOrderButtons::OnBtnBuyClick( wxCommandEvent& event ) {
+void PanelOrderButtons::ClickBuy() {
   if ( ValidateFields() ) {
     if ( m_fBtnOrderBuy ) {
       wxColour colour = m_btnBuy->GetForegroundColour();
@@ -560,10 +579,14 @@ void PanelOrderButtons::OnBtnBuyClick( wxCommandEvent& event ) {
         } );
     }
   }
+}
+
+void PanelOrderButtons::OnBtnBuyClick( wxCommandEvent& event ) {
+  ClickBuy();
   event.Skip();
 }
 
-void PanelOrderButtons::OnBtnSellClick( wxCommandEvent& event ) {
+void PanelOrderButtons::ClickSell() {
   if ( ValidateFields() ) {
     if ( m_fBtnOrderSell ) {
       wxColour colour = m_btnSell->GetForegroundColour();
@@ -575,6 +598,10 @@ void PanelOrderButtons::OnBtnSellClick( wxCommandEvent& event ) {
         } );
     }
   }
+}
+
+void PanelOrderButtons::OnBtnSellClick( wxCommandEvent& event ) {
+  ClickSell();
   event.Skip();
 }
 
@@ -802,6 +829,11 @@ void PanelOrderButtons::OnSetFocus_PositionExitProfit( wxFocusEvent& event ) {
 
 void PanelOrderButtons::OnSetFocus_PositionExitStop( wxFocusEvent& event ) {
   m_eFocus = EFocus::Stop;
+  event.Skip();
+}
+
+void PanelOrderButtons::OnKillFocus( wxFocusEvent& event ) {
+  //m_eFocus = EFocus::None;
   event.Skip();
 }
 

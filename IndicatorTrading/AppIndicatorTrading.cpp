@@ -338,6 +338,9 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
     },
     [this]( double value ) { // m_fClickRight
     },
+    [this]( const ou::tf::PanelOrderButtons_Order::EOrderMethod method ) {
+      m_pPanelOrderButtons->Trigger( method );
+    },
     [this]( const ou::tf::PanelOrderButtons_MarketData& market_data ) { // m_fUpdateMarketData
       m_pPanelOrderButtons->Update( market_data );
     },

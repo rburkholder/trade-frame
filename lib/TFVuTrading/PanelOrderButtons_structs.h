@@ -28,6 +28,7 @@ namespace tf { // TradeFrame
 
 struct PanelOrderButtons_Order {
 
+  enum class EOrderMethod { Buy=1, Sell=2, Cancel=3 };
   enum class EPositionEntryMethod { Market=1, LimitOnly=2, LimitTimeOut=3, Stoch=4 };
   enum class EPositionExitProfitMethod { Relative=1, Absolute=2, Stoch=3 };
   enum class EPositionExitStopMethod { TrailingAbsolute=1, TrailingPercent=2, Stop=3 };

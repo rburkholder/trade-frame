@@ -116,6 +116,7 @@ public:
 
   using fClick_t = std::function<void(double)>; // price level
 
+  using fTriggerOrder_t = std::function<void(ou::tf::PanelOrderButtons_Order::EOrderMethod)>;
   using fUpdateMarketData_t = std::function<void(const ou::tf::PanelOrderButtons_MarketData&)>;
   using fUpdatePosition_t = std::function<void(const ou::tf::PanelOrderButtons_PositionData&)>;
 
@@ -129,6 +130,7 @@ public:
    , fBuildPosition_t&&
    , fClick_t&& left
    , fClick_t&& right
+   , fTriggerOrder_t&&
    , fUpdateMarketData_t&&
    , fUpdatePosition_t&&
    , TreeItem*
@@ -209,6 +211,8 @@ private:
 
   fClick_t m_fClickLeft;
   fClick_t m_fClickRight;
+
+  fTriggerOrder_t m_fTriggerOrder;
   fUpdateMarketData_t m_fUpdateMarketData;
   fUpdatePosition_t m_fUpdatePosition;
 
