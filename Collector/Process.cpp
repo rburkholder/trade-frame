@@ -39,6 +39,8 @@ Process::Process(
 , const std::string& sTimeStamp
 )
 : m_choices( choices )
+, m_bHdf5AttributesSet( false )
+, m_cntDepthsByOrder {}
 , m_ixDepthsByOrder_Filling( 0 )
 , m_ixDepthsByOrder_Writing( 1 )
 , m_sPathName( sSaveValuesRoot + "/" + sTimeStamp )
@@ -125,6 +127,7 @@ void Process::StartWatch() {
       m_pDispatch->WatchAdd(
         m_sIQFeedSymbolName,
         [this]( const ou::tf::DepthByOrder& depth ){
+          m_cntDepthsByOrder++;
           m_rDepthsByOrder[m_ixDepthsByOrder_Filling].Append( depth );
         }
       );
@@ -154,18 +157,22 @@ void Process::Write() {
   ix = m_ixDepthsByOrder_Writing.exchange( ix ); // and write what was being filled
   assert( 2 == ix );
 
-  std::cout << "  Saving collected values ... " << std::endl;
+  //std::cout << "  Saving collected values ... " << std::endl;
   if ( m_pDispatch ) {
     // TODO: need to get the watch in pWatch_t operational
     if ( 0 != m_rDepthsByOrder[m_ixDepthsByOrder_Writing].Size() ) {
       ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
       ou::tf::HDF5WriteTimeSeries<ou::tf::DepthsByOrder> wtsDepths( dm, true, true, 5, 256 );
       wtsDepths.Write( m_sPathName_Depth, &m_rDepthsByOrder[m_ixDepthsByOrder_Writing] );
-      ou::tf::HDF5Attributes attrDepths( dm, m_sPathName_Depth );
-      attrDepths.SetSignature( ou::tf::DepthByOrder::Signature() );
-      //attrDepths.SetMultiplier( m_pInstrument->GetMultiplier() );
-      //attrDepths.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
-      attrDepths.SetProviderType( m_pWatch->GetProvider()->ID() );
+
+      if ( !m_bHdf5AttributesSet ) {
+        m_bHdf5AttributesSet= true;
+        ou::tf::HDF5Attributes attrDepths( dm, m_sPathName_Depth );
+        attrDepths.SetSignature( ou::tf::DepthByOrder::Signature() );
+        //attrDepths.SetMultiplier( m_pInstrument->GetMultiplier() );
+        //attrDepths.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
+        attrDepths.SetProviderType( m_pWatch->GetProvider()->ID() );
+      }
 
       m_rDepthsByOrder[m_ixDepthsByOrder_Writing].Clear();
     }
@@ -184,4 +191,5 @@ void Process::Finish() {
     StopWatch();
     m_pWatch.reset();
   }
+
 }

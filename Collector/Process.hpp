@@ -52,6 +52,7 @@ public:
 
   void Write(); // incremental write of l2
   void Finish(); // stop and write l1 + remainder of l2
+  size_t Count() const { return m_cntDepthsByOrder; }
 
 protected:
 private:
@@ -67,7 +68,8 @@ private:
 
   std::unique_ptr<ou::tf::ComposeInstrument> m_pComposeInstrumentIQFeed;
 
-  size_t m_cntInstrumentsProcessed;
+  bool m_bHdf5AttributesSet;
+  size_t m_cntDepthsByOrder;
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   pInstrument_t m_pInstrument;

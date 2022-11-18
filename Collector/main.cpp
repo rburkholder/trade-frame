@@ -71,8 +71,9 @@ int main( int argc, char* argv[] ) {
   }
 
   {
-    std::stringstream ss;
     const auto dt = ou::TimeSource::GlobalInstance().External();
+
+    std::stringstream ss;
     ss
       << ou::tf::Instrument::BuildDate( dt.date() )
       << "-"
@@ -85,7 +86,15 @@ int main( int argc, char* argv[] ) {
     if ( dt >= dtStop ) {
       dtStop = dtStop + boost::gregorian::days( 1 );
     }
+
+    std::cout
+      << "now=" << dt
+      << ",then=" << dtStop
+      << std::endl;
   }
+
+  boost::asio::deadline_timer timerWrite( m_context );
+  timerWrite.expires_from_now( boost::posix_time::seconds( 60 ) );
 
   boost::asio::deadline_timer timerStop( m_context );
   timerStop.expires_at( dtStop );
@@ -103,7 +112,7 @@ int main( int argc, char* argv[] ) {
   Process process( choices, sTSDataStreamStarted );
 
   signals.async_wait(
-    [&process,&timerStop,&m_pWork](const boost::system::error_code& error_code, int signal_number){
+    [&process,&timerStop,&timerWrite,&m_pWork](const boost::system::error_code& error_code, int signal_number){
       std::cout
         << "signal"
         << "(" << error_code.category().name()
@@ -114,14 +123,31 @@ int main( int argc, char* argv[] ) {
         << std::endl;
 
       if ( SIGINT == signal_number) {
+        timerWrite.cancel();
         m_pWork->reset();
         process.Finish();
         timerStop.cancel();
       }
     } );
 
+  using fWrite_t = std::function<void(const boost::system::error_code&)>;
+
+  fWrite_t fWrite = [&process,&timerWrite,&fWrite]( const boost::system::error_code& error_code ){
+    if ( 0 == error_code.value() ) {
+      process.Write();
+      timerWrite.expires_from_now( boost::posix_time::seconds( 60 ) );
+      timerWrite.async_wait( fWrite );
+    }
+  };
+
+  timerWrite.async_wait(
+    [&process,&timerWrite,&fWrite]( const boost::system::error_code& error_code ){
+      fWrite( error_code );
+    }
+  );
+
   timerStop.async_wait(
-    [&process,&signals,&m_pWork]( const boost::system::error_code& error_code ){
+    [&process,&signals,&timerWrite,&m_pWork]( const boost::system::error_code& error_code ){
       std::cout
         << "timer "
         << "(" << error_code.category().name()
@@ -130,6 +156,7 @@ int main( int argc, char* argv[] ) {
         << error_code.message()
         << std::endl;
       if ( 0 == error_code.value() ) { // 125 is op canceled
+        timerWrite.cancel();
         m_pWork->reset();
         process.Finish();
         signals.cancel();
@@ -140,6 +167,8 @@ int main( int argc, char* argv[] ) {
 
   signals.clear();
   signals.cancel();
+
+  std::cout << "DepthsByOrder=" << process.Count() << std::endl;
 
   return EXIT_SUCCESS;
 }
