@@ -34,7 +34,6 @@
 #include <TFOptions/GatherOptions.h>
 
 #include <TFVuTrading/TreeItem.hpp>
-#include <TFVuTrading/PanelOrderButtons_structs.h>
 
 #include "Config.h"
 #include "Strategy.hpp"

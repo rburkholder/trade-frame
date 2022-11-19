@@ -52,6 +52,7 @@
 #include <TFOptions/Chains.h>
 
 #include <TFVuTrading/WinChartView.h>
+#include <TFVuTrading/PanelOrderButtons_structs.h>
 
 #include "Indicators.hpp"
 
