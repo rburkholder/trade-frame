@@ -76,7 +76,7 @@ void ComposeInstrument::StartChainQuery() {
     assert( false );
   }
   else {
-    m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
+    m_pOptionChainQuery = std::make_shared<ou::tf::iqfeed::OptionChainQuery>(
       [this](){
         m_fInitDone();
         m_fInitDone = nullptr;

@@ -51,6 +51,9 @@ public:
 
   void Compose( const std::string& sIQFeedSymbol, fInstrument_t&& );
 
+  using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
+  pOptionChainQuery_t OptionChainQuery() { return m_pOptionChainQuery; }
+
 protected:
 private:
 
@@ -77,7 +80,6 @@ private:
   pMapQuery_t m_pMapQuery;
 
   using pBuildInstrument_t = std::unique_ptr<BuildInstrument>;
-  using pOptionChainQuery_t = std::unique_ptr<ou::tf::iqfeed::OptionChainQuery>;
 
   pProviderIQFeed_t m_pProviderIQFeed;
   pProviderIBTWS_t  m_pProviderIBTWS;
@@ -87,7 +89,7 @@ private:
   pBuildInstrument_t m_pBuildInstrumentIQFeed;
   pBuildInstrument_t m_pBuildInstrumentBoth;
 
-  pOptionChainQuery_t m_pOptionChainQuery; // need to disconnect
+  pOptionChainQuery_t m_pOptionChainQuery;
 
   void Initialize();
   void StartChainQuery();
