@@ -722,9 +722,9 @@ void InteractiveChart::SelectChains() {
 
   std::cout
     << "front chain "
-    << m_iterChainFront->first
+    << ou::tf::Instrument::BuildDate( m_iterChainFront->first )
     << ", back chain "
-    << m_iterChainBack->first
+    << ou::tf::Instrument::BuildDate( m_iterChainBack->first )
     << std::endl;
 
 }
