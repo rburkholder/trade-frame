@@ -231,23 +231,8 @@ bool AppIndicatorTrading::OnInit() {
   return 1;
 }
 
-void AppIndicatorTrading::StartChainQuery() {
-
-  if ( m_pOptionChainQuery ) {}
-  else {
-    m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
-      [this](){
-        ConstructUnderlying();
-      }
-    );
-    m_pOptionChainQuery->Connect(); // TODO: auto-connect instead?
-  }
-
-}
-
 void AppIndicatorTrading::ConstructUnderlying() {
-
-  m_pComposeInstrument = std::make_unique<ou::tf::ComposeInstrument>(
+  m_pComposeInstrument = std::make_shared<ou::tf::ComposeInstrument>(
     m_iqfeed, m_tws,
     [this](){
       m_pComposeInstrument->Compose(
@@ -314,7 +299,7 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
   m_pInteractiveChart->SetPosition(
     pPosition,
     m_config,
-    m_pOptionChainQuery,
+    m_pComposeInstrument->OptionChainQuery(),
     [this]( const std::string& sIQFeedOptionSymbol, InteractiveChart::fOption_t&& fOption ){ // fBuildOption_t
       m_pComposeInstrument->Compose(
         sIQFeedOptionSymbol,
@@ -514,11 +499,6 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
 
   m_pComposeInstrument.reset();
 
-  if ( m_pOptionChainQuery ) {
-    m_pOptionChainQuery->Disconnect();
-    m_pOptionChainQuery.reset();
-  }
-
   DelinkFromPanelProviderControl();
 
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
@@ -560,7 +540,7 @@ void AppIndicatorTrading::OnExecDisconnected( int ) {
 
 void AppIndicatorTrading::OnConnected( int ) {
   if ( m_bData1Connected & m_bExecConnected ) {
-    StartChainQuery();
+    ConstructUnderlying();
 
     CallAfter(
       [this](){

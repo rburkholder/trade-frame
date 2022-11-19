@@ -100,16 +100,13 @@ private:
   wxBoxSizer* m_sizerFrame;
   wxSplitterWindow* m_splitterRow;
 
-  std::unique_ptr<ou::tf::ComposeInstrument> m_pComposeInstrument;
+  std::shared_ptr<ou::tf::ComposeInstrument> m_pComposeInstrument;
 
   std::unique_ptr<ou::tf::db> m_pdb;
 
   config::Options m_config;
 
   pPortfolio_t m_pPortfolio;
-
-  using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
-  pOptionChainQuery_t m_pOptionChainQuery; // need to disconnect
 
   DailyHistory m_DailyHistory;
   ou::ChartEntryMark m_cemReferenceLevels;
@@ -148,7 +145,6 @@ private:
 
   void HandleMenuActionFeatureSetDump();
 
-  void StartChainQuery();
   void ConstructUnderlying();
   void InitializeUnderlying( pInstrument_t pInstrument );
   void SetInteractiveChart( pPosition_t );

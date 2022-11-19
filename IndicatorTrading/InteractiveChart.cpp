@@ -857,6 +857,7 @@ void InteractiveChart::ReleaseResources() {
   SetChartDataView( nullptr );
   m_mapLifeCycle_Trade.clear();
   m_pStrategy.reset();
+  m_pOptionChainQuery.reset();
 }
 
 void InteractiveChart::OnDestroy( wxWindowDestroyEvent& event ) {

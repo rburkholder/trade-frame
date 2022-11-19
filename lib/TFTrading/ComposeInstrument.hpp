@@ -51,6 +51,7 @@ public:
 
   void Compose( const std::string& sIQFeedSymbol, fInstrument_t&& );
 
+  // any threading issues here?
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
   pOptionChainQuery_t OptionChainQuery() { return m_pOptionChainQuery; }
 
