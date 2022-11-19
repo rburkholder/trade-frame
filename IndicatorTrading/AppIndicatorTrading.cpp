@@ -247,7 +247,6 @@ void AppIndicatorTrading::StartChainQuery() {
 
 void AppIndicatorTrading::ConstructUnderlying() {
 
-  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
   m_pComposeInstrument = std::make_unique<ou::tf::ComposeInstrument>(
     m_iqfeed, m_tws,
     [this](){
@@ -317,7 +316,7 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
     m_config,
     m_pOptionChainQuery,
     [this]( const std::string& sIQFeedOptionSymbol, InteractiveChart::fOption_t&& fOption ){ // fBuildOption_t
-      m_pBuildInstrument->Queue(
+      m_pComposeInstrument->Compose(
         sIQFeedOptionSymbol,
         [this,fOption_=std::move( fOption )](pInstrument_t pInstrument){
           if ( pInstrument ) {
@@ -513,7 +512,6 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
   // may need this earlier?
   m_pInteractiveChart->ReleaseResources();
 
-  m_pBuildInstrument.reset();
   m_pComposeInstrument.reset();
 
   if ( m_pOptionChainQuery ) {
