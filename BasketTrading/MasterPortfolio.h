@@ -31,8 +31,8 @@
 #include <OUCharting/ChartEntryIndicator.h>
 
 #include <TFTrading/ProviderManager.h>
-#include <TFTrading/PortfolioManager.h>
 #include <TFTrading/BuildInstrument.h>
+#include <TFTrading/PortfolioManager.h>
 
 #include <TFIndicators/Pivots.h>
 
@@ -205,7 +205,7 @@ private:
     std::atomic_uint32_t m_nQuery;
 
     UnderlyingWithStrategies( pUnderlying_t pUnderlying_ )
-    : pUnderlying( std::move( pUnderlying_ ) ) 
+    : pUnderlying( std::move( pUnderlying_ ) )
     , m_nQuery {}
     {}
     //UnderlyingWithStrategies( const Statistics&& statistics_ )
