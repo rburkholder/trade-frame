@@ -90,6 +90,7 @@ target_link_libraries(
       TFInteractiveBrokers
       TFSimulation
       TFVuTrading
+      MarketDepth
       TFIQFeedLevel2
       TFTrading
       TFOptions

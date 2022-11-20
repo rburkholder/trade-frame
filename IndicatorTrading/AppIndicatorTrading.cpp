@@ -40,6 +40,7 @@
 #include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/FrameControls.h>
 #include <TFVuTrading/PanelOrderButtons.h>
+#include <TFVuTrading/MarketDepth/PanelTrade.hpp>
 
 #include "200DayChart.hpp"
 #include "SessionChart.hpp"
@@ -171,6 +172,14 @@ bool AppIndicatorTrading::OnInit() {
   m_pFrameChart200Day->SetAutoLayout( true );
   m_pFrameChart200Day->Layout();
   m_pFrameChart200Day->Show( true );
+
+  m_pFrameLadderTrade = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Ladder Trading" );
+  m_pPanelTrade = new ou::tf::l2::PanelTrade( m_pFrameLadderTrade );
+  m_pFrameLadderTrade->Attach( m_pPanelTrade );
+
+  m_pFrameLadderTrade->SetAutoLayout( true );
+  m_pFrameLadderTrade->Layout();
+  m_pFrameLadderTrade->Show( true );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppIndicatorTrading::OnClose, this );  // start close of windows and controls
 

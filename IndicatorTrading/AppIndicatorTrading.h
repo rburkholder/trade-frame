@@ -58,6 +58,9 @@ namespace tf {
   class BuildInstrument;
   class ComposeInstrument;
   class PanelOrderButtons;
+namespace l2 {
+  class PanelTrade;
+}
 namespace iqfeed {
   class OptionChainQuery;
 } // namespace iqfeed
@@ -84,13 +87,18 @@ private:
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
+
   ou::tf::FrameControls* m_pFrameOrderButtons;
   ou::tf::PanelOrderButtons* m_pPanelOrderButtons;
   InteractiveChart* m_pInteractiveChart;
+
   ou::tf::FrameControls* m_pFrameSessionChart;
   SessionChart* m_pSessionChart;
   ou::tf::FrameControls* m_pFrameChart200Day;
   Chart200Day* m_pChart200Day;
+
+  ou::tf::FrameControls* m_pFrameLadderTrade;
+  ou::tf::l2::PanelTrade* m_pPanelTrade;
 
   std::string m_sTSDataStreamStarted;
 
@@ -164,6 +172,7 @@ private:
     ar & *m_pSessionChart;
     ar & *m_pFrameChart200Day;
     ar & *m_pChart200Day;
+    ar & *m_pFrameLadderTrade;
   }
 
   template<typename Archive>
@@ -186,13 +195,16 @@ private:
       ar & *m_pFrameChart200Day;
       ar & *m_pChart200Day;
     }
+    if ( 6 <= version ) {
+      ar & *m_pFrameLadderTrade;
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
-BOOST_CLASS_VERSION(AppIndicatorTrading, 5)
+BOOST_CLASS_VERSION(AppIndicatorTrading, 6)
 
 DECLARE_APP(AppIndicatorTrading)
 
