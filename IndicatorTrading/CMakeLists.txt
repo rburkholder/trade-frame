@@ -30,6 +30,9 @@ set(
     DailyHistory.hpp
     Indicators.hpp
     InteractiveChart.h
+    ModelFeed.hpp
+    ModelExec.hpp
+    ControlExec.hpp
     OptionTracker.hpp
     SessionChart.hpp
     Strategy.hpp
@@ -43,6 +46,9 @@ set(
     Config.cpp
     DailyHistory.cpp
     InteractiveChart.cpp
+    ModelFeed.cpp
+    ModelExec.cpp
+    ControlExec.cpp
     OptionTracker.cpp
     SessionChart.cpp
     Strategy.cpp
