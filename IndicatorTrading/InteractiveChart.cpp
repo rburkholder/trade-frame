@@ -234,6 +234,7 @@ void InteractiveChart::SetPosition(
 
   assert( boost::gregorian::days( 1 ) <= m_nDaysFront );
   assert( boost::gregorian::days( 1 ) <= m_nDaysBack );
+  assert( m_nDaysFront < m_nDaysBack );
 
   m_dvChart.Add( EChartSlot::Price, &cemReferenceLevels );
 
@@ -1090,6 +1091,7 @@ void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as re
 
   m_OrderBased.Set(
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fBid_
+
       ou::tf::Trade::price_t price( depth.Price() );
       ou::tf::Trade::volume_t volume( depth.Volume() );
 
