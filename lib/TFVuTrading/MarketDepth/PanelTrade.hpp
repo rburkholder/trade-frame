@@ -67,23 +67,29 @@ public:
 
   using fTrigger_t = std::function<void(double)>;
 
-  void SetInterval( double );
+  // Interface - In - Settings
+  void SetInterval( double );  // price step from rung to rung
 
+  // Interface - In - Updates - Feed
   void AppendStaticIndicator( double, const std::string& );
   void UpdateDynamicIndicator( const std::string&, double );
 
-  void OnQuote( const ou::tf::Quote& );
-  void OnTrade( const ou::tf::Trade& );
+  void OnQuote( const ou::tf::Quote& ); // l1 quote for recentering
+  void OnTrade( const ou::tf::Trade& ); // l1 trade for colour, recentering
 
-  void OnQuoteAsk( double price, int volume );
-  void OnQuoteBid( double price, int volume );
+  void OnQuoteAsk( double price, int volume ); // l2 update at level
+  void OnQuoteBid( double price, int volume ); // l2 update at level
 
-  using fTimer_t = std::function<void()>;
+  // Interface - Events - Out - Timer
+  using fTimer_t = std::function<void()>; // triggered on visible ladder refresh
   void SetOnTimer( fTimer_t&& fTimer ) { m_fTimer = std::move( fTimer); }
 
+  // Interface - Events - Out - Execution
   void Set( fTrigger_t&& fBidPlace, fTrigger_t&& fBidCancel, fTrigger_t&& fAskPlace, fTrigger_t&& fAskCancel );
-  void SetAsk( double, int ); // price, quantity
-  void SetBid( double, int ); // price, quantity
+
+  // Interface - In - Updates - Pending Orders
+  void SetAsk( double, int ); // update pending quantity@price
+  void SetBid( double, int ); // update pending quantity@price
 
 protected:
 private:
