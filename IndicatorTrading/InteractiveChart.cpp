@@ -54,7 +54,6 @@ InteractiveChart::InteractiveChart(
 , m_bConnected( false )
 , m_bOptionsReady( false )
 , m_bRecordDepths( false )
-, m_bTriggerFeatureSetDump( false )
 
 , m_dblSumVolume {}
 , m_dblSumVolumePrice {}
@@ -62,8 +61,6 @@ InteractiveChart::InteractiveChart(
 , m_bfPrice( nBarSeconds )
 , m_bfPriceUp( nBarSeconds )
 , m_bfPriceDn( nBarSeconds )
-
-, m_dblImbalanceMean {}, m_dblImbalanceSlope {}
 
 , m_ceBuySubmit( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
 , m_ceBuyFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::Blue )
@@ -190,8 +187,6 @@ void InteractiveChart::Connect() {
       pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
       pWatch->OnQuote.Add( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
       pWatch->OnTrade.Add( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
-      assert( m_pDispatch );
-      m_pDispatch->Connect();
     }
   }
 }
@@ -201,8 +196,6 @@ void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
     if ( m_bConnected ) {
       pWatch_t pWatch = m_pPositionUnderlying->GetWatch();
       m_bConnected = false;
-      assert( m_pDispatch );
-      m_pDispatch->Disconnect();
       pWatch->OnQuote.Remove( MakeDelegate( this, &InteractiveChart::HandleQuote ) );
       pWatch->OnTrade.Remove( MakeDelegate( this, &InteractiveChart::HandleTrade ) );
     }
@@ -284,8 +277,6 @@ void InteractiveChart::SetPosition(
       m_pPositionUnderlying,
       Indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled ) )
     );
-
-  StartDepthByOrder( config.nL2Levels );
 
   assert( 0 < config.nPeriodWidth );
   time_duration td = time_duration( 0, 0, config.nPeriodWidth );
@@ -464,13 +455,22 @@ void InteractiveChart::HandleTrade( const ou::tf::Trade& trade ) {
   m_bfPrice.Add( dt, price, trade.Volume() );
   if ( price >= mid ) {
     m_bfPriceUp.Add( dt, price, trade.Volume() );
-    m_nMarketOrdersAsk++;
   }
   else {
     m_bfPriceDn.Add( dt, price, -trade.Volume() );
-    m_nMarketOrdersBid++;
   }
 
+}
+
+void InteractiveChart::UpdateImbalance( boost::posix_time::ptime dt, double dblMean, double dblSmoothed ) {
+
+  m_ceImbalanceRawMean.Append( dt, dblMean );
+  //m_ceImbalanceRawB1.Append( depth.DateTime(), stats.b1 );
+
+  m_ceImbalanceSmoothMean.Append( dt, dblSmoothed );
+  //m_ceImbalanceSmoothB1.Append( depth.DateTime(), m_dblImbalanceSlope );
+
+  m_pStrategy->SetImbalance( dblMean, 0.0 ); // TODO: remove second paramenter (slope), not computed or used
 }
 
 void InteractiveChart::CheckOptions() {
@@ -1079,211 +1079,6 @@ void InteractiveChart::OptionWatchStop() {
 }
 
 void InteractiveChart::OptionEmit() {
-}
-
-void InteractiveChart::FeatureSetDump() {
-  m_bTriggerFeatureSetDump = true;
-}
-
-void InteractiveChart::StartDepthByOrder( size_t nLevels ) { // see AppDoM as reference
-
-  using EState = ou::tf::iqfeed::l2::OrderBased::EState;
-
-  m_OrderBased.Set(
-    [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fBid_
-
-      ou::tf::Trade::price_t price( depth.Price() );
-      ou::tf::Trade::volume_t volume( depth.Volume() );
-
-      if ( 0 != ix ) {
-        if ( m_bTriggerFeatureSetDump ) {
-          std::cout << "fs dump (bid) "
-            << (int)op
-            << "," << ix
-            << "," << depth.MsgType()
-            << "," << depth.Price() << "," << depth.Volume()
-            << "," << depth.Side()
-            << std::endl;
-          m_FeatureSet.Emit();
-        }
-
-        //m_FeatureSet.IntegrityCheck();
-        m_FeatureSet.HandleBookChangesBid( op, ix, depth );
-        //m_FeatureSet.IntegrityCheck();
-
-        if ( m_bTriggerFeatureSetDump ) {
-          m_FeatureSet.Emit();
-          m_bTriggerFeatureSetDump = false;
-        }
-      }
-
-      switch ( m_OrderBased.State() ) {
-        case EState::Add:
-        case EState::Delete:
-          switch ( op ) {
-            case ou::tf::iqfeed::l2::EOp::Increase:
-            case ou::tf::iqfeed::l2::EOp::Insert:
-              if ( 0 != ix ) {
-                m_FeatureSet.Bid_IncLimit( ix, depth );
-              }
-              break;
-            case ou::tf::iqfeed::l2::EOp::Decrease:
-            case ou::tf::iqfeed::l2::EOp::Delete:
-              if ( 1 == ix ) {
-                uint32_t nTicks = m_nMarketOrdersBid.load();
-                // TODO: does arrival rate of deletions affect overall Market rate?
-                if ( 0 == nTicks ) {
-                  m_FeatureSet.Bid_IncCancel( 1, depth );
-                }
-                else {
-                  --m_nMarketOrdersBid;
-                  m_FeatureSet.Bid_IncMarket( 1, depth );
-                }
-              }
-              else { // 1 < ix
-                if ( 0 != ix ) {
-                  m_FeatureSet.Bid_IncCancel( ix, depth );
-                }
-              }
-              break;
-            default:
-              break;
-          }
-          break;
-        case EState::Update:
-          // simply a change, no interesting statistics
-          break;
-        case EState::Ready:
-          assert( false ); // not allowed
-          break;
-      }
-
-      if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
-        Imbalance( depth );
-      }
-    },
-    [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
-      ou::tf::Trade::price_t price( depth.Price() );
-      ou::tf::Trade::volume_t volume( depth.Volume() );
-
-      if ( 0 != ix ) {
-        if ( m_bTriggerFeatureSetDump ) {
-          std::cout << "fs dump (ask) "
-            << (int)op
-            << "," << ix
-            << "," << depth.MsgType()
-            << "," << depth.Price() << "," << depth.Volume()
-            << "," << depth.Side()
-            << std::endl;
-          m_FeatureSet.Emit();
-        }
-
-        //m_FeatureSet.IntegrityCheck();
-        m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
-        //m_FeatureSet.IntegrityCheck();
-
-        if ( m_bTriggerFeatureSetDump ) {
-          m_FeatureSet.Emit();
-          m_bTriggerFeatureSetDump = false;
-        }
-      }
-
-      switch ( m_OrderBased.State() ) {
-        case EState::Add:
-        case EState::Delete:
-          switch ( op ) {
-            case ou::tf::iqfeed::l2::EOp::Increase:
-            case ou::tf::iqfeed::l2::EOp::Insert:
-              if ( 0 != ix ) {
-                m_FeatureSet.Ask_IncLimit( ix, depth );            }
-              break;
-            case ou::tf::iqfeed::l2::EOp::Decrease:
-            case ou::tf::iqfeed::l2::EOp::Delete:
-              if ( 1 == ix ) {
-                uint32_t nTicks = m_nMarketOrdersAsk.load();
-                if ( 0 == nTicks ) {
-                  m_FeatureSet.Ask_IncCancel( 1, depth );
-                }
-                else {
-                  --m_nMarketOrdersAsk;
-                  m_FeatureSet.Ask_IncMarket( 1, depth );
-                }
-              }
-              else { // 1 < ix
-                if ( 0 != ix ) {
-                  m_FeatureSet.Ask_IncCancel( ix, depth );
-                }
-              }
-              break;
-            default:
-              break;
-          }
-        case EState::Update:
-          // simply a change, no interesting statistics
-          break;
-        case EState::Ready:
-          assert( false ); // not allowed
-          break;
-      }
-
-      if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
-        Imbalance( depth );
-      }
-    }
-  );
-
-  m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
-    [ this, nLevels ](){
-      m_FeatureSet.Set( nLevels );  // use this many levels in the order book for feature vector set
-      m_pDispatch->Single( true );
-      m_pDispatch->WatchAdd(
-        m_pPositionUnderlying->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ),
-        [this]( const ou::tf::DepthByOrder& depth ){
-
-          if ( m_bRecordDepths ) {
-            m_depths_byorder.Append( depth );
-          }
-
-          m_OrderBased.MarketDepth( depth );
-        }
-        );
-    } );
-
-}
-
-void InteractiveChart::Imbalance( const ou::tf::Depth& depth ) {
-
-  static const double w1( 19.0 / 20.0 );
-  assert( 1.0 > w1 );
-  static const double w2( 1.0 - w1 );
-
-  ou::tf::RunningStats::Stats stats;
-  m_FeatureSet.ImbalanceSummary( stats );
-
-  m_ceImbalanceRawMean.Append( depth.DateTime(), stats.meanY );
-  //m_ceImbalanceRawB1.Append( depth.DateTime(), stats.b1 );
-
-  m_dblImbalanceMean  = w1 * m_dblImbalanceMean  + w2 * stats.meanY;
-  //m_dblImbalanceSlope = w1 * m_dblImbalanceSlope + w2 * stats.b1;
-
-  m_ceImbalanceSmoothMean.Append( depth.DateTime(), m_dblImbalanceMean );
-  //m_ceImbalanceSmoothB1.Append( depth.DateTime(), m_dblImbalanceSlope );
-
-  //double state = 0.0;
-  //if ( ( 0.0 == m_dblImbalanceMean ) || ( 0.0 == m_dblImbalanceSlope ) ) {} // nothing
-  //else {
-  //  if ( 0.0 < m_dblImbalanceMean ) {
-  //    if ( 0.0 < m_dblImbalanceSlope ) state = 1.0;
-  //    else state = 2.0;
-  //  }
-  //  else {
-  //    if ( 0.0 < m_dblImbalanceSlope ) state = -1.0;
-  //    else state = -2.0;
-  //  }
-  //}
-  //m_ceImbalanceState.Append( depth.DateTime(), state );
-
-  m_pStrategy->SetImbalance( m_dblImbalanceMean, m_dblImbalanceSlope );
 }
 
 void InteractiveChart::LeftClick( int nChart, double value ) {

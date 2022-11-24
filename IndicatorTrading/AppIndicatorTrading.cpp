@@ -305,6 +305,13 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
+  assert( m_pPanelTrade );
+  m_pPanelTrade->SetInterval( pPosition->GetInstrument()->GetMinTick() );
+
+  m_pModelFeed = std::make_shared<ModelFeed>( pPosition->GetWatch(), m_config.nL2Levels );
+  m_pModelExec = std::make_shared<ModelExec>();
+  m_pControlExec = std::make_shared<ControlExec>();
+
   m_pInteractiveChart->SetPosition(
     pPosition,
     m_config,
@@ -350,6 +357,13 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
   m_ptreeTradables->ExpandAll();
 
   m_pInteractiveChart->Connect();
+
+  namespace ph = std::placeholders;
+  m_pModelFeed->Set(
+    std::bind(
+      &InteractiveChart::UpdateImbalance, m_pInteractiveChart, ph::_1, ph::_2, ph::_3  ) );
+
+  m_pModelFeed->Connect();
 }
 
 void AppIndicatorTrading::HandleMenuActionStartChart() {
@@ -460,7 +474,7 @@ void AppIndicatorTrading::HandleMenuActionOptionEmit() {
 void AppIndicatorTrading::HandleMenuActionFeatureSetDump() {
   CallAfter(
     [this](){
-      m_pInteractiveChart->FeatureSetDump();
+      m_pModelFeed->FeatureSetDump();
     }
   );
 }
@@ -505,6 +519,8 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
 
   // may need this earlier?
   m_pInteractiveChart->ReleaseResources();
+  m_pInteractiveChart->Disconnect();
+  m_pModelFeed->Disconnect();
 
   m_pComposeInstrument.reset();
 

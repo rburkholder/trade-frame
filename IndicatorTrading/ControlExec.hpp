@@ -19,6 +19,9 @@
  * Created: 2022/11/21 14:59:32
  */
 
+// overall controller for handling interface events and distributing requests to the models
+// initiates orders and updates
+
 class ControlExec {
 public:
   ControlExec();

@@ -162,6 +162,9 @@ public:
 
   void ProcessChains();
 
+  // updated from ModelFeed
+  void UpdateImbalance( boost::posix_time::ptime, double dblMean, double dblSmoothed );
+
   void SaveWatch( const std::string& );
   void EmitOptions();
 
@@ -182,10 +185,7 @@ public:
   void EmitOrderStatus( idOrder_t );
   void DeleteLifeCycle( idOrder_t );
 
-  void Imbalance( const ou::tf::Depth& );
-
   void EmitStatus();
-  void FeatureSetDump();
 
   void ReleaseResources(); // mostly release related to ou::tf::PanelOrderButtons_Order
 
@@ -206,7 +206,6 @@ private:
 
   bool m_bConnected;
   bool m_bOptionsReady;
-  bool m_bTriggerFeatureSetDump;
 
   ou::ChartDataView m_dvChart; // the data
 
@@ -256,8 +255,6 @@ private:
 
   ou::ChartEntryIndicator m_ceImbalanceRawMean;
   ou::ChartEntryIndicator m_ceImbalanceRawB1;
-
-  double m_dblImbalanceMean, m_dblImbalanceSlope;
 
   ou::ChartEntryIndicator m_ceImbalanceSmoothMean;
   ou::ChartEntryIndicator m_ceImbalanceSmoothB1;
@@ -432,13 +429,6 @@ private:
   bool m_bRecordDepths;
   ou::tf::DepthsByOrder m_depths_byorder; // time series for persistence
 
-  std::atomic_uint32_t m_nMarketOrdersAsk; // pull from InteractiveChart
-  std::atomic_uint32_t m_nMarketOrdersBid; // pull from InteractiveChart
-
-  ou::tf::iqfeed::l2::OrderBased m_OrderBased; // direct access
-  ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
-  std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
-
   std::unique_ptr<Strategy> m_pStrategy;
 
   void Init();
@@ -473,8 +463,6 @@ private:
   void CheckOptions_v2();
 
   void TrackCombo();
-
-  void StartDepthByOrder( size_t nLevels );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
