@@ -19,6 +19,8 @@
  * Created: 2022/11/21 13:42:06
  */
 
+#pragma once
+
 // submits, tracks and reports on orders
 
 class ModelExec {
