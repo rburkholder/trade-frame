@@ -32,7 +32,7 @@ namespace {
   using EColour = ou::Colour::wx::EColour;
   using EField = ou::tf::l2::PriceRow::EField;
 
-  const ou::tf::l2::WinRow::vElement_t vElement = {
+  static const ou::tf::l2::WinRow::vElement_t vElement = {
     { (int)EField::PL,         40, "P/L",     wxRIGHT,  EColour::LightCyan,     EColour::Black, EColour::Cyan          }
   , { (int)EField::BuyCount,   45, "Ticks",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod }
   , { (int)EField::BuyVolume,  45, "BVol",    wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::PaleGoldenrod }
@@ -56,10 +56,10 @@ namespace tf { // TradeFrame
 namespace l2 { // market depth
 
 namespace {
-  const unsigned int FontHeight = 15; // pixels
-  const unsigned int RowHeight = 18;  // pixels
-  const unsigned int BorderWidth = 4; // pixels
-  const unsigned int FramedRows = 10; // when to move into frame then recenter
+  static const unsigned int FontHeight  = 15; // pixels
+  static const unsigned int RowHeight   = 18; // pixels
+  static const unsigned int BorderWidth =  4; // pixels
+  static const unsigned int FramedRows  = 10; // when to move into frame then recenter
 }
 
 PanelTrade::PanelTrade()
