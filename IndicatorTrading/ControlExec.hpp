@@ -19,12 +19,50 @@
  * Created: 2022/11/21 14:59:32
  */
 
+#pragma once
+
 // overall controller for handling interface events and distributing requests to the models
 // initiates orders and updates
 
+#include <TFTrading/Order.h>
+#include <TFTrading/Position.h>
+
+#include "PriceLevelOrder.hpp"
+
+namespace ou {
+namespace tf {
+namespace l2 {
+  class PanelTrade;
+}
+}
+}
+
+class InteractiveChart;
+
 class ControlExec {
 public:
-  ControlExec();
+
+  using pOrder_t = ou::tf::Order::pOrder_t;
+  using pPosition_t = ou::tf::Position::pPosition_t;
+
+  ControlExec( pPosition_t, unsigned int nDefaultOrder );
+
+  void Set( ou::tf::l2::PanelTrade* );
+  void Set( InteractiveChart* );
+
 protected:
 private:
+
+  pPosition_t m_pPosition;
+
+  ou::tf::l2::PanelTrade* m_pPanelTrade;
+  InteractiveChart* m_pInteractiveChart;
+
+  unsigned int m_nDefaultOrder;
+
+  using mapOrders_t = std::map<double,PriceLevelOrder>;
+  // note only one side can have orders at any moment in time
+  mapOrders_t m_mapAskOrders;
+  mapOrders_t m_mapBidOrders;
+
 };
