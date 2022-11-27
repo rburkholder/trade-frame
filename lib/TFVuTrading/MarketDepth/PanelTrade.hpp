@@ -65,8 +65,6 @@ public:
    long style = SYMBOL_PANELTRADE_STYLE
    );
 
-  using fTrigger_t = std::function<void(double)>;
-
   // Interface - In - Settings
   void SetInterval( double );  // price step from rung to rung
 
@@ -85,6 +83,7 @@ public:
   void SetOnTimer( fTimer_t&& fTimer ) { m_fTimer = std::move( fTimer); }
 
   // Interface - Events - Out - Execution
+  using fTrigger_t = std::function<void(double)>; // price
   void Set( fTrigger_t&& fBidPlace, fTrigger_t&& fBidCancel, fTrigger_t&& fAskPlace, fTrigger_t&& fAskCancel );
 
   // Interface - In - Updates - Pending Orders
