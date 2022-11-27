@@ -518,7 +518,9 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
   // may need this earlier?
   m_pInteractiveChart->ReleaseResources();
   m_pInteractiveChart->Disconnect();
-  m_pModelFeed->Disconnect();
+  if ( m_pModelFeed ) {
+    m_pModelFeed->Disconnect();
+  }
 
   m_pComposeInstrument.reset();
 
