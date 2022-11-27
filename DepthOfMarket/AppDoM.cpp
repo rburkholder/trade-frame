@@ -1140,7 +1140,7 @@ void AppDoM::LoadDailyHistory() {
 
             m_pPanelTrade->AppendStaticIndicator( dblSum200, "200day" );
             m_pPanelTrade->AppendStaticIndicator( dblSum100, "100day" );
-            m_pPanelTrade->AppendStaticIndicator( dblSum50, "50day" );
+            m_pPanelTrade->AppendStaticIndicator( dblSum50,   "50day" );
           }
         }
       );
