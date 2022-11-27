@@ -24,6 +24,8 @@
 // overall controller for handling interface events and distributing requests to the models
 // initiates orders and updates
 
+// TODO: add stop orders
+
 #include <map>
 
 #include <TFTrading/Order.h>
@@ -67,5 +69,7 @@ private:
   // note: the exchange will complain if there are orders on both sides
   mapOrders_t m_mapAskOrders;
   mapOrders_t m_mapBidOrders;
+
+  PriceLevelOrder m_KillPriceLevelOrder; // temporary for unrolling lambda call
 
 };

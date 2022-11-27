@@ -52,6 +52,7 @@ void ControlExec::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
             [this,price,iterOrders]( unsigned int quantity ){
               m_pPanelTrade->SetBid( price, quantity ); // set with plo instead
               if ( 0 == quantity ) {
+                m_KillPriceLevelOrder = std::move( iterOrders->second );
                 m_mapBidOrders.erase( iterOrders );
               }
             }
@@ -86,6 +87,7 @@ void ControlExec::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
             [this,price,iterOrders]( unsigned int quantity ){
               m_pPanelTrade->SetAsk( price, quantity ); // set with plo instead
               if ( 0 == quantity ) {
+                m_KillPriceLevelOrder = std::move( iterOrders->second );
                 m_mapAskOrders.erase( iterOrders );
               }
             }
