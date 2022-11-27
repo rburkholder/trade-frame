@@ -69,8 +69,8 @@ private:
   ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
   std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
 
-  ou::tf::l2::PanelTrade* m_pPanelTrade; // factor out IQuoteTrade?
-  InteractiveChart* m_pInteractiveChart; // factor out IQuoteTrade?
+  ou::tf::l2::PanelTrade* m_pPanelTrade;
+  InteractiveChart* m_pInteractiveChart;
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

@@ -43,19 +43,23 @@ void ModelFeed::Set( InteractiveChart* pInteractiveChart ) {
 }
 
 void ModelFeed::Connect() {
-  assert( m_pDispatch );
-  m_pDispatch->Connect();
-  assert( m_pWatchUnderlying );
-  m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &ModelFeed::HandleQuote ) );
-  m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ModelFeed::HandleTrade ) );
+  if ( m_pDispatch ) {
+    assert( m_pDispatch );
+    m_pDispatch->Connect();
+    assert( m_pWatchUnderlying );
+    m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &ModelFeed::HandleQuote ) );
+    m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ModelFeed::HandleTrade ) );
+  }
+  else std::cout << "ModelFeed: no dispatch" << std::endl;
 }
 
 void ModelFeed::Disconnect() {
-  assert( m_pDispatch );
-  m_pDispatch->Disconnect();
-  assert( m_pWatchUnderlying );
-  m_pWatchUnderlying->OnQuote.Remove( MakeDelegate( this, &ModelFeed::HandleQuote ) );
-  m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &ModelFeed::HandleTrade ) );
+  if ( m_pDispatch ) {
+    m_pDispatch->Disconnect();
+    assert( m_pWatchUnderlying );
+    m_pWatchUnderlying->OnQuote.Remove( MakeDelegate( this, &ModelFeed::HandleQuote ) );
+    m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &ModelFeed::HandleTrade ) );
+  }
 }
 
 void ModelFeed::HandleQuote( const ou::tf::Quote& quote ) {
