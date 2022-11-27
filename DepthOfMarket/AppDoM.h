@@ -174,7 +174,7 @@ private:
   double m_dblLastAsk;
   double m_dblLastBid;
 
-  struct PriceLevelOrder {
+  struct PriceLevelOrder { // re-implemented in IndicatorTrading/PriceLevelOrder
 
     using fUpdateQuantity_t = std::function<void(uint32_t)>;
 

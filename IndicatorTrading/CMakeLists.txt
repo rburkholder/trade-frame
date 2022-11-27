@@ -34,6 +34,7 @@ set(
     ModelExec.hpp
     ControlExec.hpp
     OptionTracker.hpp
+    PriceLevelOrder.hpp
     SessionChart.hpp
     Strategy.hpp
     TradeLifeTime.h
@@ -50,6 +51,7 @@ set(
     ModelExec.cpp
     ControlExec.cpp
     OptionTracker.cpp
+    PriceLevelOrder.cpp
     SessionChart.cpp
     Strategy.cpp
     TradeLifeTime.cpp
