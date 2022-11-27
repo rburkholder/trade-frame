@@ -71,8 +71,8 @@ public:
   void SetInterval( double );  // price step from rung to rung
 
   // Interface - In - Updates - Feed
-  void AppendStaticIndicator( double, const std::string& );
-  void UpdateDynamicIndicator( const std::string&, double );
+  void AppendStaticIndicator( double, const std::string& );  // supplied by indicators
+  void UpdateDynamicIndicator( const std::string&, double ); // supplied by indicators
 
   void OnQuote( const ou::tf::Quote& ); // l1 quote for recentering
   void OnTrade( const ou::tf::Trade& ); // l1 trade for colour, recentering
