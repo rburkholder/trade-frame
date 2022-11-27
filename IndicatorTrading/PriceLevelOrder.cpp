@@ -33,20 +33,32 @@ PriceLevelOrder::PriceLevelOrder( pOrder_t pOrder )
 PriceLevelOrder::PriceLevelOrder( PriceLevelOrder&& rhs ) {
   rhs.ClearEvents();
   m_pOrder = std::move( rhs.m_pOrder );
+  m_fUpdateQuantity = std::move( rhs.m_fUpdateQuantity );
   SetEvents();
 }
 
 PriceLevelOrder& PriceLevelOrder::operator=( pOrder_t pOrder ) {
   ClearEvents();
-  m_pOrder = pOrder;
+  m_pOrder = std::move( pOrder );
   if ( m_fUpdateQuantity ) m_fUpdateQuantity( m_pOrder->GetQuanRemaining() );
   SetEvents();
+  return *this;
+}
+
+PriceLevelOrder& PriceLevelOrder::operator=( PriceLevelOrder&& rhs ) {
+  if ( this != &rhs ) {
+    rhs.ClearEvents();
+    m_pOrder = std::move( rhs.m_pOrder );
+    m_fUpdateQuantity = std::move( rhs.m_fUpdateQuantity );
+    SetEvents();
+  }
   return *this;
 }
 
 PriceLevelOrder::~PriceLevelOrder() {
   ClearEvents();
   m_pOrder.reset();
+  m_fUpdateQuantity = nullptr;
 }
 
 void PriceLevelOrder::Set( fUpdateQuantity_t&& fUpdateQuantity ) {

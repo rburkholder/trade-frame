@@ -33,6 +33,7 @@ public:
   PriceLevelOrder( pOrder_t pOrder );
   PriceLevelOrder( PriceLevelOrder&& rhs );
   PriceLevelOrder& operator=( pOrder_t pOrder );
+  PriceLevelOrder& operator=( PriceLevelOrder&& rhs );
 
   ~PriceLevelOrder();
 
