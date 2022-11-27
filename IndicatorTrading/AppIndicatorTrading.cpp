@@ -308,9 +308,9 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
   assert( m_pPanelTrade );
   m_pPanelTrade->SetInterval( pPosition->GetInstrument()->GetMinTick() );
 
-  m_pModelFeed = std::make_shared<ModelFeed>( pPosition->GetWatch(), m_config.nL2Levels );
-  m_pModelExec = std::make_shared<ModelExec>();
-  m_pControlExec = std::make_shared<ControlExec>( pPosition, m_config.nBlockSize );
+  m_pFeedModel = std::make_shared<FeedModel>( pPosition->GetWatch(), m_config.nL2Levels );
+  m_pExecModel = std::make_shared<ExecModel>();
+  m_pExecControl = std::make_shared<ExecControl>( pPosition, m_config.nBlockSize );
 
   m_pInteractiveChart->SetPosition(
     pPosition,
@@ -356,12 +356,12 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
 
   m_ptreeTradables->ExpandAll();
 
-  m_pModelFeed->Set( m_pInteractiveChart);
-  m_pModelFeed->Set( m_pPanelTrade);
+  m_pFeedModel->Set( m_pInteractiveChart);
+  m_pFeedModel->Set( m_pPanelTrade);
 
   m_pInteractiveChart->Connect();
 
-  m_pModelFeed->Connect();
+  m_pFeedModel->Connect();
 }
 
 void AppIndicatorTrading::HandleMenuActionStartChart() {
@@ -472,7 +472,7 @@ void AppIndicatorTrading::HandleMenuActionOptionEmit() {
 void AppIndicatorTrading::HandleMenuActionFeatureSetDump() {
   CallAfter(
     [this](){
-      m_pModelFeed->FeatureSetDump();
+      m_pFeedModel->FeatureSetDump();
     }
   );
 }
@@ -518,8 +518,8 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
   // may need this earlier?
   m_pInteractiveChart->ReleaseResources();
   m_pInteractiveChart->Disconnect();
-  if ( m_pModelFeed ) {
-    m_pModelFeed->Disconnect();
+  if ( m_pFeedModel ) {
+    m_pFeedModel->Disconnect();
   }
 
   m_pComposeInstrument.reset();

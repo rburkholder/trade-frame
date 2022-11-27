@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    ModelFeed.cpp
+ * File:    FeedModel.cpp
  * Author:  raymond@burkholder.net
  * Project: IndicatorTrading
  * Created: 2022/11/21 13:42:06
@@ -21,10 +21,10 @@
 
 #include <TFVuTrading/MarketDepth/PanelTrade.hpp>
 
-#include "ModelFeed.hpp"
+#include "FeedModel.hpp"
 #include "InteractiveChart.h"
 
-ModelFeed::ModelFeed( pWatch_t pWatch, size_t nLevels )
+FeedModel::FeedModel( pWatch_t pWatch, size_t nLevels )
 : m_pWatchUnderlying( pWatch )
 , m_bTriggerFeatureSetDump( false )
 , m_dblImbalanceMean {}, m_dblImbalanceSlope {}
@@ -34,35 +34,35 @@ ModelFeed::ModelFeed( pWatch_t pWatch, size_t nLevels )
   StartDepthByOrder( nLevels );
 }
 
-void ModelFeed::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
+void FeedModel::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
   m_pPanelTrade = pPanelTrade;
 }
 
-void ModelFeed::Set( InteractiveChart* pInteractiveChart ) {
+void FeedModel::Set( InteractiveChart* pInteractiveChart ) {
   m_pInteractiveChart = pInteractiveChart;
 }
 
-void ModelFeed::Connect() {
+void FeedModel::Connect() {
   if ( m_pDispatch ) {
     assert( m_pDispatch );
     m_pDispatch->Connect();
     assert( m_pWatchUnderlying );
-    m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &ModelFeed::HandleQuote ) );
-    m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ModelFeed::HandleTrade ) );
+    m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &FeedModel::HandleQuote ) );
+    m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &FeedModel::HandleTrade ) );
   }
   else std::cout << "ModelFeed: no dispatch" << std::endl;
 }
 
-void ModelFeed::Disconnect() {
+void FeedModel::Disconnect() {
   if ( m_pDispatch ) {
     m_pDispatch->Disconnect();
     assert( m_pWatchUnderlying );
-    m_pWatchUnderlying->OnQuote.Remove( MakeDelegate( this, &ModelFeed::HandleQuote ) );
-    m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &ModelFeed::HandleTrade ) );
+    m_pWatchUnderlying->OnQuote.Remove( MakeDelegate( this, &FeedModel::HandleQuote ) );
+    m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &FeedModel::HandleTrade ) );
   }
 }
 
-void ModelFeed::HandleQuote( const ou::tf::Quote& quote ) {
+void FeedModel::HandleQuote( const ou::tf::Quote& quote ) {
   if ( !quote.IsValid() ) {
     return;
   }
@@ -72,7 +72,7 @@ void ModelFeed::HandleQuote( const ou::tf::Quote& quote ) {
   }
 }
 
-void ModelFeed::HandleTrade( const ou::tf::Trade& trade ) {
+void FeedModel::HandleTrade( const ou::tf::Trade& trade ) {
   ou::tf::Trade::price_t price = trade.Price();
   const double mid = m_pWatchUnderlying->LastQuote().Midpoint();
   if ( price >= mid ) {
@@ -87,11 +87,11 @@ void ModelFeed::HandleTrade( const ou::tf::Trade& trade ) {
   }
 }
 
-void ModelFeed::FeatureSetDump() {
+void FeedModel::FeatureSetDump() {
   m_bTriggerFeatureSetDump = true;
 }
 
-void ModelFeed::StartDepthByOrder( size_t nLevels ) { // see AppDoM as reference
+void FeedModel::StartDepthByOrder( size_t nLevels ) { // see AppDoM as reference
 
   using EState = ou::tf::iqfeed::l2::OrderBased::EState;
 
@@ -263,7 +263,7 @@ void ModelFeed::StartDepthByOrder( size_t nLevels ) { // see AppDoM as reference
 
 }
 
-void ModelFeed::Imbalance( const ou::tf::Depth& depth ) {
+void FeedModel::Imbalance( const ou::tf::Depth& depth ) {
 
   static const double w1( 19.0 / 20.0 );
   assert( 1.0 > w1 );

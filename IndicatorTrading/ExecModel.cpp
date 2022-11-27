@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    ModelExec.cpp
+ * File:    ExecModel.cpp
  * Author:  raymond@burkholder.net
  * Project: IndicatorTrading
  * Created: 2022/11/21 17:37:44
@@ -21,8 +21,8 @@
 
 //
 
-#include "ModelExec.hpp"
+#include "ExecModel.hpp"
 
-ModelExec::ModelExec() {
+ExecModel::ExecModel() {
 
 }

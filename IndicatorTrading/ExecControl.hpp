@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    ControlExec.hpp
+ * File:    ExecControl.hpp
  * Author:  raymond@burkholder.net
  * Project: IndicatorTrading
  * Created: 2022/11/21 14:59:32
@@ -43,13 +43,13 @@ namespace l2 {
 
 class InteractiveChart;
 
-class ControlExec {
+class ExecControl {
 public:
 
   using pOrder_t = ou::tf::Order::pOrder_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  ControlExec( pPosition_t, unsigned int nDefaultOrder );
+  ExecControl( pPosition_t, unsigned int nDefaultOrder );
 
   void Set( ou::tf::l2::PanelTrade* );
   void Set( InteractiveChart* );

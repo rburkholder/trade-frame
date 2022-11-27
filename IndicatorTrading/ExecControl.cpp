@@ -21,10 +21,10 @@
 
 #include <TFVuTrading/MarketDepth/PanelTrade.hpp>
 
-#include "ControlExec.hpp"
+#include "ExecControl.hpp"
 #include "InteractiveChart.h"
 
-ControlExec::ControlExec( pPosition_t pPosition, unsigned int nDefaultOrder )
+ExecControl::ExecControl( pPosition_t pPosition, unsigned int nDefaultOrder )
 : m_pPanelTrade( nullptr )
 , m_pInteractiveChart( nullptr )
 , m_nDefaultOrder( nDefaultOrder )
@@ -33,7 +33,7 @@ ControlExec::ControlExec( pPosition_t pPosition, unsigned int nDefaultOrder )
 }
 
 // TODO: much of this shouild be moved to ModelExec
-void ControlExec::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
+void ExecControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
   m_pPanelTrade = pPanelTrade;
 
   if ( m_pPanelTrade ) {
@@ -112,7 +112,7 @@ void ControlExec::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
   }
 }
 
-void ControlExec::Set( InteractiveChart* pInteractiveChart ) {
+void ExecControl::Set( InteractiveChart* pInteractiveChart ) {
   m_pInteractiveChart = pInteractiveChart;
   if ( m_pInteractiveChart ) {
   }

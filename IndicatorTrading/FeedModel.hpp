@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    ModelFeed.hpp
+ * File:    FeedModel.hpp
  * Author:  raymond@burkholder.net
  * Project: IndicatorTrading
  * Created: 2022/11/21 13:42:06
@@ -38,12 +38,12 @@ namespace l2 {
 
 class InteractiveChart;
 
-class ModelFeed {
+class FeedModel {
 public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
 
-  ModelFeed( pWatch_t, size_t nLevels );  // Future(ByOrder)
+  FeedModel( pWatch_t, size_t nLevels );  // Future(ByOrder)
 
   void Set( ou::tf::l2::PanelTrade* );
   void Set( InteractiveChart* );

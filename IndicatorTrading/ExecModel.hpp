@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    ModelExec.hpp
+ * File:    ExecModel.hpp
  * Author:  raymond@burkholder.net
  * Project: IndicatorTrading
  * Created: 2022/11/21 13:42:06
@@ -23,9 +23,9 @@
 
 // submits, tracks and reports on orders
 
-class ModelExec {
+class ExecModel {
 public:
-  ModelExec();
+  ExecModel();
 protected:
 private:
 };

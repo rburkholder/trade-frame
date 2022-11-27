@@ -39,9 +39,9 @@
 #include <TFBitsNPieces/FrameWork01.h>
 
 #include "Config.h"
-#include "ModelFeed.hpp"
-#include "ModelExec.hpp"
-#include "ControlExec.hpp"
+#include "FeedModel.hpp"
+#include "ExecModel.hpp"
+#include "ExecControl.hpp"
 #include "DailyHistory.hpp"
 
 class wxBoxSizer;
@@ -103,9 +103,9 @@ private:
   ou::tf::FrameControls* m_pFrameLadderTrade;
   ou::tf::l2::PanelTrade* m_pPanelTrade;
 
-  std::shared_ptr<ModelFeed> m_pModelFeed;
-  std::shared_ptr<ModelExec> m_pModelExec;
-  std::shared_ptr<ControlExec> m_pControlExec;
+  std::shared_ptr<FeedModel> m_pFeedModel;
+  std::shared_ptr<ExecModel> m_pExecModel;
+  std::shared_ptr<ExecControl> m_pExecControl;
 
   std::string m_sTSDataStreamStarted;
 
