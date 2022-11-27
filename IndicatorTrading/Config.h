@@ -32,6 +32,8 @@ struct Options {
   // Interactive Brokers api instance
   int ib_client_id;
 
+  unsigned int nBlockSize; // delta order per click
+
   size_t nThreads; // iqfeed multiple symbols
 
   boost::gregorian::days nDaysFront;

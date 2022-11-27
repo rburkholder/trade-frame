@@ -32,6 +32,7 @@ namespace po = boost::program_options;
 namespace {
   static const std::string sOption_Symbol( "symbol" );
   static const std::string sOption_IbClientId( "ib_client_id" );
+  static const std::string sOption_BlockSize( "order block size" );
   static const std::string sOption_Threads( "threads" );
   static const std::string sOption_DaysFront( "days_front" );
   static const std::string sOption_DaysBack( "days_back" );
@@ -71,6 +72,7 @@ bool Load( const std::string& sFileName, Options& options ) {
     config.add_options()
       ( sOption_Symbol.c_str(), po::value<std::string>( &options.sSymbol ), "symbol" )
       ( sOption_IbClientId.c_str(), po::value<int>( &options.ib_client_id )->default_value( 1 ), "IB Client ID" )
+      ( sOption_BlockSize.c_str(), po::value<unsigned int>( &options.nBlockSize )->default_value( 1 ), "Order Block Size" )
       ( sOption_Threads.c_str(), po::value<size_t>( &options.nThreads )->default_value( 1 ), "threads" )
 
       ( sOption_DaysFront.c_str(), po::value<boost::gregorian::days>(&options.nDaysFront), "minimum front month days in future")
@@ -103,6 +105,7 @@ bool Load( const std::string& sFileName, Options& options ) {
       std::replace_if( options.sSymbol.begin(), options.sSymbol.end(), [](char ch)->bool{return '~' == ch;}, '#' );
 
       bOk &= parse<int>( sFileName, vm, sOption_IbClientId, options.ib_client_id );
+      bOk &= parse<unsigned int>( sFileName, vm, sOption_BlockSize, options.nBlockSize );
       bOk &= parse<size_t>( sFileName, vm, sOption_Threads, options.nThreads );
 
       bOk &= parse<boost::gregorian::days>( sFileName, vm, sOption_DaysFront, options.nDaysFront );
