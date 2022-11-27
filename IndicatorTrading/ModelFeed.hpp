@@ -19,13 +19,24 @@
  * Created: 2022/11/21 13:42:06
  */
 
+#pragma once
+
 // provides the level I and level II data to the charts and indicators
 
 #include <TFTrading/Watch.h>
 
 #include <TFIQFeed/Level2/Symbols.hpp>
 #include <TFIQFeed/Level2/FeatureSet.hpp>
-#include <boost/date_time/posix_time/ptime.hpp>
+
+namespace ou {
+namespace tf {
+namespace l2 {
+  class PanelTrade;
+}
+}
+}
+
+class InteractiveChart;
 
 class ModelFeed {
 public:
@@ -34,9 +45,8 @@ public:
 
   ModelFeed( pWatch_t, size_t nLevels );  // Future(ByOrder)
 
-  using fImbalance_t = std::function<void( boost::posix_time::ptime, double, double )>; // dblMean, dblSmoothed
-
-  void Set( fImbalance_t&& );
+  void Set( ou::tf::l2::PanelTrade* );
+  void Set( InteractiveChart* );
 
   void Connect();
   void Disconnect();
@@ -59,7 +69,8 @@ private:
   ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
   std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
 
-  fImbalance_t m_fImbalance;
+  ou::tf::l2::PanelTrade* m_pPanelTrade; // factor out IQuoteTrade?
+  InteractiveChart* m_pInteractiveChart; // factor out IQuoteTrade?
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

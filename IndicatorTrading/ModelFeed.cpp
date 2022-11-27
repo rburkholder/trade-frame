@@ -19,14 +19,27 @@
  * Created: 2022/11/21 13:42:06
  */
 
+#include <TFVuTrading/MarketDepth/PanelTrade.hpp>
+
 #include "ModelFeed.hpp"
+#include "InteractiveChart.h"
 
 ModelFeed::ModelFeed( pWatch_t pWatch, size_t nLevels )
 : m_pWatchUnderlying( pWatch )
 , m_bTriggerFeatureSetDump( false )
 , m_dblImbalanceMean {}, m_dblImbalanceSlope {}
+, m_pPanelTrade( nullptr )
+, m_pInteractiveChart( nullptr )
 {
   StartDepthByOrder( nLevels );
+}
+
+void ModelFeed::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
+  m_pPanelTrade = pPanelTrade;
+}
+
+void ModelFeed::Set( InteractiveChart* pInteractiveChart ) {
+  m_pInteractiveChart = pInteractiveChart;
 }
 
 void ModelFeed::Connect() {
@@ -49,6 +62,10 @@ void ModelFeed::HandleQuote( const ou::tf::Quote& quote ) {
   if ( !quote.IsValid() ) {
     return;
   }
+
+  if ( m_pPanelTrade ) {
+    m_pPanelTrade->OnQuote( quote );
+  }
 }
 
 void ModelFeed::HandleTrade( const ou::tf::Trade& trade ) {
@@ -59,6 +76,10 @@ void ModelFeed::HandleTrade( const ou::tf::Trade& trade ) {
   }
   else {
     m_nMarketOrdersBid++;
+  }
+
+  if ( m_pPanelTrade ) {
+    m_pPanelTrade->OnTrade( trade );
   }
 }
 
@@ -134,16 +155,22 @@ void ModelFeed::StartDepthByOrder( size_t nLevels ) { // see AppDoM as reference
         case EState::Update:
           // simply a change, no interesting statistics
           break;
+        case EState::Clear:
+          break;
         case EState::Ready:
           assert( false ); // not allowed
           break;
       }
+
+      m_pPanelTrade->OnQuoteBid( price, volume );
+//      m_pPanelSideBySide->OnL2Bid( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
 
       if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
         Imbalance( depth );
       }
     },
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
+
       ou::tf::Trade::price_t price( depth.Price() );
       ou::tf::Trade::volume_t volume( depth.Volume() );
 
@@ -202,10 +229,15 @@ void ModelFeed::StartDepthByOrder( size_t nLevels ) { // see AppDoM as reference
         case EState::Update:
           // simply a change, no interesting statistics
           break;
+        case EState::Clear:
+          break;
         case EState::Ready:
           assert( false ); // not allowed
           break;
       }
+
+      m_pPanelTrade->OnQuoteAsk( price, volume );
+//      m_pPanelSideBySide->OnL2Ask( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
 
       if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
         Imbalance( depth );
@@ -225,10 +257,6 @@ void ModelFeed::StartDepthByOrder( size_t nLevels ) { // see AppDoM as reference
         );
     } );
 
-}
-
-void ModelFeed::Set( fImbalance_t&& fImbalance ) {
-  m_fImbalance = std::move( fImbalance );
 }
 
 void ModelFeed::Imbalance( const ou::tf::Depth& depth ) {
@@ -257,7 +285,21 @@ void ModelFeed::Imbalance( const ou::tf::Depth& depth ) {
   //}
   //m_ceImbalanceState.Append( depth.DateTime(), state );
 
-  if ( m_fImbalance ) m_fImbalance( depth.DateTime(), stats.meanY, m_dblImbalanceMean );
+  m_pInteractiveChart->UpdateImbalance( depth.DateTime(), stats.meanY, m_dblImbalanceMean );
 
 }
 
+/*
+    m_pPanelTrade->SetOnTimer(
+      [this](){
+        if ( 0 == m_cntLoops ) {
+          m_pPanelStatistics->Update( m_valuesStatistics );
+          m_valuesStatistics.Zero();
+          m_cntLoops = 5;
+        }
+        else m_cntLoops--;
+        for ( const vMA_t::value_type& vt: m_vMA ) {
+          m_pPanelTrade->UpdateDynamicIndicator( vt.sName, vt.Latest() );
+        }
+      });
+*/

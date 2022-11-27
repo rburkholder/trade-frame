@@ -356,12 +356,10 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
 
   m_ptreeTradables->ExpandAll();
 
-  m_pInteractiveChart->Connect();
+  m_pModelFeed->Set( m_pInteractiveChart);
+  m_pModelFeed->Set( m_pPanelTrade);
 
-  namespace ph = std::placeholders;
-  m_pModelFeed->Set(
-    std::bind(
-      &InteractiveChart::UpdateImbalance, m_pInteractiveChart, ph::_1, ph::_2, ph::_3  ) );
+  m_pInteractiveChart->Connect();
 
   m_pModelFeed->Connect();
 }
