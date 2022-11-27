@@ -19,8 +19,6 @@
  * Created: 2022/11/21 14:59:32
  */
 
-#include <map>
-
 #include <TFVuTrading/MarketDepth/PanelTrade.hpp>
 
 #include "ControlExec.hpp"
@@ -48,15 +46,20 @@ void ControlExec::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
           std::cout << "Submitted order#" << pOrder->GetOrderId() << " at bid " << price << std::endl;
           auto pair = m_mapBidOrders.emplace( price, PriceLevelOrder() );
           assert( pair.second );
-          PriceLevelOrder& plo( pair.first->second );
+          mapOrders_t::iterator iterOrders( pair.first );
+          PriceLevelOrder& plo( iterOrders->second );
           plo.Set( // fUpdateQuantity_t
-            [this,price]( unsigned int quantity ){
+            [this,price,iterOrders]( unsigned int quantity ){
               m_pPanelTrade->SetBid( price, quantity ); // set with plo instead
+              if ( 0 == quantity ) {
+                m_mapBidOrders.erase( iterOrders );
+              }
             }
           );
           plo = pOrder;
         }
         else {
+          std::cout << "order (bid) " << iterOrders->second.Order()->GetOrderId() << " exists" << std::endl;
         }
       },
       [this](double price){ // fBidCancel
@@ -65,8 +68,8 @@ void ControlExec::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
         else {
           pOrder_t pOrder = iterOrders->second.Order();
           m_pPosition->CancelOrder( pOrder->GetOrderId() );
-          m_mapBidOrders.erase( iterOrders ); // need elegant way to do this after cancellation
-          m_pPanelTrade->SetBid( price, 0 );
+          //m_mapBidOrders.erase( iterOrders ); // need elegant way to do this after cancellation
+          //m_pPanelTrade->SetBid( price, 0 );
         }
       },
       [this](double price){ // fAskPlace
@@ -77,15 +80,20 @@ void ControlExec::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
           std::cout << "Submitted order#" << pOrder->GetOrderId() << " at ask " << price << std::endl;
           auto pair = m_mapAskOrders.emplace( price, PriceLevelOrder() );
           assert( pair.second );
-          PriceLevelOrder& plo( pair.first->second );
+          mapOrders_t::iterator iterOrders( pair.first );
+          PriceLevelOrder& plo( iterOrders->second );
           plo.Set( // fUpdateQuantity_t
-            [this,price]( unsigned int quantity ){
+            [this,price,iterOrders]( unsigned int quantity ){
               m_pPanelTrade->SetAsk( price, quantity ); // set with plo instead
+              if ( 0 == quantity ) {
+                m_mapAskOrders.erase( iterOrders );
+              }
             }
           );
           plo = pOrder;
         }
         else {
+          std::cout << "order (ask) " << iterOrders->second.Order()->GetOrderId() << " exists" << std::endl;
         }
       },
       [this](double price){ // fAskCancel
@@ -94,8 +102,8 @@ void ControlExec::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
         else {
           pOrder_t pOrder = iterOrders->second.Order();
           m_pPosition->CancelOrder( pOrder->GetOrderId() );
-          m_mapAskOrders.erase( iterOrders ); // need elegant way to do this after cancellation
-          m_pPanelTrade->SetAsk( price, 0 );
+          //m_mapAskOrders.erase( iterOrders ); // need elegant way to do this after cancellation
+          //m_pPanelTrade->SetAsk( price, 0 );
         }
       }
     );

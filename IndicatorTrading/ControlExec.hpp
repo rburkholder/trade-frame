@@ -24,6 +24,8 @@
 // overall controller for handling interface events and distributing requests to the models
 // initiates orders and updates
 
+#include <map>
+
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
 
@@ -60,8 +62,9 @@ private:
 
   unsigned int m_nDefaultOrder;
 
+  // TODO: allow multiple orders per level
   using mapOrders_t = std::map<double,PriceLevelOrder>;
-  // note only one side can have orders at any moment in time
+  // note: the exchange will complain if there are orders on both sides
   mapOrders_t m_mapAskOrders;
   mapOrders_t m_mapBidOrders;
 
