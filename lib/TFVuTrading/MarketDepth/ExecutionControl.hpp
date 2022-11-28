@@ -46,6 +46,7 @@ public:
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   ExecutionControl( pPosition_t, unsigned int nDefaultOrder );
+  ~ExecutionControl();
 
   void Set( ou::tf::l2::PanelTrade* );
 

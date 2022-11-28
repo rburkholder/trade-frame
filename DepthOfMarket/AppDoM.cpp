@@ -753,10 +753,11 @@ void AppDoM::MenuItem_FeatureSet_Dump() {
 
 void AppDoM::HandleArmedFlag( bool bArm ) {
   if ( bArm ) {
+    m_pExecutionControl = std::make_shared<ou::tf::l2::ExecutionControl>( m_pPosition, m_config.nBlockSize );
     m_pExecutionControl->Set( m_pPanelTrade );
   }
   else {
-    //m_pPanelTrade->Set( nullptr, nullptr, nullptr, nullptr );
+    m_pExecutionControl.reset();
   }
 }
 
@@ -924,8 +925,6 @@ void AppDoM::InitializePosition( pInstrument_t pInstrument ) {
   assert( m_pPosition );
 
   LoadDailyHistory();
-
-  m_pExecutionControl = std::make_shared<ou::tf::l2::ExecutionControl>( m_pPosition, m_config.nBlockSize );
 
   m_pWatch->StartWatch();
   //std::cout << "Depth of Market connecting" << std::endl;

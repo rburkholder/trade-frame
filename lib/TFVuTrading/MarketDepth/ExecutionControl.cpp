@@ -31,7 +31,24 @@ ExecutionControl::ExecutionControl( pPosition_t pPosition, unsigned int nDefault
 : m_pPanelTrade( nullptr )
 , m_nDefaultOrder( nDefaultOrder )
 , m_pPosition( std::move( pPosition ) )
-{
+{}
+
+ExecutionControl::~ExecutionControl() {
+    // TODO: will need a controlled cancellation of all orders
+  if ( 0 != m_mapAskOrders.size() ) {
+    std::cout << "ExecutionControl: outstanding ask orders in limbo" << std::endl;
+    m_mapAskOrders.clear();
+  }
+
+  if ( 0 != m_mapBidOrders.size() ) {
+    std::cout << "ExecutionControl: outstanding bid orders in limbo" << std::endl;
+    m_mapBidOrders.clear();
+  }
+
+  if ( m_pPanelTrade ) {
+    m_pPanelTrade->Set( nullptr, nullptr, nullptr, nullptr );
+    m_pPanelTrade = nullptr;
+  }
 }
 
 // TODO: much of this shouild be moved to ExecModel
