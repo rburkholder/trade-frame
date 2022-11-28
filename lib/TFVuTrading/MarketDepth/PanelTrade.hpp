@@ -82,7 +82,7 @@ public:
   using fTimer_t = std::function<void()>; // triggered on visible ladder refresh
   void SetOnTimer( fTimer_t&& fTimer ) { m_fTimer = std::move( fTimer); }
 
-  // Interface - Events - Out - Execution
+  // Interface - In - Events - Execution
   using fTrigger_t = std::function<void(double)>; // price
   void Set( fTrigger_t&& fBidPlace, fTrigger_t&& fBidCancel, fTrigger_t&& fAskPlace, fTrigger_t&& fAskCancel );
 

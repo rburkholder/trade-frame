@@ -435,12 +435,10 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
             switch ( field ) {
               case PriceRow::EField::AskOrder:
                 //std::cout << "ask place order @ " << dblPrice << std::endl;
-                //rowPrice.SetAskOrderSize( 1 ); // need to define the multiple for inc/dec (from instrument)
                 if ( m_fAskPlace ) m_fAskPlace( dblPrice );
                 break;
               case PriceRow::EField::BidOrder:
                 //std::cout << "bid place order @ " << dblPrice << std::endl;
-                //rowPrice.SetBidOrderSize( 1 ); // need to define the multiple for inc/dec (from instrument)
                 if ( m_fBidPlace ) m_fBidPlace( dblPrice );
                 break;
               default:
@@ -452,12 +450,10 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
             switch ( field ) {
               case PriceRow::EField::AskOrder:
                 //std::cout << "ask cancel order @ " << dblPrice << std::endl;
-                //rowPrice.SetAskOrderSize( 0 ); // need to define the multiple for inc/dec (from instrument)
                 if ( m_fAskCancel ) m_fAskCancel( dblPrice );
                 break;
               case PriceRow::EField::BidOrder:
                 //std::cout << "bid cancel order @ " << dblPrice << std::endl;
-                //rowPrice.SetBidOrderSize( 0 ); // need to define the multiple for inc/dec (from instrument)
                 if ( m_fBidCancel ) m_fBidCancel( dblPrice );
                 break;
               default:
