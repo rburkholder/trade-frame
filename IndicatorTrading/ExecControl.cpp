@@ -32,7 +32,7 @@ ExecControl::ExecControl( pPosition_t pPosition, unsigned int nDefaultOrder )
 {
 }
 
-// TODO: much of this shouild be moved to ModelExec
+// TODO: much of this shouild be moved to ExecModel
 void ExecControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
   m_pPanelTrade = pPanelTrade;
 
@@ -51,7 +51,7 @@ void ExecControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
           plo.Set( // fUpdateQuantity_t
             [this,price,iterOrders]( unsigned int quantity ){
               m_pPanelTrade->SetBid( price, quantity ); // set with plo instead
-              if ( 0 == quantity ) {
+              if ( 0 == quantity ) { // based upon cancel, or fulfillment
                 m_KillPriceLevelOrder = std::move( iterOrders->second );
                 m_mapBidOrders.erase( iterOrders );
               }
@@ -69,8 +69,6 @@ void ExecControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
         else {
           pOrder_t pOrder = iterOrders->second.Order();
           m_pPosition->CancelOrder( pOrder->GetOrderId() );
-          //m_mapBidOrders.erase( iterOrders ); // need elegant way to do this after cancellation
-          //m_pPanelTrade->SetBid( price, 0 );
         }
       },
       [this](double price){ // fAskPlace
@@ -86,7 +84,7 @@ void ExecControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
           plo.Set( // fUpdateQuantity_t
             [this,price,iterOrders]( unsigned int quantity ){
               m_pPanelTrade->SetAsk( price, quantity ); // set with plo instead
-              if ( 0 == quantity ) {
+              if ( 0 == quantity ) { // based upon cancel, or fulfillment
                 m_KillPriceLevelOrder = std::move( iterOrders->second );
                 m_mapAskOrders.erase( iterOrders );
               }
@@ -104,8 +102,6 @@ void ExecControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
         else {
           pOrder_t pOrder = iterOrders->second.Order();
           m_pPosition->CancelOrder( pOrder->GetOrderId() );
-          //m_mapAskOrders.erase( iterOrders ); // need elegant way to do this after cancellation
-          //m_pPanelTrade->SetAsk( price, 0 );
         }
       }
     );
