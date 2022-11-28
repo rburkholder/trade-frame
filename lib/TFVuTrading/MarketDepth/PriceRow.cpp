@@ -140,36 +140,25 @@ void PriceRow::DelRowElements() {
 
 }
 
-void PriceRow::Set( fMouseClick_t&& fLeft, fMouseClick_t&& fRight ) {
-  m_fMouseClick_Left = std::move( fLeft );
-  m_fMouseClick_Right = std::move( fRight );
-  assert( m_dreBidOrder.GetWinRowElement() );
-  m_dreBidOrder.GetWinRowElement()->Set(
-    [this](){
-      if ( m_fMouseClick_Left ) {
-        m_fMouseClick_Left( m_drePrice.Get(), EField::BidOrder );
-      }
-    },
-    [this](){
-      if ( m_fMouseClick_Right ) {
-        m_fMouseClick_Right( m_drePrice.Get(), EField::BidOrder );
-      }
-    }
-  );
+void PriceRow::Set( fClick_t&& fClick ) {
 
-  assert( m_dreAskOrder.GetWinRowElement() );
-  m_dreAskOrder.GetWinRowElement()->Set(
-    [this](){
-      if ( m_fMouseClick_Left ) {
-        m_fMouseClick_Left( m_drePrice.Get(), EField::AskOrder );
-      }
-    },
-    [this](){
-      if ( m_fMouseClick_Right ) {
-        m_fMouseClick_Right( m_drePrice.Get(), EField::AskOrder );
-      }
-    }
-  );
+  m_fClick = std::move( fClick );
+
+  WinRowElement* pwre;
+
+  pwre = m_dreAskOrder.GetWinRowElement();
+  assert( pwre );
+  pwre->Set(
+    [this](EButton button, bool shift, bool control, bool alt ){
+      if ( m_fClick ) m_fClick( m_drePrice.Get(), EField::AskOrder, button, shift, control, alt );
+    } );
+
+  pwre = m_dreBidOrder.GetWinRowElement();
+  assert( pwre );
+  pwre->Set(
+    [this](EButton button, bool shift, bool control, bool alt ){
+      if ( m_fClick ) m_fClick( m_drePrice.Get(), EField::BidOrder, button, shift, control, alt );
+    } );
 }
 
 void PriceRow::SetAskOrderSize( unsigned int n ) {

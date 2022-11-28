@@ -68,8 +68,6 @@ void WinRowElement::Init() {
   m_bFocusSet = false;
   m_bCanHaveFocus = false;
   m_fClick = nullptr;
-  m_fMouseClick_Left = nullptr;
-  m_fMouseClick_Right = nullptr;
   //m_ColourBackground = wxSystemSettings::GetColour( wxSystemColour::wxSYS_COLOUR_WINDOW ).GetRGB();
   //m_ColourForeground = wxSystemSettings::GetColour( wxSystemColour::wxSYS_COLOUR_WINDOWTEXT ).GetRGB();
 }
@@ -135,11 +133,6 @@ void WinRowElement::SetColours( EColour colourB, EColour colourF, EColour colour
   SetColourHighlight( colourH );
 }
 
-void WinRowElement::Set( fMouseClick_t&& fLeft, fMouseClick_t&& fRight ) {
-  m_fMouseClick_Left = std::move( fLeft );
-  m_fMouseClick_Right = std::move( fRight );
-}
-
 void WinRowElement::Set( fClick_t&& fClick ) {
   m_fClick = std::move( fClick );
 }
@@ -196,7 +189,6 @@ void WinRowElement::OnFocusKill( wxFocusEvent& event ) {
 
 void WinRowElement::OnMouseLeftUp( wxMouseEvent& event ) {
   //std::cout << "left click" << std::endl;
-  if ( m_fMouseClick_Left ) m_fMouseClick_Left();
   if ( m_fClick ) m_fClick( EButton::Left, event.ShiftDown(), event.ControlDown(), event.AltDown() );
   event.Skip();
 }
@@ -209,7 +201,6 @@ void WinRowElement::OnMouseMiddleUp( wxMouseEvent& event ) {
 
 void WinRowElement::OnMouseRightUp( wxMouseEvent& event ) {
   //std::cout << "right click" << std::endl;
-  if ( m_fMouseClick_Right ) m_fMouseClick_Right();
   if ( m_fClick ) m_fClick( EButton::Right, event.ShiftDown(), event.ControlDown(), event.AltDown() );
   event.Skip();
 }

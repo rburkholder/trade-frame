@@ -88,12 +88,8 @@ public:
     m_dreIndicatorDynamic.Del( sIndicator );
   }
 
-  // version 1:
-  using fMouseClick_t = std::function<void(double,EField)>; // returns the price at this level
-  void Set( fMouseClick_t&& left, fMouseClick_t&& right );
-
-  // version 2: price, field, left(-1)/middle(0)/right(1), shift, control, alt
-  using fClick_t = std::function<void(double,EField,ou::tf::Mouse::EButton,bool,bool,bool)>;
+  using EButton = ou::tf::Mouse::EButton;
+  using fClick_t = std::function<void(double price,EField,EButton,bool shift,bool control,bool alt)>;
   void Set( fClick_t&& );
 
   void SetAskOrderSize( unsigned int );
@@ -121,9 +117,6 @@ private:
   DataRowElement<unsigned int>   m_dreVolume;
   DataRowElementIndicatorStatic  m_dreIndicatorStatic;
   DataRowElementIndicatorDynamic m_dreIndicatorDynamic;
-
-  fMouseClick_t m_fMouseClick_Left;
-  fMouseClick_t m_fMouseClick_Right;
 
   fClick_t m_fClick;
 

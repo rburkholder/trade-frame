@@ -68,7 +68,6 @@ public:
   using EButton = ou::tf::Mouse::EButton;
   using EColour = ou::Colour::wx::EColour;
 
-  using fMouseClick_t = std::function<void()>;
   using fClick_t = std::function<void(EButton,bool,bool,bool)>;
 
   void SetText( const std::string& );
@@ -81,7 +80,6 @@ public:
   void SetColours( EColour colourB, EColour colourF, EColour colourH );
 
   void Set( fClick_t&& );
-  void Set( fMouseClick_t&& left, fMouseClick_t&& right ); // deprecated
 
 protected:
 private:
@@ -101,9 +99,6 @@ private:
   long m_style;  // wxCENTER, wxLEFT, wxRIGHT
 
   fClick_t m_fClick;
-
-  fMouseClick_t m_fMouseClick_Left; // deprecated
-  fMouseClick_t m_fMouseClick_Right; // deprecated
 
   void Init();
   void CreateControls();

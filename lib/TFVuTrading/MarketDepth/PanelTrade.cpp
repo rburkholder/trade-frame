@@ -430,38 +430,38 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
         PriceRow& rowPrice( m_PriceRows[ iy ] );
         rowPrice.SetRowElements( *pWinRow );
         rowPrice.SetPrice( m_PriceRows.Cast( iy ), false );
-        rowPrice.Set( // TODO: make these as bind statements to methods
-          [this,&rowPrice](double dblPrice, PriceRow::EField field){
+        rowPrice.Set(  // TODO: make these as bind statements to methods
+          [this,&rowPrice](double dblPrice, PriceRow::EField field,PriceRow::EButton button,bool shift, bool control, bool alt ){
             switch ( field ) {
               case PriceRow::EField::AskOrder:
-                //std::cout << "ask place order @ " << dblPrice << std::endl;
-                if ( m_fAskPlace ) m_fAskPlace( dblPrice );
+                switch ( button ) {
+                  case PriceRow::EButton::Left:
+                    if ( m_fAskPlace ) m_fAskPlace( dblPrice );
+                    break;
+                  case PriceRow::EButton::Middle:
+                    break;
+                  case PriceRow::EButton::Right:
+                    if ( m_fAskCancel ) m_fAskCancel( dblPrice );
+                    break;
+                }
                 break;
               case PriceRow::EField::BidOrder:
-                //std::cout << "bid place order @ " << dblPrice << std::endl;
-                if ( m_fBidPlace ) m_fBidPlace( dblPrice );
+                switch ( button ) {
+                  case PriceRow::EButton::Left:
+                    if ( m_fBidPlace ) m_fBidPlace( dblPrice );
+                    break;
+                  case PriceRow::EButton::Middle:
+                    break;
+                  case PriceRow::EButton::Right:
+                    if ( m_fBidCancel ) m_fBidCancel( dblPrice );
+                    break;
+                }
                 break;
               default:
                 assert( false );
                 break;
             }
-          },
-          [this,&rowPrice](double dblPrice, PriceRow::EField field){
-            switch ( field ) {
-              case PriceRow::EField::AskOrder:
-                //std::cout << "ask cancel order @ " << dblPrice << std::endl;
-                if ( m_fAskCancel ) m_fAskCancel( dblPrice );
-                break;
-              case PriceRow::EField::BidOrder:
-                //std::cout << "bid cancel order @ " << dblPrice << std::endl;
-                if ( m_fBidCancel ) m_fBidCancel( dblPrice );
-                break;
-              default:
-                assert( false );
-                break;
-            }
-          }
-        );
+          } );
         //rowData.Refresh();  // TODO: refactor out into timer
       }
     }
