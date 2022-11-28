@@ -431,7 +431,7 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
         rowPrice.SetRowElements( *pWinRow );
         rowPrice.SetPrice( m_PriceRows.Cast( iy ), false );
         rowPrice.Set(  // TODO: make these as bind statements to methods
-          [this,&rowPrice](double dblPrice, PriceRow::EField field,PriceRow::EButton button,bool shift, bool control, bool alt ){
+          [this](double dblPrice, PriceRow::EField field, PriceRow::EButton button, bool shift, bool control, bool alt ){
             switch ( field ) {
               case PriceRow::EField::AskOrder:
                 switch ( button ) {
