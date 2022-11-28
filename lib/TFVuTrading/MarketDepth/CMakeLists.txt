@@ -11,9 +11,11 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 set(
   file_h
     DataRowElement.hpp
+    ExecutionControl.hpp
     PanelLevelIIButtons.hpp
     PanelSideBySide.hpp
     PanelTrade.hpp
+    PriceLevelOrder.hpp
     PriceRow.hpp
     PriceRows.hpp
     WinRow.hpp
@@ -23,9 +25,11 @@ set(
 set(
   file_cpp
     DataRowElement.cpp
+    ExecutionControl.cpp
     PanelLevelIIButtons.cpp
     PanelSideBySide.cpp
     PanelTrade.cpp
+    PriceLevelOrder.cpp
     PriceRow.cpp
     PriceRows.cpp
     WinRow.cpp

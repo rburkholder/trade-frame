@@ -13,9 +13,9 @@
  ************************************************************************/
 
 /*
- * File:    ExecControl.hpp
+ * File:    ExecutionControl.hpp
  * Author:  raymond@burkholder.net
- * Project: IndicatorTrading
+ * Project: lib/TFVuTrading/MarketDepth
  * Created: 2022/11/21 14:59:32
  */
 
@@ -41,8 +41,6 @@ namespace l2 {
 }
 }
 
-class InteractiveChart;
-
 class ExecControl {
 public:
 
@@ -52,7 +50,6 @@ public:
   ExecControl( pPosition_t, unsigned int nDefaultOrder );
 
   void Set( ou::tf::l2::PanelTrade* );
-  void Set( InteractiveChart* );
 
 protected:
 private:
@@ -60,7 +57,6 @@ private:
   pPosition_t m_pPosition;
 
   ou::tf::l2::PanelTrade* m_pPanelTrade;
-  InteractiveChart* m_pInteractiveChart;
 
   unsigned int m_nDefaultOrder;
 

@@ -13,20 +13,18 @@
  ************************************************************************/
 
 /*
- * File:    ControlExec.cpp
+ * File:    ExecutionControl.cpp
  * Author:  raymond@burkholder.net
- * Project: IndicatorTrading
+ * Project: lib/TFVuTrading/MarketDepth
  * Created: 2022/11/21 14:59:32
  */
 
-#include <TFVuTrading/MarketDepth/PanelTrade.hpp>
+#include "PanelTrade.hpp"
 
-#include "ExecControl.hpp"
-#include "InteractiveChart.h"
+#include "ExecutionControl.hpp"
 
 ExecControl::ExecControl( pPosition_t pPosition, unsigned int nDefaultOrder )
 : m_pPanelTrade( nullptr )
-, m_pInteractiveChart( nullptr )
 , m_nDefaultOrder( nDefaultOrder )
 , m_pPosition( std::move( pPosition ) )
 {
@@ -108,8 +106,3 @@ void ExecControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
   }
 }
 
-void ExecControl::Set( InteractiveChart* pInteractiveChart ) {
-  m_pInteractiveChart = pInteractiveChart;
-  if ( m_pInteractiveChart ) {
-  }
-}

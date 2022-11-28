@@ -36,12 +36,13 @@
 
 #include <TFTrading/DBWrapper.h>
 
+#include <TFVuTrading/MarketDepth/ExecutionControl.hpp>
+
 #include <TFBitsNPieces/FrameWork01.h>
 
 #include "Config.h"
 #include "FeedModel.hpp"
 #include "ExecModel.hpp"
-#include "ExecControl.hpp"
 #include "DailyHistory.hpp"
 
 class wxBoxSizer;

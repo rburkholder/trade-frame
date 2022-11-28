@@ -28,13 +28,11 @@ set(
     AppIndicatorTrading.h
     Config.h
     DailyHistory.hpp
-    ExecControl.hpp
     ExecModel.hpp
     FeedModel.hpp
     InteractiveChart.h
     Indicators.hpp
     OptionTracker.hpp
-    PriceLevelOrder.hpp
     SessionChart.hpp
     Strategy.hpp
     TradeLifeTime.h
@@ -46,12 +44,10 @@ set(
     AppIndicatorTrading.cpp
     Config.cpp
     DailyHistory.cpp
-    ExecControl.cpp
     ExecModel.cpp
     FeedModel.cpp
     InteractiveChart.cpp
     OptionTracker.cpp
-    PriceLevelOrder.cpp
     SessionChart.cpp
     Strategy.cpp
     TradeLifeTime.cpp

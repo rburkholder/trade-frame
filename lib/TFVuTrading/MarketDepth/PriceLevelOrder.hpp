@@ -15,7 +15,7 @@
 /*
  * File:    PriceLevelOrder.hpp (from AppDoM)
  * Author:  raymond@burkholder.net
- * Project: IndicatorTrading
+ * Project: lib/TFVuTrading/MarketDepth
  * Created: 2022/11/27 12:41:04
  */
 
@@ -46,7 +46,7 @@ public:
 
   void HandleOnPartialFill( const ou::tf::Order& order );
   void HandleOnOrderFilled( const ou::tf::Order& order );
-  void HandleOnOrderCancelled( const ou::tf::Order& order );
+  void HandleOnOrderCancelled( const ou::tf::Order& order ); // does order active go to 0?
   void HandleOnOrderExecution( const std::pair<const ou::tf::Order&, const ou::tf::Execution&>& pair );
 
 protected:

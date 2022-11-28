@@ -40,6 +40,7 @@
 #include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/FrameControls.h>
 #include <TFVuTrading/PanelOrderButtons.h>
+
 #include <TFVuTrading/MarketDepth/PanelTrade.hpp>
 
 #include "200DayChart.hpp"
