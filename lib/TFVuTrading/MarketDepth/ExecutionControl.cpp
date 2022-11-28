@@ -36,6 +36,7 @@ ExecutionControl::ExecutionControl( pPosition_t pPosition, unsigned int nDefault
 
 // TODO: much of this shouild be moved to ExecModel
 void ExecutionControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
+
   m_pPanelTrade = pPanelTrade;
 
   if ( m_pPanelTrade ) {

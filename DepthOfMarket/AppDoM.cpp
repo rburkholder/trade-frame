@@ -753,69 +753,10 @@ void AppDoM::MenuItem_FeatureSet_Dump() {
 
 void AppDoM::HandleArmedFlag( bool bArm ) {
   if ( bArm ) {
-    m_pPanelTrade->Set( // TODO set only one map is active
-      [this](double price){ // fBidPlace
-        mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
-        if ( m_mapBidOrders.end() == iterOrders ) {
-          pOrder_t pOrder = m_pPosition->PlaceOrder(
-            ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_config.nBlockSize, price );
-          std::cout << "Submitted order#" << pOrder->GetOrderId() << " at bid " << price << std::endl;
-          auto pair = m_mapBidOrders.emplace( price, ou::tf::l2::PriceLevelOrder() );
-          assert( pair.second );
-          ou::tf::l2::PriceLevelOrder& plo( pair.first->second );
-          plo.Set( // fUpdateQuantity_t
-            [this,price]( unsigned int quantity ){
-              m_pPanelTrade->SetBid( price, quantity ); // set with plo instead
-            }
-          );
-          plo = pOrder;
-        }
-        else {
-        }
-      },
-      [this](double price){ // fBidCancel
-        mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
-        if ( m_mapBidOrders.end() == iterOrders ) {}
-        else {
-          pOrder_t pOrder = iterOrders->second.Order();
-          m_pPosition->CancelOrder( pOrder->GetOrderId() );
-          m_mapBidOrders.erase( iterOrders ); // need elegant way to do this after cancellation
-          m_pPanelTrade->SetBid( price, 0 );
-        }
-      },
-      [this](double price){ // fAskPlace
-        mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
-        if ( m_mapAskOrders.end() == iterOrders ) {
-          pOrder_t pOrder = m_pPosition->PlaceOrder(
-            ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_config.nBlockSize, price );
-          std::cout << "Submitted order#" << pOrder->GetOrderId() << " at ask " << price << std::endl;
-          auto pair = m_mapAskOrders.emplace( price, ou::tf::l2::PriceLevelOrder() );
-          assert( pair.second );
-          ou::tf::l2::PriceLevelOrder& plo( pair.first->second );
-          plo.Set( // fUpdateQuantity_t
-            [this,price]( unsigned int quantity ){
-              m_pPanelTrade->SetAsk( price, quantity ); // set with plo instead
-            }
-          );
-          plo = pOrder;
-        }
-        else {
-        }
-      },
-      [this](double price){ // fAskCancel
-        mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
-        if ( m_mapAskOrders.end() == iterOrders ) {}
-        else {
-          pOrder_t pOrder = iterOrders->second.Order();
-          m_pPosition->CancelOrder( pOrder->GetOrderId() );
-          m_mapAskOrders.erase( iterOrders ); // need elegant way to do this after cancellation
-          m_pPanelTrade->SetAsk( price, 0 );
-        }
-      }
-    );
+    m_pExecutionControl->Set( m_pPanelTrade );
   }
   else {
-    m_pPanelTrade->Set( nullptr, nullptr, nullptr, nullptr );
+    //m_pPanelTrade->Set( nullptr, nullptr, nullptr, nullptr );
   }
 }
 
@@ -983,6 +924,8 @@ void AppDoM::InitializePosition( pInstrument_t pInstrument ) {
   assert( m_pPosition );
 
   LoadDailyHistory();
+
+  m_pExecutionControl = std::make_shared<ou::tf::l2::ExecutionControl>( m_pPosition, m_config.nBlockSize );
 
   m_pWatch->StartWatch();
   //std::cout << "Depth of Market connecting" << std::endl;

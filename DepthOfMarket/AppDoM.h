@@ -50,6 +50,7 @@
 #include <TFVuTrading/PanelLogging.h>
 
 #include <TFVuTrading/MarketDepth/PriceLevelOrder.hpp>
+#include <TFVuTrading/MarketDepth/ExecutionControl.hpp>
 
 #include "Config.h"
 #include "PanelStatistics.hpp"
@@ -97,6 +98,8 @@ private:
   ou::tf::l2::PanelTrade* m_pPanelTrade;
   ou::tf::l2::PanelLevelIIButtons* m_pPanelLevelIIButtons;
   ou::tf::l2::PanelSideBySide* m_pPanelSideBySide;
+
+  std::shared_ptr<ou::tf::l2::ExecutionControl> m_pExecutionControl;
 
   int m_cntLoops;
   PanelStatistics::values_t m_valuesStatistics;
