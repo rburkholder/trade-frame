@@ -36,10 +36,8 @@
 namespace ou {
 namespace tf {
 namespace l2 {
-  class PanelTrade;
-}
-}
-}
+
+class PanelTrade;
 
 class ExecControl {
 public:
@@ -69,3 +67,7 @@ private:
   PriceLevelOrder m_KillPriceLevelOrder; // temporary for unrolling lambda call
 
 };
+
+} // market depth
+} // namespace tf
+} // namespace ou

@@ -23,6 +23,10 @@
 
 #include "ExecutionControl.hpp"
 
+namespace ou {
+namespace tf {
+namespace l2 {
+
 ExecControl::ExecControl( pPosition_t pPosition, unsigned int nDefaultOrder )
 : m_pPanelTrade( nullptr )
 , m_nDefaultOrder( nDefaultOrder )
@@ -106,3 +110,6 @@ void ExecControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
   }
 }
 
+} // market depth
+} // namespace tf
+} // namespace ou

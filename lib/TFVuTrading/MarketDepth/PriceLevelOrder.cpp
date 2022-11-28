@@ -21,6 +21,10 @@
 
  #include "PriceLevelOrder.hpp"
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+namespace l2 { // market depth
+
 PriceLevelOrder::PriceLevelOrder() {}
 
 PriceLevelOrder::PriceLevelOrder( pOrder_t pOrder )
@@ -101,3 +105,7 @@ void PriceLevelOrder::HandleOnOrderCancelled( const ou::tf::Order& order ) {
 void PriceLevelOrder::HandleOnOrderExecution( const std::pair<const ou::tf::Order&, const ou::tf::Execution&>& pair ) {
   std::cout << "Execution order#" << pair.first.GetOrderId() << " of " << pair.second.GetSize() << std::endl;
 }
+
+} // market depth
+} // namespace tf
+} // namespace ou

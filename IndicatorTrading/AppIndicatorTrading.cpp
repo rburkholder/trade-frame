@@ -311,7 +311,7 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
 
   m_pFeedModel = std::make_shared<FeedModel>( pPosition->GetWatch(), m_config.nL2Levels );
   m_pExecModel = std::make_shared<ExecModel>();
-  m_pExecControl = std::make_shared<ExecControl>( pPosition, m_config.nBlockSize );
+  m_pExecControl = std::make_shared<ou::tf::l2::ExecControl>( pPosition, m_config.nBlockSize );
 
   m_pInteractiveChart->SetPosition(
     pPosition,

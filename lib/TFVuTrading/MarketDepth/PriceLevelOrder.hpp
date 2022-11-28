@@ -23,6 +23,10 @@
 
 #include <TFTrading/Order.h>
 
+namespace ou { // One Unified
+namespace tf { // TradeFrame
+namespace l2 { // market depth
+
 class PriceLevelOrder {
 public:
 
@@ -57,5 +61,8 @@ protected:
 
 private:
 
-
 }; // PriceLevelOrder
+
+} // market depth
+} // namespace tf
+} // namespace ou
