@@ -27,7 +27,7 @@ namespace ou {
 namespace tf {
 namespace l2 {
 
-ExecControl::ExecControl( pPosition_t pPosition, unsigned int nDefaultOrder )
+ExecutionControl::ExecutionControl( pPosition_t pPosition, unsigned int nDefaultOrder )
 : m_pPanelTrade( nullptr )
 , m_nDefaultOrder( nDefaultOrder )
 , m_pPosition( std::move( pPosition ) )
@@ -35,7 +35,7 @@ ExecControl::ExecControl( pPosition_t pPosition, unsigned int nDefaultOrder )
 }
 
 // TODO: much of this shouild be moved to ExecModel
-void ExecControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
+void ExecutionControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
   m_pPanelTrade = pPanelTrade;
 
   if ( m_pPanelTrade ) {

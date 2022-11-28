@@ -39,13 +39,13 @@ namespace l2 {
 
 class PanelTrade;
 
-class ExecControl {
+class ExecutionControl {
 public:
 
   using pOrder_t = ou::tf::Order::pOrder_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  ExecControl( pPosition_t, unsigned int nDefaultOrder );
+  ExecutionControl( pPosition_t, unsigned int nDefaultOrder );
 
   void Set( ou::tf::l2::PanelTrade* );
 

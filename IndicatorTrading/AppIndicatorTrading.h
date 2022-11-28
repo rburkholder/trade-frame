@@ -106,7 +106,7 @@ private:
 
   std::shared_ptr<FeedModel> m_pFeedModel;
   std::shared_ptr<ExecModel> m_pExecModel;
-  std::shared_ptr<ou::tf::l2::ExecControl> m_pExecControl;
+  std::shared_ptr<ou::tf::l2::ExecutionControl> m_pExecutionControl;
 
   std::string m_sTSDataStreamStarted;
 
