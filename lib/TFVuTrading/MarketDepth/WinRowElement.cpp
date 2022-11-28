@@ -67,6 +67,7 @@ bool WinRowElement::Create(
 void WinRowElement::Init() {
   m_bFocusSet = false;
   m_bCanHaveFocus = false;
+  m_fClick = nullptr;
   m_fMouseClick_Left = nullptr;
   m_fMouseClick_Right = nullptr;
   //m_ColourBackground = wxSystemSettings::GetColour( wxSystemColour::wxSYS_COLOUR_WINDOW ).GetRGB();
@@ -82,6 +83,7 @@ void WinRowElement::CreateControls() {
   Bind( wxEVT_LEAVE_WINDOW, &WinRowElement::OnMouseLLeaveWindow, this );
 
   Bind( wxEVT_LEFT_UP, &WinRowElement::OnMouseLeftUp, this );
+  Bind( wxEVT_MIDDLE_UP, &WinRowElement::OnMouseMiddleUp, this );
   Bind( wxEVT_RIGHT_UP, &WinRowElement::OnMouseRightUp, this );
 
   //Bind( wxEVT_CONTEXT_MENU, &WinRowElement::OnContextMenu, this, GetId() );
@@ -138,6 +140,10 @@ void WinRowElement::Set( fMouseClick_t&& fLeft, fMouseClick_t&& fRight ) {
   m_fMouseClick_Right = std::move( fRight );
 }
 
+void WinRowElement::Set( fClick_t&& fClick ) {
+  m_fClick = std::move( fClick );
+}
+
 void WinRowElement::Paint() {
   wxWindowDC dc( this );
   Render( dc );
@@ -191,12 +197,20 @@ void WinRowElement::OnFocusKill( wxFocusEvent& event ) {
 void WinRowElement::OnMouseLeftUp( wxMouseEvent& event ) {
   //std::cout << "left click" << std::endl;
   if ( m_fMouseClick_Left ) m_fMouseClick_Left();
+  if ( m_fClick ) m_fClick( EButton::Left, event.ShiftDown(), event.ControlDown(), event.AltDown() );
+  event.Skip();
+}
+
+void WinRowElement::OnMouseMiddleUp( wxMouseEvent& event ) {
+  //std::cout << "middle click" << std::endl;
+  if ( m_fClick ) m_fClick( EButton::Middle, event.ShiftDown(), event.ControlDown(), event.AltDown() );
   event.Skip();
 }
 
 void WinRowElement::OnMouseRightUp( wxMouseEvent& event ) {
   //std::cout << "right click" << std::endl;
   if ( m_fMouseClick_Right ) m_fMouseClick_Right();
+  if ( m_fClick ) m_fClick( EButton::Right, event.ShiftDown(), event.ControlDown(), event.AltDown() );
   event.Skip();
 }
 
@@ -229,6 +243,7 @@ void WinRowElement::OnDestroy( wxWindowDestroyEvent& event ) {
   Unbind( wxEVT_LEAVE_WINDOW, &WinRowElement::OnMouseLLeaveWindow, this );
 
   Unbind( wxEVT_LEFT_UP, &WinRowElement::OnMouseLeftUp, this );
+  Unbind( wxEVT_MIDDLE_UP, &WinRowElement::OnMouseMiddleUp, this );
   Unbind( wxEVT_RIGHT_UP, &WinRowElement::OnMouseRightUp, this );
 
   //Unbind( wxEVT_CONTEXT_MENU, &WinRowElement::OnContextMenu, this, this->GetId() );

@@ -143,7 +143,8 @@ void PriceRow::DelRowElements() {
 void PriceRow::Set( fMouseClick_t&& fLeft, fMouseClick_t&& fRight ) {
   m_fMouseClick_Left = std::move( fLeft );
   m_fMouseClick_Right = std::move( fRight );
-  m_dreBidOrder.Set(
+  assert( m_dreBidOrder.GetWinRowElement() );
+  m_dreBidOrder.GetWinRowElement()->Set(
     [this](){
       if ( m_fMouseClick_Left ) {
         m_fMouseClick_Left( m_drePrice.Get(), EField::BidOrder );
@@ -155,7 +156,9 @@ void PriceRow::Set( fMouseClick_t&& fLeft, fMouseClick_t&& fRight ) {
       }
     }
   );
-  m_dreAskOrder.Set(
+
+  assert( m_dreAskOrder.GetWinRowElement() );
+  m_dreAskOrder.GetWinRowElement()->Set(
     [this](){
       if ( m_fMouseClick_Left ) {
         m_fMouseClick_Left( m_drePrice.Get(), EField::AskOrder );

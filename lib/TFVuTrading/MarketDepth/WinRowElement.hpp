@@ -30,6 +30,8 @@
 
 #include <OUCommon/Colour.h>
 
+#include <TFVuTrading/Mouse.hpp>
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
@@ -63,8 +65,11 @@ public:
     long style = SYMBOL_WINELEMENT_STYLE
     );
 
+  using EButton = ou::tf::Mouse::EButton;
   using EColour = ou::Colour::wx::EColour;
+
   using fMouseClick_t = std::function<void()>;
+  using fClick_t = std::function<void(EButton,bool,bool,bool)>;
 
   void SetText( const std::string& );
   void SetText( const std::string&, bool bHighlight );
@@ -75,7 +80,8 @@ public:
   void SetColourHighlight( EColour colour );
   void SetColours( EColour colourB, EColour colourF, EColour colourH );
 
-  void Set( fMouseClick_t&& left, fMouseClick_t&& right );
+  void Set( fClick_t&& );
+  void Set( fMouseClick_t&& left, fMouseClick_t&& right ); // deprecated
 
 protected:
 private:
@@ -94,8 +100,10 @@ private:
 
   long m_style;  // wxCENTER, wxLEFT, wxRIGHT
 
-  fMouseClick_t m_fMouseClick_Left;
-  fMouseClick_t m_fMouseClick_Right;
+  fClick_t m_fClick;
+
+  fMouseClick_t m_fMouseClick_Left; // deprecated
+  fMouseClick_t m_fMouseClick_Right; // deprecated
 
   void Init();
   void CreateControls();
@@ -107,6 +115,7 @@ private:
   void OnFocusKill( wxFocusEvent& );
 
   void OnMouseLeftUp( wxMouseEvent& );
+  void OnMouseMiddleUp( wxMouseEvent& );
   void OnMouseRightUp( wxMouseEvent& );
 
   void OnMouseEnterWindow( wxMouseEvent& );

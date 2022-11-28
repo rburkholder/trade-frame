@@ -42,6 +42,7 @@ set(
     ModelPortfolio.h
     ModelPortfolioPositionOrderExecution.h
     ModelPosition.h
+    Mouse.hpp
     NotebookOptionChains.h
     PanelChartHdf5.h
     PanelFinancialChart.h

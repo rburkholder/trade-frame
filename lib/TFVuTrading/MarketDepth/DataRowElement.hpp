@@ -51,9 +51,6 @@ public:
   void Add( T );
   T Get() const;
 
-  using fMouseClick_t = WinRowElement::fMouseClick_t;
-  void Set( fMouseClick_t&& fLeft, fMouseClick_t&& fRight );
-
 protected:
 
   T m_value;
@@ -135,12 +132,6 @@ void DataRowElement<T>::UpdateWinRowElement() {
   if ( nullptr != m_pWinRowElement ) {
     m_pWinRowElement->SetText( m_sValue, m_bHighlight );
   }
-}
-
-template<typename T>
-void DataRowElement<T>::Set( fMouseClick_t&& fLeft, fMouseClick_t&& fRight ) {
-  assert( m_pWinRowElement );
-  m_pWinRowElement->Set( std::move( fLeft ), std::move( fRight ) );
 }
 
 // class DataRowElementPrice
