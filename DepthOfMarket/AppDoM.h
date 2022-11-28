@@ -18,7 +18,7 @@
  * File:    AppDoM.h
  * Author:  raymond@burkholder.net
  * Project: App Depth of Market
- * Created on October 12, 2021, 23:04
+ * Created: October 12, 2021, 23:04
  */
 
 #include <atomic>
@@ -48,6 +48,8 @@
 #include <TFBitsNPieces/FrameWork01.h>
 
 #include <TFVuTrading/PanelLogging.h>
+
+#include <TFVuTrading/MarketDepth/PriceLevelOrder.hpp>
 
 #include "Config.h"
 #include "PanelStatistics.hpp"
@@ -174,85 +176,7 @@ private:
   double m_dblLastAsk;
   double m_dblLastBid;
 
-  struct PriceLevelOrder { // re-implemented in IndicatorTrading/PriceLevelOrder
-
-    using fUpdateQuantity_t = std::function<void(uint32_t)>;
-
-    pOrder_t m_pOrder;
-    fUpdateQuantity_t m_fUpdateQuantity;
-
-    PriceLevelOrder() {}
-
-    PriceLevelOrder( pOrder_t pOrder )
-    : m_pOrder( pOrder )
-    {
-      if ( m_fUpdateQuantity ) m_fUpdateQuantity( m_pOrder->GetQuanRemaining() );
-      SetEvents();
-    }
-
-    PriceLevelOrder( PriceLevelOrder&& rhs ) {
-      rhs.ClearEvents();
-      m_pOrder = std::move( rhs.m_pOrder );
-      SetEvents();
-    }
-
-    PriceLevelOrder& operator=( pOrder_t pOrder ) {
-      ClearEvents();
-      m_pOrder = pOrder;
-      if ( m_fUpdateQuantity ) m_fUpdateQuantity( m_pOrder->GetQuanRemaining() );
-      SetEvents();
-      return *this;
-    }
-
-    ~PriceLevelOrder() {
-      ClearEvents();
-      m_pOrder.reset();
-    }
-
-    void Set( fUpdateQuantity_t&& fUpdateQuantity ) {
-      m_fUpdateQuantity = std::move( fUpdateQuantity );
-    }
-
-    void SetEvents() {
-      if ( m_pOrder ) {
-        m_pOrder->OnPartialFill.Add( MakeDelegate( this, &PriceLevelOrder::HandleOnPartialFill ) );
-        m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &PriceLevelOrder::HandleOnOrderFilled ) );
-        m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &PriceLevelOrder::HandleOnOrderCancelled ) );
-        m_pOrder->OnExecution.Add( MakeDelegate( this, &PriceLevelOrder::HandleOnOrderExecution ) );
-      }
-    }
-
-    void ClearEvents() {
-      if ( m_pOrder ) {
-        m_pOrder->OnPartialFill.Remove( MakeDelegate( this, &PriceLevelOrder::HandleOnPartialFill ) );
-        m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &PriceLevelOrder::HandleOnOrderFilled ) );
-        m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &PriceLevelOrder::HandleOnOrderCancelled ) );
-        m_pOrder->OnExecution.Remove( MakeDelegate( this, &PriceLevelOrder::HandleOnOrderExecution ) );
-      }
-    }
-
-    void HandleOnPartialFill( const ou::tf::Order& order ) { // only intermediate fill?
-    if ( m_fUpdateQuantity ) m_fUpdateQuantity( m_pOrder->GetQuanRemaining() );
-      std::cout << "Partial fill order#" << order.GetOrderId() << " quan " << order.GetQuanFilled() << std::endl;
-    }
-
-    void HandleOnOrderFilled( const ou::tf::Order& order ) { // only final fill?
-      if ( m_fUpdateQuantity ) m_fUpdateQuantity( m_pOrder->GetQuanRemaining() );
-      std::cout << "Filled order#" << order.GetOrderId() << " quan " << order.GetQuanFilled() << std::endl;
-    }
-
-    void HandleOnOrderCancelled( const ou::tf::Order& order ) {
-      if ( m_fUpdateQuantity ) m_fUpdateQuantity( 0 );
-      std::cout << "Cancelled order#" << order.GetOrderId() << " quan " << order.GetQuanOrdered() << std::endl;
-    }
-
-    void HandleOnOrderExecution( const std::pair<const ou::tf::Order&, const ou::tf::Execution&>& pair ) {
-      std::cout << "Execution order#" << pair.first.GetOrderId() << " of " << pair.second.GetSize() << std::endl;
-    }
-
-  }; // PriceLevelOrder
-
-  using mapOrders_t = std::map<double,PriceLevelOrder>;
+  using mapOrders_t = std::map<double,ou::tf::l2::PriceLevelOrder>;
   // note only one side can have orders at any moment in time
   mapOrders_t m_mapAskOrders;
   mapOrders_t m_mapBidOrders;
