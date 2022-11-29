@@ -73,8 +73,8 @@ public:
 void InstrumentSelection::ProcessGroupItem( const std::string& sObjectPath, const std::string& sObjectName ) {
   ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar> barRepository( m_dm, sObjectPath );
   ou::tf::HDF5TimeSeriesContainer<ou::tf::Bar>::iterator begin, end;
-  begin = lower_bound( barRepository.begin(), barRepository.end(), m_dtDate1 );
-  end = lower_bound( begin, barRepository.end(), m_dtDate2 );
+  begin = std::lower_bound( barRepository.begin(), barRepository.end(), m_dtDate1 );
+  end = std::lower_bound( begin, barRepository.end(), m_dtDate2 );
   hsize_t cnt = end - begin;
   if ( 8 < cnt ) {
 //    ptime dttmp = (*(end-1)).DateTime();
