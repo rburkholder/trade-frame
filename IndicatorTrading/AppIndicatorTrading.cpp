@@ -309,7 +309,7 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
   assert( m_pPanelTrade );
   m_pPanelTrade->SetInterval( pPosition->GetInstrument()->GetMinTick() );
 
-  m_pFeedModel = std::make_shared<FeedModel>( pPosition->GetWatch(), m_config.nL2Levels );
+  m_pFeedModel = std::make_shared<FeedModel>( pPosition->GetWatch(), m_config );
   m_pExecModel = std::make_shared<ExecModel>();
   m_pExecutionControl = std::make_shared<ou::tf::l2::ExecutionControl>( pPosition, m_config.nBlockSize );
 
@@ -359,6 +359,11 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
 
   m_pFeedModel->Set( m_pInteractiveChart);
   m_pFeedModel->Set( m_pPanelTrade);
+  m_pFeedModel->AddToView(
+    m_pInteractiveChart->ChartDataView(),
+    InteractiveChart::EChartSlot::Price,
+    InteractiveChart::EChartSlot::StochInd
+    );
 
   m_pInteractiveChart->Connect();
 

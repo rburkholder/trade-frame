@@ -35,15 +35,11 @@
 #include <OUCharting/ChartEntryVolume.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
-#include <TFIndicators/TSEMA.h>
-#include <TFIndicators/TSSWStochastic.h>
-
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFIQFeed/OptionChainQuery.h>
 
 #include <TFIQFeed/Level2/Symbols.hpp>
-#include <TFIQFeed/Level2/FeatureSet.hpp>
 
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
@@ -123,6 +119,8 @@ public:
 
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
 
+  enum EChartSlot { Price, Volume, StochInd, ImbalanceMean, ImbalanceB1, ImbalanceState, Sentiment, PL, Spread }; // IndMA = moving averate indicator
+
   void SetPosition(
      pPosition_t
    , const config::Options&
@@ -162,6 +160,8 @@ public:
 
   void ProcessChains();
 
+  ou::ChartDataView& ChartDataView() { return m_dvChart; }
+
   // updated from ModelFeed
   void UpdateImbalance( boost::posix_time::ptime, double dblMean, double dblSmoothed );
 
@@ -199,15 +199,13 @@ protected:
 
 private:
 
-  enum EChartSlot { Price, Volume, StochInd, ImbalanceMean, ImbalanceB1, ImbalanceState, Sentiment, PL, Spread }; // IndMA = moving averate indicator
-
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
   bool m_bConnected;
   bool m_bOptionsReady;
 
-  ou::ChartDataView m_dvChart; // the data
+  ou::ChartDataView m_dvChart; // the chart view of the data
 
   fClick_t m_fClickLeft;
   fClick_t m_fClickRight;
@@ -266,93 +264,6 @@ private:
   ou::ChartEntryMark m_cemZero;
 
   ou::tf::Quote m_quote;
-
-  struct Stochastic {
-
-    using pTSSWStochastic_t = std::unique_ptr<ou::tf::TSSWStochastic>;
-
-    pTSSWStochastic_t m_pIndicatorStochastic;
-    ou::ChartEntryIndicator m_ceStochastic;
-    ou::ChartEntryIndicator m_ceStochasticMax;
-    ou::ChartEntryIndicator m_ceStochasticMin;
-
-    Stochastic( const std::string sIx, ou::tf::Quotes& quotes, int nPeriods, time_duration td, ou::Colour::EColour colour ) {
-
-      m_ceStochastic.SetColour( colour );
-      m_ceStochasticMax.SetColour( colour );
-      m_ceStochasticMin.SetColour( colour );
-
-      m_ceStochastic.SetName( "Stoch" + sIx );
-      m_ceStochasticMax.SetName( "Stoch" + sIx + " Max" );
-      m_ceStochasticMin.SetName( "Stoch" + sIx + " Min" );
-
-      m_pIndicatorStochastic = std::make_unique<ou::tf::TSSWStochastic>(
-        quotes, nPeriods, td,
-        [this,sIx]( ptime dt, double k, double min, double max ){
-          //std::cout << sIx << " is " << k << "," << max << "," << min << std::endl;
-          m_ceStochasticMax.Append( dt, max );
-          m_ceStochasticMin.Append( dt, min );
-          m_ceStochastic.Append( dt, k ); // resides on top of min/max
-        }
-      );
-    }
-
-    Stochastic( const Stochastic& ) = delete;
-    Stochastic( Stochastic&& rhs ) = delete;
-
-    void AddToChart( ou::ChartDataView& cdv ) {
-      cdv.Add( EChartSlot::Price, &m_ceStochasticMax );
-      cdv.Add( EChartSlot::Price, &m_ceStochasticMin );
-      cdv.Add( EChartSlot::StochInd, &m_ceStochastic );
-    }
-
-    ~Stochastic() {
-      m_pIndicatorStochastic.reset();
-      m_ceStochastic.Clear();
-      m_ceStochasticMax.Clear();
-      m_ceStochasticMin.Clear();
-    }
-
-  };
-
-  using pStochastic_t = std::unique_ptr<Stochastic>;
-  using vStochastic_t = std::vector<pStochastic_t>;
-  vStochastic_t m_vStochastic;
-
-  struct MA {
-
-    ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
-    ou::ChartEntryIndicator m_ceMA;
-
-    MA( ou::tf::Quotes& quotes, size_t nPeriods, time_duration tdPeriod, ou::Colour::EColour colour, const std::string& sName )
-    : m_ema( quotes, nPeriods, tdPeriod )
-    {
-      m_ceMA.SetName( sName );
-      m_ceMA.SetColour( colour );
-    }
-
-    MA( MA&& rhs )
-    : m_ema(  std::move( rhs.m_ema ) )
-    , m_ceMA( std::move( rhs.m_ceMA ) )
-    {}
-
-    void AddToView( ou::ChartDataView& cdv ) {
-      cdv.Add( EChartSlot::Price, &m_ceMA );
-    }
-
-    void AddToView( ou::ChartDataView& cdv, EChartSlot slot ) {
-      cdv.Add( slot, &m_ceMA );
-    }
-
-    void Update( ptime dt ) {
-      m_ceMA.Append( dt, m_ema.GetEMA() );
-    }
-
-    double Latest() const { return m_ema.GetEMA(); }
-  };
-
-  using vMA_t = std::vector<MA>;
-  vMA_t m_vMA;
 
   fBuildOption_t m_fBuildOption;
   fBuildPosition_t m_fBuildPosition;

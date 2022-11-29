@@ -278,45 +278,10 @@ void InteractiveChart::SetPosition(
       Indicators( m_ceBuySubmit, m_ceBuyFill, m_ceSellSubmit, m_ceSellFill, m_ceCancelled ) )
     );
 
-  assert( 0 < config.nPeriodWidth );
-  time_duration td = time_duration( 0, 0, config.nPeriodWidth );
-
-  using vMAPeriods_t = std::vector<int>;
-  vMAPeriods_t vMAPeriods;
-
-  vMAPeriods.push_back( config.nMA1Periods );
-  vMAPeriods.push_back( config.nMA2Periods );
-  vMAPeriods.push_back( config.nMA3Periods );
-
-  assert( 3 == vMAPeriods.size() );
-  for ( vMAPeriods_t::value_type value: vMAPeriods ) {
-    assert( 0 < value );
-  }
-
-  m_vStochastic.clear();
-
-  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "1", pWatch->GetQuotes(), config.nStochastic1Periods, td, ou::Colour::DeepSkyBlue ) );
-  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "2", pWatch->GetQuotes(), config.nStochastic2Periods, td, ou::Colour::DodgerBlue ) );  // is dark: MediumSlateBlue; MediumAquamarine is greenish; MediumPurple is dark; Purple is dark
-  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "3", pWatch->GetQuotes(), config.nStochastic3Periods, td, ou::Colour::MediumSlateBlue ) ); // no MediumTurquoise, maybe Indigo
-
-  for ( vStochastic_t::value_type& vt: m_vStochastic ) {
-    vt->AddToChart( m_dvChart );
-  }
-
-  m_vMA.clear();
-
-  m_vMA.emplace_back( MA( pWatch->GetQuotes(), vMAPeriods[0], td, ou::Colour::Brown, "ma1" ) );
-  m_vMA.emplace_back( MA( pWatch->GetQuotes(), vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
-  m_vMA.emplace_back( MA( pWatch->GetQuotes(), vMAPeriods[2], td, ou::Colour::Gold,  "ma3" ) );
-
-  for ( vMA_t::value_type& ma: m_vMA ) {
-    ma.AddToView( m_dvChart );
-  }
-  //m_vMA[ 0 ].AddToView( m_dvChart, EChartSlot::Sentiment );
-  // m_vMA[ 0 ].AddToView( m_dvChart, EChartSlot::StochInd ); // need to mormailze this first
+  // options
 
   OptionChainQuery(
-    pPosition->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF )
+    m_pPositionUnderlying->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF )
     );
 
   m_pStrategy = std::make_unique<Strategy>( m_pPositionUnderlying );
@@ -432,10 +397,6 @@ void InteractiveChart::HandleQuote( const ou::tf::Quote& quote ) {
   m_ceQuoteAsk.Append( dt, quote.Ask() );
   m_ceQuoteBid.Append( dt, quote.Bid() );
   m_ceQuoteSpread.Append( dt, quote.Ask() - quote.Bid() );
-
-  for ( vMA_t::value_type& ma: m_vMA ) {
-    ma.Update( dt );
-  }
 
 }
 

@@ -23,10 +23,16 @@
 
 // provides the level I and level II data to the charts and indicators
 
+#include <memory>
+#include <vector>
+
 #include <TFTrading/Watch.h>
 
 #include <TFIQFeed/Level2/Symbols.hpp>
 #include <TFIQFeed/Level2/FeatureSet.hpp>
+
+#include "Stochastic.hpp"
+#include "MovingAverage.hpp"
 
 namespace ou {
 namespace tf {
@@ -36,6 +42,10 @@ namespace l2 {
 }
 }
 
+namespace config {
+  class Options;
+}
+
 class InteractiveChart;
 
 class FeedModel {
@@ -43,10 +53,12 @@ public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
 
-  FeedModel( pWatch_t, size_t nLevels );  // Future(ByOrder)
+  FeedModel( pWatch_t, const config::Options& );  // Future(ByOrder)
 
   void Set( ou::tf::l2::PanelTrade* );
   void Set( InteractiveChart* );
+
+  void AddToView( ou::ChartDataView& cdv, size_t price, size_t stoch );
 
   void Connect();
   void Disconnect();
@@ -71,6 +83,13 @@ private:
 
   ou::tf::l2::PanelTrade* m_pPanelTrade;
   InteractiveChart* m_pInteractiveChart;
+
+  using pStochastic_t = std::unique_ptr<Stochastic>;
+  using vStochastic_t = std::vector<pStochastic_t>;
+  vStochastic_t m_vStochastic;
+
+  using vMovingAverage_t = std::vector<MovingAverage>;
+  vMovingAverage_t m_vMovingAverage;
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

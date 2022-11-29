@@ -21,17 +21,48 @@
 
 #include <TFVuTrading/MarketDepth/PanelTrade.hpp>
 
+#include "Config.h"
 #include "FeedModel.hpp"
 #include "InteractiveChart.h"
 
-FeedModel::FeedModel( pWatch_t pWatch, size_t nLevels )
-: m_pWatchUnderlying( pWatch )
+FeedModel::FeedModel( pWatch_t pWatch, const config::Options& config )
+: m_pWatchUnderlying( std::move( pWatch ) )
 , m_bTriggerFeatureSetDump( false )
 , m_dblImbalanceMean {}, m_dblImbalanceSlope {}
 , m_pPanelTrade( nullptr )
 , m_pInteractiveChart( nullptr )
 {
-  StartDepthByOrder( nLevels );
+  StartDepthByOrder( config.nL2Levels );
+
+  // period width
+
+  assert( 0 < config.nPeriodWidth );
+  time_duration td = time_duration( 0, 0, config.nPeriodWidth );
+
+  // stochastic
+
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "1", m_pWatchUnderlying->GetQuotes(), config.nStochastic1Periods, td, ou::Colour::DeepSkyBlue ) );
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "2", m_pWatchUnderlying->GetQuotes(), config.nStochastic2Periods, td, ou::Colour::DodgerBlue ) );  // is dark: MediumSlateBlue; MediumAquamarine is greenish; MediumPurple is dark; Purple is dark
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "3", m_pWatchUnderlying->GetQuotes(), config.nStochastic3Periods, td, ou::Colour::MediumSlateBlue ) ); // no MediumTurquoise, maybe Indigo
+
+  // moving average
+
+  using vMAPeriods_t = std::vector<int>;
+  vMAPeriods_t vMAPeriods;
+
+  vMAPeriods.push_back( config.nMA1Periods );
+  vMAPeriods.push_back( config.nMA2Periods );
+  vMAPeriods.push_back( config.nMA3Periods );
+
+  assert( 3 == vMAPeriods.size() );
+  for ( vMAPeriods_t::value_type value: vMAPeriods ) {
+    assert( 0 < value );
+  }
+
+  m_vMovingAverage.emplace_back( MovingAverage( m_pWatchUnderlying->GetQuotes(), vMAPeriods[0], td, ou::Colour::Brown, "ma1" ) );
+  m_vMovingAverage.emplace_back( MovingAverage( m_pWatchUnderlying->GetQuotes(), vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
+  m_vMovingAverage.emplace_back( MovingAverage( m_pWatchUnderlying->GetQuotes(), vMAPeriods[2], td, ou::Colour::Gold,  "ma3" ) );
+
 }
 
 void FeedModel::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
@@ -40,6 +71,18 @@ void FeedModel::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
 
 void FeedModel::Set( InteractiveChart* pInteractiveChart ) {
   m_pInteractiveChart = pInteractiveChart;
+}
+
+void FeedModel::AddToView( ou::ChartDataView& cdv, size_t price, size_t stoch ) {
+
+  for ( vStochastic_t::value_type& vt: m_vStochastic ) {
+    vt->AddToView( cdv, price, stoch );
+  }
+
+  for ( vMovingAverage_t::value_type& ma: m_vMovingAverage ) {
+    ma.AddToView( cdv, price );
+  }
+
 }
 
 void FeedModel::Connect() {
@@ -67,9 +110,16 @@ void FeedModel::HandleQuote( const ou::tf::Quote& quote ) {
     return;
   }
 
+  ptime dt( quote.DateTime() );
+
   if ( m_pPanelTrade ) {
     m_pPanelTrade->OnQuote( quote );
   }
+
+  for ( vMovingAverage_t::value_type& ma: m_vMovingAverage ) {
+    ma.Update( dt );
+  }
+
 }
 
 void FeedModel::HandleTrade( const ou::tf::Trade& trade ) {
