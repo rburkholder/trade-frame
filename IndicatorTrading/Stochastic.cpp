@@ -27,9 +27,9 @@ Stochastic::Stochastic( const std::string sIx, ou::tf::Quotes& quotes, int nPeri
   m_ceStochasticMax.SetColour( colour );
   m_ceStochasticMin.SetColour( colour );
 
-  m_ceStochastic.SetName( "Stoch" + sIx );
-  m_ceStochasticMax.SetName( "Stoch" + sIx + " Max" );
-  m_ceStochasticMin.SetName( "Stoch" + sIx + " Min" );
+  m_ceStochastic.SetName( "k" + sIx );
+  m_ceStochasticMax.SetName( "k" + sIx + "u" );
+  m_ceStochasticMin.SetName( "k" + sIx + "l" );
 
   m_pIndicatorStochastic = std::make_unique<ou::tf::TSSWStochastic>(
     quotes, nPeriods, td,

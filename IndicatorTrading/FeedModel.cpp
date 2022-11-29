@@ -92,12 +92,32 @@ void FeedModel::Connect() {
     assert( m_pWatchUnderlying );
     m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &FeedModel::HandleQuote ) );
     m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &FeedModel::HandleTrade ) );
+
+    m_pPanelTrade->SetOnTimer(
+      [this](){
+        //if ( 0 == m_cntLoops ) {
+        //  m_pPanelStatistics->Update( m_valuesStatistics );
+        //  m_valuesStatistics.Zero();
+        //  m_cntLoops = 5;
+        //}
+        //else m_cntLoops--;
+        if ( 10 < m_pWatchUnderlying->GetQuotes().Size() ) {
+          for ( const vStochastic_t::value_type& vt: m_vStochastic ) {
+            m_pPanelTrade->UpdateDynamicIndicator( vt->MaxName(), vt->MaxLatest() );
+            m_pPanelTrade->UpdateDynamicIndicator( vt->MinName(), vt->MinLatest() );
+          }
+          //for ( const vMovingAverage_t::value_type& vt: m_vMovingAverage ) {
+          //  m_pPanelTrade->UpdateDynamicIndicator( vt.Name(), vt.Latest() );
+          //}
+        }
+      });
   }
   else std::cout << "ModelFeed: no dispatch" << std::endl;
 }
 
 void FeedModel::Disconnect() {
   if ( m_pDispatch ) {
+    m_pPanelTrade->SetOnTimer( nullptr );
     m_pDispatch->Disconnect();
     assert( m_pWatchUnderlying );
     m_pWatchUnderlying->OnQuote.Remove( MakeDelegate( this, &FeedModel::HandleQuote ) );
@@ -106,6 +126,7 @@ void FeedModel::Disconnect() {
 }
 
 void FeedModel::HandleQuote( const ou::tf::Quote& quote ) {
+
   if ( !quote.IsValid() ) {
     return;
   }
@@ -342,18 +363,3 @@ void FeedModel::Imbalance( const ou::tf::Depth& depth ) {
   m_pInteractiveChart->UpdateImbalance( depth.DateTime(), stats.meanY, m_dblImbalanceMean );
 
 }
-
-/*
-    m_pPanelTrade->SetOnTimer(
-      [this](){
-        if ( 0 == m_cntLoops ) {
-          m_pPanelStatistics->Update( m_valuesStatistics );
-          m_valuesStatistics.Zero();
-          m_cntLoops = 5;
-        }
-        else m_cntLoops--;
-        for ( const vMA_t::value_type& vt: m_vMA ) {
-          m_pPanelTrade->UpdateDynamicIndicator( vt.sName, vt.Latest() );
-        }
-      });
-*/

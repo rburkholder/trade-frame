@@ -39,6 +39,12 @@ public:
 
   void AddToView( ou::ChartDataView& cdv, size_t price, size_t stoch );
 
+  double MaxLatest() const { return m_pIndicatorStochastic->Max(); }
+  const std::string& MaxName() const { return m_ceStochasticMax.GetName(); }
+
+  double MinLatest() const { return m_pIndicatorStochastic->Min(); }
+  const std::string& MinName() const { return m_ceStochasticMin.GetName(); }
+
 protected:
 private:
 
