@@ -288,9 +288,13 @@ void SymbolSelection::CheckForRange( citerBars begin, citerBars end, const Instr
     << std::endl;
 }
 
-struct CalcMaxDate: public std::unary_function<ou::tf::Bar&, void> {
+struct CalcMaxDate {
 public:
-  CalcMaxDate( void ) : dtMax( boost::date_time::special_values::min_date_time ), dblMax( 0 ) { };
+  CalcMaxDate()
+  : dtMax( boost::date_time::special_values::min_date_time )
+  , dblMax( 0 )
+    {};
+
   void operator() ( const ou::tf::Bar &bar ) {
     if ( bar.Close() >= dblMax ) {
       dblMax = bar.Close();
