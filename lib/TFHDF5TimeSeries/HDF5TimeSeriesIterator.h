@@ -30,15 +30,17 @@ namespace tf { // TradeFrame
 // DD is expecting type derived from DatedDatum
 template<class DD> class HDF5TimeSeriesContainer;
 
-template<class DD> class HDF5TimeSeriesIterator:
-  public std::iterator<std::random_access_iterator_tag, DD, hsize_t> {
-    friend class HDF5TimeSeriesContainer<DD>;
+template<class DD> class HDF5TimeSeriesIterator{
+  friend class HDF5TimeSeriesContainer<DD>;
 public:
 
   //typedef HDF5TimeSeriesIterator self_type;
   //typedef self_type& self_reference;
-  typedef std::random_access_iterator_tag iterator_category;
-  typedef std::iterator<std::random_access_iterator_tag, DD, hsize_t> base_iterator;
+  using iterator_category = std::random_access_iterator_tag;
+  using value_type = DD;
+  using difference_type = hsize_t;
+  using pointer = DD*;
+  using reference = DD&;
 
   HDF5TimeSeriesIterator<DD>();
   HDF5TimeSeriesIterator<DD>( HDF5TimeSeriesAccessor<DD> *pAccessor, hsize_t Index );  // begin() or later init
@@ -57,7 +59,7 @@ public:
   bool operator==( const HDF5TimeSeriesIterator<DD>& other ) const;
   bool operator!=( const HDF5TimeSeriesIterator<DD>& other ) const;
   //HDF5TimeSeriesIterator<T> &operator[]( const hsize_t Index );
-  typename base_iterator::reference operator*();
+  reference operator*();
   //reference operator->();
 protected:
   bool m_bValidIndex;  // m_ItemIndex is valid ie, is something from .begin() to .end()
@@ -214,7 +216,7 @@ bool HDF5TimeSeriesIterator<DD>::operator!=( const HDF5TimeSeriesIterator<DD>& o
 }
 
 template<class DD>
-typename HDF5TimeSeriesIterator<DD>::base_iterator::reference HDF5TimeSeriesIterator<DD>::operator*() {
+typename HDF5TimeSeriesIterator<DD>::reference HDF5TimeSeriesIterator<DD>::operator*() {
   assert( m_bValidIndex );
   assert( m_ItemIndex < m_pAccessor->size() );
   m_pAccessor->Read( m_ItemIndex, &m_DD );
