@@ -38,8 +38,8 @@ public:
   typedef typename HDF5TimeSeriesAccessor<DD>::size_type size_type;
   iterator begin();
   const iterator &end();
-  //void Read( const iterator &_begin, const iterator &_end, T* _dest ); 
-  void Read( iterator &_begin, iterator &_end, typename ou::tf::TimeSeries<DD>* _dest ); 
+  //void Read( const iterator &_begin, const iterator &_end, T* _dest );
+  void Read( iterator &_begin, iterator &_end, typename ou::tf::TimeSeries<DD>* _dest );
   void Write( const DD* _begin, const DD* _end );
 protected:
   iterator* m_end;
@@ -89,7 +89,7 @@ template<class DD> void HDF5TimeSeriesContainer<DD>::Write( const DD* _begin, co
   size_t cnt = _end - _begin;
   if ( cnt > 0 ) {
     std::pair<HDF5TimeSeriesContainer<DD>::iterator, HDF5TimeSeriesContainer<DD>::iterator> p;
-    p = equal_range( begin(), end(), *_begin );
+    p = std::equal_range( begin(), end(), *_begin );
     // whether we found something or not, p.first is insertion point
     HDF5TimeSeriesAccessor<DD>::Write( p.first.m_ItemIndex, cnt, _begin );
   }
