@@ -34,8 +34,7 @@ template<class DD> class HDF5TimeSeriesIterator{
   friend class HDF5TimeSeriesContainer<DD>;
 public:
 
-  //typedef HDF5TimeSeriesIterator self_type;
-  //typedef self_type& self_reference;
+  // https://www.fluentcpp.com/2018/05/08/std-iterator-deprecated/
   using iterator_category = std::random_access_iterator_tag;
   using value_type = DD;
   using difference_type = hsize_t;
