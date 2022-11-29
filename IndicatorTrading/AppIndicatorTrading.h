@@ -120,7 +120,7 @@ private:
 
   std::unique_ptr<ou::tf::db> m_pdb;
 
-  config::Options m_config;
+  config::Choices m_config;
 
   pPortfolio_t m_pPortfolio;
 

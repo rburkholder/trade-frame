@@ -68,7 +68,7 @@ namespace option {
 } // namespace ou
 
 namespace config {
-  class Options;
+  class Choices;
 }
 
 class Strategy;
@@ -123,7 +123,7 @@ public:
 
   void SetPosition(
      pPosition_t
-   , const config::Options&
+   , const config::Choices&
    , pOptionChainQuery_t
    , fBuildOption_t&&
    , fBuildPosition_t&&

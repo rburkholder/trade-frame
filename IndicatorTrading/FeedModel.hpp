@@ -53,7 +53,7 @@ public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
 
-  FeedModel( pWatch_t, const config::Options& );  // Future(ByOrder)
+  FeedModel( pWatch_t, const config::Choices& );  // Future(ByOrder)
 
   void Set( ou::tf::l2::PanelTrade* );
   void Set( InteractiveChart* );

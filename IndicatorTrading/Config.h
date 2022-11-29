@@ -25,7 +25,7 @@
 
 namespace config {
 
-struct Options {
+struct Choices {
 
   std::string sSymbol; // this probably will be the general symbol, not a specific instrument
 
@@ -52,12 +52,12 @@ struct Options {
   int nStochastic2Periods;
   int nStochastic3Periods;
 
-  Options()
+  Choices()
   : ib_client_id( 2 ), nThreads( 1 )
   , nPeriodWidth( 10 ), nMA1Periods( 8 ), nMA2Periods( 13 ), nMA3Periods( 21 )
   {}
 };
 
-bool Load( const std::string& sFileName, Options& );
+bool Load( const std::string& sFileName, Choices& );
 
 } // namespace config

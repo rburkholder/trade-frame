@@ -204,7 +204,7 @@ void InteractiveChart::Disconnect() { // TODO: may also need to clear indicators
 
 void InteractiveChart::SetPosition(
   pPosition_t pPosition
-, const config::Options& config
+, const config::Choices& config
 , pOptionChainQuery_t pOptionChainQuery
 , fBuildOption_t&& fBuildOption
 , fBuildPosition_t&& fBuildPosition

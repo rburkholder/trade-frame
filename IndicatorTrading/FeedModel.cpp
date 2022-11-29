@@ -25,7 +25,7 @@
 #include "FeedModel.hpp"
 #include "InteractiveChart.h"
 
-FeedModel::FeedModel( pWatch_t pWatch, const config::Options& config )
+FeedModel::FeedModel( pWatch_t pWatch, const config::Choices& config )
 : m_pWatchUnderlying( std::move( pWatch ) )
 , m_bTriggerFeatureSetDump( false )
 , m_dblImbalanceMean {}, m_dblImbalanceSlope {}
