@@ -19,6 +19,16 @@
  * Created: February 8, 2022 00:12
  */
 
+/*
+  2022/11/27 TODO
+    build a table of the synthetic long/short entries based upon long/far, short/near
+    actions to close/roll the shart/near at profit levels
+    actions to close the synthetic together or separately
+    enter with a synthetic rather than the future itself
+    use ladder for entry, use a different table or ladder for the maintenance
+    need summary of delta/gamma to maintain neutral strategies and margin
+*/
+
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
@@ -356,6 +366,8 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
   LoadDailyHistory( pPosition );
 
   m_ptreeTradables->ExpandAll();
+
+  m_pExecutionControl->Set( m_pPanelTrade );
 
   m_pFeedModel->Set( m_pInteractiveChart);
   m_pFeedModel->Set( m_pPanelTrade);
