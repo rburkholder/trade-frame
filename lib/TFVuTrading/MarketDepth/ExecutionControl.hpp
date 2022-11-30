@@ -67,6 +67,14 @@ private:
 
   PriceLevelOrder m_KillPriceLevelOrder; // temporary for unrolling lambda call
 
+  void AskLimit( double );
+  void AskStop( double );
+  void AskCancel( double );
+
+  void BidLimit( double );
+  void BidStop( double );
+  void BidCancel( double );
+
 };
 
 } // market depth

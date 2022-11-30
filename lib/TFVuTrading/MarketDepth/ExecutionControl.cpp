@@ -46,7 +46,7 @@ ExecutionControl::~ExecutionControl() {
   }
 
   if ( m_pPanelTrade ) {
-    m_pPanelTrade->Set( nullptr, nullptr, nullptr, nullptr );
+    m_pPanelTrade->Set( nullptr );
     m_pPanelTrade = nullptr;
   }
 }
@@ -57,76 +57,123 @@ void ExecutionControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
   m_pPanelTrade = pPanelTrade;
 
   if ( m_pPanelTrade ) {
-    m_pPanelTrade->Set( // TODO set only one map is active
-      [this](double price){ // fBidPlace
-        mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
-        if ( m_mapBidOrders.end() == iterOrders ) {
-          pOrder_t pOrder = m_pPosition->PlaceOrder(
-            ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_nDefaultOrder, price );
-          std::cout << "Submitted order#" << pOrder->GetOrderId() << " at bid " << price << std::endl;
-          auto pair = m_mapBidOrders.emplace( price, PriceLevelOrder() );
-          assert( pair.second );
-          mapOrders_t::iterator iterOrders( pair.first );
-          PriceLevelOrder& plo( iterOrders->second );
-          plo.Set( // fUpdateQuantity_t
-            [this,price,iterOrders]( unsigned int quantity ){
-              m_pPanelTrade->SetBid( price, quantity ); // set with plo instead
-              if ( 0 == quantity ) { // based upon cancel, or fulfillment
-                m_KillPriceLevelOrder = std::move( iterOrders->second );
-                m_mapBidOrders.erase( iterOrders );
-              }
+    using EButton = ou::tf::Mouse::EButton;
+    using EField  = ou::tf::l2::PriceRow::EField;
+    m_pPanelTrade->Set(
+      [this]( double price, EField field, EButton button, bool shift, bool control, bool alt ){
+        switch ( field ) {
+          case PriceRow::EField::AskOrder:
+            switch ( button ) {
+              case PriceRow::EButton::Left:
+                AskLimit( price );
+                break;
+              case PriceRow::EButton::Middle:
+                break;
+              case PriceRow::EButton::Right:
+                AskCancel( price );
+                break;
             }
-          );
-          plo = pOrder;
-        }
-        else {
-          std::cout << "order (bid) " << iterOrders->second.Order()->GetOrderId() << " exists" << std::endl;
-        }
-      },
-      [this](double price){ // fBidCancel
-        mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
-        if ( m_mapBidOrders.end() == iterOrders ) {}
-        else {
-          pOrder_t pOrder = iterOrders->second.Order();
-          m_pPosition->CancelOrder( pOrder->GetOrderId() );
-        }
-      },
-      [this](double price){ // fAskPlace
-        mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
-        if ( m_mapAskOrders.end() == iterOrders ) {
-          pOrder_t pOrder = m_pPosition->PlaceOrder(
-            ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_nDefaultOrder, price );
-          std::cout << "Submitted order#" << pOrder->GetOrderId() << " at ask " << price << std::endl;
-          auto pair = m_mapAskOrders.emplace( price, PriceLevelOrder() );
-          assert( pair.second );
-          mapOrders_t::iterator iterOrders( pair.first );
-          PriceLevelOrder& plo( iterOrders->second );
-          plo.Set( // fUpdateQuantity_t
-            [this,price,iterOrders]( unsigned int quantity ){
-              m_pPanelTrade->SetAsk( price, quantity ); // set with plo instead
-              if ( 0 == quantity ) { // based upon cancel, or fulfillment
-                m_KillPriceLevelOrder = std::move( iterOrders->second );
-                m_mapAskOrders.erase( iterOrders );
-              }
+            break;
+          case PriceRow::EField::BidOrder:
+            switch ( button ) {
+              case PriceRow::EButton::Left:
+                BidLimit( price );
+                break;
+              case PriceRow::EButton::Middle:
+                break;
+              case PriceRow::EButton::Right:
+                BidCancel( price );
+                break;
             }
-          );
-          plo = pOrder;
+            break;
+          default:
+            assert( false );
+            break;
         }
-        else {
-          std::cout << "order (ask) " << iterOrders->second.Order()->GetOrderId() << " exists" << std::endl;
-        }
-      },
-      [this](double price){ // fAskCancel
-        mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
-        if ( m_mapAskOrders.end() == iterOrders ) {}
-        else {
-          pOrder_t pOrder = iterOrders->second.Order();
-          m_pPosition->CancelOrder( pOrder->GetOrderId() );
+
+      } );
+  }
+
+}
+
+void ExecutionControl::AskLimit( double price ) {
+  mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
+  if ( m_mapAskOrders.end() == iterOrders ) {
+    pOrder_t pOrder = m_pPosition->PlaceOrder(
+      ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_nDefaultOrder, price );
+    std::cout << "Submitted order#" << pOrder->GetOrderId() << " at ask " << price << std::endl;
+    auto pair = m_mapAskOrders.emplace( price, PriceLevelOrder() );
+    assert( pair.second );
+    mapOrders_t::iterator iterOrders( pair.first );
+    PriceLevelOrder& plo( iterOrders->second );
+    plo.Set( // fUpdateQuantity_t
+      [this,price,iterOrders]( unsigned int quantity ){
+        m_pPanelTrade->SetAsk( price, quantity ); // set with plo instead
+        if ( 0 == quantity ) { // based upon cancel, or fulfillment
+          m_KillPriceLevelOrder = std::move( iterOrders->second );
+          m_mapAskOrders.erase( iterOrders );
         }
       }
     );
+    plo = pOrder;
+  }
+  else {
+    std::cout << "order (ask) " << iterOrders->second.Order()->GetOrderId() << " exists" << std::endl;
   }
 }
+
+void ExecutionControl::AskStop( double price ) {
+
+}
+
+void ExecutionControl::AskCancel( double price ) {
+  mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
+  if ( m_mapAskOrders.end() == iterOrders ) {}
+  else {
+    pOrder_t pOrder = iterOrders->second.Order();
+    m_pPosition->CancelOrder( pOrder->GetOrderId() );
+  }
+}
+
+void ExecutionControl::BidLimit( double price ) {
+  mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
+  if ( m_mapBidOrders.end() == iterOrders ) {
+    pOrder_t pOrder = m_pPosition->PlaceOrder(
+      ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_nDefaultOrder, price );
+    std::cout << "Submitted order#" << pOrder->GetOrderId() << " at bid " << price << std::endl;
+    auto pair = m_mapBidOrders.emplace( price, PriceLevelOrder() );
+    assert( pair.second );
+    mapOrders_t::iterator iterOrders( pair.first );
+    PriceLevelOrder& plo( iterOrders->second );
+    plo.Set( // fUpdateQuantity_t
+      [this,price,iterOrders]( unsigned int quantity ){
+        m_pPanelTrade->SetBid( price, quantity ); // set with plo instead
+        if ( 0 == quantity ) { // based upon cancel, or fulfillment
+          m_KillPriceLevelOrder = std::move( iterOrders->second );
+          m_mapBidOrders.erase( iterOrders );
+        }
+      }
+    );
+    plo = pOrder;
+  }
+  else {
+    std::cout << "order (bid) " << iterOrders->second.Order()->GetOrderId() << " exists" << std::endl;
+  }
+}
+
+void ExecutionControl::BidStop( double price ) {
+
+}
+
+void ExecutionControl::BidCancel( double price ) {
+  mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
+  if ( m_mapBidOrders.end() == iterOrders ) {}
+  else {
+    pOrder_t pOrder = iterOrders->second.Order();
+    m_pPosition->CancelOrder( pOrder->GetOrderId() );
+  }
+}
+
 
 } // market depth
 } // namespace tf

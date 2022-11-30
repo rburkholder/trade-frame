@@ -93,10 +93,7 @@ void PanelTrade::Init() {
 
   m_dblLastPrice = 0.0;
 
-  m_fAskPlace = nullptr;
-  m_fAskCancel = nullptr;
-  m_fBidPlace = nullptr;
-  m_fBidCancel = nullptr;
+  m_fClick = nullptr;
 
   //wxToolTip::Enable( true );
   //wxToolTip::SetDelay( 500 );
@@ -430,49 +427,16 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
         PriceRow& rowPrice( m_PriceRows[ iy ] );
         rowPrice.SetRowElements( *pWinRow );
         rowPrice.SetPrice( m_PriceRows.Cast( iy ), false );
-        rowPrice.Set(  // TODO: make these as bind statements to methods
-          [this](double dblPrice, PriceRow::EField field, PriceRow::EButton button, bool shift, bool control, bool alt ){
-            switch ( field ) {
-              case PriceRow::EField::AskOrder:
-                switch ( button ) {
-                  case PriceRow::EButton::Left:
-                    if ( m_fAskPlace ) m_fAskPlace( dblPrice );
-                    break;
-                  case PriceRow::EButton::Middle:
-                    break;
-                  case PriceRow::EButton::Right:
-                    if ( m_fAskCancel ) m_fAskCancel( dblPrice );
-                    break;
-                }
-                break;
-              case PriceRow::EField::BidOrder:
-                switch ( button ) {
-                  case PriceRow::EButton::Left:
-                    if ( m_fBidPlace ) m_fBidPlace( dblPrice );
-                    break;
-                  case PriceRow::EButton::Middle:
-                    break;
-                  case PriceRow::EButton::Right:
-                    if ( m_fBidCancel ) m_fBidCancel( dblPrice );
-                    break;
-                }
-                break;
-              default:
-                assert( false );
-                break;
-            }
-          } );
+        fClick_t fClick( m_fClick ); // make a copy for each row
+        rowPrice.Set( std::move( fClick ) );  // make a copy for each row
         //rowData.Refresh();  // TODO: refactor out into timer
       }
     }
   }
 }
 
-void PanelTrade::Set( fTrigger_t&& fBidPlace, fTrigger_t&& fBidCancel, fTrigger_t&& fAskPlace, fTrigger_t&& fAskCancel ) {
-  m_fAskPlace = std::move( fAskPlace );
-  m_fAskCancel = std::move( fAskCancel );
-  m_fBidPlace = std::move( fBidPlace );
-  m_fBidCancel = std::move( fBidCancel );
+void PanelTrade::Set( fClick_t&& fClick ) {
+  m_fClick = std::move( fClick );
 }
 
 void PanelTrade::SetAsk( double price, int n ) {

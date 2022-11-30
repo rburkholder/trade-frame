@@ -83,8 +83,10 @@ public:
   void SetOnTimer( fTimer_t&& fTimer ) { m_fTimer = std::move( fTimer); }
 
   // Interface - In - Events - Execution
-  using fTrigger_t = std::function<void(double)>; // price
-  void Set( fTrigger_t&& fBidPlace, fTrigger_t&& fBidCancel, fTrigger_t&& fAskPlace, fTrigger_t&& fAskCancel );
+  using EButton = ou::tf::Mouse::EButton;
+  using EField  = ou::tf::l2::PriceRow::EField;
+  using fClick_t = ou::tf::l2::PriceRow::fClick_t;
+  void Set( fClick_t&& );
 
   // Interface - In - Updates - Pending Orders
   void SetAsk( double, int ); // update pending quantity@price
@@ -127,10 +129,7 @@ private:
   std::mutex m_mutexTimer;
   wxTimer m_timerRefresh; // TODO: need to sync foreground & background
 
-  fTrigger_t m_fAskPlace;
-  fTrigger_t m_fAskCancel;
-  fTrigger_t m_fBidPlace;
-  fTrigger_t m_fBidCancel;
+  fClick_t m_fClick;
 
   using mapDynamicIndicator_t = std::map<std::string,int>;
   mapDynamicIndicator_t m_mapDynamicIndicator;
