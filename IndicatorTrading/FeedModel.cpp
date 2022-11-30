@@ -106,9 +106,11 @@ void FeedModel::Connect() {
             m_pPanelTrade->UpdateDynamicIndicator( vt->MaxName(), vt->MaxLatest() );
             m_pPanelTrade->UpdateDynamicIndicator( vt->MinName(), vt->MinLatest() );
           }
-          //for ( const vMovingAverage_t::value_type& vt: m_vMovingAverage ) {
-          //  m_pPanelTrade->UpdateDynamicIndicator( vt.Name(), vt.Latest() );
-          //}
+          for ( const vMovingAverage_t::value_type& vt: m_vMovingAverage ) {
+            const std::string& sname( vt.Name() );
+            double val( vt.Latest() );
+            m_pPanelTrade->UpdateDynamicIndicator( sname, val );
+          }
         }
       });
   }

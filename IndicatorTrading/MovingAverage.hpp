@@ -37,7 +37,7 @@ public:
   void Update( ptime dt );
 
   double Latest() const { return m_ema.GetEMA(); }
-  const std::string& Name() const { return m_ema.GetName(); }
+  const std::string& Name() const { return m_ceMA.GetName(); }
 
 protected:
 private:
