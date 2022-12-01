@@ -15,6 +15,7 @@
 #pragma once
 
 #include <map>
+#include <stdexcept>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -31,8 +32,14 @@ public:
   void Add( const value_t& );
   void Remove( const value_t& );
 
-  value_t Min() const { return m_mapValueCount.begin()->first; };
-  value_t Max() const { return m_mapValueCount.rbegin()->first; };
+  value_t Min() const {
+    if ( 0 == m_mapValueCount.size() ) throw std::runtime_error( "no value available" );
+    return m_mapValueCount.begin()->first;
+  };
+  value_t Max() const {
+    if ( 0 == m_mapValueCount.size() ) throw std::runtime_error( "no value available" );
+    return m_mapValueCount.rbegin()->first;
+  };
 
   void Reset();
 

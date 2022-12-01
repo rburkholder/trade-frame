@@ -104,16 +104,19 @@ void FeedModel::Connect() {
         //  m_cntLoops = 5;
         //}
         //else m_cntLoops--;
-        if ( 10 < m_pWatchUnderlying->GetQuotes().Size() ) {
+
+        try {
           for ( const vStochastic_t::value_type& vt: m_vStochastic ) {
             m_pPanelTrade->UpdateDynamicIndicator( vt->MaxName(), vt->MaxLatest() );
             m_pPanelTrade->UpdateDynamicIndicator( vt->MinName(), vt->MinLatest() );
           }
-          for ( const vMovingAverage_t::value_type& vt: m_vMovingAverage ) {
-            const std::string& sname( vt.Name() );
-            double val( vt.Latest() );
-            m_pPanelTrade->UpdateDynamicIndicator( sname, val );
-          }
+        }
+        catch ( const std::runtime_error& e ) {} // ignore the error, skip update
+
+        for ( const vMovingAverage_t::value_type& vt: m_vMovingAverage ) {
+          const std::string& sname( vt.Name() );
+          double val( vt.Latest() );
+          m_pPanelTrade->UpdateDynamicIndicator( sname, val );
         }
       });
   }
