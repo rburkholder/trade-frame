@@ -25,6 +25,9 @@
 #include "FeedModel.hpp"
 #include "InteractiveChart.h"
 
+// TODO: need to add the daily high/lows to ladder
+//   refactor from AppIndicatorTrading::LoadDailyHistory
+
 FeedModel::FeedModel( pWatch_t pWatch, const config::Choices& config )
 : m_pWatchUnderlying( std::move( pWatch ) )
 , m_bTriggerFeatureSetDump( false )
