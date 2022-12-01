@@ -44,7 +44,7 @@ SessionChart::SessionChart(
 
 bool SessionChart::Create(
   wxWindow* parent, wxWindowID id,
-  const wxPoint& pos, const wxSize& size, long style 
+  const wxPoint& pos, const wxSize& size, long style
 ) {
   bool bOk = WinChartView::Create( parent, id, pos, size, style );
   Init();
@@ -119,7 +119,7 @@ void SessionChart::UnBindEvents() {
   //Unbind( wxEVT_CHAR, &SessionChart::OnChar, this );
 }
 
-void SessionChart::OnDestroy( wxWindowDestroyEvent& ) {
+void SessionChart::OnDestroy( wxWindowDestroyEvent& event ) {
   if ( m_bWatchStarted ) {
     m_bWatchStarted = false;
     using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -128,4 +128,5 @@ void SessionChart::OnDestroy( wxWindowDestroyEvent& ) {
   }
   SetChartDataView( nullptr );
   UnBindEvents();
+  event.Skip( true );
 }
