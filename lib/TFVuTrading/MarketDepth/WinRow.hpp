@@ -51,7 +51,7 @@ public:
     long alignment; // passed as style
     EColour colourBackground; // box fill
     EColour colourForeground; // text
-    EColour colourHighlight;  // fox fill to highlight
+    EColour colourHighlight;  // box fill to highlight
   };
 
   using vElement_t = std::vector<Element>;
