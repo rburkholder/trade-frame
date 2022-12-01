@@ -25,9 +25,10 @@
 
 #pragma once
 
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/thread_only.hpp>
-#include <boost/thread/condition_variable.hpp>
+#include <thread>
+
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 
 #include <wx/timer.h>
 #include <wx/window.h>
@@ -104,35 +105,31 @@ private:
 
   pwxBitmap_t m_pChartBitmap;
 
-  bool m_bThreadDrawChartActive;
-  boost::mutex m_mutexThreadDrawChart;
-  boost::condition_variable m_cvThreadDrawChart;
-  boost::thread* m_pThreadDrawChart;
-
-  bool m_bBound;
+  std::mutex m_mutexChartDataView; // when updating m_pChartDataView
+  std::thread m_threadDrawChart;
+  boost::asio::io_context m_context;
+  std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> > m_pWork;
 
   void ThreadDrawChart();  // thread starts here
-  void StartThread();
-  void StopThread();
 
   void RescaleViewPort();
 
   void UpdateChartMaster();
 
-  void HandlePaint( wxPaintEvent& event );
-  void HandleSize( wxSizeEvent& event );
+  void HandlePaint( wxPaintEvent& );
+  void HandleSize( wxSizeEvent& );
 
-  void HandleMouse( wxMouseEvent& event );
-  void HandleMouseEnter( wxMouseEvent& event );
-  void HandleMouseLeave( wxMouseEvent& event );
-  void HandleMouseWheel( wxMouseEvent& event );
+  void HandleMouse( wxMouseEvent& );
+  void HandleMouseEnter( wxMouseEvent& );
+  void HandleMouseLeave( wxMouseEvent& );
+  void HandleMouseWheel( wxMouseEvent& );
 
-  void HandleMouseLeftClick( wxMouseEvent& event );
-  void HandleMouseRightClick( wxMouseEvent& event );
+  void HandleMouseLeftClick( wxMouseEvent& );
+  void HandleMouseRightClick( wxMouseEvent& );
 
-  void OnDestroy( wxWindowDestroyEvent& event );
+  void OnDestroy( wxWindowDestroyEvent& );
 
-  void HandleGuiRefresh( wxTimerEvent& event );
+  void HandleGuiRefresh( wxTimerEvent& );
 
   void Init();
   void CreateControls();

@@ -18,6 +18,8 @@
  * Created on October 16, 2016, 5:53 PM
  */
 
+#include <boost/asio/post.hpp>
+
 #include <wx/bitmap.h>
 #include <wx/cursor.h>
 #include <wx/mstream.h>
@@ -47,14 +49,12 @@ WinChartView::WinChartView(
 }
 
 WinChartView::~WinChartView() {
+  assert( !m_threadDrawChart.joinable() ); // inheriting class needs a skip in the OnDestroy
 }
 
 void WinChartView::Init() {
 
-  m_bBound = false;
   m_bInDrawChart = false;
-  m_bThreadDrawChartActive = false;
-  m_pThreadDrawChart = nullptr;
   m_pChartDataView = nullptr;
 
   m_dblViewPortRatio = 1.0;
@@ -75,65 +75,53 @@ bool WinChartView::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, 
   return true;
 }
 
-void WinChartView::BindEvents() {
-
-  if ( !m_bBound ) {
-
-    m_bBound = true;
-
-    Bind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
-    Bind( wxEVT_SIZE, &WinChartView::HandleSize, this );
-
-    Bind( wxEVT_MOTION, &WinChartView::HandleMouse, this );
-    Bind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this );
-    Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this );
-    Bind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this );
-
-    Bind( wxEVT_LEFT_UP, &WinChartView::HandleMouseLeftClick, this );
-    Bind( wxEVT_RIGHT_UP, &WinChartView::HandleMouseRightClick, this );
-
-    // this GuiRefresh initialization should come after all else
-    m_timerGuiRefresh.SetOwner( this );
-    Bind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-    m_timerGuiRefresh.Start( 200 );
-
-  }
-}
-
 void WinChartView::CreateControls() {
 
-  //Bind( wxEVT_CLOSE_WINDOW, &WinChartView::OnClose, this );  // not called for child windows
-  Bind( wxEVT_DESTROY, &WinChartView::OnDestroy, this );
+  using executor_type = boost::asio::io_context::executor_type;
+
+  m_pWork
+    = std::make_unique<boost::asio::executor_work_guard<executor_type> >( boost::asio::make_work_guard( m_context ) );
+  //if ( m_threadDrawChart.joinable() ) m_threadDrawChart.join(); // need to finish off any previous thread - may not be required here (only if it was to be re-used)
+  m_threadDrawChart = std::move( std::thread( &WinChartView::ThreadDrawChart, this ) );
 
   BindEvents();
 
 }
 
-void WinChartView::StartThread() {
-  m_pThreadDrawChart = new boost::thread( &WinChartView::ThreadDrawChart, this );
+void WinChartView::BindEvents() {
+
+  Bind( wxEVT_DESTROY, &WinChartView::OnDestroy, this, this->GetId() );
+
+  Bind( wxEVT_PAINT, &WinChartView::HandlePaint, this, this->GetId() );
+  Bind( wxEVT_SIZE, &WinChartView::HandleSize, this, this->GetId() );
+
+  Bind( wxEVT_MOTION, &WinChartView::HandleMouse, this, this->GetId() );
+  Bind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this, this->GetId() );
+  Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this, this->GetId() );
+  Bind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this, this->GetId() );
+
+  Bind( wxEVT_LEFT_UP, &WinChartView::HandleMouseLeftClick, this, this->GetId() );
+  Bind( wxEVT_RIGHT_UP, &WinChartView::HandleMouseRightClick, this, this->GetId() );
+
+  // this GuiRefresh initialization should come after all else
+  m_timerGuiRefresh.SetOwner( this );
+  Bind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  m_timerGuiRefresh.Start( 200 );
+
 }
 
-void WinChartView::StopThread() {
-  m_bThreadDrawChartActive = false;
-  m_cvThreadDrawChart.notify_one();
-  m_pThreadDrawChart->join();
-  delete m_pThreadDrawChart;
-  m_pThreadDrawChart = nullptr;
+void WinChartView::ThreadDrawChart() { // thread for initiating chart, work is posted
+  m_context.run(); // run while work is active
 }
 
 // called from PanelChartHdf5::LoadDataAndGenerateChart
 // called from PanelCharts::HandleInstrumentLiveChart
 // called from PanelFinancialChart::HandleTreeEventitemActivated
 void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView, bool bReCalcViewPort ) {
+  std::scoped_lock<std::mutex> lock( m_mutexChartDataView );
   // TODO: need to sync with the gui refresh thread
   m_bReCalcViewPort = bReCalcViewPort;
-  if ( m_bThreadDrawChartActive ) {
-    StopThread();
-  }
-  m_pChartDataView = pChartDataView;
-  if ( nullptr != m_pChartDataView ) {
-    StartThread();
-  }
+  m_pChartDataView = pChartDataView; // TODO: need some additional tender loving care with this for the mutex
 }
 
 void WinChartView::HandleMouse( wxMouseEvent& event ) {
@@ -251,55 +239,57 @@ void WinChartView::HandleGuiRefresh( wxTimerEvent& event ) {
   DrawChart();
 }
 
+// TODO: there may be an issue with cursor & no data, which locks up the gui
 void WinChartView::DrawChart() {
-  if ( m_bThreadDrawChartActive ) {
-    m_bInDrawChart = true;
-    m_cvThreadDrawChart.notify_one();
-  }
-}
+  if ( m_threadDrawChart.joinable() ) {
 
-// could change this into a worker future/promise solution, or use asio to submit jobs or packages
-void WinChartView::ThreadDrawChart() {
-  m_bThreadDrawChartActive = true; // TODO: examine if this a problem for locking (happened when multiple changes submitted in rapid succession)
-  boost::unique_lock<boost::mutex> lock(m_mutexThreadDrawChart);
-  while ( m_bThreadDrawChartActive ) {
-    m_cvThreadDrawChart.wait( lock );
+    if ( m_pChartDataView ) {
 
-    assert( nullptr != m_pChartDataView );
+      if ( !m_bInDrawChart ) {
 
-    if ( m_bThreadDrawChartActive ) {  // exit thread if false without doing anything
-      //if ( m_bReCalcViewPort ) {
-        boost::posix_time::ptime now = ou::TimeSource::GlobalInstance().Internal(); // works with real vs simulation time
+        m_bInDrawChart = true;
 
-        static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
-        auto now_ = now;
-        boost::posix_time::ptime dtEnd = now_;
-        if ( false ) {
-          // chart moves at 1s step - not sure if this is trader friendly though
-          boost::posix_time::time_duration td( 0, 0, 0, fs - now_.time_of_day().fractional_seconds() );
-          dtEnd = now_ + td;
-        }
+        boost::asio::post(
+          m_context,
+          [this](){
+            std::scoped_lock<std::mutex> lock( m_mutexChartDataView );
 
-        boost::posix_time::ptime dtBegin = dtEnd - m_tdViewPortWidth;
+            //if ( m_bReCalcViewPort ) {
+              boost::posix_time::ptime now = ou::TimeSource::GlobalInstance().Internal(); // works with real vs simulation time
 
-        if ( false ) {
-          std::stringstream ss;
-          ss << "vport=" << dtBegin << "," << m_tdViewPortWidth << "," << dtEnd;
-          std::string s( ss.str() );
-          std::cout << s << std::endl;
-        }
+              static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
+              auto now_ = now;
+              boost::posix_time::ptime dtEnd = now_;
+              if ( false ) {
+                // chart moves at 1s step - not sure if this is trader friendly though
+                boost::posix_time::time_duration td( 0, 0, 0, fs - now_.time_of_day().fractional_seconds() );
+                dtEnd = now_ + td;
+              }
 
-        m_pChartDataView->SetViewPort( dtBegin, dtEnd );
+              boost::posix_time::ptime dtBegin = dtEnd - m_tdViewPortWidth;
 
-        m_bReCalcViewPort = false;
-      //}
+              if ( false ) {
+                std::stringstream ss;
+                ss << "vport=" << dtBegin << "," << m_tdViewPortWidth << "," << dtEnd;
+                std::string s( ss.str() );
+                std::cout << s << std::endl;
+              }
 
-      UpdateChartMaster();
+              m_pChartDataView->SetViewPort( dtBegin, dtEnd );
+
+              m_bReCalcViewPort = false;
+            //}
+
+            UpdateChartMaster();
+
+            m_bInDrawChart = false;
+          });
+      }
     }
   }
 }
 
-void WinChartView::UpdateChartMaster() {
+void WinChartView::UpdateChartMaster() { // in worker thread with DrawChart started post
 
   wxSize size = this->GetClientSize();  // may not be able to do this cross thread
   m_chartMaster.SetChartDataView( m_pChartDataView );
@@ -323,7 +313,6 @@ void WinChartView::UpdateChartMaster() {
           SetCursor( wxStockCursor( wxCURSOR_BLANK ) );
         }
 
-        m_bInDrawChart = false;
       });
     });
 
@@ -332,27 +321,24 @@ void WinChartView::UpdateChartMaster() {
 
 void WinChartView::UnbindEvents() {
 
-  if ( m_bBound ) {
+  m_timerGuiRefresh.Stop();
 
-    m_timerGuiRefresh.Stop();
+  SetChartDataView( nullptr );
 
-    SetChartDataView( nullptr );
+  assert( Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() ) );
 
-    assert( Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() ) );
+  assert( Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this, this->GetId() ) );
+  assert( Unbind( wxEVT_SIZE, &WinChartView::HandleSize, this, this->GetId() ) );
 
-    assert( Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this ) );
-    assert( Unbind( wxEVT_SIZE, &WinChartView::HandleSize, this ) );
+  assert( Unbind( wxEVT_MOTION, &WinChartView::HandleMouse, this, this->GetId() ) );
+  assert( Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this, this->GetId() ) );
+  assert( Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this, this->GetId() ) );
+  assert( Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this, this->GetId() ) );
 
-    assert( Unbind( wxEVT_MOTION, &WinChartView::HandleMouse, this ) );
-    assert( Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this ) );
-    assert( Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this ) );
-    assert( Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this ) );
+  assert( Unbind( wxEVT_LEFT_UP, &WinChartView::HandleMouseLeftClick, this, this->GetId() ) );
+  assert( Unbind( wxEVT_RIGHT_UP, &WinChartView::HandleMouseRightClick, this, this->GetId() ) );
 
-    Unbind( wxEVT_LEFT_UP, &WinChartView::HandleMouseLeftClick, this );
-    Unbind( wxEVT_RIGHT_UP, &WinChartView::HandleMouseRightClick, this );
-
-    m_bBound = false;
-  }
+  assert( Unbind( wxEVT_DESTROY, &WinChartView::OnDestroy, this, this->GetId() ) );
 
 }
 
@@ -360,7 +346,10 @@ void WinChartView::OnDestroy( wxWindowDestroyEvent& event ) {
 
   UnbindEvents();
 
-  assert( Unbind( wxEVT_DESTROY, &WinChartView::OnDestroy, this ) );
+  m_pWork.reset();
+  if ( m_threadDrawChart.joinable() ) {
+    m_threadDrawChart.join(); // to end
+  }
 
   event.Skip();  // auto followed by Destroy();
 }
