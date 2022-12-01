@@ -19,9 +19,33 @@
  * Created: 2022/11/21 14:59:32
  */
 
-#include "PanelTrade.hpp"
+#include <OUCommon/Colour.h>
 
+#include "PanelTrade.hpp"
 #include "ExecutionControl.hpp"
+
+namespace {
+
+  enum Index { NoOrder, LimitTracking, LimitSubmitted, StopTracking, StopSubmitted };
+
+  // https://en.wikipedia.org/wiki/Web_colors
+  using EColour = ou::Colour::wx::EColour;
+  std::vector<EColour> OrderColours {
+    EColour::LightYellow,    // no order
+    EColour::Turquoise,      // limit, tracking
+    EColour::LightSeaGreen,  // limit, submitted
+    EColour::LightSalmon,    // stop, tracking
+    EColour::IndianRed       // stop, submitted
+  };
+
+  //enum OrderColour {
+  //  NoOrder=EColour::LightYellow
+  //, LimitTracking = EColour::Turquoise
+  //, LimitSubmitted = EColour::LightSeaGreen
+  //, StopTracking = EColour::LightSalmon
+  //, StopSubmitted = EColour::IndianRed
+  //};
+}
 
 namespace ou {
 namespace tf {
@@ -51,7 +75,17 @@ ExecutionControl::~ExecutionControl() {
   }
 }
 
-// TODO: much of this shouild be moved to ExecModel
+// TODO: much of this shouild be moved to ExecModel, and leave the button decoding here
+// Consider: to simulate market maker, orders are submitted and retracted automatically
+//   based upon at which bid/ask rung the current price is nearest
+//   - since stops need to be simulated outside of market hours, maybe simulate/track all orders
+// TODO: use ExecutionModel to handle order submission/retraction?
+//  * can take the feed for auto-submission
+//  * then forms basis for any automated decision making
+//  * light colour: tracking order locally
+//  * dark colour:  order at exchange
+//  * green:  limit order (light/dark)
+//  * red:    stop order (light/dark)
 void ExecutionControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
 
   m_pPanelTrade = pPanelTrade;
@@ -66,7 +100,7 @@ void ExecutionControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
             switch ( button ) {
               case PriceRow::EButton::Left:
                 if ( shift ) {
-                  AskStop( price );
+                  AskStop( price ); // need to simulate submission
                 }
                 else {
                   AskLimit( price );
@@ -75,7 +109,12 @@ void ExecutionControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
               case PriceRow::EButton::Middle:
                 break;
               case PriceRow::EButton::Right:
-                AskCancel( price );
+                if ( shift ) {
+                  // TODO: cancel all orders on this side
+                }
+                else {
+                  AskCancel( price );
+                }
                 break;
             }
             break;
@@ -83,7 +122,7 @@ void ExecutionControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
             switch ( button ) {
               case PriceRow::EButton::Left:
                 if ( shift ) {
-                  BidStop( price );
+                  BidStop( price ); // need to simulate submission
                 }
                 else {
                   BidLimit( price );
@@ -92,7 +131,12 @@ void ExecutionControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
               case PriceRow::EButton::Middle:
                 break;
               case PriceRow::EButton::Right:
-                BidCancel( price );
+                if ( shift ) {
+                  // TODO: cancel all orders on this side
+                }
+                else {
+                  BidCancel( price );
+                }
                 break;
             }
             break;
@@ -106,6 +150,7 @@ void ExecutionControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
 
 }
 
+// on each click, to increase quantity, cancel order & re-submit with new quantity
 void ExecutionControl::AskLimit( double price ) {
   mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
   if ( m_mapAskOrders.end() == iterOrders ) {
@@ -118,7 +163,7 @@ void ExecutionControl::AskLimit( double price ) {
     PriceLevelOrder& plo( iterOrders->second );
     plo.Set( // fUpdateQuantity_t
       [this,price,iterOrders]( unsigned int quantity ){
-        m_pPanelTrade->SetAsk( price, quantity ); // set with plo instead
+        m_pPanelTrade->SetAsk( price, quantity, OrderColours[ 0 == quantity ? NoOrder : LimitSubmitted ] ); // set with plo instead
         if ( 0 == quantity ) { // based upon cancel, or fulfillment
           m_KillPriceLevelOrder = std::move( iterOrders->second );
           m_mapAskOrders.erase( iterOrders );
@@ -133,6 +178,7 @@ void ExecutionControl::AskLimit( double price ) {
 }
 
 // on futures, only available during regular trading hours, will need to be simulated
+// can't do a -1 on the order status, use colour instead
 void ExecutionControl::AskStop( double price ) {
   mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
   if ( m_mapAskOrders.end() == iterOrders ) {
@@ -145,7 +191,7 @@ void ExecutionControl::AskStop( double price ) {
     PriceLevelOrder& plo( iterOrders->second );
     plo.Set( // fUpdateQuantity_t
       [this,price,iterOrders]( unsigned int quantity ){
-        m_pPanelTrade->SetAsk( price, -quantity ); // set with plo instead
+        m_pPanelTrade->SetAsk( price, quantity, OrderColours[ 0 == quantity ? NoOrder : StopTracking ] ); // set with plo instead
         if ( 0 == quantity ) { // based upon cancel, or fulfillment
           m_KillPriceLevelOrder = std::move( iterOrders->second );
           m_mapAskOrders.erase( iterOrders );
@@ -168,6 +214,7 @@ void ExecutionControl::AskCancel( double price ) {
   }
 }
 
+// on each click, to increase quantity, cancel order & re-submit with new quantity
 void ExecutionControl::BidLimit( double price ) {
   mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
   if ( m_mapBidOrders.end() == iterOrders ) {
@@ -180,7 +227,7 @@ void ExecutionControl::BidLimit( double price ) {
     PriceLevelOrder& plo( iterOrders->second );
     plo.Set( // fUpdateQuantity_t
       [this,price,iterOrders]( unsigned int quantity ){
-        m_pPanelTrade->SetBid( price, quantity ); // set with plo instead
+        m_pPanelTrade->SetBid( price, quantity, OrderColours[ 0 == quantity ? NoOrder : LimitSubmitted ] ); // set with plo instead
         if ( 0 == quantity ) { // based upon cancel, or fulfillment
           m_KillPriceLevelOrder = std::move( iterOrders->second );
           m_mapBidOrders.erase( iterOrders );
@@ -195,6 +242,7 @@ void ExecutionControl::BidLimit( double price ) {
 }
 
 // on futures, only available during regular trading hours, will need to be simulated
+// can't do a -1 on the order status, use colour instead
 void ExecutionControl::BidStop( double price ) {
   mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
   if ( m_mapBidOrders.end() == iterOrders ) {
@@ -207,7 +255,7 @@ void ExecutionControl::BidStop( double price ) {
     PriceLevelOrder& plo( iterOrders->second );
     plo.Set( // fUpdateQuantity_t
       [this,price,iterOrders]( unsigned int quantity ){
-        m_pPanelTrade->SetBid( price, -quantity ); // set with plo instead
+        m_pPanelTrade->SetBid( price, quantity, OrderColours[ 0 == quantity ? NoOrder : StopTracking ] ); // set with plo instead
         if ( 0 == quantity ) { // based upon cancel, or fulfillment
           m_KillPriceLevelOrder = std::move( iterOrders->second );
           m_mapBidOrders.erase( iterOrders );

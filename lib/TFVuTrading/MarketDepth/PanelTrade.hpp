@@ -89,8 +89,9 @@ public:
   void Set( fClick_t&& );
 
   // Interface - In - Updates - Pending Orders
-  void SetAsk( double, int ); // update pending quantity@price
-  void SetBid( double, int ); // update pending quantity@price
+  using EColour = WinRowElement::EColour;
+  void SetAsk( double, int, EColour ); // update pending quantity@price
+  void SetBid( double, int, EColour ); // update pending quantity@price
 
 protected:
 private:

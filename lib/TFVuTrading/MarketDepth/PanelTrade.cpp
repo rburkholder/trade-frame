@@ -439,14 +439,14 @@ void PanelTrade::Set( fClick_t&& fClick ) {
   m_fClick = std::move( fClick );
 }
 
-void PanelTrade::SetAsk( double price, int n ) {
+void PanelTrade::SetAsk( double price, int n, EColour bg ) {
   PriceRow& rowPrice( m_PriceRows[ price ] );
-  rowPrice.SetAskOrderSize( n );
+  rowPrice.SetAskOrderSize( n, bg );
 }
 
-void PanelTrade::SetBid( double price, int n ) {
+void PanelTrade::SetBid( double price, int n, EColour bg ) {
   PriceRow& rowPrice( m_PriceRows[ price ] );
-  rowPrice.SetBidOrderSize( n );
+  rowPrice.SetBidOrderSize( n, bg );
 }
 
 } // market depth

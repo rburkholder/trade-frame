@@ -33,8 +33,9 @@ namespace {
   const std::string sFmtString( "%s" );
 }
 
-PriceRow::PriceRow( double price )
-: m_bChanged( false )
+PriceRow::PriceRow( double price ) // TODO: get rid of this?
+: m_bFirst( true )
+, m_bChanged( false )
   //m_pRowElements( nullptr ),
   //m_price( price ),
   //m_dreAcctPl( sFmtPrice, m_bChanged ),
@@ -54,7 +55,8 @@ PriceRow::PriceRow( double price )
 {}
 
 PriceRow::PriceRow( const PriceRow& rhs ) // don't copy or move anything
-: m_bChanged( false )
+: m_bFirst( true )
+, m_bChanged( false )
   //m_pRowElements( nullptr ),
   //m_price( rhs.m_price ),
   //m_dreAcctPl( sFmtPrice, m_bChanged ),
@@ -88,19 +90,21 @@ void PriceRow::SetRowElements( WinRow& wr ) {
 
   //m_dreAcctPl.SetWinRowElement(    wr[ Field::AcctPL ] );
   // TODO: is this set in another thread?  Do we lock it?
-  m_dreBuyCount.SetWinRowElement(         wr[ (int)EField::BuyCount ] );
-  m_dreBuyVolume.SetWinRowElement(        wr[ (int)EField::BuyVolume ] );
-  m_dreBidSize.SetWinRowElement(          wr[ (int)EField::BidSize ] );
-  m_dreBidOrder.SetWinRowElement(         wr[ (int)EField::BidOrder ] );
-  m_drePrice.SetWinRowElement(            wr[ (int)EField::Price ] );
-  m_dreAskOrder.SetWinRowElement(         wr[ (int)EField::AskOrder ] );
-  m_dreAskSize.SetWinRowElement(          wr[ (int)EField::AskSize ] );
-  m_dreSellVolume.SetWinRowElement(       wr[ (int)EField::SellVolume ] );
-  m_dreSellCount.SetWinRowElement(        wr[ (int)EField::SellCount ] );
-  m_dreTicks.SetWinRowElement(            wr[ (int)EField::Ticks ] );
-  m_dreVolume.SetWinRowElement(           wr[ (int)EField::Volume ] );
-  m_dreIndicatorStatic.SetWinRowElement(  wr[ (int)EField::Static ] );
-  m_dreIndicatorDynamic.SetWinRowElement( wr[ (int)EField::Dynamic ] );
+  m_dreBuyCount.SetWinRowElement(         m_bFirst, wr[ (int)EField::BuyCount ] );
+  m_dreBuyVolume.SetWinRowElement(        m_bFirst, wr[ (int)EField::BuyVolume ] );
+  m_dreBidSize.SetWinRowElement(          m_bFirst, wr[ (int)EField::BidSize ] );
+  m_dreBidOrder.SetWinRowElement(         m_bFirst, wr[ (int)EField::BidOrder ] );
+  m_drePrice.SetWinRowElement(            m_bFirst, wr[ (int)EField::Price ] );
+  m_dreAskOrder.SetWinRowElement(         m_bFirst, wr[ (int)EField::AskOrder ] );
+  m_dreAskSize.SetWinRowElement(          m_bFirst, wr[ (int)EField::AskSize ] );
+  m_dreSellVolume.SetWinRowElement(       m_bFirst, wr[ (int)EField::SellVolume ] );
+  m_dreSellCount.SetWinRowElement(        m_bFirst, wr[ (int)EField::SellCount ] );
+  m_dreTicks.SetWinRowElement(            m_bFirst, wr[ (int)EField::Ticks ] );
+  m_dreVolume.SetWinRowElement(           m_bFirst, wr[ (int)EField::Volume ] );
+  m_dreIndicatorStatic.SetWinRowElement(  m_bFirst, wr[ (int)EField::Static ] );
+  m_dreIndicatorDynamic.SetWinRowElement( m_bFirst, wr[ (int)EField::Dynamic ] );
+
+  m_bFirst = false;
 
 }
 
@@ -124,19 +128,19 @@ void PriceRow::Refresh() {
 void PriceRow::DelRowElements() {
   //m_pRowElements = nullptr;
   //m_dreAcctPl.SetWinRowElement( nullptr );
-  m_dreBuyCount.SetWinRowElement( nullptr );
-  m_dreBuyVolume.SetWinRowElement( nullptr );
-  m_dreBidSize.SetWinRowElement( nullptr );
-  m_dreBidOrder.SetWinRowElement( nullptr );
-  m_drePrice.SetWinRowElement( nullptr );
-  m_dreAskOrder.SetWinRowElement( nullptr );
-  m_dreAskSize.SetWinRowElement( nullptr );
-  m_dreSellVolume.SetWinRowElement( nullptr );
-  m_dreSellCount.SetWinRowElement( nullptr );
-  m_dreTicks.SetWinRowElement( nullptr );
-  m_dreVolume.SetWinRowElement( nullptr );
-  m_dreIndicatorStatic.SetWinRowElement( nullptr );
-  m_dreIndicatorDynamic.SetWinRowElement( nullptr );
+  m_dreBuyCount.SetWinRowElement( false, nullptr );
+  m_dreBuyVolume.SetWinRowElement( false, nullptr );
+  m_dreBidSize.SetWinRowElement( false, nullptr );
+  m_dreBidOrder.SetWinRowElement( false, nullptr );
+  m_drePrice.SetWinRowElement( false, nullptr );
+  m_dreAskOrder.SetWinRowElement( false, nullptr );
+  m_dreAskSize.SetWinRowElement( false, nullptr );
+  m_dreSellVolume.SetWinRowElement( false, nullptr );
+  m_dreSellCount.SetWinRowElement( false, nullptr );
+  m_dreTicks.SetWinRowElement( false, nullptr );
+  m_dreVolume.SetWinRowElement( false, nullptr );
+  m_dreIndicatorStatic.SetWinRowElement( false, nullptr );
+  m_dreIndicatorDynamic.SetWinRowElement( false, nullptr );
 
 }
 

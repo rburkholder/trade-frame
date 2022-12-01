@@ -40,13 +40,17 @@ public:
   DataRowElement( const DataRowElement& ) = delete; // can't be copied, &bChanged needs to be changed
   virtual ~DataRowElement();
 
-  void SetWinRowElement( WinRowElement* );
+  void SetWinRowElement( bool bFirst, WinRowElement* );
   WinRowElement* GetWinRowElement() { return m_pWinRowElement; }
 
   virtual void UpdateWinRowElement();
 
+  using EColour = WinRowElement::EColour;
+
   virtual void Set( const T );
-  void Set( const T, bool );
+  void Set( const T, bool bHighlight );
+  void Set( const T, EColour bg );
+  void Set( const T, EColour fg, EColour bg );
   void Inc();
   void Add( T );
   T Get() const;
@@ -57,6 +61,9 @@ protected:
 
   bool& m_bChanged; // reference to global
   bool m_bHighlight;
+
+  EColour m_colourBackground;
+  EColour m_colourForeground;
 
   boost::format m_format;
   std::string m_sValue; // value to be placed in WinRowElement
@@ -73,6 +80,8 @@ DataRowElement<T>::DataRowElement( const std::string& sFormat, bool& bChanged )
 , m_format( sFormat )
 , m_pWinRowElement( nullptr )
 , m_value {}
+, m_colourBackground( EColour::White )
+, m_colourForeground( EColour::Black )
 {}
 
 template<typename T>
@@ -98,6 +107,25 @@ void DataRowElement<T>::Set( const T value, bool bHighlight ) {
 }
 
 template<typename T>
+void DataRowElement<T>::Set( const T value, EColour bg ) {
+  if ( ( m_value != value ) || ( bg != m_colourBackground ) ) {
+    m_value = value;
+    m_colourBackground = bg;
+    m_bChanged = true;
+  }
+}
+
+template<typename T>
+void DataRowElement<T>::Set( const T value, EColour fg, EColour bg ) {
+  if ( ( m_value != value ) || ( fg != m_colourForeground ) || ( bg != m_colourBackground ) ) {
+    m_value = value;
+    m_colourBackground = bg;
+    m_colourForeground = fg;
+    m_bChanged = true;
+  }
+}
+
+template<typename T>
 T DataRowElement<T>::Get() const {
   return m_value;
 }
@@ -113,11 +141,15 @@ void DataRowElement<T>::Add( T value )  {
 }
 
 template<typename T>
-void DataRowElement<T>::SetWinRowElement( WinRowElement* pwre ) {
+void DataRowElement<T>::SetWinRowElement( bool bFirst, WinRowElement* pwre ) {
   // TODO: is there a way to clear an attached WinRowElement
   //   will need to reset, refresh, then unattach in caller
   // TODO: clear the FMouseClick_t callbacks?
   m_pWinRowElement = pwre;
+  if ( bFirst ) {
+    m_colourBackground = pwre->GetColourBackground();
+    m_colourForeground = pwre->GetColourForeground();
+  }
 }
 
 template<typename T>
@@ -130,6 +162,8 @@ void DataRowElement<T>::UpdateWinRowElement() {
     m_sValue.clear();
   }
   if ( nullptr != m_pWinRowElement ) {
+    m_pWinRowElement->SetColourBackground( m_colourBackground );
+    m_pWinRowElement->SetColourForeground( m_colourForeground );
     m_pWinRowElement->SetText( m_sValue, m_bHighlight );
   }
 }

@@ -92,14 +92,23 @@ public:
   using fClick_t = std::function<void(double price,EField,EButton,bool shift,bool control,bool alt)>;
   void Set( fClick_t&& );
 
+  using EColour = WinRowElement::EColour;
+
   void SetAskOrderSize( unsigned int );
+  void SetAskOrderSize( unsigned int quan, EColour bg ) {
+    m_dreAskOrder.Set( quan, bg );
+  }
+
   void SetBidOrderSize( unsigned int );
+  void SetBidOrderSize( unsigned int quan, EColour bg ) {
+    m_dreBidOrder.Set( quan, bg );
+  }
+
 
 protected:
 private:
 
-  //double m_price;
-
+  bool m_bFirst; // load colours from WinRowElement first time around, maybe use vElement_t instead like WinRow
   bool m_bChanged;
 
   // TODO: boost::fusion?  std::tuple?

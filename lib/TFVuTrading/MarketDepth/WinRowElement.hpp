@@ -72,6 +72,8 @@ public:
 
   void SetText( const std::string& );
   void SetText( const std::string&, bool bHighlight );
+  void SetText( const std::string&, EColour bg );
+  void SetText( const std::string&, EColour fg, EColour bg );
   void SetCanHaveFocus( bool );
 
   void SetColourBackground( EColour colour );
@@ -80,6 +82,10 @@ public:
   void SetColours( EColour colourB, EColour colourF, EColour colourH );
 
   void Set( fClick_t&& );
+
+  EColour GetColourBackground() const { return m_colourBackground; }
+  EColour GetColourForeground() const { return m_colourForeground; }
+  EColour GetColourHighlight() const { return m_colourHighlight; }
 
 protected:
 private:

@@ -113,6 +113,17 @@ void WinRowElement::SetText( const std::string& sText, bool bHighlight ) {
   SetText( sText );
 }
 
+void WinRowElement::SetText( const std::string& sText, EColour bg ) {
+  SetColourBackground( bg );
+  SetText( sText );
+}
+
+void WinRowElement::SetText( const std::string& sText, EColour fg, EColour bg ) {
+  SetColourForeground( fg );
+  SetColourBackground( bg );
+  SetText( sText );
+}
+
 void WinRowElement::SetColourBackground( EColour colour ) {
   m_colourBackground = colour;
   wxWindow::SetBackgroundColour( colour );

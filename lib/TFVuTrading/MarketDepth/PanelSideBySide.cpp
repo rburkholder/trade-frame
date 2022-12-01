@@ -40,6 +40,8 @@
 //   will the code be able to keep up?
 // will need to watch for disconnect and resync the order list
 
+// TODO: need to fix the SetWinRowElement lines with the false/true setting
+
 namespace {
 
   enum class EField: int {
@@ -230,14 +232,14 @@ void PanelSideBySide::CalculateStatistics() { // need to fix this, as cross thre
 
         rs.Add( ix, imbalance );
 
-        bookAsk.m_drePrice.SetWinRowElement( row[ (int)EField::APrice ] ); // can this be performed during map update?
-        bookAsk.m_dreSize.SetWinRowElement( row[ (int)EField::ASize ] );
-        bookAsk.m_dreSizeAgg.SetWinRowElement( row[ (int)EField::ASizeAgg ] );
+        bookAsk.m_drePrice.SetWinRowElement( true, row[ (int)EField::APrice ] ); // can this be performed during map update?
+        bookAsk.m_dreSize.SetWinRowElement( true, row[ (int)EField::ASize ] );
+        bookAsk.m_dreSizeAgg.SetWinRowElement( true, row[ (int)EField::ASizeAgg ] );
         bookAsk.m_dreSizeAgg.Set( nVolumeAggregateAsk );
 
-        bookBid.m_drePrice.SetWinRowElement( row[ (int)EField::BPrice ] ); // can this be performed during map update?
-        bookBid.m_dreSize.SetWinRowElement( row[ (int)EField::BSize ] );
-        bookBid.m_dreSizeAgg.SetWinRowElement( row[ (int)EField::BSizeAgg ] );
+        bookBid.m_drePrice.SetWinRowElement( true, row[ (int)EField::BPrice ] ); // can this be performed during map update?
+        bookBid.m_dreSize.SetWinRowElement( true, row[ (int)EField::BSize ] );
+        bookBid.m_dreSizeAgg.SetWinRowElement( true, row[ (int)EField::BSizeAgg ] );
         bookBid.m_dreSizeAgg.Set( nVolumeAggregateBid );
 
         // can't take these out of the lock as the maps are async updated
@@ -310,7 +312,7 @@ void PanelSideBySide::DrawWinRows() {
         m_vWinRow[ ixWinRow ] = pWinRow;
 
         pDataRow_Statistics_t pDataRow_Statistics = std::make_unique<DataRow_Statistics>();
-        pDataRow_Statistics->m_dreImbalance.SetWinRowElement( (*pWinRow)[ (int)EField::Imbalance ]);
+        pDataRow_Statistics->m_dreImbalance.SetWinRowElement( true, (*pWinRow)[ (int)EField::Imbalance ]);
         m_vStatistics[ ixWinRow ] = std::move( pDataRow_Statistics );
 
         yOffset += RowHeight;
