@@ -43,7 +43,7 @@ namespace l2 {
 }
 
 namespace config {
-  class Options;
+  class Choices;
 }
 
 class InteractiveChart;
