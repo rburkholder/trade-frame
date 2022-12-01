@@ -239,6 +239,7 @@ void ChartMaster::CrossHairDraw( bool bDraw ) {
 bool ChartMaster::DrawDynamicLayer() {
   // TODO: maybe trigger more often than data update happens?
   //   trigger a call back for sync?
+  //   confirm when hit, only when mouse is over?
 
   bool bCrossHairs( false );
 
