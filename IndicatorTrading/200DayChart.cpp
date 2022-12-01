@@ -38,7 +38,7 @@ Chart200Day::Chart200Day(
 
 bool Chart200Day::Create(
   wxWindow* parent, wxWindowID id,
-  const wxPoint& pos, const wxSize& size, long style 
+  const wxPoint& pos, const wxSize& size, long style
 ) {
   bool bOk = WinChartView::Create( parent, id, pos, size, style );
   Init();
@@ -87,7 +87,8 @@ void Chart200Day::UnBindEvents() {
   //Unbind( wxEVT_CHAR, &SessionChart::OnChar, this );
 }
 
-void Chart200Day::OnDestroy( wxWindowDestroyEvent& ) {
+void Chart200Day::OnDestroy( wxWindowDestroyEvent& event ) {
   SetChartDataView( nullptr );
   UnBindEvents();
+  event.Skip( true );
 }
