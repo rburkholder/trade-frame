@@ -504,8 +504,14 @@ void AppIndicatorTrading::LoadDailyHistory( pPosition_t pPosition ) {
 
   std::cout << "daily history for " << sSymbol << std::endl;
 
-  m_DailyHistory.Load(
-    sSymbol, m_cemReferenceLevels,
+  ou::Colour::EColour colour( ou::Colour::BlueViolet );
+
+  m_DailyHistory.Load( // change to per bar and done, then Daily history is computed here?
+    sSymbol,
+    [this,colour](double price, const std::string& sName){
+      m_cemReferenceLevels.AddMark( price, colour, sName );
+      m_pPanelTrade->AppendStaticIndicator( price, sName );
+    },
     [this](const ou::tf::Bars& bars){
       m_pChart200Day->Add( bars );
     } );

@@ -30,11 +30,12 @@
 class DailyHistory {
 public:
 
+  using fAddMark_t = std::function<void(double,const std::string&)>;
   using fDone_t = std::function<void(const ou::tf::Bars&)>;
 
   ~DailyHistory();
 
-  void Load( const std::string& sIQFeedSymbolName, ou::ChartEntryMark&, fDone_t&& );
+  void Load( const std::string& sIQFeedSymbolName, fAddMark_t&&, fDone_t&& );
   void Close();
 
 protected:

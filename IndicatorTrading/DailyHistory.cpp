@@ -19,8 +19,6 @@
  * Created: May 17, 2022 16:24
  */
 
-#include <TFTrading/Watch.h>
-
 #include <TFIndicators/Pivots.h>
 
 #include "DailyHistory.hpp"
@@ -29,39 +27,35 @@ DailyHistory::~DailyHistory() {
   Close();
 }
 
-void DailyHistory::Load( const std::string& sIQFeedSymbolName, ou::ChartEntryMark& cem, fDone_t&& fDone ) {
+void DailyHistory::Load( const std::string& sIQFeedSymbolName, fAddMark_t&& fAddMark, fDone_t&& fDone ) {
 
   assert( fDone );
 
-  using pWatch_t = ou::tf::Watch::pWatch_t;
-
   m_pBarHistory = ou::tf::iqfeed::BarHistory::Construct(
-    [this,&cem,sIQFeedSymbolName,fDone_=std::move(fDone)](){ // fConnected_t
+    [this,sIQFeedSymbolName,fAddMark_=std::move(fAddMark),fDone_=std::move(fDone)](){ // fConnected_t
       m_pBarHistory->Set(
-        [this]( const ou::tf::Bar& bar){
+        [this]( const ou::tf::Bar& bar){ // BarHistory::fBar_t
           m_barsHistory.Append( bar );
           //m_pHistoryRequest.reset(); // TODO: surface the disconnect and make synchronous
         },
-        [this,&cem,fDone__=std::move(fDone_)](){
-          ou::Colour::EColour colour( ou::Colour::BlueViolet );
-          const ou::tf::Bar& bar( m_barsHistory.last() );
+        [this,fAddMark__=std::move(fAddMark_),fDone__=std::move(fDone_)](){ // BarHistory::fDone_t
 
-          //pWatch_t pWatchUnderlying = m_pPositionUnderlying->GetWatch();
+          const ou::tf::Bar& barLast( m_barsHistory.last() );
+
           std::cout
-          //  << pWatchUnderlying->GetInstrumentName()
-            << "last bar at " << bar.DateTime()
+            << "last bar at " << barLast.DateTime()
             << std::endl;
 
           ou::tf::PivotSet setPivots;
 
-          setPivots.CalcPivots( bar );
+          setPivots.CalcPivots( barLast );
           const ou::tf::PivotSet& ps( setPivots );
           using PS = ou::tf::PivotSet;
-          cem.AddMark( ps.GetPivotValue( PS::R2 ), colour, "r2" );
-          cem.AddMark( ps.GetPivotValue( PS::R1 ), colour, "r1" );
-          cem.AddMark( ps.GetPivotValue( PS::PV ), colour, "pv" );
-          cem.AddMark( ps.GetPivotValue( PS::S1 ), colour, "s1" );
-          cem.AddMark( ps.GetPivotValue( PS::S2 ), colour, "s2" );
+          fAddMark__( ps.GetPivotValue( PS::R2 ), "r2" );
+          fAddMark__( ps.GetPivotValue( PS::R1 ), "r1" );
+          fAddMark__( ps.GetPivotValue( PS::PV ), "pv" );
+          fAddMark__( ps.GetPivotValue( PS::S1 ), "s1" );
+          fAddMark__( ps.GetPivotValue( PS::S2 ), "s2" );
 
           std::cout
             << "pivots"
@@ -86,8 +80,8 @@ void DailyHistory::Load( const std::string& sIQFeedSymbolName, ou::ChartEntryMar
 
           int ix( 1 );
 
-          m_barsHistory.ForEachReverse( 
-            [this,&ix,&cem,colour
+          m_barsHistory.ForEachReverse(
+            [this,&ix,&fAddMark__
              , &dblAvg200,&dblAvg100,&dblAvg50,&dblAvg21,&dblAvg7
              , &dblAvgRange200,&dblAvgRange100,&dblAvgRange50,&dblAvgRange21,&dblAvgRange7
             ]( const ou::tf::Bar& bar ){
@@ -96,28 +90,32 @@ void DailyHistory::Load( const std::string& sIQFeedSymbolName, ou::ChartEntryMar
             //  << std::endl;
             if ( 200 >= ix ) {
               std::string sIx = boost::lexical_cast<std::string>( ix );
-              cem.AddMark( bar.High(), colour, "hi-" + sIx );
-              cem.AddMark( bar.Low(),  colour, "lo-" + sIx );
+              fAddMark__( bar.High(), "hi-" + sIx );
+              fAddMark__( bar.Low(),  "lo-" + sIx );
             }
+
+            const ou::tf::DatedDatum::price_t close( bar.Close() );
+            const ou::tf::DatedDatum::price_t  diff( bar.High() - bar.Low() );
+
             if ( 200 >= ix ) {
-              dblAvg200 += bar.Close() / 200.0;
-              dblAvgRange200 += ( bar.High() - bar.Low() ) / 200.0;
+              dblAvg200      += close / 200.0;
+              dblAvgRange200 += diff  / 200.0;
             }
             if ( 100 >= ix ) {
-              dblAvg100 += bar.Close() / 100.0;
-              dblAvgRange100 += ( bar.High() - bar.Low() ) / 100.0;
+              dblAvg100      += close / 100.0;
+              dblAvgRange100 += diff  / 100.0;
             }
             if ( 50 >= ix ) {
-              dblAvg50 += bar.Close() / 50;
-              dblAvgRange50 += ( bar.High() - bar.Low() ) / 50;
+              dblAvg50       += close / 50;
+              dblAvgRange50  += diff  / 50;
             }
             if ( 21 >= ix ) {
-              dblAvg21 += bar.Close() / 21;
-              dblAvgRange21 += ( bar.High() - bar.Low() ) / 21;
+              dblAvg21       += close / 21;
+              dblAvgRange21  += diff  / 21;
             }
             if ( 7 >= ix ) {
-              dblAvg7 += bar.Close() / 7;
-              dblAvgRange7 += ( bar.High() - bar.Low() ) / 7;
+              dblAvg7        += close / 7;
+              dblAvgRange7   += diff  / 7;
             }
             ix++;
           });
@@ -131,20 +129,20 @@ void DailyHistory::Load( const std::string& sIQFeedSymbolName, ou::ChartEntryMar
             << ", 200 day=" << dblAvg200
             << std::endl;
 
+          fAddMark__(   dblAvg7,   "7 day" );
+          fAddMark__(  dblAvg21,  "21 day" );
+          fAddMark__(  dblAvg50,  "50 day" );
+          fAddMark__( dblAvg100, "100 day" );
+          fAddMark__( dblAvg200, "200 day" );
+
           std::cout
             << "range"
-            << " 7 day=" << dblAvgRange7
-            << ", 21 day=" << dblAvgRange21
-            << ", 50 day=" << dblAvgRange50
+            <<    " 7 day=" << dblAvgRange7
+            <<  ", 21 day=" << dblAvgRange21
+            <<  ", 50 day=" << dblAvgRange50
             << ", 100 day=" << dblAvgRange100
             << ", 200 day=" << dblAvgRange200
             << std::endl;
-
-          cem.AddMark(   dblAvg7, colour,   "7 day" );
-          cem.AddMark(  dblAvg21, colour,  "21 day" );
-          cem.AddMark(  dblAvg50, colour,  "50 day" );
-          cem.AddMark( dblAvg100, colour, "100 day" );
-          cem.AddMark( dblAvg200, colour, "200 day" );
 
           fDone__(m_barsHistory);
         }
@@ -159,5 +157,5 @@ void DailyHistory::Close() {
   if ( m_pBarHistory ) {
     m_pBarHistory.reset();
   }
-  
+
 }
