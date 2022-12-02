@@ -43,6 +43,7 @@ public:
   void AddMark( const Mark_t& mark ); // bg thread
   virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes );
   virtual void Clear();
+
 protected:
   std::vector<double> m_vPrice;
   std::vector<ou::Colour::EColour> m_vColour;
