@@ -33,7 +33,7 @@ namespace {
   const std::string sFmtString( "%s" );
 }
 
-PriceRow::PriceRow( double price ) // TODO: get rid of this?
+PriceRow::PriceRow( double price ) // called from PriceRows::operator[]( int ix )
 : m_bFirst( true )
 , m_bChanged( false )
   //m_pRowElements( nullptr ),
@@ -54,7 +54,7 @@ PriceRow::PriceRow( double price ) // TODO: get rid of this?
 , m_dreIndicatorDynamic( sFmtString, m_bChanged )
 {}
 
-PriceRow::PriceRow( const PriceRow& rhs ) // don't copy or move anything
+PriceRow::PriceRow( const PriceRow& rhs ) // called from PriceRows::operator[]( int ix )
 : m_bFirst( true )
 , m_bChanged( false )
   //m_pRowElements( nullptr ),
@@ -109,20 +109,23 @@ void PriceRow::SetRowElements( WinRow& wr ) {
 }
 
 void PriceRow::Refresh() {
-  //m_dreAcctPl.UpdateWinRowElement();
-  m_dreBuyCount.UpdateWinRowElement();
-  m_dreBuyVolume.UpdateWinRowElement();
-  m_dreBidSize.UpdateWinRowElement();
-  m_dreBidOrder.UpdateWinRowElement();
-  m_drePrice.UpdateWinRowElement();
-  m_dreAskOrder.UpdateWinRowElement();
-  m_dreAskSize.UpdateWinRowElement();
-  m_dreSellVolume.UpdateWinRowElement();
-  m_dreSellCount.UpdateWinRowElement();
-  m_dreTicks.UpdateWinRowElement();
-  m_dreVolume.UpdateWinRowElement();
-  m_dreIndicatorStatic.UpdateWinRowElement();
-  m_dreIndicatorDynamic.UpdateWinRowElement();
+  if ( m_bChanged ) {
+    //m_dreAcctPl.UpdateWinRowElement();
+    m_dreBuyCount.UpdateWinRowElement();
+    m_dreBuyVolume.UpdateWinRowElement();
+    m_dreBidSize.UpdateWinRowElement();
+    m_dreBidOrder.UpdateWinRowElement();
+    m_drePrice.UpdateWinRowElement();
+    m_dreAskOrder.UpdateWinRowElement();
+    m_dreAskSize.UpdateWinRowElement();
+    m_dreSellVolume.UpdateWinRowElement();
+    m_dreSellCount.UpdateWinRowElement();
+    m_dreTicks.UpdateWinRowElement();
+    m_dreVolume.UpdateWinRowElement();
+    m_dreIndicatorStatic.UpdateWinRowElement();
+    m_dreIndicatorDynamic.UpdateWinRowElement();
+    m_bChanged = false;
+  }
 }
 
 void PriceRow::DelRowElements() {
@@ -163,14 +166,18 @@ void PriceRow::Set( fClick_t&& fClick ) {
     [this](EButton button, bool shift, bool control, bool alt ){
       if ( m_fClick ) m_fClick( m_drePrice.Get(), EField::BidOrder, button, shift, control, alt );
     } );
+
+  m_bChanged = true;
 }
 
 void PriceRow::SetAskOrderSize( unsigned int n ) {
   m_dreAskOrder.Set( n );
+  m_bChanged = true;
 }
 
 void PriceRow::SetBidOrderSize( unsigned int n ) {
   m_dreBidOrder.Set( n );
+  m_bChanged = true;
 }
 
 

@@ -57,16 +57,17 @@ public:
 
 protected:
 
+  bool& m_bChanged; // reference to global
+
   T m_value;
 
-  bool& m_bChanged; // reference to global
+  boost::format m_format;
+  std::string m_sValue; // value to be placed in WinRowElement
+
   bool m_bHighlight;
 
   EColour m_colourBackground;
   EColour m_colourForeground;
-
-  boost::format m_format;
-  std::string m_sValue; // value to be placed in WinRowElement
 
   WinRowElement* m_pWinRowElement;
 
@@ -152,6 +153,15 @@ void DataRowElement<T>::SetWinRowElement( bool bFirst, WinRowElement* pwre ) {
   }
 }
 
+// TODO:
+//   update WinRowElement upon setting, or trigger bChanged
+//   the refresh is creating excessive computation
+//   should only need to update the gui element upon:
+//     a) attachment
+//     b) update
+//   ie, all this stuff here should only be performed when:
+//     a) m_value or a colour changes
+//     b) new WinRowElement attached
 template<typename T>
 void DataRowElement<T>::UpdateWinRowElement() {
   if ( 0 != m_value ) {
