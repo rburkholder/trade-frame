@@ -129,8 +129,6 @@ private:
 
   fClick_t m_fClick;
 
-  //RowElements* m_pRowElements;  // shared_ptr ?
-
 };
 
 } // market depth

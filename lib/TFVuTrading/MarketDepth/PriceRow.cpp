@@ -36,8 +36,6 @@ namespace {
 PriceRow::PriceRow( double price ) // called from PriceRows::operator[]( int ix )
 : m_bFirst( true )
 , m_bChanged( false )
-  //m_pRowElements( nullptr ),
-  //m_price( price ),
   //m_dreAcctPl( sFmtPrice, m_bChanged ),
 , m_dreBuyCount( sFmtInteger, m_bChanged )
 , m_dreBuyVolume( sFmtInteger, m_bChanged )
@@ -57,8 +55,6 @@ PriceRow::PriceRow( double price ) // called from PriceRows::operator[]( int ix 
 PriceRow::PriceRow( const PriceRow& rhs ) // called from PriceRows::operator[]( int ix )
 : m_bFirst( true )
 , m_bChanged( false )
-  //m_pRowElements( nullptr ),
-  //m_price( rhs.m_price ),
   //m_dreAcctPl( sFmtPrice, m_bChanged ),
 , m_dreBuyCount( sFmtInteger, m_bChanged )
 , m_dreBuyVolume( sFmtInteger, m_bChanged )
@@ -83,13 +79,11 @@ PriceRow::~PriceRow() {
 //   https://stackoverflow.com/questions/1198260/how-can-you-iterate-over-the-elements-of-an-stdtuple
 
 void PriceRow::SetRowElements( WinRow& wr ) {
-  //if ( nullptr != m_pRowElements ) {
-    DelRowElements();
-  //}
-  //m_pRowElements = re;
 
-  //m_dreAcctPl.SetWinRowElement(    wr[ Field::AcctPL ] );
+  DelRowElements();
+
   // TODO: is this set in another thread?  Do we lock it?
+  //m_dreAcctPl.SetWinRowElement(    wr[ Field::AcctPL ] );
   m_dreBuyCount.SetWinRowElement(         m_bFirst, wr[ (int)EField::BuyCount ] );
   m_dreBuyVolume.SetWinRowElement(        m_bFirst, wr[ (int)EField::BuyVolume ] );
   m_dreBidSize.SetWinRowElement(          m_bFirst, wr[ (int)EField::BidSize ] );
@@ -129,7 +123,6 @@ void PriceRow::Refresh() {
 }
 
 void PriceRow::DelRowElements() {
-  //m_pRowElements = nullptr;
   //m_dreAcctPl.SetWinRowElement( nullptr );
   m_dreBuyCount.SetWinRowElement( false, nullptr );
   m_dreBuyVolume.SetWinRowElement( false, nullptr );
@@ -144,7 +137,6 @@ void PriceRow::DelRowElements() {
   m_dreVolume.SetWinRowElement( false, nullptr );
   m_dreIndicatorStatic.SetWinRowElement( false, nullptr );
   m_dreIndicatorDynamic.SetWinRowElement( false, nullptr );
-
 }
 
 void PriceRow::Set( fClick_t&& fClick ) {
@@ -167,25 +159,21 @@ void PriceRow::Set( fClick_t&& fClick ) {
       if ( m_fClick ) m_fClick( m_drePrice.Get(), EField::BidOrder, button, shift, control, alt );
     } );
 
-  m_bChanged = true;
 }
 
 void PriceRow::SetAskOrderSize( unsigned int n ) {
   m_dreAskOrder.Set( n );
-  m_bChanged = true;
 }
 
 void PriceRow::SetBidOrderSize( unsigned int n ) {
   m_dreBidOrder.Set( n );
-  m_bChanged = true;
 }
-
 
 } // market depth
 } // namespace tf
 } // namespace ou
 
-/*
+/* from gscalp, for some additional todos
   "Acct1 P/L",
   "Acct2 P/L",
   "Acct P/L",
