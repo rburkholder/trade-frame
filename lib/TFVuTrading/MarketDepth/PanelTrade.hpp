@@ -84,7 +84,7 @@ public:
 
   // Interface - In - Events - Execution
   using EButton = ou::tf::Mouse::EButton;
-  using EField  = ou::tf::l2::PriceRow::EField;
+  using EField  = ou::tf::l2::EField;
   using fClick_t = ou::tf::l2::PriceRow::fClick_t;
   void Set( fClick_t&& );
 

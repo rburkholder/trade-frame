@@ -99,6 +99,7 @@ void PriceRow::SetRowElements( WinRow& wr ) {
   m_dreIndicatorDynamic.SetWinRowElement( m_bFirst, wr[ (int)EField::Dynamic ] );
 
   m_bFirst = false;
+  m_bChanged = true;
 
 }
 

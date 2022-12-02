@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include "Fields.hpp"
+
 #include "WinRow.hpp"
 
 #include "DataRowElement.hpp"
@@ -31,17 +33,6 @@ namespace l2 { // market depth
 
 class PriceRow {
 public:
-
-  enum class EField: int {
-    PL,
-    BuyCount, BuyVolume,
-    BidSize,
-    BidOrder, Price, AskOrder,
-    AskSize,
-    SellVolume, SellCount,
-    Ticks, Volume, Static, Dynamic
-    };
-
 
   explicit PriceRow( double price );
   PriceRow( const PriceRow& );
@@ -103,7 +94,6 @@ public:
   void SetBidOrderSize( unsigned int quan, EColour bg ) {
     m_dreBidOrder.Set( quan, bg );
   }
-
 
 protected:
 private:

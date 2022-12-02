@@ -12,6 +12,7 @@ set(
   file_h
     DataRowElement.hpp
     ExecutionControl.hpp
+    Fields.hpp
     PanelLevelIIButtons.hpp
     PanelSideBySide.hpp
     PanelTrade.hpp
@@ -26,6 +27,7 @@ set(
   file_cpp
     DataRowElement.cpp
     ExecutionControl.cpp
+    Fields.cpp
     PanelLevelIIButtons.cpp
     PanelSideBySide.cpp
     PanelTrade.cpp

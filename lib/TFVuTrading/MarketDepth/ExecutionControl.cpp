@@ -21,6 +21,7 @@
 
 #include <OUCommon/Colour.h>
 
+#include "Fields.hpp"
 #include "PanelTrade.hpp"
 #include "ExecutionControl.hpp"
 
@@ -92,11 +93,11 @@ void ExecutionControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
 
   if ( m_pPanelTrade ) {
     using EButton = ou::tf::Mouse::EButton;
-    using EField  = ou::tf::l2::PriceRow::EField;
+    using EField  = ou::tf::l2::EField;
     m_pPanelTrade->Set(
       [this]( double price, EField field, EButton button, bool shift, bool control, bool alt ){
         switch ( field ) {
-          case PriceRow::EField::AskOrder:
+          case EField::AskOrder:
             switch ( button ) {
               case PriceRow::EButton::Left:
                 if ( shift ) {
@@ -118,7 +119,7 @@ void ExecutionControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
                 break;
             }
             break;
-          case PriceRow::EField::BidOrder:
+          case EField::BidOrder:
             switch ( button ) {
               case PriceRow::EButton::Left:
                 if ( shift ) {

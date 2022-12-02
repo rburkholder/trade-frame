@@ -44,22 +44,21 @@
 
 namespace {
 
-  enum class EField: int {
+  enum class EStatsField: int {
     BSizeAgg, BSize, BPrice, Imbalance, APrice, ASize, ASizeAgg
   };
 
   using EColour = ou::Colour::wx::EColour;
-  //using EField = ou::tf::l2::DataRow::EField;
 
   // TODO: this may ultimately be a composite of three structures (try boost::hana)
-  static const ou::tf::l2::WinRow::vElement_t vElement = {
-    { (int)EField::BSizeAgg,  40, "Agg",    wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
-  , { (int)EField::BSize,     40, "Size",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
-  , { (int)EField::BPrice,    65, "Bid",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
-  , { (int)EField::Imbalance, 50, "Imbal",  wxCENTER, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod }
-  , { (int)EField::APrice,    65, "Ask",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
-  , { (int)EField::ASize,     40, "Size",   wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
-  , { (int)EField::ASizeAgg,  40, "Agg",    wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
+  static const ou::tf::l2::vElement_t vElement = {
+    { (int)EStatsField::BSizeAgg,  40, "Agg",    wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
+  , { (int)EStatsField::BSize,     40, "Size",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
+  , { (int)EStatsField::BPrice,    65, "Bid",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
+  , { (int)EStatsField::Imbalance, 50, "Imbal",  wxCENTER, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod }
+  , { (int)EStatsField::APrice,    65, "Ask",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
+  , { (int)EStatsField::ASize,     40, "Size",   wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
+  , { (int)EStatsField::ASizeAgg,  40, "Agg",    wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
   };
 
 } // anonymous
@@ -232,14 +231,14 @@ void PanelSideBySide::CalculateStatistics() { // need to fix this, as cross thre
 
         rs.Add( ix, imbalance );
 
-        bookAsk.m_drePrice.SetWinRowElement( true, row[ (int)EField::APrice ] ); // can this be performed during map update?
-        bookAsk.m_dreSize.SetWinRowElement( true, row[ (int)EField::ASize ] );
-        bookAsk.m_dreSizeAgg.SetWinRowElement( true, row[ (int)EField::ASizeAgg ] );
+        bookAsk.m_drePrice.SetWinRowElement( true, row[ (int)EStatsField::APrice ] ); // can this be performed during map update?
+        bookAsk.m_dreSize.SetWinRowElement( true, row[ (int)EStatsField::ASize ] );
+        bookAsk.m_dreSizeAgg.SetWinRowElement( true, row[ (int)EStatsField::ASizeAgg ] );
         bookAsk.m_dreSizeAgg.Set( nVolumeAggregateAsk );
 
-        bookBid.m_drePrice.SetWinRowElement( true, row[ (int)EField::BPrice ] ); // can this be performed during map update?
-        bookBid.m_dreSize.SetWinRowElement( true, row[ (int)EField::BSize ] );
-        bookBid.m_dreSizeAgg.SetWinRowElement( true, row[ (int)EField::BSizeAgg ] );
+        bookBid.m_drePrice.SetWinRowElement( true, row[ (int)EStatsField::BPrice ] ); // can this be performed during map update?
+        bookBid.m_dreSize.SetWinRowElement( true, row[ (int)EStatsField::BSize ] );
+        bookBid.m_dreSizeAgg.SetWinRowElement( true, row[ (int)EStatsField::BSizeAgg ] );
         bookBid.m_dreSizeAgg.Set( nVolumeAggregateBid );
 
         // can't take these out of the lock as the maps are async updated
@@ -299,7 +298,7 @@ void PanelSideBySide::DrawWinRows() {
 
       // should this go into the vector?
       m_pWinRow_Header.reset();
-      m_pWinRow_Header = WinRow::Construct( this, vElement, wxPoint( BorderWidth, yOffset ), RowHeight, true );
+      m_pWinRow_Header = WinRow::Construct( this, ::vElement, wxPoint( BorderWidth, yOffset ), RowHeight, true );
 
       yOffset += RowHeight;
 
@@ -308,11 +307,11 @@ void PanelSideBySide::DrawWinRows() {
       m_vStatistics.resize( m_cntWinRows_Data );
 
       while ( ixWinRow < m_cntWinRows_Data ) {
-        pWinRow_t pWinRow = WinRow::Construct( this, vElement, wxPoint( BorderWidth, yOffset ), RowHeight, false );
+        pWinRow_t pWinRow = WinRow::Construct( this, ::vElement, wxPoint( BorderWidth, yOffset ), RowHeight, false );
         m_vWinRow[ ixWinRow ] = pWinRow;
 
         pDataRow_Statistics_t pDataRow_Statistics = std::make_unique<DataRow_Statistics>();
-        pDataRow_Statistics->m_dreImbalance.SetWinRowElement( true, (*pWinRow)[ (int)EField::Imbalance ]);
+        pDataRow_Statistics->m_dreImbalance.SetWinRowElement( true, (*pWinRow)[ (int)EStatsField::Imbalance ]);
         m_vStatistics[ ixWinRow ] = std::move( pDataRow_Statistics );
 
         yOffset += RowHeight;
