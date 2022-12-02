@@ -160,7 +160,7 @@ void PanelTrade::DrawWinRows() {
 
       // should this go into the vector?
       m_pWinRow_Header.reset();
-      m_pWinRow_Header = WinRow::Construct( this, ou::tf::l2::vElement, wxPoint( BorderWidth, yOffset ), RowHeight, true );
+      m_pWinRow_Header = WinRow::Construct( this, ou::tf::l2::rung::vElement, wxPoint( BorderWidth, yOffset ), RowHeight, true );
 
       yOffset += RowHeight;
 
@@ -168,7 +168,7 @@ void PanelTrade::DrawWinRows() {
       m_vWinRow.resize( m_cntWinRows_Data );
 
       while ( ixWinRow < m_cntWinRows_Data ) {
-        pWinRow_t pWinRow = WinRow::Construct( this, ou::tf::l2::vElement, wxPoint( BorderWidth, yOffset ), RowHeight, false );
+        pWinRow_t pWinRow = WinRow::Construct( this, ou::tf::l2::rung::vElement, wxPoint( BorderWidth, yOffset ), RowHeight, false );
         m_vWinRow[ ixWinRow ] = pWinRow;
         yOffset += RowHeight;
         ixWinRow++;

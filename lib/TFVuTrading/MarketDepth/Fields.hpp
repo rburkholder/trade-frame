@@ -30,19 +30,9 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
-enum class EField: int { // may need a different namespace or name to reflect panel trade only
-  PL,
-  BuyCount, BuyVolume,
-  BidSize,
-  BidOrder, Price, AskOrder,
-  AskSize,
-  SellVolume, SellCount,
-  Ticks, Volume, Static, Dynamic
-};
-
 using EColour = ou::Colour::wx::EColour;
 
-struct Element { // definition of a row of elements
+struct Element { // definition of an element in a gui row
   int field;
   int width;
   std::string header;
@@ -54,8 +44,23 @@ struct Element { // definition of a row of elements
 
 using vElement_t = std::vector<Element>;  // TODO: convert to std::array?
 
+namespace rung { // columns/elements/fields in a row/rung of the ladder
+
+// PanelTrade Columns/Fields/Elements
+
+enum class EField: int { // may need a different namespace or name to reflect panel trade only
+  PL,
+  BuyCount, BuyVolume,
+  BidSize,
+  BidOrder, Price, AskOrder,
+  AskSize,
+  SellVolume, SellCount,
+  Ticks, Volume, Static, Dynamic
+};
+
 extern const vElement_t vElement;
 
-} // market depth
+} // namespace rung
+} // namespace market depth
 } // namespace tf
 } // namespace ou

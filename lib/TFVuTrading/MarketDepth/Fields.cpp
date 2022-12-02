@@ -26,6 +26,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
+namespace rung {
 
   const vElement_t vElement = {
     { (int)EField::PL,         40, "P/L",     wxRIGHT,  EColour::LightCyan,     EColour::Black, EColour::Cyan          }
@@ -44,6 +45,7 @@ namespace l2 { // market depth
   , { (int)EField::Dynamic,   100, "DynInd",  wxLEFT,   EColour::DimGray,       EColour::White, EColour::PaleGoldenrod } // dynamic indicators - ema, ...
   };
 
-} // market depth
+} // namespace rung
+} // namespace market depth
 } // namespace tf
 } // namespace ou

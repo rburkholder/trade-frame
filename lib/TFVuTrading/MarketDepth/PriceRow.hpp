@@ -80,6 +80,7 @@ public:
   }
 
   using EButton = ou::tf::Mouse::EButton;
+  using EField = rung::EField;
   using fClick_t = std::function<void(double price,EField,EButton,bool shift,bool control,bool alt)>;
   void Set( fClick_t&& );
 

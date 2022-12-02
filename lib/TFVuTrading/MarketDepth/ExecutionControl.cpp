@@ -93,7 +93,7 @@ void ExecutionControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
 
   if ( m_pPanelTrade ) {
     using EButton = ou::tf::Mouse::EButton;
-    using EField  = ou::tf::l2::EField;
+    using EField  = ou::tf::l2::rung::EField;
     m_pPanelTrade->Set(
       [this]( double price, EField field, EButton button, bool shift, bool control, bool alt ){
         switch ( field ) {
