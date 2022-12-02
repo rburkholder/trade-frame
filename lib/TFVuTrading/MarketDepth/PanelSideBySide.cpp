@@ -42,16 +42,14 @@
 
 // TODO: need to fix the SetWinRowElement lines with the false/true setting
 
-namespace {
-
-  enum class EStatsField: int {
-    BSizeAgg, BSize, BPrice, Imbalance, APrice, ASize, ASizeAgg
-  };
+//namespace {
 
   using EColour = ou::Colour::wx::EColour;
 
+  using EStatsField = ou::tf::l2::PanelSideBySide::EStatsField;
+
   // TODO: this may ultimately be a composite of three structures (try boost::hana)
-  static const ou::tf::l2::vElement_t vElement = {
+  const ou::tf::l2::vElement_t vElement = {
     { (int)EStatsField::BSizeAgg,  40, "Agg",    wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
   , { (int)EStatsField::BSize,     40, "Size",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
   , { (int)EStatsField::BPrice,    65, "Bid",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
@@ -61,7 +59,7 @@ namespace {
   , { (int)EStatsField::ASizeAgg,  40, "Agg",    wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
   };
 
-} // anonymous
+//} // anonymous
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -231,14 +229,14 @@ void PanelSideBySide::CalculateStatistics() { // need to fix this, as cross thre
 
         rs.Add( ix, imbalance );
 
-        bookAsk.m_drePrice.SetWinRowElement( true, row[ (int)EStatsField::APrice ] ); // can this be performed during map update?
-        bookAsk.m_dreSize.SetWinRowElement( true, row[ (int)EStatsField::ASize ] );
-        bookAsk.m_dreSizeAgg.SetWinRowElement( true, row[ (int)EStatsField::ASizeAgg ] );
+        bookAsk.m_drePrice.SetWinRowElement(   row[ (int)EStatsField::APrice ] ); // can this be performed during map update?
+        bookAsk.m_dreSize.SetWinRowElement(    row[ (int)EStatsField::ASize ] );
+        bookAsk.m_dreSizeAgg.SetWinRowElement( row[ (int)EStatsField::ASizeAgg ] );
         bookAsk.m_dreSizeAgg.Set( nVolumeAggregateAsk );
 
-        bookBid.m_drePrice.SetWinRowElement( true, row[ (int)EStatsField::BPrice ] ); // can this be performed during map update?
-        bookBid.m_dreSize.SetWinRowElement( true, row[ (int)EStatsField::BSize ] );
-        bookBid.m_dreSizeAgg.SetWinRowElement( true, row[ (int)EStatsField::BSizeAgg ] );
+        bookBid.m_drePrice.SetWinRowElement(   row[ (int)EStatsField::BPrice ] ); // can this be performed during map update?
+        bookBid.m_dreSize.SetWinRowElement(    row[ (int)EStatsField::BSize ] );
+        bookBid.m_dreSizeAgg.SetWinRowElement( row[ (int)EStatsField::BSizeAgg ] );
         bookBid.m_dreSizeAgg.Set( nVolumeAggregateBid );
 
         // can't take these out of the lock as the maps are async updated
@@ -311,7 +309,7 @@ void PanelSideBySide::DrawWinRows() {
         m_vWinRow[ ixWinRow ] = pWinRow;
 
         pDataRow_Statistics_t pDataRow_Statistics = std::make_unique<DataRow_Statistics>();
-        pDataRow_Statistics->m_dreImbalance.SetWinRowElement( true, (*pWinRow)[ (int)EStatsField::Imbalance ]);
+        pDataRow_Statistics->m_dreImbalance.SetWinRowElement( (*pWinRow)[ (int)EStatsField::Imbalance ]);
         m_vStatistics[ ixWinRow ] = std::move( pDataRow_Statistics );
 
         yOffset += RowHeight;

@@ -36,16 +36,20 @@ template<typename T>
 class DataRowElement {
 public:
 
-  DataRowElement( const std::string& sFormat, bool& bChanged );
+  using EColour = WinRowElement::EColour;
+
+  DataRowElement(
+    bool& bChanged, const std::string& sFormat,
+    EColour fg, EColour bg
+    );
+  DataRowElement( bool& bChanged, const DataRowElement& );
   DataRowElement( const DataRowElement& ) = delete; // can't be copied, &bChanged needs to be changed
   virtual ~DataRowElement();
 
-  void SetWinRowElement( bool bFirst, WinRowElement* );
+  void SetWinRowElement( WinRowElement* );
   WinRowElement* GetWinRowElement() { return m_pWinRowElement; }
 
   virtual void UpdateWinRowElement();
-
-  using EColour = WinRowElement::EColour;
 
   virtual void Set( const T );
   void Set( const T, bool bHighlight );
@@ -75,14 +79,30 @@ private:
 };
 
 template<typename T>
-DataRowElement<T>::DataRowElement( const std::string& sFormat, bool& bChanged )
+DataRowElement<T>::DataRowElement(
+  bool& bChanged, const std::string& sFormat,
+  EColour fg, EColour bg
+)
 : m_bChanged( bChanged )
 , m_bHighlight( false )
 , m_format( sFormat )
 , m_pWinRowElement( nullptr )
 , m_value {}
-, m_colourBackground( EColour::White )
-, m_colourForeground( EColour::Black )
+, m_colourBackground( bg )
+, m_colourForeground( fg )
+{}
+
+template<typename T>
+DataRowElement<T>::DataRowElement(
+  bool& bChanged, const DataRowElement& rhs
+)
+: m_bChanged( bChanged )
+, m_bHighlight( rhs.m_bHighlight )
+, m_format( rhs.m_format )
+, m_pWinRowElement( rhs.m_pWinRowElement )
+, m_value( rhs.m_value )
+, m_colourBackground( rhs.m_colourBackground )
+, m_colourForeground( rhs.m_colourForeground )
 {}
 
 template<typename T>
@@ -142,15 +162,11 @@ void DataRowElement<T>::Add( T value )  {
 }
 
 template<typename T>
-void DataRowElement<T>::SetWinRowElement( bool bFirst, WinRowElement* pwre ) {
+void DataRowElement<T>::SetWinRowElement( WinRowElement* pwre ) {
   // TODO: is there a way to clear an attached WinRowElement
   //   will need to reset, refresh, then unattach in caller
   // TODO: clear the FMouseClick_t callbacks?
   m_pWinRowElement = pwre;
-  if ( bFirst ) {
-    m_colourBackground = pwre->GetColourBackground();
-    m_colourForeground = pwre->GetColourForeground();
-  }
 }
 
 // TODO:
@@ -190,7 +206,13 @@ private:
 
 class DataRowElementIndicatorStatic: public DataRowElement<std::string> {
 public:
-  DataRowElementIndicatorStatic( const std::string& sFormat, bool& bChanged );
+  DataRowElementIndicatorStatic(
+    bool& bChanged, const std::string& sFormat,
+    EColour fg, EColour bg
+    );
+  DataRowElementIndicatorStatic(
+    bool& bChanged, const DataRowElementIndicatorStatic&
+    );
   virtual void UpdateWinRowElement();
   void Append( const std::string& );
 protected:
@@ -201,7 +223,13 @@ private:
 
 class DataRowElementIndicatorDynamic: public DataRowElement<std::string> {
 public:
-  DataRowElementIndicatorDynamic( const std::string& sFormat, bool& bChanged );
+  DataRowElementIndicatorDynamic(
+    bool& bChanged, const std::string& sFormat,
+    EColour fg, EColour bg
+    );
+  DataRowElementIndicatorDynamic(
+    bool& bChanged, const DataRowElementIndicatorDynamic&
+    );
   virtual void UpdateWinRowElement();
   virtual void Set( const std::string& );
   void Add( const std::string& );

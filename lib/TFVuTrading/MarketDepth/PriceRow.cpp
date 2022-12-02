@@ -29,46 +29,44 @@ namespace l2 { // market depth
 
 namespace {
   const std::string sFmtInteger( "%i" );
-  const std::string sFmtPrice( "%0.2f" );
-  const std::string sFmtString( "%s" );
+  const std::string sFmtPrice(   "%0.2f" );
+  const std::string sFmtString(  "%s" );
 }
 
-PriceRow::PriceRow( double price ) // called from PriceRows::operator[]( int ix )
-: m_bFirst( true )
-, m_bChanged( false )
+PriceRow::PriceRow( double price, const vElement_t& v ) // called from PriceRows::operator[]( int ix )
+: m_bChanged( false )
   //m_dreAcctPl( sFmtPrice, m_bChanged ),
-, m_dreBuyCount( sFmtInteger, m_bChanged )
-, m_dreBuyVolume( sFmtInteger, m_bChanged )
-, m_dreBidSize( sFmtInteger, m_bChanged )
-, m_dreBidOrder( sFmtInteger, m_bChanged )
-, m_drePrice( sFmtPrice, m_bChanged )
-, m_dreAskOrder( sFmtInteger, m_bChanged )
-, m_dreAskSize( sFmtInteger, m_bChanged )
-, m_dreSellVolume( sFmtInteger, m_bChanged )
-, m_dreSellCount(sFmtInteger, m_bChanged )
-, m_dreTicks( sFmtInteger, m_bChanged )
-, m_dreVolume( sFmtInteger, m_bChanged )
-, m_dreIndicatorStatic( sFmtString, m_bChanged )
-, m_dreIndicatorDynamic( sFmtString, m_bChanged )
+, m_dreBuyCount(         m_bChanged, sFmtInteger, v[ (int)rung::EField::BuyCount ].colourForeground, v[ (int)rung::EField::BuyCount ].colourBackground )
+, m_dreBuyVolume(        m_bChanged, sFmtInteger, v[ (int)rung::EField::BuyVolume ].colourForeground, v[ (int)rung::EField::BuyVolume ].colourBackground )
+, m_dreBidSize(          m_bChanged, sFmtInteger, v[ (int)rung::EField::BidSize ].colourForeground, v[ (int)rung::EField::BidSize ].colourBackground )
+, m_dreBidOrder(         m_bChanged, sFmtInteger, v[ (int)rung::EField::BidOrder ].colourForeground, v[ (int)rung::EField::BidOrder ].colourBackground )
+, m_drePrice(            m_bChanged, sFmtPrice,   v[ (int)rung::EField::Price ].colourForeground, v[ (int)rung::EField::Price ].colourBackground )
+, m_dreAskOrder(         m_bChanged, sFmtInteger, v[ (int)rung::EField::AskOrder ].colourForeground, v[ (int)rung::EField::AskOrder ].colourBackground )
+, m_dreAskSize(          m_bChanged, sFmtInteger, v[ (int)rung::EField::AskSize ].colourForeground, v[ (int)rung::EField::AskSize ].colourBackground )
+, m_dreSellVolume(       m_bChanged, sFmtInteger, v[ (int)rung::EField::SellVolume ].colourForeground, v[ (int)rung::EField::SellVolume ].colourBackground )
+, m_dreSellCount(        m_bChanged, sFmtInteger, v[ (int)rung::EField::SellCount ].colourForeground, v[ (int)rung::EField::SellCount ].colourBackground )
+, m_dreTicks(            m_bChanged, sFmtInteger, v[ (int)rung::EField::Ticks ].colourForeground, v[ (int)rung::EField::Ticks ].colourBackground )
+, m_dreVolume(           m_bChanged, sFmtInteger, v[ (int)rung::EField::Volume ].colourForeground, v[ (int)rung::EField::Volume ].colourBackground )
+, m_dreIndicatorStatic(  m_bChanged, sFmtString,  v[ (int)rung::EField::Static ].colourForeground, v[ (int)rung::EField::Static ].colourBackground )
+, m_dreIndicatorDynamic( m_bChanged, sFmtString,  v[ (int)rung::EField::Dynamic ].colourForeground, v[ (int)rung::EField::Dynamic ].colourBackground )
 {}
 
 PriceRow::PriceRow( const PriceRow& rhs ) // called from PriceRows::operator[]( int ix )
-: m_bFirst( true )
-, m_bChanged( false )
+: m_bChanged( false )
   //m_dreAcctPl( sFmtPrice, m_bChanged ),
-, m_dreBuyCount( sFmtInteger, m_bChanged )
-, m_dreBuyVolume( sFmtInteger, m_bChanged )
-, m_dreBidSize( sFmtInteger, m_bChanged )
-, m_dreBidOrder( sFmtInteger, m_bChanged )
-, m_drePrice( sFmtPrice, m_bChanged )
-, m_dreAskOrder( sFmtInteger, m_bChanged )
-, m_dreAskSize( sFmtInteger, m_bChanged )
-, m_dreSellVolume( sFmtInteger, m_bChanged )
-, m_dreSellCount(sFmtInteger, m_bChanged )
-, m_dreTicks( sFmtInteger, m_bChanged )
-, m_dreVolume( sFmtInteger, m_bChanged )
-, m_dreIndicatorStatic( sFmtString, m_bChanged )
-, m_dreIndicatorDynamic( sFmtString, m_bChanged )
+, m_dreBuyCount(         m_bChanged, rhs.m_dreBuyCount )
+, m_dreBuyVolume(        m_bChanged, rhs.m_dreBuyVolume )
+, m_dreBidSize(          m_bChanged, rhs.m_dreBidSize )
+, m_dreBidOrder(         m_bChanged, rhs.m_dreBidOrder )
+, m_drePrice(            m_bChanged, rhs.m_drePrice )
+, m_dreAskOrder(         m_bChanged, rhs.m_dreAskOrder )
+, m_dreAskSize(          m_bChanged, rhs.m_dreAskSize )
+, m_dreSellVolume(       m_bChanged, rhs.m_dreSellVolume )
+, m_dreSellCount(        m_bChanged, rhs.m_dreSellCount )
+, m_dreTicks(            m_bChanged, rhs.m_dreTicks )
+, m_dreVolume(           m_bChanged, rhs.m_dreVolume )
+, m_dreIndicatorStatic(  m_bChanged, rhs.m_dreIndicatorStatic )
+, m_dreIndicatorDynamic( m_bChanged, rhs.m_dreIndicatorDynamic )
 {}
 
 PriceRow::~PriceRow() {
@@ -84,21 +82,20 @@ void PriceRow::SetRowElements( WinRow& wr ) {
 
   // TODO: is this set in another thread?  Do we lock it?
   //m_dreAcctPl.SetWinRowElement(    wr[ Field::AcctPL ] );
-  m_dreBuyCount.SetWinRowElement(         m_bFirst, wr[ (int)EField::BuyCount ] );
-  m_dreBuyVolume.SetWinRowElement(        m_bFirst, wr[ (int)EField::BuyVolume ] );
-  m_dreBidSize.SetWinRowElement(          m_bFirst, wr[ (int)EField::BidSize ] );
-  m_dreBidOrder.SetWinRowElement(         m_bFirst, wr[ (int)EField::BidOrder ] );
-  m_drePrice.SetWinRowElement(            m_bFirst, wr[ (int)EField::Price ] );
-  m_dreAskOrder.SetWinRowElement(         m_bFirst, wr[ (int)EField::AskOrder ] );
-  m_dreAskSize.SetWinRowElement(          m_bFirst, wr[ (int)EField::AskSize ] );
-  m_dreSellVolume.SetWinRowElement(       m_bFirst, wr[ (int)EField::SellVolume ] );
-  m_dreSellCount.SetWinRowElement(        m_bFirst, wr[ (int)EField::SellCount ] );
-  m_dreTicks.SetWinRowElement(            m_bFirst, wr[ (int)EField::Ticks ] );
-  m_dreVolume.SetWinRowElement(           m_bFirst, wr[ (int)EField::Volume ] );
-  m_dreIndicatorStatic.SetWinRowElement(  m_bFirst, wr[ (int)EField::Static ] );
-  m_dreIndicatorDynamic.SetWinRowElement( m_bFirst, wr[ (int)EField::Dynamic ] );
+  m_dreBuyCount.SetWinRowElement(         wr[ (int)EField::BuyCount ] );
+  m_dreBuyVolume.SetWinRowElement(        wr[ (int)EField::BuyVolume ] );
+  m_dreBidSize.SetWinRowElement(          wr[ (int)EField::BidSize ] );
+  m_dreBidOrder.SetWinRowElement(         wr[ (int)EField::BidOrder ] );
+  m_drePrice.SetWinRowElement(            wr[ (int)EField::Price ] );
+  m_dreAskOrder.SetWinRowElement(         wr[ (int)EField::AskOrder ] );
+  m_dreAskSize.SetWinRowElement(          wr[ (int)EField::AskSize ] );
+  m_dreSellVolume.SetWinRowElement(       wr[ (int)EField::SellVolume ] );
+  m_dreSellCount.SetWinRowElement(        wr[ (int)EField::SellCount ] );
+  m_dreTicks.SetWinRowElement(            wr[ (int)EField::Ticks ] );
+  m_dreVolume.SetWinRowElement(           wr[ (int)EField::Volume ] );
+  m_dreIndicatorStatic.SetWinRowElement(  wr[ (int)EField::Static ] );
+  m_dreIndicatorDynamic.SetWinRowElement( wr[ (int)EField::Dynamic ] );
 
-  m_bFirst = false;
   m_bChanged = true;
 
 }
@@ -125,19 +122,19 @@ void PriceRow::Refresh() {
 
 void PriceRow::DelRowElements() {
   //m_dreAcctPl.SetWinRowElement( nullptr );
-  m_dreBuyCount.SetWinRowElement( false, nullptr );
-  m_dreBuyVolume.SetWinRowElement( false, nullptr );
-  m_dreBidSize.SetWinRowElement( false, nullptr );
-  m_dreBidOrder.SetWinRowElement( false, nullptr );
-  m_drePrice.SetWinRowElement( false, nullptr );
-  m_dreAskOrder.SetWinRowElement( false, nullptr );
-  m_dreAskSize.SetWinRowElement( false, nullptr );
-  m_dreSellVolume.SetWinRowElement( false, nullptr );
-  m_dreSellCount.SetWinRowElement( false, nullptr );
-  m_dreTicks.SetWinRowElement( false, nullptr );
-  m_dreVolume.SetWinRowElement( false, nullptr );
-  m_dreIndicatorStatic.SetWinRowElement( false, nullptr );
-  m_dreIndicatorDynamic.SetWinRowElement( false, nullptr );
+  m_dreBuyCount.SetWinRowElement( nullptr );
+  m_dreBuyVolume.SetWinRowElement( nullptr );
+  m_dreBidSize.SetWinRowElement( nullptr );
+  m_dreBidOrder.SetWinRowElement( nullptr );
+  m_drePrice.SetWinRowElement( nullptr );
+  m_dreAskOrder.SetWinRowElement( nullptr );
+  m_dreAskSize.SetWinRowElement( nullptr );
+  m_dreSellVolume.SetWinRowElement( nullptr );
+  m_dreSellCount.SetWinRowElement( nullptr );
+  m_dreTicks.SetWinRowElement( nullptr );
+  m_dreVolume.SetWinRowElement( nullptr );
+  m_dreIndicatorStatic.SetWinRowElement( nullptr );
+  m_dreIndicatorDynamic.SetWinRowElement( nullptr );
 }
 
 void PriceRow::Set( fClick_t&& fClick ) {

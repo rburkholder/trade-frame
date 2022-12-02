@@ -59,7 +59,7 @@ PriceRow& PriceRows::operator[]( double price ) {
     std::scoped_lock<std::mutex> lock( m_mutexMap ); // is this fine to reduce locking?
     iter = m_mapRow.find( ix ); // try again to confrirm
     if ( m_mapRow.end() == iter ) {
-      auto pair = m_mapRow.emplace( std::make_pair( ix, PriceRow( price ) ) );
+      auto pair = m_mapRow.emplace( std::make_pair( ix, PriceRow( price, rung::vElement ) ) );
       assert( pair.second );
       iter = pair.first;
     }
@@ -74,7 +74,7 @@ PriceRow& PriceRows::operator[]( int ix ) {
     std::scoped_lock<std::mutex> lock( m_mutexMap ); // is this fine to reduce locking
     iter = m_mapRow.find( ix ); // try again to confirm inside lock
     if ( m_mapRow.end() == iter ) {
-      auto pair = m_mapRow.emplace( std::make_pair( ix, PriceRow( Cast( ix ) ) ) );
+      auto pair = m_mapRow.emplace( std::make_pair( ix, PriceRow( Cast( ix ), rung::vElement ) ) );
       assert( pair.second );
       iter = pair.first;
     }

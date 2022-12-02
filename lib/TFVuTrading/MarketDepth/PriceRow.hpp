@@ -34,7 +34,7 @@ namespace l2 { // market depth
 class PriceRow {
 public:
 
-  explicit PriceRow( double price );
+  PriceRow( double price, const vElement_t& );
   PriceRow( const PriceRow& );
   ~PriceRow();
 
@@ -99,7 +99,6 @@ public:
 protected:
 private:
 
-  bool m_bFirst; // load colours from WinRowElement first time around, maybe use vElement_t instead like WinRow
   bool m_bChanged;
 
   // TODO: boost::fusion?  std::tuple?

@@ -30,6 +30,8 @@
 #include "WinRow.hpp"
 #include "DataRowElement.hpp"
 
+extern const ou::tf::l2::vElement_t vElement;
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
@@ -69,6 +71,10 @@ public:
     m_fImbalanceStats = std::move( f );
   }
 
+  enum class EStatsField: int {
+    BSizeAgg, BSize, BPrice, Imbalance, APrice, ASize, ASizeAgg
+  };
+
 protected:
 private:
 
@@ -88,9 +94,11 @@ private:
   // TODO: turn into DataRow, and link WinElement into DataRowElement
   //   remember to blank out WinElement prior to unlink
 
-  static const std::string sFmtInteger;;
-  static const std::string sFmtPrice;;
-  static const std::string sFmtString;;
+  static const std::string sFmtInteger;
+  static const std::string sFmtPrice;
+  static const std::string sFmtString;
+
+  // TODO: need to fix the colours from the quick_fix defaults
 
   struct DataRow_Book { // one for Bid, one for Ask
     bool m_bChanged;
@@ -99,24 +107,24 @@ private:
     ou::tf::l2::DataRowElement<unsigned int> m_dreSizeAgg;
     DataRow_Book()
     : m_bChanged( false )
-    , m_drePrice( sFmtPrice, m_bChanged )
-    , m_dreSize( sFmtInteger, m_bChanged )
-    , m_dreSizeAgg( sFmtInteger, m_bChanged )
+    , m_drePrice( m_bChanged, sFmtPrice, EColour::Black, EColour::LightSeaGreen )
+    , m_dreSize( m_bChanged, sFmtInteger, EColour::Black, EColour::DodgerBlue )
+    , m_dreSizeAgg( m_bChanged, sFmtInteger, EColour::Black, EColour::LightSkyBlue )
     {}
     DataRow_Book( const DataRow_Book& rhs )  // don't copy or move anything
     : m_bChanged( false )
-    , m_drePrice( sFmtPrice, m_bChanged )
-    , m_dreSize( sFmtInteger, m_bChanged )
-    , m_dreSizeAgg( sFmtInteger, m_bChanged )
+    , m_drePrice( m_bChanged, sFmtPrice, EColour::Black, EColour::LightSeaGreen )
+    , m_dreSize(  m_bChanged, sFmtInteger, EColour::Black, EColour::DodgerBlue )
+    , m_dreSizeAgg( m_bChanged, sFmtInteger, EColour::Black, EColour::LightSkyBlue )
     {
       m_drePrice.Set( rhs.m_drePrice.Get() );
       m_dreSize.Set( rhs.m_dreSize.Get() );
     }
     DataRow_Book( double price, unsigned int volume )
     : m_bChanged( false )
-    , m_drePrice( sFmtPrice, m_bChanged )
-    , m_dreSize( sFmtInteger, m_bChanged )
-    , m_dreSizeAgg( sFmtInteger, m_bChanged )
+    , m_drePrice( m_bChanged, sFmtPrice, EColour::Black, EColour::LightSeaGreen )
+    , m_dreSize( m_bChanged, sFmtInteger, EColour::Black, EColour::DodgerBlue )
+    , m_dreSizeAgg( m_bChanged, sFmtInteger, EColour::Black, EColour::LightSkyBlue )
     {
       m_drePrice.Set( price );
       m_dreSize.Set( volume );
@@ -152,7 +160,7 @@ private:
     ou::tf::l2::DataRowElement<double> m_dreImbalance;
     DataRow_Statistics()
     : m_bChanged( false )
-    , m_dreImbalance( sFmtPrice, m_bChanged )
+    , m_dreImbalance( m_bChanged, sFmtPrice, EColour::Black, EColour::DimGray )
     {}
     void Update() {
       if ( m_bChanged ) {
