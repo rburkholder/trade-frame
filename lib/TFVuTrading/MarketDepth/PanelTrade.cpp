@@ -100,7 +100,7 @@ bool PanelTrade::Create( /*wxWindow* parent, const wxString& title, const wxPoin
   return true;
 }
 
-void PanelTrade::CreateControls( void ) {
+void PanelTrade::CreateControls() {
 
   //PanelTrade* itemPanel1 = this;
   DrawWinRows();
@@ -185,11 +185,11 @@ void PanelTrade::DrawWinRows() {
 void PanelTrade::DeleteWinRows() {
 
   for (
-    int ixWinRow = 0, iyPriceRow = m_ixFirstPriceRow;
+    int ixWinRow = 0, ixPriceRow = m_ixFirstPriceRow;
     ixWinRow < m_cntWinRows_Data;
-    ixWinRow++, iyPriceRow++
+    ixWinRow++, ixPriceRow++
   ) {
-    PriceRow& rowData( m_PriceRows[ iyPriceRow ] );
+    PriceRow& rowData( m_PriceRows[ ixPriceRow ] );
     rowData.DelRowElements();
     pWinRow_t pWinRow = std::move( m_vWinRow[ ixWinRow ] );
     //pRow->DestroyWindow();
@@ -234,13 +234,14 @@ void PanelTrade::OnDestroy( wxWindowDestroyEvent& event ) {
     Unbind( wxEVT_DESTROY, &PanelTrade::OnDestroy, this, GetId() );
     Unbind( wxEVT_TIMER, &PanelTrade::HandleTimerRefresh, this, m_timerRefresh.GetId() );
 
-    //event.Skip();  // do not put this in
+    event.Skip();
   }
 
 }
 
 void PanelTrade::SetInterval( double interval ) {
   m_PriceRows.SetInterval( interval );
+  // TODO: if called more than once, need to rebuild PriceRows with new interval
 }
 
 void PanelTrade::AppendStaticIndicator( double price, const std::string& sStatic ) {
@@ -399,18 +400,17 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
       m_ixLoRecenterFrame = m_ixFirstPriceRow + m_nFramedRows;
       // need to check that same numbers for each
       for (
-        int ix = 0, iy = m_ixLastPriceRow;
-        ix < m_cntWinRows_Data;
-        ix++, iy--
-      ) {
-        pWinRow_t pWinRow = m_vWinRow[ ix ];
-        PriceRow& rowPrice( m_PriceRows[ iy ] );
-        rowPrice.SetRowElements( *pWinRow );
-        rowPrice.SetPrice( m_PriceRows.Cast( iy ), false );
-        fClick_t fClick( m_fClick ); // make a copy for each row
-        rowPrice.Set( std::move( fClick ) );  // make a copy for each row
-        //rowData.Refresh();  // TODO: refactor out into timer
-      }
+          int ix = 0, iy = m_ixLastPriceRow;
+          ix < m_cntWinRows_Data;
+          ix++, iy--
+        ) {
+          pWinRow_t pWinRow = m_vWinRow[ ix ];
+          PriceRow& rowPrice( m_PriceRows[ iy ] );
+          rowPrice.SetRowElements( *pWinRow );
+          rowPrice.SetPrice( m_PriceRows.Cast( iy ), false );
+          fClick_t fClick( m_fClick ); // make a copy for each row
+          rowPrice.Set( std::move( fClick ) );  // set each row's copy
+        }
     }
   }
 }

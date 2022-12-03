@@ -83,8 +83,6 @@ public:
   void SetOnTimer( fTimer_t&& fTimer ) { m_fTimer = std::move( fTimer); }
 
   // Interface - In - Events - Execution
-  using EButton = ou::tf::Mouse::EButton;
-  using EField  = ou::tf::l2::rung::EField;
   using fClick_t = ou::tf::l2::PriceRow::fClick_t;
   void Set( fClick_t&& );
 
