@@ -188,9 +188,7 @@ void DataRowElement<T>::UpdateWinRowElement() {
     m_sValue.clear();
   }
   if ( nullptr != m_pWinRowElement ) {
-    m_pWinRowElement->SetColourBackground( m_colourBackground );
-    m_pWinRowElement->SetColourForeground( m_colourForeground );
-    m_pWinRowElement->SetText( m_sValue, m_bHighlight );
+    m_pWinRowElement->SetText( m_sValue, m_colourForeground, m_colourBackground );
   }
 }
 
