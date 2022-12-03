@@ -27,25 +27,15 @@
 
 namespace {
 
-  enum Index { NoOrder, LimitTracking, LimitSubmitted, StopTracking, StopSubmitted };
-
   // https://en.wikipedia.org/wiki/Web_colors
   using EColour = ou::Colour::wx::EColour;
-  std::vector<EColour> OrderColours {
-    EColour::LightYellow,    // no order
-    EColour::Turquoise,      // limit, tracking
-    EColour::LightSeaGreen,  // limit, submitted
-    EColour::LightSalmon,    // stop, tracking
-    EColour::IndianRed       // stop, submitted
-  };
 
-  //enum OrderColour {
-  //  NoOrder=EColour::LightYellow
-  //, LimitTracking = EColour::Turquoise
-  //, LimitSubmitted = EColour::LightSeaGreen
-  //, StopTracking = EColour::LightSalmon
-  //, StopSubmitted = EColour::IndianRed
-  //};
+  static const EColour OrderColour_NoOrder = EColour::LightYellow;
+  static const EColour OrderColour_LimitTracking = EColour::Turquoise;
+  static const EColour OrderColour_LimitSubmitted = EColour::LightSeaGreen;
+  static const EColour OrderColour_StopTracking = EColour::LightSalmon;
+  static const EColour OrderColour_StopSubmitted = EColour::IndianRed;
+
 }
 
 namespace ou {
@@ -164,7 +154,7 @@ void ExecutionControl::AskLimit( double price ) {
     PriceLevelOrder& plo( iterOrders->second );
     plo.Set( // fUpdateQuantity_t
       [this,price,iterOrders]( unsigned int quantity ){
-        m_pPanelTrade->SetAsk( price, quantity, OrderColours[ 0 == quantity ? NoOrder : LimitSubmitted ] ); // set with plo instead
+        m_pPanelTrade->SetAsk( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_LimitSubmitted ); // set with plo instead
         if ( 0 == quantity ) { // based upon cancel, or fulfillment
           m_KillPriceLevelOrder = std::move( iterOrders->second );
           m_mapAskOrders.erase( iterOrders );
@@ -192,7 +182,7 @@ void ExecutionControl::AskStop( double price ) {
     PriceLevelOrder& plo( iterOrders->second );
     plo.Set( // fUpdateQuantity_t
       [this,price,iterOrders]( unsigned int quantity ){
-        m_pPanelTrade->SetAsk( price, quantity, OrderColours[ 0 == quantity ? NoOrder : StopTracking ] ); // set with plo instead
+        m_pPanelTrade->SetAsk( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_StopTracking ); // set with plo instead
         if ( 0 == quantity ) { // based upon cancel, or fulfillment
           m_KillPriceLevelOrder = std::move( iterOrders->second );
           m_mapAskOrders.erase( iterOrders );
@@ -228,7 +218,7 @@ void ExecutionControl::BidLimit( double price ) {
     PriceLevelOrder& plo( iterOrders->second );
     plo.Set( // fUpdateQuantity_t
       [this,price,iterOrders]( unsigned int quantity ){
-        m_pPanelTrade->SetBid( price, quantity, OrderColours[ 0 == quantity ? NoOrder : LimitSubmitted ] ); // set with plo instead
+        m_pPanelTrade->SetBid( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_LimitSubmitted ); // set with plo instead
         if ( 0 == quantity ) { // based upon cancel, or fulfillment
           m_KillPriceLevelOrder = std::move( iterOrders->second );
           m_mapBidOrders.erase( iterOrders );
@@ -256,7 +246,7 @@ void ExecutionControl::BidStop( double price ) {
     PriceLevelOrder& plo( iterOrders->second );
     plo.Set( // fUpdateQuantity_t
       [this,price,iterOrders]( unsigned int quantity ){
-        m_pPanelTrade->SetBid( price, quantity, OrderColours[ 0 == quantity ? NoOrder : StopTracking ] ); // set with plo instead
+        m_pPanelTrade->SetBid( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_StopTracking ); // set with plo instead
         if ( 0 == quantity ) { // based upon cancel, or fulfillment
           m_KillPriceLevelOrder = std::move( iterOrders->second );
           m_mapBidOrders.erase( iterOrders );
