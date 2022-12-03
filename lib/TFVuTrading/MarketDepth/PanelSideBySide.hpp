@@ -101,25 +101,29 @@ private:
   // TODO: need to fix the colours from the quick_fix defaults
 
   struct DataRow_Book { // one for Bid, one for Ask
+
     bool m_bChanged;
     ou::tf::l2::DataRowElement<double> m_drePrice;
     ou::tf::l2::DataRowElement<unsigned int> m_dreSize;
     ou::tf::l2::DataRowElement<unsigned int> m_dreSizeAgg;
+
     DataRow_Book()
     : m_bChanged( false )
     , m_drePrice( m_bChanged, sFmtPrice, EColour::Black, EColour::LightSeaGreen )
     , m_dreSize( m_bChanged, sFmtInteger, EColour::Black, EColour::DodgerBlue )
     , m_dreSizeAgg( m_bChanged, sFmtInteger, EColour::Black, EColour::LightSkyBlue )
     {}
+
     DataRow_Book( const DataRow_Book& rhs )  // don't copy or move anything
     : m_bChanged( false )
-    , m_drePrice( m_bChanged, sFmtPrice, EColour::Black, EColour::LightSeaGreen )
-    , m_dreSize(  m_bChanged, sFmtInteger, EColour::Black, EColour::DodgerBlue )
-    , m_dreSizeAgg( m_bChanged, sFmtInteger, EColour::Black, EColour::LightSkyBlue )
+    , m_drePrice( m_bChanged, rhs.m_drePrice )
+    , m_dreSize(  m_bChanged, rhs.m_dreSize )
+    , m_dreSizeAgg( m_bChanged, m_dreSizeAgg )
     {
       m_drePrice.Set( rhs.m_drePrice.Get() );
       m_dreSize.Set( rhs.m_dreSize.Get() );
     }
+
     DataRow_Book( double price, unsigned int volume )
     : m_bChanged( false )
     , m_drePrice( m_bChanged, sFmtPrice, EColour::Black, EColour::LightSeaGreen )
@@ -129,8 +133,11 @@ private:
       m_drePrice.Set( price );
       m_dreSize.Set( volume );
     }
+
     DataRow_Book( DataRow_Book&& ) = delete; // due to m_bChanged usage
+
     void Set( unsigned int volume ) { m_dreSize.Set( volume ); }
+
     void Update() {
       m_drePrice.UpdateWinRowElement();
       m_dreSize.UpdateWinRowElement();
