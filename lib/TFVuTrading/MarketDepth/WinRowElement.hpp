@@ -120,7 +120,7 @@ private:
   void OnMouseRightUp( wxMouseEvent& );
 
   void OnMouseEnterWindow( wxMouseEvent& );
-  void OnMouseLLeaveWindow( wxMouseEvent& );
+  void OnMouseLeaveWindow( wxMouseEvent& );
 
   void OnContextMenu( wxContextMenuEvent& );
 

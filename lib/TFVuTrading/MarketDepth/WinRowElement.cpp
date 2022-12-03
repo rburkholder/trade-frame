@@ -78,7 +78,7 @@ void WinRowElement::CreateControls() {
   Bind( wxEVT_DESTROY, &WinRowElement::OnDestroy, this, GetId() );
 
   Bind( wxEVT_ENTER_WINDOW, &WinRowElement::OnMouseEnterWindow, this );
-  Bind( wxEVT_LEAVE_WINDOW, &WinRowElement::OnMouseLLeaveWindow, this );
+  Bind( wxEVT_LEAVE_WINDOW, &WinRowElement::OnMouseLeaveWindow, this );
 
   Bind( wxEVT_LEFT_UP, &WinRowElement::OnMouseLeftUp, this );
   Bind( wxEVT_MIDDLE_UP, &WinRowElement::OnMouseMiddleUp, this );
@@ -224,7 +224,7 @@ void WinRowElement::OnMouseEnterWindow( wxMouseEvent& event ) {
   event.Skip();
 }
 
-void WinRowElement::OnMouseLLeaveWindow( wxMouseEvent& event ) {
+void WinRowElement::OnMouseLeaveWindow( wxMouseEvent& event ) {
   if ( m_bCanHaveFocus ) {
     m_bFocusSet = false;
     Paint();
@@ -242,7 +242,7 @@ void WinRowElement::OnDestroy( wxWindowDestroyEvent& event ) {
   Unbind( wxEVT_DESTROY, &WinRowElement::OnDestroy, this, GetId() );
 
   Unbind( wxEVT_ENTER_WINDOW, &WinRowElement::OnMouseEnterWindow, this );
-  Unbind( wxEVT_LEAVE_WINDOW, &WinRowElement::OnMouseLLeaveWindow, this );
+  Unbind( wxEVT_LEAVE_WINDOW, &WinRowElement::OnMouseLeaveWindow, this );
 
   Unbind( wxEVT_LEFT_UP, &WinRowElement::OnMouseLeftUp, this );
   Unbind( wxEVT_MIDDLE_UP, &WinRowElement::OnMouseMiddleUp, this );
