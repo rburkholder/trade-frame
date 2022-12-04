@@ -35,7 +35,7 @@ namespace {
 
 PriceRow::PriceRow( double price, const vElement_t& v ) // called from PriceRows::operator[]( int ix )
 : m_bChanged( false )
-  //m_dreAcctPl( sFmtPrice, m_bChanged ),
+, m_dreAcctPl(           m_bChanged, sFmtPrice,   v[ (int)rung::EField::PL ].colourForeground, v[ (int)rung::EField::PL ].colourBackground )
 , m_dreBuyCount(         m_bChanged, sFmtInteger, v[ (int)rung::EField::BuyCount ].colourForeground, v[ (int)rung::EField::BuyCount ].colourBackground )
 , m_dreBuyVolume(        m_bChanged, sFmtInteger, v[ (int)rung::EField::BuyVolume ].colourForeground, v[ (int)rung::EField::BuyVolume ].colourBackground )
 , m_dreBidSize(          m_bChanged, sFmtInteger, v[ (int)rung::EField::BidSize ].colourForeground, v[ (int)rung::EField::BidSize ].colourBackground )
@@ -53,7 +53,7 @@ PriceRow::PriceRow( double price, const vElement_t& v ) // called from PriceRows
 
 PriceRow::PriceRow( const PriceRow& rhs ) // called from PriceRows::operator[]( int ix )
 : m_bChanged( false )
-  //m_dreAcctPl( sFmtPrice, m_bChanged ),
+, m_dreAcctPl(           m_bChanged, rhs.m_dreAcctPl )
 , m_dreBuyCount(         m_bChanged, rhs.m_dreBuyCount )
 , m_dreBuyVolume(        m_bChanged, rhs.m_dreBuyVolume )
 , m_dreBidSize(          m_bChanged, rhs.m_dreBidSize )
@@ -81,7 +81,7 @@ void PriceRow::SetRowElements( WinRow& wr ) {
   DelRowElements();
 
   // TODO: is this set in another thread?  Do we lock it?
-  //m_dreAcctPl.SetWinRowElement(    wr[ Field::AcctPL ] );
+  m_dreAcctPl.SetWinRowElement(           wr[ (int)EField::PL ] );
   m_dreBuyCount.SetWinRowElement(         wr[ (int)EField::BuyCount ] );
   m_dreBuyVolume.SetWinRowElement(        wr[ (int)EField::BuyVolume ] );
   m_dreBidSize.SetWinRowElement(          wr[ (int)EField::BidSize ] );
@@ -102,7 +102,7 @@ void PriceRow::SetRowElements( WinRow& wr ) {
 
 void PriceRow::Refresh() {
   if ( m_bChanged ) {
-    //m_dreAcctPl.UpdateWinRowElement();
+    m_dreAcctPl.UpdateWinRowElement();
     m_dreBuyCount.UpdateWinRowElement();
     m_dreBuyVolume.UpdateWinRowElement();
     m_dreBidSize.UpdateWinRowElement();
@@ -121,7 +121,7 @@ void PriceRow::Refresh() {
 }
 
 void PriceRow::DelRowElements() {
-  //m_dreAcctPl.SetWinRowElement( nullptr );
+  m_dreAcctPl.SetWinRowElement( nullptr );
   m_dreBuyCount.SetWinRowElement( nullptr );
   m_dreBuyVolume.SetWinRowElement( nullptr );
   m_dreBidSize.SetWinRowElement( nullptr );
@@ -165,6 +165,10 @@ void PriceRow::SetAskOrderSize( unsigned int n ) {
 
 void PriceRow::SetBidOrderSize( unsigned int n ) {
   m_dreBidOrder.Set( n );
+}
+
+void PriceRow::SetProfitLoss( double pl ) {
+  m_dreAcctPl.Set( pl );
 }
 
 } // market depth

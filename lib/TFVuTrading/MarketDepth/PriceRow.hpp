@@ -67,6 +67,8 @@ public:
   void AddToBuyVolume( unsigned int n ) { m_dreBuyVolume.Add( n ); }
   void AddToSellVolume( unsigned int n ) { m_dreSellVolume.Add( n ); }
 
+  void SetProfitLoss( double );
+
   void AppendIndicatorStatic( const std::string& sIndicator ) {
     m_dreIndicatorStatic.Append( sIndicator );
   }
@@ -102,7 +104,7 @@ private:
   bool m_bChanged;
 
   // TODO: boost::fusion?  std::tuple?
-  //DataRowElement<double>         m_dreAcctPl;
+  DataRowElement<double>         m_dreAcctPl;
   DataRowElement<unsigned int>   m_dreBuyCount;
   DataRowElement<unsigned int>   m_dreBuyVolume;
   DataRowElement<unsigned int>   m_dreBidSize;
