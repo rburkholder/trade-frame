@@ -65,6 +65,9 @@ private:
   mapOrders_t m_mapAskOrders;
   mapOrders_t m_mapBidOrders;
 
+  int m_nActiveOrders;
+  double m_dblAveragePrice; // the zero point for the ladder
+
   PriceLevelOrder m_KillPriceLevelOrder; // temporary for unrolling lambda call
 
   void AskLimit( double );
@@ -74,6 +77,9 @@ private:
   void BidLimit( double );
   void BidStop( double );
   void BidCancel( double );
+
+  void HandleExecution( const ou::tf::Execution& );
+  void HandlePositionChanged( const ou::tf::Position& );
 
 };
 

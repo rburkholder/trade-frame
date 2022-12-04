@@ -19,6 +19,8 @@
  * Created: 2022/11/21 14:59:32
  */
 
+#include <functional>
+
 #include <OUCommon/Colour.h>
 
 #include "Fields.hpp"
@@ -46,9 +48,14 @@ ExecutionControl::ExecutionControl( pPosition_t pPosition, unsigned int nDefault
 : m_pPanelTrade( nullptr )
 , m_nDefaultOrder( nDefaultOrder )
 , m_pPosition( std::move( pPosition ) )
-{}
+{
+  m_pPosition->OnPositionChanged.Add( MakeDelegate( this, &ExecutionControl::HandlePositionChanged ) );
+}
 
 ExecutionControl::~ExecutionControl() {
+
+  m_pPosition->OnPositionChanged.Remove( MakeDelegate( this, &ExecutionControl::HandlePositionChanged ) );
+
     // TODO: will need a controlled cancellation of all orders
   if ( 0 != m_mapAskOrders.size() ) {
     std::cout << "ExecutionControl: outstanding ask orders in limbo" << std::endl;
@@ -159,7 +166,8 @@ void ExecutionControl::AskLimit( double price ) {
           m_KillPriceLevelOrder = std::move( iterOrders->second );
           m_mapAskOrders.erase( iterOrders );
         }
-      }
+      },
+      std::bind( &ExecutionControl::HandleExecution, this, std::placeholders::_1 )
     );
     plo = pOrder;
   }
@@ -187,7 +195,8 @@ void ExecutionControl::AskStop( double price ) {
           m_KillPriceLevelOrder = std::move( iterOrders->second );
           m_mapAskOrders.erase( iterOrders );
         }
-      }
+      },
+      std::bind( &ExecutionControl::HandleExecution, this, std::placeholders::_1 )
     );
     plo = pOrder;
   }
@@ -223,7 +232,8 @@ void ExecutionControl::BidLimit( double price ) {
           m_KillPriceLevelOrder = std::move( iterOrders->second );
           m_mapBidOrders.erase( iterOrders );
         }
-      }
+      },
+      std::bind( &ExecutionControl::HandleExecution, this, std::placeholders::_1 )
     );
     plo = pOrder;
   }
@@ -251,7 +261,8 @@ void ExecutionControl::BidStop( double price ) {
           m_KillPriceLevelOrder = std::move( iterOrders->second );
           m_mapBidOrders.erase( iterOrders );
         }
-      }
+      },
+      std::bind( &ExecutionControl::HandleExecution, this, std::placeholders::_1 )
     );
     plo = pOrder;
   }
@@ -269,6 +280,47 @@ void ExecutionControl::BidCancel( double price ) {
   }
 }
 
+void ExecutionControl::HandleExecution( const ou::tf::Execution& exec ) {
+
+  int nNewQuantity {};
+
+  switch ( exec.GetOrderSide() ) {
+    case ou::tf::OrderSide::EOrderSide::Sell:
+      nNewQuantity = m_nActiveOrders - exec.GetSize();
+      if ( 0 == nNewQuantity ) {
+        m_nActiveOrders = 0;
+        m_dblAveragePrice = 0.0;
+        // zero out p/l column
+      }
+      else {
+        m_dblAveragePrice = ( ( m_nActiveOrders * m_dblAveragePrice ) - ( exec.GetSize() * exec.GetPrice() ) ) / nNewQuantity;
+        m_nActiveOrders = nNewQuantity;
+      }
+      break;
+    case ou::tf::OrderSide::EOrderSide::Buy:
+      nNewQuantity = m_nActiveOrders + exec.GetSize();
+      if ( 0 == ( nNewQuantity ) ) {
+        m_nActiveOrders = 0;
+        m_dblAveragePrice = 0.0;
+        // zero out p/l column
+      }
+      else {
+        m_dblAveragePrice = ( ( m_nActiveOrders * m_dblAveragePrice ) + ( exec.GetSize() * exec.GetPrice() ) ) / nNewQuantity;
+        m_nActiveOrders = nNewQuantity;
+      }
+      break;
+    default:
+      assert( false );
+  }
+
+  m_pPanelTrade->UpdateProfitLoss( m_nActiveOrders, m_dblAveragePrice );
+}
+
+// several types of display:
+// 1) relative based upon current orders - present only when quantity non zero
+// 2) absolute based upon current position - always present
+void ExecutionControl::HandlePositionChanged( const ou::tf::Position& ) {
+}
 
 } // market depth
 } // namespace tf

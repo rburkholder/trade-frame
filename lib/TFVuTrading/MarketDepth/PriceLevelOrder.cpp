@@ -65,8 +65,9 @@ PriceLevelOrder::~PriceLevelOrder() {
   m_fUpdateQuantity = nullptr;
 }
 
-void PriceLevelOrder::Set( fUpdateQuantity_t&& fUpdateQuantity ) {
+void PriceLevelOrder::Set( fUpdateQuantity_t&& fUpdateQuantity, fExecution_t&& fExecution ) {
   m_fUpdateQuantity = std::move( fUpdateQuantity );
+  m_fExecution = std::move( fExecution );
 }
 
 void PriceLevelOrder::SetEvents() {
@@ -104,6 +105,7 @@ void PriceLevelOrder::HandleOnOrderCancelled( const ou::tf::Order& order ) {
 
 void PriceLevelOrder::HandleOnOrderExecution( const std::pair<const ou::tf::Order&, const ou::tf::Execution&>& pair ) {
   std::cout << "Execution order#" << pair.first.GetOrderId() << " of " << pair.second.GetSize() << std::endl;
+  if ( m_fExecution ) m_fExecution( pair.second );
 }
 
 } // market depth

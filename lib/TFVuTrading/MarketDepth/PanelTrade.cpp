@@ -429,6 +429,26 @@ void PanelTrade::SetBid( double price, int n, EColour bg ) {
   rowPrice.SetBidOrderSize( n, bg );
 }
 
+void PanelTrade::UpdateProfitLoss( int quantity, double average ) {
+  if ( 0 == quantity ) {
+    m_PriceRows.ForEach(
+      [](int ix, PriceRow& row){
+        row.SetProfitLoss( 0.0 );
+      } );
+  }
+  else {
+    int ix = m_PriceRows.Cast( average ); // find the row
+    double price = m_PriceRows.Cast( ix ); // normalize the value
+
+    m_PriceRows.ForEach(
+      [this,quantity,price,ix](int ixRow, PriceRow& row){
+        double rowPrice = m_PriceRows.Cast( ixRow );
+        double pl = (ixRow - ix ) * quantity * ( rowPrice - price ); // multiply by multiple?
+        row.SetProfitLoss( pl );
+      } );
+  }
+}
+
 } // market depth
 } // namespace tf
 } // namespace ou

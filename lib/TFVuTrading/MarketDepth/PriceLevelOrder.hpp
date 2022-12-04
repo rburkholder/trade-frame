@@ -32,6 +32,7 @@ public:
 
   using pOrder_t = ou::tf::Order::pOrder_t;
   using fUpdateQuantity_t = std::function<void(uint32_t)>;
+  using fExecution_t = std::function<void(const ou::tf::Execution&)>;
 
   PriceLevelOrder();
   PriceLevelOrder( pOrder_t pOrder );
@@ -43,21 +44,22 @@ public:
 
   pOrder_t Order() { return m_pOrder; }
 
-  void Set( fUpdateQuantity_t&& fUpdateQuantity );
+  void Set( fUpdateQuantity_t&&, fExecution_t&& );
 
   void SetEvents();
   void ClearEvents();
 
-  void HandleOnPartialFill( const ou::tf::Order& order );
-  void HandleOnOrderFilled( const ou::tf::Order& order );
-  void HandleOnOrderCancelled( const ou::tf::Order& order ); // does order active go to 0?
-  void HandleOnOrderExecution( const std::pair<const ou::tf::Order&, const ou::tf::Execution&>& pair );
+  void HandleOnPartialFill( const ou::tf::Order& );
+  void HandleOnOrderFilled( const ou::tf::Order& );
+  void HandleOnOrderCancelled( const ou::tf::Order& ); // does order active go to 0?
+  void HandleOnOrderExecution( const std::pair<const ou::tf::Order&, const ou::tf::Execution&>& );
 
 protected:
 
   pOrder_t m_pOrder;
 
   fUpdateQuantity_t m_fUpdateQuantity;
+  fExecution_t m_fExecution;
 
 private:
 
