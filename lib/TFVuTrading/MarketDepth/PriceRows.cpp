@@ -82,6 +82,15 @@ PriceRow& PriceRows::operator[]( int ix ) {
   return iter->second;
 }
 
+void PriceRows::ForEach( fForEach_t&& fForEach ) {
+  if ( fForEach ) {
+    std::scoped_lock<std::mutex> lock( m_mutexMap );
+    for ( mapRow_t::value_type& vt: m_mapRow ) {
+      fForEach( vt.first, vt.second );
+    }
+  }
+}
+
 } // market depth
 } // namespace tf
 } // namespace ou

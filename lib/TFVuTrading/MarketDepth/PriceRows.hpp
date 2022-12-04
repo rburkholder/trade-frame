@@ -45,6 +45,9 @@ public:
   PriceRow& operator[]( double ); // by price
   PriceRow& operator[]( int );    // by index
 
+  using fForEach_t = std::function<void(int,PriceRow&)>;
+  void ForEach( fForEach_t&& );
+
 protected:
 private:
 
