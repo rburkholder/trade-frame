@@ -535,6 +535,10 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
 
   //m_pFrameControls->Close();
 
+  m_pPanelTrade->SetOnTimer( nullptr );
+
+  m_pExecutionControl.reset();
+
   SaveState();
 
   m_DailyHistory.Close();
