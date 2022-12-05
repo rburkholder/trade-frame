@@ -154,28 +154,33 @@ void WinRowElement::Paint() {
 }
 
 void WinRowElement::Render( wxDC& dc ) {
-  wxSize size = dc.GetSize();
+  wxSize sizeBox = dc.GetSize();
   dc.Clear();
   if ( m_bFocusSet ) {
-    size.DecBy( 2, 2 );
-    dc.DrawRectangle( wxPoint( 1, 1 ), size );
+    sizeBox.DecBy( 2, 2 );
+    dc.DrawRectangle( wxPoint( 1, 1 ), sizeBox );
   }
 
-  wxCoord width;
-  wxCoord height;
+  wxCoord textWidth;
+  wxCoord textHeight;
   wxCoord x( 1 );
-  GetTextExtent( m_sText, &width, &height );
+  GetTextExtent( m_sText, &textWidth, &textHeight );
   switch ( m_style ) {
     case wxRIGHT:
-      x = width - 1;
+      if ( textWidth >= sizeBox.x ) {
+        // leave x as 1
+      }
+      else {
+        x = sizeBox.x - textWidth;
+      }
       break;
     case wxCENTER:
-      if ( width <= size.x ) {
-        x = ( size.x - width ) / 2;
+      if ( textWidth <= sizeBox.x ) {
+        x = ( sizeBox.x - textWidth ) / 2;
       }
       break;
     case wxLEFT:
-      x = 1;
+      // leave x as 1
       break;
   }
   dc.DrawText( m_sText, wxPoint( x, 1 ) );
