@@ -38,6 +38,7 @@ PriceLevelOrder::PriceLevelOrder( PriceLevelOrder&& rhs ) {
   rhs.ClearEvents();
   m_pOrder = std::move( rhs.m_pOrder );
   m_fUpdateQuantity = std::move( rhs.m_fUpdateQuantity );
+  m_fExecution = std::move( rhs.m_fExecution );
   SetEvents();
 }
 
@@ -54,6 +55,7 @@ PriceLevelOrder& PriceLevelOrder::operator=( PriceLevelOrder&& rhs ) {
     rhs.ClearEvents();
     m_pOrder = std::move( rhs.m_pOrder );
     m_fUpdateQuantity = std::move( rhs.m_fUpdateQuantity );
+    m_fExecution = std::move( rhs.m_fExecution );
     SetEvents();
   }
   return *this;
@@ -63,6 +65,7 @@ PriceLevelOrder::~PriceLevelOrder() {
   ClearEvents();
   m_pOrder.reset();
   m_fUpdateQuantity = nullptr;
+  m_fExecution = nullptr;
 }
 
 void PriceLevelOrder::Set( fUpdateQuantity_t&& fUpdateQuantity, fExecution_t&& fExecution ) {
