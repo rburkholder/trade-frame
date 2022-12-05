@@ -768,6 +768,10 @@ void AppDoM::EmitMarketMakerMaps() {
 
 void AppDoM::OnClose( wxCloseEvent& event ) {
 
+  m_pPanelTrade->SetOnTimer( nullptr );
+
+  m_pExecutionControl.reset();
+
   if ( m_bData1Connected ) { // TODO: fix this logic to work with OnData1Disconnecting
     if ( m_pDispatch ) {
       m_pDispatch->Disconnect();
