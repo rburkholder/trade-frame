@@ -21,9 +21,10 @@
 
 #include <memory>
 #include <thread>
+#include <stdexcept>
 #include <algorithm>
 
-#include <boost/lexical_cast.hpp>
+#include <boost/exception/diagnostic_information.hpp>
 
 #include <wx/sizer.h>
 #include <wx/dcclient.h>
@@ -171,10 +172,16 @@ void PanelSideBySide::UpdateMap( mapPriceLevel_t& map, double price, int volume,
         map.erase( iter );
       }
       else {
-        // because there are some zero volume items above which may eliminated it?
+        // because there are some zero volume items above which may eliminate it?
       }
 
     }
+  }
+  catch( boost::exception const& e ) {
+    std::cout << "PanelSideBySide::UpdateMap boost problem: " << boost::diagnostic_information_what(e) << std::endl;
+  }
+  catch( std::exception const& e ) {
+    std::cout << "PanelSideBySide::UpdateMap std problem: " << e.what()<< std::endl;
   }
   catch (...) {
     std::cout << "PanelSideBySide::UpdateMap problems" << std::endl;
