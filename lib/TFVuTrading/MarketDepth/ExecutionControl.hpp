@@ -72,6 +72,20 @@ private:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
 
+  struct TrackStop {
+
+    pWatch_t pWatch;
+    pOrder_t pOrder; // market order to submit
+
+    TrackStop( pWatch_t pWatch, pOrder_t pOrder ) {
+      // start watch
+    }
+
+    ~TrackStop() {
+
+    }
+  };
+
   void AskLimit( double );
   void AskStop( double );
   void AskCancel( double );
@@ -80,6 +94,7 @@ private:
   void BidStop( double );
   void BidCancel( double );
 
+  void HandleQuote( const ou::tf::Quote& );
   void HandleExecution( const ou::tf::Execution& );
   void HandlePositionChanged( const ou::tf::Position& );
 

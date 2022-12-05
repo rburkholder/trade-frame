@@ -47,17 +47,19 @@ namespace l2 {
 ExecutionControl::ExecutionControl( pPosition_t pPosition, unsigned int nDefaultOrder )
 : m_pPanelTrade( nullptr )
 , m_nDefaultOrder( nDefaultOrder )
+, m_nActiveOrders {}
+, m_dblAveragePrice {}
 , m_pPosition( std::move( pPosition ) )
 {
   m_pPosition->OnPositionChanged.Add( MakeDelegate( this, &ExecutionControl::HandlePositionChanged ) );
 
-  pWatch_t pWatch( m_pPosition->GetWatch() );
+  //pWatch_t pWatch( m_pPosition->GetWatch() );
   //pWatch->OnQuote.Add( MakeDelegate( this, &ExecutionControl::HandleQuote ) );
 }
 
 ExecutionControl::~ExecutionControl() {
 
-  pWatch_t pWatch( m_pPosition->GetWatch() );
+  //pWatch_t pWatch( m_pPosition->GetWatch() );
   //pWatch->OnQuote.Remove( MakeDelegate( this, &ExecutionControl::HandleQuote ) );
 
   m_pPosition->OnPositionChanged.Remove( MakeDelegate( this, &ExecutionControl::HandlePositionChanged ) );
@@ -296,9 +298,8 @@ void ExecutionControl::HandleExecution( const ou::tf::Execution& exec ) {
     case ou::tf::OrderSide::EOrderSide::Sell:
       nNewQuantity = m_nActiveOrders - exec.GetSize();
       if ( 0 == nNewQuantity ) {
-        m_nActiveOrders = 0;
         m_dblAveragePrice = 0.0;
-        // zero out p/l column
+        m_nActiveOrders = 0;
       }
       else {
         m_dblAveragePrice = ( ( m_nActiveOrders * m_dblAveragePrice ) - ( exec.GetSize() * exec.GetPrice() ) ) / nNewQuantity;
@@ -308,9 +309,8 @@ void ExecutionControl::HandleExecution( const ou::tf::Execution& exec ) {
     case ou::tf::OrderSide::EOrderSide::Buy:
       nNewQuantity = m_nActiveOrders + exec.GetSize();
       if ( 0 == ( nNewQuantity ) ) {
-        m_nActiveOrders = 0;
         m_dblAveragePrice = 0.0;
-        // zero out p/l column
+        m_nActiveOrders = 0;
       }
       else {
         m_dblAveragePrice = ( ( m_nActiveOrders * m_dblAveragePrice ) + ( exec.GetSize() * exec.GetPrice() ) ) / nNewQuantity;
@@ -328,6 +328,9 @@ void ExecutionControl::HandleExecution( const ou::tf::Execution& exec ) {
 // 1) relative based upon current orders - present only when quantity non zero
 // 2) absolute based upon current position - always present
 void ExecutionControl::HandlePositionChanged( const ou::tf::Position& ) {
+}
+
+void ExecutionControl::HandleQuote( const ou::tf::Quote& ) {
 }
 
 } // market depth
