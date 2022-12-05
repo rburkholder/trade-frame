@@ -50,9 +50,15 @@ ExecutionControl::ExecutionControl( pPosition_t pPosition, unsigned int nDefault
 , m_pPosition( std::move( pPosition ) )
 {
   m_pPosition->OnPositionChanged.Add( MakeDelegate( this, &ExecutionControl::HandlePositionChanged ) );
+
+  pWatch_t pWatch( m_pPosition->GetWatch() );
+  //pWatch->OnQuote.Add( MakeDelegate( this, &ExecutionControl::HandleQuote ) );
 }
 
 ExecutionControl::~ExecutionControl() {
+
+  pWatch_t pWatch( m_pPosition->GetWatch() );
+  //pWatch->OnQuote.Remove( MakeDelegate( this, &ExecutionControl::HandleQuote ) );
 
   m_pPosition->OnPositionChanged.Remove( MakeDelegate( this, &ExecutionControl::HandlePositionChanged ) );
 
@@ -148,11 +154,11 @@ void ExecutionControl::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
 
 }
 
-// on each click, to increase quantity, cancel order & re-submit with new quantity
+// TODO: on each click, to increase quantity, cancel order & re-submit with new quantity
 void ExecutionControl::AskLimit( double price ) {
   mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
   if ( m_mapAskOrders.end() == iterOrders ) {
-    pOrder_t pOrder = m_pPosition->PlaceOrder(
+    pOrder_t pOrder = m_pPosition->ConstructOrder(
       ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_nDefaultOrder, price );
     std::cout << "Submitted limit order#" << pOrder->GetOrderId() << " at ask " << price << std::endl;
     auto pair = m_mapAskOrders.emplace( price, PriceLevelOrder() );
@@ -170,6 +176,7 @@ void ExecutionControl::AskLimit( double price ) {
       std::bind( &ExecutionControl::HandleExecution, this, std::placeholders::_1 )
     );
     plo = pOrder;
+    m_pPosition->PlaceOrder( pOrder );
   }
   else {
     std::cout << "order (ask) " << iterOrders->second.Order()->GetOrderId() << " exists" << std::endl;
@@ -177,11 +184,10 @@ void ExecutionControl::AskLimit( double price ) {
 }
 
 // on futures, only available during regular trading hours, will need to be simulated
-// can't do a -1 on the order status, use colour instead
 void ExecutionControl::AskStop( double price ) {
   mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
   if ( m_mapAskOrders.end() == iterOrders ) {
-    pOrder_t pOrder = m_pPosition->PlaceOrder(
+    pOrder_t pOrder = m_pPosition->ConstructOrder(
       ou::tf::OrderType::Stop, ou::tf::OrderSide::Buy, m_nDefaultOrder, price );
     std::cout << "Submitted stop order#" << pOrder->GetOrderId() << " at ask " << price << std::endl;
     auto pair = m_mapAskOrders.emplace( price, PriceLevelOrder() );
@@ -199,6 +205,7 @@ void ExecutionControl::AskStop( double price ) {
       std::bind( &ExecutionControl::HandleExecution, this, std::placeholders::_1 )
     );
     plo = pOrder;
+    m_pPosition->PlaceOrder( pOrder );
   }
   else {
     std::cout << "order (ask) " << iterOrders->second.Order()->GetOrderId() << " exists" << std::endl;
@@ -214,11 +221,11 @@ void ExecutionControl::AskCancel( double price ) {
   }
 }
 
-// on each click, to increase quantity, cancel order & re-submit with new quantity
+// TODO: on each click, to increase quantity, cancel order & re-submit with new quantity
 void ExecutionControl::BidLimit( double price ) {
   mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
   if ( m_mapBidOrders.end() == iterOrders ) {
-    pOrder_t pOrder = m_pPosition->PlaceOrder(
+    pOrder_t pOrder = m_pPosition->ConstructOrder(
       ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_nDefaultOrder, price );
     std::cout << "Submitted limit order#" << pOrder->GetOrderId() << " at bid " << price << std::endl;
     auto pair = m_mapBidOrders.emplace( price, PriceLevelOrder() );
@@ -236,6 +243,7 @@ void ExecutionControl::BidLimit( double price ) {
       std::bind( &ExecutionControl::HandleExecution, this, std::placeholders::_1 )
     );
     plo = pOrder;
+    m_pPosition->PlaceOrder( pOrder );
   }
   else {
     std::cout << "order (bid) " << iterOrders->second.Order()->GetOrderId() << " exists" << std::endl;
@@ -243,11 +251,10 @@ void ExecutionControl::BidLimit( double price ) {
 }
 
 // on futures, only available during regular trading hours, will need to be simulated
-// can't do a -1 on the order status, use colour instead
 void ExecutionControl::BidStop( double price ) {
   mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
   if ( m_mapBidOrders.end() == iterOrders ) {
-    pOrder_t pOrder = m_pPosition->PlaceOrder(
+    pOrder_t pOrder = m_pPosition->ConstructOrder(
       ou::tf::OrderType::Stop, ou::tf::OrderSide::Sell, m_nDefaultOrder, price );
     std::cout << "Submitted stop order#" << pOrder->GetOrderId() << " at bid " << price << std::endl;
     auto pair = m_mapBidOrders.emplace( price, PriceLevelOrder() );
@@ -265,6 +272,7 @@ void ExecutionControl::BidStop( double price ) {
       std::bind( &ExecutionControl::HandleExecution, this, std::placeholders::_1 )
     );
     plo = pOrder;
+    m_pPosition->PlaceOrder( pOrder );
   }
   else {
     std::cout << "order (bid) " << iterOrders->second.Order()->GetOrderId() << " exists" << std::endl;

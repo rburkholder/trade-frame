@@ -70,6 +70,8 @@ private:
 
   PriceLevelOrder m_KillPriceLevelOrder; // temporary for unrolling lambda call
 
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+
   void AskLimit( double );
   void AskStop( double );
   void AskCancel( double );
