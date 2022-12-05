@@ -83,6 +83,9 @@ PriceRow& PriceRows::operator[]( int ix ) {
 }
 
 void PriceRows::ForEach( fForEach_t&& fForEach ) {
+  //size_t size = m_mapRow.size();
+  //mapRow_t::key_type b = m_mapRow.begin()->first;
+  //mapRow_t::key_type e = m_mapRow.rbegin()->first;
   if ( fForEach ) {
     std::scoped_lock<std::mutex> lock( m_mutexMap );
     for ( mapRow_t::value_type& vt: m_mapRow ) {
