@@ -59,6 +59,8 @@ PanelTrade::~PanelTrade() {}
 
 void PanelTrade::Init() {
 
+  m_bReCenter = false;
+
   m_nFramedRows = 0;
   m_nCenteredRows = 0;
 
@@ -301,16 +303,17 @@ void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
   int ixHiPrice = std::max( ixAskPrice, ixBidPrice );
   int ixLoPrice = std::max( ixAskPrice, ixBidPrice );
   int ixDiffPrice = ixHiPrice - ixLoPrice + 1;
-  if ( ixDiffPrice <= m_nCenteredRows ) {
-    // not sure where to recenter
-  }
-  else {
+
+  if ( m_bReCenter || ( ixDiffPrice > m_nCenteredRows ) ) {
     // maybe do this on the timer interval instead?
     int ixMidPoint = ( ixHiPrice + ixLoPrice ) / 2;
     CallAfter(
       [this, ixMidPoint](){
         ReCenterVisible( ixMidPoint );
       });
+  }
+  else {
+    // not sure where to recenter
   }
 }
 
@@ -380,10 +383,12 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
   }
   else {
     if (
-        ( ixPrice <= m_ixLoRecenterFrame )
+           m_bReCenter
+      || ( ixPrice <= m_ixLoRecenterFrame )
       || ( ixPrice >= m_ixHiRecenterFrame )
       || ( m_ixLoRecenterFrame == m_ixHiRecenterFrame )
     ) {
+      m_bReCenter = false;
       //std::scoped_lock<std::mutex> lock( m_mutexTimer );
       // recalibrate mappings
       if ( m_ixFirstPriceRow != m_ixLastPriceRow ) {
@@ -417,6 +422,7 @@ void PanelTrade::ReCenterVisible( int ixPrice ) {
 
 void PanelTrade::Set( fClick_t&& fClick ) {
   m_fClick = std::move( fClick );
+  m_bReCenter = true;
 }
 
 void PanelTrade::SetAsk( double price, int n, EColour bg ) {
@@ -429,7 +435,7 @@ void PanelTrade::SetBid( double price, int n, EColour bg ) {
   rowPrice.SetBidOrderSize( n, bg );
 }
 
-void PanelTrade::UpdateProfitLoss( int quantity, double average ) {
+void PanelTrade::UpdateProfitLoss( const int quantity, const double average ) {
   if ( 0 == quantity ) {
     m_PriceRows.ForEach(
       [](int ix, PriceRow& row){
@@ -437,13 +443,14 @@ void PanelTrade::UpdateProfitLoss( int quantity, double average ) {
       } );
   }
   else {
-    int ix = m_PriceRows.Cast( average ); // find the row
-    double price = m_PriceRows.Cast( ix ); // normalize the value
+    const int ixZero = m_PriceRows.Cast( average ); // find the row
+    const double priceZero = m_PriceRows.Cast( ixZero ); // normalize the value
 
     m_PriceRows.ForEach(
-      [this,quantity,price,ix](int ixRow, PriceRow& row){
-        double rowPrice = m_PriceRows.Cast( ixRow );
-        double pl = (ixRow - ix ) * quantity * ( rowPrice - price ); // multiply by multiple?
+      [this,quantity,priceZero](int ixRow, PriceRow& row){
+        const double rowPrice = m_PriceRows.Cast( ixRow );
+        const double pl = quantity * ( rowPrice - priceZero ); // multiply by multiple?
+        //std::cout << "ForEach: " << ixRow << "," << rowPrice << "," << priceZero << "," << pl << "," << std::endl;
         row.SetProfitLoss( pl );
       } );
   }

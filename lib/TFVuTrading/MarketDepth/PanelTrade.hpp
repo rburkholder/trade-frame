@@ -91,7 +91,7 @@ public:
   void SetAsk( double, int, EColour ); // update pending quantity@price
   void SetBid( double, int, EColour ); // update pending quantity@price
 
-  void UpdateProfitLoss( int quantity, double price ); // quantity at the zero profit price
+  void UpdateProfitLoss( const int quantity, const double price ); // quantity at the zero profit price
 
 protected:
 private:
@@ -126,6 +126,8 @@ private:
   vWinRow_t m_vWinRow; // non header rows only
 
   PriceRows m_PriceRows;
+
+  bool m_bReCenter;
 
   std::mutex m_mutexTimer;
   wxTimer m_timerRefresh; // TODO: need to sync foreground & background
