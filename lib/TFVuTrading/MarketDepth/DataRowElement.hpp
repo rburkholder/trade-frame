@@ -32,15 +32,38 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
+  using EColour = WinRowElement::EColour;
+
+  struct Colours {
+    EColour fg;
+    EColour bg;
+    EColour hi;
+
+    Colours(): fg( EColour::Black ), bg( EColour::White ), hi( EColour::DimGray ) {}
+    Colours( EColour fg_, EColour bg_ )
+    : fg( fg_ ), bg( bg_ ), hi( EColour::DimGray ) {}
+    Colours( EColour fg_, EColour bg_, EColour hi_)
+    : fg( fg_ ), bg( bg_ ), hi( hi_ ) {}
+
+    const Colours& operator=( const Colours& rhs ) {
+      if ( this != &rhs ) {
+        fg = rhs.fg; bg = rhs.bg; hi = rhs.hi;
+      }
+      return *this;
+    }
+  };
+
+
 template<typename T>
 class DataRowElement {
 public:
 
-  using EColour = WinRowElement::EColour;
-
   DataRowElement(
     bool& bChanged, const std::string& sFormat,
     EColour fg, EColour bg
+    );
+  DataRowElement(
+    bool& bChanged, const std::string& sFormat, const Colours&
     );
   DataRowElement( bool& bChanged, const DataRowElement& );
   DataRowElement( const DataRowElement& ) = delete; // can't be copied, &bChanged needs to be changed
@@ -70,8 +93,7 @@ protected:
 
   bool m_bHighlight;
 
-  EColour m_colourBackground;
-  EColour m_colourForeground;
+  Colours m_colours;
 
   WinRowElement* m_pWinRowElement;
 
@@ -88,8 +110,6 @@ DataRowElement<T>::DataRowElement(
 , m_format( sFormat )
 , m_pWinRowElement( nullptr )
 , m_value {}
-, m_colourBackground( bg )
-, m_colourForeground( fg )
 {}
 
 template<typename T>
@@ -101,8 +121,7 @@ DataRowElement<T>::DataRowElement(
 , m_format( rhs.m_format )
 , m_pWinRowElement( rhs.m_pWinRowElement )
 , m_value( rhs.m_value )
-, m_colourBackground( rhs.m_colourBackground )
-, m_colourForeground( rhs.m_colourForeground )
+, m_colours( rhs.m_colours )
 {}
 
 template<typename T>
@@ -129,19 +148,18 @@ void DataRowElement<T>::Set( const T value, bool bHighlight ) {
 
 template<typename T>
 void DataRowElement<T>::Set( const T value, EColour bg ) {
-  if ( ( m_value != value ) || ( bg != m_colourBackground ) ) {
+  if ( ( m_value != value ) || ( bg != m_colours.bg ) ) {
     m_value = value;
-    m_colourBackground = bg;
+    m_colours.bg = bg;
     m_bChanged = true;
   }
 }
 
 template<typename T>
 void DataRowElement<T>::Set( const T value, EColour fg, EColour bg ) {
-  if ( ( m_value != value ) || ( fg != m_colourForeground ) || ( bg != m_colourBackground ) ) {
+  if ( ( m_value != value ) || ( fg != m_colours.fg ) || ( bg != m_colours.bg ) ) {
     m_value = value;
-    m_colourBackground = bg;
-    m_colourForeground = fg;
+    m_colours = Colours( fg, bg );
     m_bChanged = true;
   }
 }
@@ -188,7 +206,7 @@ void DataRowElement<T>::UpdateWinRowElement() {
     m_sValue.clear();
   }
   if ( nullptr != m_pWinRowElement ) {
-    m_pWinRowElement->SetText( m_sValue, m_colourForeground, m_colourBackground );
+    m_pWinRowElement->SetText( m_sValue, m_colours.fg, m_colours.bg );
   }
 }
 
