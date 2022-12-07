@@ -160,7 +160,7 @@ private:
     ou::tf::l2::DataRowElement<double> m_dreImbalance;
     DataRow_Statistics()
     : m_bChanged( false )
-    , m_dreImbalance( m_bChanged, sFmtPrice, Colours( EColour::DimGray, EColour::Black, EColour::DimGray ) )
+    , m_dreImbalance( m_bChanged, sFmtPrice, Colours( EColour::DimGray, EColour::White, EColour::DimGray ) )
     {}
     void Update() {
       if ( m_bChanged ) {
