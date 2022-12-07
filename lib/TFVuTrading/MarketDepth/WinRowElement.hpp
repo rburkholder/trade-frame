@@ -32,6 +32,8 @@
 
 #include <TFVuTrading/Mouse.hpp>
 
+#include "Colours.hpp"
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
@@ -79,13 +81,13 @@ public:
   void SetColourBackground( EColour colour );
   void SetColourForeground( EColour colour );
   void SetColourHighlight( EColour colour );
-  void SetColours( EColour colourB, EColour colourF, EColour colourH );
+  void SetColours( Colours );
 
   void Set( fClick_t&& );
 
-  EColour GetColourBackground() const { return m_colourBackground; }
-  EColour GetColourForeground() const { return m_colourForeground; }
-  EColour GetColourHighlight() const { return m_colourHighlight; }
+  EColour GetColourBackground() const { return m_colours.bg; }
+  EColour GetColourForeground() const { return m_colours.fg; }
+  EColour GetColourHighlight() const { return m_colours.hi; }
 
 protected:
 private:
@@ -98,9 +100,7 @@ private:
   bool m_bHighlight;
   std::string m_sText;
 
-  EColour m_colourBackground;
-  EColour m_colourForeground;
-  EColour m_colourHighlight;
+  Colours m_colours;
 
   long m_style;  // wxCENTER, wxLEFT, wxRIGHT
 

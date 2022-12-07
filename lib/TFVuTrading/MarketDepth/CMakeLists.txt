@@ -10,6 +10,7 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 
 set(
   file_h
+    Colours.hpp
     DataRowElement.hpp
     ExecutionControl.hpp
     Fields.hpp

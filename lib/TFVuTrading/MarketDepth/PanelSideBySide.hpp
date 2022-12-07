@@ -28,6 +28,7 @@
 #include <wx/window.h>
 
 #include "WinRow.hpp"
+#include "Colours.hpp"
 #include "DataRowElement.hpp"
 
 extern const ou::tf::l2::vElement_t vElement;
@@ -117,9 +118,9 @@ private:
 
     DataRow_Book( double price, unsigned int volume )
     : m_bChanged( false )
-    , m_drePrice(   m_bChanged, sFmtPrice,   EColour::Black, EColour::LightSeaGreen )
-    , m_dreSize(    m_bChanged, sFmtInteger, EColour::Black, EColour::DodgerBlue )
-    , m_dreSizeAgg( m_bChanged, sFmtInteger, EColour::Black, EColour::LightSkyBlue )
+    , m_drePrice(   m_bChanged, sFmtPrice,   Colours( EColour::LightSeaGreen, EColour::Black, EColour::LightSeaGreen ) )
+    , m_dreSize(    m_bChanged, sFmtInteger, Colours( EColour::DodgerBlue, EColour::Black, EColour::DodgerBlue ) )
+    , m_dreSizeAgg( m_bChanged, sFmtInteger, Colours( EColour::LightSkyBlue, EColour::Black, EColour::LightSkyBlue ) )
     {
       m_drePrice.Set( price );
       m_dreSize.Set( volume );
@@ -159,7 +160,7 @@ private:
     ou::tf::l2::DataRowElement<double> m_dreImbalance;
     DataRow_Statistics()
     : m_bChanged( false )
-    , m_dreImbalance( m_bChanged, sFmtPrice, EColour::Black, EColour::DimGray )
+    , m_dreImbalance( m_bChanged, sFmtPrice, Colours( EColour::DimGray, EColour::Black, EColour::DimGray ) )
     {}
     void Update() {
       if ( m_bChanged ) {

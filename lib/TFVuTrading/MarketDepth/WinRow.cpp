@@ -53,7 +53,7 @@ WinRow::WinRow( wxWindow* parent, const vElement_t& vElement, const wxPoint& ori
       pwre->SetBackgroundColour( colourColumnHeader );
     }
     else {
-      pwre->SetColours( element.colourBackground, element.colourForeground, element.colourHighlight );
+      pwre->SetColours( element.colours );
     }
     m_vWinRowElement.push_back( pwre );
     xPos += element.width; // maybe +1 for a border

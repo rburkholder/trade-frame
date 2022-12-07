@@ -54,6 +54,10 @@ public:
     m_drePrice.Set( price, bHighLight );
   }
 
+  void SetPrice( double price, EColour bg ) {
+    m_drePrice.Set( price, bg );
+  }
+
   void IncTicks() { m_dreTicks.Inc(); }
 
   void AddVolume( unsigned int nVolume ) { m_dreVolume.Add( nVolume ); }

@@ -28,16 +28,16 @@ namespace l2 { // market depth
 // class PriceRowElementIndicatorStatic
 
 DataRowElementIndicatorStatic::DataRowElementIndicatorStatic(
-  bool& bChanged, const std::string& sFormat
-, EColour fg, EColour bg
-)
-: DataRowElement<std::string>( bChanged, sFormat, fg, bg )
-{}
-
-DataRowElementIndicatorStatic::DataRowElementIndicatorStatic(
   bool& bChanged, const DataRowElementIndicatorStatic& rhs
 )
 : DataRowElement<std::string>( bChanged, rhs )
+{}
+
+DataRowElementIndicatorStatic::DataRowElementIndicatorStatic(
+  bool& bChanged, const std::string& sFormat
+, Colours colours
+)
+: DataRowElement<std::string>( bChanged, sFormat, colours )
 {}
 
 void DataRowElementIndicatorStatic::Append( const std::string& sValue ) {
@@ -59,17 +59,17 @@ void DataRowElementIndicatorStatic::UpdateWinRowElement() {
 // class PriceRowElementIndicatorDynamic
 
 DataRowElementIndicatorDynamic::DataRowElementIndicatorDynamic(
-  bool& bChanged, const std::string& sFormat
-, EColour fg, EColour bg
+  bool& bChanged, const DataRowElementIndicatorDynamic& rhs
 )
-: DataRowElement<std::string>( bChanged, sFormat, fg, bg )
+: DataRowElement<std::string>( bChanged, rhs )
 , m_bListChanged( false )
 {}
 
 DataRowElementIndicatorDynamic::DataRowElementIndicatorDynamic(
-  bool& bChanged, const DataRowElementIndicatorDynamic& rhs
+  bool& bChanged, const std::string& sFormat
+, Colours colours
 )
-: DataRowElement<std::string>( bChanged, rhs )
+: DataRowElement<std::string>( bChanged, sFormat, colours )
 , m_bListChanged( false )
 {}
 

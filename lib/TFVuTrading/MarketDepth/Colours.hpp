@@ -13,54 +13,43 @@
  ************************************************************************/
 
 /*
- * File:    Fields.hpp
+ * File:    Colours.hpp
  * Author:  raymond@burkholder.net
  * Project: TFVuTrading/MarketDepth
- * Created: December 12, 2022 12:50:57
+ * Created: December 7, 2022 12:30:37
  */
 
 #pragma once
 
-#include <string>
-#include <vector>
-
 #include <OUCommon/Colour.h>
 
-#include "Colours.hpp"
+using EColour = ou::Colour::wx::EColour;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
-using EColour = ou::Colour::wx::EColour;
+struct Colours {
 
-struct Element { // definition of an element in a gui row
-  int field;
-  int width;
-  std::string header;
-  long alignment; // passed as style
-  Colours colours;
+  EColour bg; // box fill
+  EColour fg; // text
+  EColour hi; // box fill to highlight
+
+  Colours( EColour bg_, EColour fg_, EColour hi_)
+  : bg( bg_ ), fg( fg_ ), hi( hi_ ) {}
+
+  //Colours( EColour bg_, EColour fg_ ): Colours( bg_, fg_ , EColour::DimGray ) {}
+  Colours(): Colours( EColour::White, EColour::Black, EColour::DimGray ) {}
+
+  const Colours& operator=( const Colours& rhs ) {
+    if ( this != &rhs ) {
+      bg = rhs.bg; fg = rhs.fg; hi = rhs.hi;
+    }
+    return *this;
+  }
+
 };
 
-using vElement_t = std::vector<Element>;  // TODO: convert to std::array?
-
-namespace rung { // columns/elements/fields in a row/rung of the ladder
-
-// PanelTrade Columns/Fields/Elements
-
-enum class EField: int { // may need a different namespace or name to reflect panel trade only
-  PL,
-  BuyCount, BuyVolume,
-  BidSize,
-  BidOrder, Price, AskOrder,
-  AskSize,
-  SellVolume, SellCount,
-  Ticks, Volume, Static, Dynamic
-};
-
-extern const vElement_t vElement;
-
-} // namespace rung
 } // namespace market depth
 } // namespace tf
 } // namespace ou

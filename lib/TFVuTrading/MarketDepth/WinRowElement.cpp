@@ -109,7 +109,7 @@ void WinRowElement::SetText( const std::string& sText ) {
 }
 
 void WinRowElement::SetText( const std::string& sText, bool bHighlight ) {
-  wxWindow::SetBackgroundColour( bHighlight ? m_colourHighlight : m_colourBackground );
+  wxWindow::SetBackgroundColour( bHighlight ? m_colours.hi : m_colours.bg );
   SetText( sText );
 }
 
@@ -125,23 +125,23 @@ void WinRowElement::SetText( const std::string& sText, EColour fg, EColour bg ) 
 }
 
 void WinRowElement::SetColourBackground( EColour colour ) {
-  m_colourBackground = colour;
+  m_colours.bg = colour;
   wxWindow::SetBackgroundColour( colour );
 }
 
 void WinRowElement::SetColourForeground( EColour colour ) {
-  m_colourForeground = colour;
+  m_colours.fg = colour;
   wxWindow::SetForegroundColour( colour );
 }
 
 void WinRowElement::SetColourHighlight( EColour colour ) {
-  m_colourHighlight = colour;
+  m_colours.hi = colour;
 }
 
-void WinRowElement::SetColours( EColour colourB, EColour colourF, EColour colourH ) {
-  SetColourBackground( colourB );
-  SetColourForeground( colourF );
-  SetColourHighlight( colourH );
+void WinRowElement::SetColours( Colours colours ) {
+  m_colours = colours;
+  wxWindow::SetBackgroundColour( colours.bg );
+  wxWindow::SetForegroundColour( colours.fg );
 }
 
 void WinRowElement::Set( fClick_t&& fClick ) {

@@ -26,42 +26,19 @@
 
 #include <boost/format.hpp>
 
+#include "Colours.hpp"
 #include "WinRowElement.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace l2 { // market depth
 
-  using EColour = WinRowElement::EColour;
-
-  struct Colours {
-    EColour fg;
-    EColour bg;
-    EColour hi;
-
-    Colours(): fg( EColour::Black ), bg( EColour::White ), hi( EColour::DimGray ) {}
-    Colours( EColour fg_, EColour bg_ )
-    : fg( fg_ ), bg( bg_ ), hi( EColour::DimGray ) {}
-    Colours( EColour fg_, EColour bg_, EColour hi_)
-    : fg( fg_ ), bg( bg_ ), hi( hi_ ) {}
-
-    const Colours& operator=( const Colours& rhs ) {
-      if ( this != &rhs ) {
-        fg = rhs.fg; bg = rhs.bg; hi = rhs.hi;
-      }
-      return *this;
-    }
-  };
-
+using EColour = ou::Colour::wx::EColour;
 
 template<typename T>
 class DataRowElement {
 public:
 
-  DataRowElement(
-    bool& bChanged, const std::string& sFormat,
-    EColour fg, EColour bg
-    );
   DataRowElement(
     bool& bChanged, const std::string& sFormat, const Colours&
     );
@@ -102,18 +79,6 @@ private:
 
 template<typename T>
 DataRowElement<T>::DataRowElement(
-  bool& bChanged, const std::string& sFormat,
-  EColour fg, EColour bg
-)
-: m_bChanged( bChanged )
-, m_bHighlight( false )
-, m_format( sFormat )
-, m_pWinRowElement( nullptr )
-, m_value {}
-{}
-
-template<typename T>
-DataRowElement<T>::DataRowElement(
   bool& bChanged, const DataRowElement& rhs
 )
 : m_bChanged( bChanged )
@@ -122,6 +87,19 @@ DataRowElement<T>::DataRowElement(
 , m_pWinRowElement( rhs.m_pWinRowElement )
 , m_value( rhs.m_value )
 , m_colours( rhs.m_colours )
+{}
+
+template<typename T>
+DataRowElement<T>::DataRowElement(
+  bool& bChanged, const std::string& sFormat,
+  const Colours& colours
+)
+: m_bChanged( bChanged )
+, m_bHighlight( false )
+, m_format( sFormat )
+, m_pWinRowElement( nullptr )
+, m_value {}
+, m_colours( colours )
 {}
 
 template<typename T>
@@ -229,6 +207,10 @@ public:
   DataRowElementIndicatorStatic(
     bool& bChanged, const DataRowElementIndicatorStatic&
     );
+  DataRowElementIndicatorStatic(
+    bool& bChanged, const std::string& sFormat,
+    Colours
+    );
   virtual void UpdateWinRowElement();
   void Append( const std::string& );
 protected:
@@ -245,6 +227,10 @@ public:
     );
   DataRowElementIndicatorDynamic(
     bool& bChanged, const DataRowElementIndicatorDynamic&
+    );
+  DataRowElementIndicatorDynamic(
+    bool& bChanged, const std::string& sFormat,
+    Colours
     );
   virtual void UpdateWinRowElement();
   virtual void Set( const std::string& );

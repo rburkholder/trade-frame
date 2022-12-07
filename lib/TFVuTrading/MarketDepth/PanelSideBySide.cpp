@@ -46,18 +46,19 @@
 //namespace {
 
   using EColour = ou::Colour::wx::EColour;
+  using Colours = ou::tf::l2::Colours;
 
   using EStatsField = ou::tf::l2::PanelSideBySide::EStatsField;
 
   // TODO: this may ultimately be a composite of three structures (try boost::hana)
   const ou::tf::l2::vElement_t vElement = {
-    { (int)EStatsField::BSizeAgg,  40, "Agg",    wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
-  , { (int)EStatsField::BSize,     40, "Size",   wxCENTER, EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    }
-  , { (int)EStatsField::BPrice,    65, "Bid",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
-  , { (int)EStatsField::Imbalance, 50, "Imbal",  wxCENTER, EColour::DimGray,       EColour::White, EColour::PaleGoldenrod }
-  , { (int)EStatsField::APrice,    65, "Ask",    wxCENTER, EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   }
-  , { (int)EStatsField::ASize,     40, "Size",   wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
-  , { (int)EStatsField::ASizeAgg,  40, "Agg",    wxCENTER, EColour::LightPink,     EColour::Black, EColour::Magenta       }
+    { (int)EStatsField::BSizeAgg,  40, "Agg",    wxCENTER, Colours( EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    ) }
+  , { (int)EStatsField::BSize,     40, "Size",   wxCENTER, Colours( EColour::LightSkyBlue,  EColour::Black, EColour::DodgerBlue    ) }
+  , { (int)EStatsField::BPrice,    65, "Bid",    wxCENTER, Colours( EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   ) }
+  , { (int)EStatsField::Imbalance, 50, "Imbal",  wxCENTER, Colours( EColour::DimGray,       EColour::White, EColour::PaleGoldenrod ) }
+  , { (int)EStatsField::APrice,    65, "Ask",    wxCENTER, Colours( EColour::LightSeaGreen, EColour::Black, EColour::LightYellow   ) }
+  , { (int)EStatsField::ASize,     40, "Size",   wxCENTER, Colours( EColour::LightPink,     EColour::Black, EColour::Magenta       ) }
+  , { (int)EStatsField::ASizeAgg,  40, "Agg",    wxCENTER, Colours( EColour::LightPink,     EColour::Black, EColour::Magenta       ) }
   };
 
 //} // anonymous
