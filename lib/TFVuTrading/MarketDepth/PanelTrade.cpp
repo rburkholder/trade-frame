@@ -73,7 +73,9 @@ void PanelTrade::Init() {
   m_ixHiRecenterFrame = 0;
   m_ixLoRecenterFrame = 0;
 
+  m_dblLastAsk = 0.0;
   m_dblLastPrice = 0.0;
+  m_dblLastBid = 0.0;
 
   m_fClick = nullptr;
 
@@ -274,31 +276,32 @@ void PanelTrade::UpdateDynamicIndicator( const std::string& sIndicator, double v
 void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
   // will need to use quote for tick analysis.
   // don't update the ladder, as it interferes with L2
-  // maybe use to set the colour for best bid offer
 
   int ixAskPrice = m_PriceRows.Cast( quote.Ask() );
   int ixBidPrice = m_PriceRows.Cast( quote.Bid() );
-/*
-  if ( ( 0 != m_ixLastAsk ) && ( ixAskPrice != m_ixLastAsk ) ) {
-    DataRow& row( m_DataRows[ m_ixLastAsk ] );
-    row.SetAskVolume( 0 );
-  }
-  DataRow& rowAsk( m_DataRows[ ixAskPrice ] );
-  rowAsk.SetAskVolume( quote.AskSize() );
-  m_ixLastAsk = ixAskPrice;
 
-  if ( ( 0 != m_ixLastBid ) && ( ixBidPrice != m_ixLastBid ) ) {
-    DataRow& row( m_DataRows[ m_ixLastBid ] );
-    row.SetBidVolume( 0 );
+  if ( 0.0 != m_dblLastAsk ) { // TODO: could keep the index instead, as it is consistent
+    PriceRow& row( m_PriceRows[ m_dblLastAsk ] );
+    row.SetAskVolume( false );
   }
-  DataRow& rowBid( m_DataRows[ ixBidPrice ] );
-  rowBid.SetBidVolume( quote.BidSize() );
-  m_ixLastBid = ixBidPrice;
 
-*/
+  if ( 0.0 != m_dblLastBid ) { // TODO: could keep the index instead, as it is consistent
+    PriceRow& row( m_PriceRows[ m_dblLastBid ] );
+    row.SetBidVolume( false );
+  }
 
   m_dblLastAsk = quote.Ask();
   m_dblLastBid = quote.Bid();
+
+  if ( 0.0 != m_dblLastAsk ) {
+    PriceRow& row( m_PriceRows[ m_dblLastAsk ] );
+    row.SetAskVolume( true );
+  }
+
+  if ( 0.0 != m_dblLastBid ) {
+    PriceRow& row( m_PriceRows[ m_dblLastBid ] );
+    row.SetBidVolume( true );
+  }
 
   int ixHiPrice = std::max( ixAskPrice, ixBidPrice );
   int ixLoPrice = std::max( ixAskPrice, ixBidPrice );
@@ -318,14 +321,14 @@ void PanelTrade::OnQuote( const ou::tf::Quote& quote ) {
 }
 
 // l2 update
-void PanelTrade::OnQuoteAsk( double price, int volume ) {
+void PanelTrade::OnQuoteAsk( double price, unsigned int volume ) {
   int ixPrice = m_PriceRows.Cast( price );
   PriceRow& row( m_PriceRows[ ixPrice ] );
   row.SetAskVolume( volume );
 }
 
 // l2 update
-void PanelTrade::OnQuoteBid( double price, int volume ) {
+void PanelTrade::OnQuoteBid( double price, unsigned int volume ) {
   int ixPrice = m_PriceRows.Cast( price );
   PriceRow& row( m_PriceRows[ ixPrice ] );
   row.SetBidVolume( volume );
@@ -344,6 +347,7 @@ void PanelTrade::OnTrade( const ou::tf::Trade& trade ) {
   PriceRow& rowData( m_PriceRows[ ixPrice ] );
 
   rowData.SetPrice( trade.Volume(), true ); // need to highlight the price level
+
   rowData.IncTicks();
   rowData.AddVolume( trade.Volume() );
 

@@ -62,7 +62,9 @@ public:
 
   void AddVolume( unsigned int nVolume ) { m_dreVolume.Add( nVolume ); }
 
+  void SetAskVolume( bool bHighlight ) { m_dreAskSize.Set( bHighlight ); }
   void SetAskVolume( unsigned int nVolume ) { m_dreAskSize.Set( nVolume ); }
+  void SetBidVolume( bool bHighlight ) { m_dreBidSize.Set( bHighlight ); };
   void SetBidVolume( unsigned int nVolume ) { m_dreBidSize.Set( nVolume ); }
 
   void IncBuyCount() { m_dreBuyCount.Inc(); }

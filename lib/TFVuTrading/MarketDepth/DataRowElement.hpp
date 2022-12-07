@@ -52,6 +52,7 @@ public:
   virtual void UpdateWinRowElement();
 
   virtual void Set( const T );
+  void Set( bool bHighlight );
   void Set( const T, bool bHighlight );
   void Set( const T, EColour bg );
   void Set( const T, EColour fg, EColour bg );
@@ -116,6 +117,14 @@ void DataRowElement<T>::Set( const T value ) {
 }
 
 template<typename T>
+void DataRowElement<T>::Set( bool bHighlight ) {
+  if ( m_bHighlight != bHighlight ) {
+    m_bHighlight = bHighlight;
+    m_bChanged = true;
+  }
+}
+
+template<typename T>
 void DataRowElement<T>::Set( const T value, bool bHighlight ) {
   if ( ( m_value != value ) || ( m_bHighlight != bHighlight ) ) {
     m_value = value;
@@ -129,15 +138,6 @@ void DataRowElement<T>::Set( const T value, EColour bg ) {
   if ( ( m_value != value ) || ( bg != m_colours.bg ) ) {
     m_value = value;
     m_colours.bg = bg;
-    m_bChanged = true;
-  }
-}
-
-template<typename T>
-void DataRowElement<T>::Set( const T value, EColour fg, EColour bg ) {
-  if ( ( m_value != value ) || ( fg != m_colours.fg ) || ( bg != m_colours.bg ) ) {
-    m_value = value;
-    m_colours = Colours( fg, bg );
     m_bChanged = true;
   }
 }
@@ -184,7 +184,7 @@ void DataRowElement<T>::UpdateWinRowElement() {
     m_sValue.clear();
   }
   if ( nullptr != m_pWinRowElement ) {
-    m_pWinRowElement->SetText( m_sValue, m_colours.fg, m_colours.bg );
+    m_pWinRowElement->SetText( m_sValue, m_colours.fg, m_bHighlight ? m_colours.hi : m_colours.bg );
   }
 }
 

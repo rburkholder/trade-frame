@@ -75,8 +75,8 @@ public:
   void OnQuote( const ou::tf::Quote& ); // l1 quote for recentering
   void OnTrade( const ou::tf::Trade& ); // l1 trade for colour, recentering
 
-  void OnQuoteAsk( double price, int volume ); // l2 update at level
-  void OnQuoteBid( double price, int volume ); // l2 update at level
+  void OnQuoteAsk( double price, unsigned int volume ); // l2 update at level
+  void OnQuoteBid( double price, unsigned int volume ); // l2 update at level
 
   // Interface - Events - Out - Timer
   using fTimer_t = std::function<void()>; // triggered on visible ladder refresh

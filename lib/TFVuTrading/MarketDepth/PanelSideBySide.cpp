@@ -143,7 +143,7 @@ void PanelSideBySide::OnL2Bid( double price, int volume, bool bOnAdd ) {
   UpdateMap( m_mapBidPriceLevel, price, volume, bOnAdd );
 }
 
-void PanelSideBySide::UpdateMap( mapPriceLevel_t& map, double price, int volume, bool bOnAdd ) {
+void PanelSideBySide::UpdateMap( mapPriceLevel_t& map, double price, unsigned int volume, bool bOnAdd ) {
 
   // scoped_lock: brute force & ignorance for now, probably ultimately
   std::scoped_lock<std::mutex> lock( m_mutexMaps );
@@ -213,8 +213,8 @@ void PanelSideBySide::CalculateStatistics() { // need to fix this, as cross thre
 
     if ( 0 < nRows ) {
 
-      int nVolumeAggregateAsk {};
-      int nVolumeAggregateBid {};
+      unsigned int nVolumeAggregateAsk {};
+      unsigned int nVolumeAggregateBid {};
 
       mapPriceLevel_t::iterator iterMapAsk = m_mapAskPriceLevel.begin();
       mapPriceLevel_t::reverse_iterator iterMapBid = m_mapBidPriceLevel.rbegin();

@@ -124,7 +124,7 @@ private:
     {
       m_drePrice.Set( price );
       m_dreSize.Set( volume );
-      m_dreSizeAgg.Set( 0 );
+      m_dreSizeAgg.Set( (unsigned int)0 );
     }
 
     DataRow_Book( DataRow_Book&& ) = delete; // due to m_bChanged usage
@@ -184,7 +184,7 @@ private:
   void DrawWinRows();
   void DeleteWinRows();
 
-  void UpdateMap( mapPriceLevel_t& map, double price, int volume, bool bOnAdd );
+  void UpdateMap( mapPriceLevel_t& map, double price, unsigned int volume, bool bOnAdd );
   void CalculateStatistics();
 
   void HandleTimerRefresh( wxTimerEvent& );
