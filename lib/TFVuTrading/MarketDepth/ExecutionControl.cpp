@@ -44,23 +44,18 @@ namespace ou {
 namespace tf {
 namespace l2 {
 
-ExecutionControl::ExecutionControl( pPosition_t pPosition, unsigned int nDefaultOrder )
+ExecutionControl::ExecutionControl( pPosition_t pPosition, unsigned int sizeDefaultOrder )
 : m_pPanelTrade( nullptr )
-, m_nDefaultOrder( nDefaultOrder )
+, m_sizeDefaultOrder( sizeDefaultOrder )
 , m_nActiveOrders {}
 , m_dblAveragePrice {}
 , m_pPosition( std::move( pPosition ) )
 {
   m_pPosition->OnPositionChanged.Add( MakeDelegate( this, &ExecutionControl::HandlePositionChanged ) );
 
-  //pWatch_t pWatch( m_pPosition->GetWatch() );
-  //pWatch->OnQuote.Add( MakeDelegate( this, &ExecutionControl::HandleQuote ) );
 }
 
 ExecutionControl::~ExecutionControl() {
-
-  //pWatch_t pWatch( m_pPosition->GetWatch() );
-  //pWatch->OnQuote.Remove( MakeDelegate( this, &ExecutionControl::HandleQuote ) );
 
   m_pPosition->OnPositionChanged.Remove( MakeDelegate( this, &ExecutionControl::HandlePositionChanged ) );
 
@@ -73,6 +68,16 @@ ExecutionControl::~ExecutionControl() {
   if ( 0 != m_mapBidOrders.size() ) {
     std::cout << "ExecutionControl: outstanding bid orders in limbo" << std::endl;
     m_mapBidOrders.clear();
+  }
+
+  if ( 0 != m_mapAskTrackStop.size() ) {
+    std::cout << "ExecutionControl: outstanding ask stop orders in limbo" << std::endl;
+    m_mapAskTrackStop.clear();
+  }
+
+  if ( 0 != m_mapBidTrackStop.size() ) {
+    std::cout << "ExecutionControl: outstanding bid stop orders in limbo" << std::endl;
+    m_mapBidTrackStop.clear();
   }
 
   if ( m_pPanelTrade ) {
@@ -161,7 +166,7 @@ void ExecutionControl::AskLimit( double price ) {
   mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
   if ( m_mapAskOrders.end() == iterOrders ) {
     pOrder_t pOrder = m_pPosition->ConstructOrder(
-      ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_nDefaultOrder, price );
+      ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_sizeDefaultOrder, price );
     std::cout << "Submitted limit order#" << pOrder->GetOrderId() << " at ask " << price << std::endl;
     auto pair = m_mapAskOrders.emplace( price, PriceLevelOrder() );
     assert( pair.second );
@@ -187,27 +192,54 @@ void ExecutionControl::AskLimit( double price ) {
 
 // on futures, only available during regular trading hours, will need to be simulated
 void ExecutionControl::AskStop( double price ) {
+
   mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
   if ( m_mapAskOrders.end() == iterOrders ) {
+    // TODO: need to check regular hours to do it this way
+    //pOrder_t pOrder = m_pPosition->ConstructOrder(
+    //  ou::tf::OrderType::Stop, ou::tf::OrderSide::Buy, m_sizeDefaultOrder, price );
     pOrder_t pOrder = m_pPosition->ConstructOrder(
-      ou::tf::OrderType::Stop, ou::tf::OrderSide::Buy, m_nDefaultOrder, price );
-    std::cout << "Submitted stop order#" << pOrder->GetOrderId() << " at ask " << price << std::endl;
-    auto pair = m_mapAskOrders.emplace( price, PriceLevelOrder() );
-    assert( pair.second );
-    mapOrders_t::iterator iterOrders( pair.first );
-    PriceLevelOrder& plo( iterOrders->second );
-    plo.Set( // fUpdateQuantity_t
-      [this,price,iterOrders]( unsigned int quantity ){
-        m_pPanelTrade->SetAsk( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_StopTracking ); // set with plo instead
-        if ( 0 == quantity ) { // based upon cancel, or fulfillment
-          m_KillPriceLevelOrder = std::move( iterOrders->second );
-          m_mapAskOrders.erase( iterOrders );
-        }
-      },
-      std::bind( &ExecutionControl::HandleExecution, this, std::placeholders::_1 )
-    );
-    plo = pOrder;
-    m_pPosition->PlaceOrder( pOrder );
+      ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_sizeDefaultOrder );
+
+    m_pPanelTrade->SetAsk( price, m_sizeDefaultOrder, OrderColour_StopTracking );
+    //std::cout << "Submitted stop order#" << pOrder->GetOrderId() << " at ask " << price << std::endl;
+    std::cout << "tracking stop order#" << pOrder->GetOrderId() << " at ask " << price << std::endl;
+
+    auto pairOrders = m_mapAskOrders.emplace( price, PriceLevelOrder() );
+    assert( pairOrders.second );
+    mapOrders_t::iterator iterOrders( pairOrders.first );
+
+    mapTrackStop_t::iterator iterTrackStop = m_mapAskTrackStop.find( price );
+    assert( m_mapAskTrackStop.end() == iterTrackStop );
+
+    auto pairTrackingStop = m_mapAskTrackStop.emplace(
+      price,
+      TrackStop(
+        ou::tf::OrderSide::Buy, price, m_pPosition->GetWatch(),
+        [this, iterOrders, pOrder, price]( ou::tf::OrderSide::EOrderSide ){
+
+          mapTrackStop_t::iterator iterTrackStop = m_mapAskTrackStop.find( price );
+          assert( m_mapAskTrackStop.end() != iterTrackStop );
+
+          m_KillTrackStop = std::move( iterTrackStop->second );
+          m_mapAskTrackStop.erase( iterTrackStop );
+
+          PriceLevelOrder& plo( iterOrders->second );
+          plo.Set( // fUpdateQuantity_t
+            [this,price,iterOrders]( unsigned int quantity ){
+              //m_pPanelTrade->SetAsk( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_StopTracking ); // set with plo instead
+              m_pPanelTrade->SetAsk( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_StopSubmitted ); // set with plo instead
+              if ( 0 == quantity ) { // based upon cancel, or fulfillment
+                m_KillPriceLevelOrder = std::move( iterOrders->second );
+                m_mapAskOrders.erase( iterOrders );
+              }
+            },
+            std::bind( &ExecutionControl::HandleExecution, this, std::placeholders::_1 )
+          );
+          plo = pOrder;
+          m_pPosition->PlaceOrder( pOrder );
+        } ) );
+    assert( pairTrackingStop.second );
   }
   else {
     std::cout << "order (ask) " << iterOrders->second.Order()->GetOrderId() << " exists" << std::endl;
@@ -215,12 +247,8 @@ void ExecutionControl::AskStop( double price ) {
 }
 
 void ExecutionControl::AskCancel( double price ) {
-  mapOrders_t::iterator iterOrders = m_mapAskOrders.find( price );
-  if ( m_mapAskOrders.end() == iterOrders ) {}
-  else {
-    pOrder_t pOrder = iterOrders->second.Order();
-    m_pPosition->CancelOrder( pOrder->GetOrderId() );
-  }
+  m_pPanelTrade->SetAsk( price, 0, OrderColour_NoOrder );
+  Cancel( price, m_mapAskOrders, m_mapAskTrackStop );
 }
 
 // TODO: on each click, to increase quantity, cancel order & re-submit with new quantity
@@ -228,7 +256,7 @@ void ExecutionControl::BidLimit( double price ) {
   mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
   if ( m_mapBidOrders.end() == iterOrders ) {
     pOrder_t pOrder = m_pPosition->ConstructOrder(
-      ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_nDefaultOrder, price );
+      ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_sizeDefaultOrder, price );
     std::cout << "Submitted limit order#" << pOrder->GetOrderId() << " at bid " << price << std::endl;
     auto pair = m_mapBidOrders.emplace( price, PriceLevelOrder() );
     assert( pair.second );
@@ -254,27 +282,54 @@ void ExecutionControl::BidLimit( double price ) {
 
 // on futures, only available during regular trading hours, will need to be simulated
 void ExecutionControl::BidStop( double price ) {
+
   mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
   if ( m_mapBidOrders.end() == iterOrders ) {
+    // TODO: need to check regular hours to do it this way
+    //pOrder_t pOrder = m_pPosition->ConstructOrder(
+    //  ou::tf::OrderType::Stop, ou::tf::OrderSide::Sell, m_sizeDefaultOrder, price );
     pOrder_t pOrder = m_pPosition->ConstructOrder(
-      ou::tf::OrderType::Stop, ou::tf::OrderSide::Sell, m_nDefaultOrder, price );
-    std::cout << "Submitted stop order#" << pOrder->GetOrderId() << " at bid " << price << std::endl;
-    auto pair = m_mapBidOrders.emplace( price, PriceLevelOrder() );
-    assert( pair.second );
-    mapOrders_t::iterator iterOrders( pair.first );
-    PriceLevelOrder& plo( iterOrders->second );
-    plo.Set( // fUpdateQuantity_t
-      [this,price,iterOrders]( unsigned int quantity ){
-        m_pPanelTrade->SetBid( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_StopTracking ); // set with plo instead
-        if ( 0 == quantity ) { // based upon cancel, or fulfillment
-          m_KillPriceLevelOrder = std::move( iterOrders->second );
-          m_mapBidOrders.erase( iterOrders );
-        }
-      },
-      std::bind( &ExecutionControl::HandleExecution, this, std::placeholders::_1 )
-    );
-    plo = pOrder;
-    m_pPosition->PlaceOrder( pOrder );
+      ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_sizeDefaultOrder );
+
+    m_pPanelTrade->SetBid( price, m_sizeDefaultOrder, OrderColour_StopTracking );
+    //std::cout << "Submitted stop order#" << pOrder->GetOrderId() << " at bid " << price << std::endl;
+    std::cout << "tracking stop order#" << pOrder->GetOrderId() << " at bid " << price << std::endl;
+
+    auto pairOrders = m_mapBidOrders.emplace( price, PriceLevelOrder() );
+    assert( pairOrders.second );
+    mapOrders_t::iterator iterOrders( pairOrders.first );
+
+    mapTrackStop_t::iterator iterTrackStop = m_mapBidTrackStop.find( price );
+    assert( m_mapBidTrackStop.end() == iterTrackStop );
+
+    auto pairTrackingStop = m_mapBidTrackStop.emplace(
+      price,
+      TrackStop(
+        ou::tf::OrderSide::Sell, price, m_pPosition->GetWatch(),
+        [this, iterOrders, pOrder, price]( ou::tf::OrderSide::EOrderSide side ) {
+
+          mapTrackStop_t::iterator iterTrackStop = m_mapBidTrackStop.find( price );
+          assert( m_mapBidTrackStop.end() != iterTrackStop );
+
+          m_KillTrackStop = std::move( iterTrackStop->second );
+          m_mapBidTrackStop.erase( iterTrackStop );
+
+          PriceLevelOrder& plo( iterOrders->second );
+          plo.Set( // fUpdateQuantity_t
+            [this,price,iterOrders]( unsigned int quantity ){
+              //m_pPanelTrade->SetBid( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_StopTracking ); // set with plo instead
+              m_pPanelTrade->SetBid( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_StopSubmitted ); // set with plo instead
+              if ( 0 == quantity ) { // based upon cancel, or fulfillment
+                m_KillPriceLevelOrder = std::move( iterOrders->second );
+                m_mapBidOrders.erase( iterOrders );
+              }
+            },
+            std::bind( &ExecutionControl::HandleExecution, this, std::placeholders::_1 )
+          );
+          plo = pOrder;
+          m_pPosition->PlaceOrder( pOrder );
+        } ) );
+    assert( pairTrackingStop.second );
   }
   else {
     std::cout << "order (bid) " << iterOrders->second.Order()->GetOrderId() << " exists" << std::endl;
@@ -282,11 +337,31 @@ void ExecutionControl::BidStop( double price ) {
 }
 
 void ExecutionControl::BidCancel( double price ) {
-  mapOrders_t::iterator iterOrders = m_mapBidOrders.find( price );
-  if ( m_mapBidOrders.end() == iterOrders ) {}
-  else {
-    pOrder_t pOrder = iterOrders->second.Order();
-    m_pPosition->CancelOrder( pOrder->GetOrderId() );
+  m_pPanelTrade->SetBid( price, 0, OrderColour_NoOrder );
+  Cancel( price, m_mapBidOrders, m_mapBidTrackStop );
+}
+
+void ExecutionControl::Cancel( double price, mapOrders_t& mapOrders, mapTrackStop_t& mapTrackStop ) {
+  mapTrackStop_t::iterator iterTrackStop = mapTrackStop.find( price );
+  if ( mapTrackStop.end() == iterTrackStop ) { // not a stop order
+
+    mapOrders_t::iterator iterOrders = mapOrders.find( price );
+    if ( mapOrders.end() == iterOrders ) {}
+    else {
+      pOrder_t pOrder = iterOrders->second.Order();
+      m_pPosition->CancelOrder( pOrder->GetOrderId() );
+    }
+
+  }
+  else { // is a stop order
+
+    mapTrackStop.erase( iterTrackStop );
+
+    mapOrders_t::iterator iterOrders = mapOrders.find( price );
+    if ( mapOrders.end() == iterOrders ) {}
+    else {
+      mapOrders.erase( iterOrders ); // nothing has been submitted yet
+    }
   }
 }
 
@@ -328,9 +403,6 @@ void ExecutionControl::HandleExecution( const ou::tf::Execution& exec ) {
 // 1) relative based upon current orders - present only when quantity non zero
 // 2) absolute based upon current position - always present
 void ExecutionControl::HandlePositionChanged( const ou::tf::Position& ) {
-}
-
-void ExecutionControl::HandleQuote( const ou::tf::Quote& ) {
 }
 
 } // market depth
