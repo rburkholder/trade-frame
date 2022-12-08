@@ -30,6 +30,7 @@
 
 FeedModel::FeedModel( pWatch_t pWatch, const config::Choices& config )
 : m_pWatchUnderlying( std::move( pWatch ) )
+, m_bConnected( false )
 , m_bTriggerFeatureSetDump( false )
 , m_dblImbalanceMean {}, m_dblImbalanceSlope {}
 , m_pPanelTrade( nullptr )
@@ -68,6 +69,18 @@ FeedModel::FeedModel( pWatch_t pWatch, const config::Choices& config )
 
 }
 
+FeedModel::~FeedModel() {
+
+  m_vMovingAverage.clear();
+  m_vStochastic.clear();
+
+  m_pPanelTrade = nullptr;
+  m_pInteractiveChart = nullptr;
+
+  m_pDispatch->Disconnect();
+  m_pDispatch.reset();
+}
+
 void FeedModel::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
   m_pPanelTrade = pPanelTrade;
 }
@@ -90,46 +103,52 @@ void FeedModel::AddToView( ou::ChartDataView& cdv, size_t price, size_t stoch ) 
 
 void FeedModel::Connect() {
   if ( m_pDispatch ) {
-    assert( m_pDispatch );
-    m_pDispatch->Connect();
-    assert( m_pWatchUnderlying );
-    m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &FeedModel::HandleQuote ) );
-    m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &FeedModel::HandleTrade ) );
+    if ( !m_bConnected ) {
+      m_bConnected = true;
+      assert( m_pDispatch );
+      m_pDispatch->Connect();
+      assert( m_pWatchUnderlying );
+      m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &FeedModel::HandleQuote ) );
+      m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &FeedModel::HandleTrade ) );
 
-    m_pPanelTrade->SetOnTimer(
-      [this](){
-        //if ( 0 == m_cntLoops ) {
-        //  m_pPanelStatistics->Update( m_valuesStatistics );
-        //  m_valuesStatistics.Zero();
-        //  m_cntLoops = 5;
-        //}
-        //else m_cntLoops--;
+      m_pPanelTrade->SetOnTimer(
+        [this](){
+          //if ( 0 == m_cntLoops ) {
+          //  m_pPanelStatistics->Update( m_valuesStatistics );
+          //  m_valuesStatistics.Zero();
+          //  m_cntLoops = 5;
+          //}
+          //else m_cntLoops--;
 
-        try {
-          for ( const vStochastic_t::value_type& vt: m_vStochastic ) {
-            m_pPanelTrade->UpdateDynamicIndicator( vt->MaxName(), vt->MaxLatest() );
-            m_pPanelTrade->UpdateDynamicIndicator( vt->MinName(), vt->MinLatest() );
+          try {
+            for ( const vStochastic_t::value_type& vt: m_vStochastic ) {
+              m_pPanelTrade->UpdateDynamicIndicator( vt->MaxName(), vt->MaxLatest() );
+              m_pPanelTrade->UpdateDynamicIndicator( vt->MinName(), vt->MinLatest() );
+            }
           }
-        }
-        catch ( const std::runtime_error& e ) {} // ignore the error, skip update
+          catch ( const std::runtime_error& e ) {} // ignore the error, skip update
 
-        for ( const vMovingAverage_t::value_type& vt: m_vMovingAverage ) {
-          const std::string& sname( vt.Name() );
-          double val( vt.Latest() );
-          m_pPanelTrade->UpdateDynamicIndicator( sname, val );
-        }
-      });
+          for ( const vMovingAverage_t::value_type& vt: m_vMovingAverage ) {
+            const std::string& sname( vt.Name() );
+            double val( vt.Latest() );
+            m_pPanelTrade->UpdateDynamicIndicator( sname, val );
+          }
+        });
+    }
   }
   else std::cout << "ModelFeed: no dispatch" << std::endl;
 }
 
 void FeedModel::Disconnect() {
   if ( m_pDispatch ) {
-    m_pPanelTrade->SetOnTimer( nullptr );
-    m_pDispatch->Disconnect();
-    assert( m_pWatchUnderlying );
-    m_pWatchUnderlying->OnQuote.Remove( MakeDelegate( this, &FeedModel::HandleQuote ) );
-    m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &FeedModel::HandleTrade ) );
+    if ( m_bConnected ) {
+      m_bConnected = false;
+      m_pPanelTrade->SetOnTimer( nullptr );
+      m_pDispatch->Disconnect();
+      assert( m_pWatchUnderlying );
+      m_pWatchUnderlying->OnQuote.Remove( MakeDelegate( this, &FeedModel::HandleQuote ) );
+      m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &FeedModel::HandleTrade ) );
+    }
   }
 }
 

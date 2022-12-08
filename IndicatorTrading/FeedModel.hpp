@@ -54,6 +54,7 @@ public:
   using pWatch_t = ou::tf::Watch::pWatch_t;
 
   FeedModel( pWatch_t, const config::Choices& );  // Future(ByOrder)
+  ~FeedModel();
 
   void Set( ou::tf::l2::PanelTrade* );
   void Set( InteractiveChart* );
@@ -68,6 +69,7 @@ public:
 protected:
 private:
 
+  bool m_bConnected;
   bool m_bTriggerFeatureSetDump;
 
   double m_dblImbalanceMean, m_dblImbalanceSlope;
