@@ -57,7 +57,7 @@ private:
 
   ou::tf::l2::PanelTrade* m_pPanelTrade;
 
-  unsigned int m_nDefaultOrder;
+  unsigned int m_sizeDefaultOrder;
 
   // TODO: allow multiple orders per level
   using mapOrders_t = std::map<double,PriceLevelOrder>;
