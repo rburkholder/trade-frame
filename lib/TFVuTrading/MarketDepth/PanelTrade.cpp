@@ -429,12 +429,12 @@ void PanelTrade::Set( fClick_t&& fClick ) {
   m_bReCenter = true;
 }
 
-void PanelTrade::SetAsk( double price, int n, EColour bg ) {
+void PanelTrade::SetAskQuantity( double price, int n, EColour bg ) {
   PriceRow& rowPrice( m_PriceRows[ price ] );
   rowPrice.SetAskOrderSize( n, bg );
 }
 
-void PanelTrade::SetBid( double price, int n, EColour bg ) {
+void PanelTrade::SetBidQuantity( double price, int n, EColour bg ) {
   PriceRow& rowPrice( m_PriceRows[ price ] );
   rowPrice.SetBidOrderSize( n, bg );
 }

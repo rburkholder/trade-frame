@@ -88,8 +88,8 @@ public:
 
   // Interface - In - Updates - Pending Orders
   using EColour = WinRowElement::EColour;
-  void SetAsk( double, int, EColour ); // update pending quantity@price
-  void SetBid( double, int, EColour ); // update pending quantity@price
+  void SetAskQuantity( double, int, EColour ); // update l2 quantity@price
+  void SetBidQuantity( double, int, EColour ); // update l2 quantity@price
 
   void UpdateProfitLoss( const int quantity, const double price ); // quantity at the zero profit price
 

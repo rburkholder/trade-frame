@@ -174,7 +174,7 @@ void ExecutionControl::AskLimit( double price ) {
     PriceLevelOrder& plo( iterOrders->second );
     plo.Set( // fUpdateQuantity_t
       [this,price,iterOrders]( unsigned int quantity ){
-        m_pPanelTrade->SetAsk( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_LimitSubmitted ); // set with plo instead
+        m_pPanelTrade->SetAskQuantity( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_LimitSubmitted ); // set with plo instead
         if ( 0 == quantity ) { // based upon cancel, or fulfillment
           m_KillPriceLevelOrder = std::move( iterOrders->second );
           m_mapAskOrders.erase( iterOrders );
@@ -201,7 +201,7 @@ void ExecutionControl::AskStop( double price ) {
     pOrder_t pOrder = m_pPosition->ConstructOrder(
       ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_sizeDefaultOrder );
 
-    m_pPanelTrade->SetAsk( price, m_sizeDefaultOrder, OrderColour_StopTracking );
+    m_pPanelTrade->SetAskQuantity( price, m_sizeDefaultOrder, OrderColour_StopTracking );
     //std::cout << "Submitted stop order#" << pOrder->GetOrderId() << " at ask " << price << std::endl;
     std::cout << "tracking stop order#" << pOrder->GetOrderId() << " at ask " << price << std::endl;
 
@@ -228,7 +228,7 @@ void ExecutionControl::AskStop( double price ) {
           plo.Set( // fUpdateQuantity_t
             [this,price,iterOrders]( unsigned int quantity ){
               //m_pPanelTrade->SetAsk( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_StopTracking ); // set with plo instead
-              m_pPanelTrade->SetAsk( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_StopSubmitted ); // set with plo instead
+              m_pPanelTrade->SetAskQuantity( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_StopSubmitted ); // set with plo instead
               if ( 0 == quantity ) { // based upon cancel, or fulfillment
                 m_KillPriceLevelOrder = std::move( iterOrders->second );
                 m_mapAskOrders.erase( iterOrders );
@@ -247,7 +247,7 @@ void ExecutionControl::AskStop( double price ) {
 }
 
 void ExecutionControl::AskCancel( double price ) {
-  m_pPanelTrade->SetAsk( price, 0, OrderColour_NoOrder );
+  m_pPanelTrade->SetAskQuantity( price, 0, OrderColour_NoOrder );
   Cancel( price, m_mapAskOrders, m_mapAskTrackStop );
 }
 
@@ -264,7 +264,7 @@ void ExecutionControl::BidLimit( double price ) {
     PriceLevelOrder& plo( iterOrders->second );
     plo.Set( // fUpdateQuantity_t
       [this,price,iterOrders]( unsigned int quantity ){
-        m_pPanelTrade->SetBid( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_LimitSubmitted ); // set with plo instead
+        m_pPanelTrade->SetBidQuantity( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_LimitSubmitted ); // set with plo instead
         if ( 0 == quantity ) { // based upon cancel, or fulfillment
           m_KillPriceLevelOrder = std::move( iterOrders->second );
           m_mapBidOrders.erase( iterOrders );
@@ -291,7 +291,7 @@ void ExecutionControl::BidStop( double price ) {
     pOrder_t pOrder = m_pPosition->ConstructOrder(
       ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_sizeDefaultOrder );
 
-    m_pPanelTrade->SetBid( price, m_sizeDefaultOrder, OrderColour_StopTracking );
+    m_pPanelTrade->SetBidQuantity( price, m_sizeDefaultOrder, OrderColour_StopTracking );
     //std::cout << "Submitted stop order#" << pOrder->GetOrderId() << " at bid " << price << std::endl;
     std::cout << "tracking stop order#" << pOrder->GetOrderId() << " at bid " << price << std::endl;
 
@@ -318,7 +318,7 @@ void ExecutionControl::BidStop( double price ) {
           plo.Set( // fUpdateQuantity_t
             [this,price,iterOrders]( unsigned int quantity ){
               //m_pPanelTrade->SetBid( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_StopTracking ); // set with plo instead
-              m_pPanelTrade->SetBid( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_StopSubmitted ); // set with plo instead
+              m_pPanelTrade->SetBidQuantity( price, quantity, 0 == quantity ? OrderColour_NoOrder : OrderColour_StopSubmitted ); // set with plo instead
               if ( 0 == quantity ) { // based upon cancel, or fulfillment
                 m_KillPriceLevelOrder = std::move( iterOrders->second );
                 m_mapBidOrders.erase( iterOrders );
@@ -337,7 +337,7 @@ void ExecutionControl::BidStop( double price ) {
 }
 
 void ExecutionControl::BidCancel( double price ) {
-  m_pPanelTrade->SetBid( price, 0, OrderColour_NoOrder );
+  m_pPanelTrade->SetBidQuantity( price, 0, OrderColour_NoOrder );
   Cancel( price, m_mapBidOrders, m_mapBidTrackStop );
 }
 
