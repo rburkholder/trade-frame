@@ -74,11 +74,12 @@ FeedModel::~FeedModel() {
   m_vMovingAverage.clear();
   m_vStochastic.clear();
 
+  m_pDispatch->Disconnect();
+  m_pDispatch.reset();
+
   m_pPanelTrade = nullptr;
   m_pInteractiveChart = nullptr;
 
-  m_pDispatch->Disconnect();
-  m_pDispatch.reset();
 }
 
 void FeedModel::Set( ou::tf::l2::PanelTrade* pPanelTrade ) {
