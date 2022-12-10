@@ -27,6 +27,9 @@
 
 // https://www.musicdsp.org/en/latest/Synthesis/9-fast-sine-wave-calculation.html
 
+// https://www.edmprod.com/different-chord-types/
+// https://www.edmprod.com/chordprogressions/
+
 namespace ou { // One Unified
 
 // == Sine ==

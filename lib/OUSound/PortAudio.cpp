@@ -38,6 +38,9 @@ PortAudio::PortAudio()
 : m_pStream( nullptr )
 {
   // http://portaudio.com/docs/v19-doxydocs/initializing_portaudio.html
+  // http://files.portaudio.com/docs/v19-doxydocs/pages.html
+  // http://files.portaudio.com/docs/v19-doxydocs/portaudio_8h.html#a443ad16338191af364e3be988014cbbe
+
   PaError pa_error;
   //std::cout << "Pa_Initialize" << std::endl;
   // many device probing messages will occur at this point on the console
