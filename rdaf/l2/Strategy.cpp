@@ -145,7 +145,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   InitRdaf();
 
-  //pWatch->RecordSeries( false );
+  pWatch->RecordSeries( false ); // use Collector for keeping data
   pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
   pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
 
