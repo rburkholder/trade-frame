@@ -19,16 +19,15 @@
  * Created: December 9, 2022  16:18:19
  */
 
-
 // https://indico.cern.ch/event/697389/contributions/3062036/attachments/1712790/2761904/Support_for_SIMD_Vectorization_in_ROOT_ROOT_Workshop_2018.pdf
 // https://www.intel.com/content/www/us/en/develop/documentation/advisor-user-guide/top/analyze-cpu-roofline.html
 // https://stackoverflow.com/questions/52653025/why-is-march-native-used-so-rarely
 
- #include <chrono>
+#include <chrono>
 
 // no longer use iostream, std::cout has a multithread contention problem
 //   due to it being captured to the gui, and is not thread safe
- #include <boost/log/trivial.hpp>
+#include <boost/log/trivial.hpp>
 
 #include <boost/lexical_cast.hpp>
 

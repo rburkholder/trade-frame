@@ -34,7 +34,7 @@ struct symbol_t {
 
   enum EFeed {
     L1   // L1 quotes/trades
-  , L2M  // L1 + L2 market maker (nasdaq equities)
+  , L2M  // L1 + L2 market maker (nasdaq equities) - not used in futures l2 activity
   , L2O  // L1 + L2 orders (CME, ICE futures)
   };
 

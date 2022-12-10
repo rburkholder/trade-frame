@@ -104,7 +104,7 @@ private:
   wxTimer m_timerOneSecond;
 
   pProviderSim_t    m_sim;    // simulation
-  pProviderIB_t     m_ib;     // live - execution
+  pProviderIB_t     m_tws;    // live - execution
   pProviderIQFeed_t m_iqfeed; // live - data
 
   bool m_bL2Connected;

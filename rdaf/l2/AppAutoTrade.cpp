@@ -110,12 +110,11 @@ bool AppAutoTrade::OnInit() {
   }
 
   m_iqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
-  m_ib = ou::tf::ib::TWS::Factory();
+  m_tws = ou::tf::ib::TWS::Factory();
 
   m_iqfeed->SetThreadCount( m_choices.nThreads );
 
-  // keep this commented here in case it needs to be resurrected
-  //m_tws->SetClientId( m_choices.ib_client_id );
+  m_tws->SetClientId( m_choices.ib_client_id );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -161,7 +160,7 @@ bool AppAutoTrade::OnInit() {
   );
 
   m_pPanelProviderControl->Add(
-    m_ib,
+    m_tws,
     false, true, true, false,
     [](){}, // fConnecting
     [this](){ // fConnected
@@ -504,7 +503,7 @@ void AppAutoTrade::ConstructIBInstrument(
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
         pPosition = pm.ConstructPosition(
           sNamePortfolio, idInstrument, "rdaf",
-          "ib01", "iq01", m_ib,
+          "ib01", "iq01", m_tws,
           pWatch
         );
         BOOST_LOG_TRIVIAL(info) << "position constructed " << pPosition->GetInstrument()->GetInstrumentName();
@@ -643,7 +642,7 @@ void AppAutoTrade::ConfirmProviders() {
     m_sim->Run();
   }
   else {
-    if ( m_iqfeed->Connected() && m_ib->Connected() ) {
+    if ( m_iqfeed->Connected() && m_tws->Connected() ) {
       if ( m_bL2Connected ) {
         bValidCombo = true;
         std::cout << "ConfirmProviders: using iqfeed and ib for data/execution" << std::endl;
