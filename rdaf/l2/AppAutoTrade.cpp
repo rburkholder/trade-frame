@@ -62,7 +62,7 @@ namespace {
   static const std::string sAppName( "ROOT AutoTrade (rdaf_l2)" );
   static const std::string sVendorName( "One Unified Net Limited" );
 
-  static const std::string sDirectory( "rdaf/" );
+  static const std::string sDirectory( "rdaf/l2" );
   static const std::string sDbName( sDirectory + "/example.db" );
   static const std::string sStateFileName( sDirectory + "/example.state" );
   static const std::string sChoicesFilename( sDirectory + "/choices.cfg" );
@@ -110,10 +110,9 @@ bool AppAutoTrade::OnInit() {
   }
 
   m_iqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
-  m_alpaca = ou::tf::alpaca::Provider::Factory();
+  m_ib = ou::tf::ib::TWS::Factory();
 
   m_iqfeed->SetThreadCount( m_choices.nThreads );
-  m_alpaca->Set( m_choices.m_sAlpacaDomain, m_choices.m_sAlpacaKey, m_choices.m_sAlpacaSecret );
 
   // keep this commented here in case it needs to be resurrected
   //m_tws->SetClientId( m_choices.ib_client_id );
@@ -162,8 +161,8 @@ bool AppAutoTrade::OnInit() {
   );
 
   m_pPanelProviderControl->Add(
-    m_alpaca,
-    false, false, true, false,
+    m_ib,
+    false, true, true, false,
     [](){}, // fConnecting
     [this](){ // fConnected
       ConfirmProviders();
@@ -505,7 +504,7 @@ void AppAutoTrade::ConstructIBInstrument(
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
         pPosition = pm.ConstructPosition(
           sNamePortfolio, idInstrument, "rdaf",
-          "alpaca", "iq01", m_alpaca,
+          "ib01", "iq01", m_ib,
           pWatch
         );
         BOOST_LOG_TRIVIAL(info) << "position constructed " << pPosition->GetInstrument()->GetInstrumentName();
@@ -644,11 +643,11 @@ void AppAutoTrade::ConfirmProviders() {
     m_sim->Run();
   }
   else {
-    if ( m_iqfeed->Connected() && m_alpaca->Connected() ) {
+    if ( m_iqfeed->Connected() && m_ib->Connected() ) {
       if ( m_bL2Connected ) {
         bValidCombo = true;
-        std::cout << "ConfirmProviders: using iqfeed and alpaca for data/execution" << std::endl;
-        static const std::string sNamePortfolio( "alpaca" );
+        std::cout << "ConfirmProviders: using iqfeed and ib for data/execution" << std::endl;
+        static const std::string sNamePortfolio( "ib" );
         LoadPortfolio( sNamePortfolio );
         for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
           Strategy& strategy( *vt.second );

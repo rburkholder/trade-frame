@@ -78,10 +78,6 @@ struct choices_t {
 
   size_t ib_client_id;
 
-  std::string m_sAlpacaKey;
-  std::string m_sAlpacaSecret;
-  std::string m_sAlpacaDomain; // paper-api.alpaca.markets or api.alpaca.markets
-
   size_t nTimeBins;
 
   std::string sTimeUpper; // string from file

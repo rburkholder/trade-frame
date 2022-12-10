@@ -11,6 +11,27 @@
   "configurations": [
 
     {
+      "name": "(gdb) rdaf/l2",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/rdaf/l2/rdaf_l2",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
+    {
       "name": "(gdb) Collector",
       "type": "cppdbg",
       "request": "launch",

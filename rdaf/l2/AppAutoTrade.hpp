@@ -35,10 +35,10 @@
 
 #include <TFTrading/DBWrapper.h>
 
-#include <TFAlpaca/Provider.hpp>
-
 #include <TFIQFeed/Provider.h>
 #include <TFIQFeed/Level2/Symbols.hpp>
+
+#include <TFInteractiveBrokers/IBTWS.h>
 
 #include <TFSimulation/SimulationProvider.h>
 
@@ -83,7 +83,7 @@ private:
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
 
   using pProviderSim_t = ou::tf::SimulationProvider::pProvider_t;
-  using pProviderAlpaca_t = ou::tf::alpaca::Provider::pProvider_t;
+  using pProviderIB_t = ou::tf::ib::TWS::pProvider_t;
   using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
 
   using fInstrumentConstructed_t = std::function<void(const std::string&)>;
@@ -103,8 +103,8 @@ private:
 
   wxTimer m_timerOneSecond;
 
-  pProviderSim_t m_sim;  // simulation
-  pProviderAlpaca_t m_alpaca; // live - execution
+  pProviderSim_t    m_sim;    // simulation
+  pProviderIB_t     m_ib;     // live - execution
   pProviderIQFeed_t m_iqfeed; // live - data
 
   bool m_bL2Connected;
