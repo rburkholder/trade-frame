@@ -74,7 +74,7 @@ struct choices_t {
   bool bStartSimulator;
   std::string sGroupDirectory;
 
-  size_t nThreads;
+  size_t nThreads; // used for iqfeed and sim, depending upon which is active
 
   size_t ib_client_id;
 

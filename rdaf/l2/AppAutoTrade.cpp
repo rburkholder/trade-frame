@@ -110,10 +110,9 @@ bool AppAutoTrade::OnInit() {
   }
 
   m_iqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
-  m_tws = ou::tf::ib::TWS::Factory();
-
   m_iqfeed->SetThreadCount( m_choices.nThreads );
 
+  m_tws = ou::tf::ib::TWS::Factory();
   m_tws->SetClientId( m_choices.ib_client_id );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
@@ -134,51 +133,19 @@ bool AppAutoTrade::OnInit() {
   sizerUpper = new wxBoxSizer(wxHORIZONTAL);
   sizerFrame->Add( sizerUpper, 0, wxEXPAND, 2);
 
-  // TODO: make the panel conditional on simulation flag
-  m_pPanelProviderControl = new ou::tf::v2::PanelProviderControl( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-  m_pPanelProviderControl->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-  m_pPanelProviderControl->Show();
-
-  sizerUpper->Add( m_pPanelProviderControl, 0, wxALIGN_LEFT, 2);
-
-  m_pPanelProviderControl->Add(
-    m_iqfeed,
-    true, false, false, false,
-    [](){}, // fConnecting
-    [this](){ // fConnected
-      if (m_pL2Symbols ) {
-        m_pL2Symbols->Connect();
-      }
-      ConfirmProviders();
-    },
-    [](){}, // fDisconnecting
-    [this](){ // fDisconnected
-      if ( m_pL2Symbols ) {
-        m_pL2Symbols->Disconnect();
-      }
-    }
-  );
-
-  m_pPanelProviderControl->Add(
-    m_tws,
-    false, true, true, false,
-    [](){}, // fConnecting
-    [this](){ // fConnected
-      ConfirmProviders();
-    },
-    [](){}, // fDisconnecting
-    [](){}  // fDisconnected
-  );
-
   // will need to change the date selection in the file, maybe use date from upperTime
   // will be removing hdf5 save/load - but need to clarify if simulation engine will continue to be used
   //   as it requires hdf5 formed timeseries, otherwise they need to be rebuilt from rdaf timeseries
   auto dt = ou::TimeSource::GlobalInstance().External();
   boost::gregorian::date dateSim( dt.date() ); // dateSim used later in a loop
+
   if ( m_choices.bStartSimulator ) {
+
     // m_sim does not need to be in PanelProviderControl
+
     m_sim = ou::tf::SimulationProvider::Factory();
     m_sim->SetThreadCount( m_choices.nThreads );
+
     if ( 0 < m_choices.sGroupDirectory.size() ) {
       m_sim->SetGroupDirectory( m_choices.sGroupDirectory );
     }
@@ -194,8 +161,45 @@ bool AppAutoTrade::OnInit() {
     // need to turn off m_pL2Symbols when running a simulation
     // need to feed the algo, not from m_pL2Symbols
     // use ou::tf::iqfeed::l2::MarketMaker directly, per symbol
+
   }
   else {
+
+    m_pPanelProviderControl = new ou::tf::v2::PanelProviderControl( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    m_pPanelProviderControl->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+    m_pPanelProviderControl->Show();
+
+    sizerUpper->Add( m_pPanelProviderControl, 0, wxALIGN_LEFT, 2);
+
+    m_pPanelProviderControl->Add(
+      m_iqfeed,
+      true, false, false, false,
+      [](){}, // fConnecting
+      [this](){ // fConnected
+        if (m_pL2Symbols ) {
+          m_pL2Symbols->Connect();
+        }
+        ConfirmProviders();
+      },
+      [](){}, // fDisconnecting
+      [this](){ // fDisconnected
+        if ( m_pL2Symbols ) {
+          m_pL2Symbols->Disconnect();
+        }
+      }
+    );
+
+    m_pPanelProviderControl->Add(
+      m_tws,
+      false, true, true, false,
+      [](){}, // fConnecting
+      [this](){ // fConnected
+        ConfirmProviders();
+      },
+      [](){}, // fDisconnecting
+      [](){}  // fDisconnected
+    );
+
     m_timerOneSecond.SetOwner( this );
     Bind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
     m_timerOneSecond.Start( 500 );
@@ -207,6 +211,24 @@ bool AppAutoTrade::OnInit() {
         ConfirmProviders();
       } );
     //m_pL2Symbols->Connect();
+
+    FrameMain::vpItems_t vItems;
+    using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+
+    vItems.clear();
+    vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppAutoTrade::HandleMenuActionCloseAndDone ) ) );
+    if ( !m_choices.bStartSimulator ) {
+      vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSaveValues ) ) );
+    }
+    m_pFrameMain->AddDynamicMenu( "Actions", vItems );
+
+    vItems.clear();
+    vItems.push_back( new mi( "Flush", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityFlush ) ) );
+    vItems.push_back( new mi( "Save", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilitySave ) ) );
+    //vItems.push_back( new mi( "Clear", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityClear ) ) );
+    vItems.push_back( new mi( "Flush", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityClear ) ) );
+    m_pFrameMain->AddDynamicMenu( "Utility File", vItems );
+
   }
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
@@ -228,14 +250,14 @@ bool AppAutoTrade::OnInit() {
   sizerLower->Add(m_splitterData, 1, wxGROW, 2);
 
   //if ( m_options.bSimStart ) {
-    // just always delete it
+    // just always delete it, keep it fresh for each run
     if ( boost::filesystem::exists( sDbName ) ) {
     boost::filesystem::remove( sDbName );
     }
   //}
 
   // this needs to be placed after the providers are registered
-  m_pdb = std::make_unique<ou::tf::db>( sDbName );
+  m_pdb = std::make_unique<ou::tf::db>( sDbName ); // construct database
 
   m_ceUnRealized.SetName( "unrealized" );
   m_ceRealized.SetName( "realized" );
@@ -276,7 +298,7 @@ bool AppAutoTrade::OnInit() {
 
     auto& [sSymbol, choices] = vt;
 
-    //BOOST_LOG_TRIVIAL(info) << "creating strategy for: " << sSymbol;
+    BOOST_LOG_TRIVIAL(info) << "creating strategy for: " << sSymbol;
 
     TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
       sSymbol,
@@ -327,25 +349,6 @@ bool AppAutoTrade::OnInit() {
   m_treeSymbols->ExpandAll();
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppAutoTrade::OnClose, this );  // start close of windows and controls
-
-  FrameMain::vpItems_t vItems;
-  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
-
-  vItems.clear(); // maybe wrap this whole menu in the sim conditional
-  vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppAutoTrade::HandleMenuActionCloseAndDone ) ) );
-  if ( !m_choices.bStartSimulator ) {
-    vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSaveValues ) ) );
-  }
-  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
-
-  vItems.clear(); // TODO: need to turn off the autosave as well
-  if ( !m_choices.bStartSimulator ) {
-    vItems.push_back( new mi( "Flush", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityFlush ) ) );
-    vItems.push_back( new mi( "Save", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilitySave ) ) );
-    //vItems.push_back( new mi( "Clear", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityClear ) ) );
-    vItems.push_back( new mi( "Flush", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityClear ) ) );
-    m_pFrameMain->AddDynamicMenu( "Utility File", vItems );
-  }
 
   //m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws ); // replaced with alpaca
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed );
