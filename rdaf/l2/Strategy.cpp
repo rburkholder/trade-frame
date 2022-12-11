@@ -166,6 +166,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
       );
       break;
     case ou::tf::config::symbol_t::EFeed::L2O:  // L2 via OrderBased (CME/ICE futures)
+
       pWatch->OnDepthByOrder.Add( MakeDelegate( this, &Strategy::HandleDepthByOrder ) );
 
       m_pOrderBased = ou::tf::iqfeed::l2::OrderBased::Factory();
@@ -292,9 +293,9 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   // position has the quotes via the embedded watch
   // indicators are also attached to the embedded watch
 
-  if ( !quote.IsValid() ) {
-    return;
-  }
+  //if ( !quote.IsValid() ) { // empty function
+  //  return;
+  //}
 
   ptime dt( quote.DateTime() );
 
@@ -408,7 +409,7 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 */
 
 void Strategy::EnterLong( const ou::tf::Bar& bar ) {
-  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
+  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   m_ceLongEntry.AddLabel( bar.DateTime(), bar.Close(), "Long Submit" );
@@ -418,7 +419,7 @@ void Strategy::EnterLong( const ou::tf::Bar& bar ) {
 }
 
 void Strategy::EnterShort( const ou::tf::Bar& bar ) {
-  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
+  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   m_ceShortEntry.AddLabel( bar.DateTime(), bar.Close(), "Short Submit" );
@@ -428,7 +429,7 @@ void Strategy::EnterShort( const ou::tf::Bar& bar ) {
 }
 
 void Strategy::ExitLong( const ou::tf::Bar& bar ) {
-  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 100 );
+  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "Long Exit Submit" );
@@ -438,7 +439,7 @@ void Strategy::ExitLong( const ou::tf::Bar& bar ) {
 }
 
 void Strategy::ExitShort( const ou::tf::Bar& bar ) {
-  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 100 );
+  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "Short Exit Submit" );
@@ -463,6 +464,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   bool bTriggerEntry( false );
   double skew( 0.0 );
+
+  //m_FeatureSet.FVS().
 
   if ( m_pHistVolume ) {
 
