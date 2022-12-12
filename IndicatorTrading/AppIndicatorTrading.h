@@ -22,6 +22,7 @@
 #pragma once
 
 #include <string>
+#include <thread>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -86,8 +87,10 @@ private:
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
+  std::thread m_threadPortAudioInit;
   std::unique_ptr<ou::PortAudio> m_pPortAudio;
   std::unique_ptr<ou::music::Chords> m_pChords;
+
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;

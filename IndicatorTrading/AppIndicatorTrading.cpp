@@ -79,7 +79,6 @@ bool AppIndicatorTrading::OnInit() {
 
   wxApp::OnInit();
 
-
   if ( Load( sConfigFilename, m_config ) ) {
   }
   else {
@@ -96,6 +95,21 @@ bool AppIndicatorTrading::OnInit() {
       ;
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
+
+  m_threadPortAudioInit = std::move( std::thread(
+    [this](){
+      if ( m_pPortAudio ) {}
+      else {
+        m_pPortAudio = std::make_unique<ou::PortAudio>();
+        m_pPortAudio->Enumerate();
+        if ( m_pChords ) {}
+        else {
+          m_pChords = std::make_unique<ou::music::Chords>( *m_pPortAudio );
+        }
+      }
+    } )
+  );
+  m_threadPortAudioInit.detach();
 
   m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
@@ -426,7 +440,7 @@ void AppIndicatorTrading::HandleMenuActionEmitChainsFull() {
 void AppIndicatorTrading::HandleMenuActionTestChordsUp() {
   CallAfter(
     [this](){
-       //m_pChords->Play( ou::music::Chords::EProgression::Up );
+       m_pChords->Play( ou::music::Chords::EProgression::Up );
     }
   );
 }
@@ -434,7 +448,7 @@ void AppIndicatorTrading::HandleMenuActionTestChordsUp() {
 void AppIndicatorTrading::HandleMenuActionTestChordsDn() {
   CallAfter(
     [this](){
-      //m_pChords->Play( ou::music::Chords::EProgression::Down );
+      m_pChords->Play( ou::music::Chords::EProgression::Down );
     }
   );
 }
@@ -535,6 +549,10 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
 
   //m_pFrameControls->Close();
 
+  if ( m_threadPortAudioInit.joinable() ) {
+    m_threadPortAudioInit.join();
+  }
+
   m_pPanelTrade->SetOnTimer( nullptr );
 
   m_pExecutionControl.reset();
@@ -594,22 +612,6 @@ void AppIndicatorTrading::OnExecDisconnected( int ) {
 void AppIndicatorTrading::OnConnected( int ) {
   if ( m_bData1Connected & m_bExecConnected ) {
     ConstructUnderlying();
-
-    CallAfter(
-      [this](){
-        // need to put his in background higher priority thread
-        //if ( m_pPortAudio ) {}
-        //else {
-          //m_pPortAudio = std::make_unique<ou::PortAudio>();
-          //m_pPortAudio->Enumerate();
-          //if ( m_pChords ) {}
-          //else {
-          //  m_pChords = std::make_unique<ou::music::Chords>( *m_pPortAudio );
-          //}
-        //}
-      }
-    );
-
   }
 }
 
