@@ -42,7 +42,7 @@ PortAudio::PortAudio()
   // http://files.portaudio.com/docs/v19-doxydocs/portaudio_8h.html#a443ad16338191af364e3be988014cbbe
 
   PaError pa_error;
-  //std::cout << "Pa_Initialize" << std::endl;
+  //std::cerr << "Pa_Initialize" << std::endl;
   // many device probing messages will occur at this point on the console
   pa_error = Pa_Initialize();
   if ( paNoError != pa_error ) {
@@ -61,7 +61,7 @@ PortAudio::PortAudio()
     //const PaDeviceInfo* pInfo = Pa_GetDeviceInfo( 14 ); // "pulse"
     m_dblSampleRate = pInfo->defaultSampleRate;
 
-    //std::cout
+    //std::cerr
     //  << "sound default device '" << pInfo->name
     //  << "' channels " << pInfo->maxOutputChannels
     //  << " sample rate " << defaultSampleRate
@@ -81,7 +81,8 @@ PortAudio::PortAudio()
       nullptr,          /* no input channels */
       &parameters,      /* output channel */
       m_dblSampleRate,
-      paFramesPerBufferUnspecified,
+      //paFramesPerBufferUnspecified, // frames per buffer
+      1024, // works better in contrained env (firefox was interfering when default of 0 used)
       paClipOff|paDitherOff, //paNoFlag,
       &CallBack_Lambda,
       this              // reference self in the callback
@@ -96,7 +97,7 @@ PortAudio::PortAudio()
 
   // http://portaudio.com/docs/v19-doxydocs/utility_functions.html
   //const PaStreamInfo* pInfo;
-  //std::cout << "Pa_GetStreamInfo" << std::endl;
+  //std::cerr << "Pa_GetStreamInfo" << std::endl;
   //pInfo = Pa_GetStreamInfo( m_pStream );
 
 }
@@ -160,7 +161,7 @@ int PortAudio::CallBack_Lambda(
   PortAudio* self = reinterpret_cast<PortAudio*>( userData );
   float* pOutput = reinterpret_cast<float*>( outputBuffer );
 
-  assert(self->m_fStream );
+  assert( self->m_fStream );
   bool bContinue = self->m_fStream( framesPerBuffer, pOutput );
   if ( bContinue ) {
     return  PaStreamCallbackResult::paContinue;
@@ -180,7 +181,7 @@ void PortAudio::Enumerate() {
     const PaDeviceInfo* pDeviceInfo;
     for ( int i = 0; i < numDevices; i++ ) {
       pDeviceInfo = Pa_GetDeviceInfo( i );
-      std::cout
+      std::cerr
         << "PortAudio device "
         << i
         << ": '" << pDeviceInfo->name
@@ -194,7 +195,7 @@ void PortAudio::Start() {
   PaError pa_error;
   // http://portaudio.com/docs/v19-doxydocs/start_stop_abort.html
   if ( m_pStream ) {
-    //std::cout << "Pa_StartStream" << std::endl;
+    //std::cerr << "Pa_StartStream" << std::endl;
     pa_error = Pa_StartStream( m_pStream );
     if ( paNoError != pa_error ) {
       std::cerr << "PortAudio start error: " << Pa_GetErrorText( pa_error ) << std::endl;
