@@ -222,12 +222,12 @@ bool AppAutoTrade::OnInit() {
     }
     m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
-    vItems.clear();
-    vItems.push_back( new mi( "Flush", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityFlush ) ) );
-    vItems.push_back( new mi( "Save", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilitySave ) ) );
+    //vItems.clear();
+    //vItems.push_back( new mi( "Flush", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityFlush ) ) );
+    //vItems.push_back( new mi( "Save", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilitySave ) ) );
     //vItems.push_back( new mi( "Clear", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityClear ) ) );
-    vItems.push_back( new mi( "Flush", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityClear ) ) );
-    m_pFrameMain->AddDynamicMenu( "Utility File", vItems );
+    //vItems.push_back( new mi( "Flush", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityClear ) ) );
+    //m_pFrameMain->AddDynamicMenu( "Utility File", vItems );
 
   }
 
@@ -309,7 +309,8 @@ bool AppAutoTrade::OnInit() {
       }
     );
 
-    pStrategy_t pStrategy = std::make_unique<Strategy>( choices, pTreeItem, m_pFile, m_pFileUtility );
+    //pStrategy_t pStrategy = std::make_unique<Strategy>( choices, pTreeItem, m_pFile, m_pFileUtility );
+    pStrategy_t pStrategy = std::make_unique<Strategy>( choices, pTreeItem );
 
     if ( m_choices.bStartSimulator ) {
       pStrategy->InitForUSEquityExchanges( dateSim );
@@ -323,6 +324,7 @@ bool AppAutoTrade::OnInit() {
 
   // load list of rdaf files for historical use
   // does the list need to be sorted?  can this be loaded in StartRdaf?
+  /*
   for ( const vRdafFiles_t::value_type& sPath: m_vRdafFiles ) {
     BOOST_LOG_TRIVIAL(info) << "loading rdaf history: " << sPath;
     TFile* pFile = new TFile( sPath.c_str(), "READ" );
@@ -345,7 +347,7 @@ bool AppAutoTrade::OnInit() {
     pFile->Close();
     delete pFile;
   }
-
+*/
   m_treeSymbols->ExpandAll();
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppAutoTrade::OnClose, this );  // start close of windows and controls
@@ -418,16 +420,16 @@ void AppAutoTrade::StartRdaf( const std::string& sFileName ) {
           ptime dt( boost::posix_time::from_iso_extended_string( datetime ) );
           if ( ( m_choices.dtLower <= dt ) && ( m_choices.dtUpper > dt ) ) {
             const std::string sFileName( sDirectory + '/' + datetime + ".root" );
-            TFile* pFile = new TFile( sFileName.c_str(), "READ" );
-            if ( nullptr != pFile ) {
+//            TFile* pFile = new TFile( sFileName.c_str(), "READ" );
+//            if ( nullptr != pFile ) {
               // run a preliminary test of the files
-              if ( pFile->IsOpen() ) {
+//              if ( pFile->IsOpen() ) {
                 //std::cout << "found " << sFileName << std::endl;
-                m_vRdafFiles.push_back( sFileName );
-                pFile->Close();
-              }
-              delete pFile;
-            }
+//                m_vRdafFiles.push_back( sFileName );
+//                pFile->Close();
+//              }
+//              delete pFile;
+//            }
           }
         }
       }
@@ -435,13 +437,13 @@ void AppAutoTrade::StartRdaf( const std::string& sFileName ) {
   }
 
   // open file after directory scan, so it is not included in the list
-  m_pFile = std::make_shared<TFile>(
-    ( sFileName + ".root" ).c_str(),
-    "RECREATE",
-    "tradeframe rdaf/at quotes, trades & histogram"
-  );
+//  m_pFile = std::make_shared<TFile>(
+//    ( sFileName + ".root" ).c_str(),
+//    "RECREATE",
+//    "tradeframe rdaf/at quotes, trades & histogram"
+//  );
 
-  UpdateUtilityFile();  // re-open what exists
+//  UpdateUtilityFile();  // re-open what exists
 
   //m_threadRdaf = std::move( std::thread( ThreadRdaf, this, sFileName ) );
 
@@ -569,37 +571,37 @@ void AppAutoTrade::HandleMenuActionSimStop() {
 }
 
 // don't use this, as the pointer changes, and needs to be redistributed into the objects
-void AppAutoTrade::RecreateUtilityFile() {
-  m_pFileUtility = std::make_shared<TFile>(
-    sFileNameUtility.c_str(),
-    "RECREATE",
-    "tradeframe rdaf/at utility"
-  );
-}
+//void AppAutoTrade::RecreateUtilityFile() {
+//  m_pFileUtility = std::make_shared<TFile>(
+//    sFileNameUtility.c_str(),
+//    "RECREATE",
+//    "tradeframe rdaf/at utility"
+//  );
+//}
 
-void AppAutoTrade::UpdateUtilityFile() {
-  m_pFileUtility = std::make_shared<TFile>(
-    sFileNameUtility.c_str(),
-    "UPDATE",
-    "tradeframe rdaf/at utility"
-  );
-}
+//void AppAutoTrade::UpdateUtilityFile() {
+//  m_pFileUtility = std::make_shared<TFile>(
+//    sFileNameUtility.c_str(),
+//    "UPDATE",
+//    "tradeframe rdaf/at utility"
+//  );
+//}
 
-void AppAutoTrade::HandleMenuActionUtilitySave() {
-  if ( m_pFileUtility ) {
-    m_pFileUtility->Write();
-  }
-}
+//void AppAutoTrade::HandleMenuActionUtilitySave() {
+//  if ( m_pFileUtility ) {
+//    m_pFileUtility->Write();
+//  }
+//}
 
-void AppAutoTrade::HandleMenuActionUtilityFlush() {
-  if ( m_pFileUtility ) {
-    m_pFileUtility->Flush();
-  }
-}
+//void AppAutoTrade::HandleMenuActionUtilityFlush() {
+//  if ( m_pFileUtility ) {
+//    m_pFileUtility->Flush();
+//  }
+//}
 
-void AppAutoTrade::HandleMenuActionUtilityClear() {
-  RecreateUtilityFile();
-}
+//void AppAutoTrade::HandleMenuActionUtilityClear() {
+//  RecreateUtilityFile();
+//}
 
 void AppAutoTrade::HandleMenuActionSimEmitStats() {
   std::stringstream ss;
@@ -749,16 +751,16 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
   // NOTE: when running the simuliation, perform a deletion instead
   //   use the boost file system utilities?
   //   or the object Delete() operator may work
-  if ( m_choices.bStartSimulator ) {
-    if ( m_pFile ) { // performed at exit to ensure no duplication in file
+//  if ( m_choices.bStartSimulator ) {
+//    if ( m_pFile ) { // performed at exit to ensure no duplication in file
       //m_pFile->Delete(); // double free or corruption here
-    }
-  }
-  else {
-    if ( m_pFile ) { // performed at exit to ensure no duplication in file
-      m_pFile->Write();
-    }
-  }
+//    }
+//  }
+//  else {
+//    if ( m_pFile ) { // performed at exit to ensure no duplication in file
+//      m_pFile->Write();
+//    }
+//  }
 
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed

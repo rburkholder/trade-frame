@@ -47,7 +47,7 @@
 #include "ConfigParser.hpp"
 
 class TRint;
-class TFile;
+//class TFile;
 
 class Strategy;
 class FrameMain;
@@ -128,11 +128,11 @@ private:
   mapStrategy_t m_mapStrategy;
 
   std::unique_ptr<TRint> m_prdafApp;
-  std::shared_ptr<TFile> m_pFile; // primary timeseries
-  std::shared_ptr<TFile> m_pFileUtility;  // scratch pad use
+  //std::shared_ptr<TFile> m_pFile; // primary timeseries
+  //std::shared_ptr<TFile> m_pFileUtility;  // scratch pad use
 
-  using vRdafFiles_t = std::vector<std::string>;
-  vRdafFiles_t m_vRdafFiles;
+  //using vRdafFiles_t = std::vector<std::string>;
+  //vRdafFiles_t m_vRdafFiles;
 
   void StartRdaf( const std::string& sFilePrefix );
 
@@ -145,11 +145,11 @@ private:
   void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();
 
-  void RecreateUtilityFile();
-  void UpdateUtilityFile();
-  void HandleMenuActionUtilityFlush();
-  void HandleMenuActionUtilitySave();
-  void HandleMenuActionUtilityClear();
+  //void RecreateUtilityFile();
+  //void UpdateUtilityFile();
+  //void HandleMenuActionUtilityFlush();
+  //void HandleMenuActionUtilitySave();
+  //void HandleMenuActionUtilityClear();
 
   void ConstructIBInstrument(
     const std::string& sNamePortfolio

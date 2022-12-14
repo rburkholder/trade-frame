@@ -66,13 +66,13 @@ public:
   using TreeItem = ou::tf::TreeItem;
   using pOrder_t = ou::tf::Order::pOrder_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
-  using pFile_t = std::shared_ptr<TFile>;
+  //using pFile_t = std::shared_ptr<TFile>;
 
   Strategy(
     const ou::tf::config::symbol_t&
   , TreeItem*
-  , pFile_t
-  , pFile_t
+//  , pFile_t
+//  , pFile_t
   );
   virtual ~Strategy();
 
@@ -121,8 +121,8 @@ private:
 
   const ou::tf::config::symbol_t& m_config;
 
-  pFile_t m_pFile;
-  pFile_t m_pFileUtility;
+  //pFile_t m_pFile;
+  //pFile_t m_pFileUtility;
 
   pOrder_t m_pOrder;
   pPosition_t m_pPosition;
@@ -175,13 +175,13 @@ private:
   } m_branchTrade;
 
   // https://root.cern/doc/master/classTTree.html
-  using pTTree_t = std::shared_ptr<TTree>;
-  pTTree_t m_pTreeQuote;
-  pTTree_t m_pTreeTrade;
+  //using pTTree_t = std::shared_ptr<TTree>;
+  //pTTree_t m_pTreeQuote;
+  //pTTree_t m_pTreeTrade;
 
-  using pTH2D_t = std::shared_ptr<TH2D>;
-  pTH2D_t m_pHistVolume;
-  pTH2D_t m_pHistVolumeDemo;
+  //using pTH2D_t = std::shared_ptr<TH2D>;
+  //pTH2D_t m_pHistVolume;
+  //pTH2D_t m_pHistVolumeDemo;
 
   ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
 

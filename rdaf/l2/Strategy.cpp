@@ -50,13 +50,13 @@ namespace {
 Strategy::Strategy(
   const ou::tf::config::symbol_t& config
 , TreeItem* pTreeItem
-, pFile_t pFile
-, pFile_t pFileUtility
+//, pFile_t pFile
+//, pFile_t pFileUtility
 )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
 , m_pTreeItemSymbol( pTreeItem )
-, m_pFile( pFile )
-, m_pFileUtility( pFileUtility )
+//, m_pFile( pFile )
+//, m_pFileUtility( pFileUtility )
 , m_bChangeConfigFileMessageLatch( false )
 , m_stateTrade( ETradeState::Init )
 , m_config( config )
@@ -68,8 +68,8 @@ Strategy::Strategy(
 , m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
 , m_bfQuotes01Sec( 1 )
 {
-  assert( m_pFile );
-  assert( m_pFileUtility );
+//  assert( m_pFile );
+//  assert( m_pFileUtility );
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
@@ -245,7 +245,7 @@ void Strategy::Clear() {
 }
 
 void Strategy::InitRdaf() {
-
+/*
   pWatch_t pWatch = m_pPosition->GetWatch();
   const std::string& sSymbol( pWatch->GetInstrumentName() );
 
@@ -286,7 +286,7 @@ void Strategy::InitRdaf() {
     BOOST_LOG_TRIVIAL(error) << "problems history";
   }
   m_pHistVolumeDemo->SetDirectory( m_pFileUtility.get() );
-
+*/
 }
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
@@ -304,17 +304,17 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
   m_quote = quote;
 
-  if ( m_pTreeQuote ) { // wait for initialization in thread to start
-    std::time_t nTime = boost::posix_time::to_time_t( quote.DateTime() );
+//  if ( m_pTreeQuote ) { // wait for initialization in thread to start
+//    std::time_t nTime = boost::posix_time::to_time_t( quote.DateTime() );
 
-    m_branchQuote.time = (double)nTime / 1000.0;
-    m_branchQuote.ask = quote.Ask();
-    m_branchQuote.askvol = quote.AskSize();
-    m_branchQuote.bid = quote.Bid();
-    m_branchQuote.bidvol = quote.BidSize();
+//    m_branchQuote.time = (double)nTime / 1000.0;
+//    m_branchQuote.ask = quote.Ask();
+//    m_branchQuote.askvol = quote.AskSize();
+//    m_branchQuote.bid = quote.Bid();
+//    m_branchQuote.bidvol = quote.BidSize();
 
-    m_pTreeQuote->Fill();
-  }
+//    m_pTreeQuote->Fill();
+//  }
 
   m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
 
@@ -330,7 +330,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   const double mid = m_quote.Midpoint();
   const double price = trade.Price();
   const uint64_t volume = trade.Volume();
-
+/*
   if ( m_pTreeTrade ) { // wait for initialization in thread to start
     std::time_t nTime = boost::posix_time::to_time_t( trade.DateTime() );
     m_branchTrade.time = (double)nTime / 1000.0;
@@ -353,7 +353,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   if ( m_pHistVolumeDemo ) {
     m_pHistVolumeDemo->Fill( trade.Price(), m_branchTrade.time,  trade.Volume() );
   }
-
+*/
 }
 
 void Strategy::HandleDepthByMM( const ou::tf::DepthByMM& depth ) {
@@ -466,7 +466,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   double skew( 0.0 );
 
   //m_FeatureSet.FVS().
-
+/*
   if ( m_pHistVolume ) {
 
     auto n = m_pHistVolume->GetEntries();
@@ -517,7 +517,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     }
     m_ceSkewness.Append( bar.DateTime(), skew );
   }
-
+*/
   switch ( m_stateTrade ) {
     case ETradeState::Search:
 
