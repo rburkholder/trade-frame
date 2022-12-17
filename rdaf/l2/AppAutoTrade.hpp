@@ -161,6 +161,8 @@ private:
   void LoadPortfolio( const std::string& sName );
   void ConfirmProviders();
 
+  void HandleSimConnected( int );
+
   void HandleMenuActionSimStart();
   void HandleMenuActionSimStop();
   void HandleMenuActionSimEmitStats();

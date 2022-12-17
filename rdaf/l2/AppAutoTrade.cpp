@@ -151,12 +151,15 @@ bool AppAutoTrade::OnInit() {
 
     // m_sim does not need to be in PanelProviderControl
 
+    if ( 0 == m_choices.sGroupDirectory.size() ) {
+      std::cout << "simulation requires a group directory" << std::endl;
+      return 0;
+    }
+
     m_sim = ou::tf::SimulationProvider::Factory();
     m_sim->SetThreadCount( m_choices.nThreads );
 
-    if ( 0 < m_choices.sGroupDirectory.size() ) {
-      m_sim->SetGroupDirectory( m_choices.sGroupDirectory );
-    }
+    m_sim->SetGroupDirectory( m_choices.sGroupDirectory );
 
     boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
     boost::smatch what;
@@ -168,7 +171,6 @@ bool AppAutoTrade::OnInit() {
     // does the symbol pump the depth through the same fibre/thread?
     // need to turn off m_pL2Symbols when running a simulation
     // need to feed the algo, not from m_pL2Symbols
-    // use ou::tf::iqfeed::l2::MarketMaker directly, per symbol
 
   }
   else {
@@ -323,7 +325,9 @@ bool AppAutoTrade::OnInit() {
     pStrategy_t pStrategy = std::make_unique<Strategy>( choices, pTreeItem );
 
     if ( m_choices.bStartSimulator ) {
-      pStrategy->InitForUSEquityExchanges( dateSim );
+      //pStrategy->InitForUSEquityExchanges( dateSim );
+      // need to vefify proper period when collector starts at 5:30est
+      pStrategy->InitForUS24HourFutures( dateSim );
     }
 
     m_mapStrategy.emplace( sSymbol, std::move( pStrategy ) );
@@ -374,6 +378,7 @@ bool AppAutoTrade::OnInit() {
   if ( m_choices.bStartSimulator ) {
     CallAfter(
       [this](){
+        m_sim->OnConnected.Add( MakeDelegate( this, &AppAutoTrade::HandleSimConnected ) );
         m_sim->Connect();
       }
     );
@@ -382,6 +387,10 @@ bool AppAutoTrade::OnInit() {
   m_pFrameMain->Show( true );
 
   return 1;
+}
+
+void AppAutoTrade::HandleSimConnected( int ) {
+  ConfirmProviders();
 }
 
 void AppAutoTrade::HandleOneSecondTimer( wxTimerEvent& event ) {
