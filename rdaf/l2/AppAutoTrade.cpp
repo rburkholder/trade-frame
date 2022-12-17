@@ -78,27 +78,28 @@ namespace {
   static const std::string c_sPortfolioName( "l2" );
 }
 
-namespace {
+// =============
 
-  class CustomItemData: public wxTreeItemData {
-  public:
-    std::string sSymbol;
-    wxMenu* pMenuPopup;
-    CustomItemData( wxMenu* pMenuPopup_ )
-    : pMenuPopup( pMenuPopup_ )
-    {}
-    CustomItemData( const std::string& sSymbol_ )
-    : sSymbol( sSymbol_ ), pMenuPopup( nullptr )
-    {}
-    virtual ~CustomItemData() {
-      if ( nullptr != pMenuPopup ) {
-        // assumes binds are cleared as well
-        delete pMenuPopup;
-        pMenuPopup = nullptr;
-      }
+class CustomItemData: public wxTreeItemData {
+public:
+  std::string sSymbol;
+  wxMenu* pMenuPopup;
+  CustomItemData( wxMenu* pMenuPopup_ )
+  : pMenuPopup( pMenuPopup_ )
+  {}
+  CustomItemData( const std::string& sSymbol_ )
+  : sSymbol( sSymbol_ ), pMenuPopup( nullptr )
+  {}
+  virtual ~CustomItemData() {
+    if ( nullptr != pMenuPopup ) {
+      // assumes binds are cleared as well
+      delete pMenuPopup;
+      pMenuPopup = nullptr;
     }
-  };
-}
+  }
+};
+
+// =============
 
 IMPLEMENT_APP(AppAutoTrade)
 
