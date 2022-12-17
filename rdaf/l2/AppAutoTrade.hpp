@@ -151,12 +151,12 @@ private:
   //void HandleMenuActionUtilitySave();
   //void HandleMenuActionUtilityClear();
 
-  void ConstructIBInstrument(
+  void ConstructInstrument_IB(
     const std::string& sNamePortfolio
   , const std::string& sSymbol
   , fInstrumentConstructed_t&&
     );
-  void ConstructSimInstrument( const std::string& sNamePortfolio, const std::string& sSymbol );
+  void ConstructInstrument_Sim( const std::string& sNamePortfolio, const std::string& sSymbol );
 
   void LoadPortfolio( const std::string& sName );
   void ConfirmProviders();

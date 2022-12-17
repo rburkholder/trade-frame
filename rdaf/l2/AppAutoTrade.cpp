@@ -21,6 +21,8 @@
 
 #define BOOST_FILESYSTEM_NO_DEPRECATED
 
+#define RDAF false
+
 #include <sstream>
 
 #include <boost/log/trivial.hpp>
@@ -69,6 +71,11 @@ namespace {
   static const std::string sFileNameUtility( sDirectory + "/utility.root" );
 
   static const std::string sMenuItemPortfolio( "_USD" );
+
+  static const std::string c_sPortfolioCurrencyName( "usd" );
+  static const std::string c_sPortfolioSimulationName( "sim" );
+  static const std::string c_sPortfolioRealTimeName( "ib" );
+  static const std::string c_sPortfolioName( "l2" );
 }
 
 namespace {
@@ -291,7 +298,9 @@ bool AppAutoTrade::OnInit() {
 
   // NOTE: during simulation, this subsystem is going to have to be temporary
   //   otherwise, the same data is read in multiple times when the simulation is run multiple times
-  StartRdaf( sDirectory + m_sTSDataStreamStarted );
+  if ( RDAF ) {
+    StartRdaf( sDirectory + m_sTSDataStreamStarted );
+  }
 
   // construct strategy for each symbol name in the configuration file
   for ( ou::tf::config::choices_t::mapInstance_t::value_type& vt: m_choices.mapInstance ) {
@@ -484,8 +493,8 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
   );
 }
 
-void AppAutoTrade::ConstructIBInstrument(
-  const std::string& sNamePortfolio
+void AppAutoTrade::ConstructInstrument_IB(
+  const std::string& sRunPortfolioName
 , const std::string& sSymbol
 , fInstrumentConstructed_t&& fConstructed
 ) {
@@ -496,23 +505,24 @@ void AppAutoTrade::ConstructIBInstrument(
 
   m_pBuildInstrument->Queue(
     sSymbol,
-    [this,&sNamePortfolio, &sSymbol, fConstructed_=std::move( fConstructed )]( pInstrument_t pInstrument ){
+    [this,&sRunPortfolioName, &sSymbol, fConstructed_=std::move( fConstructed )]( pInstrument_t pInstrument ){
       const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
       ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
       pPosition_t pPosition;
-      if ( pm.PositionExists( sNamePortfolio, idInstrument ) ) {
-        pPosition = pm.GetPosition( sNamePortfolio, idInstrument );
+      if ( pm.PositionExists( sRunPortfolioName, idInstrument ) ) {
+        pPosition = pm.GetPosition( sRunPortfolioName, idInstrument );
         BOOST_LOG_TRIVIAL(info) << "position loaded " << pPosition->GetInstrument()->GetInstrumentName();
       }
       else {
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
         pPosition = pm.ConstructPosition(
-          sNamePortfolio, idInstrument, "rdaf",
+          sRunPortfolioName, idInstrument, c_sPortfolioName,
           "ib01", "iq01", m_tws,
           pWatch
         );
-        BOOST_LOG_TRIVIAL(info) << "position constructed " << pPosition->GetInstrument()->GetInstrumentName();
+        BOOST_LOG_TRIVIAL(info) << "real time position constructed: " << pPosition->GetInstrument()->GetInstrumentName();
       }
+
       mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( sSymbol );
       assert( m_mapStrategy.end() != iterStrategy );
       iterStrategy->second->SetPosition( pPosition );
@@ -521,7 +531,7 @@ void AppAutoTrade::ConstructIBInstrument(
 
 }
 
-void AppAutoTrade::ConstructSimInstrument( const std::string& sNamePortfolio, const std::string& sSymbol ) {
+void AppAutoTrade::ConstructInstrument_Sim( const std::string& sRunPortfolioName, const std::string& sSymbol ) {
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -534,20 +544,21 @@ void AppAutoTrade::ConstructSimInstrument( const std::string& sNamePortfolio, co
   pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_sim );
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   pPosition_t pPosition;
-  if ( pm.PositionExists( sNamePortfolio, idInstrument ) ) {
-    pPosition = pm.GetPosition( sNamePortfolio, idInstrument );
-    std::cout << "sim: probably should delete database first" << std::endl;
-    std::cout << "sim: position loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+  if ( pm.PositionExists( sRunPortfolioName, idInstrument ) ) {
+    pPosition = pm.GetPosition( sRunPortfolioName, idInstrument );
+    BOOST_LOG_TRIVIAL(info) << "sim: probably should delete database first" << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "sim: position loaded " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   }
   else {
     pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_sim );
     pPosition = pm.ConstructPosition(
-      sNamePortfolio, idInstrument, "rdaf",
+      sRunPortfolioName, idInstrument, c_sPortfolioName,
       "sim01", "sim01", m_sim,
       pWatch
     );
-    std::cout << "Constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "simulation position constructed: " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   }
+
   mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( sSymbol );
   assert( m_mapStrategy.end() != iterStrategy );
   iterStrategy->second->SetPosition( pPosition );
@@ -619,7 +630,7 @@ void AppAutoTrade::LoadPortfolio( const std::string& sName ) {
   else {
     m_pPortfolioUSD
       = pm.ConstructPortfolio(
-          sName, "tf01", "USD",
+          sName, "tf01", c_sPortfolioCurrencyName,
           ou::tf::Portfolio::EPortfolioType::Standard,
           ou::tf::Currency::Name[ ou::tf::Currency::USD ] );
   }
@@ -631,10 +642,10 @@ void AppAutoTrade::ConfirmProviders() {
 
   if ( m_choices.bStartSimulator ) {
     bValidCombo = true;
-    static const std::string sNamePortfolio( "SIM" );
-    LoadPortfolio( sNamePortfolio );
+
+    LoadPortfolio( c_sPortfolioSimulationName );
     for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-      ConstructSimInstrument( sNamePortfolio, vt.first );
+      ConstructInstrument_Sim( c_sPortfolioSimulationName, vt.first );
     }
 
     FrameMain::vpItems_t vItems;
@@ -651,12 +662,12 @@ void AppAutoTrade::ConfirmProviders() {
       if ( m_bL2Connected ) {
         bValidCombo = true;
         std::cout << "ConfirmProviders: using iqfeed and ib for data/execution" << std::endl;
-        static const std::string sNamePortfolio( "ib" );
-        LoadPortfolio( sNamePortfolio );
+
+        LoadPortfolio( c_sPortfolioRealTimeName );
         for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
           Strategy& strategy( *vt.second );
-          ConstructIBInstrument(
-            sNamePortfolio, vt.first,
+          ConstructInstrument_IB(
+            c_sPortfolioRealTimeName, vt.first,
             [this,&strategy]( const std::string& sSymbol ){
               //mapStrategy_t::iterator iter = m_mapStrategy.find( sSymbol );
               //Strategy& strategy( *iter->second );
