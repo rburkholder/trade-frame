@@ -272,6 +272,7 @@ void AppIndicatorTrading::ConstructUnderlying() {
       m_pComposeInstrument->Compose(
         m_config.sSymbol,
         [this]( pInstrument_t pInstrument ){
+          assert( pInstrument );
           InitializeUnderlying( pInstrument );
         }
       );
