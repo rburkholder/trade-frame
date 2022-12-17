@@ -81,8 +81,8 @@ PortAudio::PortAudio()
       nullptr,          /* no input channels */
       &parameters,      /* output channel */
       m_dblSampleRate,
-      //paFramesPerBufferUnspecified, // frames per buffer
-      1024, // works better in contrained env (firefox was interfering when default of 0 used)
+      paFramesPerBufferUnspecified, // frames per buffer
+      //1024, // works better in contrained env (firefox was interfering when default of 0 used) - nah, didn't help
       paClipOff|paDitherOff, //paNoFlag,
       &CallBack_Lambda,
       this              // reference self in the callback
