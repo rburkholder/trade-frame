@@ -158,7 +158,6 @@ bool AppAutoTrade::OnInit() {
 
     m_sim = ou::tf::SimulationProvider::Factory();
     m_sim->SetThreadCount( m_choices.nThreads );
-
     m_sim->SetGroupDirectory( m_choices.sGroupDirectory );
 
     boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
@@ -308,9 +307,18 @@ bool AppAutoTrade::OnInit() {
   // construct strategy for each symbol name in the configuration file
   for ( ou::tf::config::choices_t::mapInstance_t::value_type& vt: m_choices.mapInstance ) {
 
-    auto& [sSymbol, choices] = vt;
+    auto& [sSymbol_IQFeed, choices] = vt;
+    BOOST_LOG_TRIVIAL(info) << "creating strategy for: " << sSymbol_IQFeed;
 
-    BOOST_LOG_TRIVIAL(info) << "creating strategy for: " << sSymbol;
+    std::string sSymbol;
+
+    if ( choices.sSymbol_Generic.empty() ) {
+      sSymbol = sSymbol_IQFeed;
+    }
+    else {
+      sSymbol = choices.sSymbol_Generic;
+      BOOST_LOG_TRIVIAL(info) << "  using generic symbol: " << sSymbol;
+    }
 
     TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
       sSymbol,
@@ -547,12 +555,19 @@ void AppAutoTrade::ConstructInstrument_Sim( const std::string& sRunPortfolioName
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+
+  // only works with existing instrument
+  //  ou::tf::Instrument::pInstrument_t pInstrument = im.LoadInstrument( ou::tf::keytypes::eidProvider_t::EProviderIQF, sSymbol );
+  //  const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+  //  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_sim );
+
   ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( sSymbol );
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
-  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
   im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
   pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_sim );
-  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+
   pPosition_t pPosition;
   if ( pm.PositionExists( sRunPortfolioName, idInstrument ) ) {
     pPosition = pm.GetPosition( sRunPortfolioName, idInstrument );
