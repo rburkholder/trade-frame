@@ -58,7 +58,7 @@ protected:
 private:
 
   const std::string m_sPathName;
-  std::string m_sIQFeedSymbolName;
+  //std::string m_sIQFeedSymbolName;
   std::string m_sPathName_Depth;
 
   const config::Choices& m_choices;

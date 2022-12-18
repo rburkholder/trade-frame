@@ -107,11 +107,12 @@ void Process::StartWatch() {
 
   assert( m_pInstrument );
 
-  m_sIQFeedSymbolName = m_pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF );
+  const std::string& sSymbolName( m_pInstrument->GetInstrumentName() );
+  const std::string& sIQFeedSymbolName( m_pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
 
   std::cout << "future: "
-    << m_pInstrument->GetInstrumentName()
-    << ", " << m_sIQFeedSymbolName
+    << sSymbolName
+    << ", " << sIQFeedSymbolName
     << std::endl;
 
   m_pWatch = std::make_shared<ou::tf::Watch>( m_pInstrument, m_piqfeed );
@@ -122,10 +123,10 @@ void Process::StartWatch() {
 
   assert( !m_pDispatch );  // trigger on re-entry, need to fix
   m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
-    [ this ](){
+    [ this, &sSymbolName ](){
       m_pDispatch->Single( true );
       m_pDispatch->WatchAdd(
-        m_sIQFeedSymbolName,
+        sSymbolName,
         [this]( const ou::tf::DepthByOrder& depth ){
           m_cntDepthsByOrder++;
           m_rDepthsByOrder[m_ixDepthsByOrder_Filling].Append( depth );
@@ -183,7 +184,7 @@ void Process::Write() {
 void Process::Finish() {
 
   if ( m_pDispatch ) {
-    m_pDispatch->WatchDel( m_sIQFeedSymbolName );
+    m_pDispatch->WatchDel( m_pInstrument->GetInstrumentName() );
     Write();
   }
 
