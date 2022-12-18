@@ -72,7 +72,7 @@ namespace {
 
   static const std::string sMenuItemPortfolio( "_USD" );
 
-  static const std::string c_sPortfolioCurrencyName( "usd" );
+  static const std::string c_sPortfolioCurrencyName( "USD" ); // pre-created, needs to be uppercase
   static const std::string c_sPortfolioSimulationName( "sim" );
   static const std::string c_sPortfolioRealTimeName( "ib" );
   static const std::string c_sPortfolioName( "l2" );
@@ -651,6 +651,7 @@ void AppAutoTrade::ConfirmProviders() {
   bool bValidCombo( false );
 
   if ( m_choices.bStartSimulator ) {
+
     bValidCombo = true;
 
     LoadPortfolio( c_sPortfolioSimulationName );
