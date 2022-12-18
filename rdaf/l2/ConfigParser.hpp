@@ -56,7 +56,8 @@ struct symbol_t {
 
   // supplied after parsing
 
-  std::string sSymbol;
+  std::string sSymbol_IQFeed;
+  std::string sSymbol_Generic;
 
   size_t nTimeBins;
   double dblTimeUpper;
@@ -106,7 +107,7 @@ struct choices_t {
     for ( mapInstance_t::value_type& vt: mapInstance ) {
 
       symbol_t& def( vt.second );
-      def.sSymbol = vt.first;
+      def.sSymbol_IQFeed = vt.first;
       def.nTimeBins = nTimeBins;
       def.dblTimeUpper = dblTimeUpper;
       def.dblTimeLower = dblTimeLower;

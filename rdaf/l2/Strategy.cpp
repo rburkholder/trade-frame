@@ -190,12 +190,12 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   if ( m_config.bTradable ) {}
   else {
-    BOOST_LOG_TRIVIAL(info) << "Strategy::SetPosition " << m_config.sSymbol << ": no trading";
+    BOOST_LOG_TRIVIAL(info) << "Strategy::SetPosition " << m_config.sSymbol_IQFeed << ": no trading";
     m_stateTrade = ETradeState::NoTrade;
   }
 
   BOOST_LOG_TRIVIAL(info)
-    << "Strategy::SetPosition " << m_config.sSymbol
+    << "Strategy::SetPosition " << m_config.sSymbol_IQFeed
     << ": algorithm='" << m_config.sAlgorithm
     << "' signal_from='" <<m_config.sSignalFrom
     << "'"
@@ -207,15 +207,15 @@ void Strategy::LoadHistory( TClass* tc ) {
 
   BOOST_LOG_TRIVIAL(info) << "  load: " << tc->GetName();
 
-  if ( 0 == strcmp( ( m_config.sSymbol + "_quotes" ).c_str(), tc->GetName() ) ) {
+  if ( 0 == strcmp( ( m_config.sSymbol_IQFeed + "_quotes" ).c_str(), tc->GetName() ) ) {
     TTree* pQuotes = dynamic_cast<TTree*>( tc );
   }
 
-  if ( 0 == strcmp( ( m_config.sSymbol + "_trades" ).c_str(), tc->GetName() ) ) {
+  if ( 0 == strcmp( ( m_config.sSymbol_IQFeed + "_trades" ).c_str(), tc->GetName() ) ) {
     TTree* pTrades = dynamic_cast<TTree*>( tc );
   }
 
-  if ( 0 == strcmp( ( m_config.sSymbol + "_h1" ).c_str(), tc->GetName() ) ) {
+  if ( 0 == strcmp( ( m_config.sSymbol_IQFeed + "_h1" ).c_str(), tc->GetName() ) ) {
     TH2D* pH1 = dynamic_cast<TH2D*>( tc );
   }
 }

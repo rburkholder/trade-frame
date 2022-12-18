@@ -42,6 +42,7 @@
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::config::symbol_t,
   (ou::tf::config::symbol_t::EFeed, eFeed)
+  (std::string, sSymbol_Generic)
   (bool, bTradable)
   (std::string, sAlgorithm)
   (std::string, sSignalFrom)
@@ -143,7 +144,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> ruleDateTime
       >> *qi::lit(' ') >> qi::eol;
 
-    ruleSymbol
+    ruleSymbolIQFeed
       %= qi::lit('[')
       >> -qi::char_('@') >> qi::char_("A-Z") >> *( qi::char_("A-Z0-9" ) )// >> *qi::char_('#')
       >> qi::lit(']')
@@ -153,6 +154,12 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       %= qi::lit( "feed" )
       >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
       >> luFeed
+      >> *qi::lit(' ') >> qi::eol;
+
+    ruleSymbolGeneric
+      %= qi::lit( "sym_symbol" )
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> +qi::char_("A-Za-z0-9-")
       >> *qi::lit(' ') >> qi::eol;
 
     ruleTradable
@@ -207,6 +214,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
 
     ruleSymbolChoices
       %= -ruleFeed
+      >> -ruleSymbolGeneric
       >> -ruleTradable
       >> -ruleAlgorithm
       >> -ruleSignalFrom
@@ -219,7 +227,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       ;
 
     ruleMapEntry
-      %= ruleSymbol >> ruleSymbolChoices
+      %= ruleSymbolIQFeed >> ruleSymbolChoices
       ;
 
     ruleMap %= +ruleMapEntry;
@@ -263,7 +271,8 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   qi::rule<Iterator, std::string()> ruleDateTime;
   qi::rule<Iterator, std::string()> ruleTimeUpper;
   qi::rule<Iterator, std::string()> ruleTimeLower;
-  qi::rule<Iterator, std::string()> ruleSymbol;
+  qi::rule<Iterator, std::string()> ruleSymbolIQFeed;
+  qi::rule<Iterator, std::string()> ruleSymbolGeneric;
   qi::rule<Iterator, ou::tf::config::symbol_t::EFeed()> ruleFeed;
   qi::rule<Iterator, bool()> ruleTradable;
   qi::rule<Iterator, size_t()> rulePriceBins;
