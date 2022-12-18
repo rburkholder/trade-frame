@@ -40,7 +40,6 @@
 
 #include <wx/menu.h>
 #include <wx/sizer.h>
-#include <wx/splitter.h>
 #include <wx/treectrl.h>
 
 #include <rdaf/TRint.h>
