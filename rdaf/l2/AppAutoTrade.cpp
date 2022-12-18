@@ -322,7 +322,7 @@ bool AppAutoTrade::OnInit() {
 
     TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
       sSymbol,
-      [this,sSymbol=vt.first]( TreeItem* pTreeItem ){
+      [this,sSymbol]( TreeItem* pTreeItem ){
         mapStrategy_t::iterator iter = m_mapStrategy.find( sSymbol );
         assert( m_mapStrategy.end() != iter );
         m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
@@ -556,7 +556,7 @@ void AppAutoTrade::ConstructInstrument_Sim( const std::string& sRunPortfolioName
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
-  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+  ou::tf::PortfolioManager&  pm( ou::tf::PortfolioManager::GlobalInstance() );
 
   // only works with existing instrument
   //  ou::tf::Instrument::pInstrument_t pInstrument = im.LoadInstrument( ou::tf::keytypes::eidProvider_t::EProviderIQF, sSymbol );
