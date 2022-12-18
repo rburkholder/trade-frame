@@ -326,6 +326,8 @@ void TWS::RequestContractDetails(
     if ( "COMEX_GBX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC, IQFeed supplied
     //if ( "CME" == pInstrument->GetExchangeName() ) contract.exchange = "GLOBEX";   // ES?, IQFeed supplied
     break;
+  default:
+    assert( false );
   }
   RequestContractDetails( contract, std::move( fProcess ), std::move( fDone ), pInstrument );
 }
