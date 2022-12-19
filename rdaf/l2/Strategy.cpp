@@ -81,11 +81,11 @@ Strategy::Strategy(
 
   m_ceVolume.SetName( "Volume" );
 
-  m_ceSkewness.SetName( "Skew" );
+  //m_ceSkewness.SetName( "Skew" );
 
   m_ceProfitLoss.SetName( "P/L" );
 
-  m_ceExecutionTime.SetName( "Execution Time" );
+  //m_ceExecutionTime.SetName( "Execution Time" );
 
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
 
@@ -116,11 +116,15 @@ void Strategy::SetupChart() {
 
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
-  m_cdv.Add( EChartSlot::Skew, &m_ceSkewness );
+  for ( vStochastic_t::value_type& vt: m_vStochastic ) {
+    vt->AddToView( m_cdv, EChartSlot::Price, EChartSlot::Stoch );
+  }
+
+  //m_cdv.Add( EChartSlot::Skew, &m_ceSkewness );
 
   m_cdv.Add( EChartSlot::PL, &m_ceProfitLoss );
 
-  m_cdv.Add( EChartSlot::ET, &m_ceExecutionTime );
+  //m_cdv.Add( EChartSlot::ET, &m_ceExecutionTime );
 
   //m_cdv.Add( EChartSlot::MarketDepth, &m_cdMarketDepthAsk );
   //m_cdv.Add( EChartSlot::MarketDepth, &m_cdMarketDepthBid );
@@ -141,7 +145,16 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   m_cdv.SetNames( "AutoTrade", pWatch->GetInstrument()->GetInstrumentName() );
 
-  SetupChart();
+  assert( 0 < m_config.nPeriodWidth );
+  time_duration td = time_duration( 0, 0, m_config.nPeriodWidth );
+
+  // stochastic
+
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "1", pWatch->GetQuotes(), m_config.nStochastic1Periods, td, ou::Colour::DeepSkyBlue ) );
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "2", pWatch->GetQuotes(), m_config.nStochastic2Periods, td, ou::Colour::DodgerBlue ) );  // is dark: MediumSlateBlue; MediumAquamarine is greenish; MediumPurple is dark; Purple is dark
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "3", pWatch->GetQuotes(), m_config.nStochastic3Periods, td, ou::Colour::MediumSlateBlue ) ); // no MediumTurquoise, maybe Indigo
+
+  SetupChart(); // comes after stochastic initialization
 
   //InitRdaf();
 
@@ -221,6 +234,9 @@ void Strategy::LoadHistory( TClass* tc ) {
 }
 
 void Strategy::Clear() {
+
+  m_vStochastic.clear();
+
   using pProvider_t = ou::tf::Watch::pProvider_t;
   if  ( m_pPosition ) {
     pWatch_t pWatch = m_pPosition->GetWatch();
@@ -237,8 +253,10 @@ void Strategy::Clear() {
       case ou::tf::config::symbol_t::EFeed::L2O:
         break;
     }
+
     pWatch->OnQuote.Remove( MakeDelegate( this, &Strategy::HandleQuote ) );
     pWatch->OnTrade.Remove( MakeDelegate( this, &Strategy::HandleTrade ) );
+
     m_cdv.Clear();
     //m_pPosition.reset(); // need to fix relative to thread
   }

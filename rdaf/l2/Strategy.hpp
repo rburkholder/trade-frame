@@ -39,6 +39,8 @@
 #include <TFIQFeed/Level2/Symbols.hpp>
 #include <TFIQFeed/Level2/FeatureSet.hpp>
 
+#include <TFBitsNPieces/Stochastic.hpp>
+
 #include "ConfigParser.hpp"
 
 class TH2D;
@@ -94,7 +96,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, Skew, PL, ET, MarketDepth };
+  enum EChartSlot { Price, Volume, Stoch, Skew, PL, ET, MarketDepth };
   enum class ETradeState {
     Init,  // initiaize state in current market
     Search,  // looking for long or short enter
@@ -157,6 +159,10 @@ private:
 
   using pOrderBased_t = ou::tf::iqfeed::l2::OrderBased::pOrderBased_t;
   pOrderBased_t m_pOrderBased;
+
+  using pStochastic_t = std::unique_ptr<Stochastic>;
+  using vStochastic_t = std::vector<pStochastic_t>;
+  vStochastic_t m_vStochastic;
 
   // ==
   struct QuoteForBranch {
