@@ -123,10 +123,10 @@ void Process::StartWatch() {
 
   assert( !m_pDispatch );  // trigger on re-entry, need to fix
   m_pDispatch = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
-    [ this, &sSymbolName ](){
+    [ this, &sIQFeedSymbolName ](){
       m_pDispatch->Single( true );
       m_pDispatch->WatchAdd(
-        sSymbolName,
+        sIQFeedSymbolName,
         [this]( const ou::tf::DepthByOrder& depth ){
           m_cntDepthsByOrder++;
           m_rDepthsByOrder[m_ixDepthsByOrder_Filling].Append( depth );
