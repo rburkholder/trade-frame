@@ -32,8 +32,9 @@ group_directory=/app/rdaf/l2/2022-04-29T17:31:08.783561-1
 time_bins=3600
 time_upper=20220707T000000
 time_lower=20220706T000000
-[@ESM22]
+[@ESH23]
 feed=l2o
+sym_symbol=ES-20230317
 trade=no
 algorithm=ES
 price_bins=1000
