@@ -41,7 +41,7 @@ protected:
   ptime m_dtZero;  // datetime of first element, used as offset
   time_duration WindowWidth() const { return m_tdWindowWidth; };
 
-  void Update( void );
+  void Update();
 
   void Add( const D& datum ) {}; // CRTP override to process elements passing into window scope
   void Expire( const D& datum ) {};  // CRTP override to process elements passing out of window scope
@@ -117,23 +117,23 @@ TimeSeriesSlidingWindow<T,D>::TimeSeriesSlidingWindow( TimeSeriesSlidingWindow<T
 }
 
 template<class T, class D>
-TimeSeriesSlidingWindow<T,D>::~TimeSeriesSlidingWindow(void) {
+TimeSeriesSlidingWindow<T,D>::~TimeSeriesSlidingWindow() {
   m_Series.OnAppend.Remove( MakeDelegate( this, &TimeSeriesSlidingWindow<T,D>::HandleDatum ) );
 }
 
 template<class T, class D>
-void TimeSeriesSlidingWindow<T,D>::Init(void) {
+void TimeSeriesSlidingWindow<T,D>::Init() {
   m_Series.OnAppend.Add( MakeDelegate( this, &TimeSeriesSlidingWindow<T,D>::HandleDatum ) );
 }
 
 template<class T, class D>
-void TimeSeriesSlidingWindow<T,D>::Reset( void ) {
+void TimeSeriesSlidingWindow<T,D>::Reset() {
   m_ixTrailing = m_ixLeading = 0;
   m_dtLeading = not_a_date_time;
 }
 
 template<class T, class D>
-void TimeSeriesSlidingWindow<T,D>::Update( void ) {
+void TimeSeriesSlidingWindow<T,D>::Update() {
   if ( !m_bFirstDatumFound ) {
     if ( 0 < m_Series.Size() ) {
       m_dtZero = m_Series[ 0 ].DateTime();  // used for zeroing the statistics
@@ -195,13 +195,13 @@ public:
   TimeSeriesSlidingWindowQuoteMidPoint<T>( TimeSeries<Quote> *pSeries, long WindowSizeSeconds = 0, size_t WindowSizeCount = 0 )
     : TimeSeriesSlidingWindow<T, Quote>( pSeries, WindowSizeSeconds, WindowSizeCount ) {
   };
-  ~TimeSeriesSlidingWindowQuoteMidPoint<T>( void );
+  ~TimeSeriesSlidingWindowQuoteMidPoint<T>();
 protected:
   void Add( const Quote &datum ) { // CRTP override to process elements passing into window scope
   };
   void Expire( const Quote &datum ) { // CRTP override to process elements passing out of window scope
   };
-  void PostUpdate( void ) {};  // CRTPover ride to do final calcs
+  void PostUpdate() {};  // CRTPover ride to do final calcs
 private:
 };
 */
