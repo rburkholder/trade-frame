@@ -307,7 +307,7 @@ bool AppAutoTrade::OnInit() {
   for ( ou::tf::config::choices_t::mapInstance_t::value_type& vt: m_choices.mapInstance ) {
 
     auto& [sSymbol_IQFeed, choices] = vt;
-    BOOST_LOG_TRIVIAL(info) << "creating strategy for: " << sSymbol_IQFeed;
+    BOOST_LOG_TRIVIAL(info) << "creating strategy for:  " << sSymbol_IQFeed;
 
     std::string sSymbol;
 
@@ -680,6 +680,7 @@ void AppAutoTrade::ConfirmProviders() {
     vItems.push_back( new mi( "Stats",  MakeDelegate( this, &AppAutoTrade::HandleMenuActionSimEmitStats ) ) );
     m_pFrameMain->AddDynamicMenu( "Simulation", vItems );
 
+    m_sim->SetOnSimulationComplete( MakeDelegate( this, &AppAutoTrade::HandleSimComplete ) );
     m_sim->Run();
   }
   else {
@@ -738,6 +739,10 @@ void AppAutoTrade::ConfirmProviders() {
   if ( !bValidCombo ) {
     std::cout << "ConfirmProviders: waiting for data and execution providers" << std::endl;
   }
+}
+
+void AppAutoTrade::HandleSimComplete() {
+  BOOST_LOG_TRIVIAL(info) << "simulation complete";
 }
 
 void AppAutoTrade::SaveState() {

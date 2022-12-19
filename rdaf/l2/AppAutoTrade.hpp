@@ -168,6 +168,8 @@ private:
   void HandleMenuActionSimStop();
   void HandleMenuActionSimEmitStats();
 
+  void HandleSimComplete();
+
   void SaveState();
   void LoadState();
 
