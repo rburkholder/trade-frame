@@ -31,8 +31,8 @@
 #include <TFIQFeed/Level2/Symbols.hpp>
 #include <TFIQFeed/Level2/FeatureSet.hpp>
 
-#include "Stochastic.hpp"
-#include "MovingAverage.hpp"
+#include <TFBitsNPieces/Stochastic.hpp>
+#include <TFBitsNPieces/MovingAverage.hpp>
 
 namespace ou {
 namespace tf {

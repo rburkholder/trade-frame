@@ -15,7 +15,7 @@
 /*
  * File:    MovingAverage.hpp
  * Author:  raymond@burkholder.net
- * Project: IndicatorTrading
+ * Project: lib/TFBitsNPieces
  * Created: 2022/11/29 11:57:41
  */
 

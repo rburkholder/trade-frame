@@ -32,10 +32,8 @@ set(
     FeedModel.hpp
     InteractiveChart.h
     Indicators.hpp
-    MovingAverage.hpp
     OptionTracker.hpp
     SessionChart.hpp
-    Stochastic.hpp
     Strategy.hpp
     TradeLifeTime.h
     200DayChart.hpp
@@ -49,10 +47,8 @@ set(
     ExecModel.cpp
     FeedModel.cpp
     InteractiveChart.cpp
-    MovingAverage.cpp
     OptionTracker.cpp
     SessionChart.cpp
-    Stochastic.cpp
     Strategy.cpp
     TradeLifeTime.cpp
     200DayChart.cpp
