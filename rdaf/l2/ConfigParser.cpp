@@ -46,6 +46,10 @@ BOOST_FUSION_ADAPT_STRUCT(
   (bool, bTradable)
   (std::string, sAlgorithm)
   (std::string, sSignalFrom)
+  (int, nPeriodWidth)
+  (int, nStochastic1Periods)
+  (int, nStochastic2Periods)
+  (int, nStochastic3Periods)
   (size_t, nPriceBins)
   (double, dblPriceUpper)
   (double, dblPriceLower)
@@ -180,6 +184,28 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> -qi::char_('@') >> qi::char_("A-Z") >> *( qi::char_("A-Z0-9" ) )// >> *qi::char_('#')
       >> *qi::lit(' ') >> qi::eol;
 
+    rulePeriodWidth
+      %= qi::lit( "period_width" )
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> boost::spirit::int_
+      >> *qi::lit(' ') >> qi::eol;
+
+    ruleStochastic1Periods
+      %= qi::lit( "stochastic1_periods" )
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> boost::spirit::int_
+      >> *qi::lit(' ') >> qi::eol;
+    ruleStochastic2Periods
+      %= qi::lit( "stochastic2_periods" )
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> boost::spirit::int_
+      >> *qi::lit(' ') >> qi::eol;
+    ruleStochastic3Periods
+      %= qi::lit( "stochastic3_periods" )
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> boost::spirit::int_
+      >> *qi::lit(' ') >> qi::eol;
+
     rulePriceBins
       %= qi::lit( "price_bins" )
       >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
@@ -218,6 +244,10 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> -ruleTradable
       >> -ruleAlgorithm
       >> -ruleSignalFrom
+      >>  rulePeriodWidth
+      >>  ruleStochastic1Periods
+      >>  ruleStochastic2Periods
+      >>  ruleStochastic3Periods
       >>  rulePriceBins
       >>  rulePriceUpper
       >>  rulePriceLower
@@ -266,8 +296,12 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   qi::rule<Iterator, bool()> ruleStartSimulator;
   qi::rule<Iterator, std::string()> ruleGroupDirectory;
   qi::rule<Iterator, size_t()> ruleTimeBins;
-  qi::rule<Iterator, std::string()> ruleSignalFrom;
   qi::rule<Iterator, std::string()> ruleAlgorithm;
+  qi::rule<Iterator, std::string()> ruleSignalFrom;
+  qi::rule<Iterator, int()> rulePeriodWidth;
+  qi::rule<Iterator, int()> ruleStochastic1Periods;
+  qi::rule<Iterator, int()> ruleStochastic2Periods;
+  qi::rule<Iterator, int()> ruleStochastic3Periods;
   qi::rule<Iterator, std::string()> ruleDateTime;
   qi::rule<Iterator, std::string()> ruleTimeUpper;
   qi::rule<Iterator, std::string()> ruleTimeLower;

@@ -35,16 +35,24 @@ struct symbol_t {
   enum EFeed {
     L1   // L1 quotes/trades
   , L2M  // L1 + L2 market maker (nasdaq equities) - not used in futures l2 activity
-  , L2O  // L1 + L2 orders (CME, ICE futures)
+  , L2O  // L1 + L2 orders (CME [es, nq ..], ICE futures)
   };
 
-  // parsed direct from config file
+  // directly parsed
 
   EFeed eFeed;
   bool bTradable;
 
   std::string sAlgorithm;
   std::string sSignalFrom; // link one instrument to another
+
+  int nPeriodWidth;  // units:  seconds
+
+  int nStochastic1Periods; // => periods * width
+  int nStochastic2Periods; // => periods * width
+  int nStochastic3Periods; // => periods * width
+
+  // rdaf related
 
   size_t nPriceBins;
   double dblPriceUpper;
@@ -54,18 +62,29 @@ struct symbol_t {
   size_t nVolumeUpper;
   size_t nVolumeLower;
 
-  // supplied after parsing
+  // post parse - naming
 
   std::string sSymbol_IQFeed;
   std::string sSymbol_Generic;
+
+  // post parse - copied from choices_t
 
   size_t nTimeBins;
   double dblTimeUpper;
   double dblTimeLower;
 
+  // construction
+
   symbol_t()
   : eFeed( EFeed::L1 ) // default
   , bTradable( true )  // default
+  , nTimeBins {}
+  , dblTimeUpper {}
+  , dblTimeLower {}
+  , nPeriodWidth {}
+  , nStochastic1Periods {}
+  , nStochastic2Periods {}
+  , nStochastic3Periods {}
   {} // optional for now
 
 };
