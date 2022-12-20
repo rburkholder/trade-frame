@@ -30,6 +30,8 @@ using namespace fastdelegate;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+// MergeCarrierBase
+
 class MergeCarrierBase {
   friend class MergeDatedDatums;
 public:
@@ -52,9 +54,10 @@ protected:
 private:
 };
 
-template<class T>
+// MergeCarrier
+
+template<class T> // T is a DatedDatum type
 class MergeCarrier: public MergeCarrierBase {
-  // T is a DatedDatum type
   friend class MergeDatedDatums;
 public:
   MergeCarrier<T>( TimeSeries<T>& series, OnDatumHandler function );
@@ -87,10 +90,10 @@ void MergeCarrier<T>::ProcessDatum() {
   if ( ou::TimeSource::LocalCommonInstance().GetSimulationMode() ) {
     ou::TimeSource::LocalCommonInstance().SetSimulationTime( m_pDatum->DateTime() );
   }
-  if ( 0 != OnDatum )
+  if ( nullptr != OnDatum )
     OnDatum( *m_pDatum );
   m_pDatum = m_series.Next();
-  m_dt = ( NULL == m_pDatum )
+  m_dt = ( nullptr == m_pDatum )
     ? boost::date_time::special_values::not_a_date_time
     : m_pDatum->DateTime();
 }
