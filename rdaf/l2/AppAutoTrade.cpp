@@ -156,7 +156,7 @@ bool AppAutoTrade::OnInit() {
     }
 
     m_sim = ou::tf::SimulationProvider::Factory();
-    m_sim->SetThreadCount( m_choices.nThreads );
+    //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will use async posts
     m_sim->SetGroupDirectory( m_choices.sGroupDirectory );
 
     // 20221220-09:20:13.187534
@@ -278,7 +278,7 @@ bool AppAutoTrade::OnInit() {
   m_pWinChartView = new ou::tf::WinChartView( m_splitterData, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
   m_pWinChartView->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
 
-  m_splitterData->SplitVertically(m_treeSymbols, m_pWinChartView, 50);
+  m_splitterData->SplitVertically(m_treeSymbols, m_pWinChartView, 50); // TODO: pull from state
   sizerLower->Add(m_splitterData, 1, wxGROW, 2);
 
   //if ( m_options.bSimStart ) {
