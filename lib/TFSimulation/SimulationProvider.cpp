@@ -43,6 +43,10 @@ SimulationProvider::SimulationProvider()
 
 SimulationProvider::~SimulationProvider() {
 
+  if ( m_threadMerge.joinable() ) {
+    m_threadMerge.join(); // wait for completion
+  }
+
   if ( 0 != m_pMerge ) {
     delete m_pMerge;
     m_pMerge = nullptr;
@@ -238,7 +242,7 @@ void SimulationProvider::StopGreekWatch( pSymbol_t pSymbol ) {
 // root of background simulation thread, thread is started from Run.
 void SimulationProvider::Merge() {
 
-  if ( 0 != m_OnSimulationThreadStarted ) m_OnSimulationThreadStarted();
+  if ( nullptr != m_OnSimulationThreadStarted ) m_OnSimulationThreadStarted();
 
   // for each of the symbols, add the quote, trade and greek series
   // datums from each series will be merged and emitted in chronological order
@@ -291,19 +295,21 @@ void SimulationProvider::Merge() {
   bool bOldMode = ou::TimeSource::LocalCommonInstance().GetSimulationMode();
   ou::TimeSource::LocalCommonInstance().SetSimulationMode();
 
-  m_pMerge -> Run();
+  m_pMerge->Run();
 
   m_nProcessedDatums = m_pMerge->GetCountProcessedDatums();
+
   m_dtSimStop = ou::TimeSource::LocalCommonInstance().External();
 
-  if ( 0 != m_OnSimulationComplete ) m_OnSimulationComplete();
+  if ( nullptr != m_OnSimulationComplete ) m_OnSimulationComplete();
 
   ou::TimeSource::LocalCommonInstance().SetSimulationMode( bOldMode );
 
-  if ( 0 != m_OnSimulationThreadEnded ) m_OnSimulationThreadEnded();
+  if ( nullptr != m_OnSimulationThreadEnded ) m_OnSimulationThreadEnded();
 }
 
 void SimulationProvider::Run( bool bAsync ) {
+
   if ( 0 == m_sGroupDirectory.size() ) throw std::invalid_argument( "Group Directory is empty" );
   if ( 0 == m_mapSymbols.size() ) throw std::invalid_argument( "No Symbols to simulate" );
 
@@ -312,10 +318,10 @@ void SimulationProvider::Run( bool bAsync ) {
   }
   else {
     m_pMerge = new MergeDatedDatums();
-    boost::thread sim( boost::bind( &SimulationProvider::Merge, this ) );
+    m_threadMerge = std::move( std::thread( std::bind( &SimulationProvider::Merge, this ) ) );
 
     if ( !bAsync ) {
-      sim.join();
+      m_threadMerge.join();
     }
 
   }

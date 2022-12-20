@@ -14,11 +14,9 @@
 
 #pragma once
 
+#include <thread>
 #include <string>
 #include <sstream>
-
-#include <boost/thread.hpp>  // separate thread background merge processing
-#include <boost/bind/bind.hpp>
 
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
@@ -138,7 +136,7 @@ protected:
 
 private:
 
-  boost::thread m_threadMerge;
+  std::thread m_threadMerge;
 
 };
 
