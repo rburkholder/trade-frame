@@ -120,6 +120,7 @@ private:
   ETradeState m_stateTrade;
 
   ou::tf::Quote m_quote;
+  ou::tf::Quotes m_quotes; // used for stochastics, as storage for watch is off
 
   const ou::tf::config::symbol_t& m_config;
 

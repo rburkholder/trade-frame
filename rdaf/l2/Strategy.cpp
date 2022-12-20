@@ -150,9 +150,9 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   // stochastic
 
-  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "1", pWatch->GetQuotes(), m_config.nStochastic1Periods, td, ou::Colour::DeepSkyBlue ) );
-  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "2", pWatch->GetQuotes(), m_config.nStochastic2Periods, td, ou::Colour::DodgerBlue ) );  // is dark: MediumSlateBlue; MediumAquamarine is greenish; MediumPurple is dark; Purple is dark
-  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "3", pWatch->GetQuotes(), m_config.nStochastic3Periods, td, ou::Colour::MediumSlateBlue ) ); // no MediumTurquoise, maybe Indigo
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "1", m_quotes, m_config.nStochastic1Periods, td, ou::Colour::DeepSkyBlue ) );
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "2", m_quotes, m_config.nStochastic2Periods, td, ou::Colour::DodgerBlue ) );  // is dark: MediumSlateBlue; MediumAquamarine is greenish; MediumPurple is dark; Purple is dark
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "3", m_quotes, m_config.nStochastic3Periods, td, ou::Colour::MediumSlateBlue ) ); // no MediumTurquoise, maybe Indigo
 
   SetupChart(); // comes after stochastic initialization
 
@@ -321,6 +321,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   m_ceQuoteBid.Append( dt, quote.Bid() );
 
   m_quote = quote;
+  m_quotes.Append( quote );
 
 //  if ( m_pTreeQuote ) { // wait for initialization in thread to start
 //    std::time_t nTime = boost::posix_time::to_time_t( quote.DateTime() );
