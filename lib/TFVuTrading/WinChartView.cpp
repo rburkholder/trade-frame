@@ -255,18 +255,9 @@ void WinChartView::DrawChart() {
             std::scoped_lock<std::mutex> lock( m_mutexChartDataView );
 
             //if ( m_bReCalcViewPort ) {
-              boost::posix_time::ptime now = ou::TimeSource::GlobalInstance().Internal(); // works with real vs simulation time
 
-              static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
-              auto now_ = now;
-              boost::posix_time::ptime dtEnd = now_;
-              if ( false ) {
-                // chart moves at 1s step - not sure if this is trader friendly though
-                boost::posix_time::time_duration td( 0, 0, 0, fs - now_.time_of_day().fractional_seconds() );
-                dtEnd = now_ + td;
-              }
-
-              boost::posix_time::ptime dtBegin = dtEnd - m_tdViewPortWidth;
+              const boost::posix_time::ptime dtEnd = ou::TimeSource::GlobalInstance().Internal(); // works with real vs simulation time
+              const boost::posix_time::ptime dtBegin = dtEnd - m_tdViewPortWidth;
 
               if ( false ) {
                 std::stringstream ss;
@@ -278,6 +269,7 @@ void WinChartView::DrawChart() {
               m_pChartDataView->SetViewPort( dtBegin, dtEnd );
 
               m_bReCalcViewPort = false;
+
             //}
 
             UpdateChartMaster();
