@@ -58,7 +58,8 @@ Strategy::Strategy(
 //, m_pFile( pFile )
 //, m_pFileUtility( pFileUtility )
 , m_bChangeConfigFileMessageLatch( false )
-, m_stateTrade( ETradeState::Init )
+, m_stateTrade( EStateTrade::Init )
+, m_stateStochastic( EStateStochastic::Init )
 , m_config( config )
 , m_ceLongEntry( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
 , m_ceLongFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::Blue )
@@ -204,7 +205,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   if ( m_config.bTradable ) {}
   else {
     BOOST_LOG_TRIVIAL(info) << "Strategy::SetPosition " << m_config.sSymbol_IQFeed << ": no trading";
-    m_stateTrade = ETradeState::NoTrade;
+    m_stateTrade = EStateTrade::NoTrade;
   }
 
   BOOST_LOG_TRIVIAL(info)
@@ -432,7 +433,7 @@ void Strategy::EnterLong( const ou::tf::Bar& bar ) {
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   m_ceLongEntry.AddLabel( bar.DateTime(), bar.Close(), "Long Submit" );
-  m_stateTrade = ETradeState::LongSubmitted;
+  m_stateTrade = EStateTrade::LongSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
   ShowOrder( m_pOrder );
 }
@@ -442,7 +443,7 @@ void Strategy::EnterShort( const ou::tf::Bar& bar ) {
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   m_ceShortEntry.AddLabel( bar.DateTime(), bar.Close(), "Short Submit" );
-  m_stateTrade = ETradeState::ShortSubmitted;
+  m_stateTrade = EStateTrade::ShortSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
   ShowOrder( m_pOrder );
 }
@@ -452,7 +453,7 @@ void Strategy::ExitLong( const ou::tf::Bar& bar ) {
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "Long Exit Submit" );
-  m_stateTrade = ETradeState::LongExitSubmitted;
+  m_stateTrade = EStateTrade::LongExitSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
   ShowOrder( m_pOrder );
 }
@@ -462,7 +463,7 @@ void Strategy::ExitShort( const ou::tf::Bar& bar ) {
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "Short Exit Submit" );
-  m_stateTrade = ETradeState::ShortExitSubmitted;
+  m_stateTrade = EStateTrade::ShortExitSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
   ShowOrder( m_pOrder );
 }
@@ -476,124 +477,49 @@ void Strategy::ShowOrder( pOrder_t pOrder ) {
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
-  // DailyTradeTimeFrame: Trading during regular active equity market hours
+  //const std::chrono::time_point<std::chrono::system_clock> begin
+  //  = std::chrono::system_clock::now();
 
-  const std::chrono::time_point<std::chrono::system_clock> begin
-    = std::chrono::system_clock::now();
+  //m_FeatureSet.FVS(). // use imbalance, and others
 
-  bool bTriggerEntry( false );
-  double skew( 0.0 );
-
-  //m_FeatureSet.FVS().
-/*
-  if ( m_pHistVolume ) {
-
-    auto n = m_pHistVolume->GetEntries();
-    if ( n < 1000 ) {
-    }
-    else {
-
-      std::time_t nTime = boost::posix_time::to_time_t( bar.DateTime() );
-      nTime = (double)nTime / 1000.0;
-
-      //find the bin that the time given belongs to:
-      Int_t bin_y = m_pHistVolume->GetYaxis()->FindBin( nTime );
-
-      if ( bin_y < 1 ) {
-        if ( !m_bChangeConfigFileMessageLatch ) {
-          BOOST_LOG_TRIVIAL(warning) << m_config.sSymbol << ", need to adjust lower time in config file";
-          m_bChangeConfigFileMessageLatch = true;
-        }
-      }
-      else {
-        //now find projection of h1 from the beginning till now:
-        auto h1_x = m_pHistVolume->ProjectionX( ( m_config.sSymbol + "_px" ).c_str(), 1, bin_y );
-        double skew_ = h1_x->GetSkewness( 1 );
-
-        switch ( fpclassify( skew_ ) ) {
-            case FP_INFINITE:
-              skew_ = 0.0;
-              break;
-            case FP_NAN:
-              skew_ = 0.0;
-              break;
-            case FP_NORMAL:
-              break;
-            case FP_SUBNORMAL:
-              skew_ = 0.0;
-              break;
-            case FP_ZERO:
-              break;
-            default:
-              break;
-        }
-
-        if ( 0.1 < skew_ ) {
-          bTriggerEntry = true;
-        }
-        skew = skew_;
-      }
-    }
-    m_ceSkewness.Append( bar.DateTime(), skew );
-  }
-*/
   switch ( m_stateTrade ) {
-    case ETradeState::Search:
-
-      if ( bTriggerEntry ) {
-        BOOST_LOG_TRIVIAL(info) << m_pPosition->GetInstrument()->GetInstrumentName() << " entry with skew: " << skew;
-        EnterLong( bar );
-      }
+    case EStateTrade::Search:
       break;
-    case ETradeState::LongSubmitted:
+    case EStateTrade::LongSubmitted:
       // wait for order to execute
       break;
-    case ETradeState::LongExit:
-      if ( m_pPosition->GetUnRealizedPL() > m_quote.Bid() * 0.08 ) { // NOTE: GetUnRealizedPL may need to be divided by 100
-        // exit long
-
-        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 100, m_quote.Bid() - 0.01 );
-        m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-        m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-        m_ceLongExit.AddLabel( bar.DateTime(), m_quote.Midpoint(), "Long Exit" );
-        m_stateTrade = ETradeState::LongExitSubmitted;
-        m_pPosition->PlaceOrder( m_pOrder );
-      }
+    case EStateTrade::LongExit:
       break;
-    case ETradeState::ShortSubmitted:
+    case EStateTrade::ShortSubmitted:
       // wait for order to execute
       break;
-    case ETradeState::ShortExit:
-/*      if ( bar.Close() > ma2 ) {
-        // exit short
-        ExitShort( bar );
-      } */
+    case EStateTrade::ShortExit:
       break;
-    case ETradeState::LongExitSubmitted:
-    case ETradeState::ShortExitSubmitted:
+    case EStateTrade::LongExitSubmitted:
+    case EStateTrade::ShortExitSubmitted:
       // wait for order to execute
       break;
-    case ETradeState::EndOfDayCancel:
-    case ETradeState::EndOfDayNeutral:
-    case ETradeState::Done:
+    case EStateTrade::EndOfDayCancel:
+    case EStateTrade::EndOfDayNeutral:
+    case EStateTrade::Done:
       // quiescent
       break;
-    case ETradeState::NoTrade:
+    case EStateTrade::NoTrade:
       // do nothing based upon config file
       break;
-    case ETradeState::Init:
+    case EStateTrade::Init:
       // market open statistics management here
       // will need to wait for ma to load & diverge (based upon width & period)
-      m_stateTrade = ETradeState::Search;
+      m_stateTrade = EStateTrade::Search;
       break;
   }
 
-  const std::chrono::time_point<std::chrono::system_clock> end
-    = std::chrono::system_clock::now();
+  //const std::chrono::time_point<std::chrono::system_clock> end
+  //  = std::chrono::system_clock::now();
 
-   auto delta = std::chrono::duration_cast<std::chrono::microseconds>( end - begin).count();
+   //auto delta = std::chrono::duration_cast<std::chrono::microseconds>( end - begin).count();
    //auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end - begin).count();
-   m_ceExecutionTime.Append( bar.DateTime(), delta );
+   //m_ceExecutionTime.Append( bar.DateTime(), delta );
 
 }
 
@@ -601,18 +527,18 @@ void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
   m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   switch ( m_stateTrade ) {
-    case ETradeState::EndOfDayCancel:
-    case ETradeState::EndOfDayNeutral:
+    case EStateTrade::EndOfDayCancel:
+    case EStateTrade::EndOfDayNeutral:
       BOOST_LOG_TRIVIAL(info) << "order " << order.GetOrderId() << " cancelled - end of day";
       break;
-    case ETradeState::LongExitSubmitted:
-    case ETradeState::ShortExitSubmitted:
+    case EStateTrade::LongExitSubmitted:
+    case EStateTrade::ShortExitSubmitted:
       //assert( false );  // TODO: need to figure out a plan to retry exit
       BOOST_LOG_TRIVIAL(error) << "order " << order.GetOrderId() << " cancelled - state machine needs fixes";
-      m_stateTrade = ETradeState::Done;
+      m_stateTrade = EStateTrade::Done;
       break;
     default:
-      m_stateTrade = ETradeState::Search;
+      m_stateTrade = EStateTrade::Search;
   }
   m_pOrder.reset();
 }
@@ -621,27 +547,27 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
   m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   switch ( m_stateTrade ) {
-    case ETradeState::LongSubmitted:
+    case EStateTrade::LongSubmitted:
       m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Long Fill" );
-      m_stateTrade = ETradeState::LongExit;
+      m_stateTrade = EStateTrade::LongExit;
       break;
-    case ETradeState::ShortSubmitted:
+    case EStateTrade::ShortSubmitted:
       m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Fill" );
-      m_stateTrade = ETradeState::ShortExit;
+      m_stateTrade = EStateTrade::ShortExit;
       break;
-    case ETradeState::LongExitSubmitted:
+    case EStateTrade::LongExitSubmitted:
       m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Long Exit Fill" );
-      m_stateTrade = ETradeState::Search;
+      m_stateTrade = EStateTrade::Search;
       break;
-    case ETradeState::ShortExitSubmitted:
+    case EStateTrade::ShortExitSubmitted:
       m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Exit Fill" );
-      m_stateTrade = ETradeState::Search;
+      m_stateTrade = EStateTrade::Search;
       break;
-    case ETradeState::EndOfDayCancel:
-    case ETradeState::EndOfDayNeutral:
+    case EStateTrade::EndOfDayCancel:
+    case EStateTrade::EndOfDayNeutral:
       // figure out what labels to apply
       break;
-    case ETradeState::Done:
+    case EStateTrade::Done:
       break;
     default:
        assert( false ); // TODO: unravel the state mess if we get here
@@ -650,7 +576,7 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
 }
 
 void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
-  m_stateTrade = ETradeState::EndOfDayCancel;
+  m_stateTrade = EStateTrade::EndOfDayCancel;
   if ( m_pPosition ) {
     m_pPosition->CancelOrders();
   }
@@ -658,11 +584,11 @@ void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_dur
 
 void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
   switch ( m_stateTrade ) {
-    case ETradeState::NoTrade:
+    case EStateTrade::NoTrade:
       // do nothing
       break;
     default:
-      m_stateTrade = ETradeState::EndOfDayNeutral;
+      m_stateTrade = EStateTrade::EndOfDayNeutral;
       if ( m_pPosition ) {
         m_pPosition->ClosePosition();
       }
@@ -684,14 +610,14 @@ void Strategy::SaveWatch( const std::string& sPrefix ) {
 void Strategy::CloseAndDone() {
   std::cout << "Sending Close & Done" << std::endl;
   switch ( m_stateTrade ) {
-    case ETradeState::NoTrade:
+    case EStateTrade::NoTrade:
       // do nothing
       break;
     default:
       if ( m_pPosition ) {
         m_pPosition->ClosePosition();
       }
-      m_stateTrade = ETradeState::Done;
+      m_stateTrade = EStateTrade::Done;
       break;
   }
 }

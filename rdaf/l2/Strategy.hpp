@@ -97,7 +97,8 @@ protected:
 private:
 
   enum EChartSlot { Price, Volume, Stoch, Skew, PL, ET, MarketDepth };
-  enum class ETradeState {
+
+  enum class EStateTrade {
     Init,  // initiaize state in current market
     Search,  // looking for long or short enter
     LongSubmitted, // order has been submitted, waiting for confirmation
@@ -112,12 +113,21 @@ private:
     Done // no more action
     };
 
+  enum class EStateStochastic {
+    Init,
+    Above80,
+    Above50,
+    Below50,
+    Below20
+  };
+
+  EStateTrade m_stateTrade;
+  EStateStochastic m_stateStochastic;
+
   TreeItem* m_pTreeItemSymbol;
   TreeItem* m_pTreeItemOrder;
 
   bool m_bChangeConfigFileMessageLatch;
-
-  ETradeState m_stateTrade;
 
   ou::tf::Quote m_quote;
   ou::tf::Quotes m_quotes; // used for stochastics, as storage for watch is off
