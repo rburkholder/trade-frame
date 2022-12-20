@@ -95,7 +95,7 @@ bool AppIndicatorTrading::OnInit() {
       ;
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
-
+/*
   m_threadPortAudioInit = std::move( std::thread(
     [this](){
       if ( m_pPortAudio ) {}
@@ -110,7 +110,7 @@ bool AppIndicatorTrading::OnInit() {
     } )
   );
   m_threadPortAudioInit.detach();
-
+*/
   m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
   m_tws->SetClientId( m_config.ib_client_id );
@@ -215,8 +215,8 @@ bool AppIndicatorTrading::OnInit() {
   vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionSaveValues ) ) );
   vItems.push_back( new mi( "Emit Chains Summary", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitChainsSummary ) ) );
   vItems.push_back( new mi( "Emit Chains Full", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionEmitChainsFull ) ) );
-  vItems.push_back( new mi( "Test Chords Up", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionTestChordsUp ) ) );
-  vItems.push_back( new mi( "Test Chords Down", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionTestChordsDn ) ) );
+  //vItems.push_back( new mi( "Test Chords Up", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionTestChordsUp ) ) );
+  //vItems.push_back( new mi( "Test Chords Down", MakeDelegate( this, &AppIndicatorTrading::HandleMenuActionTestChordsDn ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   vItems.clear();
@@ -441,7 +441,7 @@ void AppIndicatorTrading::HandleMenuActionEmitChainsFull() {
 void AppIndicatorTrading::HandleMenuActionTestChordsUp() {
   CallAfter(
     [this](){
-       m_pChords->Play( ou::music::Chords::EProgression::Up );
+       //m_pChords->Play( ou::music::Chords::EProgression::Up );
     }
   );
 }
@@ -449,7 +449,7 @@ void AppIndicatorTrading::HandleMenuActionTestChordsUp() {
 void AppIndicatorTrading::HandleMenuActionTestChordsDn() {
   CallAfter(
     [this](){
-      m_pChords->Play( ou::music::Chords::EProgression::Down );
+      //m_pChords->Play( ou::music::Chords::EProgression::Down );
     }
   );
 }
@@ -550,9 +550,9 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
 
   //m_pFrameControls->Close();
 
-  if ( m_threadPortAudioInit.joinable() ) {
-    m_threadPortAudioInit.join();
-  }
+  //if ( m_threadPortAudioInit.joinable() ) {
+  //  m_threadPortAudioInit.join();
+  //}
 
   m_pPanelTrade->SetOnTimer( nullptr );
 
