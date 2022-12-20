@@ -93,6 +93,7 @@ public:
     return lt.utc_time();
   }
 
+  // NOTE:  search for time_zone_ptr/TimeZoneNewYork in code for UTC to local/est conversions
   static boost::local_time::time_zone_ptr TimeZoneNewYork() { return m_tzNewYork; }
 
   boost::local_time::time_zone_ptr LoadTimeZone( const std::string& sRegion );
