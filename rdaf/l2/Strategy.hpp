@@ -121,6 +121,14 @@ private:
     Below20
   };
 
+  enum class EStateDesired {
+    Continue,
+    GoLong,
+    GoShort,
+    Exit
+  };
+
+  EStateDesired m_stateDesired;
   EStateTrade m_stateTrade;
   EStateStochastic m_stateStochastic;
 

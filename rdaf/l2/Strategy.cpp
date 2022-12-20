@@ -58,6 +58,7 @@ Strategy::Strategy(
 //, m_pFile( pFile )
 //, m_pFileUtility( pFileUtility )
 , m_bChangeConfigFileMessageLatch( false )
+, m_stateDesired( EStateDesired::Continue )
 , m_stateTrade( EStateTrade::Init )
 , m_stateStochastic( EStateStochastic::Init )
 , m_config( config )
@@ -482,18 +483,120 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   //m_FeatureSet.FVS(). // use imbalance, and others
 
+  EStateStochastic stateStochastic( m_stateStochastic ); // sticky until changed
+
+  double k = m_vStochastic[1]->Latest();
+  if ( k > 50.0 ) {
+    if ( k > 80.0 ) {
+      stateStochastic = EStateStochastic::Above80;
+    }
+    else {
+      stateStochastic = EStateStochastic::Above50;
+    }
+  }
+  else {
+    if ( k < 50.0 ) {
+      if ( k < 20.0 ) {
+        stateStochastic = EStateStochastic::Below20;
+      }
+      else {
+        stateStochastic = EStateStochastic::Below50;
+      }
+    }
+  }
+
+  EStateDesired stateDesired( m_stateDesired ); // sticky until reset to Continue (allows cycling through exit -> entry)
+
+  switch ( m_stateStochastic) {
+    case EStateStochastic::Init:
+      // wait for another crossing
+      break;
+    case EStateStochastic::Above80:
+      if ( EStateStochastic::Above50 == stateStochastic ) {
+        // exit & go short
+        stateDesired = EStateDesired::GoShort;
+      }
+      break;
+    case EStateStochastic::Above50:
+      switch ( stateStochastic ) {
+        case EStateStochastic::Above80:
+          // go/continue long
+          stateDesired = EStateDesired::GoLong;
+          break;
+        case EStateStochastic::Below50:
+          // exit & go short - maybe
+          //desired = EStateDesired::Exit;
+          break;
+      }
+      break;
+    case EStateStochastic::Below50:
+      switch ( stateStochastic ) {
+        case EStateStochastic::Above50:
+          // exit & go long - maybe
+          //desired = EStateDesired::Exit;
+          break;
+        case EStateStochastic::Below20:
+          // go/continue short
+          stateDesired = EStateDesired::GoShort;
+          break;
+      }
+      break;
+    case EStateStochastic::Below20:
+      if ( EStateStochastic::Below50 == stateStochastic ) {
+        // exit & go long
+        stateDesired = EStateDesired::GoLong;
+      }
+      break;
+  }
+
+  m_stateStochastic = stateStochastic;
+
   switch ( m_stateTrade ) {
     case EStateTrade::Search:
+      switch ( stateDesired ) {
+        case EStateDesired::GoLong:
+          stateDesired = EStateDesired::Continue;
+          EnterLong( bar );
+          break;
+        case EStateDesired::GoShort:
+          stateDesired = EStateDesired::Continue;
+          EnterShort( bar );
+          break;
+      }
       break;
     case EStateTrade::LongSubmitted:
       // wait for order to execute
       break;
     case EStateTrade::LongExit:
+      switch ( stateDesired ) {
+        case EStateDesired::GoShort:
+          // stateDesired = EStateDesired::Continue; leave desire as it is
+          ExitLong( bar );
+          break;
+        case EStateDesired::Exit:
+          stateDesired = EStateDesired::Continue;
+          ExitLong( bar );
+          break;
+        default:
+          assert( false );  // broken state machine
+      }
       break;
     case EStateTrade::ShortSubmitted:
       // wait for order to execute
       break;
     case EStateTrade::ShortExit:
+      switch ( stateDesired ) {
+        case EStateDesired::GoLong:
+          // stateDesired = EStateDesired::Continue; leave desire as it is
+          ExitShort( bar );
+          break;
+        case EStateDesired::Exit:
+          stateDesired = EStateDesired::Continue;
+          ExitShort( bar );
+          break;
+        default:
+          assert( false );  // broken state machine
+      }
       break;
     case EStateTrade::LongExitSubmitted:
     case EStateTrade::ShortExitSubmitted:
@@ -502,17 +605,33 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     case EStateTrade::EndOfDayCancel:
     case EStateTrade::EndOfDayNeutral:
     case EStateTrade::Done:
-      // quiescent
+      // perform exit?
       break;
     case EStateTrade::NoTrade:
       // do nothing based upon config file
       break;
     case EStateTrade::Init:
       // market open statistics management here
-      // will need to wait for ma to load & diverge (based upon width & period)
-      m_stateTrade = EStateTrade::Search;
+      if ( ( m_vStochastic[0]->Latest() > m_vStochastic[1]->Latest() )
+        && ( m_vStochastic[1]->Latest() > m_vStochastic[2]->Latest() )
+      ) {
+        m_stateTrade = EStateTrade::Search;
+        m_stateDesired = EStateDesired::Continue;
+        m_stateStochastic = EStateStochastic::Init;
+      }
+      else {
+        if ( ( m_vStochastic[0]->Latest() < m_vStochastic[1]->Latest() )
+          && ( m_vStochastic[1]->Latest() < m_vStochastic[2]->Latest() )
+        ) {
+          m_stateTrade = EStateTrade::Search;
+          m_stateDesired = EStateDesired::Continue;
+          m_stateStochastic = EStateStochastic::Init;
+        }
+      }
       break;
   }
+
+  m_stateDesired = stateDesired;
 
   //const std::chrono::time_point<std::chrono::system_clock> end
   //  = std::chrono::system_clock::now();
