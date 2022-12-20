@@ -193,7 +193,8 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
   m_bReCalcViewPort = true;
 
   DrawChart();
-  //event.Skip();
+
+  event.Skip();
 }
 
 void WinChartView::RescaleViewPort() {
