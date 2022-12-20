@@ -247,35 +247,38 @@ void WinChartView::DrawChart() {
 
       if ( !m_bInDrawChart ) {
 
-        m_bInDrawChart = true;
+        std::scoped_lock<std::mutex> lock( m_mutexChartDataView );
+        if ( !m_bInDrawChart ) {
+          m_bInDrawChart = true;
 
-        boost::asio::post(
-          m_context,
-          [this](){
-            std::scoped_lock<std::mutex> lock( m_mutexChartDataView );
+          boost::asio::post(
+            m_context,
+            [this](){
+              std::scoped_lock<std::mutex> lock( m_mutexChartDataView );
 
-            //if ( m_bReCalcViewPort ) {
+              //if ( m_bReCalcViewPort ) {
 
-              const boost::posix_time::ptime dtEnd = ou::TimeSource::GlobalInstance().Internal(); // works with real vs simulation time
-              const boost::posix_time::ptime dtBegin = dtEnd - m_tdViewPortWidth;
+                const boost::posix_time::ptime dtEnd = ou::TimeSource::GlobalInstance().Internal(); // works with real vs simulation time
+                const boost::posix_time::ptime dtBegin = dtEnd - m_tdViewPortWidth;
 
-              if ( false ) {
-                std::stringstream ss;
-                ss << "vport=" << dtBegin << "," << m_tdViewPortWidth << "," << dtEnd;
-                std::string s( ss.str() );
-                std::cout << s << std::endl;
-              }
+                if ( false ) {
+                  std::stringstream ss;
+                  ss << "vport=" << dtBegin << "," << m_tdViewPortWidth << "," << dtEnd;
+                  std::string s( ss.str() );
+                  std::cout << s << std::endl;
+                }
 
-              m_pChartDataView->SetViewPort( dtBegin, dtEnd );
+                m_pChartDataView->SetViewPort( dtBegin, dtEnd );
 
-              m_bReCalcViewPort = false;
+                m_bReCalcViewPort = false;
 
-            //}
+              //}
 
-            UpdateChartMaster();
+              UpdateChartMaster();
 
-            m_bInDrawChart = false;
-          });
+              m_bInDrawChart = false;
+            });
+        }
       }
     }
   }
