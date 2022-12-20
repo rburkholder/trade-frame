@@ -159,12 +159,36 @@ bool AppAutoTrade::OnInit() {
     m_sim->SetThreadCount( m_choices.nThreads );
     m_sim->SetGroupDirectory( m_choices.sGroupDirectory );
 
-    boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
+    // 20221220-09:20:13.187534
+    bool bOk( true );
     boost::smatch what;
-    if ( boost::regex_search( m_choices.sGroupDirectory, what, expr ) ) {
-      dateSim = boost::gregorian::from_undelimited_string( what[ 0 ] );
-      std::cout << "simulation date " << dateSim << std::endl;
+
+    boost::gregorian::date date;
+    boost::regex exprDate { "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
+    if ( boost::regex_search( m_choices.sGroupDirectory, what, exprDate ) ) {
+      date = boost::gregorian::from_undelimited_string( what[ 0 ] );
     }
+    else bOk = false;
+
+    boost::posix_time::time_duration time;
+    boost::regex exprTime { "([0-9][0-9]:[0-9][0-9]:[0-9][0-9])" };
+    if ( boost::regex_search( m_choices.sGroupDirectory, what, exprTime ) ) {
+      time = boost::posix_time::duration_from_string( what[ 0 ] );
+    }
+    else bOk = false;
+
+    if ( bOk ) {
+      ptime dtUTC = ptime( date, time );
+      boost::local_time::local_date_time lt( dtUTC, ou::TimeSource::TimeZoneNewYork() );
+      boost::posix_time::ptime dtStart = lt.local_time();
+      std::cout << "times: " << dtUTC << "(UTC) is " << dtStart << "(eastern)" << std::endl;
+      dateSim = Strategy::MarketOpenDate( dtUTC );
+      std::cout << "simulation date: " << dateSim << std::endl;
+    }
+    else {
+      return 0;
+    }
+
     // need to be able to hookup simulation depth to the algo
     // does the symbol pump the depth through the same fibre/thread?
     // need to turn off m_pL2Symbols when running a simulation
