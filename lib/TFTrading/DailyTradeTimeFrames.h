@@ -43,8 +43,8 @@ public:
   void TimeTick( const DD& dd );
 
   boost::gregorian::date MarketOpenDate( boost::posix_time::ptime dt ) const;
-  boost::posix_time::ptime Normalize( boost::gregorian::date date, boost::posix_time::time_duration time, const std::string& zone ) const {
-    return ou::TimeSource::GlobalInstance().ConvertRegionalToUtc( date, time, zone );
+  static boost::posix_time::ptime Normalize( boost::gregorian::date date, boost::posix_time::time_duration time, const std::string& zone ) {
+    return ou::TimeSource::ConvertRegionalToUtc( date, time, zone );
   }
 
   void InitForUSEquityExchanges( boost::gregorian::date ); // can be used by simulation
