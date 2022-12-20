@@ -42,7 +42,7 @@ public:
   template<typename DD>  // DD is DatedDatum construct
   void TimeTick( const DD& dd );
 
-  boost::gregorian::date MarketOpenDate( boost::posix_time::ptime dt ) const;
+  static boost::gregorian::date MarketOpenDate( boost::posix_time::ptime dt );
   static boost::posix_time::ptime Normalize( boost::gregorian::date date, boost::posix_time::time_duration time, const std::string& zone ) {
     return ou::TimeSource::ConvertRegionalToUtc( date, time, zone );
   }
@@ -133,7 +133,7 @@ void DailyTradeTimeFrame<T>::InitForUSEquityExchanges( boost::gregorian::date da
 }
 
 template<class T>
-boost::gregorian::date DailyTradeTimeFrame<T>:: MarketOpenDate( boost::posix_time::ptime dtUtcCurrent ) const {
+boost::gregorian::date DailyTradeTimeFrame<T>::MarketOpenDate( boost::posix_time::ptime dtUtcCurrent ) {
   boost::posix_time::ptime dtUtcTransition
     = Normalize( dtUtcCurrent.date(), boost::posix_time::time_duration( 17, 0, 0 ), "America/New_York" );  // market transition time
   boost::gregorian::date date;
