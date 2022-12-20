@@ -483,10 +483,12 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   //m_FeatureSet.FVS(). // use imbalance, and others
 
+  ptime dt( bar.DateTime() );
+
   EStateStochastic stateStochastic( m_stateStochastic ); // sticky until changed
 
   double k = m_vStochastic[1]->Latest();
-  if ( k > 50.0 ) {
+  if ( k >= 50.0 ) {
     if ( k > 80.0 ) {
       stateStochastic = EStateStochastic::Above80;
     }
@@ -495,13 +497,11 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     }
   }
   else {
-    if ( k < 50.0 ) {
-      if ( k < 20.0 ) {
-        stateStochastic = EStateStochastic::Below20;
-      }
-      else {
-        stateStochastic = EStateStochastic::Below50;
-      }
+    if ( k < 20.0 ) {
+      stateStochastic = EStateStochastic::Below20;
+    }
+    else {
+      stateStochastic = EStateStochastic::Below50;
     }
   }
 
@@ -512,9 +512,15 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       // wait for another crossing
       break;
     case EStateStochastic::Above80:
-      if ( EStateStochastic::Above50 == stateStochastic ) {
-        // exit & go short
-        stateDesired = EStateDesired::GoShort;
+      switch ( stateStochastic ) {
+        case EStateStochastic::Above80:
+          break;
+        case EStateStochastic::Above50:
+        case EStateStochastic::Below50:
+        case EStateStochastic::Below20:
+          // exit & go short
+          stateDesired = EStateDesired::GoShort;
+          break;
       }
       break;
     case EStateStochastic::Above50:
@@ -542,23 +548,29 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       }
       break;
     case EStateStochastic::Below20:
-      if ( EStateStochastic::Below50 == stateStochastic ) {
-        // exit & go long
-        stateDesired = EStateDesired::GoLong;
+      switch ( stateStochastic ) {
+        case EStateStochastic::Above80:
+        case EStateStochastic::Above50:
+        case EStateStochastic::Below50:
+          // exit & go long
+          stateDesired = EStateDesired::GoLong;
+          break;
+        case EStateStochastic::Below20:
+          break;
       }
       break;
   }
-
-  m_stateStochastic = stateStochastic;
 
   switch ( m_stateTrade ) {
     case EStateTrade::Search:
       switch ( stateDesired ) {
         case EStateDesired::GoLong:
+          BOOST_LOG_TRIVIAL(info) << dt << " Search->GoLong";
           stateDesired = EStateDesired::Continue;
           EnterLong( bar );
           break;
         case EStateDesired::GoShort:
+          BOOST_LOG_TRIVIAL(info) << dt << " Search->GoShort";
           stateDesired = EStateDesired::Continue;
           EnterShort( bar );
           break;
@@ -570,12 +582,25 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     case EStateTrade::LongExit:
       switch ( stateDesired ) {
         case EStateDesired::GoShort:
+          BOOST_LOG_TRIVIAL(info) << dt << " GoShort->ExitLong";
           // stateDesired = EStateDesired::Continue; leave desire as it is
           ExitLong( bar );
           break;
         case EStateDesired::Exit:
+          BOOST_LOG_TRIVIAL(info) << dt << " Exit->ExitLong";
           stateDesired = EStateDesired::Continue;
           ExitLong( bar );
+          break;
+        case EStateDesired::GoLong:
+          BOOST_LOG_TRIVIAL(info)
+            << dt << " GoLong->Continue:"
+            << (int)stateDesired << "," << (int)m_stateDesired
+            << "," << (int)stateStochastic << "," << (int)m_stateStochastic
+            ; // already long
+          stateDesired = EStateDesired::Continue;
+          break;
+        case EStateDesired::Continue:
+          BOOST_LOG_TRIVIAL(info) << dt << " LongExit->Continue";
           break;
         default:
           assert( false );  // broken state machine
@@ -587,12 +612,25 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     case EStateTrade::ShortExit:
       switch ( stateDesired ) {
         case EStateDesired::GoLong:
+          BOOST_LOG_TRIVIAL(info) << dt << " GoLong->ExitShort";
           // stateDesired = EStateDesired::Continue; leave desire as it is
           ExitShort( bar );
           break;
         case EStateDesired::Exit:
+          BOOST_LOG_TRIVIAL(info) << dt << " Exit->ExitShort";
           stateDesired = EStateDesired::Continue;
           ExitShort( bar );
+          break;
+        case EStateDesired::GoShort:
+          BOOST_LOG_TRIVIAL(info)
+            << dt << " GoShort->Continue:"
+            << (int)stateDesired << "," << (int)m_stateDesired
+            << "," << (int)stateStochastic << "," << (int)m_stateStochastic
+            ; // already short
+          stateDesired = EStateDesired::Continue;
+          break;
+        case EStateDesired::Continue:
+          BOOST_LOG_TRIVIAL(info) << dt << " ShortExit->Continue";
           break;
         default:
           assert( false );  // broken state machine
@@ -632,6 +670,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   }
 
   m_stateDesired = stateDesired;
+  m_stateStochastic = stateStochastic;
 
   //const std::chrono::time_point<std::chrono::system_clock> end
   //  = std::chrono::system_clock::now();
