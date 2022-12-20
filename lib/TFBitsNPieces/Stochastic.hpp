@@ -42,6 +42,8 @@ public:
   double MaxLatest() const { return m_pIndicatorStochastic->Max(); }
   const std::string& MaxName() const { return m_ceStochasticMax.GetName(); }
 
+  double Latest() const { return m_pIndicatorStochastic->K(); }
+
   double MinLatest() const { return m_pIndicatorStochastic->Min(); }
   const std::string& MinName() const { return m_ceStochasticMin.GetName(); }
 
