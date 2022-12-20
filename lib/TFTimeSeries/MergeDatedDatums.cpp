@@ -12,10 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
-//#include "LibCommon/Log.h"
-
 #include "MergeDatedDatums.h"
 
 namespace ou { // One Unified
@@ -37,27 +33,27 @@ MergeDatedDatums::~MergeDatedDatums() {
   }
 }
 
-void MergeDatedDatums::Add( TimeSeries<Quote>& series, MergeDatedDatums::OnDatumHandler function) {
+void MergeDatedDatums::Add( TimeSeries<Quote>& series, MergeDatedDatums::OnDatumHandler function ) {
   m_mhCarriers.Append( new MergeCarrier<Quote>( series, function ) );
 }
 
-void MergeDatedDatums::Add( TimeSeries<Trade>& series, MergeDatedDatums::OnDatumHandler function) {
+void MergeDatedDatums::Add( TimeSeries<Trade>& series, MergeDatedDatums::OnDatumHandler function ) {
   m_mhCarriers.Append( new MergeCarrier<Trade>( series, function ) );
 }
 
-void MergeDatedDatums::Add( TimeSeries<Bar>& series, MergeDatedDatums::OnDatumHandler function) {
+void MergeDatedDatums::Add( TimeSeries<Bar>& series, MergeDatedDatums::OnDatumHandler function ) {
   m_mhCarriers.Append( new MergeCarrier<Bar>( series, function ) );
 }
 
-void MergeDatedDatums::Add( TimeSeries<Greek>& series, MergeDatedDatums::OnDatumHandler function) {
+void MergeDatedDatums::Add( TimeSeries<Greek>& series, MergeDatedDatums::OnDatumHandler function ) {
   m_mhCarriers.Append( new MergeCarrier<Greek>( series, function ) );
 }
 
-void MergeDatedDatums::Add( TimeSeries<DepthByMM>& series, MergeDatedDatums::OnDatumHandler function) {
+void MergeDatedDatums::Add( TimeSeries<DepthByMM>& series, MergeDatedDatums::OnDatumHandler function ) {
   m_mhCarriers.Append( new MergeCarrier<DepthByMM>( series, function ) );
 }
 
-void MergeDatedDatums::Add( TimeSeries<DepthByOrder>& series, MergeDatedDatums::OnDatumHandler function) {
+void MergeDatedDatums::Add( TimeSeries<DepthByOrder>& series, MergeDatedDatums::OnDatumHandler function ) {
   m_mhCarriers.Append( new MergeCarrier<DepthByOrder>( series, function ) );
 }
 
@@ -75,19 +71,18 @@ protected:
 
 // be aware that this maybe running in alternate thread
 // the thread is not created in this class
-// for example, see CSimulationProvider
 void MergeDatedDatums::Run() {
   m_request = eRun;
   size_t cntCarriers = m_mhCarriers.Size();
 //  LOG << "#carriers: " << cntCarriers;  // need cross thread writing
-  MergeCarrierBase *pCarrier;
+  MergeCarrierBase* pCarrier = nullptr;
   m_cntProcessedDatums = 0;
   m_state = eRunning;
   while ( ( 0 != cntCarriers ) && ( eRun == m_request ) ) {  // once all series have been depleted, end of run
     pCarrier = m_mhCarriers.GetRoot();
     pCarrier->ProcessDatum();  // automatically loads next datum when done
     ++m_cntProcessedDatums;
-    if ( NULL == pCarrier->GetDatedDatum() ) {
+    if ( nullptr == pCarrier->GetDatedDatum() ) {
       // retire the consumed carrier
       m_mhCarriers.ArchiveRoot();
       --cntCarriers;
