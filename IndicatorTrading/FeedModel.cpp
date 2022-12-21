@@ -155,10 +155,6 @@ void FeedModel::Disconnect() {
 
 void FeedModel::HandleQuote( const ou::tf::Quote& quote ) {
 
-  if ( !quote.IsValid() ) {
-    return;
-  }
-
   ptime dt( quote.DateTime() );
 
   if ( m_pPanelTrade ) {
@@ -266,7 +262,7 @@ void FeedModel::StartDepthByOrder( size_t nLevels ) { // see AppDoM as reference
       }
 
       m_pPanelTrade->OnQuoteBid( price, volume );
-//      m_pPanelSideBySide->OnL2Bid( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
+      //m_pPanelSideBySide->OnL2Bid( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
 
       if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
         Imbalance( depth );
@@ -340,7 +336,7 @@ void FeedModel::StartDepthByOrder( size_t nLevels ) { // see AppDoM as reference
       }
 
       m_pPanelTrade->OnQuoteAsk( price, volume );
-//      m_pPanelSideBySide->OnL2Ask( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
+      //m_pPanelSideBySide->OnL2Ask( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
 
       if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
         Imbalance( depth );
