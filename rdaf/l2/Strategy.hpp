@@ -96,7 +96,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, Stoch, Skew, PL, ET, MarketDepth };
+  enum EChartSlot { Price, Volume, ImbalanceMean, Stoch, Skew, PL, ET, MarketDepth };
 
   enum class EStateTrade {
     Init,  // initiaize state in current market
@@ -135,8 +135,6 @@ private:
   TreeItem* m_pTreeItemSymbol;
   TreeItem* m_pTreeItemOrder;
 
-  bool m_bChangeConfigFileMessageLatch;
-
   ou::tf::Quote m_quote;
   ou::tf::Quotes m_quotes; // used for stochastics, as storage for watch is off
 
@@ -171,6 +169,9 @@ private:
   ou::ChartEntryIndicator m_ceSkewness;
   ou::ChartEntryIndicator m_ceExecutionTime;
 
+  ou::ChartEntryIndicator m_ceImbalanceRawMean;
+  ou::ChartEntryIndicator m_ceImbalanceSmoothMean;
+
   ou::tf::BarFactory m_bfQuotes01Sec;
 
   using pMarketMaker_t = ou::tf::iqfeed::l2::MarketMaker::pMarketMaker_t;
@@ -178,6 +179,11 @@ private:
 
   using pOrderBased_t = ou::tf::iqfeed::l2::OrderBased::pOrderBased_t;
   pOrderBased_t m_pOrderBased;
+
+  std::atomic_uint32_t m_nMarketOrdersAsk; // pull from InteractiveChart
+  std::atomic_uint32_t m_nMarketOrdersBid; // pull from InteractiveChart
+
+  double m_dblImbalanceMean, m_dblImbalanceSlope;
 
   using pStochastic_t = std::unique_ptr<Stochastic>;
   using vStochastic_t = std::vector<pStochastic_t>;
@@ -211,6 +217,9 @@ private:
   ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
 
   void InitRdaf();
+
+  void StartDepthByOrder();
+  void Imbalance( const ou::tf::Depth& depth );
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

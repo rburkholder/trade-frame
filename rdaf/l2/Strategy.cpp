@@ -57,7 +57,6 @@ Strategy::Strategy(
 , m_pTreeItemSymbol( pTreeItem )
 //, m_pFile( pFile )
 //, m_pFileUtility( pFileUtility )
-, m_bChangeConfigFileMessageLatch( false )
 , m_stateDesired( EStateDesired::Continue )
 , m_stateTrade( EStateTrade::Init )
 , m_stateStochastic( EStateStochastic::Init )
@@ -122,6 +121,13 @@ void Strategy::SetupChart() {
     vt->AddToView( m_cdv, EChartSlot::Price, EChartSlot::Stoch );
   }
 
+  m_cdv.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceRawMean );
+  m_ceImbalanceRawMean.SetName( "imbalance mean" );
+  m_ceImbalanceRawMean.SetColour( ou::Colour::LightGreen );
+
+  m_cdv.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceSmoothMean );
+  m_ceImbalanceSmoothMean.SetColour( ou::Colour::DarkGreen );
+
   //m_cdv.Add( EChartSlot::Skew, &m_ceSkewness );
 
   m_cdv.Add( EChartSlot::PL, &m_ceProfitLoss );
@@ -181,25 +187,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
       );
       break;
     case ou::tf::config::symbol_t::EFeed::L2O:  // L2 via OrderBased (CME/ICE futures)
-
-      pWatch->OnDepthByOrder.Add( MakeDelegate( this, &Strategy::HandleDepthByOrder ) );
-
-      m_pOrderBased = ou::tf::iqfeed::l2::OrderBased::Factory();
-
-      m_FeatureSet.Set( 10 );
-
-      m_pOrderBased->Set( // maybe just do a bind
-        [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fBid_
-          if ( 0 < ix ) {
-            m_FeatureSet.HandleBookChangesBid( op, ix, depth );
-          }
-        },
-        [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
-          if ( 0 < ix ) {
-            m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
-          }
-        }
-      );
+      StartDepthByOrder();
       break;
   }
 
@@ -215,6 +203,177 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
     << "' signal_from='" <<m_config.sSignalFrom
     << "'"
     ;
+
+}
+
+void Strategy::StartDepthByOrder() {
+  // from IndicatorTrading/FeedModel.cpp
+
+  using EState = ou::tf::iqfeed::l2::OrderBased::EState;
+
+  m_FeatureSet.Set( 10 );
+
+  m_pOrderBased = ou::tf::iqfeed::l2::OrderBased::Factory();
+
+  m_pOrderBased->Set(
+    [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fBid_
+
+      ou::tf::Trade::price_t price( depth.Price() );
+      ou::tf::Trade::volume_t volume( depth.Volume() );
+
+      if ( 0 != ix ) {
+        //m_FeatureSet.IntegrityCheck();
+        m_FeatureSet.HandleBookChangesBid( op, ix, depth );
+        //m_FeatureSet.IntegrityCheck();
+      }
+
+      switch ( m_pOrderBased->State() ) {
+        case EState::Add:
+        case EState::Delete:
+          switch ( op ) {
+            case ou::tf::iqfeed::l2::EOp::Increase:
+            case ou::tf::iqfeed::l2::EOp::Insert:
+              if ( 0 != ix ) {
+                m_FeatureSet.Bid_IncLimit( ix, depth );
+              }
+              break;
+            case ou::tf::iqfeed::l2::EOp::Decrease:
+            case ou::tf::iqfeed::l2::EOp::Delete:
+              if ( 1 == ix ) {
+                uint32_t nTicks = m_nMarketOrdersBid.load();
+                // TODO: does arrival rate of deletions affect overall Market rate?
+                if ( 0 == nTicks ) {
+                  m_FeatureSet.Bid_IncCancel( 1, depth );
+                }
+                else {
+                  --m_nMarketOrdersBid;
+                  m_FeatureSet.Bid_IncMarket( 1, depth );
+                }
+              }
+              else { // 1 < ix
+                if ( 0 != ix ) {
+                  m_FeatureSet.Bid_IncCancel( ix, depth );
+                }
+              }
+              break;
+            default:
+              break;
+          }
+          break;
+        case EState::Update:
+          // simply a change, no interesting statistics
+          break;
+        case EState::Clear:
+          break;
+        case EState::Ready:
+          assert( false ); // not allowed
+          break;
+      }
+
+      if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
+        Imbalance( depth );
+      }
+    },
+    [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
+
+      ou::tf::Trade::price_t price( depth.Price() );
+      ou::tf::Trade::volume_t volume( depth.Volume() );
+
+      if ( 0 != ix ) {
+
+        //m_FeatureSet.IntegrityCheck();
+        m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
+        //m_FeatureSet.IntegrityCheck();
+
+      }
+
+      switch ( m_pOrderBased->State() ) {
+        case EState::Add:
+        case EState::Delete:
+          switch ( op ) {
+            case ou::tf::iqfeed::l2::EOp::Increase:
+            case ou::tf::iqfeed::l2::EOp::Insert:
+              if ( 0 != ix ) {
+                m_FeatureSet.Ask_IncLimit( ix, depth );            }
+              break;
+            case ou::tf::iqfeed::l2::EOp::Decrease:
+            case ou::tf::iqfeed::l2::EOp::Delete:
+              if ( 1 == ix ) {
+                uint32_t nTicks = m_nMarketOrdersAsk.load();
+                if ( 0 == nTicks ) {
+                  m_FeatureSet.Ask_IncCancel( 1, depth );
+                }
+                else {
+                  --m_nMarketOrdersAsk;
+                  m_FeatureSet.Ask_IncMarket( 1, depth );
+                }
+              }
+              else { // 1 < ix
+                if ( 0 != ix ) {
+                  m_FeatureSet.Ask_IncCancel( ix, depth );
+                }
+              }
+              break;
+            default:
+              break;
+          }
+        case EState::Update:
+          // simply a change, no interesting statistics
+          break;
+        case EState::Clear:
+          break;
+        case EState::Ready:
+          assert( false ); // not allowed
+          break;
+      }
+
+      if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
+        Imbalance( depth );
+      }
+    }
+  );
+
+  pWatch_t pWatch = m_pPosition->GetWatch();
+  pWatch->OnDepthByOrder.Add( MakeDelegate( this, &Strategy::HandleDepthByOrder ) );
+
+}
+
+void Strategy::Imbalance( const ou::tf::Depth& depth ) {
+  // from IndicatorTrading/FeedModel.cpp
+
+  static const double w1( 19.0 / 20.0 );
+  assert( 1.0 > w1 );
+  static const double w2( 1.0 - w1 );
+
+  ou::tf::RunningStats::Stats stats;
+  m_FeatureSet.ImbalanceSummary( stats );
+
+  m_dblImbalanceMean = w1 * m_dblImbalanceMean + w2 * stats.meanY;  // exponential moving average
+  //m_dblImbalanceSlope = w1 * m_dblImbalanceSlope + w2 * stats.b1;
+
+  //double state = 0.0;
+  //if ( ( 0.0 == m_dblImbalanceMean ) || ( 0.0 == m_dblImbalanceSlope ) ) {} // nothing
+  //else {
+  //  if ( 0.0 < m_dblImbalanceMean ) {
+  //    if ( 0.0 < m_dblImbalanceSlope ) state = 1.0;
+  //    else state = 2.0;
+  //  }
+  //  else {
+  //    if ( 0.0 < m_dblImbalanceSlope ) state = -1.0;
+  //    else state = -2.0;
+  //  }
+  //}
+  //m_ceImbalanceState.Append( depth.DateTime(), state );
+
+  //m_pInteractiveChart->UpdateImbalance( depth.DateTime(), stats.meanY, m_dblImbalanceMean );
+
+  boost::posix_time::ptime dt( depth.DateTime() );
+
+  m_ceImbalanceRawMean.Append( dt, stats.meanY );
+  //m_ceImbalanceRawB1.Append( depth.DateTime(), stats.b1 );
+
+  m_ceImbalanceSmoothMean.Append( dt, m_dblImbalanceMean );
+  //m_ceImbalanceSmoothB1.Append( depth.DateTime(), m_dblImbalanceSlope );
 
 }
 
@@ -349,8 +508,16 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   m_ceVolume.Append( dt, trade.Volume() );
 
   const double mid = m_quote.Midpoint();
-  const double price = trade.Price();
+  const ou::tf::Trade::price_t price = trade.Price();
   const uint64_t volume = trade.Volume();
+
+  if ( price >= mid ) {
+    m_nMarketOrdersAsk++;
+  }
+  else {
+    m_nMarketOrdersBid++;
+  }
+
 /*
   if ( m_pTreeTrade ) { // wait for initialization in thread to start
     std::time_t nTime = boost::posix_time::to_time_t( trade.DateTime() );
@@ -487,7 +654,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   EStateStochastic stateStochastic( m_stateStochastic ); // sticky until changed
 
-  double k = m_vStochastic[1]->Latest();
+  double k = m_vStochastic[2]->Latest();
   if ( k >= 50.0 ) {
     if ( k > 80.0 ) {
       stateStochastic = EStateStochastic::Above80;
