@@ -162,9 +162,9 @@ void InteractiveChart::Init() {
   m_ceImbalanceRawMean.SetColour( ou::Colour::LightGreen );
   m_ceImbalanceSmoothMean.SetColour( ou::Colour::DarkGreen );
 
-  m_ceImbalanceRawB1.SetName( "imbalance slope" );
-  m_ceImbalanceRawB1.SetColour( ou::Colour::LightGreen );
-  m_ceImbalanceSmoothB1.SetColour( ou::Colour::DarkGreen );
+  //m_ceImbalanceRawB1.SetName( "imbalance slope" );
+  //m_ceImbalanceRawB1.SetColour( ou::Colour::LightGreen );
+  //m_ceImbalanceSmoothB1.SetColour( ou::Colour::DarkGreen );
 
   //m_ceImbalanceState.SetName( "imbalance state" );
   //m_ceImbalanceState.SetColour( ou::Colour::Green );
