@@ -349,6 +349,9 @@ bool AppAutoTrade::OnInit() {
         mapStrategy_t::iterator iter = m_mapStrategy.find( sSymbol );
         assert( m_mapStrategy.end() != iter );
         m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
+        if ( m_choices.bStartSimulator ) {
+          m_pWinChartView->SetReview();
+        }
       }
     );
 

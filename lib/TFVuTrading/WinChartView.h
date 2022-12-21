@@ -63,13 +63,11 @@ public:
     long style = SYMBOL_WIN_CHARTINTERACTIVE_STYLE );
   virtual ~WinChartView();
 
-  void SetChartDataView( ou::ChartDataView* pChartDataView, bool bReCalcViewPort = true );
+  void SetChartDataView( ou::ChartDataView* pChartDataView, bool bReCalcViewPort = true ); // bReCalcViewPort isn't used
   ou::ChartDataView* GetChartDataView() const { return m_pChartDataView; }
 
-  using fOnRefreshData_t = std::function<void()>;
-  void SetOnRefreshData( fOnRefreshData_t && f ) {
-    m_fRefreshData = std::move( f );
-  }
+  void SetReview() { m_state = EState::review; }
+  void SetFollow() { m_state = EState::trail; }
 
 protected:
 
@@ -85,8 +83,15 @@ protected:
 
 private:
 
+  enum class EState {
+    trail // original 'follow along' (live mode)
+  , review  // zoom/scroll (simulation mode)
+  };
+
   using pwxBitmap_t = boost::shared_ptr<wxBitmap>;
   using ViewPort_t = ChartEntryTime::range_t;
+
+  EState m_state;
 
   boost::posix_time::time_duration m_tdViewPortWidth;
 
@@ -94,14 +99,11 @@ private:
   ViewPort_t m_vpPrior;
   bool m_bBeginExtentFound;
 
-  fOnRefreshData_t m_fRefreshData; // refreh chart data
-
   ou::ChartMaster m_chartMaster;
   ou::ChartDataView* m_pChartDataView;
 
   wxTimer m_timerGuiRefresh;
   bool m_bInDrawChart;
-  bool m_bReCalcViewPort;
 
   pwxBitmap_t m_pChartBitmap;
 

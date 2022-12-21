@@ -54,6 +54,8 @@ WinChartView::~WinChartView() {
 
 void WinChartView::Init() {
 
+  m_state = EState::trail;
+
   m_bInDrawChart = false;
   m_pChartDataView = nullptr;
 
@@ -120,7 +122,6 @@ void WinChartView::ThreadDrawChart() { // thread for initiating chart, work is p
 void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView, bool bReCalcViewPort ) {
   std::scoped_lock<std::mutex> lock( m_mutexChartDataView );
   // TODO: need to sync with the gui refresh thread
-  m_bReCalcViewPort = bReCalcViewPort;
   m_pChartDataView = pChartDataView; // TODO: need some additional tender loving care with this for the mutex
 }
 
@@ -136,7 +137,7 @@ void WinChartView::HandleMouse( wxMouseEvent& event ) {
   // 0,120,-120
   m_chartMaster.CrossHairPosition( x, y );
   // TODO: translate into a price
-  //event.Skip();
+  event.Skip();
 }
 
 void WinChartView::HandleMouseLeftClick( wxMouseEvent& event ) {
@@ -144,6 +145,7 @@ void WinChartView::HandleMouseLeftClick( wxMouseEvent& event ) {
   double dblY;
   m_chartMaster.WorldCoord( nChart, dblY );
   LeftClick( nChart, dblY );
+  event.Skip();
 }
 
 void WinChartView::HandleMouseRightClick( wxMouseEvent& event ) {
@@ -151,6 +153,7 @@ void WinChartView::HandleMouseRightClick( wxMouseEvent& event ) {
   double dblY;
   m_chartMaster.WorldCoord( nChart, dblY );
   RightClick( nChart, dblY );
+  event.Skip();
 }
 
 void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
@@ -190,8 +193,6 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
 
   //std::cout << "m_tdViewPortWidth=" << m_tdViewPortWidth << std::endl;
 
-  m_bReCalcViewPort = true;
-
   DrawChart();
 
   event.Skip();
@@ -225,7 +226,7 @@ void WinChartView::HandleMouseLeave( wxMouseEvent& event ) {
 void WinChartView::HandlePaint( wxPaintEvent& event ) {
   if ( 0 != m_pChartBitmap.use_count() ) {
     wxPaintDC dc( this );
-    dc.DrawBitmap( *m_pChartBitmap.get(), 0, 0);
+    dc.DrawBitmap( *m_pChartBitmap.get(), 0, 0 );
   }
 }
 
@@ -236,7 +237,6 @@ void WinChartView::HandleSize( wxSizeEvent& event ) {
 }
 
 void WinChartView::HandleGuiRefresh( wxTimerEvent& event ) {
-  if ( m_fRefreshData ) m_fRefreshData();
   DrawChart();
 }
 
@@ -257,23 +257,24 @@ void WinChartView::DrawChart() {
             [this](){
               std::scoped_lock<std::mutex> lock( m_mutexChartDataView );
 
-              //if ( m_bReCalcViewPort ) {
+              static const boost::posix_time::time_duration one_sec( 0, 0, 1 ); // provide a border
 
-                const boost::posix_time::ptime dtEnd = ou::TimeSource::GlobalInstance().Internal(); // works with real vs simulation time
-                const boost::posix_time::ptime dtBegin = dtEnd - m_tdViewPortWidth;
+              switch ( m_state ) {
+                case EState::trail:
+                  {
+                    const boost::posix_time::ptime dtEnd = ou::TimeSource::GlobalInstance().Internal() + one_sec; // works with real vs simulation time
+                    const boost::posix_time::ptime dtBegin = dtEnd - m_tdViewPortWidth;
 
-                if ( false ) {
-                  std::stringstream ss;
-                  ss << "vport=" << dtBegin << "," << m_tdViewPortWidth << "," << dtEnd;
-                  std::string s( ss.str() );
-                  std::cout << s << std::endl;
-                }
-
-                m_pChartDataView->SetViewPort( dtBegin, dtEnd );
-
-                m_bReCalcViewPort = false;
-
-              //}
+                    m_pChartDataView->SetViewPort( dtBegin, dtEnd );
+                  }
+                  break;
+                case EState::review:
+                  {
+                    const ou::ChartDataView::ViewPort_t view = m_pChartDataView->GetExtents();
+                    m_pChartDataView->SetViewPort( view.dtEnd - m_tdViewPortWidth, view.dtEnd + one_sec );
+                  }
+                  break;
+              }
 
               UpdateChartMaster();
 
