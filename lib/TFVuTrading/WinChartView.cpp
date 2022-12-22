@@ -54,12 +54,12 @@ WinChartView::~WinChartView() {
 
 void WinChartView::Init() {
 
-  m_state = EState::trail;
+  SetSim( false );
 
   m_bInDrawChart = false;
   m_pChartDataView = nullptr;
 
-  m_dblViewPortRatio = 1.0;
+  //m_dblViewPortRatio = 1.0;
   m_bBeginExtentFound = false;
 
   m_tdViewPortWidth = boost::posix_time::time_duration( 0, 10, 0 );  // default viewport width to 10 minutes
@@ -123,6 +123,12 @@ void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView, bool bRe
   std::scoped_lock<std::mutex> lock( m_mutexChartDataView );
   // TODO: need to sync with the gui refresh thread
   m_pChartDataView = pChartDataView; // TODO: need some additional tender loving care with this for the mutex
+  if ( m_pChartDataView ) {
+    m_vpDataViewVisual = m_vpDataViewExtents = m_pChartDataView->GetExtents();
+  }
+  else {
+    m_vpDataViewVisual = m_vpDataViewExtents = ViewPort_t();
+  }
 }
 
 void WinChartView::HandleMouse( wxMouseEvent& event ) {
@@ -167,10 +173,10 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
   wxPoint pos = event.GetPosition();
   wxSize size = GetClientSize();
 
-  if ( 0 == size.GetWidth() ) m_dblViewPortRatio = 1.0;
-  else {
-    m_dblViewPortRatio = (double) pos.x / (double) size.GetWidth();
-  }
+  //if ( 0 == size.GetWidth() ) m_dblViewPortRatio = 1.0;
+  //else {
+  //  m_dblViewPortRatio = (double) pos.x / (double) size.GetWidth();
+  //}
 
   //std::cout
   //      << "Wheel: " << delta << "," << rotation << ",sca:"
@@ -198,16 +204,18 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
   event.Skip();
 }
 
-void WinChartView::RescaleViewPort() {
-  ViewPort_t vp;
-  if ( !m_bBeginExtentFound ) {
-    vp = m_pChartDataView->GetExtents();
-    if ( vp.HasBegin() ) m_bBeginExtentFound = true;
-  }
-  else {
+void WinChartView::RescaleViewPort() { // is not referenced
+
+  ViewPort_t vp; // this isn't used anywhere.  refer to
+
+  if ( m_bBeginExtentFound ) {
     // assume 'begin' extent never changes - time moves forward
     vp.dtBegin = m_vpPrior.dtBegin; // may or may not need this line
     vp.dtEnd = m_pChartDataView->GetExtentEnd();
+  }
+  else {
+    vp = m_pChartDataView->GetExtents();
+    if ( vp.HasBegin() ) m_bBeginExtentFound = true;
   }
 }
 
@@ -240,6 +248,16 @@ void WinChartView::HandleGuiRefresh( wxTimerEvent& event ) {
   DrawChart();
 }
 
+void WinChartView::SetSim( bool bSim ) {
+  m_bSim = bSim;
+  if ( bSim ) {
+    m_state = EState::sim_trail;
+  }
+  else {
+    m_state = EState::live_trail;
+  }
+}
+
 // TODO: there may be an issue with cursor & no data, which locks up the gui
 void WinChartView::DrawChart() {
   if ( m_threadDrawChart.joinable() ) {
@@ -260,7 +278,7 @@ void WinChartView::DrawChart() {
               static const boost::posix_time::time_duration one_sec( 0, 0, 1 ); // provide a border
 
               switch ( m_state ) {
-                case EState::trail:
+                case EState::live_trail:
                   {
                     const boost::posix_time::ptime dtEnd = ou::TimeSource::GlobalInstance().Internal() + one_sec; // works with real vs simulation time
                     const boost::posix_time::ptime dtBegin = dtEnd - m_tdViewPortWidth;
@@ -268,10 +286,17 @@ void WinChartView::DrawChart() {
                     m_pChartDataView->SetViewPort( dtBegin, dtEnd );
                   }
                   break;
-                case EState::review:
+                case EState::live_review:
+                  break;
+                case EState::sim_trail:
                   {
-                    const ou::ChartDataView::ViewPort_t view = m_pChartDataView->GetExtents();
-                    m_pChartDataView->SetViewPort( view.dtEnd - m_tdViewPortWidth, view.dtEnd + one_sec );
+                    m_vpDataViewExtents = m_pChartDataView->GetExtents(); // TODO: obtain just end extent?
+                    m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - m_tdViewPortWidth, m_vpDataViewExtents.dtEnd + one_sec );
+                    m_pChartDataView->SetViewPort( m_vpDataViewVisual );
+                  }
+                  break;
+                case EState::sim_review:
+                  {
                   }
                   break;
               }

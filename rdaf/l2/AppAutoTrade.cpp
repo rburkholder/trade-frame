@@ -350,7 +350,7 @@ bool AppAutoTrade::OnInit() {
         assert( m_mapStrategy.end() != iter );
         m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
         if ( m_choices.bStartSimulator ) {
-          m_pWinChartView->SetReview();
+          m_pWinChartView->SetSim( true );
         }
       }
     );

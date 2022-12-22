@@ -66,8 +66,7 @@ public:
   void SetChartDataView( ou::ChartDataView* pChartDataView, bool bReCalcViewPort = true ); // bReCalcViewPort isn't used
   ou::ChartDataView* GetChartDataView() const { return m_pChartDataView; }
 
-  void SetReview() { m_state = EState::review; }
-  void SetFollow() { m_state = EState::trail; }
+  void SetSim( bool bSim = true );
 
 protected:
 
@@ -84,23 +83,29 @@ protected:
 private:
 
   enum class EState {
-    trail // original 'follow along' (live mode)
-  , review  // zoom/scroll (simulation mode)
+    live_trail // original 'follow along' (live mode)
+  , live_review
+  , sim_trail
+  , sim_review
   };
 
   using pwxBitmap_t = boost::shared_ptr<wxBitmap>;
   using ViewPort_t = ChartEntryTime::range_t;
 
-  EState m_state;
+  bool m_bSim; // default to false
+  EState m_state; // default to live_trail
 
-  boost::posix_time::time_duration m_tdViewPortWidth;
+  boost::posix_time::time_duration m_tdViewPortWidth; // width of currently displayed window
 
-  double m_dblViewPortRatio; // 0.0 ... 1.0 (expands around mouse)
+  //double m_dblViewPortRatio; // 0.0 ... 1.0 (expands around mouse)
   ViewPort_t m_vpPrior;
   bool m_bBeginExtentFound;
 
   ou::ChartMaster m_chartMaster;
   ou::ChartDataView* m_pChartDataView;
+
+  ViewPort_t m_vpDataViewExtents;
+  ViewPort_t m_vpDataViewVisual;
 
   wxTimer m_timerGuiRefresh;
   bool m_bInDrawChart;
