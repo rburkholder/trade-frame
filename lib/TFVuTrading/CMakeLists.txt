@@ -31,7 +31,6 @@ set(
     GridIBPositionDetails_impl.h
     GridOptionChain.h
     GridOptionChain_impl.h
-    InterfaceBoundEvents.h
     ModelBase.h
     ModelCell.h
     ModelCell_macros.h
@@ -90,7 +89,6 @@ set(
     GridIBPositionDetails_impl.cpp
     GridOptionChain.cpp
     GridOptionChain_impl.cpp
-    InterfaceBoundEvents.cpp
     ModelBase.cpp
     ModelCell.cpp
     ModelChartHdf5.cpp

@@ -36,8 +36,6 @@
 #include <OUCharting/ChartMaster.h>
 #include <OUCharting/ChartDataView.h>
 
-#include <TFVuTrading/InterfaceBoundEvents.h>
-
 #define SYMBOL_WIN_CHARTINTERACTIVE_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_WIN_CHARTINTERACTIVE_TITLE _("Window Interactive Chart")
 #define SYMBOL_WIN_CHARTINTERACTIVE_IDNAME ID_WINDOW_CHARTINTERACTIVE
@@ -47,7 +45,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class WinChartView: public wxWindow, public InterfaceBoundEvents {
+class WinChartView: public wxWindow {
 public:
 
   WinChartView();
@@ -141,8 +139,8 @@ private:
   void Init();
   void CreateControls();
 
-  virtual void BindEvents();
-  virtual void UnbindEvents();
+  void BindEvents();
+  void UnbindEvents();
 
 };
 

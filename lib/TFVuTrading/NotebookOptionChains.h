@@ -31,7 +31,6 @@
 #include <wx/wx.h>
 #include <wx/notebook.h>
 
-#include <TFVuTrading/InterfaceBoundEvents.h>
 #include <TFTrading/TradingEnumerations.h>
 #include <TFOptions/Option.h>
 #include <TFVuTrading/GridOptionChain.h>
@@ -46,7 +45,7 @@ namespace tf { // TradeFrame
 #define SYMBOL_OPTIONCHAINS_SIZE wxSize(-1, -1)
 #define SYMBOL_OPTIONCHAINS_POSITION wxDefaultPosition
 
-class NotebookOptionChains: public wxNotebook, public InterfaceBoundEvents {
+class NotebookOptionChains: public wxNotebook {
   friend class boost::serialization::access;
 public:
 
@@ -80,10 +79,6 @@ public:
   fOnPageEvent_t m_fOnPageChanged;  // new page in place
 
   void SetGridOptionChain_ColumnSaver( ou::tf::GridColumnSizer* );
-
-// really don't want these here, but necessary to deal with searchdynamiceventtable issues
-  virtual void BindEvents();
-  virtual void UnbindEvents();
 
 protected:
 private:
@@ -135,6 +130,9 @@ private:
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };
+
+  void BindEvents();
+  void UnbindEvents();
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

@@ -264,7 +264,7 @@ void NotebookOptionChains::OnDestroy( wxWindowDestroyEvent& event ) {
 
   assert( Unbind( wxEVT_DESTROY, &NotebookOptionChains::OnDestroy, this ) );
 
-  event.Skip();  // auto followed by Destroy();
+  event.Skip( true );  // auto followed by Destroy();
 }
 
 wxBitmap NotebookOptionChains::GetBitmapResource( const wxString& name ) {

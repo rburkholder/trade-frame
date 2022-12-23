@@ -46,6 +46,7 @@
 #include "TreeItemGroup.h"
 #include "InstrumentActions.h"
 
+class wxBoxSizer;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

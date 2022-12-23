@@ -190,7 +190,7 @@ void PanelCharts::CreateControls() {
 void PanelCharts::RemoveRightDetail() {
   auto winRightDetail = m_winRightDetail;
   if ( 0 != winRightDetail ) {
-    dynamic_cast<InterfaceBoundEvents*>( winRightDetail )->UnbindEvents();
+    //dynamic_cast<InterfaceBoundEvents*>( winRightDetail )->UnbindEvents();
     // perform this afterwards as the DynamicEventTable seems to have problems
     CallAfter([this,winRightDetail](){
       assert( 0 != winRightDetail );
