@@ -11,8 +11,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-//#include <sstream>
-#include <boost/format.hpp>
 
 #include "ChartMaster.h"
 #include "ChartDataView.h"
@@ -20,10 +18,11 @@
 namespace ou { // One Unified
 
 ChartMaster::ChartMaster( unsigned int width, unsigned int height )
-: m_pCdv( nullptr), m_pDA( nullptr ),
-  m_nChartWidth( width ), m_nChartHeight( height ),
-  m_intCrossHairX {}, m_intCrossHairY {}, m_bCrossHair( false ),
-  m_bHasData( false )
+: m_pCdv( nullptr), m_pDA( nullptr )
+, m_nChartWidth( width ), m_nChartHeight( height )
+, m_intCrossHairX {}, m_intCrossHairY {}, m_bCrossHair( false )
+, m_bHasData( false )
+, m_formatter( "%.2f"  )
 {
   Initialize();
 }
@@ -294,8 +293,7 @@ bool ChartMaster::DrawDynamicLayer() {
 
       assert( nullptr != pChartFocus );
       m_dblY = pChartFocus->getYValue( m_intCrossHairY - pChartFocus->getAbsOffsetY() );
-      static boost::format fmter( "%.2f" );
-      std::string sValue = ( fmter % m_dblY ).str();
+      std::string sValue = ( m_formatter % m_dblY ).str();
 
       // chartdir does not like taking a c_str() of anything, so need to perform a copy
       char sz[100];

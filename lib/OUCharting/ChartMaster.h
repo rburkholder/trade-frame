@@ -17,6 +17,8 @@
 #include <string>
 #include <functional>
 
+#include <boost/format.hpp>
+
 // Note, that there is a wxChartDir wrapper!
 // https://github.com/utelle/wxchartdir
 // https://www.wxwidgets.org/blog/2018/08/wxchartdir-using-chartdirector-in-wxwidgets-applications/
@@ -75,6 +77,8 @@ private:
   using vSubChart_t = std::vector<pXYChart_t>;
 
   vSubChart_t m_vSubCharts;
+
+  boost::format m_formatter;
 
   XYChart* m_pXY0;
   DrawArea* m_pDA;
