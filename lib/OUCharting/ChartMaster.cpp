@@ -22,6 +22,7 @@ ChartMaster::ChartMaster( unsigned int width, unsigned int height )
 , m_nChartWidth( width ), m_nChartHeight( height )
 , m_intCrossHairX {}, m_intCrossHairY {}, m_bCrossHair( false )
 , m_bHasData( false )
+, m_dblX {}, m_dblY {}
 , m_formatter( "%.2f"  )
 {
   Initialize();
@@ -292,6 +293,7 @@ bool ChartMaster::DrawDynamicLayer() {
       bCrossHairs = true;
 
       assert( nullptr != pChartFocus );
+      m_dblY = pChartFocus->getXValue( m_intCrossHairX - pChartFocus->getAbsOffsetX() );
       m_dblY = pChartFocus->getYValue( m_intCrossHairY - pChartFocus->getAbsOffsetY() );
       std::string sValue = ( m_formatter % m_dblY ).str();
 

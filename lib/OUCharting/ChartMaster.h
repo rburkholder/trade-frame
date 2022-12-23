@@ -89,7 +89,8 @@ private:
   bool m_bCrossHair;
 
   int m_nChart;
-  double m_dblY;
+  double m_dblX; // date time
+  double m_dblY; // chart specific value
 
   void Initialize();
 
