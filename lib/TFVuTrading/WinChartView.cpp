@@ -149,7 +149,7 @@ void WinChartView::HandleMouse( wxMouseEvent& event ) {
 void WinChartView::HandleMouseLeftClick( wxMouseEvent& event ) {
   int nChart;
   double dblY;
-  m_chartMaster.WorldCoord( nChart, dblY );
+  m_chartMaster.GetWorldCoordY( nChart, dblY );
   LeftClick( nChart, dblY );
   event.Skip();
 }
@@ -157,7 +157,7 @@ void WinChartView::HandleMouseLeftClick( wxMouseEvent& event ) {
 void WinChartView::HandleMouseRightClick( wxMouseEvent& event ) {
   int nChart;
   double dblY;
-  m_chartMaster.WorldCoord( nChart, dblY );
+  m_chartMaster.GetWorldCoordY( nChart, dblY );
   RightClick( nChart, dblY );
   event.Skip();
 }

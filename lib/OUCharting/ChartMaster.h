@@ -57,7 +57,7 @@ public:
   void CrossHairPosition( int x, int y );
   void CrossHairDraw( bool );
 
-  void WorldCoord( int& nChart, double& dblY ) const { nChart = m_nChart; dblY = m_dblY; }
+  void GetWorldCoordY( int& nChart, double& dblY ) const { nChart = m_nChart; dblY = m_dblY; }
 
 protected:
 
