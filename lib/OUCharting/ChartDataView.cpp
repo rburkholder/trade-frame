@@ -169,28 +169,31 @@ ChartDataView::ViewPort_t ChartDataView::GetExtents() const {
     m_vChartEntryCarrier.begin(), m_vChartEntryCarrier.end(),
     [&view](const ChartEntryCarrier& cec ){
       try {
-        ViewPort_t extent = dynamic_cast<const ChartEntryTime*>( cec.GetChartEntry() )->GetExtents();
+        const ChartEntryTime* p = dynamic_cast<const ChartEntryTime*>( cec.GetChartEntry() );
+        if ( p ) {
+          ViewPort_t extent = p->GetExtents();
 
-        if ( boost::posix_time::not_a_date_time != view.dtBegin ) {
-          if ( boost::posix_time::not_a_date_time != extent.dtBegin ) {
-            if ( extent.dtBegin < view.dtBegin ) {
-              view.dtBegin = extent.dtBegin;
+          if ( boost::posix_time::not_a_date_time != view.dtBegin ) {
+            if ( boost::posix_time::not_a_date_time != extent.dtBegin ) {
+              if ( extent.dtBegin < view.dtBegin ) {
+                view.dtBegin = extent.dtBegin;
+              }
             }
           }
-        }
-        else {
-          view.dtBegin = extent.dtBegin;
-        }
+          else {
+            view.dtBegin = extent.dtBegin;
+          }
 
-        if ( boost::posix_time::not_a_date_time != view.dtEnd ) {
-          if ( boost::posix_time::not_a_date_time != extent.dtEnd ) {
-            if ( extent.dtEnd > view.dtEnd ) {
-              view.dtEnd = extent.dtEnd;
+          if ( boost::posix_time::not_a_date_time != view.dtEnd ) {
+            if ( boost::posix_time::not_a_date_time != extent.dtEnd ) {
+              if ( extent.dtEnd > view.dtEnd ) {
+                view.dtEnd = extent.dtEnd;
+              }
             }
           }
-        }
-        else {
-          view.dtEnd = extent.dtEnd;
+          else {
+            view.dtEnd = extent.dtEnd;
+          }
         }
 
       }
