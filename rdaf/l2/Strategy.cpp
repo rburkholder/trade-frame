@@ -76,6 +76,15 @@ Strategy::Strategy(
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
 
+  m_cemZero.AddMark( 0, ou::Colour::Black,  "0" );
+
+  // need to present the marks prior to presenting the data
+  m_cemStochastic.AddMark( 100, ou::Colour::Black,    "" ); // hidden by legend
+  m_cemStochastic.AddMark(  80, ou::Colour::Red,   "80%" );
+  m_cemStochastic.AddMark(  50, ou::Colour::Green, "50%" );
+  m_cemStochastic.AddMark(  20, ou::Colour::Blue,  "20%" );
+  m_cemStochastic.AddMark(   0, ou::Colour::Black,  "0%" );
+
   m_ceProfitUnRealized.SetColour( ou::Colour::Purple );
   m_ceProfitRealized.SetColour( ou::Colour::DeepSkyBlue );
   m_ceCommissionsPaid.SetColour( ou::Colour::DarkGreen );
@@ -125,9 +134,13 @@ void Strategy::SetupChart() {
 
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
+  m_cdv.Add( EChartSlot::Stoch, &m_cemStochastic );
+
   for ( vStochastic_t::value_type& vt: m_vStochastic ) {
     vt->AddToView( m_cdv, EChartSlot::Price, EChartSlot::Stoch );
   }
+
+  m_cdv.Add( EChartSlot::ImbalanceMean, &m_cemZero );
 
   m_cdv.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceRawMean );
   m_ceImbalanceRawMean.SetName( "imbalance mean" );

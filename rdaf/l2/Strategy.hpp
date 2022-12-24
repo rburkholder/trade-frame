@@ -175,6 +175,9 @@ private:
   ou::ChartEntryIndicator m_ceImbalanceRawMean;
   ou::ChartEntryIndicator m_ceImbalanceSmoothMean;
 
+  ou::ChartEntryMark m_cemStochastic;
+  ou::ChartEntryMark m_cemZero;
+
   ou::tf::BarFactory m_bfQuotes01Sec;
 
   using pMarketMaker_t = ou::tf::iqfeed::l2::MarketMaker::pMarketMaker_t;
