@@ -161,7 +161,10 @@ private:
   ou::ChartEntryShape m_ceShortFill;
   ou::ChartEntryShape m_ceShortExit;
 
-  ou::ChartEntryIndicator m_ceProfitLoss;
+  ou::ChartEntryIndicator m_ceProfitUnRealized;
+  ou::ChartEntryIndicator m_ceProfitRealized;
+  ou::ChartEntryIndicator m_ceCommissionsPaid;
+  ou::ChartEntryIndicator m_ceProfit;
 
   ou::ChartEntryIndicator m_cdMarketDepthAsk;
   ou::ChartEntryIndicator m_cdMarketDepthBid;

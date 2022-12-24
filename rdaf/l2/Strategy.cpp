@@ -76,6 +76,11 @@ Strategy::Strategy(
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
 
+  m_ceProfitUnRealized.SetColour( ou::Colour::Purple );
+  m_ceProfitRealized.SetColour( ou::Colour::DeepSkyBlue );
+  m_ceCommissionsPaid.SetColour( ou::Colour::DarkGreen );
+  m_ceProfit.SetColour( ou::Colour::Green );
+
   m_ceQuoteAsk.SetName( "Ask" );
   m_ceTrade.SetName( "Tick" );
   m_ceQuoteBid.SetName( "Bid" );
@@ -84,7 +89,10 @@ Strategy::Strategy(
 
   //m_ceSkewness.SetName( "Skew" );
 
-  m_ceProfitLoss.SetName( "P/L" );
+  m_ceProfitUnRealized.SetName( "UnRealized" );
+  m_ceProfitRealized.SetName( "Realized" );
+  m_ceCommissionsPaid.SetName( "Commissions" );
+  m_ceProfit.SetName( "Profit" );
 
   //m_ceExecutionTime.SetName( "Execution Time" );
 
@@ -130,7 +138,10 @@ void Strategy::SetupChart() {
 
   //m_cdv.Add( EChartSlot::Skew, &m_ceSkewness );
 
-  m_cdv.Add( EChartSlot::PL, &m_ceProfitLoss );
+  m_cdv.Add( EChartSlot::PL, &m_ceProfitUnRealized );
+  m_cdv.Add( EChartSlot::PL, &m_ceProfitRealized );
+  m_cdv.Add( EChartSlot::PL, &m_ceCommissionsPaid );
+  m_cdv.Add( EChartSlot::PL, &m_ceProfit );
 
   //m_cdv.Add( EChartSlot::ET, &m_ceExecutionTime );
 
@@ -578,7 +589,11 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
 
   m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
-  m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
+
+  m_ceProfitUnRealized.Append( bar.DateTime(), dblUnRealized );
+  m_ceProfitRealized.Append( bar.DateTime(), dblRealized );
+  m_ceCommissionsPaid.Append( bar.DateTime(), dblCommissionsPaid );
+  m_ceProfit.Append( bar.DateTime(), dblTotal );
 
   TimeTick( bar );
 }
