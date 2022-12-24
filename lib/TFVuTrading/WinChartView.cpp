@@ -164,40 +164,74 @@ void WinChartView::HandleMouseRightClick( wxMouseEvent& event ) {
 
 void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
 
+  static const boost::posix_time::time_duration tdTenSeconds( 0, 0, 10 );
+
   //int delta = event.GetWheelDelta();
   int rotation = event.GetWheelRotation(); // has positive, negative, use delta to normalize
-  //bool bShift = event.ShiftDown();
-  //bool bControl = event.ControlDown();
-  //bool bAlt = event.AltDown();
 
   wxPoint pos = event.GetPosition();
   wxSize size = GetClientSize();
 
-  //if ( 0 == size.GetWidth() ) m_dblViewPortRatio = 1.0;
-  //else {
-  //  m_dblViewPortRatio = (double) pos.x / (double) size.GetWidth();
-  //}
+  double dblViewPortRatio( 0.5 );
+  if ( 10 <= size.GetWidth() ) {
+    dblViewPortRatio = (double) pos.x / (double) size.GetWidth();
+  }
+  int pctRatio = std::floor( 100.0 * dblViewPortRatio );
 
-  //std::cout
-  //      << "Wheel: " << delta << "," << rotation << ",sca:"
-  //    << bShift << bControl << bAlt
-  //    << std::endl;
+  // use the view port ratio to determine how much to expand on left vs right side
+  // if right size is beyond extent, shift all left to fit (same for left side)
+  // scale the ratio to 100, then use integers for the math
+  // m_dblViewPortRatio should probably be maintained as int instead then
 
-  static const boost::posix_time::time_duration tdTenSeconds( 0, 0, 10 );
-  boost::posix_time::time_duration tdCurrent( m_tdViewPortWidth );
+  boost::posix_time::time_duration tdNewWidth;
+  boost::posix_time::time_duration tdDelta;
+  boost::posix_time::time_duration tdDeltaLeft;
+  boost::posix_time::time_duration tdDeltaRight;
+
+  assert( m_vpDataViewVisual.HasBoth() );
 
   if ( 0 > rotation ) {
-    m_tdViewPortWidth *= 12;
-    m_tdViewPortWidth /= 10;
+    tdNewWidth = m_tdViewPortWidth * 12;
+    tdNewWidth /= 10;
+
+    tdDelta = tdNewWidth - m_tdViewPortWidth;
+
+    tdDeltaLeft = tdDelta * pctRatio;
+    tdDeltaLeft /= 100;
+
+    tdDeltaRight = tdDelta - tdDeltaLeft;
+
+    m_vpDataViewVisual.dtBegin -= tdDeltaLeft;
+    m_vpDataViewVisual.dtEnd += tdDeltaRight;
+
+    if ( m_vpDataViewVisual.dtEnd >= m_vpDataViewExtents.dtEnd ) {
+      m_state = m_bSim ? EState::sim_trail : EState::live_trail;
+      m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdNewWidth, m_vpDataViewExtents.dtEnd );
+    }
   }
   else {
-    m_tdViewPortWidth *= 10;
-    m_tdViewPortWidth /= 12;
+    tdNewWidth = m_tdViewPortWidth * 10;
+    tdNewWidth /= 12;
+
+    tdDelta = m_tdViewPortWidth - tdNewWidth;
+
+    if ( tdDelta < tdTenSeconds ) tdDelta = tdTenSeconds;
+
+    tdDeltaLeft = tdDelta * pctRatio;
+    tdDeltaLeft /= 100;
+
+    tdDeltaRight = tdDelta - tdDeltaLeft;
+
+    m_vpDataViewVisual.dtBegin += tdDeltaLeft;
+    m_vpDataViewVisual.dtEnd -= tdDeltaRight;
+
+    if ( m_vpDataViewVisual.dtEnd < m_vpDataViewExtents.dtEnd ) {
+      m_state = m_bSim ? EState::sim_review : EState::live_review;
+      //m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdNewWidth, m_vpDataViewExtents.dtEnd );
+    }
   }
 
-  if ( m_tdViewPortWidth < tdTenSeconds ) m_tdViewPortWidth = tdCurrent;
-
-  //std::cout << "m_tdViewPortWidth=" << m_tdViewPortWidth << std::endl;
+  m_tdViewPortWidth = tdNewWidth;
 
   DrawChart();
 
@@ -280,13 +314,14 @@ void WinChartView::DrawChart() {
               switch ( m_state ) {
                 case EState::live_trail:
                   {
-                    const boost::posix_time::ptime dtEnd = ou::TimeSource::GlobalInstance().Internal() + one_sec; // works with real vs simulation time
-                    const boost::posix_time::ptime dtBegin = dtEnd - m_tdViewPortWidth;
+                    m_vpDataViewVisual.dtEnd = ou::TimeSource::GlobalInstance().Internal() + one_sec; // works with real vs simulation time
+                    m_vpDataViewVisual.dtBegin = m_vpDataViewVisual.dtEnd - m_tdViewPortWidth;
 
-                    m_pChartDataView->SetViewPort( dtBegin, dtEnd );
+                    m_pChartDataView->SetViewPort( m_vpDataViewVisual );
                   }
                   break;
                 case EState::live_review:
+                  m_pChartDataView->SetViewPort( m_vpDataViewVisual );
                   break;
                 case EState::sim_trail:
                   {
@@ -296,8 +331,7 @@ void WinChartView::DrawChart() {
                   }
                   break;
                 case EState::sim_review:
-                  {
-                  }
+                  m_pChartDataView->SetViewPort( m_vpDataViewVisual );
                   break;
               }
 
