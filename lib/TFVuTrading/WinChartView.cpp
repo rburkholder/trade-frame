@@ -97,13 +97,17 @@ void WinChartView::BindEvents() {
   Bind( wxEVT_PAINT, &WinChartView::HandlePaint, this, this->GetId() );
   Bind( wxEVT_SIZE, &WinChartView::HandleSize, this, this->GetId() );
 
-  Bind( wxEVT_MOTION, &WinChartView::HandleMouse, this, this->GetId() );
+  Bind( wxEVT_MOTION, &WinChartView::HandleMouseMotion, this, this->GetId() );
   Bind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this, this->GetId() );
+
   Bind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this, this->GetId() );
   Bind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this, this->GetId() );
 
-  Bind( wxEVT_LEFT_UP, &WinChartView::HandleMouseLeftClick, this, this->GetId() );
-  Bind( wxEVT_RIGHT_UP, &WinChartView::HandleMouseRightClick, this, this->GetId() );
+  Bind( wxEVT_LEFT_DOWN, &WinChartView::HandleMouseLeftDown, this, this->GetId() );
+  Bind( wxEVT_LEFT_UP,   &WinChartView::HandleMouseLeftUp,   this, this->GetId() );
+
+  Bind( wxEVT_RIGHT_DOWN, &WinChartView::HandleMouseRightDown, this, this->GetId() );
+  Bind( wxEVT_RIGHT_UP,   &WinChartView::HandleMouseRightUp,   this, this->GetId() );
 
   // this GuiRefresh initialization should come after all else
   m_timerGuiRefresh.SetOwner( this );
@@ -131,35 +135,123 @@ void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView, bool bRe
   }
 }
 
-void WinChartView::HandleMouse( wxMouseEvent& event ) {
+void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
   //if ( event.LeftIsDown() ) std::cout << "Left is down" << std::endl;
   //if ( event.MiddleIsDown() ) std::cout << "Middle is down" << std::endl;
   //if ( event.RightIsDown() ) std::cout << "Right is down" << std::endl;
   wxCoord x, y;
   event.GetPosition( &x, &y );
   //std::cout << x << "," << y << std::endl;
-//  std::cout << event.AltDown() << "," << event.ControlDown() << "," << event.ShiftDown() << std::endl;
-//  std::cout << event.GetWheelAxis() << "," << event.GetWheelDelta() << "," << event.GetWheelRotation() << std::endl;
+  //std::cout << event.AltDown() << "," << event.ControlDown() << "," << event.ShiftDown() << std::endl;
+  //std::cout << event.GetWheelAxis() << "," << event.GetWheelDelta() << "," << event.GetWheelRotation() << std::endl;
   // 0,120,-120
-  m_chartMaster.CrossHairPosition( x, y );
-  // TODO: translate into a price
+
+  if ( m_vpDataViewVisual.HasBoth() ) {
+
+    switch ( m_stateMouse ) {
+      case EMouse::Down:
+        if ( event.Dragging() ) {
+          m_stateMouse = EMouse::Drag;
+        }
+        // fall into next state
+      case EMouse::Drag:
+          // TODO: update chart for intermediate positions? or just change cursor?
+          if ( m_coordXStart != x ) {
+            wxSize size = GetClientSize();
+            double ratio( 0.0 );
+            if ( 10 <= size.GetWidth() ) {
+
+              int distance {};
+              if ( x > m_coordXStart ) {
+                distance = x - m_coordXStart;
+              }
+              else {
+                distance = m_coordXStart - x;
+              }
+
+              ratio = (double) distance / (double) size.GetWidth();
+              int pctRatio = std::floor( 100.0 * ratio );
+
+              boost::posix_time::time_duration tdMovement;
+              tdMovement  = m_tdViewPortWidth * pctRatio;
+              tdMovement /= 100;
+
+              if ( x < m_coordXStart ) {
+                m_vpDataViewVisual.dtBegin += tdMovement;
+                m_vpDataViewVisual.dtEnd += tdMovement;
+
+                if ( m_vpDataViewVisual.dtEnd >= m_vpDataViewExtents.dtEnd ) {
+                  m_state = m_bSim ? EState::sim_trail : EState::live_trail;
+                }
+
+              }
+              else {
+                m_vpDataViewVisual.dtBegin -= tdMovement;
+                m_vpDataViewVisual.dtEnd -= tdMovement;
+              }
+            }
+
+            m_coordXStart = x;
+
+          }
+        break;
+      case EMouse::NothingSpecial:
+        break;
+    }
+
+    m_chartMaster.CrossHairPosition( x, y );
+
+    DrawChart(); // before or after CrossHairPosition?
+  }
+
   event.Skip();
 }
 
-void WinChartView::HandleMouseLeftClick( wxMouseEvent& event ) {
+void WinChartView::HandleMouseLeftDown( wxMouseEvent& event ) {
+  wxCoord x, y;
+  event.GetPosition( &x, &y );
+  m_coordXStart = x;
+  m_stateMouse = EMouse::Down;
+  event.Skip();
+}
+
+void WinChartView::HandleMouseLeftUp( wxMouseEvent& event ) {
+  switch ( m_stateMouse ) {
+    case EMouse::NothingSpecial:
+    case EMouse::Down:
+      HandleMouseLeftClick(); // only on non-movement
+      break;
+    case EMouse::Drag:
+      // update chart
+      break;
+  }
+
+  m_stateMouse = EMouse::NothingSpecial;
+
+  event.Skip();
+}
+
+void WinChartView::HandleMouseRightDown( wxMouseEvent& event ) {
+  event.Skip();
+}
+
+void WinChartView::HandleMouseRightUp( wxMouseEvent& event ) {
+  HandleMouseRightClick(); // only on non-movement
+  event.Skip();
+}
+
+void WinChartView::HandleMouseLeftClick() {
   int nChart;
   double dblY;
   m_chartMaster.GetWorldCoordY( nChart, dblY );
   LeftClick( nChart, dblY );
-  event.Skip();
 }
 
-void WinChartView::HandleMouseRightClick( wxMouseEvent& event ) {
+void WinChartView::HandleMouseRightClick() {
   int nChart;
   double dblY;
   m_chartMaster.GetWorldCoordY( nChart, dblY );
   RightClick( nChart, dblY );
-  event.Skip();
 }
 
 void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
@@ -188,52 +280,52 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
   boost::posix_time::time_duration tdDeltaLeft;
   boost::posix_time::time_duration tdDeltaRight;
 
-  assert( m_vpDataViewVisual.HasBoth() );
+  if ( m_vpDataViewVisual.HasBoth() ) {
+    if ( 0 > rotation ) {
+      tdNewWidth = m_tdViewPortWidth * 12;
+      tdNewWidth /= 10;
 
-  if ( 0 > rotation ) {
-    tdNewWidth = m_tdViewPortWidth * 12;
-    tdNewWidth /= 10;
+      tdDelta = tdNewWidth - m_tdViewPortWidth;
 
-    tdDelta = tdNewWidth - m_tdViewPortWidth;
+      tdDeltaLeft = tdDelta * pctRatio;
+      tdDeltaLeft /= 100;
 
-    tdDeltaLeft = tdDelta * pctRatio;
-    tdDeltaLeft /= 100;
+      tdDeltaRight = tdDelta - tdDeltaLeft;
 
-    tdDeltaRight = tdDelta - tdDeltaLeft;
+      m_vpDataViewVisual.dtBegin -= tdDeltaLeft;
+      m_vpDataViewVisual.dtEnd += tdDeltaRight;
 
-    m_vpDataViewVisual.dtBegin -= tdDeltaLeft;
-    m_vpDataViewVisual.dtEnd += tdDeltaRight;
-
-    if ( m_vpDataViewVisual.dtEnd >= m_vpDataViewExtents.dtEnd ) {
-      m_state = m_bSim ? EState::sim_trail : EState::live_trail;
-      m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdNewWidth, m_vpDataViewExtents.dtEnd );
+      if ( m_vpDataViewVisual.dtEnd >= m_vpDataViewExtents.dtEnd ) {
+        m_state = m_bSim ? EState::sim_trail : EState::live_trail;
+        m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdNewWidth, m_vpDataViewExtents.dtEnd );
+      }
     }
-  }
-  else {
-    tdNewWidth = m_tdViewPortWidth * 10;
-    tdNewWidth /= 12;
+    else {
+      tdNewWidth = m_tdViewPortWidth * 10;
+      tdNewWidth /= 12;
 
-    tdDelta = m_tdViewPortWidth - tdNewWidth;
+      tdDelta = m_tdViewPortWidth - tdNewWidth;
 
-    if ( tdDelta < tdTenSeconds ) tdDelta = tdTenSeconds;
+      if ( tdDelta < tdTenSeconds ) tdDelta = tdTenSeconds;
 
-    tdDeltaLeft = tdDelta * pctRatio;
-    tdDeltaLeft /= 100;
+      tdDeltaLeft = tdDelta * pctRatio;
+      tdDeltaLeft /= 100;
 
-    tdDeltaRight = tdDelta - tdDeltaLeft;
+      tdDeltaRight = tdDelta - tdDeltaLeft;
 
-    m_vpDataViewVisual.dtBegin += tdDeltaLeft;
-    m_vpDataViewVisual.dtEnd -= tdDeltaRight;
+      m_vpDataViewVisual.dtBegin += tdDeltaLeft;
+      m_vpDataViewVisual.dtEnd -= tdDeltaRight;
 
-    if ( m_vpDataViewVisual.dtEnd < m_vpDataViewExtents.dtEnd ) {
-      m_state = m_bSim ? EState::sim_review : EState::live_review;
-      //m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdNewWidth, m_vpDataViewExtents.dtEnd );
+      if ( m_vpDataViewVisual.dtEnd < m_vpDataViewExtents.dtEnd ) {
+        m_state = m_bSim ? EState::sim_review : EState::live_review;
+        //m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdNewWidth, m_vpDataViewExtents.dtEnd );
+      }
     }
+
+    m_tdViewPortWidth = tdNewWidth;
+
+    DrawChart();
   }
-
-  m_tdViewPortWidth = tdNewWidth;
-
-  DrawChart();
 
   event.Skip();
 }
@@ -314,9 +406,9 @@ void WinChartView::DrawChart() {
               switch ( m_state ) {
                 case EState::live_trail:
                   {
+                    m_vpDataViewExtents = m_pChartDataView->GetExtents(); // TODO: obtain just end extent?
                     m_vpDataViewVisual.dtEnd = ou::TimeSource::GlobalInstance().Internal() + one_sec; // works with real vs simulation time
                     m_vpDataViewVisual.dtBegin = m_vpDataViewVisual.dtEnd - m_tdViewPortWidth;
-
                     m_pChartDataView->SetViewPort( m_vpDataViewVisual );
                   }
                   break;
@@ -386,13 +478,17 @@ void WinChartView::UnbindEvents() {
   assert( Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this, this->GetId() ) );
   assert( Unbind( wxEVT_SIZE, &WinChartView::HandleSize, this, this->GetId() ) );
 
-  assert( Unbind( wxEVT_MOTION, &WinChartView::HandleMouse, this, this->GetId() ) );
+  assert( Unbind( wxEVT_MOTION, &WinChartView::HandleMouseMotion, this, this->GetId() ) );
   assert( Unbind( wxEVT_MOUSEWHEEL, &WinChartView::HandleMouseWheel, this, this->GetId() ) );
+
   assert( Unbind( wxEVT_ENTER_WINDOW, &WinChartView::HandleMouseEnter, this, this->GetId() ) );
   assert( Unbind( wxEVT_LEAVE_WINDOW, &WinChartView::HandleMouseLeave, this, this->GetId() ) );
 
-  assert( Unbind( wxEVT_LEFT_UP, &WinChartView::HandleMouseLeftClick, this, this->GetId() ) );
-  assert( Unbind( wxEVT_RIGHT_UP, &WinChartView::HandleMouseRightClick, this, this->GetId() ) );
+  assert( Unbind( wxEVT_LEFT_DOWN, &WinChartView::HandleMouseLeftDown, this, this->GetId() ) );
+  assert( Unbind( wxEVT_LEFT_UP,   &WinChartView::HandleMouseLeftUp,   this, this->GetId() ) );
+
+  assert( Unbind( wxEVT_RIGHT_DOWN, &WinChartView::HandleMouseRightDown, this, this->GetId() ) );
+  assert( Unbind( wxEVT_RIGHT_UP,   &WinChartView::HandleMouseRightUp,   this, this->GetId() ) );
 
   assert( Unbind( wxEVT_DESTROY, &WinChartView::OnDestroy, this, this->GetId() ) );
 

@@ -87,11 +87,19 @@ private:
   , sim_review
   };
 
+  enum class EMouse {
+    Drag
+  , Down
+  , NothingSpecial
+  } m_stateMouse;
+
   using pwxBitmap_t = boost::shared_ptr<wxBitmap>;
   using ViewPort_t = ChartEntryTime::range_t;
 
   bool m_bSim; // default to false
   EState m_state; // default to live_trail
+
+  wxCoord m_coordXStart;
 
   boost::posix_time::time_duration m_tdViewPortWidth; // width of currently displayed window
 
@@ -124,13 +132,20 @@ private:
   void HandlePaint( wxPaintEvent& );
   void HandleSize( wxSizeEvent& );
 
-  void HandleMouse( wxMouseEvent& );
-  void HandleMouseEnter( wxMouseEvent& );
-  void HandleMouseLeave( wxMouseEvent& );
+  void HandleMouseMotion( wxMouseEvent& );
   void HandleMouseWheel( wxMouseEvent& );
 
-  void HandleMouseLeftClick( wxMouseEvent& );
-  void HandleMouseRightClick( wxMouseEvent& );
+  void HandleMouseEnter( wxMouseEvent& );
+  void HandleMouseLeave( wxMouseEvent& );
+
+  void HandleMouseLeftDown( wxMouseEvent& );
+  void HandleMouseLeftUp( wxMouseEvent& );
+
+  void HandleMouseRightDown( wxMouseEvent& );
+  void HandleMouseRightUp( wxMouseEvent& );
+
+  void HandleMouseLeftClick(); // secondary event
+  void HandleMouseRightClick(); // secondary event
 
   void OnDestroy( wxWindowDestroyEvent& );
 
