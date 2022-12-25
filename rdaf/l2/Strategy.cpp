@@ -63,10 +63,10 @@ Strategy::Strategy(
 , m_stateFilter( EStateStochastic::Init )
 , m_config( config )
 , m_ceLongEntry( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
-, m_ceLongFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::Blue )
+//, m_ceLongFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::Blue )
 , m_ceLongExit( ou::ChartEntryShape::EShape::LongStop, ou::Colour::Blue )
 , m_ceShortEntry( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
-, m_ceShortFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red )
+//, m_ceShortFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red )
 , m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
 , m_bfQuotes01Sec( 1 )
 {
@@ -127,10 +127,10 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::Price, &m_ceQuoteBid );
 
   m_cdv.Add( EChartSlot::Price, &m_ceLongEntry );
-  m_cdv.Add( EChartSlot::Price, &m_ceLongFill );
+  //m_cdv.Add( EChartSlot::Price, &m_ceLongFill );
   m_cdv.Add( EChartSlot::Price, &m_ceLongExit );
   m_cdv.Add( EChartSlot::Price, &m_ceShortEntry );
-  m_cdv.Add( EChartSlot::Price, &m_ceShortFill );
+  //m_cdv.Add( EChartSlot::Price, &m_ceShortFill );
   m_cdv.Add( EChartSlot::Price, &m_ceShortExit );
 
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
@@ -631,7 +631,7 @@ void Strategy::EnterLong( const ou::tf::Bar& bar ) {
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  m_ceLongEntry.AddLabel( bar.DateTime(), bar.Close(), "Long Submit" );
+  m_ceLongEntry.AddLabel( bar.DateTime(), bar.Close(), "LeS-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
   m_stateTrade = EStateTrade::LongSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
   ShowOrder( m_pOrder );
@@ -641,7 +641,7 @@ void Strategy::EnterShort( const ou::tf::Bar& bar ) {
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  m_ceShortEntry.AddLabel( bar.DateTime(), bar.Close(), "Short Submit" );
+  m_ceShortEntry.AddLabel( bar.DateTime(), bar.Close(), "SeS-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
   m_stateTrade = EStateTrade::ShortSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
   ShowOrder( m_pOrder );
@@ -651,7 +651,7 @@ void Strategy::ExitLong( const ou::tf::Bar& bar ) {
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "Long Exit Submit" );
+  m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "LxS-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
   m_stateTrade = EStateTrade::LongExitSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
   ShowOrder( m_pOrder );
@@ -661,7 +661,7 @@ void Strategy::ExitShort( const ou::tf::Bar& bar ) {
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "Short Exit Submit" );
+  m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "SxS-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
   m_stateTrade = EStateTrade::ShortExitSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
   ShowOrder( m_pOrder );
@@ -923,19 +923,19 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
   m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   switch ( m_stateTrade ) {
     case EStateTrade::LongSubmitted:
-      m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Long Fill" );
+      m_ceLongEntry.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "LeF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
       m_stateTrade = EStateTrade::LongExit;
       break;
     case EStateTrade::ShortSubmitted:
-      m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Fill" );
+      m_ceShortEntry.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "SeF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
       m_stateTrade = EStateTrade::ShortExit;
       break;
     case EStateTrade::LongExitSubmitted:
-      m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Long Exit Fill" );
+      m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "LxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
       m_stateTrade = EStateTrade::Search;
       break;
     case EStateTrade::ShortExitSubmitted:
-      m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Exit Fill" );
+      m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "SxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
       m_stateTrade = EStateTrade::Search;
       break;
     case EStateTrade::EndOfDayCancel:

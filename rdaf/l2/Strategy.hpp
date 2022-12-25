@@ -55,6 +55,8 @@ namespace tf {
 } // namespace tf
 } // namespace ou
 
+using pOrder_t = ou::tf::Order::pOrder_t;
+
 class Strategy:
   public ou::tf::DailyTradeTimeFrame<Strategy>
 {
@@ -66,7 +68,6 @@ public:
   using volume_t = ou::tf::Trade::volume_t;
 
   using TreeItem = ou::tf::TreeItem;
-  using pOrder_t = ou::tf::Order::pOrder_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
   //using pFile_t = std::shared_ptr<TFile>;
 
@@ -155,10 +156,10 @@ private:
   ou::ChartEntryVolume m_ceVolume;
 
   ou::ChartEntryShape m_ceLongEntry;
-  ou::ChartEntryShape m_ceLongFill;
+  //ou::ChartEntryShape m_ceLongFill;
   ou::ChartEntryShape m_ceLongExit;
   ou::ChartEntryShape m_ceShortEntry;
-  ou::ChartEntryShape m_ceShortFill;
+  //ou::ChartEntryShape m_ceShortFill;
   ou::ChartEntryShape m_ceShortExit;
 
   ou::ChartEntryIndicator m_ceProfitUnRealized;
