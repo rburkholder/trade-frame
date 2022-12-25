@@ -45,6 +45,8 @@ using pWatch_t = ou::tf::Watch::pWatch_t;
 
 namespace {
   static const unsigned int max_ix = 10; // TODO need to obtain from elsewhere & sync with Symbols
+  static const int k_up = 90;
+  static const int k_lo = 10;
 }
 
 Strategy::Strategy(
@@ -60,7 +62,8 @@ Strategy::Strategy(
 , m_stateDesired( EStateDesired::Continue )
 , m_stateTrade( EStateTrade::Init )
 , m_stateStochastic( EStateStochastic::Init )
-, m_stateFilter( EStateStochastic::Init )
+, m_stochasticStable( EStateStochastic::Init )
+, m_stochasticStablizing( EStateStochastic::Init )
 , m_config( config )
 , m_ceLongEntry( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
 //, m_ceLongFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::Blue )
@@ -81,9 +84,9 @@ Strategy::Strategy(
 
   // need to present the marks prior to presenting the data
   m_cemStochastic.AddMark( 100, ou::Colour::Black,    "" ); // hidden by legend
-  m_cemStochastic.AddMark(  80, ou::Colour::Red,   "80%" );
+  m_cemStochastic.AddMark(  k_up, ou::Colour::Red,   boost::lexical_cast<std::string>( k_up ) + "%" );
   m_cemStochastic.AddMark(  50, ou::Colour::Green, "50%" );
-  m_cemStochastic.AddMark(  20, ou::Colour::Blue,  "20%" );
+  m_cemStochastic.AddMark(  k_lo, ou::Colour::Blue,  boost::lexical_cast<std::string>( k_lo ) + "%" );
   m_cemStochastic.AddMark(   0, ou::Colour::Black,  "0%" );
 
   m_ceProfitUnRealized.SetColour( ou::Colour::Purple );
@@ -172,7 +175,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   Clear();
 
-  m_dtFilter = ou::TimeSource::GlobalInstance().Internal();
+  m_dtFilterStochastic = ou::TimeSource::GlobalInstance().Internal();
 
   m_pPosition = pPosition;
   pWatch_t pWatch = m_pPosition->GetWatch();
@@ -503,6 +506,8 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   //  return;
   //}
 
+  static const boost::posix_time::time_duration filter( 0, 0, 2 );
+
   ptime dt( quote.DateTime() );
 
   m_ceQuoteAsk.Append( dt, quote.Ask() );
@@ -522,6 +527,39 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
 //    m_pTreeQuote->Fill();
 //  }
+
+  EStateStochastic stochasticStablizing( m_stochasticStablizing ); // sticky until changed
+
+  double k = m_vStochastic[2]->Latest();
+  if ( k >= 50.0 ) {
+    if ( k > (double)k_up ) {
+      stochasticStablizing = EStateStochastic::Above80;
+    }
+    else {
+      stochasticStablizing = EStateStochastic::Above50;
+    }
+  }
+  else {
+    if ( k < (double)k_lo ) {
+      stochasticStablizing = EStateStochastic::Below20;
+    }
+    else {
+      stochasticStablizing = EStateStochastic::Below50;
+    }
+  }
+
+  if ( stochasticStablizing != m_stochasticStablizing ) {
+    m_stochasticStablizing = stochasticStablizing;
+    m_dtFilterStochastic = dt + filter;  // start of transition, requires to be unchanging over filter seconds
+  }
+  else {
+    if ( m_stochasticStablizing == m_stochasticStable ) {}
+    else {
+      if ( m_dtFilterStochastic < dt ) {
+        m_stochasticStable = stochasticStablizing;
+      }
+    }
+  }
 
   m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
 
@@ -681,46 +719,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   //m_FeatureSet.FVS(). // use imbalance, and others
 
-  static const boost::posix_time::time_duration filter( 0, 0, 2 );
-
   ptime dt( bar.DateTime() );
-
-  EStateStochastic stateStochastic( m_stateStochastic ); // sticky until changed
-  EStateStochastic filterStochastic( m_stateStochastic ); // sticky until changed
-
-  double k = m_vStochastic[0]->Latest();
-  if ( k >= 50.0 ) {
-    if ( k > 80.0 ) {
-      filterStochastic = EStateStochastic::Above80;
-    }
-    else {
-      filterStochastic = EStateStochastic::Above50;
-    }
-  }
-  else {
-    if ( k < 20.0 ) {
-      filterStochastic = EStateStochastic::Below20;
-    }
-    else {
-      filterStochastic = EStateStochastic::Below50;
-    }
-  }
-
-  if ( filterStochastic == m_stateStochastic ) {
-    // nothing to do
-    //m_stateFilter = filterStochastic; // is this necessary, other than for safety?
-  }
-  else {
-    if ( filterStochastic != m_stateFilter ) {
-      m_stateFilter = filterStochastic;
-      m_dtFilter = dt + filter;  // start of transition, requires to be unchanging over filter seconds
-    }
-    else {
-      if ( m_dtFilter < dt ) {
-        stateStochastic = filterStochastic;
-      }
-    }
-  }
 
   EStateDesired stateDesired( m_stateDesired ); // sticky until reset to Continue (allows cycling through exit -> entry)
 
@@ -729,7 +728,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       // wait for another crossing
       break;
     case EStateStochastic::Above80:
-      switch ( stateStochastic ) {
+      switch ( m_stochasticStable ) {
         case EStateStochastic::Above80:
           break;
         case EStateStochastic::Above50:
@@ -741,7 +740,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       }
       break;
     case EStateStochastic::Above50:
-      switch ( stateStochastic ) {
+      switch ( m_stochasticStable ) {
         case EStateStochastic::Above80:
           // go/continue long
           stateDesired = EStateDesired::GoLong;
@@ -753,7 +752,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       }
       break;
     case EStateStochastic::Below50:
-      switch ( stateStochastic ) {
+      switch ( m_stochasticStable ) {
         case EStateStochastic::Above50:
           // exit & go long - maybe
           //desired = EStateDesired::Exit;
@@ -765,7 +764,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       }
       break;
     case EStateStochastic::Below20:
-      switch ( stateStochastic ) {
+      switch ( m_stochasticStable ) {
         case EStateStochastic::Above80:
         case EStateStochastic::Above50:
         case EStateStochastic::Below50:
@@ -812,12 +811,12 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           BOOST_LOG_TRIVIAL(info)
             << dt << " GoLong->Continue:"
             << (int)stateDesired << "," << (int)m_stateDesired
-            << "," << (int)stateStochastic << "," << (int)m_stateStochastic
+            << "," << (int)m_stochasticStable << "," << (int)m_stateStochastic
             ; // already long
           stateDesired = EStateDesired::Continue;
           break;
         case EStateDesired::Continue:
-          BOOST_LOG_TRIVIAL(info) << dt << " LongExit->Continue";
+          //BOOST_LOG_TRIVIAL(info) << dt << " LongExit->Continue";
           break;
         default:
           assert( false );  // broken state machine
@@ -842,12 +841,12 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           BOOST_LOG_TRIVIAL(info)
             << dt << " GoShort->Continue:"
             << (int)stateDesired << "," << (int)m_stateDesired
-            << "," << (int)stateStochastic << "," << (int)m_stateStochastic
+            << "," << (int)m_stochasticStable << "," << (int)m_stateStochastic
             ; // already short
           stateDesired = EStateDesired::Continue;
           break;
         case EStateDesired::Continue:
-          BOOST_LOG_TRIVIAL(info) << dt << " ShortExit->Continue";
+          //BOOST_LOG_TRIVIAL(info) << dt << " ShortExit->Continue";
           break;
         default:
           assert( false );  // broken state machine
@@ -887,7 +886,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   }
 
   m_stateDesired = stateDesired;
-  m_stateStochastic = stateStochastic;
+  m_stateStochastic = m_stochasticStable;
 
   //const std::chrono::time_point<std::chrono::system_clock> end
   //  = std::chrono::system_clock::now();

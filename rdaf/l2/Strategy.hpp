@@ -129,9 +129,16 @@ private:
     Exit
   };
 
-  EStateDesired m_stateDesired;
-  EStateTrade m_stateTrade;
+  boost::posix_time::ptime m_dtFilterStochastic;
+
+  EStateStochastic m_stochasticStable;
+  EStateStochastic m_stochasticStablizing;
+
   EStateStochastic m_stateStochastic;
+
+  EStateDesired m_stateDesired;
+
+  EStateTrade m_stateTrade;
 
   TreeItem* m_pTreeItemSymbol;
   TreeItem* m_pTreeItemOrder;
@@ -191,9 +198,6 @@ private:
   std::atomic_uint32_t m_nMarketOrdersBid; // pull from InteractiveChart
 
   double m_dblImbalanceMean, m_dblImbalanceSlope;
-
-  boost::posix_time::ptime m_dtFilter;
-  EStateStochastic m_stateFilter;
 
   using pStochastic_t = std::unique_ptr<Stochastic>;
   using vStochastic_t = std::vector<pStochastic_t>;
