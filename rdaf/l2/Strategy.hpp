@@ -191,6 +191,9 @@ private:
 
   double m_dblImbalanceMean, m_dblImbalanceSlope;
 
+  boost::posix_time::ptime m_dtFilter;
+  EStateStochastic m_stateFilter;
+
   using pStochastic_t = std::unique_ptr<Stochastic>;
   using vStochastic_t = std::vector<pStochastic_t>;
   vStochastic_t m_vStochastic;

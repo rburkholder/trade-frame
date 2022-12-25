@@ -60,6 +60,7 @@ Strategy::Strategy(
 , m_stateDesired( EStateDesired::Continue )
 , m_stateTrade( EStateTrade::Init )
 , m_stateStochastic( EStateStochastic::Init )
+, m_stateFilter( EStateStochastic::Init )
 , m_config( config )
 , m_ceLongEntry( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
 , m_ceLongFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::Blue )
@@ -170,6 +171,8 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   assert( pPosition );
 
   Clear();
+
+  m_dtFilter = ou::TimeSource::GlobalInstance().Internal();
 
   m_pPosition = pPosition;
   pWatch_t pWatch = m_pPosition->GetWatch();
@@ -678,25 +681,44 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   //m_FeatureSet.FVS(). // use imbalance, and others
 
+  static const boost::posix_time::time_duration filter( 0, 0, 2 );
+
   ptime dt( bar.DateTime() );
 
   EStateStochastic stateStochastic( m_stateStochastic ); // sticky until changed
+  EStateStochastic filterStochastic( m_stateStochastic ); // sticky until changed
 
-  double k = m_vStochastic[2]->Latest();
+  double k = m_vStochastic[0]->Latest();
   if ( k >= 50.0 ) {
     if ( k > 80.0 ) {
-      stateStochastic = EStateStochastic::Above80;
+      filterStochastic = EStateStochastic::Above80;
     }
     else {
-      stateStochastic = EStateStochastic::Above50;
+      filterStochastic = EStateStochastic::Above50;
     }
   }
   else {
     if ( k < 20.0 ) {
-      stateStochastic = EStateStochastic::Below20;
+      filterStochastic = EStateStochastic::Below20;
     }
     else {
-      stateStochastic = EStateStochastic::Below50;
+      filterStochastic = EStateStochastic::Below50;
+    }
+  }
+
+  if ( filterStochastic == m_stateStochastic ) {
+    // nothing to do
+    //m_stateFilter = filterStochastic; // is this necessary, other than for safety?
+  }
+  else {
+    if ( filterStochastic != m_stateFilter ) {
+      m_stateFilter = filterStochastic;
+      m_dtFilter = dt + filter;  // start of transition, requires to be unchanging over filter seconds
+    }
+    else {
+      if ( m_dtFilter < dt ) {
+        stateStochastic = filterStochastic;
+      }
     }
   }
 
