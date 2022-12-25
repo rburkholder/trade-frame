@@ -116,10 +116,10 @@ private:
 
   enum class EStateStochastic {
     Init,
-    Above80,
-    Above50,
-    Below50,
-    Below20
+    AboveHi,
+    AboveMid,
+    BelowMid,
+    BelowLo
   };
 
   enum class EStateDesired {

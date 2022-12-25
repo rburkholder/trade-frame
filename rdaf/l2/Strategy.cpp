@@ -45,8 +45,8 @@ using pWatch_t = ou::tf::Watch::pWatch_t;
 
 namespace {
   static const unsigned int max_ix = 10; // TODO need to obtain from elsewhere & sync with Symbols
-  static const int k_up = 90;
-  static const int k_lo = 10;
+  static const int k_up = 85;
+  static const int k_lo = 15;
 }
 
 Strategy::Strategy(
@@ -530,21 +530,21 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
   EStateStochastic stochasticStablizing( m_stochasticStablizing ); // sticky until changed
 
-  double k = m_vStochastic[2]->Latest();
+  double k = m_vStochastic[0]->Latest();
   if ( k >= 50.0 ) {
     if ( k > (double)k_up ) {
-      stochasticStablizing = EStateStochastic::Above80;
+      stochasticStablizing = EStateStochastic::AboveHi;
     }
     else {
-      stochasticStablizing = EStateStochastic::Above50;
+      stochasticStablizing = EStateStochastic::AboveMid;
     }
   }
   else {
     if ( k < (double)k_lo ) {
-      stochasticStablizing = EStateStochastic::Below20;
+      stochasticStablizing = EStateStochastic::BelowLo;
     }
     else {
-      stochasticStablizing = EStateStochastic::Below50;
+      stochasticStablizing = EStateStochastic::BelowMid;
     }
   }
 
@@ -727,51 +727,51 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     case EStateStochastic::Init:
       // wait for another crossing
       break;
-    case EStateStochastic::Above80:
+    case EStateStochastic::AboveHi:
       switch ( m_stochasticStable ) {
-        case EStateStochastic::Above80:
+        case EStateStochastic::AboveHi:
           break;
-        case EStateStochastic::Above50:
-        case EStateStochastic::Below50:
-        case EStateStochastic::Below20:
+        case EStateStochastic::AboveMid:
+        case EStateStochastic::BelowMid:
+        case EStateStochastic::BelowLo:
           // exit & go short
           stateDesired = EStateDesired::GoShort;
           break;
       }
       break;
-    case EStateStochastic::Above50:
+    case EStateStochastic::AboveMid:
       switch ( m_stochasticStable ) {
-        case EStateStochastic::Above80:
+        case EStateStochastic::AboveHi:
           // go/continue long
           stateDesired = EStateDesired::GoLong;
           break;
-        case EStateStochastic::Below50:
+        case EStateStochastic::BelowMid:
           // exit & go short - maybe
           //desired = EStateDesired::Exit;
           break;
       }
       break;
-    case EStateStochastic::Below50:
+    case EStateStochastic::BelowMid:
       switch ( m_stochasticStable ) {
-        case EStateStochastic::Above50:
+        case EStateStochastic::AboveMid:
           // exit & go long - maybe
           //desired = EStateDesired::Exit;
           break;
-        case EStateStochastic::Below20:
+        case EStateStochastic::BelowLo:
           // go/continue short
           stateDesired = EStateDesired::GoShort;
           break;
       }
       break;
-    case EStateStochastic::Below20:
+    case EStateStochastic::BelowLo:
       switch ( m_stochasticStable ) {
-        case EStateStochastic::Above80:
-        case EStateStochastic::Above50:
-        case EStateStochastic::Below50:
+        case EStateStochastic::AboveHi:
+        case EStateStochastic::AboveMid:
+        case EStateStochastic::BelowMid:
           // exit & go long
           stateDesired = EStateDesired::GoLong;
           break;
-        case EStateStochastic::Below20:
+        case EStateStochastic::BelowLo:
           break;
       }
       break;
