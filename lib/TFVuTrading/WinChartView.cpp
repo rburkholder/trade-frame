@@ -155,54 +155,55 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
         }
         // fall into next state
       case EMouse::Drag:
-          // TODO: update chart for intermediate positions? or just change cursor?
-          if ( m_coordXStart != x ) {
-            wxSize size = GetClientSize();
-            double ratio( 0.0 );
-            if ( 10 <= size.GetWidth() ) {
+        // TODO: update chart for intermediate positions? or just change cursor?
+        if ( m_coordXStart != x ) {
+          wxSize size = GetClientSize();
+          double ratio( 0.0 );
+          if ( 10 <= size.GetWidth() ) {
 
-              int distance {};
-              if ( x > m_coordXStart ) {
-                distance = x - m_coordXStart;
-              }
-              else {
-                distance = m_coordXStart - x;
-              }
-
-              ratio = (double) distance / (double) size.GetWidth();
-              int pctRatio = std::floor( 100.0 * ratio );
-
-              boost::posix_time::time_duration tdMovement;
-              tdMovement  = m_tdViewPortWidth * pctRatio;
-              tdMovement /= 100;
-
-              if ( x < m_coordXStart ) {
-                m_vpDataViewVisual.dtBegin += tdMovement;
-                m_vpDataViewVisual.dtEnd += tdMovement;
-
-                if ( m_vpDataViewVisual.dtEnd >= m_vpDataViewExtents.dtEnd ) {
-                  m_state = m_bSim ? EState::sim_trail : EState::live_trail;
-                }
-
-              }
-              else {
-                m_vpDataViewVisual.dtBegin -= tdMovement;
-                m_vpDataViewVisual.dtEnd -= tdMovement;
-              }
+            int distance {};
+            if ( x > m_coordXStart ) {
+              distance = x - m_coordXStart;
+            }
+            else {
+              distance = m_coordXStart - x;
             }
 
-            m_coordXStart = x;
+            ratio = (double) distance / (double) size.GetWidth();
+            int pctRatio = std::floor( 100.0 * ratio );
 
+            boost::posix_time::time_duration tdMovement;
+            tdMovement  = m_tdViewPortWidth * pctRatio;
+            tdMovement /= 100;
+
+            if ( x < m_coordXStart ) {
+              m_vpDataViewVisual.dtBegin += tdMovement;
+              m_vpDataViewVisual.dtEnd += tdMovement;
+
+              if ( m_vpDataViewVisual.dtEnd >= m_vpDataViewExtents.dtEnd ) {
+                m_vpDataViewVisual.dtEnd = m_vpDataViewExtents.dtEnd;
+                m_state = m_bSim ? EState::sim_trail : EState::live_trail;
+              }
+
+            }
+            else {
+              m_vpDataViewVisual.dtBegin -= tdMovement;
+              m_vpDataViewVisual.dtEnd -= tdMovement;
+            }
           }
+
+          m_coordXStart = x;
+
+        }
         break;
       case EMouse::NothingSpecial:
         break;
     }
 
-    m_chartMaster.CrossHairPosition( x, y );
-
-    DrawChart(); // before or after CrossHairPosition?
   }
+
+  m_chartMaster.CrossHairPosition( x, y );
+  DrawChart(); // after CrossHairPosition
 
   event.Skip();
 }
@@ -222,7 +223,7 @@ void WinChartView::HandleMouseLeftUp( wxMouseEvent& event ) {
       HandleMouseLeftClick(); // only on non-movement
       break;
     case EMouse::Drag:
-      // update chart
+      // update chart with MouseMove
       break;
   }
 
@@ -403,29 +404,23 @@ void WinChartView::DrawChart() {
 
               static const boost::posix_time::time_duration one_sec( 0, 0, 1 ); // provide a border
 
+              m_vpDataViewExtents = m_pChartDataView->GetExtents(); // TODO: obtain just end extent?
+
               switch ( m_state ) {
                 case EState::live_trail:
-                  {
-                    m_vpDataViewExtents = m_pChartDataView->GetExtents(); // TODO: obtain just end extent?
-                    m_vpDataViewVisual.dtEnd = ou::TimeSource::GlobalInstance().Internal() + one_sec; // works with real vs simulation time
-                    m_vpDataViewVisual.dtBegin = m_vpDataViewVisual.dtEnd - m_tdViewPortWidth;
-                    m_pChartDataView->SetViewPort( m_vpDataViewVisual );
-                  }
+                  m_vpDataViewVisual.dtEnd = ou::TimeSource::GlobalInstance().Internal() + one_sec; // works with real vs simulation time
+                  m_vpDataViewVisual.dtBegin = m_vpDataViewVisual.dtEnd - m_tdViewPortWidth;
                   break;
                 case EState::live_review:
-                  m_pChartDataView->SetViewPort( m_vpDataViewVisual );
                   break;
                 case EState::sim_trail:
-                  {
-                    m_vpDataViewExtents = m_pChartDataView->GetExtents(); // TODO: obtain just end extent?
-                    m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - m_tdViewPortWidth, m_vpDataViewExtents.dtEnd + one_sec );
-                    m_pChartDataView->SetViewPort( m_vpDataViewVisual );
-                  }
+                  m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - m_tdViewPortWidth, m_vpDataViewExtents.dtEnd + one_sec );
                   break;
                 case EState::sim_review:
-                  m_pChartDataView->SetViewPort( m_vpDataViewVisual );
                   break;
               }
+
+              m_pChartDataView->SetViewPort( m_vpDataViewVisual );
 
               UpdateChartMaster();
 
