@@ -57,7 +57,11 @@ public:
   void CrossHairPosition( int x, int y );
   void CrossHairDraw( bool );
 
+  void GetWorldCoordX( int& nChart, double& dblX ) const { nChart = m_nChart; dblX = m_dblX; }
   void GetWorldCoordY( int& nChart, double& dblY ) const { nChart = m_nChart; dblY = m_dblY; }
+  void GetX( int& left, int& x, int& right ) const {
+    left = m_xLeft;  x = m_xX; right = m_xRight;
+  }
 
 protected:
 
@@ -91,6 +95,8 @@ private:
   int m_nChart;
   double m_dblX; // date time
   double m_dblY; // chart specific value
+
+  int m_xLeft, m_xX, m_xRight;
 
   void Initialize();
 

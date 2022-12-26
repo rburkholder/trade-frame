@@ -23,6 +23,7 @@ ChartMaster::ChartMaster( unsigned int width, unsigned int height )
 , m_intCrossHairX {}, m_intCrossHairY {}, m_bCrossHair( false )
 , m_bHasData( false )
 , m_dblX {}, m_dblY {}
+, m_xLeft {}, m_xX {}, m_xRight {}
 , m_formatter( "%.2f"  )
 {
   Initialize();
@@ -256,7 +257,7 @@ bool ChartMaster::DrawDynamicLayer() {
     assert( 0 < n );
 
     BaseChart* p;
-    int top, left, right, bottom;
+    int top, bottom;
 
     XYChart* pChartFocus( nullptr );
 
@@ -269,9 +270,9 @@ bool ChartMaster::DrawDynamicLayer() {
       int pxChartTop = pChart->getAbsOffsetY() + pArea->getTopY();
 
       if ( 0 == ix ) {
-        top    = pxChartTop;
-        left   = pChart->getAbsOffsetX() + pArea->getLeftX();
-        right  = pChart->getAbsOffsetX() + pArea->getRightX();
+        top      = pxChartTop;
+        m_xLeft  = pChart->getAbsOffsetX() + pArea->getLeftX();
+        m_xRight = pChart->getAbsOffsetX() + pArea->getRightX();
       }
 
       bottom = pChart->getAbsOffsetY() + pArea->getBottomY();
@@ -286,14 +287,15 @@ bool ChartMaster::DrawDynamicLayer() {
     if (
       ( top < m_intCrossHairY  ) &&
       ( bottom > m_intCrossHairY ) &&
-      ( left < m_intCrossHairX ) &&
-      ( right > m_intCrossHairX )
+      ( m_xLeft < m_intCrossHairX ) &&
+      ( m_xRight > m_intCrossHairX )
     ) {
 
       bCrossHairs = true;
 
       assert( nullptr != pChartFocus );
-      m_dblY = pChartFocus->getXValue( m_intCrossHairX - pChartFocus->getAbsOffsetX() );
+      m_xX = m_intCrossHairX - pChartFocus->getAbsOffsetX();
+      m_dblX = pChartFocus->getXValue( m_xX );
       m_dblY = pChartFocus->getYValue( m_intCrossHairY - pChartFocus->getAbsOffsetY() );
       std::string sValue = ( m_formatter % m_dblY ).str();
 
@@ -302,7 +304,7 @@ bool ChartMaster::DrawDynamicLayer() {
       memcpy( sz, sValue.c_str(), sValue.size() );
       sz[ sValue.size() ] = 0;
 
-      m_pDA->hline( left, right, m_intCrossHairY, Colour::Gray );
+      m_pDA->hline( m_xLeft, m_xRight, m_intCrossHairY, Colour::Gray );
       m_pDA->vline( top, bottom, m_intCrossHairX, Colour::Gray );
       m_pDA->text( sz, "normal", 10, m_intCrossHairX + 1, m_intCrossHairY - 14, Colour::Black );
 

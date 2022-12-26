@@ -139,12 +139,13 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
   //if ( event.LeftIsDown() ) std::cout << "Left is down" << std::endl;
   //if ( event.MiddleIsDown() ) std::cout << "Middle is down" << std::endl;
   //if ( event.RightIsDown() ) std::cout << "Right is down" << std::endl;
-  wxCoord x, y;
-  event.GetPosition( &x, &y );
   //std::cout << x << "," << y << std::endl;
   //std::cout << event.AltDown() << "," << event.ControlDown() << "," << event.ShiftDown() << std::endl;
   //std::cout << event.GetWheelAxis() << "," << event.GetWheelDelta() << "," << event.GetWheelRotation() << std::endl;
   // 0,120,-120
+
+  int xLeft, xX, xRight;
+  m_chartMaster.GetX( xLeft, xX, xRight );
 
   if ( m_vpDataViewVisual.HasBoth() ) {
 
@@ -156,27 +157,23 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
         // fall into next state
       case EMouse::Drag:
         // TODO: update chart for intermediate positions? or just change cursor?
-        if ( m_coordXStart != x ) {
-          wxSize size = GetClientSize();
-          double ratio( 0.0 );
-          if ( 10 <= size.GetWidth() ) {
+        if ( m_coordXStart != xX ) {
+          int width = xRight - xLeft;
+          if ( 10 <= ( width ) ) {
 
             int distance {};
-            if ( x > m_coordXStart ) {
-              distance = x - m_coordXStart;
+            if ( xX > m_coordXStart ) {
+              distance = xX - m_coordXStart;
             }
             else {
-              distance = m_coordXStart - x;
+              distance = m_coordXStart - xX;
             }
 
-            ratio = (double) distance / (double) size.GetWidth();
-            int pctRatio = std::floor( 100.0 * ratio );
-
             boost::posix_time::time_duration tdMovement;
-            tdMovement  = m_tdViewPortWidth * pctRatio;
-            tdMovement /= 100;
+            tdMovement  = m_tdViewPortWidth * distance;
+            tdMovement /= width;
 
-            if ( x < m_coordXStart ) {
+            if ( xX < m_coordXStart ) {
               m_vpDataViewVisual.dtBegin += tdMovement;
               m_vpDataViewVisual.dtEnd += tdMovement;
 
@@ -192,7 +189,7 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
             }
           }
 
-          m_coordXStart = x;
+          m_coordXStart = xX;
 
         }
         break;
@@ -202,16 +199,23 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
 
   }
 
-  m_chartMaster.CrossHairPosition( x, y );
+  {
+    wxCoord x, y;
+    event.GetPosition( &x, &y );
+    m_chartMaster.CrossHairPosition( x, y );
+  }
+
   DrawChart(); // after CrossHairPosition
 
   event.Skip();
 }
 
 void WinChartView::HandleMouseLeftDown( wxMouseEvent& event ) {
-  wxCoord x, y;
-  event.GetPosition( &x, &y );
-  m_coordXStart = x;
+  //wxCoord x, y;
+  //event.GetPosition( &x, &y );
+  int xLeft, xX, xRight;
+  m_chartMaster.GetX( xLeft, xX, xRight );
+  m_coordXStart = xX;
   m_stateMouse = EMouse::Down;
   event.Skip();
 }
@@ -262,14 +266,8 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
   //int delta = event.GetWheelDelta();
   int rotation = event.GetWheelRotation(); // has positive, negative, use delta to normalize
 
-  wxPoint pos = event.GetPosition();
-  wxSize size = GetClientSize();
-
-  double dblViewPortRatio( 0.5 );
-  if ( 10 <= size.GetWidth() ) {
-    dblViewPortRatio = (double) pos.x / (double) size.GetWidth();
-  }
-  int pctRatio = std::floor( 100.0 * dblViewPortRatio );
+  int xLeft, xX, xRight;
+  m_chartMaster.GetX( xLeft, xX, xRight );
 
   // use the view port ratio to determine how much to expand on left vs right side
   // if right size is beyond extent, shift all left to fit (same for left side)
@@ -288,8 +286,8 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
 
       tdDelta = tdNewWidth - m_tdViewPortWidth;
 
-      tdDeltaLeft = tdDelta * pctRatio;
-      tdDeltaLeft /= 100;
+      tdDeltaLeft = tdDelta * xX;
+      tdDeltaLeft /= ( xRight - xLeft );
 
       tdDeltaRight = tdDelta - tdDeltaLeft;
 
@@ -309,8 +307,8 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
 
       if ( tdDelta < tdTenSeconds ) tdDelta = tdTenSeconds;
 
-      tdDeltaLeft = tdDelta * pctRatio;
-      tdDeltaLeft /= 100;
+      tdDeltaLeft = tdDelta * xX;
+      tdDeltaLeft /= ( xRight - xLeft );
 
       tdDeltaRight = tdDelta - tdDeltaLeft;
 
