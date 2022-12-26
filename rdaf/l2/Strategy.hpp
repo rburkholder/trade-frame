@@ -57,6 +57,27 @@ namespace tf {
 
 using pOrder_t = ou::tf::Order::pOrder_t;
 
+// =========
+
+class Cycle {
+public:
+  using fDone_t = std::function<void()>;
+  Cycle( pOrder_t pEntry, pOrder_t pExit, fDone_t&& fDone )
+  : m_pOrderEntry( std::move( pEntry ) )
+  , m_pOrderExit( std::move( pExit ) )
+  , m_fDone( std::move( fDone ) )
+  {}
+  void PlaceEntry() {}
+  void PlaceExit() {}
+protected:
+private:
+  pOrder_t m_pOrderEntry;
+  pOrder_t m_pOrderExit;
+  fDone_t m_fDone;
+};
+
+// =========
+
 class Strategy:
   public ou::tf::DailyTradeTimeFrame<Strategy>
 {
@@ -97,7 +118,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, ImbalanceMean, Stoch, Skew, PL, ET, MarketDepth };
+  enum EChartSlot { Price, Volume, ImbalanceMean, Stoch, FVS_Var1, Skew, PL, ET, MarketDepth };
 
   enum class EStateTrade {
     Init,  // initiaize state in current market
@@ -182,6 +203,10 @@ private:
 
   ou::ChartEntryIndicator m_ceImbalanceRawMean;
   ou::ChartEntryIndicator m_ceImbalanceSmoothMean;
+
+  ou::ChartEntryIndicator m_ceFVS_Var1_Ask;
+  ou::ChartEntryIndicator m_ceFVS_Var1_Diff;
+  ou::ChartEntryIndicator m_ceFVS_Var1_Bid;
 
   ou::ChartEntryMark m_cemStochastic;
   ou::ChartEntryMark m_cemZero;

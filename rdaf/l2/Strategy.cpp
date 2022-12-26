@@ -117,6 +117,13 @@ Strategy::Strategy(
   m_cdMarketDepthBid.SetName( "MarketDepth Bid" );
   m_cdMarketDepthBid.SetColour( ou::Colour::Blue );
 
+  m_ceFVS_Var1_Ask.SetName( "Depth Ask Var1" );
+  m_ceFVS_Var1_Bid.SetName( "Depth Bid Var1" );
+
+  m_ceFVS_Var1_Ask.SetColour( ou::Colour::Red );
+  m_ceFVS_Var1_Diff.SetColour( ou::Colour::Green );
+  m_ceFVS_Var1_Bid.SetColour( ou::Colour::Blue );
+
 }
 
 Strategy::~Strategy() {
@@ -159,6 +166,12 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::PL, &m_ceProfitRealized );
   m_cdv.Add( EChartSlot::PL, &m_ceCommissionsPaid );
   m_cdv.Add( EChartSlot::PL, &m_ceProfit );
+
+  m_cdv.Add( EChartSlot::FVS_Var1, &m_cemZero );
+
+  m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Ask );
+  m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Diff );
+  m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Bid );
 
   //m_cdv.Add( EChartSlot::ET, &m_ceExecutionTime );
 
@@ -302,6 +315,13 @@ void Strategy::StartDepthByOrder() {
 
       if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
         Imbalance( depth );
+        if ( 1 == ix ) {
+          //double var1 = m_FeatureSet.FVS()[1].bid.v9.accelLimit;
+          double var1B = m_FeatureSet.FVS()[1].bid.v8.relativeLimit;
+          m_ceFVS_Var1_Bid.Append( depth.DateTime(), -var1B );
+          double var1A = m_FeatureSet.FVS()[1].ask.v8.relativeLimit;
+          m_ceFVS_Var1_Diff.Append( depth.DateTime(), var1A - var1B );
+        }
       }
     },
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
@@ -359,6 +379,13 @@ void Strategy::StartDepthByOrder() {
 
       if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
         Imbalance( depth );
+        if ( 1 == ix ) {
+          //double var1 = m_FeatureSet.FVS()[1].ask.v9.accelLimit;
+          double var1A = m_FeatureSet.FVS()[1].ask.v8.relativeLimit;
+          m_ceFVS_Var1_Ask.Append( depth.DateTime(), var1A );
+          double var1B = m_FeatureSet.FVS()[1].bid.v8.relativeLimit;
+          m_ceFVS_Var1_Diff.Append( depth.DateTime(), var1A - var1B );
+        }
       }
     }
   );
