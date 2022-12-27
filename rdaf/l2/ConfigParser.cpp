@@ -94,11 +94,11 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
 
     luFeed.add
       ( "l1", ou::tf::config::symbol_t::L1 )
-      ( "l2M", ou::tf::config::symbol_t::L2M )
-      ( "l2O", ou::tf::config::symbol_t::L2O )
-      ( "l1", ou::tf::config::symbol_t::L1 )
+      ( "L1", ou::tf::config::symbol_t::L1 )
       ( "l2m", ou::tf::config::symbol_t::L2M )
+      ( "L2M", ou::tf::config::symbol_t::L2M )
       ( "l2o", ou::tf::config::symbol_t::L2O )
+      ( "L2O", ou::tf::config::symbol_t::L2O )
       ;
 
     //ruleSeparator = *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ');
