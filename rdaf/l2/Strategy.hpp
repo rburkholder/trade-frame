@@ -125,9 +125,9 @@ private:
     Init,  // initiaize state in current market
     Search,  // looking for long or short enter
     LongSubmitted, // order has been submitted, waiting for confirmation
-    LongExit,  // position exists, looking for exit
+    LongExitSignal,  // position exists, looking for exit
     ShortSubmitted,  // order has been submitted, waiting for confirmtaion
-    ShortExit,  // position exists, looking for exit
+    ShortExitSignal,  // position exists, looking for exit
     LongExitSubmitted, // wait for exit to complete
     ShortExitSubmitted, // wait for exit to complete
     NoTrade, // from the config file, no trading, might be a future
@@ -281,10 +281,15 @@ private:
   void ExitLong( const ou::tf::Bar& );
   void ExitShort( const ou::tf::Bar& );
 
+  void ExitPosition( const ou::tf::Bar& );
+
   void ShowOrder( pOrder_t );
 
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );
+
+  void HandleExitOrderCancelled( const ou::tf::Order& );
+  void HandleExitOrderFilled( const ou::tf::Order& );
 
   void Clear();
   void SetupChart();

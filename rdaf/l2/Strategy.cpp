@@ -609,7 +609,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
     if ( m_stochasticStablizing == m_stochasticStable ) {}
     else {
       if ( m_dtFilterStochastic < dt ) {
-        m_stochasticStable = stochasticStablizing;
+        m_stochasticStable = m_stochasticStablizing;
       }
     }
   }
@@ -720,6 +720,7 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 
 void Strategy::EnterLong( const ou::tf::Bar& bar ) {
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+  m_pOrder->SetSignalPrice( bar.Close() );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   m_ceLongEntry.AddLabel( bar.DateTime(), bar.Close(), "LeS-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
@@ -730,6 +731,7 @@ void Strategy::EnterLong( const ou::tf::Bar& bar ) {
 
 void Strategy::EnterShort( const ou::tf::Bar& bar ) {
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+  m_pOrder->SetSignalPrice( bar.Close() );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   m_ceShortEntry.AddLabel( bar.DateTime(), bar.Close(), "SeS-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
@@ -740,6 +742,7 @@ void Strategy::EnterShort( const ou::tf::Bar& bar ) {
 
 void Strategy::ExitLong( const ou::tf::Bar& bar ) {
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+  m_pOrder->SetSignalPrice( bar.Close() );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "LxS-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
@@ -750,6 +753,7 @@ void Strategy::ExitLong( const ou::tf::Bar& bar ) {
 
 void Strategy::ExitShort( const ou::tf::Bar& bar ) {
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+  m_pOrder->SetSignalPrice( bar.Close() );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "SxS-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
@@ -758,11 +762,41 @@ void Strategy::ExitShort( const ou::tf::Bar& bar ) {
   ShowOrder( m_pOrder );
 }
 
+void Strategy::ExitPosition( const ou::tf::Bar& bar ) {
+  if ( m_pPosition->IsActive() ) {
+    assert( 1 == m_pPosition->GetActiveSize() );
+    switch ( m_pPosition->GetRow().eOrderSideActive ) {
+      case ou::tf::OrderSide::EOrderSide::Buy:
+        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+        m_pOrder->SetSignalPrice( bar.Close() );
+        m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
+        m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
+        m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "LxS-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
+        m_stateTrade = EStateTrade::LongExitSubmitted;
+        m_pPosition->PlaceOrder( m_pOrder );
+        ShowOrder( m_pOrder );
+        break;
+      case ou::tf::OrderSide::EOrderSide::Sell:
+        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+        m_pOrder->SetSignalPrice( bar.Close() );
+        m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
+        m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
+        m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "SxS-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
+        m_stateTrade = EStateTrade::ShortExitSubmitted;
+        m_pPosition->PlaceOrder( m_pOrder );
+        ShowOrder( m_pOrder );
+        break;
+      default:
+        assert( false ); // maybe check for unknown
+    }
+  }
+}
+
 void Strategy::ShowOrder( pOrder_t pOrder ) {
-  m_pTreeItemOrder = m_pTreeItemSymbol->AppendChild(
-      "Order "
-    + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() )
-    );
+  //m_pTreeItemOrder = m_pTreeItemSymbol->AppendChild(
+  //    "Order "
+  //  + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() )
+  //  );
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
@@ -848,12 +882,14 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     case EStateTrade::LongSubmitted:
       // wait for order to execute
       break;
-    case EStateTrade::LongExit:
+    case EStateTrade::LongExitSignal:
       switch ( stateDesired ) {
         case EStateDesired::GoShort:
           BOOST_LOG_TRIVIAL(info) << dt << " GoShort->ExitLong";
           // stateDesired = EStateDesired::Continue; leave desire as it is
-          ExitLong( bar );
+          ExitPosition( bar );
+          EnterShort( bar );
+          //ExitLong( bar );
           break;
         case EStateDesired::Exit:
           BOOST_LOG_TRIVIAL(info) << dt << " Exit->ExitLong";
@@ -878,12 +914,14 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     case EStateTrade::ShortSubmitted:
       // wait for order to execute
       break;
-    case EStateTrade::ShortExit:
+    case EStateTrade::ShortExitSignal:
       switch ( stateDesired ) {
         case EStateDesired::GoLong:
           BOOST_LOG_TRIVIAL(info) << dt << " GoLong->ExitShort";
           // stateDesired = EStateDesired::Continue; leave desire as it is
-          ExitShort( bar );
+          ExitPosition( bar );
+          EnterShort( bar );
+          //ExitShort( bar );
           break;
         case EStateDesired::Exit:
           BOOST_LOG_TRIVIAL(info) << dt << " Exit->ExitShort";
@@ -976,11 +1014,11 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
   switch ( m_stateTrade ) {
     case EStateTrade::LongSubmitted:
       m_ceLongEntry.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "LeF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
-      m_stateTrade = EStateTrade::LongExit;
+      m_stateTrade = EStateTrade::LongExitSignal;
       break;
     case EStateTrade::ShortSubmitted:
       m_ceShortEntry.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "SeF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
-      m_stateTrade = EStateTrade::ShortExit;
+      m_stateTrade = EStateTrade::ShortExitSignal;
       break;
     case EStateTrade::LongExitSubmitted:
       m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "LxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
@@ -1000,6 +1038,40 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
        assert( false ); // TODO: unravel the state mess if we get here
   }
   m_pOrder.reset();
+}
+
+void Strategy::HandleExitOrderCancelled( const ou::tf::Order& order ) {
+  ou::tf::Order& order_( const_cast<ou::tf::Order&>( order ) );
+  order_.OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
+  order_.OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
+
+  switch ( order.GetOrderSide() ) {
+    case ou::tf::OrderSide::EOrderSide::Buy: // is dt filled a real time?
+      m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetSignalPrice(), "LxC-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
+      break;
+    case ou::tf::OrderSide::EOrderSide::Sell: // is dt filled a real time?
+      m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetSignalPrice(), "SxC-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
+      break;
+    default:
+      assert( false );
+  }
+}
+
+void Strategy::HandleExitOrderFilled( const ou::tf::Order& order ) {
+  ou::tf::Order& order_( const_cast<ou::tf::Order&>( order ) );
+  order_.OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
+  order_.OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
+
+  switch ( order.GetOrderSide() ) {
+    case ou::tf::OrderSide::EOrderSide::Buy:
+      m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "LxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
+      break;
+    case ou::tf::OrderSide::EOrderSide::Sell:
+      m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "SxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
+      break;
+    default:
+      assert( false );
+  }
 }
 
 void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
