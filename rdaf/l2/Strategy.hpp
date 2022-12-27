@@ -40,6 +40,7 @@
 #include <TFIQFeed/Level2/FeatureSet.hpp>
 
 #include <TFBitsNPieces/Stochastic.hpp>
+#include <TFBitsNPieces/MovingAverage.hpp>
 
 #include "ConfigParser.hpp"
 
@@ -227,6 +228,9 @@ private:
   using pStochastic_t = std::unique_ptr<Stochastic>;
   using vStochastic_t = std::vector<pStochastic_t>;
   vStochastic_t m_vStochastic;
+
+  using vMovingAverage_t = std::vector<MovingAverage>;
+  vMovingAverage_t m_vMovingAverage;
 
   // ==
   struct QuoteForBranch {

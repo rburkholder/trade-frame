@@ -47,6 +47,9 @@ BOOST_FUSION_ADAPT_STRUCT(
   (std::string, sAlgorithm)
   (std::string, sSignalFrom)
   (int, nPeriodWidth)
+  (int, nMA1Periods)
+  (int, nMA2Periods)
+  (int, nMA3Periods)
   (int, nStochastic1Periods)
   (int, nStochastic2Periods)
   (int, nStochastic3Periods)
@@ -190,6 +193,22 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> boost::spirit::int_
       >> *qi::lit(' ') >> qi::eol;
 
+    ruleMovingAverage1Periods
+      %= qi::lit( "ma1_periods" )
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> boost::spirit::int_
+      >> *qi::lit(' ') >> qi::eol;
+    ruleMovingAverage2Periods
+      %= qi::lit( "ma2_periods" )
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> boost::spirit::int_
+      >> *qi::lit(' ') >> qi::eol;
+    ruleMovingAverage3Periods
+      %= qi::lit( "ma3_periods" )
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> boost::spirit::int_
+      >> *qi::lit(' ') >> qi::eol;
+
     ruleStochastic1Periods
       %= qi::lit( "stochastic1_periods" )
       >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
@@ -245,6 +264,9 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> -ruleAlgorithm
       >> -ruleSignalFrom
       >>  rulePeriodWidth
+      >>  ruleMovingAverage1Periods
+      >>  ruleMovingAverage2Periods
+      >>  ruleMovingAverage3Periods
       >>  ruleStochastic1Periods
       >>  ruleStochastic2Periods
       >>  ruleStochastic3Periods
@@ -299,6 +321,9 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   qi::rule<Iterator, std::string()> ruleAlgorithm;
   qi::rule<Iterator, std::string()> ruleSignalFrom;
   qi::rule<Iterator, int()> rulePeriodWidth;
+  qi::rule<Iterator, int()> ruleMovingAverage1Periods;
+  qi::rule<Iterator, int()> ruleMovingAverage2Periods;
+  qi::rule<Iterator, int()> ruleMovingAverage3Periods;
   qi::rule<Iterator, int()> ruleStochastic1Periods;
   qi::rule<Iterator, int()> ruleStochastic2Periods;
   qi::rule<Iterator, int()> ruleStochastic3Periods;

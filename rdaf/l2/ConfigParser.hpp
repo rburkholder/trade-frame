@@ -48,6 +48,11 @@ struct symbol_t {
 
   int nPeriodWidth;  // units:  seconds
 
+  // shortest to longest
+  int nMA1Periods;
+  int nMA2Periods;
+  int nMA3Periods;
+
   int nStochastic1Periods; // => periods * width
   int nStochastic2Periods; // => periods * width
   int nStochastic3Periods; // => periods * width

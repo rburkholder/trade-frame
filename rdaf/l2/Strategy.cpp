@@ -143,6 +143,10 @@ void Strategy::SetupChart() {
   //m_cdv.Add( EChartSlot::Price, &m_ceShortFill );
   m_cdv.Add( EChartSlot::Price, &m_ceShortExit );
 
+  for ( vMovingAverage_t::value_type& ma: m_vMovingAverage ) {
+    ma.AddToView( m_cdv, EChartSlot::Price );
+  }
+
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
   m_cdv.Add( EChartSlot::Stoch, &m_cemStochastic );
@@ -204,6 +208,24 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   m_vStochastic.emplace_back( std::make_unique<Stochastic>( "1", m_quotes, m_config.nStochastic1Periods, td, ou::Colour::DeepSkyBlue ) );
   m_vStochastic.emplace_back( std::make_unique<Stochastic>( "2", m_quotes, m_config.nStochastic2Periods, td, ou::Colour::DodgerBlue ) );  // is dark: MediumSlateBlue; MediumAquamarine is greenish; MediumPurple is dark; Purple is dark
   m_vStochastic.emplace_back( std::make_unique<Stochastic>( "3", m_quotes, m_config.nStochastic3Periods, td, ou::Colour::MediumSlateBlue ) ); // no MediumTurquoise, maybe Indigo
+
+  // moving average
+
+  using vMAPeriods_t = std::vector<int>;
+  vMAPeriods_t vMAPeriods;
+
+  vMAPeriods.push_back( m_config.nMA1Periods );
+  vMAPeriods.push_back( m_config.nMA2Periods );
+  vMAPeriods.push_back( m_config.nMA3Periods );
+
+  assert( 3 == vMAPeriods.size() );
+  for ( vMAPeriods_t::value_type value: vMAPeriods ) {
+    assert( 0 < value );
+  }
+
+  m_vMovingAverage.emplace_back( MovingAverage( m_quotes, vMAPeriods[0], td, ou::Colour::Brown, "ma1" ) );
+  m_vMovingAverage.emplace_back( MovingAverage( m_quotes, vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
+  m_vMovingAverage.emplace_back( MovingAverage( m_quotes, vMAPeriods[2], td, ou::Colour::Gold,  "ma3" ) );
 
   SetupChart(); // comes after stochastic initialization
 
@@ -554,6 +576,10 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
 //    m_pTreeQuote->Fill();
 //  }
+
+  for ( vMovingAverage_t::value_type& ma: m_vMovingAverage ) {
+    ma.Update( dt );
+  }
 
   EStateStochastic stochasticStablizing( m_stochasticStablizing ); // sticky until changed
 
