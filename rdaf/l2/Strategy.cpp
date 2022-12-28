@@ -155,14 +155,14 @@ void Strategy::SetupChart() {
     vt->AddToView( m_cdv, EChartSlot::Price, EChartSlot::Stoch );
   }
 
-  m_cdv.Add( EChartSlot::ImbalanceMean, &m_cemZero );
+  //m_cdv.Add( EChartSlot::ImbalanceMean, &m_cemZero );
 
-  m_cdv.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceRawMean );
-  m_ceImbalanceRawMean.SetName( "imbalance mean" );
-  m_ceImbalanceRawMean.SetColour( ou::Colour::LightGreen );
+  //m_cdv.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceRawMean );
+  //m_ceImbalanceRawMean.SetName( "imbalance mean" );
+  //m_ceImbalanceRawMean.SetColour( ou::Colour::LightGreen );
 
-  m_cdv.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceSmoothMean );
-  m_ceImbalanceSmoothMean.SetColour( ou::Colour::DarkGreen );
+  //m_cdv.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceSmoothMean );
+  //m_ceImbalanceSmoothMean.SetColour( ou::Colour::DarkGreen );
 
   //m_cdv.Add( EChartSlot::Skew, &m_ceSkewness );
 
@@ -336,7 +336,7 @@ void Strategy::StartDepthByOrder() {
       }
 
       if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
-        Imbalance( depth );
+        //Imbalance( depth );
         if ( 1 == ix ) {
           //double var1 = m_FeatureSet.FVS()[1].bid.v9.accelLimit;
           //double var1B = m_FeatureSet.FVS()[1].bid.v8.relativeLimit;
@@ -400,7 +400,7 @@ void Strategy::StartDepthByOrder() {
       }
 
       if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
-        Imbalance( depth );
+        //Imbalance( depth );
         if ( 1 == ix ) {
           //double var1 = m_FeatureSet.FVS()[1].ask.v9.accelLimit;
           //double var1A = m_FeatureSet.FVS()[1].ask.v8.relativeLimit;
