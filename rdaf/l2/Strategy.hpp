@@ -205,9 +205,9 @@ private:
   ou::ChartEntryIndicator m_ceImbalanceRawMean;
   ou::ChartEntryIndicator m_ceImbalanceSmoothMean;
 
-  ou::ChartEntryIndicator m_ceFVS_Var1_Ask;
-  ou::ChartEntryIndicator m_ceFVS_Var1_Diff;
-  ou::ChartEntryIndicator m_ceFVS_Var1_Bid;
+  //ou::ChartEntryIndicator m_ceFVS_Var1_Ask;
+  //ou::ChartEntryIndicator m_ceFVS_Var1_Diff;
+  //ou::ChartEntryIndicator m_ceFVS_Var1_Bid;
 
   ou::ChartEntryMark m_cemStochastic;
   ou::ChartEntryMark m_cemZero;

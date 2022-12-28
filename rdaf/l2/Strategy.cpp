@@ -117,12 +117,12 @@ Strategy::Strategy(
   m_cdMarketDepthBid.SetName( "MarketDepth Bid" );
   m_cdMarketDepthBid.SetColour( ou::Colour::Blue );
 
-  m_ceFVS_Var1_Ask.SetName( "Depth Ask Var1" );
-  m_ceFVS_Var1_Bid.SetName( "Depth Bid Var1" );
+  //m_ceFVS_Var1_Ask.SetName( "Depth Ask Var1" );
+  //m_ceFVS_Var1_Bid.SetName( "Depth Bid Var1" );
 
-  m_ceFVS_Var1_Ask.SetColour( ou::Colour::Red );
-  m_ceFVS_Var1_Diff.SetColour( ou::Colour::Green );
-  m_ceFVS_Var1_Bid.SetColour( ou::Colour::Blue );
+  //m_ceFVS_Var1_Ask.SetColour( ou::Colour::Red );
+  //m_ceFVS_Var1_Diff.SetColour( ou::Colour::Green );
+  //m_ceFVS_Var1_Bid.SetColour( ou::Colour::Blue );
 
 }
 
@@ -173,9 +173,9 @@ void Strategy::SetupChart() {
 
   m_cdv.Add( EChartSlot::FVS_Var1, &m_cemZero );
 
-  m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Ask );
-  m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Diff );
-  m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Bid );
+  //m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Ask );
+  //m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Diff );
+  //m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Bid );
 
   //m_cdv.Add( EChartSlot::ET, &m_ceExecutionTime );
 
@@ -339,10 +339,10 @@ void Strategy::StartDepthByOrder() {
         Imbalance( depth );
         if ( 1 == ix ) {
           //double var1 = m_FeatureSet.FVS()[1].bid.v9.accelLimit;
-          double var1B = m_FeatureSet.FVS()[1].bid.v8.relativeLimit;
-          m_ceFVS_Var1_Bid.Append( depth.DateTime(), -var1B );
-          double var1A = m_FeatureSet.FVS()[1].ask.v8.relativeLimit;
-          m_ceFVS_Var1_Diff.Append( depth.DateTime(), var1A - var1B );
+          //double var1B = m_FeatureSet.FVS()[1].bid.v8.relativeLimit;
+          //m_ceFVS_Var1_Bid.Append( depth.DateTime(), -var1B );
+          //double var1A = m_FeatureSet.FVS()[1].ask.v8.relativeLimit;
+          //m_ceFVS_Var1_Diff.Append( depth.DateTime(), var1A - var1B );
         }
       }
     },
@@ -403,10 +403,10 @@ void Strategy::StartDepthByOrder() {
         Imbalance( depth );
         if ( 1 == ix ) {
           //double var1 = m_FeatureSet.FVS()[1].ask.v9.accelLimit;
-          double var1A = m_FeatureSet.FVS()[1].ask.v8.relativeLimit;
-          m_ceFVS_Var1_Ask.Append( depth.DateTime(), var1A );
-          double var1B = m_FeatureSet.FVS()[1].bid.v8.relativeLimit;
-          m_ceFVS_Var1_Diff.Append( depth.DateTime(), var1A - var1B );
+          //double var1A = m_FeatureSet.FVS()[1].ask.v8.relativeLimit;
+          //m_ceFVS_Var1_Ask.Append( depth.DateTime(), var1A );
+          //double var1B = m_FeatureSet.FVS()[1].bid.v8.relativeLimit;
+          //m_ceFVS_Var1_Diff.Append( depth.DateTime(), var1A - var1B );
         }
       }
     }
@@ -870,12 +870,12 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         case EStateDesired::GoLong:
           BOOST_LOG_TRIVIAL(info) << dt << " Search->GoLong";
           stateDesired = EStateDesired::Continue;
-          EnterLong( bar );
+          //EnterLong( bar );
           break;
         case EStateDesired::GoShort:
           BOOST_LOG_TRIVIAL(info) << dt << " Search->GoShort";
           stateDesired = EStateDesired::Continue;
-          EnterShort( bar );
+          //EnterShort( bar );
           break;
       }
       break;
