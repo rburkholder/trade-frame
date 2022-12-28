@@ -1047,10 +1047,10 @@ void Strategy::HandleExitOrderCancelled( const ou::tf::Order& order ) {
 
   switch ( order.GetOrderSide() ) {
     case ou::tf::OrderSide::EOrderSide::Buy: // is dt filled a real time?
-      m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetSignalPrice(), "LxC-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
+      //m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetSignalPrice(), "LxC-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
       break;
     case ou::tf::OrderSide::EOrderSide::Sell: // is dt filled a real time?
-      m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetSignalPrice(), "SxC-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
+      //m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetSignalPrice(), "SxC-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
       break;
     default:
       assert( false );
@@ -1064,10 +1064,10 @@ void Strategy::HandleExitOrderFilled( const ou::tf::Order& order ) {
 
   switch ( order.GetOrderSide() ) {
     case ou::tf::OrderSide::EOrderSide::Buy:
-      m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "LxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
+      //m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "LxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
       break;
     case ou::tf::OrderSide::EOrderSide::Sell:
-      m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "SxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
+      //m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "SxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
       break;
     default:
       assert( false );
