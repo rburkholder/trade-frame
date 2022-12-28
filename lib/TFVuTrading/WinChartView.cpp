@@ -186,6 +186,11 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
             else {
               m_vpDataViewVisual.dtBegin -= tdMovement;
               m_vpDataViewVisual.dtEnd -= tdMovement;
+
+              if ( m_vpDataViewVisual.dtEnd < m_vpDataViewExtents.dtEnd ) {
+                m_state = m_bSim ? EState::sim_review : EState::live_review;
+                //m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdNewWidth, m_vpDataViewExtents.dtEnd );
+              }
             }
           }
 
