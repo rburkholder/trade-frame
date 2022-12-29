@@ -102,6 +102,9 @@ Strategy::Strategy(
 
   //m_ceSkewness.SetName( "Skew" );
 
+  m_ceStochasticProbability.SetName( "Stoch Prob" );
+  m_ceStochasticProbability.SetColour( ou::Colour::DarkGreen );
+
   m_ceProfitUnRealized.SetName( "UnRealized" );
   m_ceProfitRealized.SetName( "Realized" );
   m_ceCommissionsPaid.SetName( "Commissions" );
@@ -154,6 +157,7 @@ void Strategy::SetupChart() {
   for ( vStochastic_t::value_type& vt: m_vStochastic ) {
     vt->AddToView( m_cdv, EChartSlot::Price, EChartSlot::Stoch );
   }
+  m_cdv.Add( EChartSlot::Stoch, &m_ceStochasticProbability );
 
   //m_cdv.Add( EChartSlot::ImbalanceMean, &m_cemZero );
 
@@ -171,7 +175,7 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::PL, &m_ceCommissionsPaid );
   m_cdv.Add( EChartSlot::PL, &m_ceProfit );
 
-  m_cdv.Add( EChartSlot::FVS_Var1, &m_cemZero );
+  //m_cdv.Add( EChartSlot::FVS_Var1, &m_cemZero );
 
   //m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Ask );
   //m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Diff );
@@ -208,6 +212,15 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   m_vStochastic.emplace_back( std::make_unique<Stochastic>( "1", m_quotes, m_config.nStochastic1Periods, td, ou::Colour::DeepSkyBlue ) );
   m_vStochastic.emplace_back( std::make_unique<Stochastic>( "2", m_quotes, m_config.nStochastic2Periods, td, ou::Colour::DodgerBlue ) );  // is dark: MediumSlateBlue; MediumAquamarine is greenish; MediumPurple is dark; Purple is dark
   m_vStochastic.emplace_back( std::make_unique<Stochastic>( "3", m_quotes, m_config.nStochastic3Periods, td, ou::Colour::MediumSlateBlue ) ); // no MediumTurquoise, maybe Indigo
+
+  double total = 0.0;
+  total += m_config.nStochastic1Periods;
+  total += m_config.nStochastic2Periods;
+  total += m_config.nStochastic3Periods;
+
+  m_vStochasticProbablity.push_back( m_config.nStochastic1Periods / total );
+  m_vStochasticProbablity.push_back( m_config.nStochastic2Periods / total );
+  m_vStochasticProbablity.push_back( m_config.nStochastic3Periods / total );
 
   // moving average
 
@@ -581,9 +594,20 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
     ma.Update( dt );
   }
 
+  double probability {};
+  //probability += m_vStochasticProbablity[0] * m_vStochastic[0]->Latest();
+  //probability += m_vStochasticProbablity[1] * m_vStochastic[1]->Latest();
+  //probability += m_vStochasticProbablity[2] * m_vStochastic[2]->Latest();
+  probability += 0.33 * m_vStochastic[0]->Latest();
+  probability += 0.33 * m_vStochastic[1]->Latest();
+  probability += 0.33 * m_vStochastic[2]->Latest();
+  m_ceStochasticProbability.Append( dt, probability );
+
   EStateStochastic stochasticStablizing( m_stochasticStablizing ); // sticky until changed
 
-  double k = m_vStochastic[0]->Latest();
+  //double k = m_vStochastic[0]->Latest();
+  double k = probability;
+
   if ( k >= 50.0 ) {
     if ( k > (double)k_up ) {
       stochasticStablizing = EStateStochastic::AboveHi;

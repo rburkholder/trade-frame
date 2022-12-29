@@ -229,6 +229,10 @@ private:
   using vStochastic_t = std::vector<pStochastic_t>;
   vStochastic_t m_vStochastic;
 
+  using vProbability = std::vector<double>;
+  vProbability m_vStochasticProbablity;
+  ou::ChartEntryIndicator m_ceStochasticProbability;
+
   using vMovingAverage_t = std::vector<MovingAverage>;
   vMovingAverage_t m_vMovingAverage;
 
