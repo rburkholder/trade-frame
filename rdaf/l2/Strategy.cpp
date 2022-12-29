@@ -894,12 +894,12 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         case EStateDesired::GoLong:
           BOOST_LOG_TRIVIAL(info) << dt << " Search->GoLong";
           stateDesired = EStateDesired::Continue;
-          //EnterLong( bar );
+          EnterLong( bar );
           break;
         case EStateDesired::GoShort:
           BOOST_LOG_TRIVIAL(info) << dt << " Search->GoShort";
           stateDesired = EStateDesired::Continue;
-          //EnterShort( bar );
+          EnterShort( bar );
           break;
       }
       break;
