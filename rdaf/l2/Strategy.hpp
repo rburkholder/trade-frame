@@ -243,6 +243,7 @@ private:
   using vMovingAverage_t = std::vector<MovingAverage>;
   vMovingAverage_t m_vMovingAverage;
 
+  std::string m_sProfitDescription;
   double m_dblProfitMax;
   double m_dblProfitMin;
 
