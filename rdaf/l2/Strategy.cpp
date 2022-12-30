@@ -719,15 +719,15 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 
   double dblRealized, dblCommissionsPaid, dblTotal;
 
-  m_pPosition->QueryStats( m_dblRealized, dblRealized, dblCommissionsPaid, dblTotal );
+  m_pPosition->QueryStats( m_dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
 
-  m_ceProfitUnRealized.Append( bar.DateTime(), m_dblRealized );
+  m_ceProfitUnRealized.Append( bar.DateTime(), m_dblUnRealized );
   m_ceProfitRealized.Append( bar.DateTime(), dblRealized );
   m_ceCommissionsPaid.Append( bar.DateTime(), dblCommissionsPaid );
   m_ceProfit.Append( bar.DateTime(), dblTotal );
 
-  if ( m_dblRealized > m_dblProfitMax )m_dblProfitMax = m_dblRealized;
-  if ( m_dblRealized < m_dblProfitMin )m_dblProfitMin = m_dblRealized;
+  if ( m_dblUnRealized > m_dblProfitMax )m_dblProfitMax = m_dblUnRealized;
+  if ( m_dblUnRealized < m_dblProfitMin )m_dblProfitMin = m_dblUnRealized;
 
   TimeTick( bar );
 }
@@ -746,7 +746,7 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 */
 
 void Strategy::EnterLong( const ou::tf::Bar& bar ) {
-  m_dblProfitMax = m_dblRealized = m_dblProfitMin = 0.0;
+  m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
   m_pOrder->SetSignalPrice( bar.Close() );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
@@ -758,7 +758,7 @@ void Strategy::EnterLong( const ou::tf::Bar& bar ) {
 }
 
 void Strategy::EnterShort( const ou::tf::Bar& bar ) {
-  m_dblProfitMax = m_dblRealized = m_dblProfitMin = 0.0;
+  m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
   m_pOrder->SetSignalPrice( bar.Close() );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
@@ -801,7 +801,7 @@ void Strategy::ExitPosition( const ou::tf::Bar& bar ) {
         m_pOrder->SetDescription(
             m_sProfitDescription + ","
           + boost::lexical_cast<std::string>( m_dblProfitMin ) + ","
-          + boost::lexical_cast<std::string>( m_dblRealized ) + ","
+          + boost::lexical_cast<std::string>( m_dblUnRealized ) + ","
           + boost::lexical_cast<std::string>( m_dblProfitMax )
           );
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
@@ -817,7 +817,7 @@ void Strategy::ExitPosition( const ou::tf::Bar& bar ) {
         m_pOrder->SetDescription(
             m_sProfitDescription + ","
           + boost::lexical_cast<std::string>( m_dblProfitMin ) + ","
-          + boost::lexical_cast<std::string>( m_dblRealized ) + ","
+          + boost::lexical_cast<std::string>( m_dblUnRealized ) + ","
           + boost::lexical_cast<std::string>( m_dblProfitMax )
           );
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
@@ -998,17 +998,24 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
             ; // already long
           break;
         case EStateDesired::Continue:
-          if ( m_bUseMARising ) {
-            if ( EMovingAverage::Rising == currentMovingAverage ) {
-              //BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue";
-            }
-            else {
-              BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue(Exit)";
-              m_sProfitDescription += ",x,cont";
-              ExitPosition( bar );
-              //m_bUseMAFalling = EMovingAverage::Falling == currentMovingAverage;
-              //m_sProfitDescription = "s,cont";
-              //EnterShort( bar );
+          if ( -1.0 >= m_dblUnRealized ) {
+            BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue(Stop)";
+            m_sProfitDescription += ",x,stop";
+            ExitPosition( bar );
+          }
+          else {
+            if ( m_bUseMARising ) {
+              if ( EMovingAverage::Rising == currentMovingAverage ) {
+                //BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue";
+              }
+              else {
+                BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue(Exit)";
+                m_sProfitDescription += ",x,cont";
+                ExitPosition( bar );
+                //m_bUseMAFalling = EMovingAverage::Falling == currentMovingAverage;
+                //m_sProfitDescription = "s,cont";
+                //EnterShort( bar );
+              }
             }
           }
           break;
@@ -1059,17 +1066,24 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
             ; // already short
           break;
         case EStateDesired::Continue:
-          if ( m_bUseMAFalling ) {
-            if ( EMovingAverage::Falling == currentMovingAverage ) {
-              //BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue";
-            }
-            else {
-              BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue(Exit)";
-              m_sProfitDescription += ",x,cont";
-              ExitPosition( bar );
-              //m_bUseMARising = EMovingAverage::Rising == currentMovingAverage;
-              //m_sProfitDescription = "l,cont";
-              //EnterLong( bar );
+          if ( -1.0 >= m_dblUnRealized ) {
+            BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue(Stop)";
+            m_sProfitDescription += ",x,stop";
+            ExitPosition( bar );
+          }
+          else {
+            if ( m_bUseMAFalling ) {
+              if ( EMovingAverage::Falling == currentMovingAverage ) {
+                //BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue";
+              }
+              else {
+                BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue(Exit)";
+                m_sProfitDescription += ",x,cont";
+                ExitPosition( bar );
+                //m_bUseMARising = EMovingAverage::Rising == currentMovingAverage;
+                //m_sProfitDescription = "l,cont";
+                //EnterLong( bar );
+              }
             }
           }
           break;

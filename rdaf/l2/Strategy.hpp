@@ -247,7 +247,7 @@ private:
 
   std::string m_sProfitDescription;
   double m_dblProfitMax;
-  double m_dblRealized;
+  double m_dblUnRealized;
   double m_dblProfitMin;
 
   // ==
