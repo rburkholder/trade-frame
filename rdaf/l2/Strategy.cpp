@@ -727,6 +727,9 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   m_ceCommissionsPaid.Append( bar.DateTime(), dblCommissionsPaid );
   m_ceProfit.Append( bar.DateTime(), dblTotal );
 
+  if ( dblUnRealized > m_dblProfitMax )m_dblProfitMax = dblUnRealized;
+  if ( dblUnRealized < m_dblProfitMin )m_dblProfitMin = dblUnRealized;
+
   TimeTick( bar );
 }
 
@@ -744,6 +747,7 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 */
 
 void Strategy::EnterLong( const ou::tf::Bar& bar ) {
+  m_dblProfitMax = m_dblProfitMin = 0.0;
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
   m_pOrder->SetSignalPrice( bar.Close() );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
@@ -755,6 +759,7 @@ void Strategy::EnterLong( const ou::tf::Bar& bar ) {
 }
 
 void Strategy::EnterShort( const ou::tf::Bar& bar ) {
+  m_dblProfitMax = m_dblProfitMin = 0.0;
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
   m_pOrder->SetSignalPrice( bar.Close() );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
@@ -794,6 +799,11 @@ void Strategy::ExitPosition( const ou::tf::Bar& bar ) {
       case ou::tf::OrderSide::EOrderSide::Buy:
         m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
         m_pOrder->SetSignalPrice( bar.Close() );
+        m_pOrder->SetDescription(
+          boost::lexical_cast<std::string>( m_dblProfitMin )
+          + ","
+          + boost::lexical_cast<std::string>( m_dblProfitMax )
+          );
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
         m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
         m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "LxS2-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
@@ -804,6 +814,11 @@ void Strategy::ExitPosition( const ou::tf::Bar& bar ) {
       case ou::tf::OrderSide::EOrderSide::Sell:
         m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
         m_pOrder->SetSignalPrice( bar.Close() );
+        m_pOrder->SetDescription(
+          boost::lexical_cast<std::string>( m_dblProfitMin )
+          + ","
+          + boost::lexical_cast<std::string>( m_dblProfitMax )
+          );
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
         m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
         m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "SxS2-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
@@ -953,7 +968,6 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
               BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->GoShort";
               ExitPosition( bar );
               m_bUseMAFalling = EMovingAverage::Falling == currentMovingAverage;
-              //m_bUseMAFalling = false;
               EnterShort( bar );
             }
           }
@@ -978,7 +992,6 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
               BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue(Exit)";
               ExitPosition( bar );
               m_bUseMAFalling = EMovingAverage::Falling == currentMovingAverage;
-              //m_bUseMAFalling = false;
               EnterShort( bar );
             }
           }
@@ -1005,7 +1018,6 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
               BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->GoLong";
               ExitPosition( bar );
               m_bUseMARising = EMovingAverage::Rising == currentMovingAverage;
-              //m_bUseMARising = false;
               EnterLong( bar );
             }
           }
@@ -1030,7 +1042,6 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
               BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue(Exit)";
               ExitPosition( bar );
               m_bUseMARising = EMovingAverage::Rising == currentMovingAverage;
-              //m_bUseMAFalling = false;
               EnterLong( bar );
             }
           }

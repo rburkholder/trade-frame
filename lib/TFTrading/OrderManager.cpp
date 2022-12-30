@@ -140,6 +140,7 @@ namespace OrderManagerQueries {
       ou::db::Field( a, "orderstatus", eOrderStatus );
       ou::db::Field( a, "datetimesubmitted", dtOrderSubmitted );
       ou::db::Field( a, "signalprice", dblSignalPrice );
+      ou::db::Field( a, "description", sDescription );
       ou::db::Field( a, "orderid", idOrder );
     }
 
@@ -153,15 +154,18 @@ namespace OrderManagerQueries {
     OrderStatus::EOrderStatus eOrderStatus;
     ptime dtOrderSubmitted;
     double dblSignalPrice;
+    std::string sDescription;
 
     UpdateAtPlaceOrder1(
       ETimeInForce eTimeInForce_, ptime dtGoodTillDate_, ptime dtGoodAfterTime_
     , Order::idOrder_t idParent_, bool bTransmit_, bool bOutsideRTH_
-    , Order::idOrder_t id, OrderStatus::EOrderStatus status, ptime dtOrderSubmitted_, double dblSignalPrice_
+    , Order::idOrder_t id, OrderStatus::EOrderStatus status, ptime dtOrderSubmitted_
+    , double dblSignalPrice_, const std::string& sDescription_
     )
     : eTimeInForce( eTimeInForce_ ), dtGoodTillDate( dtGoodTillDate_ ), dtGoodAfterTime( dtGoodAfterTime_ )
     , idParent( idParent_ ), bTransmit( bTransmit_ ), bOutsideRTH( bOutsideRTH_ )
-    , idOrder( id ), dtOrderSubmitted( dtOrderSubmitted_ ), eOrderStatus( status ), dblSignalPrice( dblSignalPrice_ ) {};
+    , idOrder( id ), dtOrderSubmitted( dtOrderSubmitted_ ), eOrderStatus( status )
+    , dblSignalPrice( dblSignalPrice_ ), sDescription( sDescription_) {};
   };
 }
 
@@ -179,14 +183,16 @@ void OrderManager::PlaceOrder(ProviderInterfaceBase *pProvider, pOrder_t pOrder)
           update(
             pOrder->GetTimeInForce(), pOrder->GetGoodTillDate(), pOrder->GetGoodAfterTime()
             , pOrder->GetParentOrderId(), pOrder->GetTransmit(), pOrder->GetOutsideRTH()
-            , pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderSubmitted, pOrder->GetRow().dblSignalPrice
+            , pOrder->GetOrderId(), pOrder->GetRow().eOrderStatus, pOrder->GetRow().dtOrderSubmitted
+            , pOrder->GetRow().dblSignalPrice, pOrder->GetRow().sDescription
           );
         ou::db::QueryFields<OrderManagerQueries::UpdateAtPlaceOrder1>::pQueryFields_t pQuery
           = m_pSession->SQL<OrderManagerQueries::UpdateAtPlaceOrder1>( // todo:  cache this query
             "update orders set"
             " timeinforce=?, goodtilldate=?, goodaftertime=?"
             ", parentid=?, transmit=?, outsiderth=?"
-            ", orderstatus=?, datetimesubmitted=?, signalprice=?"
+            ", orderstatus=?, datetimesubmitted=?"
+            ", signalprice=?, description=?"
             , update ).Where( "orderid=?" );
       }
     }

@@ -243,6 +243,9 @@ private:
   using vMovingAverage_t = std::vector<MovingAverage>;
   vMovingAverage_t m_vMovingAverage;
 
+  double m_dblProfitMax;
+  double m_dblProfitMin;
+
   // ==
   struct QuoteForBranch {
     double time;
