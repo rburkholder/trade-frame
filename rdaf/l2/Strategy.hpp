@@ -152,14 +152,20 @@ private:
     Exit
   };
 
+  enum class EMovingAverage {
+    Rising, ToRising, Flat, ToFlat, Falling, ToFalling
+  };
+
   boost::posix_time::ptime m_dtFilterStochastic;
 
   EStateStochastic m_stochasticStable;
   EStateStochastic m_stochasticStablizing;
 
   EStateStochastic m_stateStochastic;
+  EMovingAverage m_stateMovingAverage;
 
-  //EStateDesired m_stateDesired;
+  bool m_bUseMARising;
+  bool m_bUseMAFalling;
 
   EStateTrade m_stateTrade;
 
