@@ -119,7 +119,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, ImbalanceMean, Stoch, FVS_Var1, Skew, PL, ET, MarketDepth };
+  enum EChartSlot { Price, Volume, ImbalanceMean, Stoch, FVS_Var1, Skew, PL1, PL2, ET, MarketDepth };
 
   enum class EStateTrade {
     Init,  // initiaize state in current market

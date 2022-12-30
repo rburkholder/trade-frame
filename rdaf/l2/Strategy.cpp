@@ -170,10 +170,10 @@ void Strategy::SetupChart() {
 
   //m_cdv.Add( EChartSlot::Skew, &m_ceSkewness );
 
-  m_cdv.Add( EChartSlot::PL, &m_ceProfitUnRealized );
-  m_cdv.Add( EChartSlot::PL, &m_ceProfitRealized );
-  m_cdv.Add( EChartSlot::PL, &m_ceCommissionsPaid );
-  m_cdv.Add( EChartSlot::PL, &m_ceProfit );
+  m_cdv.Add( EChartSlot::PL1, &m_ceProfitUnRealized );
+  m_cdv.Add( EChartSlot::PL2, &m_ceProfitRealized );
+  m_cdv.Add( EChartSlot::PL1, &m_ceCommissionsPaid );
+  m_cdv.Add( EChartSlot::PL2, &m_ceProfit );
 
   //m_cdv.Add( EChartSlot::FVS_Var1, &m_cemZero );
 
