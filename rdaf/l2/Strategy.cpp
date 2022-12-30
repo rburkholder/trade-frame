@@ -59,7 +59,7 @@ Strategy::Strategy(
 , m_pTreeItemSymbol( pTreeItem )
 //, m_pFile( pFile )
 //, m_pFileUtility( pFileUtility )
-, m_stateDesired( EStateDesired::Continue )
+//, m_stateDesired( EStateDesired::Continue )
 , m_stateTrade( EStateTrade::Init )
 , m_stateStochastic( EStateStochastic::Init )
 , m_stochasticStable( EStateStochastic::Init )
@@ -832,7 +832,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   ptime dt( bar.DateTime() );
 
-  EStateDesired stateDesired( m_stateDesired ); // sticky until reset to Continue (allows cycling through exit -> entry)
+  //EStateDesired stateDesired( m_stateDesired ); // sticky until reset to Continue (allows cycling through exit -> entry)
+  EStateDesired stateDesired( EStateDesired::Continue );
 
   switch ( m_stateStochastic) {
     case EStateStochastic::Init:
@@ -893,12 +894,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       switch ( stateDesired ) {
         case EStateDesired::GoLong:
           BOOST_LOG_TRIVIAL(info) << dt << " Search->GoLong";
-          stateDesired = EStateDesired::Continue;
           EnterLong( bar );
           break;
         case EStateDesired::GoShort:
           BOOST_LOG_TRIVIAL(info) << dt << " Search->GoShort";
-          stateDesired = EStateDesired::Continue;
           EnterShort( bar );
           break;
       }
@@ -910,23 +909,21 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       switch ( stateDesired ) {
         case EStateDesired::GoShort:
           BOOST_LOG_TRIVIAL(info) << dt << " GoShort->ExitLong";
-          // stateDesired = EStateDesired::Continue; leave desire as it is
           ExitPosition( bar );
           EnterShort( bar );
           //ExitLong( bar );
           break;
-        case EStateDesired::Exit:
+        case EStateDesired::Exit: // not currently reachable
           BOOST_LOG_TRIVIAL(info) << dt << " Exit->ExitLong";
-          stateDesired = EStateDesired::Continue;
           ExitLong( bar );
           break;
         case EStateDesired::GoLong:
           BOOST_LOG_TRIVIAL(info)
             << dt << " GoLong->Continue:"
-            << (int)stateDesired << "," << (int)m_stateDesired
+            << (int)stateDesired
+            //<< "," << (int)m_stateDesired
             << "," << (int)m_stochasticStable << "," << (int)m_stateStochastic
             ; // already long
-          stateDesired = EStateDesired::Continue;
           break;
         case EStateDesired::Continue:
           //BOOST_LOG_TRIVIAL(info) << dt << " LongExit->Continue";
@@ -942,23 +939,21 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       switch ( stateDesired ) {
         case EStateDesired::GoLong:
           BOOST_LOG_TRIVIAL(info) << dt << " GoLong->ExitShort";
-          // stateDesired = EStateDesired::Continue; leave desire as it is
           ExitPosition( bar );
           EnterShort( bar );
           //ExitShort( bar );
           break;
-        case EStateDesired::Exit:
+        case EStateDesired::Exit: // not currently reachable
           BOOST_LOG_TRIVIAL(info) << dt << " Exit->ExitShort";
-          stateDesired = EStateDesired::Continue;
           ExitShort( bar );
           break;
         case EStateDesired::GoShort:
           BOOST_LOG_TRIVIAL(info)
             << dt << " GoShort->Continue:"
-            << (int)stateDesired << "," << (int)m_stateDesired
+            << (int)stateDesired
+            //<< "," << (int)m_stateDesired
             << "," << (int)m_stochasticStable << "," << (int)m_stateStochastic
             ; // already short
-          stateDesired = EStateDesired::Continue;
           break;
         case EStateDesired::Continue:
           //BOOST_LOG_TRIVIAL(info) << dt << " ShortExit->Continue";
@@ -985,7 +980,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         && ( m_vStochastic[1]->Latest() > m_vStochastic[2]->Latest() )
       ) {
         m_stateTrade = EStateTrade::Search;
-        m_stateDesired = EStateDesired::Continue;
+        //m_stateDesired = EStateDesired::Continue;
         m_stateStochastic = EStateStochastic::Init;
       }
       else {
@@ -993,14 +988,14 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           && ( m_vStochastic[1]->Latest() < m_vStochastic[2]->Latest() )
         ) {
           m_stateTrade = EStateTrade::Search;
-          m_stateDesired = EStateDesired::Continue;
+          //m_stateDesired = EStateDesired::Continue;
           m_stateStochastic = EStateStochastic::Init;
         }
       }
       break;
   }
 
-  m_stateDesired = stateDesired;
+  //m_stateDesired = stateDesired;
   m_stateStochastic = m_stochasticStable;
 
   //const std::chrono::time_point<std::chrono::system_clock> end

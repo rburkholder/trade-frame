@@ -158,7 +158,7 @@ private:
 
   EStateStochastic m_stateStochastic;
 
-  EStateDesired m_stateDesired;
+  //EStateDesired m_stateDesired;
 
   EStateTrade m_stateTrade;
 
