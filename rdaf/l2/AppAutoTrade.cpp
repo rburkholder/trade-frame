@@ -708,7 +708,7 @@ void AppAutoTrade::ConfirmProviders() {
     m_pFrameMain->AddDynamicMenu( "Simulation", vItems );
 
     m_sim->SetOnSimulationComplete( MakeDelegate( this, &AppAutoTrade::HandleSimComplete ) );
-    m_sim->Run();
+    //m_sim->Run();
   }
   else {
     if ( m_iqfeed->Connected() && m_tws->Connected() ) {
