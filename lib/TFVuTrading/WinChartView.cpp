@@ -56,6 +56,8 @@ void WinChartView::Init() {
 
   SetSim( false );
 
+  m_stateMouse = EMouse::NothingSpecial;
+
   m_bInDrawChart = false;
   m_pChartDataView = nullptr;
 
@@ -182,6 +184,10 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
                 m_state = m_bSim ? EState::sim_trail : EState::live_trail;
               }
 
+              if ( m_vpDataViewVisual.dtBegin < m_vpDataViewExtents.dtBegin ) {
+                m_vpDataViewVisual.dtBegin = m_vpDataViewVisual.dtBegin;
+              }
+
             }
             else {
               m_vpDataViewVisual.dtBegin -= tdMovement;
@@ -202,6 +208,9 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
         break;
     }
 
+  }
+  else {
+    //assert( false );  // will need to check structures and fix
   }
 
   {
