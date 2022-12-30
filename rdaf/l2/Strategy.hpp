@@ -130,6 +130,7 @@ private:
     ShortExitSignal,  // position exists, looking for exit
     LongExitSubmitted, // wait for exit to complete
     ShortExitSubmitted, // wait for exit to complete
+    Cancelled,
     NoTrade, // from the config file, no trading, might be a future
     EndOfDayCancel,
     EndOfDayNeutral,

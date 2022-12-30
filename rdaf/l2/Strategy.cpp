@@ -769,7 +769,7 @@ void Strategy::ExitLong( const ou::tf::Bar& bar ) {
   m_pOrder->SetSignalPrice( bar.Close() );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "LxS-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
+  m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "LxS1-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
   m_stateTrade = EStateTrade::LongExitSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
   ShowOrder( m_pOrder );
@@ -780,7 +780,7 @@ void Strategy::ExitShort( const ou::tf::Bar& bar ) {
   m_pOrder->SetSignalPrice( bar.Close() );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "SxS-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
+  m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "SxS1-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
   m_stateTrade = EStateTrade::ShortExitSubmitted;
   m_pPosition->PlaceOrder( m_pOrder );
   ShowOrder( m_pOrder );
@@ -795,7 +795,7 @@ void Strategy::ExitPosition( const ou::tf::Bar& bar ) {
         m_pOrder->SetSignalPrice( bar.Close() );
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
         m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
-        m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "LxS-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
+        m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "LxS2-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
         m_stateTrade = EStateTrade::LongExitSubmitted;
         m_pPosition->PlaceOrder( m_pOrder );
         ShowOrder( m_pOrder );
@@ -805,7 +805,7 @@ void Strategy::ExitPosition( const ou::tf::Bar& bar ) {
         m_pOrder->SetSignalPrice( bar.Close() );
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
         m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
-        m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "SxS-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
+        m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "SxS2-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
         m_stateTrade = EStateTrade::ShortExitSubmitted;
         m_pPosition->PlaceOrder( m_pOrder );
         ShowOrder( m_pOrder );
@@ -813,6 +813,9 @@ void Strategy::ExitPosition( const ou::tf::Bar& bar ) {
       default:
         assert( false ); // maybe check for unknown
     }
+  }
+  else {
+    m_stateTrade = EStateTrade::Search;
   }
 }
 
@@ -855,7 +858,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       switch ( m_stochasticStable ) {
         case EStateStochastic::AboveHi:
           // go/continue long
-          stateDesired = EStateDesired::GoLong;
+          stateDesired = EStateDesired::GoLong;  // many are not successful, try short instead? (some sort of stop)
           break;
         case EStateStochastic::BelowMid:
           // exit & go short - maybe
@@ -871,7 +874,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           break;
         case EStateStochastic::BelowLo:
           // go/continue short
-          stateDesired = EStateDesired::GoShort;
+          stateDesired = EStateDesired::GoShort;  // many are not successful, try long instead? (some sort of stop)
           break;
       }
       break;
@@ -908,25 +911,23 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     case EStateTrade::LongExitSignal:
       switch ( stateDesired ) {
         case EStateDesired::GoShort:
-          BOOST_LOG_TRIVIAL(info) << dt << " GoShort->ExitLong";
-          ExitPosition( bar );
-          EnterShort( bar );
-          //ExitLong( bar );
+            BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->GoShort";
+            ExitPosition( bar );
+            EnterShort( bar );
           break;
         case EStateDesired::Exit: // not currently reachable
-          BOOST_LOG_TRIVIAL(info) << dt << " Exit->ExitLong";
+          BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Exit";
           ExitLong( bar );
           break;
         case EStateDesired::GoLong:
           BOOST_LOG_TRIVIAL(info)
-            << dt << " GoLong->Continue:"
+            << dt << " LongExitSignal->GoLong:"
             << (int)stateDesired
             //<< "," << (int)m_stateDesired
             << "," << (int)m_stochasticStable << "," << (int)m_stateStochastic
             ; // already long
           break;
         case EStateDesired::Continue:
-          //BOOST_LOG_TRIVIAL(info) << dt << " LongExit->Continue";
           break;
         default:
           assert( false );  // broken state machine
@@ -938,25 +939,23 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     case EStateTrade::ShortExitSignal:
       switch ( stateDesired ) {
         case EStateDesired::GoLong:
-          BOOST_LOG_TRIVIAL(info) << dt << " GoLong->ExitShort";
-          ExitPosition( bar );
-          EnterShort( bar );
-          //ExitShort( bar );
+            BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->GoLong";
+            ExitPosition( bar );
+            EnterLong( bar );
           break;
         case EStateDesired::Exit: // not currently reachable
-          BOOST_LOG_TRIVIAL(info) << dt << " Exit->ExitShort";
+          BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Exit";
           ExitShort( bar );
           break;
         case EStateDesired::GoShort:
           BOOST_LOG_TRIVIAL(info)
-            << dt << " GoShort->Continue:"
+            << dt << " ShortExitSignal->GoShort:"
             << (int)stateDesired
             //<< "," << (int)m_stateDesired
             << "," << (int)m_stochasticStable << "," << (int)m_stateStochastic
             ; // already short
           break;
         case EStateDesired::Continue:
-          //BOOST_LOG_TRIVIAL(info) << dt << " ShortExit->Continue";
           break;
         default:
           assert( false );  // broken state machine
@@ -1067,9 +1066,11 @@ void Strategy::HandleExitOrderCancelled( const ou::tf::Order& order ) {
   switch ( order.GetOrderSide() ) {
     case ou::tf::OrderSide::EOrderSide::Buy: // is dt filled a real time?
       //m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetSignalPrice(), "LxC-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
+      m_stateTrade = EStateTrade::Cancelled;  // or use cancelled for custom processing
       break;
     case ou::tf::OrderSide::EOrderSide::Sell: // is dt filled a real time?
       //m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetSignalPrice(), "SxC-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
+      m_stateTrade = EStateTrade::Cancelled;  // or use cancelled for custom processing
       break;
     default:
       assert( false );
@@ -1084,9 +1085,19 @@ void Strategy::HandleExitOrderFilled( const ou::tf::Order& order ) {
   switch ( order.GetOrderSide() ) {
     case ou::tf::OrderSide::EOrderSide::Buy:
       //m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "LxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
+      switch( m_stateTrade ) {
+        case EStateTrade::ShortExitSubmitted:
+          m_stateTrade = EStateTrade::Search;
+          break;
+      }
       break;
     case ou::tf::OrderSide::EOrderSide::Sell:
       //m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "SxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
+      switch( m_stateTrade ) {
+        case EStateTrade::LongExitSubmitted:
+          m_stateTrade = EStateTrade::Search;
+          break;
+      }
       break;
     default:
       assert( false );
