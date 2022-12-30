@@ -47,6 +47,7 @@ namespace {
   static const unsigned int max_ix = 10; // TODO need to obtain from elsewhere & sync with Symbols
   static const int k_up = 85;
   static const int k_lo = 15;
+  static const boost::posix_time::time_duration filter_stoch( 0, 0, 1 );
 }
 
 Strategy::Strategy(
@@ -569,8 +570,6 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   //  return;
   //}
 
-  static const boost::posix_time::time_duration filter( 0, 0, 2 );
-
   ptime dt( quote.DateTime() );
 
   m_ceQuoteAsk.Append( dt, quote.Ask() );
@@ -628,7 +627,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
   if ( stochasticStablizing != m_stochasticStablizing ) {
     m_stochasticStablizing = stochasticStablizing;
-    m_dtFilterStochastic = dt + filter;  // start of transition, requires to be unchanging over filter seconds
+    m_dtFilterStochastic = dt + filter_stoch;  // start of transition, requires to be unchanging over filter seconds
   }
   else {
     if ( m_stochasticStablizing == m_stochasticStable ) {}
@@ -718,17 +717,17 @@ void Strategy::HandleUpdateL2Bid( price_t price, volume_t volume, bool bAdd ) {
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 
-  double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
+  double dblRealized, dblCommissionsPaid, dblTotal;
 
-  m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+  m_pPosition->QueryStats( m_dblRealized, dblRealized, dblCommissionsPaid, dblTotal );
 
-  m_ceProfitUnRealized.Append( bar.DateTime(), dblUnRealized );
+  m_ceProfitUnRealized.Append( bar.DateTime(), m_dblRealized );
   m_ceProfitRealized.Append( bar.DateTime(), dblRealized );
   m_ceCommissionsPaid.Append( bar.DateTime(), dblCommissionsPaid );
   m_ceProfit.Append( bar.DateTime(), dblTotal );
 
-  if ( dblUnRealized > m_dblProfitMax )m_dblProfitMax = dblUnRealized;
-  if ( dblUnRealized < m_dblProfitMin )m_dblProfitMin = dblUnRealized;
+  if ( m_dblRealized > m_dblProfitMax )m_dblProfitMax = m_dblRealized;
+  if ( m_dblRealized < m_dblProfitMin )m_dblProfitMin = m_dblRealized;
 
   TimeTick( bar );
 }
@@ -747,7 +746,7 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 */
 
 void Strategy::EnterLong( const ou::tf::Bar& bar ) {
-  m_dblProfitMax = m_dblProfitMin = 0.0;
+  m_dblProfitMax = m_dblRealized = m_dblProfitMin = 0.0;
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
   m_pOrder->SetSignalPrice( bar.Close() );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
@@ -759,7 +758,7 @@ void Strategy::EnterLong( const ou::tf::Bar& bar ) {
 }
 
 void Strategy::EnterShort( const ou::tf::Bar& bar ) {
-  m_dblProfitMax = m_dblProfitMin = 0.0;
+  m_dblProfitMax = m_dblRealized = m_dblProfitMin = 0.0;
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
   m_pOrder->SetSignalPrice( bar.Close() );
   m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
@@ -800,8 +799,9 @@ void Strategy::ExitPosition( const ou::tf::Bar& bar ) {
         m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
         m_pOrder->SetSignalPrice( bar.Close() );
         m_pOrder->SetDescription(
-          boost::lexical_cast<std::string>( m_dblProfitMin )
-          + ","
+            m_sProfitDescription + ","
+          + boost::lexical_cast<std::string>( m_dblProfitMin ) + ","
+          + boost::lexical_cast<std::string>( m_dblRealized ) + ","
           + boost::lexical_cast<std::string>( m_dblProfitMax )
           );
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
@@ -815,8 +815,9 @@ void Strategy::ExitPosition( const ou::tf::Bar& bar ) {
         m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
         m_pOrder->SetSignalPrice( bar.Close() );
         m_pOrder->SetDescription(
-          boost::lexical_cast<std::string>( m_dblProfitMin )
-          + ","
+            m_sProfitDescription + ","
+          + boost::lexical_cast<std::string>( m_dblProfitMin ) + ","
+          + boost::lexical_cast<std::string>( m_dblRealized ) + ","
           + boost::lexical_cast<std::string>( m_dblProfitMax )
           );
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
@@ -893,7 +894,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         case EStateStochastic::BelowMid:
         case EStateStochastic::BelowLo:
           // exit & go short
-          stateDesired = EStateDesired::GoShort;
+          stateDesired = EStateDesired::GoShortHi;
           break;
       }
       break;
@@ -901,7 +902,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       switch ( m_stochasticStable ) {
         case EStateStochastic::AboveHi:
           // go/continue long
-          stateDesired = EStateDesired::GoLong;  // many are not successful, try short instead? (some sort of stop)
+          stateDesired = EStateDesired::GoLongHi;  // many are not successful, try short instead? (some sort of stop)
           break;
         case EStateStochastic::BelowMid:
           // exit & go short - maybe
@@ -917,7 +918,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           break;
         case EStateStochastic::BelowLo:
           // go/continue short
-          stateDesired = EStateDesired::GoShort;  // many are not successful, try long instead? (some sort of stop)
+          stateDesired = EStateDesired::GoShortLo;  // many are not successful, try long instead? (some sort of stop)
           break;
       }
       break;
@@ -927,7 +928,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         case EStateStochastic::AboveMid:
         case EStateStochastic::BelowMid:
           // exit & go long
-          stateDesired = EStateDesired::GoLong;
+          stateDesired = EStateDesired::GoLongLo;
           break;
         case EStateStochastic::BelowLo:
           break;
@@ -938,14 +939,18 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   switch ( m_stateTrade ) {
     case EStateTrade::Search:
       switch ( stateDesired ) {
-        case EStateDesired::GoLong:
+        case EStateDesired::GoLongHi:
+        case EStateDesired::GoLongLo:
           BOOST_LOG_TRIVIAL(info) << dt << " Search->GoLong";
           m_bUseMARising = EMovingAverage::Rising == currentMovingAverage;
+          m_sProfitDescription = "l,srch";
           EnterLong( bar );
           break;
-        case EStateDesired::GoShort:
+        case EStateDesired::GoShortHi:
+        case EStateDesired::GoShortLo:
           BOOST_LOG_TRIVIAL(info) << dt << " Search->GoShort";
           m_bUseMAFalling = EMovingAverage::Falling == currentMovingAverage;
+          m_sProfitDescription = "s,srch";
           EnterShort( bar );
           break;
       }
@@ -955,7 +960,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       break;
     case EStateTrade::LongExitSignal:
       switch ( stateDesired ) {
-        case EStateDesired::GoShort:
+        case EStateDesired::GoShortHi:
+        case EStateDesired::GoShortLo:
           {
             bool bGoShort( true );
             if ( m_bUseMARising ) {
@@ -966,8 +972,15 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
             }
             if ( bGoShort ) {
               BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->GoShort";
+              if ( EStateDesired::GoShortHi == stateDesired ) {
+                m_sProfitDescription += ",x,shrthi";
+              }
+              if ( EStateDesired::GoShortLo == stateDesired ) {
+                m_sProfitDescription += ",x,shrtlo";
+              }
               ExitPosition( bar );
               m_bUseMAFalling = EMovingAverage::Falling == currentMovingAverage;
+              m_sProfitDescription = "s,go";
               EnterShort( bar );
             }
           }
@@ -976,7 +989,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Exit";
           ExitLong( bar );
           break;
-        case EStateDesired::GoLong:
+        case EStateDesired::GoLongHi:
+        case EStateDesired::GoLongLo:
           BOOST_LOG_TRIVIAL(info)
             << dt << " LongExitSignal->GoLong:"
             << (int)stateDesired
@@ -990,9 +1004,11 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
             }
             else {
               BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue(Exit)";
+              m_sProfitDescription += ",x,cont";
               ExitPosition( bar );
-              m_bUseMAFalling = EMovingAverage::Falling == currentMovingAverage;
-              EnterShort( bar );
+              //m_bUseMAFalling = EMovingAverage::Falling == currentMovingAverage;
+              //m_sProfitDescription = "s,cont";
+              //EnterShort( bar );
             }
           }
           break;
@@ -1005,7 +1021,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       break;
     case EStateTrade::ShortExitSignal:
       switch ( stateDesired ) {
-        case EStateDesired::GoLong:
+        case EStateDesired::GoLongHi:
+        case EStateDesired::GoLongLo:
           {
             bool bGoLong( true );
             if ( m_bUseMAFalling ) {
@@ -1016,8 +1033,15 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
             }
             if ( bGoLong ) {
               BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->GoLong";
+              if ( EStateDesired::GoLongHi == stateDesired ) {
+                m_sProfitDescription += ",x,longhi";
+              }
+              if ( EStateDesired::GoLongLo == stateDesired ) {
+                m_sProfitDescription += ",x,longlo";
+              }
               ExitPosition( bar );
               m_bUseMARising = EMovingAverage::Rising == currentMovingAverage;
+              m_sProfitDescription = "l,go";
               EnterLong( bar );
             }
           }
@@ -1026,7 +1050,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Exit";
           ExitShort( bar );
           break;
-        case EStateDesired::GoShort:
+        case EStateDesired::GoShortHi:
+        case EStateDesired::GoShortLo:
           BOOST_LOG_TRIVIAL(info)
             << dt << " ShortExitSignal->GoShort:"
             << (int)stateDesired
@@ -1040,9 +1065,11 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
             }
             else {
               BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue(Exit)";
+              m_sProfitDescription += ",x,cont";
               ExitPosition( bar );
-              m_bUseMARising = EMovingAverage::Rising == currentMovingAverage;
-              EnterLong( bar );
+              //m_bUseMARising = EMovingAverage::Rising == currentMovingAverage;
+              //m_sProfitDescription = "l,cont";
+              //EnterLong( bar );
             }
           }
           break;

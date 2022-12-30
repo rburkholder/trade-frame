@@ -147,8 +147,10 @@ private:
 
   enum class EStateDesired {
     Continue,
-    GoLong,
-    GoShort,
+    GoLongHi,
+    GoLongLo,
+    GoShortHi,
+    GoShortLo,
     Exit
   };
 
@@ -245,6 +247,7 @@ private:
 
   std::string m_sProfitDescription;
   double m_dblProfitMax;
+  double m_dblRealized;
   double m_dblProfitMin;
 
   // ==
