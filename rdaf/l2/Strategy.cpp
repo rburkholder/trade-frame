@@ -31,6 +31,7 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <cmath>
 #include <rdaf/TH2.h>
 #include <rdaf/TTree.h>
 #include <rdaf/TFile.h>
@@ -45,9 +46,9 @@ using pWatch_t = ou::tf::Watch::pWatch_t;
 
 namespace {
   static const unsigned int max_ix = 10; // TODO need to obtain from elsewhere & sync with Symbols
-  static const int k_up = 80;
-  static const int k_lo = 20;
-  static const boost::posix_time::time_duration filter_stoch( 0, 0, 2 );
+  static const int k_up = 100;
+  static const int k_lo =   0;
+  static const boost::posix_time::time_duration filter_stoch( 0, 0, 1 );
 }
 
 Strategy::Strategy(
@@ -161,14 +162,14 @@ void Strategy::SetupChart() {
   }
   m_cdv.Add( EChartSlot::Stoch, &m_ceStochastic );
 
-  //m_cdv.Add( EChartSlot::ImbalanceMean, &m_cemZero );
+  m_cdv.Add( EChartSlot::ImbalanceMean, &m_cemZero );
 
-  //m_cdv.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceRawMean );
-  //m_ceImbalanceRawMean.SetName( "imbalance mean" );
-  //m_ceImbalanceRawMean.SetColour( ou::Colour::LightGreen );
+  m_ceImbalanceRawMean.SetName( "imbalance mean" );
+  m_ceImbalanceRawMean.SetColour( ou::Colour::LightGreen );
+  m_cdv.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceRawMean );
 
-  //m_cdv.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceSmoothMean );
-  //m_ceImbalanceSmoothMean.SetColour( ou::Colour::DarkGreen );
+  m_ceImbalanceSmoothMean.SetColour( ou::Colour::DarkGreen );
+  m_cdv.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceSmoothMean );
 
   //m_cdv.Add( EChartSlot::Skew, &m_ceSkewness );
 
@@ -212,11 +213,6 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   m_vStochastic.emplace_back( std::make_unique<Stochastic>( "1", m_quotes, m_config.nStochastic1Periods, td, ou::Colour::DeepSkyBlue ) );
   m_vStochastic.emplace_back( std::make_unique<Stochastic>( "2", m_quotes, m_config.nStochastic2Periods, td, ou::Colour::DodgerBlue ) );  // is dark: MediumSlateBlue; MediumAquamarine is greenish; MediumPurple is dark; Purple is dark
   m_vStochastic.emplace_back( std::make_unique<Stochastic>( "3", m_quotes, m_config.nStochastic3Periods, td, ou::Colour::MediumSlateBlue ) ); // no MediumTurquoise, maybe Indigo
-
-  double total = 0.0;
-  total += m_config.nStochastic1Periods;
-  total += m_config.nStochastic2Periods;
-  total += m_config.nStochastic3Periods;
 
   // moving average
 
@@ -345,7 +341,7 @@ void Strategy::StartDepthByOrder() {
       }
 
       if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
-        //Imbalance( depth );
+        Imbalance( depth );
         if ( 1 == ix ) {
           //double var1 = m_FeatureSet.FVS()[1].bid.v9.accelLimit;
           //double var1B = m_FeatureSet.FVS()[1].bid.v8.relativeLimit;
@@ -409,7 +405,7 @@ void Strategy::StartDepthByOrder() {
       }
 
       if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
-        //Imbalance( depth );
+        Imbalance( depth );
         if ( 1 == ix ) {
           //double var1 = m_FeatureSet.FVS()[1].ask.v9.accelLimit;
           //double var1A = m_FeatureSet.FVS()[1].ask.v8.relativeLimit;
@@ -593,12 +589,25 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   mix += 0.33 * m_vStochastic[1]->Latest();
   mix += 0.33 * m_vStochastic[2]->Latest();
 
-  //double value = m_vStochastic[1]->Latest();
-  double value = mix;
-  m_pricesStochastic.Append( ou::tf::Price( dt, value ) ); // updates m_emaStochastic
+  //double k_100 = m_emaStochastic.GetEMA();
+  double k_100 = mix;
+  //double k_100 = m_vStochastic[0]->Latest();
 
-  double k = m_emaStochastic.GetEMA();
-  m_ceStochastic.Append( dt, k );
+  double k_normalized = 2.0 * ( ( k_100 / 100.0 ) - 0.5 );  // place into range -1.0 .. +1.0
+
+  // ehlers cybernetic analysis for stocks & futures page 7
+  double k_fisher = 0.5 * std::log( ( 1.0 + k_normalized ) / ( 1.0 - k_normalized ) );
+
+  double k_expanded = 50.0 + ( k_fisher * 50.0 );
+
+  double k_smoothed {};
+  if ( ( 200.0 > k_expanded ) && ( -200.0 < k_expanded ) ) {
+    m_pricesStochastic.Append( ou::tf::Price( dt, k_expanded ) ); // updates m_emaStochastic (smooth curve)
+    k_smoothed = m_emaStochastic.GetEMA();
+    m_ceStochastic.Append( dt, k_smoothed );
+  }
+
+  double k = k_smoothed;
 
   EStateStochastic stochasticStablizing( m_stableStochastic ); // sticky until changed
 
