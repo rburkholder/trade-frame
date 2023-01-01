@@ -904,7 +904,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       switch ( m_stochasticStable ) {
         case EStateStochastic::AboveHi:
           // go/continue long
-          stateDesired = EStateDesired::GoLongHi;  // many are not successful, try short instead? (some sort of stop)
+          //stateDesired = EStateDesired::GoLongHi;  // many are not successful, try short instead? (some sort of stop)
+          stateDesired = EStateDesired::GoShortHi;  // 2022/12/31 from ehlers, and use time based stop (average width of stochastic edge)
           break;
         case EStateStochastic::BelowMid:
           // exit & go short - maybe
@@ -920,7 +921,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           break;
         case EStateStochastic::BelowLo:
           // go/continue short
-          stateDesired = EStateDesired::GoShortLo;  // many are not successful, try long instead? (some sort of stop)
+          //stateDesired = EStateDesired::GoShortLo;  // many are not successful, try long instead? (some sort of stop)
+          stateDesired = EStateDesired::GoLongLo;  // 2022/12/31 from ehlers, and use time based stop (average width of stochastic edge)
           break;
       }
       break;
@@ -1000,10 +1002,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
             ; // already long
           break;
         case EStateDesired::Continue:
-          if ( -1.0 >= m_dblUnRealized ) {
-            BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue(Stop)";
-            m_sProfitDescription += ",x,stop";
-            ExitPosition( bar );
+          if ( -1.0 >= m_dblUnRealized ) { // ehlers - use time instead
+            //BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue(Stop)";
+            //m_sProfitDescription += ",x,stop";
+            //ExitPosition( bar );
           }
           else {
             if ( m_bUseMARising ) {
@@ -1068,10 +1070,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
             ; // already short
           break;
         case EStateDesired::Continue:
-          if ( -1.0 >= m_dblUnRealized ) {
-            BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue(Stop)";
-            m_sProfitDescription += ",x,stop";
-            ExitPosition( bar );
+          if ( -1.0 >= m_dblUnRealized ) { // ehlers - use time instead
+            //BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue(Stop)";
+            //m_sProfitDescription += ",x,stop";
+            //ExitPosition( bar );
           }
           else {
             if ( m_bUseMAFalling ) {
