@@ -45,9 +45,9 @@ using pWatch_t = ou::tf::Watch::pWatch_t;
 
 namespace {
   static const unsigned int max_ix = 10; // TODO need to obtain from elsewhere & sync with Symbols
-  static const int k_up = 85;
-  static const int k_lo = 15;
-  static const boost::posix_time::time_duration filter_stoch( 0, 0, 1 );
+  static const int k_up = 80;
+  static const int k_lo = 20;
+  static const boost::posix_time::time_duration filter_stoch( 0, 0, 2 );
 }
 
 Strategy::Strategy(
@@ -61,9 +61,9 @@ Strategy::Strategy(
 //, m_pFile( pFile )
 //, m_pFileUtility( pFileUtility )
 , m_stateTrade( EStateTrade::Init )
+, m_stableStochastic( EStateStochastic::Init )
 , m_stateStochastic( EStateStochastic::Init )
-, m_stochasticStable( EStateStochastic::Init )
-, m_stochasticStablizing( EStateStochastic::Init )
+, m_emaStochastic( m_pricesStochastic, filter_stoch )
 , m_stateMovingAverage( EMovingAverage::Flat )
 , m_bUseMARising( false ), m_bUseMAFalling( false )
 , m_config( config )
@@ -104,8 +104,8 @@ Strategy::Strategy(
 
   //m_ceSkewness.SetName( "Skew" );
 
-  m_ceStochasticProbability.SetName( "Stoch Prob" );
-  m_ceStochasticProbability.SetColour( ou::Colour::DarkGreen );
+  m_ceStochastic.SetName( "Stoch Prob" );
+  m_ceStochastic.SetColour( ou::Colour::DarkGreen );
 
   m_ceProfitUnRealized.SetName( "UnRealized" );
   m_ceProfitRealized.SetName( "Realized" );
@@ -159,7 +159,7 @@ void Strategy::SetupChart() {
   for ( vStochastic_t::value_type& vt: m_vStochastic ) {
     vt->AddToView( m_cdv, EChartSlot::Price, EChartSlot::Stoch );
   }
-  m_cdv.Add( EChartSlot::Stoch, &m_ceStochasticProbability );
+  m_cdv.Add( EChartSlot::Stoch, &m_ceStochastic );
 
   //m_cdv.Add( EChartSlot::ImbalanceMean, &m_cemZero );
 
@@ -198,8 +198,6 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   Clear();
 
-  m_dtFilterStochastic = ou::TimeSource::GlobalInstance().Internal();
-
   m_pPosition = pPosition;
   pWatch_t pWatch = m_pPosition->GetWatch();
   pProvider_t pDataProvider = pWatch->GetProvider();
@@ -219,10 +217,6 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   total += m_config.nStochastic1Periods;
   total += m_config.nStochastic2Periods;
   total += m_config.nStochastic3Periods;
-
-  m_vStochasticProbablity.push_back( m_config.nStochastic1Periods / total );
-  m_vStochasticProbablity.push_back( m_config.nStochastic2Periods / total );
-  m_vStochasticProbablity.push_back( m_config.nStochastic3Periods / total );
 
   // moving average
 
@@ -594,19 +588,19 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
     ma.Update( dt );
   }
 
-  double probability {};
-  //probability += m_vStochasticProbablity[0] * m_vStochastic[0]->Latest();
-  //probability += m_vStochasticProbablity[1] * m_vStochastic[1]->Latest();
-  //probability += m_vStochasticProbablity[2] * m_vStochastic[2]->Latest();
-  probability += 0.33 * m_vStochastic[0]->Latest();
-  probability += 0.33 * m_vStochastic[1]->Latest();
-  probability += 0.33 * m_vStochastic[2]->Latest();
-  m_ceStochasticProbability.Append( dt, probability );
+  double mix {};
+  mix += 0.33 * m_vStochastic[0]->Latest();
+  mix += 0.33 * m_vStochastic[1]->Latest();
+  mix += 0.33 * m_vStochastic[2]->Latest();
 
-  EStateStochastic stochasticStablizing( m_stochasticStablizing ); // sticky until changed
+  //double value = m_vStochastic[1]->Latest();
+  double value = mix;
+  m_pricesStochastic.Append( ou::tf::Price( dt, value ) ); // updates m_emaStochastic
 
-  //double k = m_vStochastic[2]->Latest();
-  double k = probability;
+  double k = m_emaStochastic.GetEMA();
+  m_ceStochastic.Append( dt, k );
+
+  EStateStochastic stochasticStablizing( m_stableStochastic ); // sticky until changed
 
   if ( k >= 50.0 ) {
     if ( k > (double)k_up ) {
@@ -625,18 +619,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
     }
   }
 
-  if ( stochasticStablizing != m_stochasticStablizing ) {
-    m_stochasticStablizing = stochasticStablizing;
-    m_dtFilterStochastic = dt + filter_stoch;  // start of transition, requires to be unchanging over filter seconds
-  }
-  else {
-    if ( m_stochasticStablizing == m_stochasticStable ) {}
-    else {
-      if ( m_dtFilterStochastic < dt ) {
-        m_stochasticStable = m_stochasticStablizing;
-      }
-    }
-  }
+  m_stableStochastic = stochasticStablizing;
 
   m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
 
@@ -889,7 +872,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       // wait for another crossing
       break;
     case EStateStochastic::AboveHi:
-      switch ( m_stochasticStable ) {
+      switch ( m_stableStochastic ) {
         case EStateStochastic::AboveHi:
           break;
         case EStateStochastic::AboveMid:
@@ -901,11 +884,11 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       }
       break;
     case EStateStochastic::AboveMid:
-      switch ( m_stochasticStable ) {
+      switch ( m_stableStochastic ) {
         case EStateStochastic::AboveHi:
           // go/continue long
-          //stateDesired = EStateDesired::GoLongHi;  // many are not successful, try short instead? (some sort of stop)
-          stateDesired = EStateDesired::GoShortHi;  // 2022/12/31 from ehlers, and use time based stop (average width of stochastic edge)
+          stateDesired = EStateDesired::GoLongHi;  // many are not successful, try short instead? (some sort of stop)
+          //stateDesired = EStateDesired::GoShortHi;  // 2022/12/31 from ehlers, and use time based stop (average width of stochastic edge)
           break;
         case EStateStochastic::BelowMid:
           // exit & go short - maybe
@@ -914,20 +897,20 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       }
       break;
     case EStateStochastic::BelowMid:
-      switch ( m_stochasticStable ) {
+      switch ( m_stableStochastic ) {
         case EStateStochastic::AboveMid:
           // exit & go long - maybe
           //desired = EStateDesired::Exit;
           break;
         case EStateStochastic::BelowLo:
           // go/continue short
-          //stateDesired = EStateDesired::GoShortLo;  // many are not successful, try long instead? (some sort of stop)
-          stateDesired = EStateDesired::GoLongLo;  // 2022/12/31 from ehlers, and use time based stop (average width of stochastic edge)
+          stateDesired = EStateDesired::GoShortLo;  // many are not successful, try long instead? (some sort of stop)
+          //stateDesired = EStateDesired::GoLongLo;  // 2022/12/31 from ehlers, and use time based stop (average width of stochastic edge)
           break;
       }
       break;
     case EStateStochastic::BelowLo:
-      switch ( m_stochasticStable ) {
+      switch ( m_stableStochastic ) {
         case EStateStochastic::AboveHi:
         case EStateStochastic::AboveMid:
         case EStateStochastic::BelowMid:
@@ -946,14 +929,14 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         case EStateDesired::GoLongHi:
         case EStateDesired::GoLongLo:
           BOOST_LOG_TRIVIAL(info) << dt << " Search->GoLong";
-          m_bUseMARising = EMovingAverage::Rising == currentMovingAverage;
+          m_bUseMARising = ( EMovingAverage::Rising == currentMovingAverage );
           m_sProfitDescription = "l,srch";
           EnterLong( bar );
           break;
         case EStateDesired::GoShortHi:
         case EStateDesired::GoShortLo:
           BOOST_LOG_TRIVIAL(info) << dt << " Search->GoShort";
-          m_bUseMAFalling = EMovingAverage::Falling == currentMovingAverage;
+          m_bUseMAFalling = ( EMovingAverage::Falling == currentMovingAverage );
           m_sProfitDescription = "s,srch";
           EnterShort( bar );
           break;
@@ -998,14 +981,14 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           BOOST_LOG_TRIVIAL(info)
             << dt << " LongExitSignal->GoLong:"
             << (int)stateDesired
-            << "," << (int)m_stochasticStable << "," << (int)m_stateStochastic
+            << "," << (int)m_stableStochastic << "," << (int)m_stateStochastic
             ; // already long
           break;
         case EStateDesired::Continue:
-          if ( -1.0 >= m_dblUnRealized ) { // ehlers - use time instead
-            //BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue(Stop)";
-            //m_sProfitDescription += ",x,stop";
-            //ExitPosition( bar );
+          if ( -1.0 >= m_dblUnRealized ) { // ehlers - use time instead?
+            BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue(Stop)";
+            m_sProfitDescription += ",x,stop";
+            ExitPosition( bar );
           }
           else {
             if ( m_bUseMARising ) {
@@ -1014,7 +997,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
               }
               else {
                 BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue(Exit)";
-                m_sProfitDescription += ",x,cont";
+                m_sProfitDescription += ",x,cont.exit";
                 ExitPosition( bar );
                 //m_bUseMAFalling = EMovingAverage::Falling == currentMovingAverage;
                 //m_sProfitDescription = "s,cont";
@@ -1066,14 +1049,14 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           BOOST_LOG_TRIVIAL(info)
             << dt << " ShortExitSignal->GoShort:"
             << (int)stateDesired
-            << "," << (int)m_stochasticStable << "," << (int)m_stateStochastic
+            << "," << (int)m_stableStochastic << "," << (int)m_stateStochastic
             ; // already short
           break;
         case EStateDesired::Continue:
-          if ( -1.0 >= m_dblUnRealized ) { // ehlers - use time instead
-            //BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue(Stop)";
-            //m_sProfitDescription += ",x,stop";
-            //ExitPosition( bar );
+          if ( -1.0 >= m_dblUnRealized ) { // ehlers - use time instead?
+            BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue(Stop)";
+            m_sProfitDescription += ",x,stop";
+            ExitPosition( bar );
           }
           else {
             if ( m_bUseMAFalling ) {
@@ -1082,7 +1065,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
               }
               else {
                 BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue(Exit)";
-                m_sProfitDescription += ",x,cont";
+                m_sProfitDescription += ",x,cont.exit";
                 ExitPosition( bar );
                 //m_bUseMARising = EMovingAverage::Rising == currentMovingAverage;
                 //m_sProfitDescription = "l,cont";
@@ -1126,7 +1109,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       break;
   }
 
-  m_stateStochastic = m_stochasticStable;
+  m_stateStochastic = m_stableStochastic;
 
   //const std::chrono::time_point<std::chrono::system_clock> end
   //  = std::chrono::system_clock::now();

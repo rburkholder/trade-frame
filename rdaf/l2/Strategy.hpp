@@ -158,12 +158,9 @@ private:
     Rising, ToRising, Flat, ToFlat, Falling, ToFalling
   };
 
-  boost::posix_time::ptime m_dtFilterStochastic;
-
-  EStateStochastic m_stochasticStable;
-  EStateStochastic m_stochasticStablizing;
-
+  EStateStochastic m_stableStochastic;
   EStateStochastic m_stateStochastic;
+
   EMovingAverage m_stateMovingAverage;
 
   bool m_bUseMARising;
@@ -238,9 +235,10 @@ private:
   using vStochastic_t = std::vector<pStochastic_t>;
   vStochastic_t m_vStochastic;
 
-  using vProbability = std::vector<double>;
-  vProbability m_vStochasticProbablity;
-  ou::ChartEntryIndicator m_ceStochasticProbability;
+  ou::tf::Prices m_pricesStochastic;
+  ou::tf::hf::TSEMA<ou::tf::Price> m_emaStochastic;
+
+  ou::ChartEntryIndicator m_ceStochastic;
 
   using vMovingAverage_t = std::vector<MovingAverage>;
   vMovingAverage_t m_vMovingAverage;
