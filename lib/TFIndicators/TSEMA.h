@@ -108,6 +108,7 @@ TSEMA<D>::TSEMA( TimeSeries<D>& series, size_t nPeriods, time_duration tdPeriodW
   }
   m_tdTimeRange = tdSum;
   m_dblTimeRange = (double) m_tdTimeRange.total_microseconds();
+  m_seriesSource.OnAppend.Add( MakeDelegate( this, &TSEMA<D>::HandleAppend ) );
 }
 
 template<class D>
