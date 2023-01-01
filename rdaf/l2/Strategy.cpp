@@ -802,6 +802,7 @@ void Strategy::ExitPosition( const ou::tf::Bar& bar ) {
             m_sProfitDescription + ","
           + boost::lexical_cast<std::string>( m_dblProfitMin ) + ","
           + boost::lexical_cast<std::string>( m_dblUnRealized ) + ","
+          + boost::lexical_cast<std::string>( m_dblProfitMax - m_dblUnRealized ) + ","
           + boost::lexical_cast<std::string>( m_dblProfitMax )
           );
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
@@ -818,6 +819,7 @@ void Strategy::ExitPosition( const ou::tf::Bar& bar ) {
             m_sProfitDescription + ","
           + boost::lexical_cast<std::string>( m_dblProfitMin ) + ","
           + boost::lexical_cast<std::string>( m_dblUnRealized ) + ","
+          + boost::lexical_cast<std::string>( m_dblProfitMax - m_dblUnRealized ) + ","
           + boost::lexical_cast<std::string>( m_dblProfitMax )
           );
         m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
