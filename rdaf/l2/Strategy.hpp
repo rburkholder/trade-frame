@@ -118,7 +118,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, Cycle, CycleSlope, ImbalanceMean, FVS_Var1, Skew, PL1, PL2, ET, MarketDepth };
+  enum EChartSlot { Price, Volume, Cycle, CycleSlope, MA, ImbalanceMean, FVS_Var1, Skew, PL1, PL2, ET, MarketDepth };
 
   enum class EStateTrade {
     Init,  // initiaize state in current market
@@ -198,6 +198,10 @@ private:
 
   ou::ChartEntryIndicator m_ceImbalanceRawMean;
   ou::ChartEntryIndicator m_ceImbalanceSmoothMean;
+
+  ou::ChartEntryIndicator m_ceRelativeMA1;
+  ou::ChartEntryIndicator m_ceRelativeMA2;
+  ou::ChartEntryIndicator m_ceRelativeMA3;
 
   //ou::ChartEntryIndicator m_ceFVS_Var1_Ask;
   //ou::ChartEntryIndicator m_ceFVS_Var1_Diff;

@@ -95,6 +95,10 @@ Strategy::Strategy(
 
   //m_ceSkewness.SetName( "Skew" );
 
+  m_ceRelativeMA1.SetName( "MA1" );
+  m_ceRelativeMA2.SetName( "MA2" );
+  m_ceRelativeMA3.SetName( "MA3" );
+
   m_ceProfitUnRealized.SetName( "UnRealized" );
   m_ceProfitRealized.SetName( "Realized" );
   m_ceCommissionsPaid.SetName( "Commissions" );
@@ -155,6 +159,11 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[1].m_ceEhlersHiPassFilterSlope );
   m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[2].m_ceEhlersHiPassFilterSlope );
   //m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[3].m_ceEhlersHiPassFilterSlope );
+
+  m_cdv.Add( EChartSlot::MA, &m_cemZero );
+  m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA1 );
+  m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA2 );
+  m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA3 );
 
   m_cdv.Add( EChartSlot::ImbalanceMean, &m_cemZero );
 
@@ -225,6 +234,10 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_quotes, vMAPeriods[0], td, ou::Colour::Brown, "ma1" ) );
   m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_quotes, vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
   m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_quotes, vMAPeriods[2], td, ou::Colour::Gold,  "ma3" ) );
+
+  m_ceRelativeMA1.SetColour( ou::Colour::Green );
+  m_ceRelativeMA2.SetColour( ou::Colour::Brown );
+  m_ceRelativeMA3.SetColour( ou::Colour::Coral );
 
   SetupChart(); // comes after stochastic initialization
 
@@ -806,6 +819,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   const double ma1( m_vMovingAverage[1].Latest() );
   const double ma2( m_vMovingAverage[2].Latest() );
   const double ma3( m_vMovingAverage[3].Latest() );
+
+  m_ceRelativeMA1.Append( dt, ma0 - ma3 );
+  m_ceRelativeMA2.Append( dt, ma1 - ma3 );
+  m_ceRelativeMA3.Append( dt, ma2 - ma3 );
 
   if ( ( ma1 > ma2 ) && ( ma2 > ma3 ) ) {
     currentMovingAverage = EMovingAverage::Rising;
