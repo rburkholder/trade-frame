@@ -137,12 +137,11 @@ private:
     };
 
   enum class EStateDesired {
-    Continue,
-    GoLongHi,
-    GoLongLo,
-    GoShortHi,
-    GoShortLo,
-    Exit
+    Continue
+  , GoLong
+  , GoShort
+  , Cancel
+  , Exit
   };
 
   enum class EMovingAverage {
@@ -237,6 +236,7 @@ private:
     double m_alpha_by_two;
     double m_one_minus_alpha_by_two;
     double m_alpha_squared;
+
     double m_dblPrice0, m_dblPrice1, m_dblPrice2;
     double m_dblHPF0, m_dblHPF1, m_dblHPF2;
     //double m_dblLPF0, m_dblLPF1, m_dblLPF2;

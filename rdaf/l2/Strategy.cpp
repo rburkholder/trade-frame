@@ -152,13 +152,13 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[0].m_ceEhlersHiPassFilter );
   m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[1].m_ceEhlersHiPassFilter );
   m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[2].m_ceEhlersHiPassFilter );
-  //m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[3].m_ceEhlersHiPassFilter );
+  m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[3].m_ceEhlersHiPassFilter );
 
   m_cdv.Add( EChartSlot::CycleSlope, &m_cemZero );
   m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[0].m_ceEhlersHiPassFilterSlope );
   m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[1].m_ceEhlersHiPassFilterSlope );
   m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[2].m_ceEhlersHiPassFilterSlope );
-  //m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[3].m_ceEhlersHiPassFilterSlope );
+  m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[3].m_ceEhlersHiPassFilterSlope );
 
   m_cdv.Add( EChartSlot::MA, &m_cemZero );
   m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA1 );
@@ -214,7 +214,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   m_rHiPass[0].Init( m_config.nPeriodWidth, ou::Colour::Brown, "HP1" );
   m_rHiPass[1].Init( m_config.nPeriodWidth, ou::Colour::Coral, "HP2" );
   m_rHiPass[2].Init( m_config.nMA1Periods, ou::Colour::Gold, "HP3" );
-  //m_rHiPass[3].Init( m_config.nMA1Periods, ou::Colour::Green, "HP4" );
+  m_rHiPass[3].Init( m_config.nMA1Periods, ou::Colour::Green, "HP4" );
 
   // moving average
 
@@ -848,24 +848,22 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   m_rHiPass[0].Update( dt, ma0 );
   m_rHiPass[1].Update( dt, ma1 );
   m_rHiPass[2].Update( dt, ma0 );
-  //m_rHiPass[3].Update( dt, ma1 );
+  m_rHiPass[3].Update( dt, ma1 );
 
   EStateDesired stateDesired( EStateDesired::Continue );
 
-  // this is where the stochastic indicator was evaluated
+  // may need to change to continuous rather than at one second intervals
 
   switch ( m_stateTrade ) {
     case EStateTrade::Search:
       switch ( stateDesired ) {
-        case EStateDesired::GoLongHi:
-        case EStateDesired::GoLongLo:
+        case EStateDesired::GoLong:
           BOOST_LOG_TRIVIAL(info) << dt << " Search->GoLong";
           m_bUseMARising = ( EMovingAverage::Rising == currentMovingAverage );
           m_sProfitDescription = "l,srch";
           EnterLong( bar );
           break;
-        case EStateDesired::GoShortHi:
-        case EStateDesired::GoShortLo:
+        case EStateDesired::GoShort:
           BOOST_LOG_TRIVIAL(info) << dt << " Search->GoShort";
           m_bUseMAFalling = ( EMovingAverage::Falling == currentMovingAverage );
           m_sProfitDescription = "s,srch";
@@ -882,8 +880,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       break;
     case EStateTrade::LongExitSignal:
       switch ( stateDesired ) {
-        case EStateDesired::GoShortHi:
-        case EStateDesired::GoShortLo:
+        case EStateDesired::GoShort:
           {
             bool bGoShort( true );
             if ( m_bUseMARising ) {
@@ -894,11 +891,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
             }
             if ( bGoShort ) {
               BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->GoShort";
-              if ( EStateDesired::GoShortHi == stateDesired ) {
-                m_sProfitDescription += ",x,shrthi";
-              }
-              if ( EStateDesired::GoShortLo == stateDesired ) {
-                m_sProfitDescription += ",x,shrtlo";
+              if ( EStateDesired::GoShort == stateDesired ) {
+                m_sProfitDescription += ",x,shrt";
               }
               ExitPosition( bar );
               m_bUseMAFalling = EMovingAverage::Falling == currentMovingAverage;
@@ -911,8 +905,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Exit";
           ExitLong( bar );
           break;
-        case EStateDesired::GoLongHi:
-        case EStateDesired::GoLongLo:
+        case EStateDesired::GoLong:
           BOOST_LOG_TRIVIAL(info)
             << dt << " LongExitSignal->GoLong:"
             << (int)stateDesired
@@ -949,8 +942,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       break;
     case EStateTrade::ShortExitSignal:
       switch ( stateDesired ) {
-        case EStateDesired::GoLongHi:
-        case EStateDesired::GoLongLo:
+        case EStateDesired::GoLong:
           {
             bool bGoLong( true );
             if ( m_bUseMAFalling ) {
@@ -961,11 +953,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
             }
             if ( bGoLong ) {
               BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->GoLong";
-              if ( EStateDesired::GoLongHi == stateDesired ) {
-                m_sProfitDescription += ",x,longhi";
-              }
-              if ( EStateDesired::GoLongLo == stateDesired ) {
-                m_sProfitDescription += ",x,longlo";
+              if ( EStateDesired::GoLong == stateDesired ) {
+                m_sProfitDescription += ",x,long";
               }
               ExitPosition( bar );
               m_bUseMARising = EMovingAverage::Rising == currentMovingAverage;
@@ -978,8 +967,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Exit";
           ExitShort( bar );
           break;
-        case EStateDesired::GoShortHi:
-        case EStateDesired::GoShortLo:
+        case EStateDesired::GoShort:
           BOOST_LOG_TRIVIAL(info)
             << dt << " ShortExitSignal->GoShort:"
             << (int)stateDesired
