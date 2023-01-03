@@ -88,6 +88,7 @@ Strategy::Strategy(
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
 
   m_ceEhlersHiPassFilter.SetColour( ou::Colour::DarkTurquoise );
+  m_ceEhlersHiPassFilterSlope.SetColour( ou::Colour::DarkTurquoise );
   //m_ceEhlersLoPassFilter.SetColour( ou::Colour::DarkMagenta );
 
   m_cemZero.AddMark( 0, ou::Colour::Black,  "0" );
@@ -109,6 +110,7 @@ Strategy::Strategy(
   m_ceQuoteBid.SetName( "Bid" );
 
   m_ceEhlersHiPassFilter.SetName( "HiPass" );
+  m_ceEhlersHiPassFilterSlope.SetName( "HiPassSlope" );
   //m_ceEhlersLoPassFilter.SetName( "LoPass" );
 
   m_ceVolume.SetName( "Volume" );
@@ -169,6 +171,9 @@ void Strategy::SetupChart() {
 
   m_cdv.Add( EChartSlot::Cycle, &m_cemZero );
   m_cdv.Add( EChartSlot::Cycle, &m_ceEhlersHiPassFilter );
+
+  m_cdv.Add( EChartSlot::CycleSlope, &m_cemZero );
+  m_cdv.Add( EChartSlot::CycleSlope, &m_ceEhlersHiPassFilterSlope );
 
   m_cdv.Add( EChartSlot::Stoch, &m_cemStochastic );
 
@@ -921,6 +926,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
               - m_one_minus_alpha * m_one_minus_alpha * m_dblHPF2
               ;
     m_ceEhlersHiPassFilter.Append( dt, -m_dblHPF0 );
+    m_ceEhlersHiPassFilterSlope.Append( dt, m_dblHPF1 - m_dblHPF0 );
+
     //if ( 10 > m_ceEhlersHiPassFilter.Size() ) {
     //  BOOST_LOG_TRIVIAL(info) << "hpf=" << m_dblPrice0 << "," << m_dblHPF0 << "," << m_dblHPF1 << "," << m_dblHPF2 << std::endl;
     //}
