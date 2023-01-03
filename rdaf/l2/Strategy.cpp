@@ -221,10 +221,10 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
     assert( 0 < value );
   }
 
-  m_vMovingAverage.emplace_back( MovingAverage( m_quotes,            1,  td, ou::Colour::Green, "ma0" ) ); // for ehlers
-  m_vMovingAverage.emplace_back( MovingAverage( m_quotes, vMAPeriods[0], td, ou::Colour::Brown, "ma1" ) );
-  m_vMovingAverage.emplace_back( MovingAverage( m_quotes, vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
-  m_vMovingAverage.emplace_back( MovingAverage( m_quotes, vMAPeriods[2], td, ou::Colour::Gold,  "ma3" ) );
+  m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_quotes,            1,  td, ou::Colour::Green, "ma0" ) ); // for ehlers
+  m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_quotes, vMAPeriods[0], td, ou::Colour::Brown, "ma1" ) );
+  m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_quotes, vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
+  m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_quotes, vMAPeriods[2], td, ou::Colour::Gold,  "ma3" ) );
 
   SetupChart(); // comes after stochastic initialization
 

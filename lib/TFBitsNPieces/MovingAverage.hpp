@@ -26,10 +26,13 @@
 
 #include <TFIndicators/TSEMA.h>
 
+namespace ou {
+namespace tf {
+
 class MovingAverage {
 public:
 
-  MovingAverage( ou::tf::Quotes& quotes, size_t nPeriods, time_duration tdPeriod, ou::Colour::EColour colour, const std::string& sName );
+  MovingAverage( Quotes& quotes, size_t nPeriods, time_duration tdPeriod, ou::Colour::EColour colour, const std::string& sName );
   MovingAverage( MovingAverage&& rhs );
 
   void AddToView( ou::ChartDataView& cdv, size_t slot );
@@ -47,3 +50,6 @@ private:
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
 
 };
+
+} // namespace ou
+} // namespace tf

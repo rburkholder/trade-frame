@@ -63,9 +63,9 @@ FeedModel::FeedModel( pWatch_t pWatch, const config::Choices& config )
     assert( 0 < value );
   }
 
-  m_vMovingAverage.emplace_back( MovingAverage( m_pWatchUnderlying->GetQuotes(), vMAPeriods[0], td, ou::Colour::Brown, "ma1" ) );
-  m_vMovingAverage.emplace_back( MovingAverage( m_pWatchUnderlying->GetQuotes(), vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
-  m_vMovingAverage.emplace_back( MovingAverage( m_pWatchUnderlying->GetQuotes(), vMAPeriods[2], td, ou::Colour::Gold,  "ma3" ) );
+  m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_pWatchUnderlying->GetQuotes(), vMAPeriods[0], td, ou::Colour::Brown, "ma1" ) );
+  m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_pWatchUnderlying->GetQuotes(), vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
+  m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_pWatchUnderlying->GetQuotes(), vMAPeriods[2], td, ou::Colour::Gold,  "ma3" ) );
 
 }
 

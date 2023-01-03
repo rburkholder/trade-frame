@@ -21,6 +21,9 @@
 
 #include "MovingAverage.hpp"
 
+namespace ou {
+namespace tf {
+
 MovingAverage::MovingAverage( ou::tf::Quotes& quotes, size_t nPeriods, time_duration tdPeriod, ou::Colour::EColour colour, const std::string& sName )
 : m_ema( quotes, nPeriods, tdPeriod )
 {
@@ -40,3 +43,7 @@ void MovingAverage::AddToView( ou::ChartDataView& cdv, size_t slot ) {
 void MovingAverage::Update( ptime dt ) {
   m_ceMA.Append( dt, m_ema.GetEMA() );
 }
+
+} // namespace ou
+} // namespace tf
+

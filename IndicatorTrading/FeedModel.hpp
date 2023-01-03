@@ -90,7 +90,7 @@ private:
   using vStochastic_t = std::vector<pStochastic_t>;
   vStochastic_t m_vStochastic;
 
-  using vMovingAverage_t = std::vector<MovingAverage>;
+  using vMovingAverage_t = std::vector<ou::tf::MovingAverage>;
   vMovingAverage_t m_vMovingAverage;
 
   void HandleQuote( const ou::tf::Quote& );

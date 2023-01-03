@@ -218,7 +218,7 @@ private:
 
   double m_dblImbalanceMean, m_dblImbalanceSlope;
 
-  using vMovingAverage_t = std::vector<MovingAverage>;
+  using vMovingAverage_t = std::vector<ou::tf::MovingAverage>;
   vMovingAverage_t m_vMovingAverage;
 
   struct HiPass {
