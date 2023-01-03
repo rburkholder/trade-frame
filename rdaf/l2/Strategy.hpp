@@ -39,7 +39,6 @@
 #include <TFIQFeed/Level2/Symbols.hpp>
 #include <TFIQFeed/Level2/FeatureSet.hpp>
 
-#include <TFBitsNPieces/Stochastic.hpp>
 #include <TFBitsNPieces/MovingAverage.hpp>
 
 #include "ConfigParser.hpp"
@@ -119,7 +118,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, Cycle, CycleSlope, ImbalanceMean, Stoch, FVS_Var1, Skew, PL1, PL2, ET, MarketDepth };
+  enum EChartSlot { Price, Volume, Cycle, CycleSlope, ImbalanceMean, FVS_Var1, Skew, PL1, PL2, ET, MarketDepth };
 
   enum class EStateTrade {
     Init,  // initiaize state in current market
@@ -137,14 +136,6 @@ private:
     Done // no more action
     };
 
-  enum class EStateStochastic {
-    Init,
-    AboveHi,
-    AboveMid,
-    BelowMid,
-    BelowLo
-  };
-
   enum class EStateDesired {
     Continue,
     GoLongHi,
@@ -157,9 +148,6 @@ private:
   enum class EMovingAverage {
     Rising, ToRising, Flat, ToFlat, Falling, ToFalling
   };
-
-  EStateStochastic m_stableStochastic;
-  EStateStochastic m_stateStochastic;
 
   EMovingAverage m_stateMovingAverage;
 
@@ -215,7 +203,6 @@ private:
   //ou::ChartEntryIndicator m_ceFVS_Var1_Diff;
   //ou::ChartEntryIndicator m_ceFVS_Var1_Bid;
 
-  ou::ChartEntryMark m_cemStochastic;
   ou::ChartEntryMark m_cemZero;
 
   ou::tf::BarFactory m_bfQuotes01Sec;
@@ -230,15 +217,6 @@ private:
   std::atomic_uint32_t m_nMarketOrdersBid; // pull from InteractiveChart
 
   double m_dblImbalanceMean, m_dblImbalanceSlope;
-
-  using pStochastic_t = std::unique_ptr<Stochastic>;
-  using vStochastic_t = std::vector<pStochastic_t>;
-  vStochastic_t m_vStochastic;
-
-  ou::tf::Prices m_pricesStochastic;
-  ou::tf::hf::TSEMA<ou::tf::Price> m_emaStochastic;
-
-  ou::ChartEntryIndicator m_ceStochastic;
 
   using vMovingAverage_t = std::vector<MovingAverage>;
   vMovingAverage_t m_vMovingAverage;
