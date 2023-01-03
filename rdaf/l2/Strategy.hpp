@@ -241,11 +241,14 @@ private:
     double m_dblHPF0, m_dblHPF1, m_dblHPF2;
     //double m_dblLPF0, m_dblLPF1, m_dblLPF2;
 
+    double m_dblHPF_Slope0, m_dblHPF_Slope1;
+
     HiPass()
     : m_alpha( 0.1 )
     , m_dblPrice0 {}, m_dblPrice1 {}, m_dblPrice2 {}
     , m_dblHPF0 {}, m_dblHPF1 {}, m_dblHPF2 {}
     //, m_dblLPF0 {}, m_dblLPF1 {}, m_dblLPF2 {}
+    , m_dblHPF_Slope0 {}, m_dblHPF_Slope1 {}
     {}
 
     void Init( int nPeriods, ou::Colour::EColour colour, const std::string& sName ) {
@@ -276,17 +279,21 @@ private:
         //m_dblLPF0 = m_dblLPF1 = m_dblLPF2 = ma0;
       }
       else {
-        m_dblPrice2 = m_dblPrice1; m_dblPrice1 = m_dblPrice0;
+        m_dblPrice2 = m_dblPrice1; m_dblPrice1 = m_dblPrice0; // archive older values
         m_dblPrice0 = price;
-        m_dblHPF2 = m_dblHPF1; m_dblHPF1 = m_dblHPF0;
-
         const double weighted = m_dblPrice0 - ( m_dblPrice1 + m_dblPrice1 ) + m_dblPrice2;
+
+        m_dblHPF2 = m_dblHPF1; m_dblHPF1 = m_dblHPF0; // archive older values
+
         m_dblHPF0 = m_one_minus_alpha_by_two * m_one_minus_alpha_by_two * weighted
                   + 2.0 * m_one_minus_alpha * m_dblHPF1
                   - m_one_minus_alpha * m_one_minus_alpha * m_dblHPF2
                   ;
         m_ceEhlersHiPassFilter.Append( dt, m_dblHPF0 );
-        m_ceEhlersHiPassFilterSlope.Append( dt, m_dblHPF0 - m_dblHPF1 );
+
+        m_dblHPF_Slope1 = m_dblHPF_Slope0; // keep previous value
+        m_dblHPF_Slope0 = m_dblHPF0 - m_dblHPF1; // diff is slope
+        m_ceEhlersHiPassFilterSlope.Append( dt, m_dblHPF_Slope0 );
 
         //if ( 10 > m_ceEhlersHiPassFilter.Size() ) {
         //  BOOST_LOG_TRIVIAL(info) << "hpf=" << m_dblPrice0 << "," << m_dblHPF0 << "," << m_dblHPF1 << "," << m_dblHPF2 << std::endl;

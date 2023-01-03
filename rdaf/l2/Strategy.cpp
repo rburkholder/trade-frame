@@ -854,6 +854,17 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   // may need to change to continuous rather than at one second intervals
 
+  HiPass& hp( m_rHiPass[2] );
+
+  if ( ( 0.0 > hp.m_dblHPF_Slope1 ) && ( 0.0 < hp.m_dblHPF_Slope0 ) ) {
+    stateDesired = EStateDesired::GoLong;
+  }
+  else {
+    if ( ( 0.0 < hp.m_dblHPF_Slope1 ) && ( 0.0 > hp.m_dblHPF_Slope0 ) ) {
+      stateDesired = EStateDesired::GoShort;
+    }
+  }
+
   switch ( m_stateTrade ) {
     case EStateTrade::Search:
       switch ( stateDesired ) {
@@ -1013,6 +1024,9 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       break;
     case EStateTrade::Init:
       // market open statistics management here
+      if ( ( 0.0 != hp.m_dblHPF_Slope1 ) && ( 0.0 != hp.m_dblHPF_Slope0 ) ) {
+        m_stateTrade = EStateTrade::Search;
+      }
       break;
   }
 
