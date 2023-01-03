@@ -202,10 +202,6 @@ private:
   ou::ChartEntryIndicator m_ceCommissionsPaid;
   ou::ChartEntryIndicator m_ceProfit;
 
-  ou::ChartEntryIndicator m_ceEhlersHiPassFilter;
-  ou::ChartEntryIndicator m_ceEhlersHiPassFilterSlope;
-  //ou::ChartEntryIndicator m_ceEhlersLoPassFilter;
-
   ou::ChartEntryIndicator m_cdMarketDepthAsk;
   ou::ChartEntryIndicator m_cdMarketDepthBid;
 
@@ -247,15 +243,89 @@ private:
   using vMovingAverage_t = std::vector<MovingAverage>;
   vMovingAverage_t m_vMovingAverage;
 
-  // ehlers, cybernetic analsys, eqn 2.7, eqn 2.9
-  double m_alpha;
-  double m_one_minus_alpha;
-  double m_alpha_by_two;
-  double m_one_minus_alpha_by_two;
-  double m_alpha_squared;
-  double m_dblPrice0, m_dblPrice1, m_dblPrice2;
-  double m_dblHPF0, m_dblHPF1, m_dblHPF2;
-  //double m_dblLPF0, m_dblLPF1, m_dblLPF2;
+  struct HiPass {
+
+    ou::ChartEntryIndicator m_ceEhlersHiPassFilter;
+    ou::ChartEntryIndicator m_ceEhlersHiPassFilterSlope;
+    //ou::ChartEntryIndicator m_ceEhlersLoPassFilter;
+
+    // ehlers, cybernetic analsys, eqn 2.7, eqn 2.9
+    double m_alpha;
+    double m_one_minus_alpha;
+    double m_alpha_by_two;
+    double m_one_minus_alpha_by_two;
+    double m_alpha_squared;
+    double m_dblPrice0, m_dblPrice1, m_dblPrice2;
+    double m_dblHPF0, m_dblHPF1, m_dblHPF2;
+    //double m_dblLPF0, m_dblLPF1, m_dblLPF2;
+
+    HiPass()
+    : m_alpha( 0.1 )
+    , m_dblPrice0 {}, m_dblPrice1 {}, m_dblPrice2 {}
+    , m_dblHPF0 {}, m_dblHPF1 {}, m_dblHPF2 {}
+    //, m_dblLPF0 {}, m_dblLPF1 {}, m_dblLPF2 {}
+    {}
+
+    void Init( int nPeriods, ou::Colour::EColour colour, const std::string& sName ) {
+
+      m_alpha = 1.0 / (double) nPeriods;
+      m_one_minus_alpha = 1.0 - m_alpha;
+      m_alpha_by_two = m_alpha / 2.0;
+      m_one_minus_alpha_by_two = 1.0 - m_alpha_by_two;
+      m_alpha_squared = m_alpha * m_alpha;
+
+      m_ceEhlersHiPassFilter.SetColour( colour );
+      m_ceEhlersHiPassFilterSlope.SetColour( colour );
+      //m_ceEhlersLoPassFilter.SetColour( colour );
+
+      m_ceEhlersHiPassFilter.SetName( sName );
+      m_ceEhlersHiPassFilterSlope.SetName( sName + "Slope" );
+      //m_ceEhlersLoPassFilter.SetName( "LoPass" );
+
+    }
+
+    void Update( boost::posix_time::ptime dt, double price ) {
+      // ehlers page 15, eqn 2.7, high pass filter
+      // ehlers page 16, eqn 2.9, low pass filter
+
+      if ( 0.0 == m_dblPrice0 ) {
+        m_dblPrice0 = m_dblPrice1 = m_dblPrice2 = price;
+        //m_dblHPF0 = m_dblHPF1 = m_dblHPF2 = 0.0;
+        //m_dblLPF0 = m_dblLPF1 = m_dblLPF2 = ma0;
+      }
+      else {
+        m_dblPrice0 = price;
+        m_dblPrice2 = m_dblPrice1; m_dblPrice1 = m_dblPrice0;
+        m_dblHPF2 = m_dblHPF1; m_dblHPF1 = m_dblHPF0;
+
+        const double price = m_dblPrice0 - ( m_dblPrice1 + m_dblPrice1 ) + m_dblPrice2;
+        m_dblHPF0 = m_one_minus_alpha_by_two * m_one_minus_alpha_by_two * price
+                  + 2.0 * m_one_minus_alpha * m_dblHPF1
+                  - m_one_minus_alpha * m_one_minus_alpha * m_dblHPF2
+                  ;
+        m_ceEhlersHiPassFilter.Append( dt, -m_dblHPF0 );
+        m_ceEhlersHiPassFilterSlope.Append( dt, m_dblHPF1 - m_dblHPF0 );
+
+        //if ( 10 > m_ceEhlersHiPassFilter.Size() ) {
+        //  BOOST_LOG_TRIVIAL(info) << "hpf=" << m_dblPrice0 << "," << m_dblHPF0 << "," << m_dblHPF1 << "," << m_dblHPF2 << std::endl;
+        //}
+
+        // only marginally better than a simple ema
+        //m_dblLPF2 = m_dblLPF1; m_dblLPF1 = m_dblLPF0;
+        //m_dblLPF0 = ( m_alpha - m_alpha_by_two * m_alpha_by_two ) * m_dblPrice0
+        //          + ( m_alpha_squared / 2 ) * m_dblPrice1
+        //          - ( m_alpha - 3.0 * m_alpha_squared / 4.0 ) * m_dblPrice2
+        //          + 2.0 * m_one_minus_alpha * m_dblLPF1
+        //          - m_one_minus_alpha * m_one_minus_alpha * m_dblLPF2
+        //          ;
+        //m_ceEhlersLoPassFilter.Append( dt, m_dblLPF0 );
+      }
+
+    }
+
+  };
+
+  HiPass m_rHiPass[4];
 
   std::string m_sProfitDescription;
   double m_dblProfitMax;

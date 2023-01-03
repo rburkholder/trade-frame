@@ -75,10 +75,6 @@ Strategy::Strategy(
 //, m_ceShortFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red )
 , m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
 , m_bfQuotes01Sec( 1 )
-, m_alpha( 0.1 )
-, m_dblPrice0 {}, m_dblPrice1 {}, m_dblPrice2 {}
-, m_dblHPF0 {}, m_dblHPF1 {}, m_dblHPF2 {}
-//, m_dblLPF0 {}, m_dblLPF1 {}, m_dblLPF2 {}
 {
 //  assert( m_pFile );
 //  assert( m_pFileUtility );
@@ -86,10 +82,6 @@ Strategy::Strategy(
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
-
-  m_ceEhlersHiPassFilter.SetColour( ou::Colour::DarkTurquoise );
-  m_ceEhlersHiPassFilterSlope.SetColour( ou::Colour::DarkTurquoise );
-  //m_ceEhlersLoPassFilter.SetColour( ou::Colour::DarkMagenta );
 
   m_cemZero.AddMark( 0, ou::Colour::Black,  "0" );
 
@@ -108,10 +100,6 @@ Strategy::Strategy(
   m_ceQuoteAsk.SetName( "Ask" );
   m_ceTrade.SetName( "Tick" );
   m_ceQuoteBid.SetName( "Bid" );
-
-  m_ceEhlersHiPassFilter.SetName( "HiPass" );
-  m_ceEhlersHiPassFilterSlope.SetName( "HiPassSlope" );
-  //m_ceEhlersLoPassFilter.SetName( "LoPass" );
 
   m_ceVolume.SetName( "Volume" );
 
@@ -170,10 +158,16 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
   m_cdv.Add( EChartSlot::Cycle, &m_cemZero );
-  m_cdv.Add( EChartSlot::Cycle, &m_ceEhlersHiPassFilter );
+  m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[0].m_ceEhlersHiPassFilter );
+  m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[1].m_ceEhlersHiPassFilter );
+  m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[2].m_ceEhlersHiPassFilter );
+  //m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[3].m_ceEhlersHiPassFilter );
 
   m_cdv.Add( EChartSlot::CycleSlope, &m_cemZero );
-  m_cdv.Add( EChartSlot::CycleSlope, &m_ceEhlersHiPassFilterSlope );
+  m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[0].m_ceEhlersHiPassFilterSlope );
+  m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[1].m_ceEhlersHiPassFilterSlope );
+  m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[2].m_ceEhlersHiPassFilterSlope );
+  //m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[3].m_ceEhlersHiPassFilterSlope );
 
   m_cdv.Add( EChartSlot::Stoch, &m_cemStochastic );
 
@@ -228,12 +222,10 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   assert( 0 < m_config.nPeriodWidth );
   time_duration td = time_duration( 0, 0, m_config.nPeriodWidth );
 
-  //static const double alpha = 1.0 / 7.0;
-  m_alpha = 1.0 / m_config.nPeriodWidth;
-  m_one_minus_alpha = 1.0 - m_alpha;
-  m_alpha_by_two = m_alpha / 2.0;
-  m_one_minus_alpha_by_two = 1.0 - m_alpha_by_two;
-  m_alpha_squared = m_alpha * m_alpha;
+  m_rHiPass[0].Init( m_config.nPeriodWidth, ou::Colour::Brown, "HP1" );
+  m_rHiPass[1].Init( m_config.nPeriodWidth, ou::Colour::Coral, "HP2" );
+  m_rHiPass[2].Init( m_config.nMA1Periods, ou::Colour::Gold, "HP3" );
+  //m_rHiPass[3].Init( m_config.nMA1Periods, ou::Colour::Green, "HP4" );
 
   // stochastic
 
@@ -907,41 +899,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   m_stateMovingAverage = currentMovingAverage; // not stateMovingAverage
 
-  // ehlers page 15, eqn 2.7, high pass filter
-  // ehlers page 16, eqn 2.9, low pass filter
-
-  if ( 0.0 == m_dblPrice0 ) {
-    m_dblPrice0 = m_dblPrice1 = m_dblPrice2 = ma0;
-    //m_dblHPF0 = m_dblHPF1 = m_dblHPF2 = 0.0;
-    //m_dblLPF0 = m_dblLPF1 = m_dblLPF2 = ma0;
-  }
-  else {
-    m_dblPrice0 = ma0;
-    m_dblPrice2 = m_dblPrice1; m_dblPrice1 = m_dblPrice0;
-    m_dblHPF2 = m_dblHPF1; m_dblHPF1 = m_dblHPF0;
-
-    const double price = m_dblPrice0 - ( m_dblPrice1 + m_dblPrice1 ) + m_dblPrice2;
-    m_dblHPF0 = m_one_minus_alpha_by_two * m_one_minus_alpha_by_two * price
-              + 2.0 * m_one_minus_alpha * m_dblHPF1
-              - m_one_minus_alpha * m_one_minus_alpha * m_dblHPF2
-              ;
-    m_ceEhlersHiPassFilter.Append( dt, -m_dblHPF0 );
-    m_ceEhlersHiPassFilterSlope.Append( dt, m_dblHPF1 - m_dblHPF0 );
-
-    //if ( 10 > m_ceEhlersHiPassFilter.Size() ) {
-    //  BOOST_LOG_TRIVIAL(info) << "hpf=" << m_dblPrice0 << "," << m_dblHPF0 << "," << m_dblHPF1 << "," << m_dblHPF2 << std::endl;
-    //}
-
-    // only marginally better than a simple ema
-    //m_dblLPF2 = m_dblLPF1; m_dblLPF1 = m_dblLPF0;
-    //m_dblLPF0 = ( m_alpha - m_alpha_by_two * m_alpha_by_two ) * m_dblPrice0
-    //          + ( m_alpha_squared / 2 ) * m_dblPrice1
-    //          - ( m_alpha - 3.0 * m_alpha_squared / 4.0 ) * m_dblPrice2
-    //          + 2.0 * m_one_minus_alpha * m_dblLPF1
-    //          - m_one_minus_alpha * m_one_minus_alpha * m_dblLPF2
-    //          ;
-    //m_ceEhlersLoPassFilter.Append( dt, m_dblLPF0 );
-  }
+  m_rHiPass[0].Update( dt, ma0 );
+  m_rHiPass[1].Update( dt, ma1 );
+  m_rHiPass[2].Update( dt, ma0 );
+  //m_rHiPass[3].Update( dt, ma1 );
 
   EStateDesired stateDesired( EStateDesired::Continue );
 
