@@ -266,22 +266,22 @@ private:
 
     }
 
-    void Update( boost::posix_time::ptime dt, double price_ ) {
+    void Update( boost::posix_time::ptime dt, double price ) {
       // ehlers page 15, eqn 2.7, high pass filter
       // ehlers page 16, eqn 2.9, low pass filter
 
       if ( 0.0 == m_dblPrice0 ) {
-        m_dblPrice0 = m_dblPrice1 = m_dblPrice2 = price_;
+        m_dblPrice0 = m_dblPrice1 = m_dblPrice2 = price;
         //m_dblHPF0 = m_dblHPF1 = m_dblHPF2 = 0.0;
         //m_dblLPF0 = m_dblLPF1 = m_dblLPF2 = ma0;
       }
       else {
         m_dblPrice2 = m_dblPrice1; m_dblPrice1 = m_dblPrice0;
-        m_dblPrice0 = price_;
+        m_dblPrice0 = price;
         m_dblHPF2 = m_dblHPF1; m_dblHPF1 = m_dblHPF0;
 
-        const double price = m_dblPrice0 - ( m_dblPrice1 + m_dblPrice1 ) + m_dblPrice2;
-        m_dblHPF0 = m_one_minus_alpha_by_two * m_one_minus_alpha_by_two * price
+        const double weighted = m_dblPrice0 - ( m_dblPrice1 + m_dblPrice1 ) + m_dblPrice2;
+        m_dblHPF0 = m_one_minus_alpha_by_two * m_one_minus_alpha_by_two * weighted
                   + 2.0 * m_one_minus_alpha * m_dblHPF1
                   - m_one_minus_alpha * m_one_minus_alpha * m_dblHPF2
                   ;
