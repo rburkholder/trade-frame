@@ -75,6 +75,10 @@ Strategy::Strategy(
 //, m_ceShortFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red )
 , m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
 , m_bfQuotes01Sec( 1 )
+, m_alpha( 0.1 )
+, m_dblPrice0 {}, m_dblPrice1 {}, m_dblPrice2 {}
+, m_dblHPF0 {}, m_dblHPF1 {}, m_dblHPF2 {}
+//, m_dblLPF0 {}, m_dblLPF1 {}, m_dblLPF2 {}
 {
 //  assert( m_pFile );
 //  assert( m_pFileUtility );
@@ -82,6 +86,9 @@ Strategy::Strategy(
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
+
+  m_ceEhlersHiPassFilter.SetColour( ou::Colour::DarkTurquoise );
+  //m_ceEhlersLoPassFilter.SetColour( ou::Colour::DarkMagenta );
 
   m_cemZero.AddMark( 0, ou::Colour::Black,  "0" );
 
@@ -100,6 +107,9 @@ Strategy::Strategy(
   m_ceQuoteAsk.SetName( "Ask" );
   m_ceTrade.SetName( "Tick" );
   m_ceQuoteBid.SetName( "Bid" );
+
+  m_ceEhlersHiPassFilter.SetName( "HiPass" );
+  //m_ceEhlersLoPassFilter.SetName( "LoPass" );
 
   m_ceVolume.SetName( "Volume" );
 
@@ -149,11 +159,16 @@ void Strategy::SetupChart() {
   //m_cdv.Add( EChartSlot::Price, &m_ceShortFill );
   m_cdv.Add( EChartSlot::Price, &m_ceShortExit );
 
+  //m_cdv.Add( EChartSlot::Price, &m_ceEhlersLoPassFilter );
+
   for ( vMovingAverage_t::value_type& ma: m_vMovingAverage ) {
     ma.AddToView( m_cdv, EChartSlot::Price );
   }
 
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
+
+  m_cdv.Add( EChartSlot::Cycle, &m_cemZero );
+  m_cdv.Add( EChartSlot::Cycle, &m_ceEhlersHiPassFilter );
 
   m_cdv.Add( EChartSlot::Stoch, &m_cemStochastic );
 
@@ -208,6 +223,13 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   assert( 0 < m_config.nPeriodWidth );
   time_duration td = time_duration( 0, 0, m_config.nPeriodWidth );
 
+  //static const double alpha = 1.0 / 7.0;
+  m_alpha = 1.0 / m_config.nPeriodWidth;
+  m_one_minus_alpha = 1.0 - m_alpha;
+  m_alpha_by_two = m_alpha / 2.0;
+  m_one_minus_alpha_by_two = 1.0 - m_alpha_by_two;
+  m_alpha_squared = m_alpha * m_alpha;
+
   // stochastic
 
   m_vStochastic.emplace_back( std::make_unique<Stochastic>( "1", m_quotes, m_config.nStochastic1Periods, td, ou::Colour::DeepSkyBlue ) );
@@ -228,6 +250,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
     assert( 0 < value );
   }
 
+  m_vMovingAverage.emplace_back( MovingAverage( m_quotes,            1,  td, ou::Colour::Green, "ma0" ) ); // for ehlers
   m_vMovingAverage.emplace_back( MovingAverage( m_quotes, vMAPeriods[0], td, ou::Colour::Brown, "ma1" ) );
   m_vMovingAverage.emplace_back( MovingAverage( m_quotes, vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
   m_vMovingAverage.emplace_back( MovingAverage( m_quotes, vMAPeriods[2], td, ou::Colour::Gold,  "ma3" ) );
@@ -580,6 +603,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 //    m_pTreeQuote->Fill();
 //  }
 
+  // TODO: this could be performed in the class if updated each quote
   for ( vMovingAverage_t::value_type& ma: m_vMovingAverage ) {
     ma.Update( dt );
   }
@@ -737,6 +761,9 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   m_pOrder->SetTimeInForce( ou::tf::TimeInForce::GoodTillDate );
 */
 
+// try using limit orders instead, will simulator work on limit orders?
+//   therefore, need some sort of predictive ability
+
 void Strategy::EnterLong( const ou::tf::Bar& bar ) {
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
   m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
@@ -849,9 +876,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   EMovingAverage stateMovingAverage( m_stateMovingAverage );
   EMovingAverage currentMovingAverage( EMovingAverage::Flat );
 
-  const double ma1( m_vMovingAverage[0].Latest() );
-  const double ma2( m_vMovingAverage[1].Latest() );
-  const double ma3( m_vMovingAverage[2].Latest() );
+  const double ma0( m_vMovingAverage[0].Latest() );
+  const double ma1( m_vMovingAverage[1].Latest() );
+  const double ma2( m_vMovingAverage[2].Latest() );
+  const double ma3( m_vMovingAverage[3].Latest() );
 
   if ( ( ma1 > ma2 ) && ( ma2 > ma3 ) ) {
     currentMovingAverage = EMovingAverage::Rising;
@@ -874,6 +902,40 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   m_stateMovingAverage = currentMovingAverage; // not stateMovingAverage
 
+  // ehlers page 15, eqn 2.7, high pass filter
+  // ehlers page 16, eqn 2.9, low pass filter
+
+  if ( 0.0 == m_dblPrice0 ) {
+    m_dblPrice0 = m_dblPrice1 = m_dblPrice2 = ma0;
+    //m_dblHPF0 = m_dblHPF1 = m_dblHPF2 = 0.0;
+    //m_dblLPF0 = m_dblLPF1 = m_dblLPF2 = ma0;
+  }
+  else {
+    m_dblPrice0 = ma0;
+    m_dblPrice2 = m_dblPrice1; m_dblPrice1 = m_dblPrice0;
+    m_dblHPF2 = m_dblHPF1; m_dblHPF1 = m_dblHPF0;
+
+    const double price = m_dblPrice0 - ( m_dblPrice1 + m_dblPrice1 ) + m_dblPrice2;
+    m_dblHPF0 = m_one_minus_alpha_by_two * m_one_minus_alpha_by_two * price
+              + 2.0 * m_one_minus_alpha * m_dblHPF1
+              - m_one_minus_alpha * m_one_minus_alpha * m_dblHPF2
+              ;
+    m_ceEhlersHiPassFilter.Append( dt, -m_dblHPF0 );
+    //if ( 10 > m_ceEhlersHiPassFilter.Size() ) {
+    //  BOOST_LOG_TRIVIAL(info) << "hpf=" << m_dblPrice0 << "," << m_dblHPF0 << "," << m_dblHPF1 << "," << m_dblHPF2 << std::endl;
+    //}
+
+    // only marginally better than a simple ema
+    //m_dblLPF2 = m_dblLPF1; m_dblLPF1 = m_dblLPF0;
+    //m_dblLPF0 = ( m_alpha - m_alpha_by_two * m_alpha_by_two ) * m_dblPrice0
+    //          + ( m_alpha_squared / 2 ) * m_dblPrice1
+    //          - ( m_alpha - 3.0 * m_alpha_squared / 4.0 ) * m_dblPrice2
+    //          + 2.0 * m_one_minus_alpha * m_dblLPF1
+    //          - m_one_minus_alpha * m_one_minus_alpha * m_dblLPF2
+    //          ;
+    //m_ceEhlersLoPassFilter.Append( dt, m_dblLPF0 );
+  }
+
   EStateDesired stateDesired( EStateDesired::Continue );
 
   switch ( m_stateStochastic) {
@@ -890,6 +952,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           // exit & go short
           stateDesired = EStateDesired::GoShortHi;
           break;
+        default: // ensure 100% coverage
+          assert( false );
       }
       break;
     case EStateStochastic::AboveMid:
@@ -903,6 +967,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           // exit & go short - maybe
           //desired = EStateDesired::Exit;
           break;
+        default: // ensure 100% coverage
+          assert( true );
       }
       break;
     case EStateStochastic::BelowMid:
@@ -916,6 +982,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           stateDesired = EStateDesired::GoShortLo;  // many are not successful, try long instead? (some sort of stop)
           //stateDesired = EStateDesired::GoLongLo;  // 2022/12/31 from ehlers, and use time based stop (average width of stochastic edge)
           break;
+        default: // ensure 100% coverage
+          assert( true );
       }
       break;
     case EStateStochastic::BelowLo:
@@ -928,6 +996,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           break;
         case EStateStochastic::BelowLo:
           break;
+        default: // ensure 100% coverage
+          assert( false );
       }
       break;
   }
@@ -949,6 +1019,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           m_sProfitDescription = "s,srch";
           EnterShort( bar );
           break;
+        case EStateDesired::Continue:
+          break; // nothing to do
+        default: // ensure 100% coverage
+          assert( false );
       }
       break;
     case EStateTrade::LongSubmitted:

@@ -119,7 +119,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, ImbalanceMean, Stoch, FVS_Var1, Skew, PL1, PL2, ET, MarketDepth };
+  enum EChartSlot { Price, Volume, Cycle, ImbalanceMean, Stoch, FVS_Var1, Skew, PL1, PL2, ET, MarketDepth };
 
   enum class EStateTrade {
     Init,  // initiaize state in current market
@@ -202,6 +202,9 @@ private:
   ou::ChartEntryIndicator m_ceCommissionsPaid;
   ou::ChartEntryIndicator m_ceProfit;
 
+  ou::ChartEntryIndicator m_ceEhlersHiPassFilter;
+  //ou::ChartEntryIndicator m_ceEhlersLoPassFilter;
+
   ou::ChartEntryIndicator m_cdMarketDepthAsk;
   ou::ChartEntryIndicator m_cdMarketDepthBid;
 
@@ -242,6 +245,16 @@ private:
 
   using vMovingAverage_t = std::vector<MovingAverage>;
   vMovingAverage_t m_vMovingAverage;
+
+  // ehlers, cybernetic analsys, eqn 2.7, eqn 2.9
+  double m_alpha;
+  double m_one_minus_alpha;
+  double m_alpha_by_two;
+  double m_one_minus_alpha_by_two;
+  double m_alpha_squared;
+  double m_dblPrice0, m_dblPrice1, m_dblPrice2;
+  double m_dblHPF0, m_dblHPF1, m_dblHPF2;
+  //double m_dblLPF0, m_dblLPF1, m_dblLPF2;
 
   std::string m_sProfitDescription;
   double m_dblProfitMax;
