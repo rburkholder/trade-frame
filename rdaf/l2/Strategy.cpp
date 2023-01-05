@@ -71,6 +71,7 @@ Strategy::Strategy(
 , m_ceShortEntry( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
 //, m_ceShortFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red )
 , m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
+, m_dblMA1_Slope {}
 , m_bfQuotes01Sec( 1 )
 {
 //  assert( m_pFile );
@@ -95,9 +96,11 @@ Strategy::Strategy(
 
   //m_ceSkewness.SetName( "Skew" );
 
-  m_ceRelativeMA1.SetName( "MA1" );
-  m_ceRelativeMA2.SetName( "MA2" );
-  m_ceRelativeMA3.SetName( "MA3" );
+  //m_ceRelativeMA1.SetName( "MA1" );
+  //m_ceRelativeMA2.SetName( "MA2" );
+  //m_ceRelativeMA3.SetName( "MA3" );
+
+  m_ceMA1_Slope.SetName( "MA1 Slope" );
 
   m_ceProfitUnRealized.SetName( "UnRealized" );
   m_ceProfitRealized.SetName( "Realized" );
@@ -161,9 +164,10 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[3].m_ceEhlersHiPassFilterSlope );
 
   m_cdv.Add( EChartSlot::MA, &m_cemZero );
-  m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA1 );
-  m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA2 );
-  m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA3 );
+  //m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA1 );
+  //m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA2 );
+  //m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA3 );
+  m_cdv.Add( EChartSlot::MA, &m_ceMA1_Slope );
 
   m_cdv.Add( EChartSlot::ImbalanceMean, &m_cemZero );
 
@@ -235,9 +239,11 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_quotes, vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
   m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_quotes, vMAPeriods[2], td, ou::Colour::Gold,  "ma3" ) );
 
-  m_ceRelativeMA1.SetColour( ou::Colour::Green );
-  m_ceRelativeMA2.SetColour( ou::Colour::Brown );
-  m_ceRelativeMA3.SetColour( ou::Colour::Coral );
+  //m_ceRelativeMA1.SetColour( ou::Colour::Green );
+  //m_ceRelativeMA2.SetColour( ou::Colour::Brown );
+  //m_ceRelativeMA3.SetColour( ou::Colour::Coral );
+
+  m_ceMA1_Slope.SetColour( ou::Colour::Green );
 
   SetupChart(); // comes after stochastic initialization
 
@@ -590,6 +596,13 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
     ma.Update( dt );
   }
 
+  const double ma0( m_vMovingAverage[0].Latest() );
+  double diff = ma0 - m_dblMA1_Slope;
+  if ( 0.0 != diff ) {
+    m_ceMA1_Slope.Append( dt, diff );
+    m_dblMA1_Slope = ma0;
+  }
+
   // ehlers cybernetic analysis for stocks & futures page 7
   //double k_fisher = 0.5 * std::log( ( 1.0 + k_normalized ) / ( 1.0 - k_normalized ) );
 
@@ -703,89 +716,102 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 // try using limit orders instead, will simulator work on limit orders?
 //   therefore, need some sort of predictive ability
 
-void Strategy::EnterLong( const ou::tf::Bar& bar ) {
+void Strategy::EnterLong( const ou::tf::Bar& bar ) { // limit orders, in real, will need to be normalized
+  //assert( nullptr == m_pOrderPending.get() );
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-  m_pOrder->SetSignalPrice( bar.Close() );
-  m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-  m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  m_ceLongEntry.AddLabel( bar.DateTime(), bar.Close(), "LeS-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
+  //m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
+  pOrder->SetSignalPrice( bar.Close() );
+  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+  pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  m_ceLongEntry.AddLabel( bar.DateTime(), bar.Close(), "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   m_stateTrade = EStateTrade::LongSubmitted;
-  m_pPosition->PlaceOrder( m_pOrder );
-  ShowOrder( m_pOrder );
+  m_pOrderPending = pOrder;
+  m_pPosition->PlaceOrder( pOrder );
+  ShowOrder( pOrder );
 }
 
-void Strategy::EnterShort( const ou::tf::Bar& bar ) {
+void Strategy::EnterShort( const ou::tf::Bar& bar ) { // limit orders, in real, will need to be normalized
+  //assert( nullptr == m_pOrderPending.get() );
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-  m_pOrder->SetSignalPrice( bar.Close() );
-  m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-  m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  m_ceShortEntry.AddLabel( bar.DateTime(), bar.Close(), "SeS-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
+  //m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
+  pOrder->SetSignalPrice( bar.Close() );
+  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+  pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  m_ceShortEntry.AddLabel( bar.DateTime(), bar.Close(), "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   m_stateTrade = EStateTrade::ShortSubmitted;
-  m_pPosition->PlaceOrder( m_pOrder );
-  ShowOrder( m_pOrder );
+  m_pOrderPending = pOrder;
+  m_pPosition->PlaceOrder( pOrder );
+  ShowOrder( pOrder );
 }
 
 void Strategy::ExitLong( const ou::tf::Bar& bar ) {
-  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-  m_pOrder->SetSignalPrice( bar.Close() );
-  m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-  m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "LxS1-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
+  //assert( nullptr == m_pOrderPending.get() );
+  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
+  pOrder->SetSignalPrice( bar.Close() );
+  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+  pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   m_stateTrade = EStateTrade::LongExitSubmitted;
-  m_pPosition->PlaceOrder( m_pOrder );
-  ShowOrder( m_pOrder );
+  m_pOrderPending = pOrder;
+  m_pPosition->PlaceOrder( pOrder );
+  ShowOrder( pOrder );
 }
 
 void Strategy::ExitShort( const ou::tf::Bar& bar ) {
-  m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-  m_pOrder->SetSignalPrice( bar.Close() );
-  m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-  m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "SxS1-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
+  //assert( nullptr == m_pOrderPending.get() );
+  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
+  pOrder->SetSignalPrice( bar.Close() );
+  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+  pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   m_stateTrade = EStateTrade::ShortExitSubmitted;
-  m_pPosition->PlaceOrder( m_pOrder );
-  ShowOrder( m_pOrder );
+  m_pOrderPending = pOrder;
+  m_pPosition->PlaceOrder( pOrder );
+  ShowOrder( pOrder );
 }
 
 void Strategy::ExitPosition( const ou::tf::Bar& bar ) {
+  pOrder_t pOrder;
   if ( m_pPosition->IsActive() ) {
     assert( 1 == m_pPosition->GetActiveSize() );
     switch ( m_pPosition->GetRow().eOrderSideActive ) {
       case ou::tf::OrderSide::EOrderSide::Buy:
-        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-        m_pOrder->SetSignalPrice( bar.Close() );
-        m_pOrder->SetDescription(
+        pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+        pOrder->SetSignalPrice( bar.Close() );
+        pOrder->SetDescription(
             m_sProfitDescription + ","
           + boost::lexical_cast<std::string>( m_dblProfitMin ) + ","
           + boost::lexical_cast<std::string>( m_dblUnRealized ) + ","
           + boost::lexical_cast<std::string>( m_dblProfitMax - m_dblUnRealized ) + ","
           + boost::lexical_cast<std::string>( m_dblProfitMax )
           );
-        m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
-        m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
-        m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "LxS2-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
+        pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
+        pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
+        m_ceLongExit.AddLabel( bar.DateTime(), bar.Close(), "LxS2-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
         m_stateTrade = EStateTrade::LongExitSubmitted;
-        m_pPosition->PlaceOrder( m_pOrder );
-        ShowOrder( m_pOrder );
+        m_pPosition->PlaceOrder( pOrder );
+        ShowOrder( pOrder );
         break;
       case ou::tf::OrderSide::EOrderSide::Sell:
-        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-        m_pOrder->SetSignalPrice( bar.Close() );
-        m_pOrder->SetDescription(
+        pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+        pOrder->SetSignalPrice( bar.Close() );
+        pOrder->SetDescription(
             m_sProfitDescription + ","
           + boost::lexical_cast<std::string>( m_dblProfitMin ) + ","
           + boost::lexical_cast<std::string>( m_dblUnRealized ) + ","
           + boost::lexical_cast<std::string>( m_dblProfitMax - m_dblUnRealized ) + ","
           + boost::lexical_cast<std::string>( m_dblProfitMax )
           );
-        m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
-        m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
-        m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "SxS2-" + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() ) );
+        pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
+        pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
+        m_ceShortExit.AddLabel( bar.DateTime(), bar.Close(), "SxS2-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
         m_stateTrade = EStateTrade::ShortExitSubmitted;
-        m_pPosition->PlaceOrder( m_pOrder );
-        ShowOrder( m_pOrder );
+        m_pPosition->PlaceOrder( pOrder );
+        ShowOrder( pOrder );
         break;
       default:
         assert( false ); // maybe check for unknown
@@ -812,6 +838,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   ptime dt( bar.DateTime() );
 
+  // Moving Average
+
   EMovingAverage stateMovingAverage( m_stateMovingAverage );
   EMovingAverage currentMovingAverage( EMovingAverage::Flat );
 
@@ -820,20 +848,42 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   const double ma2( m_vMovingAverage[2].Latest() );
   const double ma3( m_vMovingAverage[3].Latest() );
 
-  m_ceRelativeMA1.Append( dt, ma0 - ma3 );
-  m_ceRelativeMA2.Append( dt, ma1 - ma3 );
-  m_ceRelativeMA3.Append( dt, ma2 - ma3 );
+  //m_ceRelativeMA1.Append( dt, ma0 - ma3 );
+  //m_ceRelativeMA2.Append( dt, ma1 - ma3 );
+  //m_ceRelativeMA3.Append( dt, ma2 - ma3 );
 
-  if ( ( ma1 > ma2 ) && ( ma2 > ma3 ) ) {
+  const bool bMa0AboveMa1( ma0 > ma1 );
+  const bool bMa1AboveMa2( ma1 > ma2 );
+  const bool bMa2AboveMa3( ma2 > ma3 );
+
+  const bool bMa0AboveMa3( ma0 > ma3 );
+  const bool bMa1AboveMa3( ma1 > ma3 );
+  //const bool bMa2AboveMa3( ma2 > ma3 );
+
+  //const bool bMaRising( bMa0AboveMa1 && bMa1AboveMa2 && bMa2AboveMa3 );
+  const bool bMaRising( bMa0AboveMa3 && bMa1AboveMa3 && bMa2AboveMa3 );
+
+  const bool bMa0BelowMa1( ma0 < ma1 );
+  const bool bMa1BelowMa2( ma1 < ma2 );
+  const bool bMa2BelowMa3( ma2 < ma3 );
+
+  const bool bMa0BelowMa3( ma0 < ma3 );
+  const bool bMa1BelowMa3( ma1 < ma3 );
+  //const bool bMa1BelowMa3( ma2 < ma3 );
+
+  //const bool bMaFalling( bMa0BelowMa1 && bMa1BelowMa2 && bMa2BelowMa3 );
+  const bool bMaFalling( bMa0BelowMa3 && bMa1BelowMa3 && bMa2BelowMa3 );
+
+  if ( bMaRising ) {
     currentMovingAverage = EMovingAverage::Rising;
     stateMovingAverage = ( currentMovingAverage == stateMovingAverage ) ? EMovingAverage::Rising : EMovingAverage::ToRising;
-    if ( !m_bUseMARising ) m_bUseMARising = true;
+    m_bUseMARising = true;
   }
   else {
-    if ( ( ma1 < ma2 ) && ( ma2 < ma3 ) ) {
+    if ( bMaFalling ) {
       currentMovingAverage = EMovingAverage::Falling;
       stateMovingAverage = ( currentMovingAverage == stateMovingAverage ) ? EMovingAverage::Falling : EMovingAverage::ToFalling;
-      if ( !m_bUseMAFalling ) m_bUseMAFalling = true;
+      m_bUseMAFalling = true;
     }
     else {
       assert( EMovingAverage::Flat == currentMovingAverage );
@@ -843,7 +893,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     }
   }
 
-  m_stateMovingAverage = currentMovingAverage; // not stateMovingAverage
+  // Hi Pass - may need to change to continuous rather than at one second intervals
 
   m_rHiPass[0].Update( dt, ma0 );
   m_rHiPass[1].Update( dt, ma1 );
@@ -852,18 +902,64 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   EStateDesired stateDesired( EStateDesired::Continue );
 
-  // may need to change to continuous rather than at one second intervals
+  HiPass& hp( m_rHiPass[3] );
 
-  HiPass& hp( m_rHiPass[2] );
+  // ==
 
-  if ( ( 0.0 > hp.m_dblHPF_Slope1 ) && ( 0.0 < hp.m_dblHPF_Slope0 ) ) {
-    stateDesired = EStateDesired::GoLong;
-  }
-  else {
-    if ( ( 0.0 < hp.m_dblHPF_Slope1 ) && ( 0.0 > hp.m_dblHPF_Slope0 ) ) {
-      stateDesired = EStateDesired::GoShort;
-    }
-  }
+  const bool bHP0Hi( 0.0 < hp.m_dblHPF0 );
+  const bool bHP0Lo( 0.0 > hp.m_dblHPF0 );
+
+  const bool bHP1Hi( 0.0 < hp.m_dblHPF1 );
+  const bool bHP1Lo( 0.0 > hp.m_dblHPF1 );
+
+  const bool bHPUpCross( bHP1Lo && bHP0Hi );
+  const bool bHPDnCross( bHP1Hi && bHP0Lo );
+
+  // ==
+
+  const bool bHpSlope0Hi( 0.0 < hp.m_dblHPF_Slope0 );
+  const bool bHPSlope0Lo( 0.0 > hp.m_dblHPF_Slope0 );
+
+  const bool bHPSlope1Hi( 0.0 < hp.m_dblHPF_Slope1 );
+  const bool bHPSlope1Lo( 0.0 > hp.m_dblHPF_Slope1 );
+
+  const bool bHPSlopeUpCross( bHPSlope1Lo && bHpSlope0Hi );
+  const bool bHPSlopeDnCross( bHPSlope1Hi && bHPSlope0Lo );
+
+  // ==
+
+  //if ( !bHPUpCross && !bHPDnCross ) {
+    //stateDesired = EStateDesired::Cancel; // implement on limit orders
+  //}
+  //else {
+    //if ( EMovingAverage::Flat == currentMovingAverage ) {
+    //  stateDesired = EStateDesired::Exit;
+    //}
+    //else {
+      //if ( bMaRising && bHPSlopeUpCross ) {
+      if ( bHPSlopeUpCross ) {
+        stateDesired = EStateDesired::GoLong;
+      }
+      else {
+        //if ( bMaFalling && bHPSlopeDnCross ) {
+        if ( bHPSlopeDnCross ) {
+          stateDesired = EStateDesired::GoShort;
+        }
+        else {
+          if ( bHPUpCross || bHPDnCross ) {
+            stateDesired = EStateDesired::Cancel;
+          }
+        }
+      }
+    //}
+  //}
+
+  // 1a) filter on moving average to reduce churn
+  // 1b) lock it in by trailing a stop, based upon one of the ma
+  // 2) run limit orders to reduce slippage
+  // 3) apply risk or prediction factors, use markov chain to retry successful trades
+
+  // how many seconds (or ratio) does it trend vs going sideways?
 
   switch ( m_stateTrade ) {
     case EStateTrade::Search:
@@ -880,6 +976,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           m_sProfitDescription = "s,srch";
           EnterShort( bar );
           break;
+        case EStateDesired::Exit:
+        case EStateDesired::Cancel:
         case EStateDesired::Continue:
           break; // nothing to do
         default: // ensure 100% coverage
@@ -888,22 +986,31 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       break;
     case EStateTrade::LongSubmitted:
       // wait for order to execute
+      switch ( stateDesired ) {
+        case EStateDesired::Cancel:
+          if ( m_pOrderPending ) {
+            auto id = m_pOrderPending->GetOrderId();
+            BOOST_LOG_TRIVIAL(info) << dt << " LongSubmitted->Cancel " << id;
+            m_pPosition->CancelOrder( id );
+          }
+          break;
+      }
       break;
     case EStateTrade::LongExitSignal:
       switch ( stateDesired ) {
         case EStateDesired::GoShort:
           {
             bool bGoShort( true );
-            if ( m_bUseMARising ) {
-              if ( EMovingAverage::Rising == currentMovingAverage ) {
-                BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal - still strong long";
-                bGoShort = false;
-              }
-            }
+            //if ( m_bUseMARising ) {
+            //  if ( EMovingAverage::Rising == currentMovingAverage ) {
+            //    BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal - still strong long";
+            //    bGoShort = false;
+            //  }
+            //}
             if ( bGoShort ) {
               BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->GoShort";
               if ( EStateDesired::GoShort == stateDesired ) {
-                m_sProfitDescription += ",x,shrt";
+                m_sProfitDescription += ",x,short";
               }
               ExitPosition( bar );
               m_bUseMAFalling = EMovingAverage::Falling == currentMovingAverage;
@@ -912,7 +1019,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
             }
           }
           break;
-        case EStateDesired::Exit: // not currently reachable
+        case EStateDesired::Exit:
           BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Exit";
           ExitLong( bar );
           break;
@@ -923,12 +1030,12 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
             ; // already long
           break;
         case EStateDesired::Continue:
-          if ( -1.0 >= m_dblUnRealized ) { // ehlers - use time instead?
-            BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue(Stop)";
-            m_sProfitDescription += ",x,stop";
-            ExitPosition( bar );
-          }
-          else {
+          //if ( -1.0 >= m_dblUnRealized ) { // ehlers - use time instead?
+          //  BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue(Stop)";
+          //  m_sProfitDescription += ",x,stop";
+          //  ExitPosition( bar );
+          //}
+          //else {
             if ( m_bUseMARising ) {
               if ( EMovingAverage::Rising == currentMovingAverage ) {
                 //BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue";
@@ -942,7 +1049,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
                 //EnterShort( bar );
               }
             }
-          }
+          //}
+          break;
+        case EStateDesired::Cancel:
+          BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Cancel - nothing to cancel";
           break;
         default:
           assert( false );  // broken state machine
@@ -950,18 +1060,27 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       break;
     case EStateTrade::ShortSubmitted:
       // wait for order to execute
+      switch ( stateDesired ) {
+        case EStateDesired::Cancel:
+          if ( m_pOrderPending ) {
+            auto id = m_pOrderPending->GetOrderId();
+            BOOST_LOG_TRIVIAL(info) << dt << " ShortSubmitted->Cancel " << id;
+            m_pPosition->CancelOrder( id );
+          }
+          break;
+      }
       break;
     case EStateTrade::ShortExitSignal:
       switch ( stateDesired ) {
         case EStateDesired::GoLong:
           {
             bool bGoLong( true );
-            if ( m_bUseMAFalling ) {
-              if ( EMovingAverage::Falling == currentMovingAverage ) {
-                BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal - still strong short";
-                bGoLong = false;
-              }
-            }
+            //if ( m_bUseMAFalling ) {
+            //  if ( EMovingAverage::Falling == currentMovingAverage ) {
+            //    BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal - still strong short";
+            //    bGoLong = false;
+            //  }
+            //}
             if ( bGoLong ) {
               BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->GoLong";
               if ( EStateDesired::GoLong == stateDesired ) {
@@ -974,7 +1093,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
             }
           }
           break;
-        case EStateDesired::Exit: // not currently reachable
+        case EStateDesired::Exit:
           BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Exit";
           ExitShort( bar );
           break;
@@ -985,12 +1104,12 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
             ; // already short
           break;
         case EStateDesired::Continue:
-          if ( -1.0 >= m_dblUnRealized ) { // ehlers - use time instead?
-            BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue(Stop)";
-            m_sProfitDescription += ",x,stop";
-            ExitPosition( bar );
-          }
-          else {
+          //if ( -1.0 >= m_dblUnRealized ) { // ehlers - use time instead?
+          //  BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue(Stop)";
+          //  m_sProfitDescription += ",x,stop";
+          //  ExitPosition( bar );
+          //}
+          //else {
             if ( m_bUseMAFalling ) {
               if ( EMovingAverage::Falling == currentMovingAverage ) {
                 //BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue";
@@ -1004,7 +1123,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
                 //EnterLong( bar );
               }
             }
-          }
+          //}
+          break;
+        case EStateDesired::Cancel:
+          BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Cancel - nothing to cancel";
           break;
         default:
           assert( false );  // broken state machine
@@ -1030,6 +1152,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       break;
   }
 
+  m_stateMovingAverage = currentMovingAverage; // not stateMovingAverage
+
   //const std::chrono::time_point<std::chrono::system_clock> end
   //  = std::chrono::system_clock::now();
 
@@ -1040,8 +1164,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
-  m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-  m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  ou::tf::Order& order_( const_cast<ou::tf::Order&>( order ) );
+  order_.OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+  order_.OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+
   switch ( m_stateTrade ) {
     case EStateTrade::EndOfDayCancel:
     case EStateTrade::EndOfDayNeutral:
@@ -1050,18 +1176,20 @@ void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
     case EStateTrade::LongExitSubmitted:
     case EStateTrade::ShortExitSubmitted:
       //assert( false );  // TODO: need to figure out a plan to retry exit
-      BOOST_LOG_TRIVIAL(error) << "order " << order.GetOrderId() << " cancelled - state machine needs fixes";
+      BOOST_LOG_TRIVIAL(error) << "order " << order.GetOrderId() << " cancelled";
       m_stateTrade = EStateTrade::Done;
       break;
     default:
       m_stateTrade = EStateTrade::Search;
   }
-  m_pOrder.reset();
+  m_pOrderPending.reset();
 }
 
 void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
-  m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-  m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  ou::tf::Order& order_( const_cast<ou::tf::Order&>( order ) );
+  order_.OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+  order_.OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+
   switch ( m_stateTrade ) {
     case EStateTrade::LongSubmitted:
       m_ceLongEntry.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "LeF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
@@ -1088,7 +1216,7 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
     default:
        assert( false ); // TODO: unravel the state mess if we get here
   }
-  m_pOrder.reset();
+  m_pOrderPending.reset();
 }
 
 void Strategy::HandleExitOrderCancelled( const ou::tf::Order& order ) {
@@ -1097,11 +1225,11 @@ void Strategy::HandleExitOrderCancelled( const ou::tf::Order& order ) {
   order_.OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
 
   switch ( order.GetOrderSide() ) {
-    case ou::tf::OrderSide::EOrderSide::Buy: // is dt filled a real time?
+    case ou::tf::OrderSide::EOrderSide::Buy: // is dt filled at 'internal' time?
       //m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetSignalPrice(), "LxC-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
       m_stateTrade = EStateTrade::Cancelled;  // or use cancelled for custom processing
       break;
-    case ou::tf::OrderSide::EOrderSide::Sell: // is dt filled a real time?
+    case ou::tf::OrderSide::EOrderSide::Sell: // is dt filled at 'internal' time?
       //m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetSignalPrice(), "SxC-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
       m_stateTrade = EStateTrade::Cancelled;  // or use cancelled for custom processing
       break;

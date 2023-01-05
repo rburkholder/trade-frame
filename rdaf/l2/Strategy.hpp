@@ -166,7 +166,9 @@ private:
   //pFile_t m_pFile;
   //pFile_t m_pFileUtility;
 
-  pOrder_t m_pOrder;
+  pOrder_t m_pOrderPending;
+  //pOrder_t m_pOrderDone;
+
   pPosition_t m_pPosition;
 
   ou::ChartDataView m_cdv;
@@ -198,9 +200,12 @@ private:
   ou::ChartEntryIndicator m_ceImbalanceRawMean;
   ou::ChartEntryIndicator m_ceImbalanceSmoothMean;
 
-  ou::ChartEntryIndicator m_ceRelativeMA1;
-  ou::ChartEntryIndicator m_ceRelativeMA2;
-  ou::ChartEntryIndicator m_ceRelativeMA3;
+  //ou::ChartEntryIndicator m_ceRelativeMA1;
+  //ou::ChartEntryIndicator m_ceRelativeMA2;
+  //ou::ChartEntryIndicator m_ceRelativeMA3;
+
+  double m_dblMA1_Slope;
+  ou::ChartEntryIndicator m_ceMA1_Slope;
 
   //ou::ChartEntryIndicator m_ceFVS_Var1_Ask;
   //ou::ChartEntryIndicator m_ceFVS_Var1_Diff;
