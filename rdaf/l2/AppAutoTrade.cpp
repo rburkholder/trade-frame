@@ -359,8 +359,8 @@ bool AppAutoTrade::OnInit() {
     pStrategy_t pStrategy = std::make_unique<Strategy>( choices, pTreeItem );
 
     if ( m_choices.bStartSimulator ) {
-      //pStrategy->InitForUSEquityExchanges( dateSim );
       // need to vefify proper period when collector starts at 5:30est
+      //pStrategy->InitForUSEquityExchanges( dateSim );
       pStrategy->InitForUS24HourFutures( dateSim );
     }
 
