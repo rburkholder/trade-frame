@@ -482,8 +482,8 @@ void Strategy::Imbalance( const ou::tf::Depth& depth ) {
 
 }
 
-void Strategy::LoadHistory( TClass* tc ) {
 #if RDAF
+void Strategy::LoadHistory( TClass* tc ) {
   BOOST_LOG_TRIVIAL(info) << "  load: " << tc->GetName();
 
   if ( 0 == strcmp( ( m_config.sSymbol_IQFeed + "_quotes" ).c_str(), tc->GetName() ) ) {
@@ -497,8 +497,8 @@ void Strategy::LoadHistory( TClass* tc ) {
   if ( 0 == strcmp( ( m_config.sSymbol_IQFeed + "_h1" ).c_str(), tc->GetName() ) ) {
     TH2D* pH1 = dynamic_cast<TH2D*>( tc );
   }
-#endif
 }
+#endif
 
 void Strategy::Clear() {
 

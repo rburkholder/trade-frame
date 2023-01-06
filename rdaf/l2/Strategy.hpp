@@ -51,10 +51,12 @@
 
 #include "ConfigParser.hpp"
 
+#if RDAF
 class TH2D;
 class TFile;
 class TTree;
 class TClass;
+#endif
 
 namespace ou {
   class ChartDataView;
@@ -103,8 +105,10 @@ public:
   Strategy(
     const ou::tf::config::symbol_t&
   , TreeItem*
-//  , pFile_t
-//  , pFile_t
+#if RDAF
+  , pFile_t
+  , pFile_t
+#endif
   );
   virtual ~Strategy();
 
@@ -112,7 +116,9 @@ public:
 
   ou::tf::config::symbol_t::EFeed Feed() const { return m_config.eFeed; }
 
+#if RDAF
   void LoadHistory( TClass* );
+#endif
 
   void HandleUpdateL2Ask( price_t price, volume_t volume, bool bAdd );
   void HandleUpdateL2Bid( price_t price, volume_t volume, bool bAdd );
