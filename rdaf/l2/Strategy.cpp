@@ -613,6 +613,25 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   // ehlers cybernetic analysis for stocks & futures page 7
   //double k_fisher = 0.5 * std::log( ( 1.0 + k_normalized ) / ( 1.0 - k_normalized ) );
 
+  switch ( m_stateTrade ) {
+    case EStateTrade::LongExitSignal:
+      {
+        double bid = quote.Bid();
+        if ( bid > ( m_dblStopActiveActual + m_dblStopActiveDelta ) ) {
+          m_dblStopActiveActual = bid - m_dblStopActiveDelta;
+        }
+      }
+      break;
+    case EStateTrade::ShortExitSignal:
+      {
+        double ask = quote.Ask();
+        if ( ask < ( m_dblStopActiveActual - m_dblStopActiveDelta ) ) {
+          m_dblStopActiveActual = ask + m_dblStopActiveDelta;
+        }
+      }
+      break;
+  }
+
   m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
 
 }
@@ -1087,11 +1106,6 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
               ExitPosition( bar ); // provides completion summary
               //ExitLong( bar );
             }
-            else {
-              if ( bid > ( m_dblStopActiveActual + m_dblStopActiveDelta ) ) {
-                m_dblStopActiveActual = bid - m_dblStopActiveDelta;
-              }
-            }
           }
           break;
         case EStateDesired::Cancel:
@@ -1148,11 +1162,6 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
               m_sProfitDescription += ",x,cont.stop";
               ExitPosition( bar ); // provides completion summary
               //ExitShort( bar );
-            }
-            else {
-              if ( ask < ( m_dblStopActiveActual - m_dblStopActiveDelta ) ) {
-                m_dblStopActiveActual = ask + m_dblStopActiveDelta;
-              }
             }
           }
           break;
