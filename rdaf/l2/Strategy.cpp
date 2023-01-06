@@ -223,7 +223,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   //m_rHiPass[0].Init( m_config.nPeriodWidth, ou::Colour::Coral, "HP1" );
   //m_rHiPass[1].Init( m_config.nPeriodWidth, ou::Colour::Gold, "HP2" );
-  m_rHiPass[2].Init( m_config.nMA1Periods, ou::Colour::Brown, "HP3" );
+  m_rHiPass[2].Init( m_config.nPeriodWidth, ou::Colour::Brown, "HP3" );
   //m_rHiPass[3].Init( m_config.nMA1Periods, ou::Colour::Green, "HP4" );
 
   // moving average
@@ -616,7 +616,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
     m_ceMA_Slope.Append( dt, m_dblMA_Slope_current );
   }
 
-  m_rHiPass[2].Update( dt, ma1 );
+  // m_rHiPass[2].Update( dt, ma1 ); // not here, no regular interval
 
   // ehlers cybernetic analysis for stocks & futures page 7
   //double k_fisher = 0.5 * std::log( ( 1.0 + k_normalized ) / ( 1.0 - k_normalized ) );
@@ -927,11 +927,11 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     }
   }
 
-  // Hi Pass - may need to change to continuous rather than at one second intervals
+  // Hi Pass - at one second intervals - continuous won't work with irregular intervals (ie quote/trade)
 
   //m_rHiPass[0].Update( dt, ma0 );
   //m_rHiPass[1].Update( dt, ma1 );
-  //m_rHiPass[2].Update( dt, ma1 );
+  m_rHiPass[2].Update( dt, ma1 );
   //m_rHiPass[3].Update( dt, ma1 );
 
   EStateDesired stateDesired( EStateDesired::Continue );
