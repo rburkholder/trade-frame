@@ -309,40 +309,47 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
   // scale the ratio to 100, then use integers for the math
   // m_dblViewPortRatio should probably be maintained as int instead then
 
-  boost::posix_time::time_duration tdNewWidth;
-  boost::posix_time::time_duration tdDelta;
-  boost::posix_time::time_duration tdDeltaLeft;
-  boost::posix_time::time_duration tdDeltaRight;
+  boost::posix_time::time_duration tdDeltaOld;
+  boost::posix_time::time_duration tdDeltaNew;
+  boost::posix_time::time_duration tdCursorOld; // offset from left
+  boost::posix_time::time_duration tdCursorNew; // offset from left
+  boost::posix_time::ptime dtCursor;
 
   if ( m_vpDataViewVisual.HasBoth() ) {
 
     //assert( m_vpDataViewVisual.dtBegin >= m_vpDataViewExtents.dtBegin );
     //assert( m_vpDataViewVisual.dtEnd <= m_vpDataViewExtents.dtEnd );
 
+    assert ( m_vpDataViewVisual.dtBegin <= m_vpDataViewVisual.dtEnd );
+
+    tdDeltaOld = m_vpDataViewVisual.dtEnd - m_vpDataViewVisual.dtBegin;
+
+    tdCursorOld = tdDeltaOld * xX;
+    tdCursorOld /= ( xRight - xLeft );
+
+    dtCursor =  m_vpDataViewVisual.dtBegin + tdCursorOld;
+
     if ( 0 > rotation ) { // expand width
-      tdNewWidth = m_tdViewPortWidth * 12;
-      tdNewWidth /= 10;
 
-      tdDelta = tdNewWidth - m_tdViewPortWidth;
+      tdDeltaNew = tdDeltaOld * 12;
+      tdDeltaNew /= 10;
 
-      tdDeltaLeft = tdDelta * xX;
-      tdDeltaLeft /= ( xRight - xLeft );
+      tdCursorNew = tdDeltaNew * xX;
+      tdCursorNew /= ( xRight - xLeft );
 
-      tdDeltaRight = tdDelta - tdDeltaLeft;
-
-      m_vpDataViewVisual.dtBegin -= tdDeltaLeft;
-      m_vpDataViewVisual.dtEnd += tdDeltaRight;
+      m_vpDataViewVisual.dtBegin = dtCursor - tdCursorNew;
+      m_vpDataViewVisual.dtEnd   = m_vpDataViewVisual.dtBegin + tdDeltaNew;
 
       if ( m_vpDataViewVisual.dtBegin < m_vpDataViewExtents.dtBegin ) {
         m_vpDataViewVisual.dtBegin = m_vpDataViewExtents.dtBegin;
         if ( m_vpDataViewVisual.dtBegin >= m_vpDataViewVisual.dtEnd ) {
-          m_vpDataViewVisual.dtEnd = m_vpDataViewVisual.dtBegin + tdNewWidth;
+          m_vpDataViewVisual.dtEnd = m_vpDataViewVisual.dtBegin + tdDeltaNew;
         }
       }
 
       if ( m_vpDataViewVisual.dtEnd >= m_vpDataViewExtents.dtEnd ) {
         m_state = m_bSim ? EState::sim_trail : EState::live_trail;
-        m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdNewWidth, m_vpDataViewExtents.dtEnd );
+        m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdDeltaNew, m_vpDataViewExtents.dtEnd );
       }
 
       assert ( m_vpDataViewVisual.dtBegin <= m_vpDataViewVisual.dtEnd );
@@ -350,42 +357,27 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
     }
     else { // reduce width
 
+      tdDeltaNew = tdDeltaOld * 10;
+      tdDeltaNew /= 12;
+
+      if ( tdDeltaNew < tdTenSeconds ) tdDeltaNew = tdTenSeconds;
+
+      tdCursorNew = tdDeltaNew * xX;
+      tdCursorNew /= ( xRight - xLeft );
+
+      m_vpDataViewVisual.dtBegin = dtCursor - tdCursorNew;
+      m_vpDataViewVisual.dtEnd   = m_vpDataViewVisual.dtBegin + tdDeltaNew;
+
       assert ( m_vpDataViewVisual.dtBegin <= m_vpDataViewVisual.dtEnd );
 
-      tdNewWidth = m_tdViewPortWidth * 10;
-      tdNewWidth /= 12;
-
-      if ( tdNewWidth < tdTenSeconds ) tdNewWidth = tdTenSeconds;
-      if ( tdNewWidth < m_tdViewPortWidth ) {
-        tdDelta = m_tdViewPortWidth - tdNewWidth;
-
-        tdDeltaLeft = tdDelta * xX;
-        tdDeltaLeft /= ( xRight - xLeft );
-
-        assert( tdDeltaLeft < tdDelta );
-        tdDeltaRight = tdDelta - tdDeltaLeft;
-
-        auto diff = m_vpDataViewVisual.dtEnd - m_vpDataViewVisual.dtBegin;
-        if ( diff > tdDelta ) {
-          m_vpDataViewVisual.dtBegin += tdDeltaLeft;
-          m_vpDataViewVisual.dtEnd -= tdDeltaRight;
-        }
-        else {
-          tdNewWidth = diff;
-        }
-
-        assert ( m_vpDataViewVisual.dtBegin <= m_vpDataViewVisual.dtEnd );
-
-        if ( m_vpDataViewVisual.dtEnd < m_vpDataViewExtents.dtEnd ) {
-          m_state = m_bSim ? EState::sim_review : EState::live_review;
-          //m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdNewWidth, m_vpDataViewExtents.dtEnd );
-        }
+      if ( m_vpDataViewVisual.dtEnd < m_vpDataViewExtents.dtEnd ) {
+        m_state = m_bSim ? EState::sim_review : EState::live_review;
+        //m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdNewWidth, m_vpDataViewExtents.dtEnd );
       }
 
-      assert ( m_vpDataViewVisual.dtBegin <= m_vpDataViewVisual.dtEnd );
     }
 
-    m_tdViewPortWidth = tdNewWidth;
+    m_tdViewPortWidth = tdDeltaNew;
 
     DrawChart();
   }
