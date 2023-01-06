@@ -71,8 +71,9 @@ Strategy::Strategy(
 , m_ceShortEntry( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
 //, m_ceShortFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red )
 , m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
-, m_dblMA1_Slope {}
+, m_dblMA_Slope_previous {}, m_dblMA_Slope_current {}
 , m_bfQuotes01Sec( 1 )
+, m_stats( m_ma, boost::posix_time::time_duration( 0, 0, 3 ) )
 {
 //  assert( m_pFile );
 //  assert( m_pFileUtility );
@@ -96,11 +97,11 @@ Strategy::Strategy(
 
   //m_ceSkewness.SetName( "Skew" );
 
-  //m_ceRelativeMA1.SetName( "MA1" );
-  //m_ceRelativeMA2.SetName( "MA2" );
-  //m_ceRelativeMA3.SetName( "MA3" );
+  m_ceRelativeMA1.SetName( "MA1" );
+  m_ceRelativeMA2.SetName( "MA2" );
+  m_ceRelativeMA3.SetName( "MA3" );
 
-  m_ceMA1_Slope.SetName( "MA1 Slope" );
+  m_ceMA_Slope.SetName( "MA Slope" );
 
   m_ceProfitUnRealized.SetName( "UnRealized" );
   m_ceProfitRealized.SetName( "Realized" );
@@ -152,22 +153,24 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
   m_cdv.Add( EChartSlot::Cycle, &m_cemZero );
-  m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[0].m_ceEhlersHiPassFilter );
-  m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[1].m_ceEhlersHiPassFilter );
+  //m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[0].m_ceEhlersHiPassFilter );
+  //m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[1].m_ceEhlersHiPassFilter );
   m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[2].m_ceEhlersHiPassFilter );
-  m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[3].m_ceEhlersHiPassFilter );
+  //m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[3].m_ceEhlersHiPassFilter );
 
   m_cdv.Add( EChartSlot::CycleSlope, &m_cemZero );
-  m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[0].m_ceEhlersHiPassFilterSlope );
-  m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[1].m_ceEhlersHiPassFilterSlope );
+  //m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[0].m_ceEhlersHiPassFilterSlope );
+  //m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[1].m_ceEhlersHiPassFilterSlope );
   m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[2].m_ceEhlersHiPassFilterSlope );
-  m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[3].m_ceEhlersHiPassFilterSlope );
+  //m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[3].m_ceEhlersHiPassFilterSlope );
+
+  m_cdv.Add( EChartSlot::MASlope, &m_cemZero );
+  m_cdv.Add( EChartSlot::MASlope, &m_ceMA_Slope );
 
   m_cdv.Add( EChartSlot::MA, &m_cemZero );
-  //m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA1 );
-  //m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA2 );
-  //m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA3 );
-  m_cdv.Add( EChartSlot::MA, &m_ceMA1_Slope );
+  m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA1 );
+  m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA2 );
+  m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA3 );
 
   m_cdv.Add( EChartSlot::ImbalanceMean, &m_cemZero );
 
@@ -215,10 +218,10 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   assert( 0 < m_config.nPeriodWidth );
   time_duration td = time_duration( 0, 0, m_config.nPeriodWidth );
 
-  m_rHiPass[0].Init( m_config.nPeriodWidth, ou::Colour::Brown, "HP1" );
-  m_rHiPass[1].Init( m_config.nPeriodWidth, ou::Colour::Coral, "HP2" );
-  m_rHiPass[2].Init( m_config.nMA1Periods, ou::Colour::Gold, "HP3" );
-  m_rHiPass[3].Init( m_config.nMA1Periods, ou::Colour::Green, "HP4" );
+  //m_rHiPass[0].Init( m_config.nPeriodWidth, ou::Colour::Coral, "HP1" );
+  //m_rHiPass[1].Init( m_config.nPeriodWidth, ou::Colour::Gold, "HP2" );
+  m_rHiPass[2].Init( m_config.nMA1Periods, ou::Colour::Brown, "HP3" );
+  //m_rHiPass[3].Init( m_config.nMA1Periods, ou::Colour::Green, "HP4" );
 
   // moving average
 
@@ -239,11 +242,11 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_quotes, vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
   m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_quotes, vMAPeriods[2], td, ou::Colour::Gold,  "ma3" ) );
 
-  //m_ceRelativeMA1.SetColour( ou::Colour::Green );
-  //m_ceRelativeMA2.SetColour( ou::Colour::Brown );
-  //m_ceRelativeMA3.SetColour( ou::Colour::Coral );
+  m_ceRelativeMA1.SetColour( ou::Colour::Green );
+  m_ceRelativeMA2.SetColour( ou::Colour::Brown );
+  m_ceRelativeMA3.SetColour( ou::Colour::Coral );
 
-  m_ceMA1_Slope.SetColour( ou::Colour::Green );
+  m_ceMA_Slope.SetColour( ou::Colour::Green );
 
   SetupChart(); // comes after stochastic initialization
 
@@ -596,12 +599,16 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
     ma.Update( dt );
   }
 
-  const double ma0( m_vMovingAverage[0].Latest() );
-  double diff = ma0 - m_dblMA1_Slope;
-  if ( 0.0 != diff ) {
-    m_ceMA1_Slope.Append( dt, diff );
-    m_dblMA1_Slope = ma0;
+  //const double ma0( m_vMovingAverage[0].Latest() );
+  const double ma1( m_vMovingAverage[1].Latest() );
+  m_ma.Append( ou::tf::Price( dt, ma1 ) );
+  m_dblMA_Slope_current = m_stats.Slope();
+  static const double limit( 0.005 );
+  if ( ( limit > m_dblMA_Slope_current ) && ( -limit < m_dblMA_Slope_current ) ) {
+    m_ceMA_Slope.Append( dt, m_dblMA_Slope_current );
   }
+
+  m_rHiPass[2].Update( dt, ma1 );
 
   // ehlers cybernetic analysis for stocks & futures page 7
   //double k_fisher = 0.5 * std::log( ( 1.0 + k_normalized ) / ( 1.0 - k_normalized ) );
@@ -694,8 +701,8 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   m_ceCommissionsPaid.Append( bar.DateTime(), dblCommissionsPaid );
   m_ceProfit.Append( bar.DateTime(), dblTotal );
 
-  if ( m_dblUnRealized > m_dblProfitMax )m_dblProfitMax = m_dblUnRealized;
-  if ( m_dblUnRealized < m_dblProfitMin )m_dblProfitMin = m_dblUnRealized;
+  if ( m_dblUnRealized > m_dblProfitMax ) m_dblProfitMax = m_dblUnRealized;
+  if ( m_dblUnRealized < m_dblProfitMin ) m_dblProfitMin = m_dblUnRealized;
 
   TimeTick( bar );
 }
@@ -719,8 +726,8 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 void Strategy::EnterLong( const ou::tf::Bar& bar ) { // limit orders, in real, will need to be normalized
   //assert( nullptr == m_pOrderPending.get() );
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  //m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
   pOrder->SetSignalPrice( bar.Close() );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
@@ -734,8 +741,8 @@ void Strategy::EnterLong( const ou::tf::Bar& bar ) { // limit orders, in real, w
 void Strategy::EnterShort( const ou::tf::Bar& bar ) { // limit orders, in real, will need to be normalized
   //assert( nullptr == m_pOrderPending.get() );
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  //m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
   pOrder->SetSignalPrice( bar.Close() );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
@@ -748,8 +755,8 @@ void Strategy::EnterShort( const ou::tf::Bar& bar ) { // limit orders, in real, 
 
 void Strategy::ExitLong( const ou::tf::Bar& bar ) {
   //assert( nullptr == m_pOrderPending.get() );
-  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
   pOrder->SetSignalPrice( bar.Close() );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
@@ -762,8 +769,8 @@ void Strategy::ExitLong( const ou::tf::Bar& bar ) {
 
 void Strategy::ExitShort( const ou::tf::Bar& bar ) {
   //assert( nullptr == m_pOrderPending.get() );
-  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
   pOrder->SetSignalPrice( bar.Close() );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
@@ -848,9 +855,9 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   const double ma2( m_vMovingAverage[2].Latest() );
   const double ma3( m_vMovingAverage[3].Latest() );
 
-  //m_ceRelativeMA1.Append( dt, ma0 - ma3 );
-  //m_ceRelativeMA2.Append( dt, ma1 - ma3 );
-  //m_ceRelativeMA3.Append( dt, ma2 - ma3 );
+  m_ceRelativeMA1.Append( dt, ma0 - ma3 );
+  m_ceRelativeMA2.Append( dt, ma1 - ma3 );
+  m_ceRelativeMA3.Append( dt, ma2 - ma3 );
 
   const bool bMa0AboveMa1( ma0 > ma1 );
   const bool bMa1AboveMa2( ma1 > ma2 );
@@ -895,14 +902,14 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   // Hi Pass - may need to change to continuous rather than at one second intervals
 
-  m_rHiPass[0].Update( dt, ma0 );
-  m_rHiPass[1].Update( dt, ma1 );
-  m_rHiPass[2].Update( dt, ma0 );
-  m_rHiPass[3].Update( dt, ma1 );
+  //m_rHiPass[0].Update( dt, ma0 );
+  //m_rHiPass[1].Update( dt, ma1 );
+  //m_rHiPass[2].Update( dt, ma1 );
+  //m_rHiPass[3].Update( dt, ma1 );
 
   EStateDesired stateDesired( EStateDesired::Continue );
 
-  HiPass& hp( m_rHiPass[3] );
+  HiPass& hp( m_rHiPass[2] );
 
   // ==
 
@@ -938,21 +945,61 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     //else {
       //if ( bMaRising && bHPSlopeUpCross ) {
       if ( bHPSlopeUpCross ) {
-        stateDesired = EStateDesired::GoLong;
+//        stateDesired = EStateDesired::GoLong;
       }
       else {
         //if ( bMaFalling && bHPSlopeDnCross ) {
         if ( bHPSlopeDnCross ) {
-          stateDesired = EStateDesired::GoShort;
+//          stateDesired = EStateDesired::GoShort;
         }
         else {
           if ( bHPUpCross || bHPDnCross ) {
-            stateDesired = EStateDesired::Cancel;
+//            stateDesired = EStateDesired::Cancel;
           }
         }
       }
     //}
   //}
+
+  const bool bSlopePrvAboveZero( 0.0 < m_dblMA_Slope_previous );
+  const bool bSlopePrvBelowZero( 0.0 > m_dblMA_Slope_previous );
+
+  const bool bSlopeCurAboveZero( 0.0 < m_dblMA_Slope_current );
+  const bool bSlopeCurBelowZero( 0.0 > m_dblMA_Slope_current );
+
+  const bool bSlopeRising( bSlopePrvBelowZero && bSlopeCurAboveZero );
+  const bool bSlopeFalling( bSlopePrvAboveZero && bSlopeCurBelowZero );
+
+  // TODO: perform a 'potential profit' test to determine if entering is desirable
+  //    maybe a width of moving averages - which requires some data collection
+  //    on successful vs unsuccessful
+
+  static const double stop_delta_min( 0.50 );
+
+  //if ( bMaRising && bSlopeRising ) {
+  if ( bMaRising && bSlopeCurAboveZero ) {
+    double diff = ma1 - ma3;
+    assert( 0.0 < diff );
+    if ( stop_delta_min <= diff ) {
+      m_dblStopDeltaProposed = diff;
+      stateDesired = EStateDesired::GoLong;
+    }
+  }
+  else {
+    if ( bMaFalling && bSlopeCurBelowZero ) {
+      double diff = ma3 - ma1;
+      assert( 0.0 < diff );
+      if ( stop_delta_min <= diff ) {
+        m_dblStopDeltaProposed = diff;
+        stateDesired = EStateDesired::GoShort;
+      }
+    }
+    else {
+      // four seconds perform a cancel
+    }
+  }
+
+  m_dblMA_Slope_previous = m_dblMA_Slope_current;
 
   // 1a) filter on moving average to reduce churn
   // 1b) lock it in by trailing a stop, based upon one of the ma
@@ -965,13 +1012,21 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     case EStateTrade::Search:
       switch ( stateDesired ) {
         case EStateDesired::GoLong:
-          BOOST_LOG_TRIVIAL(info) << dt << " Search->GoLong";
+
+          m_dblStopActiveDelta = m_dblStopDeltaProposed;
+          m_dblStopActiveActual = m_quote.Ask() - m_dblStopActiveDelta;
+
+          BOOST_LOG_TRIVIAL(info) << dt << " Search->GoLong," << m_dblStopActiveActual << "," << m_dblStopActiveDelta;
           m_bUseMARising = ( EMovingAverage::Rising == currentMovingAverage );
           m_sProfitDescription = "l,srch";
           EnterLong( bar );
           break;
         case EStateDesired::GoShort:
-          BOOST_LOG_TRIVIAL(info) << dt << " Search->GoShort";
+
+          m_dblStopActiveDelta = m_dblStopDeltaProposed;
+          m_dblStopActiveActual = m_quote.Bid() + m_dblStopActiveDelta;
+
+          BOOST_LOG_TRIVIAL(info) << dt << " Search->GoShort," << m_dblStopActiveActual << "," << m_dblStopActiveDelta;
           m_bUseMAFalling = ( EMovingAverage::Falling == currentMovingAverage );
           m_sProfitDescription = "s,srch";
           EnterShort( bar );
@@ -1001,12 +1056,6 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         case EStateDesired::GoShort:
           {
             bool bGoShort( true );
-            //if ( m_bUseMARising ) {
-            //  if ( EMovingAverage::Rising == currentMovingAverage ) {
-            //    BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal - still strong long";
-            //    bGoShort = false;
-            //  }
-            //}
             if ( bGoShort ) {
               BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->GoShort";
               if ( EStateDesired::GoShort == stateDesired ) {
@@ -1024,32 +1073,26 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           ExitLong( bar );
           break;
         case EStateDesired::GoLong:
-          BOOST_LOG_TRIVIAL(info)
-            << dt << " LongExitSignal->GoLong:"
-            << (int)stateDesired
-            ; // already long
+          //BOOST_LOG_TRIVIAL(info)
+          //  << dt << " LongExitSignal->GoLong staying: "
+          //  << (int)stateDesired
+          //  ; // already long
           break;
         case EStateDesired::Continue:
-          //if ( -1.0 >= m_dblUnRealized ) { // ehlers - use time instead?
-          //  BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue(Stop)";
-          //  m_sProfitDescription += ",x,stop";
-          //  ExitPosition( bar );
-          //}
-          //else {
-            if ( m_bUseMARising ) {
-              if ( EMovingAverage::Rising == currentMovingAverage ) {
-                //BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue";
-              }
-              else {
-                BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue(Exit)";
-                m_sProfitDescription += ",x,cont.exit";
-                ExitPosition( bar );
-                //m_bUseMAFalling = EMovingAverage::Falling == currentMovingAverage;
-                //m_sProfitDescription = "s,cont";
-                //EnterShort( bar );
+          {
+            const double bid = m_quote.Bid();
+            if ( bid <= m_dblStopActiveActual ) {
+              BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Continue(stop out)";
+              m_sProfitDescription += ",x,cont.stop";
+              ExitPosition( bar ); // provides completion summary
+              //ExitLong( bar );
+            }
+            else {
+              if ( bid > ( m_dblStopActiveActual + m_dblStopActiveDelta ) ) {
+                m_dblStopActiveActual = bid - m_dblStopActiveDelta;
               }
             }
-          //}
+          }
           break;
         case EStateDesired::Cancel:
           BOOST_LOG_TRIVIAL(info) << dt << " LongExitSignal->Cancel - nothing to cancel";
@@ -1075,12 +1118,6 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         case EStateDesired::GoLong:
           {
             bool bGoLong( true );
-            //if ( m_bUseMAFalling ) {
-            //  if ( EMovingAverage::Falling == currentMovingAverage ) {
-            //    BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal - still strong short";
-            //    bGoLong = false;
-            //  }
-            //}
             if ( bGoLong ) {
               BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->GoLong";
               if ( EStateDesired::GoLong == stateDesired ) {
@@ -1098,32 +1135,26 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           ExitShort( bar );
           break;
         case EStateDesired::GoShort:
-          BOOST_LOG_TRIVIAL(info)
-            << dt << " ShortExitSignal->GoShort:"
-            << (int)stateDesired
-            ; // already short
+          //BOOST_LOG_TRIVIAL(info)
+          //  << dt << " ShortExitSignal->GoShort staying: "
+          //  << (int)stateDesired
+          //  ; // already short
           break;
         case EStateDesired::Continue:
-          //if ( -1.0 >= m_dblUnRealized ) { // ehlers - use time instead?
-          //  BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue(Stop)";
-          //  m_sProfitDescription += ",x,stop";
-          //  ExitPosition( bar );
-          //}
-          //else {
-            if ( m_bUseMAFalling ) {
-              if ( EMovingAverage::Falling == currentMovingAverage ) {
-                //BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue";
-              }
-              else {
-                BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue(Exit)";
-                m_sProfitDescription += ",x,cont.exit";
-                ExitPosition( bar );
-                //m_bUseMARising = EMovingAverage::Rising == currentMovingAverage;
-                //m_sProfitDescription = "l,cont";
-                //EnterLong( bar );
+          {
+            const double ask = m_quote.Ask();
+            if ( ask >= m_dblStopActiveActual ) {
+              BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Continue(stop out)";
+              m_sProfitDescription += ",x,cont.stop";
+              ExitPosition( bar ); // provides completion summary
+              //ExitShort( bar );
+            }
+            else {
+              if ( ask < ( m_dblStopActiveActual - m_dblStopActiveDelta ) ) {
+                m_dblStopActiveActual = ask + m_dblStopActiveDelta;
               }
             }
-          //}
+          }
           break;
         case EStateDesired::Cancel:
           BOOST_LOG_TRIVIAL(info) << dt << " ShortExitSignal->Cancel - nothing to cancel";
@@ -1145,8 +1176,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       // do nothing based upon config file
       break;
     case EStateTrade::Init:
-      // market open statistics management here
-      if ( ( 0.0 != hp.m_dblHPF_Slope1 ) && ( 0.0 != hp.m_dblHPF_Slope0 ) ) {
+      if ( ( EStateDesired::GoLong == stateDesired ) || ( EStateDesired::GoShort == stateDesired ) ) {
         m_stateTrade = EStateTrade::Search;
       }
       break;
@@ -1189,6 +1219,8 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
   ou::tf::Order& order_( const_cast<ou::tf::Order&>( order ) );
   order_.OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   order_.OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+
+  //m_dblStopActiveActual = order.GetAverageFillPrice(); // needs adjustment with delta
 
   switch ( m_stateTrade ) {
     case EStateTrade::LongSubmitted:
