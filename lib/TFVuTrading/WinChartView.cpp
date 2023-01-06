@@ -61,7 +61,6 @@ void WinChartView::Init() {
   m_bInDrawChart = false;
   m_pChartDataView = nullptr;
 
-  //m_dblViewPortRatio = 1.0;
   m_bBeginExtentFound = false;
 
   m_tdViewPortWidth = boost::posix_time::time_duration( 0, 10, 0 );  // default viewport width to 10 minutes
@@ -304,10 +303,8 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
   int xLeft, xX, xRight;
   m_chartMaster.GetX( xLeft, xX, xRight );
 
-  // use the view port ratio to determine how much to expand on left vs right side
-  // if right size is beyond extent, shift all left to fit (same for left side)
-  // scale the ratio to 100, then use integers for the math
-  // m_dblViewPortRatio should probably be maintained as int instead then
+  // zoom in/out around cursor
+  // TODO: use this to provide date/time on cursor
 
   boost::posix_time::time_duration tdDeltaOld;
   boost::posix_time::time_duration tdDeltaNew;
@@ -372,7 +369,6 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
 
       if ( m_vpDataViewVisual.dtEnd < m_vpDataViewExtents.dtEnd ) {
         m_state = m_bSim ? EState::sim_review : EState::live_review;
-        //m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdNewWidth, m_vpDataViewExtents.dtEnd );
       }
 
     }
