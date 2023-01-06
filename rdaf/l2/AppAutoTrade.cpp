@@ -306,6 +306,9 @@ bool AppAutoTrade::OnInit() {
   m_dvChart.Add( 0, &m_ceTotal );
   m_dvChart.Add( 2, &m_ceCommissionsPaid );
 
+  if ( m_choices.bStartSimulator ) { // set sim mode prior to assigning data view
+    m_pWinChartView->SetSim( true );
+  }
   m_pWinChartView->SetChartDataView( &m_dvChart );
 
   TreeItem::Bind( m_pFrameMain, m_treeSymbols );
@@ -317,6 +320,9 @@ bool AppAutoTrade::OnInit() {
   m_pTreeItemPortfolio = m_pTreeItemRoot->AppendChild(
     sMenuItemPortfolio,
     [this]( TreeItem* pTreeItem ){
+      if ( m_choices.bStartSimulator ) { // set sim mode prior to assigning data view
+        m_pWinChartView->SetSim( true );
+      }
       m_pWinChartView->SetChartDataView( &m_dvChart );
     }
   );
@@ -348,10 +354,10 @@ bool AppAutoTrade::OnInit() {
       [this,sSymbol]( TreeItem* pTreeItem ){
         mapStrategy_t::iterator iter = m_mapStrategy.find( sSymbol );
         assert( m_mapStrategy.end() != iter );
-        m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
-        if ( m_choices.bStartSimulator ) {
+        if ( m_choices.bStartSimulator ) { // set sim mode prior to assigning data view
           m_pWinChartView->SetSim( true );
         }
+        m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
       }
     );
 
