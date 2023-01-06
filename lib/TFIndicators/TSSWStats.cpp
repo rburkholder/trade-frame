@@ -135,13 +135,13 @@ TSSWStatsPrice::~TSSWStatsPrice() {
 
 void TSSWStatsPrice::Add( const Price& price ) {
   time_duration dur = price.DateTime() - m_dtZero;
-  double dif = (double) dur.total_seconds();
+  double dif = (double) dur.total_milliseconds();
   m_stats.Add( dif, price.Value() );
 }
 
 void TSSWStatsPrice::Expire( const Price& price ) {
   time_duration dur = price.DateTime() - m_dtZero;
-  double dif = (double) dur.total_seconds();
+  double dif = (double) dur.total_milliseconds();
   m_stats.Remove( dif, price.Value() );
 }
 
