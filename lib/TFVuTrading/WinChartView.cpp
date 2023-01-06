@@ -151,6 +151,9 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
 
   if ( m_vpDataViewVisual.HasBoth() ) {
 
+    //assert( m_vpDataViewVisual.dtBegin >= m_vpDataViewExtents.dtBegin );
+    //assert( m_vpDataViewVisual.dtEnd <= m_vpDataViewExtents.dtEnd );
+
     switch ( m_stateMouse ) {
       case EMouse::Down:
         if ( event.Dragging() ) {
@@ -179,24 +182,36 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
               m_vpDataViewVisual.dtBegin += tdMovement;
               m_vpDataViewVisual.dtEnd += tdMovement;
 
+              if ( m_vpDataViewVisual.dtBegin < m_vpDataViewExtents.dtBegin ) {
+                m_vpDataViewVisual.dtBegin = m_vpDataViewExtents.dtBegin;
+                if ( m_vpDataViewVisual.dtBegin >= m_vpDataViewVisual.dtEnd ) {
+                  m_vpDataViewVisual.dtEnd = m_vpDataViewVisual.dtBegin + m_tdViewPortWidth;
+                }
+              }
+
               if ( m_vpDataViewVisual.dtEnd >= m_vpDataViewExtents.dtEnd ) {
                 m_vpDataViewVisual.dtEnd = m_vpDataViewExtents.dtEnd;
                 m_state = m_bSim ? EState::sim_trail : EState::live_trail;
               }
 
-              if ( m_vpDataViewVisual.dtBegin < m_vpDataViewExtents.dtBegin ) {
-                m_vpDataViewVisual.dtBegin = m_vpDataViewVisual.dtBegin;
-              }
 
             }
             else {
               m_vpDataViewVisual.dtBegin -= tdMovement;
               m_vpDataViewVisual.dtEnd -= tdMovement;
 
+              if ( m_vpDataViewVisual.dtBegin < m_vpDataViewExtents.dtBegin ) {
+                m_vpDataViewVisual.dtBegin = m_vpDataViewExtents.dtBegin;
+                if ( m_vpDataViewVisual.dtBegin >= m_vpDataViewVisual.dtEnd ) {
+                  m_vpDataViewVisual.dtEnd = m_vpDataViewVisual.dtBegin + m_tdViewPortWidth;
+                }
+              }
+
               if ( m_vpDataViewVisual.dtEnd < m_vpDataViewExtents.dtEnd ) {
                 m_state = m_bSim ? EState::sim_review : EState::live_review;
                 //m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdNewWidth, m_vpDataViewExtents.dtEnd );
               }
+
             }
           }
 
@@ -210,7 +225,7 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
 
   }
   else {
-    //assert( false );  // will need to check structures and fix
+    assert( true );  // test point
   }
 
   {
@@ -294,7 +309,11 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
   boost::posix_time::time_duration tdDeltaRight;
 
   if ( m_vpDataViewVisual.HasBoth() ) {
-    if ( 0 > rotation ) {
+
+    //assert( m_vpDataViewVisual.dtBegin >= m_vpDataViewExtents.dtBegin );
+    //assert( m_vpDataViewVisual.dtEnd <= m_vpDataViewExtents.dtEnd );
+
+    if ( 0 > rotation ) { // expand width
       tdNewWidth = m_tdViewPortWidth * 12;
       tdNewWidth /= 10;
 
@@ -308,12 +327,20 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
       m_vpDataViewVisual.dtBegin -= tdDeltaLeft;
       m_vpDataViewVisual.dtEnd += tdDeltaRight;
 
+      if ( m_vpDataViewVisual.dtBegin < m_vpDataViewExtents.dtBegin ) {
+        m_vpDataViewVisual.dtBegin = m_vpDataViewExtents.dtBegin;
+        if ( m_vpDataViewVisual.dtBegin >= m_vpDataViewVisual.dtEnd ) {
+          m_vpDataViewVisual.dtEnd = m_vpDataViewVisual.dtBegin + tdNewWidth;
+        }
+      }
+
       if ( m_vpDataViewVisual.dtEnd >= m_vpDataViewExtents.dtEnd ) {
         m_state = m_bSim ? EState::sim_trail : EState::live_trail;
         m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdNewWidth, m_vpDataViewExtents.dtEnd );
       }
+
     }
-    else {
+    else { // reduce width
       tdNewWidth = m_tdViewPortWidth * 10;
       tdNewWidth /= 12;
 
@@ -338,6 +365,9 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
     m_tdViewPortWidth = tdNewWidth;
 
     DrawChart();
+  }
+  else {
+    assert( true ); // test point
   }
 
   event.Skip();
