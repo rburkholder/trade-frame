@@ -99,15 +99,15 @@ target_link_libraries(
       wx_baseu-3.1
       pthread
 # alpaca components:
-      crypto
-      ssl
+#      crypto
+#      ssl
 # rdaf components:
-      Core
-      Gpad
-      Hist
-      Rint
-      Thread
-      Tree
-      RIO
+#      Core
+#      Gpad
+#      Hist
+#      Rint
+#      Thread
+#      Tree
+#      RIO
   )
 

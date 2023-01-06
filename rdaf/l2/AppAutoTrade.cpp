@@ -21,8 +21,6 @@
 
 #define BOOST_FILESYSTEM_NO_DEPRECATED
 
-#define RDAF false
-
 #include <sstream>
 
 #include <boost/log/trivial.hpp>
@@ -42,9 +40,11 @@
 #include <wx/sizer.h>
 #include <wx/treectrl.h>
 
+#if RDAF
 #include <rdaf/TRint.h>
 #include <rdaf/TROOT.h>
 #include <rdaf/TFile.h>
+#endif
 
 #include <TFTrading/Watch.h>
 #include <TFTrading/Position.h>
@@ -329,9 +329,9 @@ bool AppAutoTrade::OnInit() {
 
   // NOTE: during simulation, this subsystem is going to have to be temporary
   //   otherwise, the same data is read in multiple times when the simulation is run multiple times
-  if ( RDAF ) {
+  #if RDAF
     StartRdaf( sDirectory + m_sTSDataStreamStarted );
-  }
+  #endif
 
   // construct strategy for each symbol name in the configuration file
   for ( ou::tf::config::choices_t::mapInstance_t::value_type& vt: m_choices.mapInstance ) {
@@ -456,11 +456,11 @@ void AppAutoTrade::StartRdaf( const std::string& sFileName ) {
 
   int argc {};
   char** argv = nullptr;
-
+#if RDAF
   m_prdafApp = std::make_unique<TRint>( "rdaf_at", &argc, argv );
   ROOT::EnableImplicitMT();
   ROOT::EnableThreadSafety();
-
+#endif
   namespace fs = boost::filesystem;
   namespace algo = boost::algorithm;
   if ( fs::is_directory( sDirectory ) ) {
@@ -479,16 +479,18 @@ void AppAutoTrade::StartRdaf( const std::string& sFileName ) {
           ptime dt( boost::posix_time::from_iso_extended_string( datetime ) );
           if ( ( m_choices.dtLower <= dt ) && ( m_choices.dtUpper > dt ) ) {
             const std::string sFileName( sDirectory + '/' + datetime + ".root" );
-//            TFile* pFile = new TFile( sFileName.c_str(), "READ" );
-//            if ( nullptr != pFile ) {
+#if RDAF
+            TFile* pFile = new TFile( sFileName.c_str(), "READ" );
+            if ( nullptr != pFile ) {
               // run a preliminary test of the files
-//              if ( pFile->IsOpen() ) {
+              if ( pFile->IsOpen() ) {
                 //std::cout << "found " << sFileName << std::endl;
-//                m_vRdafFiles.push_back( sFileName );
-//                pFile->Close();
-//              }
-//              delete pFile;
-//            }
+                m_vRdafFiles.push_back( sFileName );
+                pFile->Close();
+              }
+              delete pFile;
+            }
+#endif
           }
         }
       }
@@ -496,11 +498,13 @@ void AppAutoTrade::StartRdaf( const std::string& sFileName ) {
   }
 
   // open file after directory scan, so it is not included in the list
-//  m_pFile = std::make_shared<TFile>(
-//    ( sFileName + ".root" ).c_str(),
-//    "RECREATE",
-//    "tradeframe rdaf/at quotes, trades & histogram"
-//  );
+#if RDAF
+  m_pFile = std::make_shared<TFile>(
+    ( sFileName + ".root" ).c_str(),
+    "RECREATE",
+    "tradeframe rdaf/at quotes, trades & histogram"
+  );
+#endif
 
 //  UpdateUtilityFile();  // re-open what exists
 

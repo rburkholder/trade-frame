@@ -19,6 +19,12 @@
  * Created: December 9, 2022  16:18:19
  */
 
+#pragma once
+
+#ifndef RDAF
+#define RDAF false
+#endif
+
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 

@@ -21,6 +21,10 @@
 
 #pragma once
 
+#ifndef RDAF
+#define RDAF false
+#endif
+
 #include <string>
 #include <memory>
 
@@ -47,8 +51,10 @@
 
 #include "ConfigParser.hpp"
 
+#if RDAF
 class TRint;
-//class TFile;
+class TFile;
+#endif
 
 class Strategy;
 class FrameMain;
@@ -128,12 +134,14 @@ private:
   using mapStrategy_t = std::map<std::string,pStrategy_t>;
   mapStrategy_t m_mapStrategy;
 
+#if RDAF
   std::unique_ptr<TRint> m_prdafApp;
-  //std::shared_ptr<TFile> m_pFile; // primary timeseries
-  //std::shared_ptr<TFile> m_pFileUtility;  // scratch pad use
+  std::shared_ptr<TFile> m_pFile; // primary timeseries
+  std::shared_ptr<TFile> m_pFileUtility;  // scratch pad use
 
-  //using vRdafFiles_t = std::vector<std::string>;
-  //vRdafFiles_t m_vRdafFiles;
+  using vRdafFiles_t = std::vector<std::string>;
+  vRdafFiles_t m_vRdafFiles;
+#endif
 
   void StartRdaf( const std::string& sFilePrefix );
 

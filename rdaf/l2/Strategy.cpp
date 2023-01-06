@@ -32,9 +32,12 @@
 #include <boost/lexical_cast.hpp>
 
 #include <cmath>
+
+#if RDAF
 #include <rdaf/TH2.h>
 #include <rdaf/TTree.h>
 #include <rdaf/TFile.h>
+#endif
 
 #include <OUCharting/ChartDataView.h>
 
@@ -250,7 +253,9 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   SetupChart(); // comes after stochastic initialization
 
-  //InitRdaf();
+#if RDAF
+  InitRdaf();
+#endif
 
   pWatch->RecordSeries( false ); // use Collector for keeping data
   pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
@@ -478,7 +483,7 @@ void Strategy::Imbalance( const ou::tf::Depth& depth ) {
 }
 
 void Strategy::LoadHistory( TClass* tc ) {
-
+#if RDAF
   BOOST_LOG_TRIVIAL(info) << "  load: " << tc->GetName();
 
   if ( 0 == strcmp( ( m_config.sSymbol_IQFeed + "_quotes" ).c_str(), tc->GetName() ) ) {
@@ -492,6 +497,7 @@ void Strategy::LoadHistory( TClass* tc ) {
   if ( 0 == strcmp( ( m_config.sSymbol_IQFeed + "_h1" ).c_str(), tc->GetName() ) ) {
     TH2D* pH1 = dynamic_cast<TH2D*>( tc );
   }
+#endif
 }
 
 void Strategy::Clear() {
@@ -522,7 +528,7 @@ void Strategy::Clear() {
 }
 
 void Strategy::InitRdaf() {
-/*
+#if RDAF
   pWatch_t pWatch = m_pPosition->GetWatch();
   const std::string& sSymbol( pWatch->GetInstrumentName() );
 
@@ -563,7 +569,7 @@ void Strategy::InitRdaf() {
     BOOST_LOG_TRIVIAL(error) << "problems history";
   }
   m_pHistVolumeDemo->SetDirectory( m_pFileUtility.get() );
-*/
+#endif
 }
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
@@ -582,17 +588,19 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   m_quote = quote;
   m_quotes.Append( quote );
 
-//  if ( m_pTreeQuote ) { // wait for initialization in thread to start
-//    std::time_t nTime = boost::posix_time::to_time_t( quote.DateTime() );
+#if RDAF
+  if ( m_pTreeQuote ) { // wait for initialization in thread to start
+    std::time_t nTime = boost::posix_time::to_time_t( quote.DateTime() );
 
-//    m_branchQuote.time = (double)nTime / 1000.0;
-//    m_branchQuote.ask = quote.Ask();
-//    m_branchQuote.askvol = quote.AskSize();
-//    m_branchQuote.bid = quote.Bid();
-//    m_branchQuote.bidvol = quote.BidSize();
+    m_branchQuote.time = (double)nTime / 1000.0;
+    m_branchQuote.ask = quote.Ask();
+    m_branchQuote.askvol = quote.AskSize();
+    m_branchQuote.bid = quote.Bid();
+    m_branchQuote.bidvol = quote.BidSize();
 
-//    m_pTreeQuote->Fill();
-//  }
+    m_pTreeQuote->Fill();
+  }
+#endif
 
   // TODO: this could be performed in the class if updated each quote
   for ( vMovingAverage_t::value_type& ma: m_vMovingAverage ) {
