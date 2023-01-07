@@ -74,7 +74,7 @@ Strategy::Strategy(
 , m_ceShortEntry( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
 //, m_ceShortFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red )
 , m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
-, m_dblMA_Slope_previous {}, m_dblMA_Slope_current {}
+, m_dblMA_Slope_previous {}
 , m_dblStopDeltaProposed {}
 , m_dblStopActiveDelta {}, m_dblStopActiveActual {}
 , m_bfQuotes01Sec( 1 )
@@ -972,11 +972,13 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     //}
   //}
 
+  double dblMA_Slope_current = m_vMovingAverageSlope[0].Slope();
+
   const bool bSlopePrvAboveZero( 0.0 < m_dblMA_Slope_previous );
   const bool bSlopePrvBelowZero( 0.0 > m_dblMA_Slope_previous );
 
-  const bool bSlopeCurAboveZero( 0.0 < m_dblMA_Slope_current );
-  const bool bSlopeCurBelowZero( 0.0 > m_dblMA_Slope_current );
+  const bool bSlopeCurAboveZero( 0.0 < dblMA_Slope_current );
+  const bool bSlopeCurBelowZero( 0.0 > dblMA_Slope_current );
 
   const bool bSlopeRising( bSlopePrvBelowZero && bSlopeCurAboveZero );
   const bool bSlopeFalling( bSlopePrvAboveZero && bSlopeCurBelowZero );
@@ -1006,11 +1008,11 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       }
     }
     else {
-      // four seconds perform a cancel
+      // TODO: suggestion, four seconds perform a cancel, or from some other event
     }
   }
 
-  m_dblMA_Slope_previous = m_dblMA_Slope_current;
+  m_dblMA_Slope_previous = dblMA_Slope_current;
 
   // 1a) filter on moving average to reduce churn
   // 1b) lock it in by trailing a stop, based upon one of the ma
