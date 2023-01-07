@@ -161,10 +161,6 @@ void FeedModel::HandleQuote( const ou::tf::Quote& quote ) {
     m_pPanelTrade->OnQuote( quote );
   }
 
-  for ( vMovingAverage_t::value_type& ma: m_vMovingAverage ) {
-    ma.Update( dt );
-  }
-
 }
 
 void FeedModel::HandleTrade( const ou::tf::Trade& trade ) {

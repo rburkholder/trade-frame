@@ -29,19 +29,26 @@ MovingAverage::MovingAverage( ou::tf::Quotes& quotes, size_t nPeriods, time_dura
 {
   m_ceMA.SetName( sName );
   m_ceMA.SetColour( colour );
+  m_ema.OnUpdate.Add( MakeDelegate( this, &MovingAverage::HandleUpdate ) );
 }
 
 MovingAverage::MovingAverage( MovingAverage&& rhs )
 : m_ema(  std::move( rhs.m_ema ) )
 , m_ceMA( std::move( rhs.m_ceMA ) )
-{}
+{
+  m_ema.OnUpdate.Add( MakeDelegate( this, &MovingAverage::HandleUpdate ) );
+}
+
+MovingAverage::~MovingAverage() {
+  m_ema.OnUpdate.Remove( MakeDelegate( this, &MovingAverage::HandleUpdate ) );
+}
 
 void MovingAverage::AddToView( ou::ChartDataView& cdv, size_t slot ) {
   cdv.Add( slot, &m_ceMA );
 }
 
-void MovingAverage::Update( ptime dt ) {
-  m_ceMA.Append( dt, m_ema.GetEMA() );
+void MovingAverage::HandleUpdate( const ou::tf::Price& price ) {
+  m_ceMA.Append( price );
 }
 
 } // namespace ou

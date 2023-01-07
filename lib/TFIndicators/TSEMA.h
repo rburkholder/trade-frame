@@ -25,16 +25,19 @@ namespace tf { // TradeFrame
 namespace hf { // high frequency
 
 template<class D> // D => type derived from DatedDatum
-class TSEMA: public Prices {  // new time series built up from linked time series
+class TSEMA: public ou::tf::Prices {  // new time series built up from linked time series
 public:
 
-  TSEMA( TimeSeries<D>& series, time_duration );
-  TSEMA<D>( TimeSeries<D>& series, size_t nPeriods, time_duration tdPeriodWidth );
+  TSEMA( ou::tf::TimeSeries<D>& series, time_duration );
+  TSEMA<D>( ou::tf::TimeSeries<D>& series, size_t nPeriods, time_duration tdPeriodWidth );
   TSEMA( const TSEMA& );
   TSEMA( TSEMA&& );
   virtual ~TSEMA();
 
   double GetEMA() const { return m_dblRecentEMA; };
+
+  ou::Delegate<const ou::tf::Price&> OnUpdate;
+
 protected:
 private:
 
@@ -44,7 +47,7 @@ private:
   double m_XatTminus1;
   double m_dblRecentEMA;
 
-  double EMA( ptime t, double XatT );
+  void EMA( ptime t, double XatT );
 
   void HandleAppend( const D& datum ) {
     EMA( datum.DateTime(), GetPrice( datum ) );
@@ -61,6 +64,7 @@ private:
   double GetPrice( const Trade& trade ) const {
     return trade.Price();
   }
+
 /*
   // http://stackoverflow.com/questions/6013066/explicit-specialization-template-class-member-function-with-different-return-typ
   void HandleAppend( const D& datum ) { EMA_impl<TSEMA<D>,D>::calc( *this, datum ); };
@@ -87,8 +91,10 @@ private:
 };
 
 template<class D>
-TSEMA<D>::TSEMA( TimeSeries<D>& series, time_duration td )
-: Prices(), m_seriesSource( series ), m_tdTimeRange( td ), m_XatTminus1( 0.0 ), m_dblRecentEMA( 0.0 )
+TSEMA<D>::TSEMA( ou::tf::TimeSeries<D>& series, time_duration td )
+: Prices()
+, m_seriesSource( series )
+, m_tdTimeRange( td ), m_XatTminus1( 0.0 ), m_dblRecentEMA( 0.0 )
 {
   assert( 0 < td.total_seconds() );
   m_dblTimeRange = (double) td.total_microseconds();
@@ -96,8 +102,10 @@ TSEMA<D>::TSEMA( TimeSeries<D>& series, time_duration td )
 }
 
 template<class D>
-TSEMA<D>::TSEMA( TimeSeries<D>& series, size_t nPeriods, time_duration tdPeriodWidth )
-: Prices(), m_seriesSource( series ),  m_XatTminus1( 0.0 ), m_dblRecentEMA( 0.0 )
+TSEMA<D>::TSEMA( ou::tf::TimeSeries<D>& series, size_t nPeriods, time_duration tdPeriodWidth )
+: Prices()
+, m_seriesSource( series )
+, m_XatTminus1( 0.0 ), m_dblRecentEMA( 0.0 )
 {
   assert( 0 < nPeriods );
   assert( 0 < tdPeriodWidth.total_seconds() );
@@ -113,19 +121,27 @@ TSEMA<D>::TSEMA( TimeSeries<D>& series, size_t nPeriods, time_duration tdPeriodW
 
 template<class D>
 TSEMA<D>::TSEMA( const TSEMA<D>& rhs )
-: Prices(), m_tdTimeRange( rhs.m_tdTimeRange ), m_dblTimeRange( rhs.m_dblTimeRange ), m_seriesSource( rhs.m_seriesSource ),
-  m_XatTminus1( rhs.m_XatTminus1 ), m_dblRecentEMA( rhs.m_dblRecentEMA )
+: Prices()
+, m_seriesSource( rhs.m_seriesSource )
+, m_tdTimeRange( rhs.m_tdTimeRange )
+, m_dblTimeRange( rhs.m_dblTimeRange )
+, m_dblRecentEMA( rhs.m_dblRecentEMA )
+, m_XatTminus1( rhs.m_XatTminus1 )
 {
+  //rhs.m_seriesSource.OnAppend.Remove( MakeDelegate( &rhs, &TSEMA<D>::HandleAppend ) ); // proper but causes problems?
   m_seriesSource.OnAppend.Add( MakeDelegate( this, &TSEMA<D>::HandleAppend ) );
 }
 
 template<class D>
 TSEMA<D>::TSEMA( TSEMA<D>&& rhs )
-: Prices(), m_tdTimeRange( rhs.m_tdTimeRange ),
-  m_dblTimeRange( rhs.m_dblTimeRange ), m_seriesSource( rhs.m_seriesSource ),
-  m_XatTminus1( rhs.m_XatTminus1 ), m_dblRecentEMA( rhs.m_dblRecentEMA )
+: ou::tf::Prices()
+, m_seriesSource( rhs.m_seriesSource )
+, m_tdTimeRange( rhs.m_tdTimeRange )
+, m_dblTimeRange( rhs.m_dblTimeRange )
+, m_XatTminus1( rhs.m_XatTminus1 )
+, m_dblRecentEMA( rhs.m_dblRecentEMA )
 {
-  //m_seriesSource.OnAppend.Remove( MakeDelegate( &rhs, &TSEMA<D>::HandleAppend ) ); // proper but causes problems
+  //rhs.m_seriesSource.OnAppend.Remove( MakeDelegate( &rhs, &TSEMA<D>::HandleAppend ) ); // proper but causes problems?
   m_seriesSource.OnAppend.Add( MakeDelegate( this, &TSEMA<D>::HandleAppend ) );
 }
 
@@ -137,15 +153,15 @@ TSEMA<D>::~TSEMA() {
 // refer to paper : "Specially Weighted Movng Averages With Repeated Application of the EMA Operator"
 // Intro to HF Finance, pg 59, has further variation
 template<class D>
-double TSEMA<D>::EMA( ptime dt, double XatT ) {
+void TSEMA<D>::EMA( ptime dt, double XatT ) {
   static const time_duration tdOne( microseconds( 1 ) );
   if ( 0 == Prices::Size() ) {
     m_dblRecentEMA = XatT;
     m_XatTminus1 = XatT;
-    Prices::Append( Price( dt, XatT ) );  // initialize first element of series
+    ou::tf::Prices::Append( ou::tf::Price( dt, XatT ) );  // initialize first element of series
   }
   else {
-    const Price& prvEMA( Prices::Ago( 0 ) );
+    const Price& prvEMA( ou::tf::Prices::last() );
     ptime dtPrv = prvEMA.DateTime();
     time_duration tdDif = dt == dtPrv ? tdOne : dt - dtPrv;
     double alpha = ( (double) tdDif.total_microseconds() ) / m_dblTimeRange;
@@ -156,9 +172,11 @@ double TSEMA<D>::EMA( ptime dt, double XatT ) {
     //double v = mu;  // next point
     m_dblRecentEMA = mu * prvEMA.Value() + ( v - mu ) * m_XatTminus1 + ( 1.0 - v ) * XatT; // ema calc
     m_XatTminus1 = XatT;
-    Prices::Append( Price( dt, m_dblRecentEMA ) );
+
+    const ou::tf::Price price( dt, m_dblRecentEMA );
+    ou::tf::Prices::Append( price ); // inherited class
+    OnUpdate( price );
   }
-  return m_dblRecentEMA;
 
 }
 

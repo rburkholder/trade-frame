@@ -34,10 +34,9 @@ public:
 
   MovingAverage( Quotes& quotes, size_t nPeriods, time_duration tdPeriod, ou::Colour::EColour colour, const std::string& sName );
   MovingAverage( MovingAverage&& rhs );
+  ~MovingAverage();
 
   void AddToView( ou::ChartDataView& cdv, size_t slot );
-
-  void Update( ptime dt );
 
   double Latest() const { return m_ema.GetEMA(); }
   const std::string& Name() const { return m_ceMA.GetName(); }
@@ -45,10 +44,10 @@ public:
 protected:
 private:
 
+  ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
   ou::ChartEntryIndicator m_ceMA;
 
-  ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
-
+  void HandleUpdate( const ou::tf::Price& );
 };
 
 } // namespace ou
