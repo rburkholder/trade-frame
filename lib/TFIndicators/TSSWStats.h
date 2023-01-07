@@ -14,8 +14,8 @@
 
 #pragma once
 
-#include "TimeSeriesSlidingWindow.h"
 #include "RunningStats.h"
+#include "TimeSeriesSlidingWindow.h"
 
 // continuously updated series based upon attachment to an underlying time series.
 
@@ -25,6 +25,7 @@ namespace tf { // TradeFrame
 template<class T, class D>
 class TimeSeriesSlidingWindowStats
 : public TimeSeriesSlidingWindow<T,D> {
+  friend TimeSeriesSlidingWindow<T,D>;
 public:
 
   TimeSeriesSlidingWindowStats<T,D>( TimeSeries<D>& Series, time_duration tdWindowWidth, size_t WindowSizeCount = 0 );
@@ -52,12 +53,27 @@ public:
     m_stats.Reset();
     };
 
+  struct Results {
+    boost::posix_time::ptime dt;
+    const RunningStats::Stats& stats;
+    Results( boost::posix_time::ptime dt_, const RunningStats::Stats& stats_ )
+    : dt( dt_ ), stats( stats_ ) {}
+  };
+
+  Delegate<const Results&> OnUpdate;
+
 protected:
-//  void Add( const T &datum ) {}; // override to process elements passing into window scope
-//  void Expire( const T &datum ) {};  // override to process elements passing out of window scope
+  // void Add( const T &datum ) {}; // override to process elements passing into window scope
+  // void Expire( const T &datum ) {};  // override to process elements passing out of window scope
+
+  boost::posix_time::ptime m_dtLast;
   RunningStats m_stats;
-  void PostUpdate() { m_stats.CalcStats(); };  // CRTP based call
+
 private:
+  void PostUpdate() {   // CRTP based call
+    m_stats.CalcStats();
+    OnUpdate( Results( m_dtLast, m_stats.Get() ) );
+  };
 };
 
 // constructor

@@ -37,7 +37,8 @@ TSSWStatsTrade::~TSSWStatsTrade() {
 }
 
 void TSSWStatsTrade::Add( const Trade &trade ) {
-  time_duration dur = trade.DateTime() - m_dtZero;
+  m_dtLast = trade.DateTime();
+  time_duration dur = m_dtLast - m_dtZero;
   double dif = (double) dur.total_seconds();
   m_stats.Add( dif, trade.Price() );
 }
@@ -66,7 +67,8 @@ TSSWStatsQuote::~TSSWStatsQuote( void ) {
 }
 
 void TSSWStatsQuote::Add( const Quote &quote ) {
-  time_duration dur = quote.DateTime() - m_dtZero;
+  m_dtLast = quote.DateTime();
+  time_duration dur = m_dtLast - m_dtZero;
   double dif = (double) dur.total_seconds();
   m_stats.Add( dif, quote.Bid() );
   m_stats.Add( dif, quote.Ask() );
@@ -105,7 +107,8 @@ TSSWStatsMidQuote::~TSSWStatsMidQuote() {
 }
 
 void TSSWStatsMidQuote::Add( const Quote &quote ) {
-  time_duration dur = quote.DateTime() - m_dtZero;
+  m_dtLast = quote.DateTime();
+  time_duration dur = m_dtLast - m_dtZero;
   double dif = (double) dur.total_seconds();
   m_stats.Add( dif, quote.Midpoint() );
 }
@@ -134,7 +137,8 @@ TSSWStatsPrice::~TSSWStatsPrice() {
 }
 
 void TSSWStatsPrice::Add( const Price& price ) {
-  time_duration dur = price.DateTime() - m_dtZero;
+  m_dtLast = price.DateTime();
+  time_duration dur = m_dtLast - m_dtZero;
   double dif = (double) dur.total_milliseconds();
   m_stats.Add( dif, price.Value() );
 }
