@@ -41,11 +41,12 @@ public:
 protected:
 private:
 
-  time_duration m_tdTimeRange;
-  double m_dblTimeRange;
-  TimeSeries<D>& m_seriesSource;
   double m_XatTminus1;
+  double m_dblTimeRange;
   double m_dblRecentEMA;
+
+  time_duration m_tdTimeRange;
+  TimeSeries<D>& m_seriesSource;
 
   void EMA( ptime t, double XatT );
 
@@ -92,7 +93,7 @@ private:
 
 template<class D>
 TSEMA<D>::TSEMA( ou::tf::TimeSeries<D>& series, time_duration td )
-: Prices()
+: ou::tf::Prices()
 , m_seriesSource( series )
 , m_tdTimeRange( td ), m_XatTminus1( 0.0 ), m_dblRecentEMA( 0.0 )
 {
@@ -103,7 +104,7 @@ TSEMA<D>::TSEMA( ou::tf::TimeSeries<D>& series, time_duration td )
 
 template<class D>
 TSEMA<D>::TSEMA( ou::tf::TimeSeries<D>& series, size_t nPeriods, time_duration tdPeriodWidth )
-: Prices()
+: ou::tf::Prices()
 , m_seriesSource( series )
 , m_XatTminus1( 0.0 ), m_dblRecentEMA( 0.0 )
 {
@@ -121,7 +122,7 @@ TSEMA<D>::TSEMA( ou::tf::TimeSeries<D>& series, size_t nPeriods, time_duration t
 
 template<class D>
 TSEMA<D>::TSEMA( const TSEMA<D>& rhs )
-: Prices()
+: ou::tf::Prices()
 , m_seriesSource( rhs.m_seriesSource )
 , m_tdTimeRange( rhs.m_tdTimeRange )
 , m_dblTimeRange( rhs.m_dblTimeRange )
