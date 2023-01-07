@@ -85,8 +85,18 @@ void MovingAverageSlope::AddToView( ou::ChartDataView& cdv, size_t slotMA, size_
 }
 
 void MovingAverageSlope::HandleUpdate( const ou::tf::TSSWStatsPrice::Results& results ) {
-  m_ceSlope.Append( results.dt, results.stats.b1 );
-  m_dblLast = results.stats.b1;
+  static const double limit( 0.0003 );
+  double slope = results.stats.b1;
+  if ( limit < slope ) {
+    slope = limit;
+  }
+  else {
+    if ( -limit > slope ) {
+      slope = -limit;
+    }
+  }
+  m_ceSlope.Append( results.dt, slope );
+  m_dblLast = slope;
 }
 
 // ====
