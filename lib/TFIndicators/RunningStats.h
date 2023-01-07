@@ -53,6 +53,8 @@ public:
   void CalcStats( Stats& );
   void Reset();
 
+  const Stats& Get() const { return m_stats; }
+
   double Slope() const { return m_stats.b1; }; // slope  B1  termios.h has this as #define
   double Offset() const { return m_stats.b0; }; // offset B0
 
