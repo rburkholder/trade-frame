@@ -235,24 +235,24 @@ FeatureSet_Level::BookLevel& FeatureSet_Level::BookLevel::operator=( const Featu
 // prepare for insertion, shuffle all upwards
 void FeatureSet_Level::Ask_CopyFrom( const FeatureSet_Level& rhs ) {
   if ( m_pNext ) m_pNext->Ask_CopyFrom( *this );
-  this->ask = rhs.ask;
+  ask = rhs.ask;
 }
 
 // after deletion, shuffle all downwards
 void FeatureSet_Level::Ask_CopyTo( FeatureSet_Level& lhs ) {
-  lhs.ask = this->ask;
+  lhs.ask = ask;
   if ( m_pNext ) m_pNext->Ask_CopyTo( *this );
  }
 
 // prepare for insertion, shuffle all upwards
 void FeatureSet_Level::Bid_CopyFrom( const FeatureSet_Level& rhs ) {
   if ( m_pNext ) m_pNext->Bid_CopyFrom( *this );
-  this->bid = rhs.bid;
+  bid = rhs.bid;
 }
 
 // after deletion, shuffle all downwards
 void FeatureSet_Level::Bid_CopyTo( FeatureSet_Level& lhs ) {
-  lhs.bid = this->bid;
+  lhs.bid = bid;
   if ( m_pNext ) m_pNext->Bid_CopyTo( *this );
  }
 
