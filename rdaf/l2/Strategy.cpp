@@ -75,6 +75,8 @@ Strategy::Strategy(
 //, m_ceShortFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red )
 , m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
 , m_dblMA_Slope_previous {}, m_dblMA_Slope_current {}
+, m_dblStopDeltaProposed {}
+, m_dblStopActiveDelta {}, m_dblStopActiveActual {}
 , m_bfQuotes01Sec( 1 )
 {
 //  assert( m_pFile );
@@ -567,8 +569,9 @@ void Strategy::InitRdaf() {
 }
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
+
   // position has the quotes via the embedded watch
-  // indicators are also attached to the embedded watch
+  // indicators could be attached to the embedded watch (but sometimes that watch has vector turned off)
 
   //if ( !quote.IsValid() ) { // empty function
   //  return;
@@ -595,11 +598,6 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
     m_pTreeQuote->Fill();
   }
 #endif
-
-  //static const double limit( 0.005 );
-  //if ( ( limit > m_dblMA_Slope_current ) && ( -limit < m_dblMA_Slope_current ) ) {
-  //  m_ceMA_Slope.Append( dt, m_dblMA_Slope_current );
-  //}
 
   // m_rHiPass[2].Update( dt, ma1 ); // not here, no regular interval
 
@@ -638,7 +636,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
   const double mid = m_quote.Midpoint();
   const ou::tf::Trade::price_t price = trade.Price();
-  const uint64_t volume = trade.Volume();
+  //const uint64_t volume = trade.Volume();
 
   if ( price >= mid ) {
     m_nMarketOrdersAsk++;
@@ -647,7 +645,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
     m_nMarketOrdersBid++;
   }
 
-/*
+#if RDAF
   if ( m_pTreeTrade ) { // wait for initialization in thread to start
     std::time_t nTime = boost::posix_time::to_time_t( trade.DateTime() );
     m_branchTrade.time = (double)nTime / 1000.0;
@@ -670,7 +668,8 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   if ( m_pHistVolumeDemo ) {
     m_pHistVolumeDemo->Fill( trade.Price(), m_branchTrade.time,  trade.Volume() );
   }
-*/
+#endif
+
 }
 
 void Strategy::HandleDepthByMM( const ou::tf::DepthByMM& depth ) {

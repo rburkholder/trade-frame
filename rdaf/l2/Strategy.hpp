@@ -175,8 +175,10 @@ private:
 
   const ou::tf::config::symbol_t& m_config;
 
-  //pFile_t m_pFile;
-  //pFile_t m_pFileUtility;
+#if RDAF
+  pFile_t m_pFile;
+  pFile_t m_pFileUtility;
+#endif
 
   pOrder_t m_pOrderPending;
   //pOrder_t m_pOrderDone;
@@ -357,14 +359,16 @@ private:
     int64_t direction;
   } m_branchTrade;
 
+#if RDAF
   // https://root.cern/doc/master/classTTree.html
-  //using pTTree_t = std::shared_ptr<TTree>;
-  //pTTree_t m_pTreeQuote;
-  //pTTree_t m_pTreeTrade;
+  using pTTree_t = std::shared_ptr<TTree>;
+  pTTree_t m_pTreeQuote;
+  pTTree_t m_pTreeTrade;
 
-  //using pTH2D_t = std::shared_ptr<TH2D>;
-  //pTH2D_t m_pHistVolume;
-  //pTH2D_t m_pHistVolumeDemo;
+  using pTH2D_t = std::shared_ptr<TH2D>;
+  pTH2D_t m_pHistVolume;
+  pTH2D_t m_pHistVolumeDemo;
+#endif
 
   ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
 
