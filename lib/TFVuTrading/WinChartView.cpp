@@ -351,6 +351,8 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
 
       assert ( m_vpDataViewVisual.dtBegin <= m_vpDataViewVisual.dtEnd );
 
+      tdDeltaNew = m_vpDataViewVisual.dtEnd - m_vpDataViewVisual.dtBegin;
+
     }
     else { // reduce width
 
