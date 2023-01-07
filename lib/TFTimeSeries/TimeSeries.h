@@ -227,7 +227,8 @@ TimeSeries<T>::TimeSeries( const std::string& sName, size_type nSize )
 // this probably isn't going to work as the mutex may make this non-copyable
 template<typename T>
 TimeSeries<T>::TimeSeries( const TimeSeries<T>& series )
-  : m_bAppendToVector( series.m_bAppendToVector ) {
+: m_bAppendToVector( series.m_bAppendToVector )
+{
   m_vSeries = series.m_vSeries;
   //assert( !m_bLock );
   //m_vSeries.get_allocator().lockRequest = fastdelegate::MakeDelegate( this, &TimeSeries<T>::lock );
