@@ -76,7 +76,6 @@ Strategy::Strategy(
 , m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
 , m_dblMA_Slope_previous {}, m_dblMA_Slope_current {}
 , m_bfQuotes01Sec( 1 )
-, m_stats( m_ma, boost::posix_time::time_duration( 0, 0, 3 ) )
 {
 //  assert( m_pFile );
 //  assert( m_pFileUtility );
@@ -103,8 +102,6 @@ Strategy::Strategy(
   m_ceRelativeMA1.SetName( "MA1" );
   m_ceRelativeMA2.SetName( "MA2" );
   m_ceRelativeMA3.SetName( "MA3" );
-
-  m_ceMA_Slope.SetName( "MA Slope" );
 
   m_ceProfitUnRealized.SetName( "UnRealized" );
   m_ceProfitRealized.SetName( "Realized" );
@@ -149,11 +146,13 @@ void Strategy::SetupChart() {
 
   //m_cdv.Add( EChartSlot::Price, &m_ceEhlersLoPassFilter );
 
-  for ( vMovingAverage_t::value_type& ma: m_vMovingAverage ) {
-    ma.AddToView( m_cdv, EChartSlot::Price );
-  }
-
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
+
+  m_cdv.Add( EChartSlot::MASlope, &m_cemZero );
+
+  for ( vMovingAverageSlope_t::value_type& mas: m_vMovingAverageSlope ) {
+    mas.AddToView( m_cdv, EChartSlot::Price, EChartSlot::MASlope );
+  }
 
   m_cdv.Add( EChartSlot::Cycle, &m_cemZero );
   //m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[0].m_ceEhlersHiPassFilter );
@@ -166,9 +165,6 @@ void Strategy::SetupChart() {
   //m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[1].m_ceEhlersHiPassFilterSlope );
   m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[2].m_ceEhlersHiPassFilterSlope );
   //m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[3].m_ceEhlersHiPassFilterSlope );
-
-  m_cdv.Add( EChartSlot::MASlope, &m_cemZero );
-  m_cdv.Add( EChartSlot::MASlope, &m_ceMA_Slope );
 
   m_cdv.Add( EChartSlot::MA, &m_cemZero );
   m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA1 );
@@ -240,16 +236,14 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
     assert( 0 < value );
   }
 
-  m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_quotes,            1,  td, ou::Colour::Green, "ma0" ) ); // for ehlers
-  m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_quotes, vMAPeriods[0], td, ou::Colour::Brown, "ma1" ) );
-  m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_quotes, vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
-  m_vMovingAverage.emplace_back( ou::tf::MovingAverage( m_quotes, vMAPeriods[2], td, ou::Colour::Gold,  "ma3" ) );
+  m_vMovingAverageSlope.emplace_back( ou::tf::MovingAverageSlope( m_quotes,            1,  td, ou::Colour::Green, "ma0" ) ); // for ehlers
+  m_vMovingAverageSlope.emplace_back( ou::tf::MovingAverageSlope( m_quotes, vMAPeriods[0], td, ou::Colour::Brown, "ma1" ) );
+  m_vMovingAverageSlope.emplace_back( ou::tf::MovingAverageSlope( m_quotes, vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
+  m_vMovingAverageSlope.emplace_back( ou::tf::MovingAverageSlope( m_quotes, vMAPeriods[2], td, ou::Colour::Gold,  "ma3" ) );
 
   m_ceRelativeMA1.SetColour( ou::Colour::Green );
   m_ceRelativeMA2.SetColour( ou::Colour::Brown );
   m_ceRelativeMA3.SetColour( ou::Colour::Coral );
-
-  m_ceMA_Slope.SetColour( ou::Colour::Green );
 
   SetupChart(); // comes after stochastic initialization
 
@@ -602,19 +596,10 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   }
 #endif
 
-  // TODO: this could be performed in the class if updated each quote
-  for ( vMovingAverage_t::value_type& ma: m_vMovingAverage ) {
-    ma.Update( dt );
-  }
-
-  //const double ma0( m_vMovingAverage[0].Latest() );
-  const double ma1( m_vMovingAverage[1].Latest() );
-  m_ma.Append( ou::tf::Price( dt, ma1 ) );
-  m_dblMA_Slope_current = m_stats.Slope();
-  static const double limit( 0.005 );
-  if ( ( limit > m_dblMA_Slope_current ) && ( -limit < m_dblMA_Slope_current ) ) {
-    m_ceMA_Slope.Append( dt, m_dblMA_Slope_current );
-  }
+  //static const double limit( 0.005 );
+  //if ( ( limit > m_dblMA_Slope_current ) && ( -limit < m_dblMA_Slope_current ) ) {
+  //  m_ceMA_Slope.Append( dt, m_dblMA_Slope_current );
+  //}
 
   // m_rHiPass[2].Update( dt, ma1 ); // not here, no regular interval
 
@@ -877,10 +862,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   EMovingAverage stateMovingAverage( m_stateMovingAverage );
   EMovingAverage currentMovingAverage( EMovingAverage::Flat );
 
-  const double ma0( m_vMovingAverage[0].Latest() );
-  const double ma1( m_vMovingAverage[1].Latest() );
-  const double ma2( m_vMovingAverage[2].Latest() );
-  const double ma3( m_vMovingAverage[3].Latest() );
+  const double ma0( m_vMovingAverageSlope[0].EMA() );
+  const double ma1( m_vMovingAverageSlope[1].EMA() );
+  const double ma2( m_vMovingAverageSlope[2].EMA() );
+  const double ma3( m_vMovingAverageSlope[3].EMA() );
 
   m_ceRelativeMA1.Append( dt, ma0 - ma3 );
   m_ceRelativeMA2.Append( dt, ma1 - ma3 );

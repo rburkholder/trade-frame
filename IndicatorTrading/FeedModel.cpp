@@ -131,7 +131,7 @@ void FeedModel::Connect() {
 
           for ( const vMovingAverage_t::value_type& vt: m_vMovingAverage ) {
             const std::string& sname( vt.Name() );
-            double val( vt.Latest() );
+            double val( vt.EMA() );
             m_pPanelTrade->UpdateDynamicIndicator( sname, val );
           }
         });

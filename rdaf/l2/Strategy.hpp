@@ -38,8 +38,6 @@
 
 #include <TFTimeSeries/BarFactory.h>
 
-#include <TFIndicators/TSSWStats.h>
-
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
@@ -237,8 +235,10 @@ private:
 
   double m_dblImbalanceMean, m_dblImbalanceSlope;
 
-  using vMovingAverage_t = std::vector<ou::tf::MovingAverage>;
-  vMovingAverage_t m_vMovingAverage;
+  double m_dblMA_Slope_previous, m_dblMA_Slope_current;
+
+  using vMovingAverageSlope_t = std::vector<ou::tf::MovingAverageSlope>;
+  vMovingAverageSlope_t m_vMovingAverageSlope;
 
   struct HiPass {
 
@@ -331,12 +331,6 @@ private:
   };
 
   HiPass m_rHiPass[4];
-
-  ou::tf::Prices m_ma;
-  ou::tf::TSSWStatsPrice m_stats;
-
-  double m_dblMA_Slope_previous, m_dblMA_Slope_current;
-  ou::ChartEntryIndicator m_ceMA_Slope;
 
   double m_dblStopDeltaProposed;
   double m_dblStopActiveDelta;

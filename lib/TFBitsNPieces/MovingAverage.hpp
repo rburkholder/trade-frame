@@ -25,30 +25,60 @@
 #include <OUCharting/ChartEntryIndicator.h>
 
 #include <TFIndicators/TSEMA.h>
+#include <TFIndicators/TSSWStats.h>
 
 namespace ou {
 namespace tf {
+
+// ====
 
 class MovingAverage {
 public:
 
   MovingAverage( Quotes& quotes, size_t nPeriods, time_duration tdPeriod, ou::Colour::EColour colour, const std::string& sName );
   MovingAverage( MovingAverage&& rhs );
-  ~MovingAverage();
+  virtual ~MovingAverage();
 
   void AddToView( ou::ChartDataView& cdv, size_t slot );
 
-  double Latest() const { return m_ema.GetEMA(); }
+  double EMA() const { return m_ema.GetEMA(); }
   const std::string& Name() const { return m_ceMA.GetName(); }
+
+protected:
+  ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
+private:
+
+  ou::ChartEntryIndicator m_ceMA;
+
+  void HandleUpdate( const ou::tf::Price& );
+
+};
+
+// ====
+
+class MovingAverageSlope: public MovingAverage {
+public:
+
+  MovingAverageSlope( Quotes& quotes, size_t nPeriods, time_duration tdPeriod, ou::Colour::EColour colour, const std::string& sName );
+  MovingAverageSlope( MovingAverageSlope&& rhs );
+  virtual ~MovingAverageSlope();
+
+  void AddToView( ou::ChartDataView& cdv, size_t slotMA, size_t slotSlope );
+
+  double Slope() const { return m_dblLast; }
 
 protected:
 private:
 
-  ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
-  ou::ChartEntryIndicator m_ceMA;
+  double m_dblLast;
 
-  void HandleUpdate( const ou::tf::Price& );
+  ou::tf::TSSWStatsPrice m_stats;
+  ou::ChartEntryIndicator m_ceSlope;
+
+  void HandleUpdate( const ou::tf::TSSWStatsPrice::Results& );
 };
+
+// ====
 
 } // namespace ou
 } // namespace tf

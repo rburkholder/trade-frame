@@ -24,6 +24,8 @@
 namespace ou {
 namespace tf {
 
+// ====
+
 MovingAverage::MovingAverage( ou::tf::Quotes& quotes, size_t nPeriods, time_duration tdPeriod, ou::Colour::EColour colour, const std::string& sName )
 : m_ema( quotes, nPeriods, tdPeriod )
 {
@@ -50,6 +52,44 @@ void MovingAverage::AddToView( ou::ChartDataView& cdv, size_t slot ) {
 void MovingAverage::HandleUpdate( const ou::tf::Price& price ) {
   m_ceMA.Append( price );
 }
+
+// ====
+
+MovingAverageSlope::MovingAverageSlope( ou::tf::Quotes& quotes, size_t nPeriods, time_duration tdPeriod, ou::Colour::EColour colour, const std::string& sName )
+: MovingAverage( quotes, nPeriods, tdPeriod, colour, sName )
+, m_stats( m_ema, boost::posix_time::time_duration( 0, 0, 3 ) )
+, m_dblLast {}
+{
+  m_ceSlope.SetName( sName + " Slope" );
+  m_ceSlope.SetColour( colour );
+  m_stats.OnUpdate.Add( MakeDelegate( this, &MovingAverageSlope::HandleUpdate ) );
+}
+
+MovingAverageSlope::MovingAverageSlope( MovingAverageSlope&& rhs )
+: MovingAverage( std::move( rhs ) )
+//, m_stats( std::move( rhs.m_stats ) ) // don't do this, attaches to incorrect m_ema
+, m_stats( m_ema, boost::posix_time::time_duration( 0, 0, 3 ) )
+, m_ceSlope( std::move( rhs.m_ceSlope ) )
+, m_dblLast( rhs.m_dblLast )
+{
+  m_stats.OnUpdate.Add( MakeDelegate( this, &MovingAverageSlope::HandleUpdate ) );
+}
+
+MovingAverageSlope::~MovingAverageSlope() {
+  m_stats.OnUpdate.Remove( MakeDelegate( this, &MovingAverageSlope::HandleUpdate ) );
+}
+
+void MovingAverageSlope::AddToView( ou::ChartDataView& cdv, size_t slotMA, size_t slotSlope ) {
+  MovingAverage::AddToView( cdv, slotMA );
+  cdv.Add( slotSlope, &m_ceSlope );
+}
+
+void MovingAverageSlope::HandleUpdate( const ou::tf::TSSWStatsPrice::Results& results ) {
+  m_ceSlope.Append( results.dt, results.stats.b1 );
+  m_dblLast = results.stats.b1;
+}
+
+// ====
 
 } // namespace ou
 } // namespace tf
