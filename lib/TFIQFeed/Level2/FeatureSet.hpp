@@ -28,13 +28,14 @@
 
 #include <vector>
 
-#include <TFIndicators/RunningStats.h>
-
 #include "Symbols.hpp"
 #include "FeatureSet_Level.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace linear {
+  class Stats;
+}
 namespace iqfeed { // IQFeed
 namespace l2 { // level 2 data
 
@@ -56,7 +57,7 @@ public:
   using vLevels_t = std::vector<FeatureSet_Level>;
   const vLevels_t& FVS() const { return m_vLevels; }
 
-  void ImbalanceSummary( ou::tf::RunningStats::Stats& ) const;
+  void ImbalanceSummary( ou::tf::linear::Stats& ) const;
 
   // Assignment / Update
 

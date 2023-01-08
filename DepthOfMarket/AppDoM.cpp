@@ -42,6 +42,8 @@ TODO:
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 
+#include <TFIndicators/RunningStats.h>
+
 #include <TFTrading/BuildInstrument.h>
 
 #include <TFVuTrading/FrameMain.h>
@@ -502,7 +504,7 @@ void AppDoM::StartDepthByOrderWithFVS() {
       m_pPanelSideBySide->OnL2Bid( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
 
       if ( 1 == ix ) { // may need to recalculate at any level change instead
-        ou::tf::RunningStats::Stats stats;
+        ou::tf::linear::Stats stats;
         m_FeatureSet.ImbalanceSummary( stats );
         m_valuesStatistics.dblFvsMean = stats.meanY;
         m_valuesStatistics.dblFvsSlope = stats.b1;
@@ -589,7 +591,7 @@ void AppDoM::StartDepthByOrderWithFVS() {
       m_pPanelSideBySide->OnL2Ask( price, volume, ou::tf::iqfeed::l2::EOp::Delete != op );
 
       if ( 1 == ix ) { // may need to recalculate at any level change instead
-        ou::tf::RunningStats::Stats stats;
+        ou::tf::linear::Stats stats;
         m_FeatureSet.ImbalanceSummary( stats );
         m_valuesStatistics.dblFvsMean = stats.meanY;
         m_valuesStatistics.dblFvsSlope = stats.b1;

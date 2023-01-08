@@ -55,8 +55,8 @@ public:
 
   struct Results {
     boost::posix_time::ptime dt;
-    const RunningStats::Stats& stats;
-    Results( boost::posix_time::ptime dt_, const RunningStats::Stats& stats_ )
+    const linear::Stats& stats;
+    Results( boost::posix_time::ptime dt_, const linear::Stats& stats_ )
     : dt( dt_ ), stats( stats_ ) {}
   };
 

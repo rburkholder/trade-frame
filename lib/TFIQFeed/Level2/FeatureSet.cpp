@@ -19,8 +19,9 @@
  * Created: May 11, 2022 15:24
  */
 
+#include <TFIndicators/RunningStats.h>
+
 #include "FeatureSet.hpp"
-#include "TFIndicators/RunningStats.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -133,7 +134,7 @@ void FeatureSet::Bid_IncCancel( unsigned int ix, const ou::tf::Depth& depth ) {
   m_vLevels[ ix ].Bid_IncCancel( depth );
 }
 
-void FeatureSet::ImbalanceSummary( ou::tf::RunningStats::Stats& stats ) const {
+void FeatureSet::ImbalanceSummary( ou::tf::linear::Stats& stats ) const {
   double ix( 1.0 );
   ou::tf::RunningStats rs;
   for ( const vLevels_t::value_type& vt: m_vLevels ) {

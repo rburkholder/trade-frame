@@ -19,10 +19,7 @@ namespace tf { // TradeFrame
 
 // RunningStats has no events
 //   CalcStats could be inherited, and called, then event processed in higher levels
-
-class RunningStats {
-public:
-
+namespace linear {
   struct Stats {
     double b1; // slope
     double b0; // offset
@@ -37,6 +34,10 @@ public:
       b1 = b0 = meanY = rr = r = sd = 0.0;
     }
   };
+}
+
+class RunningStats {
+public:
 
   RunningStats();
   RunningStats( double BBMultiplier );
@@ -50,10 +51,10 @@ public:
   void Add( double x, double y );
   void Remove( double x, double y );
   virtual void CalcStats();
-  void CalcStats( Stats& );
+  void CalcStats( linear::Stats& );
   void Reset();
 
-  const Stats& Get() const { return m_stats; }
+  const linear::Stats& Get() const { return m_stats; }
 
   double Slope() const { return m_stats.b1; }; // slope  B1  termios.h has this as #define
   double Offset() const { return m_stats.b0; }; // offset B0
@@ -72,7 +73,7 @@ public:
 protected:
 private:
 
-  Stats m_stats;
+  linear::Stats m_stats;
 
   unsigned int m_nX;
   double m_SumXX, m_SumX, m_SumXY, m_SumY, m_SumYY;

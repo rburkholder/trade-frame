@@ -293,8 +293,8 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
 }
 
+// from IndicatorTrading/FeedModel.cpp
 void Strategy::StartDepthByOrder() {
-  // from IndicatorTrading/FeedModel.cpp
 
   using EState = ou::tf::iqfeed::l2::OrderBased::EState;
 
@@ -446,7 +446,7 @@ void Strategy::Imbalance( const ou::tf::Depth& depth ) {
   assert( 1.0 > w1 );
   static const double w2( 1.0 - w1 );
 
-  ou::tf::RunningStats::Stats stats;
+  ou::tf::linear::Stats stats;
   m_FeatureSet.ImbalanceSummary( stats );
 
   m_dblImbalanceMean = w1 * m_dblImbalanceMean + w2 * stats.meanY;  // exponential moving average

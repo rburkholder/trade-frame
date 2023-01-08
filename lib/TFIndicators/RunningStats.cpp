@@ -89,7 +89,7 @@ void RunningStats::CalcStats() {
   CalcStats( m_stats );
 }
 
-void RunningStats::CalcStats( Stats& stats ) {
+void RunningStats::CalcStats( linear::Stats& stats ) {
 
   if ( 0 == m_nX ) {
     m_SumXX = m_SumX = 0;
