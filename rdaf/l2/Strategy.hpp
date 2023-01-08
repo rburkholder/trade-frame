@@ -375,26 +375,28 @@ private:
   void InitRdaf();
 
   void StartDepthByOrder();
-  void Imbalance( const ou::tf::Depth& depth );
+  void Imbalance( const ou::tf::Depth& );
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
   void HandleDepthByMM( const ou::tf::DepthByMM& );
   void HandleDepthByOrder( const ou::tf::DepthByOrder& );
 
-  void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
+  void HandleBarQuotes01Sec( const ou::tf::Bar& );
 
-  void HandleRHTrading( const ou::tf::Bar& bar );
+  void HandleRHTrading( const ou::tf::Quote& );
+
+  void HandleRHTrading( const ou::tf::Bar& );
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
 
-  void EnterLong( const ou::tf::Bar& );
-  void EnterShort( const ou::tf::Bar& );
+  void EnterLong( const ou::tf::Quote& );
+  void EnterShort( const ou::tf::Quote& );
 
-  void ExitLong( const ou::tf::Bar& );
-  void ExitShort( const ou::tf::Bar& );
+  void ExitLong( const ou::tf::Quote& );
+  void ExitShort( const ou::tf::Quote& );
 
-  void ExitPosition( const ou::tf::Bar& );
+  void ExitPosition( const ou::tf::Quote& );
 
   void ShowOrder( pOrder_t );
 
