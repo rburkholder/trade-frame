@@ -55,6 +55,7 @@ public:
   }
 
   void SetCrossHairPosition( int x, int y );
+  void SetCrossHairTime( const std::string& );
   void CrossHairDraw( bool );
 
   void GetWorldCoordX( int& nChart, double& dblX ) const { nChart = m_nChart; dblX = m_dblX; }
@@ -99,6 +100,8 @@ private:
   int m_xLeft;  // coord of left side of chart
   int m_xX;     // coord of mouse on chart
   int m_xRight; // coord of right side of chart
+
+  char m_szCursorTime[ 100 ]; // place time at cursor
 
   void Initialize();
 

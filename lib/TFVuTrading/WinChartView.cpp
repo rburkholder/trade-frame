@@ -234,6 +234,21 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
         break;
     }
 
+    boost::posix_time::time_duration tdCursor;
+    boost::posix_time::time_duration tdDelta;
+
+    tdDelta = m_vpDataViewVisual.dtEnd - m_vpDataViewVisual.dtBegin;
+
+    tdCursor = tdDelta * ( xX - xLeft );
+    tdCursor /= ( xRight - xLeft );
+
+    boost::posix_time::ptime dtCursor =  m_vpDataViewVisual.dtBegin + tdCursor;
+
+    //boost::posix_time::time_duration td( dtCursor.time_of_day() );
+    //std::string sTime = boost::posix_time::to_simple_string( td );
+    std::string sDT = boost::posix_time::to_simple_string( dtCursor );
+    m_chartMaster.SetCrossHairTime( sDT );
+
   }
   else {
     assert( true );  // test point
@@ -321,7 +336,7 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
 
     tdDeltaOld = m_vpDataViewVisual.dtEnd - m_vpDataViewVisual.dtBegin;
 
-    tdCursorOld = tdDeltaOld * xX;
+    tdCursorOld = tdDeltaOld * ( xX - xLeft );
     tdCursorOld /= ( xRight - xLeft );
 
     dtCursor =  m_vpDataViewVisual.dtBegin + tdCursorOld;
@@ -331,7 +346,7 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
       tdDeltaNew = tdDeltaOld * 12;
       tdDeltaNew /= 10;
 
-      tdCursorNew = tdDeltaNew * xX;
+      tdCursorNew = tdDeltaNew * ( xX - xLeft );
       tdCursorNew /= ( xRight - xLeft );
 
       m_vpDataViewVisual.dtBegin = dtCursor - tdCursorNew;
@@ -361,7 +376,7 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
 
       if ( tdDeltaNew < tdTenSeconds ) tdDeltaNew = tdTenSeconds;
 
-      tdCursorNew = tdDeltaNew * xX;
+      tdCursorNew = tdDeltaNew * ( xX - xLeft );
       tdCursorNew /= ( xRight - xLeft );
 
       m_vpDataViewVisual.dtBegin = dtCursor - tdCursorNew;
@@ -376,6 +391,11 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
     }
 
     m_tdViewPortWidth = tdDeltaNew;
+
+    //boost::posix_time::time_duration td( dtCursor.time_of_day() );
+    //std::string sTime = boost::posix_time::to_simple_string( td );
+    std::string sDT = boost::posix_time::to_simple_string( dtCursor );
+    m_chartMaster.SetCrossHairTime( sDT );
 
     DrawChart();
   }

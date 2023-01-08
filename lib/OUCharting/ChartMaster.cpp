@@ -25,8 +25,9 @@ ChartMaster::ChartMaster( unsigned int width, unsigned int height )
 , m_dblX {}, m_dblY {}
 , m_xLeft {}, m_xX {}, m_xRight {}
 , m_formatter( "%.2f"  )
-//, m_nChart {}
+, m_nChart {}
 {
+  m_szCursorTime[ 0 ] = 0;
   Initialize();
 }
 
@@ -234,6 +235,12 @@ void ChartMaster::SetCrossHairPosition( int x, int y ) {
   m_intCrossHairY = y;
 }
 
+void ChartMaster::SetCrossHairTime( const std::string& sTime ) {
+  auto size = sTime.size();
+  memcpy( m_szCursorTime, sTime.c_str(), size );
+  m_szCursorTime[ size ] = 0;
+}
+
 void ChartMaster::CrossHairDraw( bool bDraw ) {
   m_bCrossHair = bDraw;
 }
@@ -310,6 +317,10 @@ bool ChartMaster::DrawDynamicLayer() {
       m_pDA->hline( m_xLeft, m_xRight, m_intCrossHairY, Colour::Gray );
       m_pDA->vline( top, bottom, m_intCrossHairX, Colour::Gray );
       m_pDA->text( sz, "normal", 10, m_intCrossHairX + 1, m_intCrossHairY - 14, Colour::Black );
+
+      if ( 0 != m_szCursorTime[ 0 ] ) {
+        m_pDA->text( m_szCursorTime, "normal", 10, m_intCrossHairX + 1, m_intCrossHairY + 2, Colour::Black );
+      }
 
     }
 
