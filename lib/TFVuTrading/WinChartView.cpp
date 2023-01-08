@@ -145,6 +145,12 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
   //std::cout << event.GetWheelAxis() << "," << event.GetWheelDelta() << "," << event.GetWheelRotation() << std::endl;
   // 0,120,-120
 
+  {
+    wxCoord x, y;
+    event.GetPosition( &x, &y );
+    m_chartMaster.SetCrossHairPosition( x, y );
+  }
+
   int xLeft, xX, xRight;
   m_chartMaster.GetX( xLeft, xX, xRight );
 
@@ -231,12 +237,6 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
   }
   else {
     assert( true );  // test point
-  }
-
-  {
-    wxCoord x, y;
-    event.GetPosition( &x, &y );
-    m_chartMaster.CrossHairPosition( x, y );
   }
 
   DrawChart(); // after CrossHairPosition
