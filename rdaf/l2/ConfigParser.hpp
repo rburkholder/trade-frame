@@ -42,6 +42,7 @@ struct symbol_t {
 
   EFeed eFeed;
   bool bTradable;
+  bool bEmitFVS;
 
   std::string sAlgorithm;
   std::string sSignalFrom; // link one instrument to another
@@ -83,6 +84,7 @@ struct symbol_t {
   symbol_t()
   : eFeed( EFeed::L1 ) // default
   , bTradable( true )  // default
+  , bEmitFVS( false )
   , nTimeBins {}
   , dblTimeUpper {}
   , dblTimeLower {}

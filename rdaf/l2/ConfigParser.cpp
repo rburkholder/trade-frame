@@ -44,6 +44,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   (ou::tf::config::symbol_t::EFeed, eFeed)
   (std::string, sSymbol_Generic)
   (bool, bTradable)
+  (bool, bEmitFVS)
   (std::string, sAlgorithm)
   (std::string, sSignalFrom)
   (int, nPeriodWidth)
@@ -88,8 +89,12 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       ( "off", false )
       ( "true", true )
       ( "false", false )
+      ( "True", true )
+      ( "False", false )
       ( "yes", true )
       ( "no", false )
+      ( "Yes", true )
+      ( "No", false )
       ;
 
     luFeed.add
@@ -171,6 +176,12 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
 
     ruleTradable
       %= qi::lit("trade")
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> luBool
+      >> *qi::lit(' ') >> qi::eol;
+
+    ruleEmitFVS
+      %= qi::lit("emit_fvs")
       >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
       >> luBool
       >> *qi::lit(' ') >> qi::eol;
@@ -261,6 +272,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       %= -ruleFeed
       >> -ruleSymbolGeneric
       >> -ruleTradable
+      >> -ruleEmitFVS
       >> -ruleAlgorithm
       >> -ruleSignalFrom
       >>  rulePeriodWidth
@@ -334,6 +346,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   qi::rule<Iterator, std::string()> ruleSymbolGeneric;
   qi::rule<Iterator, ou::tf::config::symbol_t::EFeed()> ruleFeed;
   qi::rule<Iterator, bool()> ruleTradable;
+  qi::rule<Iterator, bool()> ruleEmitFVS;
   qi::rule<Iterator, size_t()> rulePriceBins;
   qi::rule<Iterator, double()> rulePriceUpper;
   qi::rule<Iterator, double()> rulePriceLower;
