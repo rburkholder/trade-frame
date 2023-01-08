@@ -234,20 +234,22 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
         break;
     }
 
-    boost::posix_time::time_duration tdCursor;
-    boost::posix_time::time_duration tdDelta;
+    if ( xLeft < xRight ) { // check for non-zer as well?
+      boost::posix_time::time_duration tdCursor;
+      boost::posix_time::time_duration tdDelta;
 
-    tdDelta = m_vpDataViewVisual.dtEnd - m_vpDataViewVisual.dtBegin;
+      tdDelta = m_vpDataViewVisual.dtEnd - m_vpDataViewVisual.dtBegin;
 
-    tdCursor = tdDelta * ( xX - xLeft );
-    tdCursor /= ( xRight - xLeft );
+      tdCursor = tdDelta * ( xX - xLeft );
+      tdCursor /= ( xRight - xLeft );
 
-    boost::posix_time::ptime dtCursor =  m_vpDataViewVisual.dtBegin + tdCursor;
+      boost::posix_time::ptime dtCursor =  m_vpDataViewVisual.dtBegin + tdCursor;
 
-    //boost::posix_time::time_duration td( dtCursor.time_of_day() );
-    //std::string sTime = boost::posix_time::to_simple_string( td );
-    std::string sDT = boost::posix_time::to_simple_string( dtCursor );
-    m_chartMaster.SetCrossHairTime( sDT );
+      //boost::posix_time::time_duration td( dtCursor.time_of_day() );
+      //std::string sTime = boost::posix_time::to_simple_string( td );
+      std::string sDT = boost::posix_time::to_simple_string( dtCursor );
+      m_chartMaster.SetCrossHairTime( sDT );
+    }
 
   }
   else {
