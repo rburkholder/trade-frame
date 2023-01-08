@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "math.h"
+#include <cmath>
 
 #include "RunningStats.h"
 
@@ -110,9 +110,9 @@ void RunningStats::CalcStats( Stats& stats ) {
     const double SSE = SST - SSR;
 
     stats.rr = SSR / SST;
-    stats.r = Sxy / sqrt( Sxx * Syy );
+    stats.r = Sxy / std::sqrt( Sxx * Syy );
 
-    stats.sd = sqrt( Syy / nX );
+    stats.sd = std::sqrt( Syy / nX );
 
     stats.meanY = m_SumY / nX;
 
