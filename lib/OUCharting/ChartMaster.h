@@ -54,7 +54,7 @@ public:
     m_fOnDrawChart = std::move( function );
   }
 
-  void CrossHairPosition( int x, int y );
+  void SetCrossHairPosition( int x, int y );
   void CrossHairDraw( bool );
 
   void GetWorldCoordX( int& nChart, double& dblX ) const { nChart = m_nChart; dblX = m_dblX; }
@@ -96,7 +96,9 @@ private:
   double m_dblX; // date time
   double m_dblY; // chart specific value
 
-  int m_xLeft, m_xX, m_xRight;
+  int m_xLeft;  // coord of left side of chart
+  int m_xX;     // coord of mouse on chart
+  int m_xRight; // coord of right side of chart
 
   void Initialize();
 

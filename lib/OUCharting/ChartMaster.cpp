@@ -25,6 +25,7 @@ ChartMaster::ChartMaster( unsigned int width, unsigned int height )
 , m_dblX {}, m_dblY {}
 , m_xLeft {}, m_xX {}, m_xRight {}
 , m_formatter( "%.2f"  )
+//, m_nChart {}
 {
   Initialize();
 }
@@ -228,7 +229,7 @@ bool ChartMaster::ResetDynamicLayer() {
   return bExisted;
 }
 
-void ChartMaster::CrossHairPosition( int x, int y ) {
+void ChartMaster::SetCrossHairPosition( int x, int y ) {
   m_intCrossHairX = x;
   m_intCrossHairY = y;
 }
@@ -256,29 +257,31 @@ bool ChartMaster::DrawDynamicLayer() {
     const int n = m_pChart->getChartCount();
     assert( 0 < n );
 
-    BaseChart* p;
-    int top, bottom;
+    BaseChart* pSubBaseChart;
+    int top {}, bottom {};
 
     XYChart* pChartFocus( nullptr );
 
     for ( int ix = 0; ix < n; ix++ ) {
 
-      p = m_pChart->getChart( ix );
-      XYChart* pChart = dynamic_cast<XYChart*>( p );
-      PlotArea* pArea = pChart->getPlotArea();
+      pSubBaseChart = m_pChart->getChart( ix );
+      XYChart* pSubChart = dynamic_cast<XYChart*>( pSubBaseChart );
+      PlotArea* pArea = pSubChart->getPlotArea();
 
-      int pxChartTop = pChart->getAbsOffsetY() + pArea->getTopY();
+      int pxChartTop = pSubChart->getAbsOffsetY() + pArea->getTopY();
 
       if ( 0 == ix ) {
+        auto AbsOffsetX = pSubChart->getAbsOffsetX(); // offset to left side of chart
+        // set based upon top chart:
         top      = pxChartTop;
-        m_xLeft  = pChart->getAbsOffsetX() + pArea->getLeftX();
-        m_xRight = pChart->getAbsOffsetX() + pArea->getRightX();
+        m_xLeft  = AbsOffsetX + pArea->getLeftX();
+        m_xRight = AbsOffsetX + pArea->getRightX();
       }
 
-      bottom = pChart->getAbsOffsetY() + pArea->getBottomY();
+      bottom = pSubChart->getAbsOffsetY() + pArea->getBottomY();
 
       if ( pxChartTop < m_intCrossHairY ) {
-        pChartFocus = pChart;
+        pChartFocus = pSubChart;
         m_nChart = ix;
       }
 
