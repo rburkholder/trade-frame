@@ -439,7 +439,7 @@ void AppDoM::StartDepthByOrderWithFVS() {
             << "," << depth.Price() << "," << depth.Volume()
             << "," << depth.Side()
             << std::endl;
-          m_FeatureSet.Emit();
+          std::cout << m_FeatureSet << std::endl;
         }
 
         m_FeatureSet.IntegrityCheck();
@@ -447,7 +447,7 @@ void AppDoM::StartDepthByOrderWithFVS() {
         m_FeatureSet.IntegrityCheck();
 
         if ( m_bTriggerFeatureSetDump ) {
-          m_FeatureSet.Emit();
+          std::cout << m_FeatureSet << std::endl;
           m_bTriggerFeatureSetDump = false;
         }
       }
@@ -526,7 +526,7 @@ void AppDoM::StartDepthByOrderWithFVS() {
             << "," << depth.Price() << "," << depth.Volume()
             << "," << depth.Side()
             << std::endl;
-          m_FeatureSet.Emit();
+          std::cout << m_FeatureSet << std::endl;
         }
 
         m_FeatureSet.IntegrityCheck();
@@ -534,7 +534,7 @@ void AppDoM::StartDepthByOrderWithFVS() {
         m_FeatureSet.IntegrityCheck();
 
         if ( m_bTriggerFeatureSetDump ) {
-          m_FeatureSet.Emit();
+          std::cout << m_FeatureSet << std::endl;
           m_bTriggerFeatureSetDump = false;
         }
       }

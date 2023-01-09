@@ -29,6 +29,8 @@
 
 #pragma once
 
+#include <ostream>
+
 #include <TFTimeSeries/DatedDatum.h>
 
 namespace ou { // One Unified
@@ -204,7 +206,7 @@ public:
   void Bid_IncMarket( const ou::tf::Depth& depth );
   void Bid_IncCancel( const ou::tf::Depth& depth );
 
-  void Emit() const;
+  std::ostream& operator<<( std::ostream& s ) const;
 
 protected:
 private:
@@ -232,6 +234,8 @@ private:
   void Intensity( const ou::tf::Depth&, ptime&, double&, double&, double& );
 
 };
+
+std::ostream& operator<<( std::ostream&, const FeatureSet_Level& );
 
 } // namespace l2
 } // namesapce iqfeed

@@ -201,7 +201,7 @@ void FeedModel::StartDepthByOrder( size_t nLevels ) { // see AppDoM as reference
             << "," << depth.Price() << "," << depth.Volume()
             << "," << depth.Side()
             << std::endl;
-          m_FeatureSet.Emit();
+          std::cout << m_FeatureSet << std::endl;
         }
 
         //m_FeatureSet.IntegrityCheck();
@@ -209,7 +209,7 @@ void FeedModel::StartDepthByOrder( size_t nLevels ) { // see AppDoM as reference
         //m_FeatureSet.IntegrityCheck();
 
         if ( m_bTriggerFeatureSetDump ) {
-          m_FeatureSet.Emit();
+          std::cout << m_FeatureSet << std::endl;
           m_bTriggerFeatureSetDump = false;
         }
       }
@@ -278,7 +278,7 @@ void FeedModel::StartDepthByOrder( size_t nLevels ) { // see AppDoM as reference
             << "," << depth.Price() << "," << depth.Volume()
             << "," << depth.Side()
             << std::endl;
-          m_FeatureSet.Emit();
+          std::cout << m_FeatureSet << std::endl;
         }
 
         //m_FeatureSet.IntegrityCheck();
@@ -286,7 +286,7 @@ void FeedModel::StartDepthByOrder( size_t nLevels ) { // see AppDoM as reference
         //m_FeatureSet.IntegrityCheck();
 
         if ( m_bTriggerFeatureSetDump ) {
-          m_FeatureSet.Emit();
+          std::cout << m_FeatureSet << std::endl;
           m_bTriggerFeatureSetDump = false;
         }
       }

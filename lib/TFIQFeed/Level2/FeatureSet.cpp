@@ -147,10 +147,16 @@ void FeatureSet::ImbalanceSummary( ou::tf::linear::Stats& stats ) const {
   rs.CalcStats( stats );
 }
 
-void FeatureSet::Emit() const {
+std::ostream& FeatureSet::operator<<( std::ostream& stream ) const {
   for ( const vLevels_t::value_type& vt: m_vLevels ) {
-    vt.Emit();
+    stream << vt;
   }
+  return stream;
+}
+
+std::ostream& operator<<( std::ostream& stream, const FeatureSet& fvs ) {
+  fvs.operator<<( stream );
+  return stream;
 }
 
 bool FeatureSet::IntegrityCheck() const {

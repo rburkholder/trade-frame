@@ -317,8 +317,8 @@ void FeatureSet_Level::Bid_IncCancel( const ou::tf::Depth& depth ) {
   }
 }
 
-void FeatureSet_Level::Emit() const {
-  std::cout
+std::ostream& FeatureSet_Level::operator<<( std::ostream& stream ) const {
+  stream
     << "lvl " << m_ix
     << " ask: "
     << ask.v1.volume << "@" << ask.v1.price
@@ -328,7 +328,13 @@ void FeatureSet_Level::Emit() const {
     << "=>" << bid.v1.aggregateVolume
     << ",cross: "
     << "lvl=" << cross.v2.imbalanceLvl << ",agg=" << cross.v2.imbalanceAgg
-    << std::endl;
+    ;
+  return stream;
+}
+
+std::ostream& operator<<( std::ostream& stream, const FeatureSet_Level& level ) {
+  level.operator<<( stream );
+  return stream;
 }
 
 } // namespace l2

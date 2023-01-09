@@ -27,6 +27,7 @@
 #pragma once
 
 #include <vector>
+#include <ostream>
 
 #include "Symbols.hpp"
 #include "FeatureSet_Level.hpp"
@@ -74,8 +75,8 @@ public:
 
   // Diagnostic
 
-  void Emit() const;
   bool IntegrityCheck() const;
+  std::ostream& operator<<( std::ostream& s ) const;
 
 protected:
 private:
@@ -85,6 +86,8 @@ private:
   vLevels_t m_vLevels;
 
 };
+
+std::ostream& operator<<( std::ostream&, const FeatureSet& );
 
 } // namespace l2
 } // namesapce iqfeed
