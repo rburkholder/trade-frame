@@ -113,7 +113,7 @@ bool AppAutoTrade::OnInit() {
   m_bL2Connected = false;
 
   if ( !ou::tf::config::Load( sChoicesFilename, m_choices ) ) {
-    return 0;
+    return false;
   }
 
   m_iqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
@@ -194,8 +194,8 @@ bool AppAutoTrade::OnInit() {
     // need to turn off m_pL2Symbols when running a simulation
     // need to feed the algo, not from m_pL2Symbols
 
-  }
-  else {
+  } // simulator
+  else { // live
 
     m_pPanelProviderControl = new ou::tf::v2::PanelProviderControl( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
     m_pPanelProviderControl->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
@@ -261,7 +261,7 @@ bool AppAutoTrade::OnInit() {
     //vItems.push_back( new mi( "Flush", MakeDelegate( this, &AppAutoTrade::HandleMenuActionUtilityClear ) ) );
     //m_pFrameMain->AddDynamicMenu( "Utility File", vItems );
 
-  }
+  } // live configuration
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
   m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
@@ -521,9 +521,12 @@ void AppAutoTrade::StartRdaf( const std::string& sFileName ) {
 
 void AppAutoTrade::HandleMenuActionCloseAndDone() {
   std::cout << "Closing & Done" << std::endl;
-  for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-    vt.second->CloseAndDone();
-  }
+  CallAfter(
+    [this](){
+      for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
+        vt.second->CloseAndDone();
+      }
+    } );
 }
 
 void AppAutoTrade::HandleMenuActionSaveValues() {
