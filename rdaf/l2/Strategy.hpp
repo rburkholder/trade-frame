@@ -111,6 +111,7 @@ public:
   virtual ~Strategy();
 
   void SetPosition( pPosition_t );
+  void SetFVSPath( const std::string& sPath ) { m_sFVSPath = sPath; }
 
   ou::tf::config::symbol_t::EFeed Feed() const { return m_config.eFeed; }
 
@@ -180,10 +181,10 @@ private:
   pFile_t m_pFileUtility;
 #endif
 
+  pPosition_t m_pPosition;
+
   pOrder_t m_pOrderPending;
   //pOrder_t m_pOrderDone;
-
-  pPosition_t m_pPosition;
 
   ou::ChartDataView m_cdv;
 
@@ -371,6 +372,7 @@ private:
 #endif
 
   ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
+  std::string m_sFVSPath;
 
   void InitRdaf();
 
