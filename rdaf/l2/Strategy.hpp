@@ -25,6 +25,8 @@
 #define RDAF false
 #endif
 
+#include <fstream>
+
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
@@ -111,7 +113,9 @@ public:
   virtual ~Strategy();
 
   void SetPosition( pPosition_t );
-  void SetFVSPath( const std::string& sPath ) { m_sFVSPath = sPath; }
+
+  void FVSStreamStart( const std::string& sPath );
+  void FVSStreamStop();
 
   ou::tf::config::symbol_t::EFeed Feed() const { return m_config.eFeed; }
 
@@ -373,6 +377,7 @@ private:
 
   ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
   std::string m_sFVSPath;
+  std::ofstream m_streamFVS;
 
   void InitRdaf();
 

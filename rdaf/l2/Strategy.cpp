@@ -293,6 +293,40 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
 }
 
+void Strategy::FVSStreamStart( const std::string& sPath ) {
+
+  bool bOpen( false );
+
+  if ( sPath.empty() ) {
+    if ( m_streamFVS.is_open() ) {
+      m_streamFVS.close();
+    }
+    m_sFVSPath.clear();
+  }
+  else {
+    if ( sPath == m_sFVSPath ) {
+      if ( m_streamFVS.is_open() ) {} // leave as is
+      else bOpen = true;
+    }
+    else {
+      if ( m_streamFVS.is_open() ) {
+        m_streamFVS.close();
+      }
+      m_sFVSPath = sPath;
+      bOpen = true;
+    }
+  }
+
+  if ( bOpen ) {
+    m_streamFVS.open( m_sFVSPath, std::ios_base::trunc );
+    assert( m_streamFVS.is_open() );
+  }
+}
+
+void Strategy::FVSStreamStop() {
+  m_streamFVS.close();
+}
+
 // from IndicatorTrading/FeedModel.cpp
 void Strategy::StartDepthByOrder() {
 
@@ -367,6 +401,11 @@ void Strategy::StartDepthByOrder() {
           //m_ceFVS_Var1_Diff.Append( depth.DateTime(), var1A - var1B );
         }
       }
+
+      if ( m_streamFVS.is_open() ) {
+        m_streamFVS << m_FeatureSet << std::endl;
+      }
+
     },
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
 
@@ -431,6 +470,11 @@ void Strategy::StartDepthByOrder() {
           //m_ceFVS_Var1_Diff.Append( depth.DateTime(), var1A - var1B );
         }
       }
+
+      if ( m_streamFVS.is_open() ) {
+        m_streamFVS << m_FeatureSet << std::endl;
+      }
+
     }
   );
 
@@ -655,10 +699,11 @@ void Strategy::HandleDepthByOrder( const ou::tf::DepthByOrder& depth ) {
   m_pOrderBased->MarketDepth( depth );
 }
 
-
+// l2 market maker only
 void Strategy::HandleUpdateL2Ask( price_t price, volume_t volume, bool bAdd ) {
 }
 
+// l2 market maker only
 void Strategy::HandleUpdateL2Bid( price_t price, volume_t volume, bool bAdd ) {
 }
 
