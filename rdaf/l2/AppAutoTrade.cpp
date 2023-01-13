@@ -32,6 +32,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <boost/date_time/posix_time/time_formatters.hpp>
+
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/regex.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -152,11 +154,11 @@ bool AppAutoTrade::OnInit() {
 
     if ( 0 == m_choices.sGroupDirectory.size() ) {
       std::cout << "simulation requires a group directory" << std::endl;
-      return 0;
+      return false;
     }
 
     m_sim = ou::tf::SimulationProvider::Factory();
-    //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will use async posts
+    //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will post across unsynchronized threads
     m_sim->SetGroupDirectory( m_choices.sGroupDirectory );
 
     // 20221220-09:20:13.187534
@@ -184,9 +186,11 @@ bool AppAutoTrade::OnInit() {
       std::cout << "times: " << dtUTC << "(UTC) is " << dtStart << "(eastern)" << std::endl;
       dateSim = Strategy::MarketOpenDate( dtUTC );
       std::cout << "simulation date: " << dateSim << std::endl;
+
+      m_sSimulationDateTime = boost::posix_time::to_iso_string( dtUTC );
     }
     else {
-      return 0;
+      return false;
     }
 
     // need to be able to hookup simulation depth to the algo
@@ -625,7 +629,12 @@ void AppAutoTrade::ConstructInstrument_Sim( const std::string& sRunPortfolioName
 
   mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( sSymbol );
   assert( m_mapStrategy.end() != iterStrategy );
-  iterStrategy->second->SetPosition( pPosition );
+
+  Strategy& strategy( *iterStrategy->second );
+  strategy.SetPosition( pPosition );
+
+  m_OnSimulationComplete.Add( MakeDelegate( &strategy, &Strategy::FVSStreamStop ) );
+  strategy.FVSStreamStart( sDirectory + "/" + m_sSimulationDateTime + ".fvs.csv" );
 
 }
 
@@ -782,6 +791,7 @@ void AppAutoTrade::ConfirmProviders() {
 }
 
 void AppAutoTrade::HandleSimComplete() {
+  m_OnSimulationComplete( 0 );
   BOOST_LOG_TRIVIAL(info) << "simulation complete";
 }
 

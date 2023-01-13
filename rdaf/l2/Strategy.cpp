@@ -295,35 +295,38 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
 void Strategy::FVSStreamStart( const std::string& sPath ) {
 
-  bool bOpen( false );
+  if ( m_config.bEmitFVS ) {
 
-  if ( sPath.empty() ) {
-    if ( m_streamFVS.is_open() ) {
-      m_streamFVS.close();
-    }
-    m_sFVSPath.clear();
-  }
-  else {
-    if ( sPath == m_sFVSPath ) {
-      if ( m_streamFVS.is_open() ) {} // leave as is
-      else bOpen = true;
-    }
-    else {
+    bool bOpen( false );
+
+    if ( sPath.empty() ) {
       if ( m_streamFVS.is_open() ) {
         m_streamFVS.close();
       }
-      m_sFVSPath = sPath;
-      bOpen = true;
+      m_sFVSPath.clear();
     }
-  }
+    else {
+      if ( sPath == m_sFVSPath ) {
+        if ( m_streamFVS.is_open() ) {} // leave as is
+        else bOpen = true;
+      }
+      else {
+        if ( m_streamFVS.is_open() ) {
+          m_streamFVS.close();
+        }
+        m_sFVSPath = sPath;
+        bOpen = true;
+      }
+    }
 
-  if ( bOpen ) {
-    m_streamFVS.open( m_sFVSPath, std::ios_base::trunc );
-    assert( m_streamFVS.is_open() );
+    if ( bOpen ) {
+      m_streamFVS.open( m_sFVSPath, std::ios_base::trunc );
+      assert( m_streamFVS.is_open() );
+    }
   }
 }
 
-void Strategy::FVSStreamStop() {
+void Strategy::FVSStreamStop( int ) {
   m_streamFVS.close();
 }
 

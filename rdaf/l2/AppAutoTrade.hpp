@@ -116,6 +116,7 @@ private:
 
   bool m_bL2Connected;
   std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pL2Symbols;
+  std::string m_sSimulationDateTime;  // used for l2 output streaming file name
 
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
 
@@ -133,6 +134,8 @@ private:
   using pStrategy_t = std::unique_ptr<Strategy>;
   using mapStrategy_t = std::map<std::string,pStrategy_t>;
   mapStrategy_t m_mapStrategy;
+
+  ou::Delegate<int> m_OnSimulationComplete;
 
 #if RDAF
   std::unique_ptr<TRint> m_prdafApp;

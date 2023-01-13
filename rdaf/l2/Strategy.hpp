@@ -115,7 +115,7 @@ public:
   void SetPosition( pPosition_t );
 
   void FVSStreamStart( const std::string& sPath );
-  void FVSStreamStop();
+  void FVSStreamStop( int );
 
   ou::tf::config::symbol_t::EFeed Feed() const { return m_config.eFeed; }
 
