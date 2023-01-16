@@ -322,7 +322,7 @@ void Strategy::FVSStreamStart( const std::string& sPath ) {
     if ( bOpen ) {
       m_streamFVS.open( m_sFVSPath, std::ios_base::trunc );
       assert( m_streamFVS.is_open() );
-      m_streamFVS << "datetime" << m_FeatureSet.Header() << std::endl;
+      m_streamFVS << "datetime," << m_FeatureSet.Header() << std::endl;
     }
   }
 }
