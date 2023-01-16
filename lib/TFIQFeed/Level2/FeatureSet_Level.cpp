@@ -277,44 +277,32 @@ void FeatureSet_Level::Intensity( const ou::tf::Depth& depth, ptime& dtLast, dou
 
 void FeatureSet_Level::Ask_IncLimit(  const ou::tf::Depth& depth ) {
   Intensity( depth, ask.v7.dtLastLimit, ask.v7.intensityLimit, ask.v8.intensityLimit, ask.v9.accelLimit );
-  if ( 0.0 < ask.v8.intensityLimit ) {
-    ask.v8.relativeLimit = ask.v7.intensityLimit / ask.v8.intensityLimit;
-  }
+  ask.v8.relativeLimit = ( 0.0 < ask.v8.intensityLimit ) ? ask.v7.intensityLimit / ask.v8.intensityLimit : 0.0;
 }
 
 void FeatureSet_Level::Ask_IncMarket( const ou::tf::Depth& depth ) {
   Intensity( depth, ask.v7.dtLastMarket, ask.v7.intensityMarket, ask.v8.intensityMarket, ask.v9.accelMarket );
-  if ( 0.0 < ask.v8.intensityMarket ) {
-    ask.v8.relativeMarket = ask.v7.intensityMarket / ask.v8.intensityMarket;
-  }
+  ask.v8.relativeMarket = ( 0.0 < ask.v8.intensityMarket ) ? ask.v7.intensityMarket / ask.v8.intensityMarket : 0.0;
 }
 
 void FeatureSet_Level::Ask_IncCancel( const ou::tf::Depth& depth ) {
   Intensity( depth, ask.v7.dtLastCancel, ask.v7.intensityCancel, ask.v8.intensityCancel, ask.v9.accelCancel );
-  if ( 0.0 < ask.v8.intensityCancel ) {
-    ask.v8.relativeCancel = ask.v7.intensityCancel / ask.v8.intensityCancel;
-  }
+  ask.v8.relativeCancel = ( 0.0 < ask.v8.intensityCancel ) ? ask.v7.intensityCancel / ask.v8.intensityCancel : 0.0;
 }
 
 void FeatureSet_Level::Bid_IncLimit(  const ou::tf::Depth& depth ) {
   Intensity( depth, bid.v7.dtLastLimit, bid.v7.intensityLimit, bid.v8.intensityLimit, bid.v9.accelLimit  );
-  if ( 0.0 < bid.v8.intensityLimit ) {
-    bid.v8.relativeLimit = bid.v7.intensityLimit / bid.v8.intensityLimit;
-  }
+  bid.v8.relativeLimit = ( 0.0 < bid.v8.intensityLimit ) ? bid.v7.intensityLimit / bid.v8.intensityLimit : 0.0;
 }
 
 void FeatureSet_Level::Bid_IncMarket( const ou::tf::Depth& depth ) {
   Intensity( depth, bid.v7.dtLastMarket, bid.v7.intensityMarket, bid.v8.intensityMarket, bid.v9.accelMarket );
-  if ( 0.0 < bid.v8.intensityMarket ) {
-    bid.v8.relativeMarket = bid.v7.intensityMarket / bid.v8.intensityMarket;
-  }
+  bid.v8.relativeMarket = ( 0.0 < bid.v8.intensityMarket ) ? bid.v7.intensityMarket / bid.v8.intensityMarket : 0.0;
 }
 
 void FeatureSet_Level::Bid_IncCancel( const ou::tf::Depth& depth ) {
   Intensity( depth, bid.v7.dtLastCancel, bid.v7.intensityCancel, bid.v8.intensityCancel, bid.v9.accelCancel );
-  if ( 0.0 < bid.v8.intensityCancel ) {
-    bid.v8.relativeCancel = bid.v7.intensityCancel / bid.v8.intensityCancel;
-  }
+  bid.v8.relativeCancel = ( 0.0 < bid.v8.intensityCancel ) ? bid.v7.intensityCancel / bid.v8.intensityCancel : 0.0;
 }
 
 const std::string FeatureSet_Level::Header() {
@@ -339,7 +327,7 @@ const std::string FeatureSet_Level::Header() {
 
          ",cross.v2.spread,cross.v2.mid"
          ",cross.v2.imbal.lvl,cross.v2.imbal.agg"
-         ",cross.v5.sum.price.spreads,cross.v4.sum.vol.spreads"
+         ",cross.v5.sum.price.spreads,cross.v5.sum.vol.spreads"
   );
 }
 
