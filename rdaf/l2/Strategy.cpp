@@ -322,7 +322,7 @@ void Strategy::FVSStreamStart( const std::string& sPath ) {
     if ( bOpen ) {
       m_streamFVS.open( m_sFVSPath, std::ios_base::trunc );
       assert( m_streamFVS.is_open() );
-      m_streamFVS << m_FeatureSet.Header() << std::endl;
+      m_streamFVS << "datetime" << m_FeatureSet.Header() << std::endl;
     }
   }
 }
@@ -407,7 +407,10 @@ void Strategy::StartDepthByOrder() {
       }
 
       if ( m_streamFVS.is_open() ) {
-        m_streamFVS << m_FeatureSet << std::endl;
+        m_streamFVS
+          << boost::posix_time::to_iso_string( depth.DateTime() )
+          << ',' << m_FeatureSet
+          << std::endl;
       }
 
     },
@@ -476,7 +479,10 @@ void Strategy::StartDepthByOrder() {
       }
 
       if ( m_streamFVS.is_open() ) {
-        m_streamFVS << m_FeatureSet << std::endl;
+        m_streamFVS
+          << boost::posix_time::to_iso_string( depth.DateTime() )
+          << ',' << m_FeatureSet
+          << std::endl;
       }
 
     }
