@@ -368,10 +368,13 @@ bool AppAutoTrade::OnInit() {
     //pStrategy_t pStrategy = std::make_unique<Strategy>( choices, pTreeItem, m_pFile, m_pFileUtility );
     pStrategy_t pStrategy = std::make_unique<Strategy>( choices, pTreeItem );
 
+    m_pWinChartView->SetChartDataView( &pStrategy->GetChartDataView() );
+
     if ( m_choices.bStartSimulator ) {
       // need to vefify proper period when collector starts at 5:30est
       //pStrategy->InitForUSEquityExchanges( dateSim );
       pStrategy->InitForUS24HourFutures( dateSim );
+      m_pWinChartView->SetSim( true );
     }
 
     m_mapStrategy.emplace( sSymbol, std::move( pStrategy ) );
