@@ -147,6 +147,21 @@ void FeatureSet::ImbalanceSummary( ou::tf::linear::Stats& stats ) const {
   rs.CalcStats( stats );
 }
 
+const std::string FeatureSet::Header() {
+  bool bSeparator( false );
+  bool bSkipLevel0( true );
+  std::string header;
+  for ( const vLevels_t::value_type& vt: m_vLevels ) {
+    if ( bSkipLevel0 ) bSkipLevel0 = false;
+    else {
+      if ( bSeparator ) header += ',';
+      else bSeparator = true;
+      header += vt.Header();
+    }
+  }
+  return header;
+}
+
 std::ostream& FeatureSet::operator<<( std::ostream& stream ) const {
   bool bSeparator( false );
   bool bSkipLevel0( true );

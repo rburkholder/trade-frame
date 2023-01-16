@@ -76,6 +76,7 @@ public:
   // Diagnostic
 
   bool IntegrityCheck() const;
+  const std::string Header();
   std::ostream& operator<<( std::ostream& s ) const;
 
 protected:
