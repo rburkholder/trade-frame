@@ -198,13 +198,13 @@ public:
   void Ask_Quote( const ou::tf::Depth& );
   void Bid_Quote( const ou::tf::Depth& );
 
-  void Ask_IncLimit(  const ou::tf::Depth& depth );
-  void Ask_IncMarket( const ou::tf::Depth& depth );
-  void Ask_IncCancel( const ou::tf::Depth& depth );
+  void Ask_IncLimit(  const ou::tf::Depth& );
+  void Ask_IncMarket( const ou::tf::Depth& );
+  void Ask_IncCancel( const ou::tf::Depth& );
 
-  void Bid_IncLimit(  const ou::tf::Depth& depth );
-  void Bid_IncMarket( const ou::tf::Depth& depth );
-  void Bid_IncCancel( const ou::tf::Depth& depth );
+  void Bid_IncLimit(  const ou::tf::Depth& );
+  void Bid_IncMarket( const ou::tf::Depth& );
+  void Bid_IncCancel( const ou::tf::Depth& );
 
   static const std::string Header();
 
