@@ -319,15 +319,18 @@ void FeatureSet_Level::Bid_IncCancel( const ou::tf::Depth& depth ) {
 
 std::ostream& FeatureSet_Level::operator<<( std::ostream& stream ) const {
   stream
-    << "lvl " << m_ix
-    << " ask: "
-    << ask.v1.volume << "@" << ask.v1.price
-    << "=>" << ask.v1.aggregateVolume
-    << " bid: "
-    << bid.v1.volume << "@" << bid.v1.price
-    << "=>" << bid.v1.aggregateVolume
-    << ",cross: "
-    << "lvl=" << cross.v2.imbalanceLvl << ",agg=" << cross.v2.imbalanceAgg
+    << "lvl," << m_ix
+    << ",ask"
+    << ',' << ask.v1.volume
+    << ',' << ask.v1.price
+    << ',' << ask.v1.aggregateVolume
+    << ",bid"
+    << ',' << bid.v1.volume
+    << ',' << bid.v1.price
+    << ',' << bid.v1.aggregateVolume
+    << ",cross"
+    << ',' << cross.v2.imbalanceLvl
+    << ',' << cross.v2.imbalanceAgg
     ;
   return stream;
 }

@@ -148,8 +148,15 @@ void FeatureSet::ImbalanceSummary( ou::tf::linear::Stats& stats ) const {
 }
 
 std::ostream& FeatureSet::operator<<( std::ostream& stream ) const {
+  bool bSeparator( false );
+  bool bSkipLevel0( true );
   for ( const vLevels_t::value_type& vt: m_vLevels ) {
-    stream << vt;
+    if ( bSkipLevel0 ) bSkipLevel0 = false;
+    else {
+      if ( bSeparator ) stream << ',';
+      else bSeparator = true;
+      stream << vt;
+    }
   }
   return stream;
 }
