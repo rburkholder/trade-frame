@@ -413,9 +413,6 @@ bool AppAutoTrade::OnInit() {
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppAutoTrade::OnClose, this );  // start close of windows and controls
 
-  //m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws ); // replaced with alpaca
-  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed );
-
   CallAfter(
     [this](){
       LoadState();
@@ -566,6 +563,8 @@ void AppAutoTrade::ConstructInstrument_IB(
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
+
+  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
 
   m_pBuildInstrument->Queue(
     sSymbol,
