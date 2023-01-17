@@ -44,6 +44,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   (ou::tf::config::symbol_t::EFeed, eFeed)
   (std::string, sSymbol_Generic)
   (ou::tf::InstrumentType::EInstrumentType, eInstrumentType)
+  (double, dblCommission)
   (bool, bTradable)
   (bool, bEmitFVS)
   (std::string, sAlgorithm)
@@ -186,6 +187,12 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> luInstrumentType
       >> *qi::lit(' ') >> qi::eol;
 
+    ruleCommission
+      %= qi::lit( "commissionh" )
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> boost::spirit::double_
+      >> *qi::lit(' ') >> qi::eol;
+
     ruleTradable
       %= qi::lit("trade")
       >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
@@ -284,6 +291,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       %= -ruleFeed
       >> -ruleSymbolGeneric
       >> -ruleSymInstType
+      >> -ruleCommission
       >> -ruleTradable
       >> -ruleEmitFVS
       >> -ruleAlgorithm
@@ -359,6 +367,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   qi::rule<Iterator, std::string()> ruleSymbolIQFeed;
   qi::rule<Iterator, std::string()> ruleSymbolGeneric;
   qi::rule<Iterator, ou::tf::InstrumentType::EInstrumentType()> ruleSymInstType;
+  qi::rule<Iterator, double()> ruleCommission;
   qi::rule<Iterator, ou::tf::config::symbol_t::EFeed()> ruleFeed;
   qi::rule<Iterator, bool()> ruleTradable;
   qi::rule<Iterator, bool()> ruleEmitFVS;
