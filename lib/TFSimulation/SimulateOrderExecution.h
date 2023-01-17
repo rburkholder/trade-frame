@@ -62,7 +62,7 @@ public:
   }
 
   void SetOrderDelay( const time_duration &dtOrderDelay ) { m_dtQueueDelay = dtOrderDelay; };
-  void SetCommission( double Commission ) { m_dblCommission = Commission; };
+  void SetCommission( double dblCommission ) { m_dblCommission = dblCommission; };
 
   void NewQuote( const Quote& quote );
   void NewDepthByMM( const DepthByMM& depth ); // has no influence on the self administred order books

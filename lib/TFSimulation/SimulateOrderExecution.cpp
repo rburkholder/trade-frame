@@ -22,7 +22,8 @@ namespace tf { // TradeFrame
 int SimulateOrderExecution::m_nExecId( 1000 );
 
 SimulateOrderExecution::SimulateOrderExecution()
-: m_dtQueueDelay( milliseconds( 500 ) ), m_dblCommission( 1.00 )//, m_ea( EAQuotes )
+: m_dtQueueDelay( milliseconds( 250 ) )
+, m_dblCommission( 1.00 )
 {
 }
 
@@ -72,12 +73,12 @@ void SimulateOrderExecution::CalculateCommission( Order* pOrder, Trade::tradesiz
           dblCommission = 0.95 * (double) quan;
           break;
         case InstrumentType::Future:
-          dblCommission = 2.50 * (double) quan;  // GC futures have this commission
+          dblCommission = 2.50 * (double) quan;  // GC futures have this commission (is this per order, or per unit?)
           break;
         case InstrumentType::Currency:
           break;
         case InstrumentType::Unknown:
-          // default of some sort?
+          dblCommission = m_dblCommission * (double) quan;
           break;
         default:
           assert( false );
