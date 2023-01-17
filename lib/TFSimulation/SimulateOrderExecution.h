@@ -22,16 +22,16 @@
 #include <string>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-using namespace boost::posix_time;
-using namespace boost::gregorian;
+
 #include <boost/lexical_cast.hpp>
 
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
+#include <TFTimeSeries/DatedDatum.h>
+
 #include <TFTrading/Order.h>
 #include <TFTrading/Execution.h>
-#include <TFTimeSeries/DatedDatum.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -92,13 +92,16 @@ protected:
 
   using lOrderQueue_t = std::list<pOrder_t>;
   using lOrderQueue_iter_t = lOrderQueue_t::iterator;
+
   std::list<structCancelOrder> m_lCancelDelay; // separate structure for the cancellations, since not an order
+
   lOrderQueue_t m_lOrderDelay;  // all orders put in delay queue, taken out then processed as limit or market or stop
   lOrderQueue_t m_lOrderMarket;  // market orders to be processed
 
   using mapOrderBook_t = std::multimap<double,pOrder_t>;
   using mapOrderBook_iter_t = mapOrderBook_t::iterator;
-  using mapOrderBook_pair_t = std::pair<double,pOrder_t>;
+  using mapOrderBook_pair_t = mapOrderBook_t::value_type;
+
   mapOrderBook_t m_mapAsks; // lowest at beginning
   mapOrderBook_t m_mapBids; // highest at end
   mapOrderBook_t m_mapSellStops;  // pending sell stops, turned into market order when touched

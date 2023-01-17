@@ -58,10 +58,10 @@ void SimulateOrderExecution::CancelOrder( Order::idOrder_t nOrderId ) {
 }
 
 void SimulateOrderExecution::CalculateCommission( Order* pOrder, Trade::tradesize_t quan ) {
-  // Order or CInstrument should have commission calculation?
+  // Order or Instrument should have commission calculation?
   if ( 0 != quan ) {
-    if ( NULL != OnCommission ) {
-      double dblCommission( 0 );
+    if ( nullptr != OnCommission ) {
+      double dblCommission {};
       switch ( pOrder->GetInstrument()->GetInstrumentType() ) {
         case InstrumentType::ETF:
         case InstrumentType::Stock:
@@ -76,6 +76,11 @@ void SimulateOrderExecution::CalculateCommission( Order* pOrder, Trade::tradesiz
           break;
         case InstrumentType::Currency:
           break;
+        case InstrumentType::Unknown:
+          // default of some sort?
+          break;
+        default:
+          assert( false );
       }
       OnCommission( pOrder->GetOrderId(), dblCommission );
     }
@@ -84,9 +89,9 @@ void SimulateOrderExecution::CalculateCommission( Order* pOrder, Trade::tradesiz
 
 void SimulateOrderExecution::ProcessOrderQueues( const Quote &quote ) {
 
-  if ( !quote.IsValid() ) {
-    return;
-  }
+  //if ( !quote.IsValid() ) {
+  //  return;
+  //}
 
   ProcessCancelQueue( quote );
 
