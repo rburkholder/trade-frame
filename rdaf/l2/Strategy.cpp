@@ -406,11 +406,13 @@ void Strategy::StartDepthByOrder() {
         }
       }
 
-      if ( m_streamFVS.is_open() ) {
-        m_streamFVS
-          << boost::posix_time::to_iso_string( depth.DateTime() )
-          << ',' << m_FeatureSet
-          << std::endl;
+      if ( m_config.bEmitFVS ) {
+        if ( m_streamFVS.is_open() ) {
+          m_streamFVS
+            << boost::posix_time::to_iso_string( depth.DateTime() )
+            << ',' << m_FeatureSet
+            << std::endl;
+        }
       }
 
     },
@@ -478,11 +480,13 @@ void Strategy::StartDepthByOrder() {
         }
       }
 
-      if ( m_streamFVS.is_open() ) {
-        m_streamFVS
-          << boost::posix_time::to_iso_string( depth.DateTime() )
-          << ',' << m_FeatureSet
-          << std::endl;
+      if ( m_config.bEmitFVS ) {
+        if ( m_streamFVS.is_open() ) {
+          m_streamFVS
+            << boost::posix_time::to_iso_string( depth.DateTime() )
+            << ',' << m_FeatureSet
+            << std::endl;
+        }
       }
 
     }
