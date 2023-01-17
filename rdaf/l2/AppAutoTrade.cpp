@@ -427,6 +427,9 @@ bool AppAutoTrade::OnInit() {
       }
     );
   }
+  else {
+    m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
+  }
 
   m_pFrameMain->Show( true );
 
@@ -564,8 +567,6 @@ void AppAutoTrade::ConstructInstrument_IB(
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
-
   m_pBuildInstrument->Queue(
     sSymbol,
     [this,&sRunPortfolioName, &sSymbol, fConstructed_=std::move( fConstructed )]( pInstrument_t pInstrument ){
@@ -608,7 +609,24 @@ void AppAutoTrade::ConstructInstrument_Sim( const std::string& sRunPortfolioName
   //  const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
   //  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_sim );
 
-  ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( sSymbol );
+  mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( sSymbol );
+  assert( m_mapStrategy.end() != iterStrategy );
+
+  Strategy& strategy( *iterStrategy->second );
+
+  ou::tf::Instrument::pInstrument_t pInstrument;
+
+  //switch ( strategy.Choices().eInstrumentType ) { // not enough info to use this properly
+  //  case ou::tf::InstrumentType::Stock:
+  //    break;
+  //  case ou::tf::InstrumentType::Future:
+  //    break;
+  //  default:
+  //    assert( false );
+  //}
+
+  pInstrument = std::make_shared<ou::tf::Instrument>( sSymbol );
+
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
   im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
   pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_sim );
@@ -629,10 +647,6 @@ void AppAutoTrade::ConstructInstrument_Sim( const std::string& sRunPortfolioName
     BOOST_LOG_TRIVIAL(info) << "simulation position constructed: " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   }
 
-  mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( sSymbol );
-  assert( m_mapStrategy.end() != iterStrategy );
-
-  Strategy& strategy( *iterStrategy->second );
   strategy.SetPosition( pPosition );
 
   m_OnSimulationComplete.Add( MakeDelegate( &strategy, &Strategy::FVSStreamStop ) );

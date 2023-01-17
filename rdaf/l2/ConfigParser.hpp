@@ -26,6 +26,8 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#include <TFTrading/TradingEnumerations.h>
+
 namespace ou {
 namespace tf {
 namespace config {
@@ -41,6 +43,7 @@ struct symbol_t {
   // directly parsed
 
   EFeed eFeed;
+  ou::tf::InstrumentType::EInstrumentType eInstrumentType;
   bool bTradable;
   bool bEmitFVS;
 
@@ -83,6 +86,7 @@ struct symbol_t {
 
   symbol_t()
   : eFeed( EFeed::L1 ) // default
+  , eInstrumentType( ou::tf::InstrumentType::Stock )
   , bTradable( true )  // default
   , bEmitFVS( false )
   , nTimeBins {}

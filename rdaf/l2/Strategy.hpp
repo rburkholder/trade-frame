@@ -112,6 +112,8 @@ public:
   );
   virtual ~Strategy();
 
+  const ou::tf::config::symbol_t& Choices() const { return m_config; }
+
   void SetPosition( pPosition_t );
 
   void FVSStreamStart( const std::string& sPath );

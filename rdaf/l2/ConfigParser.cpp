@@ -43,6 +43,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::config::symbol_t,
   (ou::tf::config::symbol_t::EFeed, eFeed)
   (std::string, sSymbol_Generic)
+  (ou::tf::InstrumentType::EInstrumentType, eInstrumentType)
   (bool, bTradable)
   (bool, bEmitFVS)
   (std::string, sAlgorithm)
@@ -104,6 +105,11 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       ( "L2M", ou::tf::config::symbol_t::L2M )
       ( "l2o", ou::tf::config::symbol_t::L2O )
       ( "L2O", ou::tf::config::symbol_t::L2O )
+      ;
+
+    luInstrumentType.add
+      ( "future", ou::tf::InstrumentType::Future )
+      ( "stock",  ou::tf::InstrumentType::Stock )
       ;
 
     //ruleSeparator = *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ');
@@ -172,6 +178,12 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       %= qi::lit( "sym_symbol" )
       >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
       >> +qi::char_("A-Za-z0-9-")
+      >> *qi::lit(' ') >> qi::eol;
+
+    ruleSymInstType
+      %= qi::lit( "sym_inst_type" )
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> luInstrumentType
       >> *qi::lit(' ') >> qi::eol;
 
     ruleTradable
@@ -271,6 +283,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
     ruleSymbolChoices
       %= -ruleFeed
       >> -ruleSymbolGeneric
+      >> -ruleSymInstType
       >> -ruleTradable
       >> -ruleEmitFVS
       >> -ruleAlgorithm
@@ -324,6 +337,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
 
   qi::symbols<char, bool> luBool;
   qi::symbols<char, ou::tf::config::symbol_t::EFeed> luFeed;
+  qi::symbols<char, ou::tf::InstrumentType::EInstrumentType> luInstrumentType;
 
   qi::rule<Iterator, size_t()> ruleIbClientId;
   qi::rule<Iterator, size_t()> ruleThreads;
@@ -344,6 +358,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   qi::rule<Iterator, std::string()> ruleTimeLower;
   qi::rule<Iterator, std::string()> ruleSymbolIQFeed;
   qi::rule<Iterator, std::string()> ruleSymbolGeneric;
+  qi::rule<Iterator, ou::tf::InstrumentType::EInstrumentType()> ruleSymInstType;
   qi::rule<Iterator, ou::tf::config::symbol_t::EFeed()> ruleFeed;
   qi::rule<Iterator, bool()> ruleTradable;
   qi::rule<Iterator, bool()> ruleEmitFVS;
