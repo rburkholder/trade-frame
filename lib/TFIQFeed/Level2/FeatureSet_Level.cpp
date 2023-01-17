@@ -309,25 +309,25 @@ const std::string FeatureSet_Level::Header() {
   return std::string(
     "level,ask.v1.vol,ask.v1.price,ask.v1.aggvol,ask.v1.aggprice"
          ",ask.v3.diff2top,ask.v3.diff2adj"
-         ",ask.v4.meanprice,ask.v4.meanvol"
+         ",ask.v4.mean.price,ask.v4.mean.vol"
          ",ask.v6.dprice,ask.v6.dvol"
-         ",ask.v7.limit,ask.v7.market,ask.v7.cancel"
-         ",ask.v8.limit.int,ask.v8.market.int,ask.v8.cncl.int"
-         ",ask.v8.limit.rel,ask.v8.market.rel,ask.v8.cncl.rel"
-         ",ask.v9.limit,ask.v9.market,ask.v8.cancel"
+         ",ask.v7.limit.int,ask.v7.mrkt.int,ask.v7.cncl.int"
+         ",ask.v8.limit.int,ask.v8.mrkt.int,ask.v8.cncl.int"
+         ",ask.v8.limit.rel,ask.v8.mrkt.rel,ask.v8.cncl.rel"
+         ",ask.v9.limit,ask.v9.mrkt,ask.v9.cncl"
 
          ",bid.v1.volume,bid.v1.price,bid.v1.aggvol,bid.v1.aggprice"
          ",bid.v3.diff2top,bid.v3.diff2adj"
-         ",bid.v4.meanprice,ask.v4.meanvol"
+         ",bid.v4.mean.price,ask.v4.mean.vol"
          ",bid.v6.dprice,bid.v6.dvol"
-         ",bid.v7.limit,bid.v7.market,bid.v7.cancel"
-         ",bid.v8.limit.int,bid.v8.market.int,bid.v8.cncl.int"
-         ",bid.v8.limit.rel,bid.v8.market.rel,bid.v8.cncl.rel"
-         ",bid.v9.limit,bid.v9.market,bid.v8.cancel"
+         ",bid.v7.limit.int,bid.v7.mrkt.int,bid.v7.cncl.int"
+         ",bid.v8.limit.int,bid.v8.mrkt.int,bid.v8.cncl.int"
+         ",bid.v8.limit.rel,bid.v8.mrkt.rel,bid.v8.cncl.rel"
+         ",bid.v9.limit,bid.v9.mrkt,bid.v9.cncl"
 
          ",cross.v2.spread,cross.v2.mid"
          ",cross.v2.imbal.lvl,cross.v2.imbal.agg"
-         ",cross.v5.sum.price.spreads,cross.v5.sum.vol.spreads"
+         ",cross.v5.sum.price.spread,cross.v5.sum.vol.spread"
   );
 }
 
