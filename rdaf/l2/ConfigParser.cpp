@@ -188,7 +188,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> *qi::lit(' ') >> qi::eol;
 
     ruleCommission
-      %= qi::lit( "commissionh" )
+      %= qi::lit( "sym_commission" )
       >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
       >> boost::spirit::double_
       >> *qi::lit(' ') >> qi::eol;
