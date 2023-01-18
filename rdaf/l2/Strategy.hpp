@@ -244,7 +244,7 @@ private:
 
   double m_dblImbalanceMean, m_dblImbalanceSlope;
 
-  double m_dblMA_Slope_previous;
+  //double m_dblMA_Slope_previous;
 
   using vMovingAverageSlope_t = std::vector<ou::tf::MovingAverageSlope>;
   vMovingAverageSlope_t m_vMovingAverageSlope;

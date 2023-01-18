@@ -74,7 +74,7 @@ Strategy::Strategy(
 , m_ceShortEntry( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
 //, m_ceShortFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red )
 , m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
-, m_dblMA_Slope_previous {}
+//, m_dblMA_Slope_previous {}
 , m_dblStopDeltaProposed {}
 , m_dblStopActiveDelta {}, m_dblStopActiveActual {}
 , m_bfQuotes01Sec( 1 )
@@ -915,33 +915,57 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   m_ceRelativeMA2.Append( dt, ma1 - ma3 );
   m_ceRelativeMA3.Append( dt, ma2 - ma3 );
 
-  const bool bMa0AboveMa1( ma0 > ma1 );
-  const bool bMa1AboveMa2( ma1 > ma2 );
-  const bool bMa2AboveMa3( ma2 > ma3 );
+  // use a series of State objects to track changes,
+  //   and forecast with a probability model
+  //   for appropriate returns
 
-  const bool bMa0AboveMa3( ma0 > ma3 );
-  const bool bMa1AboveMa3( ma1 > ma3 );
+  double dblMA_Slope_current = m_vMovingAverageSlope[0].Slope();
 
-  //const bool bMaRising( bMa0AboveMa1 && bMa1AboveMa2 && bMa2AboveMa3 );
-  const bool bMaRising( bMa0AboveMa3 && bMa1AboveMa3 && bMa2AboveMa3 );
+  struct State {
+    const bool bMa0AboveMa1;
+    const bool bMa1AboveMa2;
+    const bool bMa2AboveMa3;
 
-  const bool bMa0BelowMa1( ma0 < ma1 );
-  const bool bMa1BelowMa2( ma1 < ma2 );
-  const bool bMa2BelowMa3( ma2 < ma3 );
+    const bool bMa0AboveMa3;
+    const bool bMa1AboveMa3;
 
-  const bool bMa0BelowMa3( ma0 < ma3 );
-  const bool bMa1BelowMa3( ma1 < ma3 );
+    const bool bMa0BelowMa1;
+    const bool bMa1BelowMa2;
+    const bool bMa2BelowMa3;
 
-  //const bool bMaFalling( bMa0BelowMa1 && bMa1BelowMa2 && bMa2BelowMa3 );
-  const bool bMaFalling( bMa0BelowMa3 && bMa1BelowMa3 && bMa2BelowMa3 );
+    const bool bMa0BelowMa3;
+    const bool bMa1BelowMa3;
 
-  if ( bMaRising ) {
+    const bool bSlopeCurAboveZero;
+    const bool bSlopeCurBelowZero;
+
+    State( const double ma0, const double ma1, const double ma2, const double ma3, const double slope )
+    : bMa0AboveMa1( ma0 > ma1 )
+    , bMa1AboveMa2( ma1 > ma2 )
+    , bMa2AboveMa3( ma2 > ma3 )
+    , bMa0AboveMa3( ma0 > ma3 )
+    , bMa1AboveMa3( ma1 > ma3 )
+    , bMa0BelowMa1( ma0 < ma1 )
+    , bMa1BelowMa2( ma1 < ma2 )
+    , bMa2BelowMa3( ma2 < ma3 )
+    , bMa0BelowMa3( ma0 < ma3 )
+    , bMa1BelowMa3( ma1 < ma3 )
+    , bSlopeCurAboveZero( 0.0 < slope )
+    , bSlopeCurBelowZero( 0.0 > slope )
+    {}
+    bool Rising() const { return ( bMa0AboveMa3 && bMa1AboveMa3 && bMa2AboveMa3 ); }
+    bool Falling() const { return ( bMa0BelowMa3 && bMa1BelowMa3 && bMa2BelowMa3 ); }
+    bool Above() const { return bSlopeCurAboveZero; }
+    bool Below() const { return bSlopeCurBelowZero; }
+  } state( ma0, ma1, ma2, ma3, dblMA_Slope_current );
+
+  if ( state.Rising() ) {
     currentMovingAverage = EMovingAverage::Rising;
     stateMovingAverage = ( currentMovingAverage == stateMovingAverage ) ? EMovingAverage::Rising : EMovingAverage::ToRising;
     m_bUseMARising = true;
   }
   else {
-    if ( bMaFalling ) {
+    if ( state.Falling() ) {
       currentMovingAverage = EMovingAverage::Falling;
       stateMovingAverage = ( currentMovingAverage == stateMovingAverage ) ? EMovingAverage::Falling : EMovingAverage::ToFalling;
       m_bUseMAFalling = true;
@@ -956,17 +980,15 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
 
   EStateDesired stateDesired( EStateDesired::Continue );
 
-  double dblMA_Slope_current = m_vMovingAverageSlope[0].Slope();
-
   // may need smoothing on this
-  const bool bSlopePrvAboveZero( 0.0 < m_dblMA_Slope_previous );
-  const bool bSlopePrvBelowZero( 0.0 > m_dblMA_Slope_previous );
+  //const bool bSlopePrvAboveZero( 0.0 < m_dblMA_Slope_previous );
+  //const bool bSlopePrvBelowZero( 0.0 > m_dblMA_Slope_previous );
 
-  const bool bSlopeCurAboveZero( 0.0 < dblMA_Slope_current );
-  const bool bSlopeCurBelowZero( 0.0 > dblMA_Slope_current );
+  //const bool bSlopeCurAboveZero( 0.0 < dblMA_Slope_current );
+  //const bool bSlopeCurBelowZero( 0.0 > dblMA_Slope_current );
 
-  const bool bSlopeRising( bSlopePrvBelowZero && bSlopeCurAboveZero );
-  const bool bSlopeFalling( bSlopePrvAboveZero && bSlopeCurBelowZero );
+  //const bool bSlopeRising( bSlopePrvBelowZero && bSlopeCurAboveZero );
+  //const bool bSlopeFalling( bSlopePrvAboveZero && bSlopeCurBelowZero );
 
   // TODO: perform a 'potential profit' test to determine if entering is desirable
   //    maybe a width of moving averages - which requires some data collection
@@ -975,7 +997,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   static const double stop_delta_min( 0.50 );
 
   //if ( bMaRising && bSlopeRising ) {
-  if ( bMaRising && bSlopeCurAboveZero ) {
+  if ( state.Rising() && state.Above() ) {
     double diff = ma1 - ma3;
     assert( 0.0 < diff );
     if ( stop_delta_min <= diff ) {
@@ -984,7 +1006,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     }
   }
   else {
-    if ( bMaFalling && bSlopeCurBelowZero ) {
+    if ( state.Falling() && state.Below() ) {
       double diff = ma3 - ma1;
       assert( 0.0 < diff );
       if ( stop_delta_min <= diff ) {
@@ -997,7 +1019,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     }
   }
 
-  m_dblMA_Slope_previous = dblMA_Slope_current;
+  //m_dblMA_Slope_previous = dblMA_Slope_current;
 
   // 1a) filter on moving average to reduce churn
   // 1b) lock it in by trailing a stop, based upon one of the ma
