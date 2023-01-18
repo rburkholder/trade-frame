@@ -647,6 +647,8 @@ void AppAutoTrade::ConstructInstrument_Sim( const std::string& sRunPortfolioName
     BOOST_LOG_TRIVIAL(info) << "simulation position constructed: " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   }
 
+  m_sim->SetCommission( sSymbol, strategy.Choices().dblCommission );
+
   strategy.SetPosition( pPosition );
 
   m_OnSimulationComplete.Add( MakeDelegate( &strategy, &Strategy::FVSStreamStop ) );

@@ -385,6 +385,15 @@ void SimulationProvider::HandleCancellation( Order::idOrder_t orderId ) {
   OrderManager::LocalCommonInstance().ReportCancellation( orderId );
 }
 
+void SimulationProvider::SetCommission( const std::string& sSymbol, double commission ) {
+  mapSymbols_t::iterator iter = m_mapSymbols.find( sSymbol );
+  if ( m_mapSymbols.end() == iter ) {
+    assert( false );
+  }
+  else {
+    iter->second->m_simExec.SetCommission( commission );
+  }
+}
 
 } // namespace tf
 } // namespace ou

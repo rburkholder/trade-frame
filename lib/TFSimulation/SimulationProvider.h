@@ -101,6 +101,8 @@ public:
     m_OnSimulationComplete = function;
   }
 
+  void SetCommission( const std::string& sSymbol, double commission );
+
 protected:
 
   std::string m_sGroupDirectory;
