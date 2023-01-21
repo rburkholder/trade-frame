@@ -989,7 +989,8 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     using rEValue_t = std::array<EValue,6>;
     rEValue_t rEValue;
 
-    double slope;
+    const bool bSlopeCurAboveZero;
+    const bool bSlopeCurBelowZero;
 
     void Insert( mapRelative_t& map, EValue e, const double value ) {
       mapRelative_t::iterator iter = map.find( value );
@@ -1004,9 +1005,10 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     State2(
       const double bid, const double ask
     , const double ma0, const double ma1, const double ma2, const double ma3
-    , const double slope_
+    , const double slope
     )
-    : slope( slope_ )
+    : bSlopeCurAboveZero( 0.0 < slope )
+    , bSlopeCurBelowZero( 0.0 > slope )
     {
       mapRelative_t mapRelative;
 
@@ -1017,6 +1019,10 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       Insert( mapRelative, EValue::ma2, ma2 );
       Insert( mapRelative, EValue::ma3, ma3 );
 
+      // TODO:
+      //   ratio of mid two related to min/max
+      //   slope > 0, slope < 0
+
       rEValue_t::iterator iterEValue( rEValue.begin() );
       for ( const mapRelative_t::value_type& vt_map: mapRelative ) {
         for ( const vRelative_t::value_type vt_vector: vt_map.second ) {
@@ -1025,6 +1031,20 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
         }
       }
 
+    }
+
+    bool operator==( const State2& rhs ) {
+      bool bResult( true );
+      rEValue_t::const_iterator iterLhs = rEValue.begin();
+      rEValue_t::const_iterator iterRhs = rhs.rEValue.begin();
+      for (
+        ;
+        iterLhs != rEValue.end();
+        iterLhs++, iterRhs++
+      ) {
+        bResult &= ( *iterLhs == *iterRhs );
+      }
+      return bResult;
     }
   };
 
