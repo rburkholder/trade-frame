@@ -23,6 +23,7 @@
 // https://www.intel.com/content/www/us/en/develop/documentation/advisor-user-guide/top/analyze-cpu-roofline.html
 // https://stackoverflow.com/questions/52653025/why-is-march-native-used-so-rarely
 
+#include <array>
 #include <chrono>
 
 // no longer use iostream, std::cout has a multithread contention problem
@@ -977,6 +978,57 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       }
     }
   }
+
+  struct State2 {
+
+    enum class EValue { bid, ask, ma0, ma1, ma2, ma3 };
+
+    using vRelative_t = std::vector<EValue>;
+    using mapRelative_t = std::map<double,vRelative_t>;
+
+    using rEValue_t = std::array<EValue,6>;
+    rEValue_t rEValue;
+
+    double slope;
+
+    void Insert( mapRelative_t& map, EValue e, const double value ) {
+      mapRelative_t::iterator iter = map.find( value );
+      if ( map.end() == iter ) {
+        auto pair =  map.emplace( mapRelative_t::value_type( value, std::move( vRelative_t() ) ));
+        assert( pair.second );
+        iter = pair.first;
+      }
+      iter->second.push_back( e );
+    }
+
+    State2(
+      const double bid, const double ask
+    , const double ma0, const double ma1, const double ma2, const double ma3
+    , const double slope_
+    )
+    : slope( slope_ )
+    {
+      mapRelative_t mapRelative;
+
+      Insert( mapRelative, EValue::bid, bid );
+      Insert( mapRelative, EValue::ask, ask );
+      Insert( mapRelative, EValue::ma0, ma0 );
+      Insert( mapRelative, EValue::ma1, ma1 );
+      Insert( mapRelative, EValue::ma2, ma2 );
+      Insert( mapRelative, EValue::ma3, ma3 );
+
+      rEValue_t::iterator iterEValue( rEValue.begin() );
+      for ( const mapRelative_t::value_type& vt_map: mapRelative ) {
+        for ( const vRelative_t::value_type vt_vector: vt_map.second ) {
+          *iterEValue = vt_vector;
+          iterEValue++;
+        }
+      }
+
+    }
+  };
+
+  State2 state2( quote.Bid(), quote.Ask(), ma0, ma1, ma2, ma3, dblMA_Slope_current );
 
   EStateDesired stateDesired( EStateDesired::Continue );
 
