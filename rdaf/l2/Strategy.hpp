@@ -163,15 +163,6 @@ private:
   , Exit
   };
 
-  enum class EMovingAverage {
-    Rising, ToRising, Flat, ToFlat, Falling, ToFalling
-  };
-
-  EMovingAverage m_stateMovingAverage;
-
-  bool m_bUseMARising;
-  bool m_bUseMAFalling;
-
   EStateTrade m_stateTrade;
 
   TreeItem* m_pTreeItemSymbol;
@@ -243,8 +234,6 @@ private:
   std::atomic_uint32_t m_nMarketOrdersBid; // pull from InteractiveChart
 
   double m_dblImbalanceMean, m_dblImbalanceSlope;
-
-  //double m_dblMA_Slope_previous;
 
   using vMovingAverageSlope_t = std::vector<ou::tf::MovingAverageSlope>;
   vMovingAverageSlope_t m_vMovingAverageSlope;

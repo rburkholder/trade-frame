@@ -66,8 +66,6 @@ Strategy::Strategy(
 //, m_pFile( pFile )
 //, m_pFileUtility( pFileUtility )
 , m_stateTrade( EStateTrade::Init )
-, m_stateMovingAverage( EMovingAverage::Flat )
-, m_bUseMARising( false ), m_bUseMAFalling( false )
 , m_config( config )
 , m_ceLongEntry( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
 //, m_ceLongFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::Blue )
@@ -75,7 +73,6 @@ Strategy::Strategy(
 , m_ceShortEntry( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
 //, m_ceShortFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red )
 , m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
-//, m_dblMA_Slope_previous {}
 , m_dblStopDeltaProposed {}
 , m_dblStopActiveDelta {}, m_dblStopActiveActual {}
 , m_bfQuotes01Sec( 1 )
@@ -627,11 +624,12 @@ void Strategy::InitRdaf() {
 #endif
 }
 
-void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
+// TODO:
+//   confirm if quote comes before or after the related l2 change
+//   are there top of book l2 changes not reflected as l1 quote changes?
+//   use top of book changes instead of using quote as event?
 
-  //if ( !quote.IsValid() ) { // empty function
-  //  return;
-  //}
+void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
   ptime dt( quote.DateTime() );
 
@@ -656,7 +654,6 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
   const double mid = m_quote.Midpoint();
   const ou::tf::Trade::price_t price = trade.Price();
-  //const uint64_t volume = trade.Volume();
 
   if ( price >= mid ) {
     m_nMarketOrdersAsk++;
@@ -904,9 +901,6 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
 
   // Moving Average
 
-  EMovingAverage stateMovingAverage( m_stateMovingAverage );
-  EMovingAverage currentMovingAverage( EMovingAverage::Flat );
-
   const double ma0( m_vMovingAverageSlope[0].EMA() ); // shortest
   const double ma1( m_vMovingAverageSlope[1].EMA() );
   const double ma2( m_vMovingAverageSlope[2].EMA() );
@@ -923,63 +917,6 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   double dblMA_Slope_current = m_vMovingAverageSlope[0].Slope();
 
   struct State {
-    const bool bMa0AboveMa1;
-    const bool bMa1AboveMa2;
-    const bool bMa2AboveMa3;
-
-    const bool bMa0AboveMa3;
-    const bool bMa1AboveMa3;
-
-    const bool bMa0BelowMa1;
-    const bool bMa1BelowMa2;
-    const bool bMa2BelowMa3;
-
-    const bool bMa0BelowMa3;
-    const bool bMa1BelowMa3;
-
-    const bool bSlopeCurAboveZero;
-    const bool bSlopeCurBelowZero;
-
-    State( const double ma0, const double ma1, const double ma2, const double ma3, const double slope )
-    : bMa0AboveMa1( ma0 > ma1 )
-    , bMa1AboveMa2( ma1 > ma2 )
-    , bMa2AboveMa3( ma2 > ma3 )
-    , bMa0AboveMa3( ma0 > ma3 )
-    , bMa1AboveMa3( ma1 > ma3 )
-    , bMa0BelowMa1( ma0 < ma1 )
-    , bMa1BelowMa2( ma1 < ma2 )
-    , bMa2BelowMa3( ma2 < ma3 )
-    , bMa0BelowMa3( ma0 < ma3 )
-    , bMa1BelowMa3( ma1 < ma3 )
-    , bSlopeCurAboveZero( 0.0 < slope )
-    , bSlopeCurBelowZero( 0.0 > slope )
-    {}
-    bool Rising() const { return ( bMa0AboveMa3 && bMa1AboveMa3 && bMa2AboveMa3 ); }
-    bool Falling() const { return ( bMa0BelowMa3 && bMa1BelowMa3 && bMa2BelowMa3 ); }
-    bool Above() const { return bSlopeCurAboveZero; }
-    bool Below() const { return bSlopeCurBelowZero; }
-  } state( ma0, ma1, ma2, ma3, dblMA_Slope_current );
-
-  if ( state.Rising() ) {
-    currentMovingAverage = EMovingAverage::Rising;
-    stateMovingAverage = ( currentMovingAverage == stateMovingAverage ) ? EMovingAverage::Rising : EMovingAverage::ToRising;
-    m_bUseMARising = true;
-  }
-  else {
-    if ( state.Falling() ) {
-      currentMovingAverage = EMovingAverage::Falling;
-      stateMovingAverage = ( currentMovingAverage == stateMovingAverage ) ? EMovingAverage::Falling : EMovingAverage::ToFalling;
-      m_bUseMAFalling = true;
-    }
-    else {
-      assert( EMovingAverage::Flat == currentMovingAverage );
-      if ( EMovingAverage::Flat != stateMovingAverage ) {
-        stateMovingAverage = EMovingAverage::ToFlat;
-      }
-    }
-  }
-
-  struct State2 {
 
     enum class EValue { bid, ask, ma0, ma1, ma2, ma3 };
 
@@ -1002,7 +939,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       iter->second.push_back( e );
     }
 
-    State2(
+    State(
       const double bid, const double ask
     , const double ma0, const double ma1, const double ma2, const double ma3
     , const double slope
@@ -1033,7 +970,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
 
     }
 
-    bool operator==( const State2& rhs ) {
+    bool operator==( const State& rhs ) {
       bool bResult( true );
       rEValue_t::const_iterator iterLhs = rEValue.begin();
       rEValue_t::const_iterator iterRhs = rhs.rEValue.begin();
@@ -1046,21 +983,31 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       }
       return bResult;
     }
+
+    bool EnterLong() const {
+      return (
+           ( EValue::bid == rEValue[ 4 ] )
+        && ( EValue::ma0 == rEValue[ 3 ] )
+        && ( EValue::ma1 == rEValue[ 2 ] )
+        && ( EValue::ma2 == rEValue[ 1 ] )
+        && ( EValue::ma3 == rEValue[ 0 ] )
+      );
+    }
+
+    bool EnterShort() const {
+      return (
+            ( EValue::ask == rEValue[ 1 ] )
+         && ( EValue::ma0 == rEValue[ 2 ] )
+         && ( EValue::ma1 == rEValue[ 3 ] )
+         && ( EValue::ma2 == rEValue[ 4 ] )
+         && ( EValue::ma3 == rEValue[ 5 ] )
+      );
+    }
   };
 
-  State2 state2( quote.Bid(), quote.Ask(), ma0, ma1, ma2, ma3, dblMA_Slope_current );
+  State state( quote.Bid(), quote.Ask(), ma0, ma1, ma2, ma3, dblMA_Slope_current );
 
   EStateDesired stateDesired( EStateDesired::Continue );
-
-  // may need smoothing on this
-  //const bool bSlopePrvAboveZero( 0.0 < m_dblMA_Slope_previous );
-  //const bool bSlopePrvBelowZero( 0.0 > m_dblMA_Slope_previous );
-
-  //const bool bSlopeCurAboveZero( 0.0 < dblMA_Slope_current );
-  //const bool bSlopeCurBelowZero( 0.0 > dblMA_Slope_current );
-
-  //const bool bSlopeRising( bSlopePrvBelowZero && bSlopeCurAboveZero );
-  //const bool bSlopeFalling( bSlopePrvAboveZero && bSlopeCurBelowZero );
 
   // TODO: perform a 'potential profit' test to determine if entering is desirable
   //    maybe a width of moving averages - which requires some data collection
@@ -1068,8 +1015,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
 
   static const double stop_delta_min( 0.50 );
 
-  //if ( bMaRising && bSlopeRising ) {
-  if ( state.Rising() && state.Above() ) {
+  if ( state.EnterLong() ) {
     double diff = ma1 - ma3;
     assert( 0.0 < diff );
     if ( stop_delta_min <= diff ) {
@@ -1078,7 +1024,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     }
   }
   else {
-    if ( state.Falling() && state.Below() ) {
+    if ( state.EnterShort() ) {
       double diff = ma3 - ma1;
       assert( 0.0 < diff );
       if ( stop_delta_min <= diff ) {
@@ -1090,8 +1036,6 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       // TODO: suggestion, four seconds perform a cancel, or from some other event
     }
   }
-
-  //m_dblMA_Slope_previous = dblMA_Slope_current;
 
   // 1a) filter on moving average to reduce churn
   // 1b) lock it in by trailing a stop, based upon one of the ma
@@ -1109,7 +1053,6 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
           m_dblStopActiveActual = quote.Ask() - m_dblStopActiveDelta;
 
           BOOST_LOG_TRIVIAL(info) << dt << " Search->GoLong," << m_dblStopActiveActual << "," << m_dblStopActiveDelta;
-          m_bUseMARising = ( EMovingAverage::Rising == currentMovingAverage );
           m_sProfitDescription = "l,srch";
           EnterLong( quote );
           break;
@@ -1119,7 +1062,6 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
           m_dblStopActiveActual = quote.Bid() + m_dblStopActiveDelta;
 
           BOOST_LOG_TRIVIAL(info) << dt << " Search->GoShort," << m_dblStopActiveActual << "," << m_dblStopActiveDelta;
-          m_bUseMAFalling = ( EMovingAverage::Falling == currentMovingAverage );
           m_sProfitDescription = "s,srch";
           EnterShort( quote );
           break;
@@ -1154,7 +1096,6 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
                 m_sProfitDescription += ",x,short";
               }
               ExitPosition( quote );
-              m_bUseMAFalling = EMovingAverage::Falling == currentMovingAverage;
               m_sProfitDescription = "s,go";
               EnterShort( quote );
             }
@@ -1216,7 +1157,6 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
                 m_sProfitDescription += ",x,long";
               }
               ExitPosition( quote );
-              m_bUseMARising = EMovingAverage::Rising == currentMovingAverage;
               m_sProfitDescription = "l,go";
               EnterLong( quote );
             }
@@ -1274,7 +1214,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       break;
   }
 
-  m_stateMovingAverage = currentMovingAverage; // not stateMovingAverage
+  //m_stateMovingAverage = currentMovingAverage; // not stateMovingAverage
 
 }
 
