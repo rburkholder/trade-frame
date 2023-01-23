@@ -97,11 +97,9 @@ Strategy::Strategy(
 
   m_ceVolume.SetName( "Volume" );
 
-  //m_ceSkewness.SetName( "Skew" );
-
-  m_ceRelativeMA1.SetName( "MA1" );
-  m_ceRelativeMA2.SetName( "MA2" );
-  m_ceRelativeMA3.SetName( "MA3" );
+  m_ceRelativeMA1.SetName( "ma0-ma3" );
+  m_ceRelativeMA2.SetName( "ma1-ma3" );
+  m_ceRelativeMA3.SetName( "ma2-ma3" );
 
   m_ceProfitUnRealized.SetName( "UnRealized" );
   m_ceProfitRealized.SetName( "Realized" );
@@ -117,13 +115,6 @@ Strategy::Strategy(
 
   m_cdMarketDepthBid.SetName( "MarketDepth Bid" );
   m_cdMarketDepthBid.SetColour( ou::Colour::Blue );
-
-  //m_ceFVS_Var1_Ask.SetName( "Depth Ask Var1" );
-  //m_ceFVS_Var1_Bid.SetName( "Depth Bid Var1" );
-
-  //m_ceFVS_Var1_Ask.SetColour( ou::Colour::Red );
-  //m_ceFVS_Var1_Diff.SetColour( ou::Colour::Green );
-  //m_ceFVS_Var1_Bid.SetColour( ou::Colour::Blue );
 
   m_ceFVS_Ask_Lvl1RelLmt.SetName( "AskRelLmit" );
   m_ceFVS_Ask_Lvl1RelMkt.SetName( "AskRelMkt" );
@@ -196,18 +187,12 @@ void Strategy::SetupChart() {
   m_ceImbalanceSmoothMean.SetColour( ou::Colour::DarkGreen );
   m_cdv.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceSmoothMean );
 
-  //m_cdv.Add( EChartSlot::Skew, &m_ceSkewness );
-
   m_cdv.Add( EChartSlot::PL1, &m_ceProfitUnRealized );
   m_cdv.Add( EChartSlot::PL2, &m_ceProfitRealized );
   m_cdv.Add( EChartSlot::PL1, &m_ceCommissionsPaid );
   m_cdv.Add( EChartSlot::PL2, &m_ceProfit );
 
-  //m_cdv.Add( EChartSlot::FVS_Var1, &m_cemZero );
-
-  //m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Ask );
-  //m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Diff );
-  //m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Bid );
+  m_cdv.Add( EChartSlot::FVS_v8_rel, &m_cemZero );
 
   m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Ask_Lvl1RelLmt );
   m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Ask_Lvl1RelMkt );
@@ -365,6 +350,8 @@ void Strategy::StartDepthByOrder() {
   m_pOrderBased->Set(
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fBid_
 
+      ptime dt( depth.DateTime() );
+
       ou::tf::Trade::price_t price( depth.Price() );
       ou::tf::Trade::volume_t volume( depth.Volume() );
 
@@ -420,11 +407,9 @@ void Strategy::StartDepthByOrder() {
       if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
         Imbalance( depth );
         if ( 1 == ix ) {
-          //double var1 = m_FeatureSet.FVS()[1].bid.v9.accelLimit;
-          //double var1B = m_FeatureSet.FVS()[1].bid.v8.relativeLimit;
-          //m_ceFVS_Var1_Bid.Append( depth.DateTime(), -var1B );
-          //double var1A = m_FeatureSet.FVS()[1].ask.v8.relativeLimit;
-          //m_ceFVS_Var1_Diff.Append( depth.DateTime(), var1A - var1B );
+          m_ceFVS_Bid_Lvl1RelLmt.Append( dt, -m_FeatureSet.FVS()[ 1 ].bid.v8.relativeLimit );
+          m_ceFVS_Bid_Lvl1RelMkt.Append( dt, -m_FeatureSet.FVS()[ 1 ].bid.v8.relativeMarket );
+          m_ceFVS_Bid_Lvl1RelCncl.Append( dt, -m_FeatureSet.FVS()[ 1 ].bid.v8.relativeCancel );
         }
       }
 
@@ -439,6 +424,8 @@ void Strategy::StartDepthByOrder() {
 
     },
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
+
+      ptime dt( depth.DateTime() );
 
       ou::tf::Trade::price_t price( depth.Price() );
       ou::tf::Trade::volume_t volume( depth.Volume() );
@@ -494,11 +481,9 @@ void Strategy::StartDepthByOrder() {
       if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
         Imbalance( depth );
         if ( 1 == ix ) {
-          //double var1 = m_FeatureSet.FVS()[1].ask.v9.accelLimit;
-          //double var1A = m_FeatureSet.FVS()[1].ask.v8.relativeLimit;
-          //m_ceFVS_Var1_Ask.Append( depth.DateTime(), var1A );
-          //double var1B = m_FeatureSet.FVS()[1].bid.v8.relativeLimit;
-          //m_ceFVS_Var1_Diff.Append( depth.DateTime(), var1A - var1B );
+          m_ceFVS_Ask_Lvl1RelLmt.Append( dt, +m_FeatureSet.FVS()[ 1 ].ask.v8.relativeLimit );
+          m_ceFVS_Ask_Lvl1RelMkt.Append( dt, +m_FeatureSet.FVS()[ 1 ].ask.v8.relativeMarket );
+          m_ceFVS_Ask_Lvl1RelCncl.Append( dt, +m_FeatureSet.FVS()[ 1 ].ask.v8.relativeCancel );
         }
       }
 
@@ -920,14 +905,6 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
 
   // ehlers cybernetic analysis for stocks & futures page 7
   //double k_fisher = 0.5 * std::log( ( 1.0 + k_normalized ) / ( 1.0 - k_normalized ) );
-
-  m_ceFVS_Ask_Lvl1RelLmt.Append( dt, +m_FeatureSet.FVS()[ 1 ].ask.v8.relativeLimit );
-  m_ceFVS_Ask_Lvl1RelMkt.Append( dt, +m_FeatureSet.FVS()[ 1 ].ask.v8.relativeMarket );
-  m_ceFVS_Ask_Lvl1RelCncl.Append( dt, +m_FeatureSet.FVS()[ 1 ].ask.v8.relativeCancel );
-
-  m_ceFVS_Bid_Lvl1RelLmt.Append( dt, -m_FeatureSet.FVS()[ 1 ].bid.v8.relativeLimit );
-  m_ceFVS_Bid_Lvl1RelMkt.Append( dt, -m_FeatureSet.FVS()[ 1 ].bid.v8.relativeMarket );
-  m_ceFVS_Bid_Lvl1RelCncl.Append( dt, -m_FeatureSet.FVS()[ 1 ].bid.v8.relativeCancel );
 
   // Moving Average
 
