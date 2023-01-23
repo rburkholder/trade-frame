@@ -194,13 +194,13 @@ void Strategy::SetupChart() {
 
   m_cdv.Add( EChartSlot::FVS_v8_rel, &m_cemZero );
 
-  m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Ask_Lvl1RelLmt );
   m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Ask_Lvl1RelMkt );
   m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Ask_Lvl1RelCncl );
+  m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Ask_Lvl1RelLmt );
 
   m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Bid_Lvl1RelLmt );
-  m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Bid_Lvl1RelMkt );
   m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Bid_Lvl1RelCncl );
+  m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Bid_Lvl1RelMkt );
 
   //m_cdv.Add( EChartSlot::ET, &m_ceExecutionTime );
 
@@ -765,8 +765,8 @@ void Strategy::EnterLong( const ou::tf::Quote& quote ) { // limit orders, in rea
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
+  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
   pOrder->SetSignalPrice( dblMidPoint );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
@@ -774,15 +774,15 @@ void Strategy::EnterLong( const ou::tf::Quote& quote ) { // limit orders, in rea
   m_stateTrade = EStateTrade::LongSubmitted;
   m_pOrderPending = pOrder;
   m_pPosition->PlaceOrder( pOrder );
-  ShowOrder( pOrder );
+  //ShowOrder( pOrder );
 }
 
 void Strategy::EnterShort( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
+  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
   pOrder->SetSignalPrice( dblMidPoint );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
@@ -790,7 +790,7 @@ void Strategy::EnterShort( const ou::tf::Quote& quote ) { // limit orders, in re
   m_stateTrade = EStateTrade::ShortSubmitted;
   m_pOrderPending = pOrder;
   m_pPosition->PlaceOrder( pOrder );
-  ShowOrder( pOrder );
+  //ShowOrder( pOrder );
 }
 
 void Strategy::ExitLong( const ou::tf::Quote& quote ) {
@@ -805,7 +805,7 @@ void Strategy::ExitLong( const ou::tf::Quote& quote ) {
   m_stateTrade = EStateTrade::LongExitSubmitted;
   m_pOrderPending = pOrder;
   m_pPosition->PlaceOrder( pOrder );
-  ShowOrder( pOrder );
+  //ShowOrder( pOrder );
 }
 
 void Strategy::ExitShort( const ou::tf::Quote& quote ) {
@@ -820,7 +820,7 @@ void Strategy::ExitShort( const ou::tf::Quote& quote ) {
   m_stateTrade = EStateTrade::ShortExitSubmitted;
   m_pOrderPending = pOrder;
   m_pPosition->PlaceOrder( pOrder );
-  ShowOrder( pOrder );
+  //ShowOrder( pOrder );
 }
 
 void Strategy::ExitPosition( const ou::tf::Quote& quote ) {
@@ -1051,6 +1051,8 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
 
   // how many seconds (or ratio) does it trend vs going sideways?
 
+  static const boost::posix_time::seconds wait( 6 );
+
   switch ( m_stateTrade ) {
     case EStateTrade::Search:
       switch ( stateDesired ) {
@@ -1082,14 +1084,14 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       break;
     case EStateTrade::LongSubmitted:
       // wait for order to execute
-      switch ( stateDesired ) {
-        case EStateDesired::Cancel:
-          if ( m_pOrderPending ) {
-            auto id = m_pOrderPending->GetOrderId();
-            BOOST_LOG_TRIVIAL(info) << dt << " LongSubmitted->Cancel " << id;
-            m_pPosition->CancelOrder( id );
-          }
-          break;
+      if ( m_pOrderPending ) {
+        if ( wait > ( dt - m_pOrderPending->GetDateTimeOrderSubmitted() ) ) {
+          auto id = m_pOrderPending->GetOrderId();
+          BOOST_LOG_TRIVIAL(info) << dt << " LongSubmitted->Cancel " << id;
+          //m_stateTrade = EStateTrade::Cancelling; // can't do this as a fill may happen
+          m_pOrderPending.reset();
+          m_pPosition->CancelOrder( id );
+        }
       }
       break;
     case EStateTrade::LongExitSignal:
@@ -1143,14 +1145,14 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       break;
     case EStateTrade::ShortSubmitted:
       // wait for order to execute
-      switch ( stateDesired ) {
-        case EStateDesired::Cancel:
-          if ( m_pOrderPending ) {
-            auto id = m_pOrderPending->GetOrderId();
-            BOOST_LOG_TRIVIAL(info) << dt << " ShortSubmitted->Cancel " << id;
-            m_pPosition->CancelOrder( id );
-          }
-          break;
+      if ( m_pOrderPending ) {
+        if ( wait > ( dt - m_pOrderPending->GetDateTimeOrderSubmitted() ) ) {
+          auto id = m_pOrderPending->GetOrderId();
+          BOOST_LOG_TRIVIAL(info) << dt << " ShortSubmitted->Cancel " << id;
+          //m_stateTrade = EStateTrade::Cancelling; // can't do this as a fill may happen
+          m_pOrderPending.reset();
+          m_pPosition->CancelOrder( id );
+        }
       }
       break;
     case EStateTrade::ShortExitSignal:
