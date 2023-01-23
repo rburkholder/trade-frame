@@ -126,7 +126,7 @@ public:
     double relativeCancel; // ratio of short term intensity vs long term intensity
 
     V8()
-    : intensityLimit {},  relativeLimit {}
+    : intensityLimit  {}, relativeLimit  {}
     , intensityMarket {}, relativeMarket {}
     , intensityCancel {}, relativeCancel {}
     {}
