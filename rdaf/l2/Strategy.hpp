@@ -137,7 +137,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, Cycle, CycleSlope, MASlope, MA, ImbalanceMean, FVS_Var1, Skew, PL1, PL2, ET, MarketDepth };
+  enum EChartSlot { Price, Volume, Cycle, CycleSlope, MASlope, MA, ImbalanceMean, FVS_v8_rel, Skew, PL1, PL2, ET, MarketDepth };
 
   enum class EStateTrade {
     Init,  // initiaize state in current market
@@ -219,6 +219,13 @@ private:
   //ou::ChartEntryIndicator m_ceFVS_Var1_Ask;
   //ou::ChartEntryIndicator m_ceFVS_Var1_Diff;
   //ou::ChartEntryIndicator m_ceFVS_Var1_Bid;
+
+  ou::ChartEntryIndicator m_ceFVS_Ask_Lvl1RelLmt;
+  ou::ChartEntryIndicator m_ceFVS_Ask_Lvl1RelMkt;
+  ou::ChartEntryIndicator m_ceFVS_Ask_Lvl1RelCncl;
+  ou::ChartEntryIndicator m_ceFVS_Bid_Lvl1RelLmt;
+  ou::ChartEntryIndicator m_ceFVS_Bid_Lvl1RelMkt;
+  ou::ChartEntryIndicator m_ceFVS_Bid_Lvl1RelCncl;
 
   ou::ChartEntryMark m_cemZero;
 

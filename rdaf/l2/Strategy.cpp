@@ -125,6 +125,22 @@ Strategy::Strategy(
   //m_ceFVS_Var1_Diff.SetColour( ou::Colour::Green );
   //m_ceFVS_Var1_Bid.SetColour( ou::Colour::Blue );
 
+  m_ceFVS_Ask_Lvl1RelLmt.SetName( "AskRelLmit" );
+  m_ceFVS_Ask_Lvl1RelMkt.SetName( "AskRelMkt" );
+  m_ceFVS_Ask_Lvl1RelCncl.SetName( "AskRelCncl" );
+
+  m_ceFVS_Ask_Lvl1RelLmt.SetColour( ou::Colour::DeepSkyBlue );
+  m_ceFVS_Ask_Lvl1RelMkt.SetColour( ou::Colour::Green );
+  m_ceFVS_Ask_Lvl1RelCncl.SetColour( ou::Colour::Purple );
+
+  m_ceFVS_Bid_Lvl1RelLmt.SetName( "BidRelLmit" );
+  m_ceFVS_Bid_Lvl1RelMkt.SetName( "BidRelMkt" );
+  m_ceFVS_Bid_Lvl1RelCncl.SetName( "BidRelCncl" );
+
+  m_ceFVS_Bid_Lvl1RelLmt.SetColour( ou::Colour::DeepSkyBlue );
+  m_ceFVS_Bid_Lvl1RelMkt.SetColour( ou::Colour::Green );
+  m_ceFVS_Bid_Lvl1RelCncl.SetColour( ou::Colour::Purple );
+
 }
 
 Strategy::~Strategy() {
@@ -192,6 +208,14 @@ void Strategy::SetupChart() {
   //m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Ask );
   //m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Diff );
   //m_cdv.Add( EChartSlot::FVS_Var1, & m_ceFVS_Var1_Bid );
+
+  m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Ask_Lvl1RelLmt );
+  m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Ask_Lvl1RelMkt );
+  m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Ask_Lvl1RelCncl );
+
+  m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Bid_Lvl1RelLmt );
+  m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Bid_Lvl1RelMkt );
+  m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Bid_Lvl1RelCncl );
 
   //m_cdv.Add( EChartSlot::ET, &m_ceExecutionTime );
 
@@ -897,7 +921,13 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   // ehlers cybernetic analysis for stocks & futures page 7
   //double k_fisher = 0.5 * std::log( ( 1.0 + k_normalized ) / ( 1.0 - k_normalized ) );
 
-  //m_FeatureSet.FVS(). // use imbalance, and others
+  m_ceFVS_Ask_Lvl1RelLmt.Append( dt, +m_FeatureSet.FVS()[ 1 ].ask.v8.relativeLimit );
+  m_ceFVS_Ask_Lvl1RelMkt.Append( dt, +m_FeatureSet.FVS()[ 1 ].ask.v8.relativeMarket );
+  m_ceFVS_Ask_Lvl1RelCncl.Append( dt, +m_FeatureSet.FVS()[ 1 ].ask.v8.relativeCancel );
+
+  m_ceFVS_Bid_Lvl1RelLmt.Append( dt, -m_FeatureSet.FVS()[ 1 ].bid.v8.relativeLimit );
+  m_ceFVS_Bid_Lvl1RelMkt.Append( dt, -m_FeatureSet.FVS()[ 1 ].bid.v8.relativeMarket );
+  m_ceFVS_Bid_Lvl1RelCncl.Append( dt, -m_FeatureSet.FVS()[ 1 ].bid.v8.relativeCancel );
 
   // Moving Average
 
