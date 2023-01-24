@@ -997,7 +997,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     bool EnterLong() const {
       return (
            ( EValue::bid == rEValue[ 4 ] )
-        && ( EValue::ma0 == rEValue[ 3 ] )
+        //&& ( EValue::ma0 == rEValue[ 3 ] )
         && ( EValue::ma1 == rEValue[ 2 ] )
         && ( EValue::ma2 == rEValue[ 1 ] )
         && ( EValue::ma3 == rEValue[ 0 ] )
@@ -1007,7 +1007,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     bool EnterShort() const {
       return (
             ( EValue::ask == rEValue[ 1 ] )
-         && ( EValue::ma0 == rEValue[ 2 ] )
+         //&& ( EValue::ma0 == rEValue[ 2 ] )
          && ( EValue::ma1 == rEValue[ 3 ] )
          && ( EValue::ma2 == rEValue[ 4 ] )
          && ( EValue::ma3 == rEValue[ 5 ] )
@@ -1054,7 +1054,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
 
   // how many seconds (or ratio) does it trend vs going sideways?
 
-  static const boost::posix_time::seconds wait( 6 );
+  static const boost::posix_time::seconds wait( 2 );
 
   switch ( m_stateTrade ) {
     case EStateTrade::Search:
@@ -1088,7 +1088,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     case EStateTrade::LongSubmitted:
       // wait for order to execute
       if ( m_pOrderPending ) {
-        if ( wait > ( dt - m_pOrderPending->GetDateTimeOrderSubmitted() ) ) {
+        if ( wait < ( dt - m_pOrderPending->GetDateTimeOrderSubmitted() ) ) {
           auto id = m_pOrderPending->GetOrderId();
           BOOST_LOG_TRIVIAL(info) << dt << " LongSubmitted->Cancel " << id;
           //m_stateTrade = EStateTrade::Cancelling; // can't do this as a fill may happen
@@ -1149,7 +1149,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     case EStateTrade::ShortSubmitted:
       // wait for order to execute
       if ( m_pOrderPending ) {
-        if ( wait > ( dt - m_pOrderPending->GetDateTimeOrderSubmitted() ) ) {
+        if ( wait < ( dt - m_pOrderPending->GetDateTimeOrderSubmitted() ) ) {
           auto id = m_pOrderPending->GetOrderId();
           BOOST_LOG_TRIVIAL(info) << dt << " ShortSubmitted->Cancel " << id;
           //m_stateTrade = EStateTrade::Cancelling; // can't do this as a fill may happen
