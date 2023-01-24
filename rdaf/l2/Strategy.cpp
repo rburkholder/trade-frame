@@ -115,7 +115,7 @@ Strategy::Strategy(
 
   m_cdMarketDepthBid.SetName( "MarketDepth Bid" );
   m_cdMarketDepthBid.SetColour( ou::Colour::Blue );
-
+#if FVS
   m_ceFVS_Ask_Lvl1RelLmt.SetName( "AskRelLmit" );
   m_ceFVS_Ask_Lvl1RelMkt.SetName( "AskRelMkt" );
   m_ceFVS_Ask_Lvl1RelCncl.SetName( "AskRelCncl" );
@@ -131,7 +131,7 @@ Strategy::Strategy(
   m_ceFVS_Bid_Lvl1RelLmt.SetColour( ou::Colour::DeepSkyBlue );
   m_ceFVS_Bid_Lvl1RelMkt.SetColour( ou::Colour::Green );
   m_ceFVS_Bid_Lvl1RelCncl.SetColour( ou::Colour::Purple );
-
+#endif
 }
 
 Strategy::~Strategy() {
@@ -192,6 +192,7 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::PL1, &m_ceCommissionsPaid );
   m_cdv.Add( EChartSlot::PL2, &m_ceProfit );
 
+#if FVS
   m_cdv.Add( EChartSlot::FVS_v8_rel, &m_cemZero );
 
   m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Ask_Lvl1RelMkt );
@@ -201,7 +202,7 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Bid_Lvl1RelLmt );
   m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Bid_Lvl1RelCncl );
   m_cdv.Add( EChartSlot::FVS_v8_rel, & m_ceFVS_Bid_Lvl1RelMkt );
-
+#endif
   //m_cdv.Add( EChartSlot::ET, &m_ceExecutionTime );
 
   //m_cdv.Add( EChartSlot::MarketDepth, &m_cdMarketDepthAsk );
@@ -407,9 +408,11 @@ void Strategy::StartDepthByOrder() {
       if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
         Imbalance( depth );
         if ( 1 == ix ) {
+#if FVS
           m_ceFVS_Bid_Lvl1RelLmt.Append( dt, -m_FeatureSet.FVS()[ 1 ].bid.v8.relativeLimit );
           m_ceFVS_Bid_Lvl1RelMkt.Append( dt, -m_FeatureSet.FVS()[ 1 ].bid.v8.relativeMarket );
           m_ceFVS_Bid_Lvl1RelCncl.Append( dt, -m_FeatureSet.FVS()[ 1 ].bid.v8.relativeCancel );
+#endif
         }
       }
 
@@ -431,11 +434,9 @@ void Strategy::StartDepthByOrder() {
       ou::tf::Trade::volume_t volume( depth.Volume() );
 
       if ( 0 != ix ) {
-
         //m_FeatureSet.IntegrityCheck();
         m_FeatureSet.HandleBookChangesAsk( op, ix, depth );
         //m_FeatureSet.IntegrityCheck();
-
       }
 
       switch ( m_pOrderBased->State() ) {
@@ -481,9 +482,11 @@ void Strategy::StartDepthByOrder() {
       if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
         Imbalance( depth );
         if ( 1 == ix ) {
+#if FVS
           m_ceFVS_Ask_Lvl1RelLmt.Append( dt, +m_FeatureSet.FVS()[ 1 ].ask.v8.relativeLimit );
           m_ceFVS_Ask_Lvl1RelMkt.Append( dt, +m_FeatureSet.FVS()[ 1 ].ask.v8.relativeMarket );
           m_ceFVS_Ask_Lvl1RelCncl.Append( dt, +m_FeatureSet.FVS()[ 1 ].ask.v8.relativeCancel );
+#endif
         }
       }
 

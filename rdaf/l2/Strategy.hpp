@@ -21,8 +21,12 @@
 
 #pragma once
 
-#ifndef RDAF
-#define RDAF false
+#ifdef RDAF
+#undef RDAF
+#endif
+
+#ifdef FVS
+#undef FVS
 #endif
 
 #include <fstream>
@@ -216,14 +220,14 @@ private:
   ou::ChartEntryIndicator m_ceRelativeMA1;
   ou::ChartEntryIndicator m_ceRelativeMA2;
   ou::ChartEntryIndicator m_ceRelativeMA3;
-
+#if FVS
   ou::ChartEntryIndicator m_ceFVS_Ask_Lvl1RelLmt;
   ou::ChartEntryIndicator m_ceFVS_Ask_Lvl1RelMkt;
   ou::ChartEntryIndicator m_ceFVS_Ask_Lvl1RelCncl;
   ou::ChartEntryIndicator m_ceFVS_Bid_Lvl1RelLmt;
   ou::ChartEntryIndicator m_ceFVS_Bid_Lvl1RelMkt;
   ou::ChartEntryIndicator m_ceFVS_Bid_Lvl1RelCncl;
-
+#endif
   ou::ChartEntryMark m_cemZero;
 
   ou::tf::BarFactory m_bfQuotes01Sec;
@@ -343,6 +347,7 @@ private:
   double m_dblUnRealized;
   double m_dblProfitMin;
 
+#if RDAF
   // ==
   struct QuoteForBranch {
     double time;
@@ -359,7 +364,6 @@ private:
     int64_t direction;
   } m_branchTrade;
 
-#if RDAF
   // https://root.cern/doc/master/classTTree.html
   using pTTree_t = std::shared_ptr<TTree>;
   pTTree_t m_pTreeQuote;
