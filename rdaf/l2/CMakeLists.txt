@@ -57,13 +57,13 @@ target_include_directories(
     "../lib"
     "/usr/local/lib/wx/include/gtk3-unicode-3.1"
     "/usr/local/include/wx-3.1"
-    "/usr/local/include/rdaf"
+#    "/usr/local/include/rdaf"
   )
 
 target_link_directories(
   ${PROJECT_NAME} PUBLIC
     /usr/local/lib
-    /usr/local/lib/rdaf
+#    /usr/local/lib/rdaf
   )
 
 target_link_libraries(
@@ -89,18 +89,10 @@ target_link_libraries(
       z
       curl
       ${Boost_LIBRARIES}
-#      wx_gtk3u_xrc-3.0
-#      wx_gtk3u_html-3.0 
-#      wx_gtk3u_qa-3.0
       wx_gtk3u_adv-3.1
       wx_gtk3u_core-3.1
-#      wx_baseu_xml-3.0
-#      wx_baseu_net-3.0
       wx_baseu-3.1
       pthread
-# alpaca components:
-#      crypto
-#      ssl
 # rdaf components:
 #      Core
 #      Gpad
