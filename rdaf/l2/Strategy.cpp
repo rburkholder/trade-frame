@@ -920,13 +920,20 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   m_ceRelativeMA2.Append( dt, ma1 - ma3 );
   m_ceRelativeMA3.Append( dt, ma2 - ma3 );
 
+  double slope0 = m_vMovingAverageSlope[0].Slope();
+  double slope1 = m_vMovingAverageSlope[1].Slope();
+  double slope2 = m_vMovingAverageSlope[2].Slope();
+  double slope3 = m_vMovingAverageSlope[3].Slope();
+
   // use a series of State objects to track changes,
   //   and forecast with a probability model
   //   for appropriate returns
 
-  double dblMA_Slope_current = m_vMovingAverageSlope[0].Slope();
-
-  State state( quote.Bid(), quote.Ask(), ma0, ma1, ma2, ma3, dblMA_Slope_current );
+  State state(
+    quote.Bid(), quote.Ask()
+  , ma0, ma1, ma2, ma3
+  , slope0, slope1, slope2, slope3
+  );
 
   EStateDesired stateDesired( EStateDesired::Continue );
 
@@ -934,10 +941,11 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   //    maybe a width of moving averages - which requires some data collection
   //    on successful vs unsuccessful
 
+  // TODO: trail and decrement stop as price moves
   static const double stop_delta_min( 0.50 );
 
   if ( state.EnterLong() ) {
-    double diff = ma1 - ma3;
+    double diff = state.Stop();
     assert( 0.0 < diff );
     if ( stop_delta_min <= diff ) {
       m_dblStopDeltaProposed = diff;
@@ -946,7 +954,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   }
   else {
     if ( state.EnterShort() ) {
-      double diff = ma3 - ma1;
+      double diff = state.Stop();
       assert( 0.0 < diff );
       if ( stop_delta_min <= diff ) {
         m_dblStopDeltaProposed = diff;
