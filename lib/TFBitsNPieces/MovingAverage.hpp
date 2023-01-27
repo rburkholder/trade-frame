@@ -41,7 +41,7 @@ public:
 
   void AddToView( ou::ChartDataView& cdv, size_t slot );
 
-  double EMA() const { return m_ema.GetEMA(); }
+  inline double EMA() const { return m_ema.GetEMA(); }
   const std::string& Name() const { return m_ceMA.GetName(); }
 
 protected:
@@ -65,7 +65,7 @@ public:
 
   void AddToView( ou::ChartDataView& cdv, size_t slotMA, size_t slotSlope );
 
-  double Slope() const { return m_dblLast; }
+  inline double Slope() const { return m_dblLast; }
 
 protected:
 private:

@@ -62,6 +62,7 @@ MovingAverageSlope::MovingAverageSlope( ou::tf::Quotes& quotes, size_t nPeriods,
 {
   m_ceSlope.SetName( sName + " Slope" );
   m_ceSlope.SetColour( colour );
+
   m_stats.OnUpdate.Add( MakeDelegate( this, &MovingAverageSlope::HandleUpdate ) );
 }
 
@@ -97,6 +98,7 @@ void MovingAverageSlope::HandleUpdate( const ou::tf::TSSWStatsPrice::Results& re
   }
   m_ceSlope.Append( results.dt, slope );
   m_dblLast = slope;
+
 }
 
 // ====
