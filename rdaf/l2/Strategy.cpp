@@ -158,7 +158,7 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::MASlope, &m_cemZero );
 
   for ( vMovingAverageSlope_t::value_type& mas: m_vMovingAverageSlope ) {
-    mas.AddToView( m_cdv, EChartSlot::Price, EChartSlot::MASlope );
+    mas.AddToView( m_cdv, EChartSlot::Price, EChartSlot::SD, EChartSlot::MASlope );
   }
 
   //m_cdv.Add( EChartSlot::Cycle, &m_cemZero );

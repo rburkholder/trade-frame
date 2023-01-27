@@ -28,29 +28,56 @@ namespace tf {
 
 MovingAverage::MovingAverage( ou::tf::Quotes& quotes, size_t nPeriods, time_duration tdPeriod, ou::Colour::EColour colour, const std::string& sName )
 : m_ema( quotes, nPeriods, tdPeriod )
+, m_stats( quotes, nPeriods, tdPeriod )
 {
   m_ceMA.SetName( sName );
   m_ceMA.SetColour( colour );
-  m_ema.OnUpdate.Add( MakeDelegate( this, &MovingAverage::HandleUpdate ) );
+
+  m_ema.OnUpdate.Add( MakeDelegate( this, &MovingAverage::HandleUpdateEma ) );
+
+  m_ceStdDeviation.SetName( sName + " SD" );
+  m_ceStdDeviation.SetColour( colour );
+
+  m_stats.OnUpdate.Add( MakeDelegate( this, &MovingAverage::HandleUpdateStats ) );
+
 }
 
 MovingAverage::MovingAverage( MovingAverage&& rhs )
 : m_ema(  std::move( rhs.m_ema ) )
 , m_ceMA( std::move( rhs.m_ceMA ) )
+, m_stats( std::move( rhs.m_stats ) )
+, m_ceStdDeviation( std::move( rhs.m_ceStdDeviation ) )
 {
-  m_ema.OnUpdate.Add( MakeDelegate( this, &MovingAverage::HandleUpdate ) );
+  m_ema.OnUpdate.Add( MakeDelegate( this, &MovingAverage::HandleUpdateEma ) );
+  m_stats.OnUpdate.Add( MakeDelegate( this, &MovingAverage::HandleUpdateStats ) );
 }
 
 MovingAverage::~MovingAverage() {
-  m_ema.OnUpdate.Remove( MakeDelegate( this, &MovingAverage::HandleUpdate ) );
+  m_stats.OnUpdate.Remove( MakeDelegate( this, &MovingAverage::HandleUpdateStats ) );
+  m_ema.OnUpdate.Remove( MakeDelegate( this, &MovingAverage::HandleUpdateEma ) );
 }
 
-void MovingAverage::AddToView( ou::ChartDataView& cdv, size_t slot ) {
-  cdv.Add( slot, &m_ceMA );
+void MovingAverage::AddToView( ou::ChartDataView& cdv, size_t slotMA ) {
+  cdv.Add( slotMA, &m_ceMA );
+  //cdv.Add( slotSD, &m_ceStdDeviation );
 }
 
-void MovingAverage::HandleUpdate( const ou::tf::Price& price ) {
+void MovingAverage::AddToView( ou::ChartDataView& cdv, size_t slotMA, size_t slotSD ) {
+  cdv.Add( slotMA, &m_ceMA );
+  cdv.Add( slotSD, &m_ceStdDeviation );
+}
+
+void MovingAverage::HandleUpdateEma( const ou::tf::Price& price ) {
+
   m_ceMA.Append( price );
+
+}
+
+void MovingAverage::HandleUpdateStats( const ou::tf::TSSWStatsMidQuote::Results& results ) {
+  //double ema( m_ema.GetEMA() );
+  //double mid( m_quotes.last().Midpoint() );
+  //double sdx2( 2.0 * results.stats.sd );
+  m_ceStdDeviation.Append( results.dt, results.stats.sd );
 }
 
 // ====
@@ -80,8 +107,8 @@ MovingAverageSlope::~MovingAverageSlope() {
   m_stats.OnUpdate.Remove( MakeDelegate( this, &MovingAverageSlope::HandleUpdate ) );
 }
 
-void MovingAverageSlope::AddToView( ou::ChartDataView& cdv, size_t slotMA, size_t slotSlope ) {
-  MovingAverage::AddToView( cdv, slotMA );
+void MovingAverageSlope::AddToView( ou::ChartDataView& cdv, size_t slotMA, size_t slotSD, size_t slotSlope ) {
+  MovingAverage::AddToView( cdv, slotMA, slotSD );
   cdv.Add( slotSlope, &m_ceSlope );
 }
 

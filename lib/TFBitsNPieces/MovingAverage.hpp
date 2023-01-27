@@ -39,7 +39,8 @@ public:
   MovingAverage( MovingAverage&& rhs );
   virtual ~MovingAverage();
 
-  void AddToView( ou::ChartDataView& cdv, size_t slot );
+  void AddToView( ou::ChartDataView& cdv, size_t slotSD );  // deprecated, need to update IndicatorTrading/FeedModel.cpp
+  void AddToView( ou::ChartDataView& cdv, size_t slotMA, size_t slotSD );
 
   inline double EMA() const { return m_ema.GetEMA(); }
   const std::string& Name() const { return m_ceMA.GetName(); }
@@ -48,9 +49,14 @@ protected:
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
 private:
 
+  ou::tf::TSSWStatsMidQuote m_stats;
+
   ou::ChartEntryIndicator m_ceMA;
 
-  void HandleUpdate( const ou::tf::Price& );
+  ou::ChartEntryIndicator m_ceStdDeviation;
+
+  void HandleUpdateEma( const ou::tf::Price& );
+  void HandleUpdateStats( const ou::tf::TSSWStatsMidQuote::Results& );
 
 };
 
@@ -63,7 +69,7 @@ public:
   MovingAverageSlope( MovingAverageSlope&& rhs );
   virtual ~MovingAverageSlope();
 
-  void AddToView( ou::ChartDataView& cdv, size_t slotMA, size_t slotSlope );
+  void AddToView( ou::ChartDataView& cdv, size_t slotMA, size_t slotSD, size_t slotSlope );
 
   inline double Slope() const { return m_dblLast; }
 
