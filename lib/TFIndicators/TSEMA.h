@@ -34,7 +34,7 @@ public:
   TSEMA( TSEMA&& );
   virtual ~TSEMA();
 
-  double GetEMA() const { return m_dblRecentEMA; };
+  inline double GetEMA() const { return m_dblRecentEMA; };
 
   ou::Delegate<const ou::tf::Price&> OnUpdate;
 
