@@ -3,8 +3,6 @@ cmake_minimum_required (VERSION 3.13)
 
 PROJECT(IQFeedGetHistory)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 #set(CMAKE_EXE_LINKER_FLAGS "--trace --verbose")
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -80,13 +78,8 @@ target_link_libraries(
       z
       curl
       ${Boost_LIBRARIES}
-#      wx_gtk3u_xrc-3.0
-#      wx_gtk3u_html-3.0 
-#      wx_gtk3u_qa-3.0
       wx_gtk3u_adv-3.1
       wx_gtk3u_core-3.1
-#      wx_baseu_xml-3.0
-#      wx_baseu_net-3.0
       wx_baseu-3.1
       pthread
   )

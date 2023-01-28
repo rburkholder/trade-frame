@@ -3,8 +3,6 @@ cmake_minimum_required (VERSION 3.13)
 
 PROJECT(Collector)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
 #set(CMAKE_EXE_LINKER_FLAGS "--trace --verbose")
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -69,17 +67,11 @@ target_link_directories(
 
 target_link_libraries(
   ${PROJECT_NAME}
-#      TFBitsNPieces
       TFTrading
       TFInteractiveBrokers
-#      TFSimulation
-#      TFVuTrading
-#      TFOptions
       TFHDF5TimeSeries
       OUSQL
       OUSqlite
-#      OUCharting
-#      TFIndicators
       TFIQFeedLevel2
       TFIQFeed
       TFTimeSeries
@@ -88,11 +80,7 @@ target_link_libraries(
       TFTrading
       dl
       z
-#      curl
       ${Boost_LIBRARIES}
-#      wx_gtk3u_adv-3.0
-#      wx_gtk3u_core-3.0
-#      wx_baseu-3.0
       pthread
   )
 
