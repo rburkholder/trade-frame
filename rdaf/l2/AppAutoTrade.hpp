@@ -62,7 +62,6 @@ class FrameMain;
 class wxTreeCtrl;
 class wxTreeEvent;
 class wxTimerEvent;
-class wxSplitterWindow;
 
 namespace ou {
 namespace tf {
