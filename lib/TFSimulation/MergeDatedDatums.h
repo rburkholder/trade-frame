@@ -22,7 +22,8 @@
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
-#include "TimeSeries.h"
+#include <TFTimeSeries/TimeSeries.h>
+
 #include "MergeDatedDatumCarrier.h"
 
 namespace ou { // One Unified

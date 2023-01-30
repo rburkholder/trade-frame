@@ -9,6 +9,8 @@ PROJECT(TFSimulation)
 set(
   file_h
 #    CrossThreadMerge.h
+    MergeDatedDatumCarrier.h
+    MergeDatedDatums.h    
     SimulateOrderExecution.h
     SimulationProvider.h
     SimulationSymbol.h
@@ -17,6 +19,7 @@ set(
 set(
   file_cpp
 #    CrossThreadMerge.cpp
+    MergeDatedDatums.cpp
     SimulateOrderExecution.cpp
     SimulationProvider.cpp
     SimulationSymbol.cpp
@@ -24,8 +27,8 @@ set(
 
 add_library(
   ${PROJECT_NAME}
-  ${file_h}
-  ${file_cpp}
+    ${file_h}
+    ${file_cpp}
   )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_LOG_DYN_LINK )
@@ -34,3 +37,8 @@ target_include_directories(
   ${PROJECT_NAME} PUBLIC
     ".."
   )
+
+#target_link_libraries(
+#  ${PROJECT_NAME}
+    
+#  )

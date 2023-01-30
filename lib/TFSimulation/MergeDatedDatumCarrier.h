@@ -21,7 +21,7 @@ using namespace fastdelegate;
 
 #include <OUCommon/TimeSource.h>
 
-#include "TimeSeries.h"
+#include <TFTimeSeries/TimeSeries.h>
 
 // Each carrier holds a TimeSeries.  The carrier holds an index to the current DatedDatum in each TimeSeries.
 // The current DatedDatum timestamp is maintained for the merge process to figure out which DatedDatum to

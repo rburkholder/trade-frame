@@ -26,8 +26,8 @@ set(
     DatedDatum.h
     DoubleBuffer.h
     ExchangeHolidays.h
-    MergeDatedDatumCarrier.h
-    MergeDatedDatums.h
+#    MergeDatedDatumCarrier.h
+#    MergeDatedDatums.h
     TimeSeries.h
     TSAllocator.h
     TSMicrostructure.h
@@ -39,7 +39,7 @@ set(
     DatedDatum.cpp
     DoubleBuffer.cpp
     ExchangeHolidays.cpp
-    MergeDatedDatums.cpp
+ #   MergeDatedDatums.cpp
     TimeSeries.cpp
     TSAllocator.cpp
     TSMicrostructure.cpp

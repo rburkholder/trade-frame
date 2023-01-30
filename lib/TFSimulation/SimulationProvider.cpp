@@ -15,13 +15,12 @@
 #include <cassert>
 #include <stdexcept>
 
-#include <TFTimeSeries/MergeDatedDatums.h>
-
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 
 #include <TFTrading/KeyTypes.h>
 #include <TFTrading/OrderManager.h>
 
+#include "MergeDatedDatums.h"
 #include "SimulationProvider.h"
 
 namespace ou { // One Unified
