@@ -72,7 +72,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC -D_FILE_OFFSET_BITS=64 )
 target_compile_definitions(${PROJECT_NAME} PUBLIC -DWXUSINGDLL )
 target_compile_definitions(${PROJECT_NAME} PUBLIC -D__WXGTK__ )
 
-# SYSTEM turns the include directory into a system include directory. 
+# SYSTEM turns the include directory into a system include directory.
 # Compilers will not issue warnings from header files originating from there.
 target_include_directories(
   ${PROJECT_NAME} SYSTEM PUBLIC
@@ -89,23 +89,22 @@ target_link_directories(
 target_link_libraries(
   ${PROJECT_NAME}
       TFBitsNPieces
+      TFIQFeed
+      TFIQFeedLevel2
       TFInteractiveBrokers
       TFSimulation
-      TFVuTrading
-      MarketDepth
-      TFIQFeedLevel2
-      TFTrading
       TFOptions
+      TFVuTrading
       TFTrading
       TFHDF5TimeSeries
+      TFIndicators
+      TFTimeSeries
+      MarketDepth
       OUCommon
 #      OUSound
       OUSQL
       OUSqlite
       OUCharting
-      TFIndicators
-      TFTimeSeries
-      TFIQFeed
       dl
       z
       curl
