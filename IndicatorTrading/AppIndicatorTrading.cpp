@@ -29,6 +29,9 @@
     need summary of delta/gamma to maintain neutral strategies and margin
 */
 
+// TODO: 200 day, 50 day, 20 day, 7 day moving average to understand direction of
+//   trend, then run options starting long or short, depending
+
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
