@@ -22,6 +22,7 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
+#include <wx/app.h>
 #include <wx/splitter.h>
 
 #include <TFIQFeed/Provider.h>
@@ -31,7 +32,7 @@
 
 #include <TFBitsNPieces/FrameWork02.hpp>
 
-#include <wx/app.h>
+#include "Choices.hpp"
 
 class FrameMain;
 
@@ -57,6 +58,8 @@ protected:
 private:
 
   using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
+
+  config::Choices m_choices;
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;

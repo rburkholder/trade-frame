@@ -19,8 +19,12 @@
  * Created: January 27, 2023  19:20:09
  */
 
+// TODO: add range of options across the calendar and create volatility surface
+
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
+
+#include <wx/sizer.h>
 
 #include <TFTrading/Watch.h>
 #include <TFTrading/BuildInstrument.h>
@@ -29,8 +33,6 @@
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/WinChartView.h>
 #include <TFVuTrading/PanelProviderControlv2.hpp>
-
-#include <wx/sizer.h>
 
 #include "AppImpliedVolatility.hpp"
 
@@ -55,6 +57,12 @@ bool AppImpliedVolatility::OnInit() {
   wxApp::SetVendorDisplayName( "(c)2022 " + sVendorName );
 
   wxApp::OnInit();
+
+  if ( Load( sChoicesFilename, m_choices ) ) {
+  }
+  else {
+    return 0;
+  }
 
   m_iqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
   //m_iqfeed->SetThreadCount( m_choices.nThreads );
