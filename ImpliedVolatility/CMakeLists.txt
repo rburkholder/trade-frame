@@ -25,12 +25,14 @@ set(
   file_h
     AppImpliedVolatility.hpp
     Choices.hpp
+    Collector.hpp
   )
 
 set(
   file_cpp
     AppImpliedVolatility.cpp
     Choices.cpp
+    Collector.cpp
   )
 
 add_executable(

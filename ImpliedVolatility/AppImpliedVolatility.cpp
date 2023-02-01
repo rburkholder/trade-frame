@@ -28,6 +28,7 @@
 
 #include <TFTrading/Watch.h>
 #include <TFTrading/BuildInstrument.h>
+#include <TFTrading/ComposeInstrument.hpp>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
@@ -54,7 +55,7 @@ bool AppImpliedVolatility::OnInit() {
 
   wxApp::SetVendorName( sVendorName );
   wxApp::SetAppDisplayName( sAppName );
-  wxApp::SetVendorDisplayName( "(c)2022 " + sVendorName );
+  wxApp::SetVendorDisplayName( "(c)2023 " + sVendorName );
 
   wxApp::OnInit();
 
@@ -62,6 +63,17 @@ bool AppImpliedVolatility::OnInit() {
   }
   else {
     return 0;
+  }
+
+  {
+    std::stringstream ss;
+    auto dt = ou::TimeSource::GlobalInstance().External();
+    ss
+      << ou::tf::Instrument::BuildDate( dt.date() )
+      << "-"
+      << dt.time_of_day()
+      ;
+    m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
 
   m_iqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
@@ -83,6 +95,7 @@ bool AppImpliedVolatility::OnInit() {
   m_pFrameMain->SetSizer(sizerFrame);
 
   sizerUpper = new wxBoxSizer(wxHORIZONTAL);
+  sizerUpper->SetMinSize( wxSize( 100, 50 ) );
   sizerFrame->Add( sizerUpper, 0, wxEXPAND, 2);
 
   m_pPanelProviderControl = new ou::tf::v2::PanelProviderControl( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
@@ -103,6 +116,16 @@ bool AppImpliedVolatility::OnInit() {
     }
   );
 
+  m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+  m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+  sizerUpper->Add(m_pPanelLogging, 2, wxEXPAND, 2);
+
+  sizerLower = new wxBoxSizer(wxVERTICAL);
+  sizerFrame->Add(sizerLower, 1, wxEXPAND, 2);
+
+  m_pWinChartView = new ou::tf::WinChartView( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+  m_pWinChartView->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+
   FrameMain::vpItems_t vItems;
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
 
@@ -111,27 +134,17 @@ bool AppImpliedVolatility::OnInit() {
   vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppImpliedVolatility::HandleMenuActionSaveValues ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
-  m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
-  m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-  sizerUpper->Add(m_pPanelLogging, 2, wxEXPAND, 2);
-
-  sizerLower = new wxBoxSizer(wxVERTICAL);
-  sizerFrame->Add(sizerLower, 1, wxEXPAND, 2);
-
-  m_pWinChartView = new ou::tf::WinChartView( m_splitterData, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
-  m_pWinChartView->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppImpliedVolatility::OnClose, this );  // start close of windows and controls
+
+  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed );
+
+  m_pFrameMain->Show( true );
 
   CallAfter(
     [this](){
       LoadState();
     }
   );
-
-  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed );
-
-  m_pFrameMain->Show( true );
 
   return 1;
 }
@@ -168,6 +181,37 @@ void AppImpliedVolatility::HandleMenuActionSaveValues() {
 }
 
 void AppImpliedVolatility::ConfirmProviders() {
+  if ( m_iqfeed->Connected() ) {
+    ConstructUnderlying();
+  }
+}
+
+void AppImpliedVolatility::ConstructUnderlying() {
+  m_pComposeInstrument = std::make_shared<ou::tf::ComposeInstrument>(
+    m_iqfeed,
+    [this](){
+      m_pComposeInstrument->Compose(
+        m_choices.sSymbol,
+        [this]( pInstrument_t pInstrument ){
+          assert( pInstrument );
+          InitializeUnderlying( pInstrument );
+        }
+      );
+    }
+  );
+}
+
+void AppImpliedVolatility::InitializeUnderlying( pInstrument_t pInstrument ) {
+
+  const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+
+  std::cout << idInstrument << std::endl;
+
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+
+  m_pCollector = std::make_shared<Collector>( pWatch );
+
 }
 
 int AppImpliedVolatility::OnExit() {
