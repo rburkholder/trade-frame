@@ -466,10 +466,10 @@ void AppComboTrading::BuildFrameCharts( void ) {
     m_pOptionEngine->Remove( pOption, pWatchUnderlying );
   };
   m_pPanelCharts->m_fBuildOption = [this](pInstrument_t pInstrument, pOption_t& pOption){
-    m_pOptionEngine->Find( pInstrument, pOption );
+    pOption = m_pOptionEngine->FindOption( pInstrument );
   };
   m_pPanelCharts->m_fBuildWatch = [this](pInstrument_t pInstrument, pWatch_t& pWatch){
-    m_pOptionEngine->Find( pInstrument, pWatch );
+    pWatch = m_pOptionEngine->FindWatch( pInstrument );
   };
 
   m_pFCharts->SetAutoLayout( true );
@@ -651,15 +651,15 @@ AppComboTrading::pPanelOptionCombo_t AppComboTrading::HandleNewPanelOptionCombo(
 
     assert( 0 != pUnderlyingInstrument.use_count() );
     assert( 0 != pUnderlyingInstrument.get() );
-    pWatch_t pWatch;
-    m_pOptionEngine->Find( pUnderlyingInstrument, pWatch ); // construct watch from instrument
+
+    pWatch_t pWatch = m_pOptionEngine->FindWatch( pUnderlyingInstrument ); // construct watch from instrument
     assert( 0 != pWatch.use_count() );
     assert( 0 != pWatch.get() );
 
     assert( 0 != pOptionInstrument.use_count() );
     assert( 0 != pOptionInstrument.get() );
-    pOption_t pOption;
-    m_pOptionEngine->Find( pOptionInstrument, pOption );  // construct option from instrument
+
+    pOption_t pOption = m_pOptionEngine->FindOption( pOptionInstrument );  // construct option from instrument
     assert( 0 != pOption.use_count() );
     assert( 0 != pOption.get() );
 

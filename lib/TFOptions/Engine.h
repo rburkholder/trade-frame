@@ -137,11 +137,12 @@ public:
   void Remove( pOption_t pOption, pWatch_t pUnderlying ); // part of the reference counting, will change reference count on associated underlying and auto remove
 
   // these effectively handle registration of underlying and option, using a callback
-  void Find( const pInstrument_t pInstrument, pWatch_t& pWatch );  // if Watch not found, construct one.  Then provide the watch.
-  void Find( const pInstrument_t pInstrument, pOption_t& pOption );  // if Option not found, construct one.  Then provide the option.
-
   fBuildWatch_t m_fBuildWatch;
+  pWatch_t FindWatch( const pInstrument_t pInstrument );  // if Watch not found, construct one.  Then provide the watch.
+
   fBuildOption_t m_fBuildOption;
+  pOption_t FindOption( const pInstrument_t pInstrument );  // if Option not found, construct one.  Then provide the option.
+
 
 private:
 

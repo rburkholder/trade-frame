@@ -235,9 +235,10 @@ void Engine::RegisterOption( const pOption_t& pOption) {
 //}
 
 // needs to be used to load up underlying watch
-void Engine::Find( const pInstrument_t pInstrument, pWatch_t& pWatch ) {
+ou::tf::Watch::pWatch_t Engine::FindWatch( const pInstrument_t pInstrument ) {
   //std::cout << "Engine::Find Watch: " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
   //std::cout << "Engine::Find Watch: " << pInstrument->GetInstrumentName() << std::endl;
+  pWatch_t pWatch;
   std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   mapKnownWatches_t::iterator iter = m_mapKnownWatches.find( pInstrument->GetInstrumentName() );
   if ( m_mapKnownWatches.end() == iter ) {
@@ -254,12 +255,14 @@ void Engine::Find( const pInstrument_t pInstrument, pWatch_t& pWatch ) {
     pWatch = iter->second;
   }
   assert( pWatch );
+  return pWatch;
 }
 
 // needs to be used to load up options
-void Engine::Find( const pInstrument_t pInstrument, pOption_t& pOption ) {
+Option::pOption_t Engine::FindOption( const pInstrument_t pInstrument ) {
   //std::cout << "Engine::Find Option: " << pOption->GetInstrument()->GetInstrumentName() << std::endl;
   //std::cout << "Engine::Find Option: " << pInstrument->GetInstrumentName() << std::endl;
+  pOption_t pOption;
   std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   mapKnownOptions_t::iterator iter = m_mapKnownOptions.find( pInstrument->GetInstrumentName() );
   if ( m_mapKnownOptions.end() == iter ) {
@@ -276,6 +279,7 @@ void Engine::Find( const pInstrument_t pInstrument, pOption_t& pOption ) {
     pOption = iter->second;
   }
   assert( 0 != pOption.get() );
+  return pOption;
 }
 
 void Engine::Addv1( pOption_t pOption, pWatch_t pUnderlying, fCallbackWithGreek_t&& fGreek ) {
