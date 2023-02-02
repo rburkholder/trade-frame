@@ -159,23 +159,8 @@ MasterPortfolio::MasterPortfolio(
   // will need to make this generic if need some for multiple providers.
   m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
 
-  m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
-  m_pOptionEngine->m_fBuildWatch
-    = [this](pInstrument_t pInstrument)->pWatch_t {
-      // fix: need to look up and retrieve the pre-constructed watch
-        //ou::tf::Watch::pWatch_t pWatch( new ou::tf::Watch( pInstrument, m_pData1 ) );
-        pWatch_t pWatch;  // will cause a fault, should not need to be used -- hmm?  check this!
-        return pWatch;
-      };
-  m_pOptionEngine->m_fBuildOption
-    = [this](pInstrument_t pInstrument)->pOption_t {
-      // fix: need to lookup and retrieve the pre-constructed option
-        //ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1 ) );
-        pOption_t pOption; // will cause a fault, should not need to be used -- hmm?  check this!
-        return pOption;
-      };
-
   m_fedrate.SetWatchOn( m_pIQ );
+  m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
 
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_pIQ, m_pIB );
 
