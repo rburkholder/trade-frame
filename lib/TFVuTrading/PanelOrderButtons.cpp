@@ -472,30 +472,43 @@ void PanelOrderButtons::Update( const PanelOrderButtons_MarketData& data ) {
 
   CallAfter(
     [this,
-         //sBase = std::move( data.m_sBase ),
-         sBaseAsk = std::move(data.m_sBaseAsk ),
-         sBaseBid = std::move( data.m_sBaseBid )
-         ](){
+      //sBase = std::move( data.m_sBase ),
+      sBaseAsk = std::move(data.m_sBaseAsk )
+    , sBaseBid = std::move( data.m_sBaseBid )
+
+    , sCallItmAsk = std::move( data.m_sCall1Ask )
+    , sCallItmBid = std::move( data.m_sCall1Bid )
+
+    , sPutOtmAsk = std::move( data.m_sPut1Ask )
+    , sPutOtmBid = std::move( data.m_sPut1Bid )
+
+    , sPutItmAsk = std::move( data.m_sPut2Ask )
+    , sPutItmBid = std::move( data.m_sPut2Bid )
+
+    , sCallOtmAsk = std::move( data.m_sCall2Ask )
+    , sCallOtmBid = std::move( data.m_sCall2Bid )
+    ](){
       //m_txtBase->SetLabel( sBase );
       m_txtBaseAsk->SetLabel( std::move( sBaseAsk ) );
       m_txtBaseBid->SetLabel( std::move( sBaseBid ) );
+
+      //m_txtCallItm->SetLabel( data.m_sCall1 );
+      m_txtCallItmAsk->SetLabel( sCallItmAsk );
+      m_txtCallItmBid->SetLabel( sCallItmBid );
+
+      //m_txtPutOtm->SetLabel( data.m_sPut1 );
+      m_txtPutOtmAsk->SetLabel( sPutOtmAsk );
+      m_txtPutOtmBid->SetLabel( sPutOtmBid);
+
+      //m_txtCallOtm->SetLabel( data.m_sCall2 );
+      m_txtCallOtmAsk->SetLabel( sCallOtmAsk );
+      m_txtCallOtmBid->SetLabel( sCallOtmBid );
+
+      //m_txtPutItm->SetLabel( data.m_sPut2 );
+      m_txtPutItmAsk->SetLabel( sPutItmAsk );
+      m_txtPutItmBid->SetLabel( sPutItmBid );
     } );
 
-  //m_txtCallItm->SetLabel( data.m_sCall1 );
-  //m_txtCallItmAsk->SetLabel( data.m_sCall1Ask );
-  //m_txtCallItmBid->SetLabel( data.m_sCall1Bid );
-
-  //m_txtPutOtm->SetLabel( data.m_sPut1 );
-  //m_txtPutOtmAsk->SetLabel( data.m_sPut1Ask );
-  //m_txtPutOtmBid->SetLabel( data.m_sPut1Bid );
-
-  //m_txtCallOtm->SetLabel( data.m_sCall2 );
-  //m_txtCallOtmAsk->SetLabel( data.m_sCall2Ask );
-  //m_txtCallOtmBid->SetLabel( data.m_sCall2Bid );
-
-  //m_txtPutItm->SetLabel( data.m_sPut2 );
-  //m_txtPutItmAsk->SetLabel( data.m_sPut2Ask );
-  //m_txtPutItmBid->SetLabel( data.m_sPut2Bid );
 
 }
 

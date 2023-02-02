@@ -382,7 +382,7 @@ private:
   void CheckOptions();
   pOptionTracker_t AddOptionTracker( double strike, pOption_t );
 
-  void CheckOptions_v2();
+  void CheckOptions_v2( boost::format&, ou::tf::PanelOrderButtons_MarketData& );
 
   void TrackCombo();
 

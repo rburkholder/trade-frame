@@ -672,11 +672,11 @@ void InteractiveChart::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
     format % quote.Bid();
     data.m_sBaseBid = format.str();
 
+    CheckOptions_v2( format, data );
+
     m_fUpdateMarketData( data );
   }
 
-  //CheckOptions(); // do this differently
-  CheckOptions_v2();
 }
 
 void InteractiveChart::SelectChains() {
@@ -699,19 +699,24 @@ void InteractiveChart::SelectChains() {
 }
 
 void InteractiveChart::UpdateSynthetic( pOption_t& pCurrent, pOption_t pSelected ) {
+  bool bChanged( false );
   if ( !pCurrent ) {
     pCurrent = pSelected;
+    bChanged = true;
   }
   else {
     if ( pCurrent->GetStrike() != pSelected->GetStrike() ) {
-      // stop current watch
+      pCurrent->StopWatch();
       pCurrent = pSelected;
-      // start watch
+      bChanged = true;
     }
+  }
+  if ( bChanged ) {
+    pCurrent->StartWatch();
   }
 }
 
-void InteractiveChart::CheckOptions_v2() {
+void InteractiveChart::CheckOptions_v2( boost::format& format, ou::tf::PanelOrderButtons_MarketData& data ) {
 
   if ( m_bOptionsReady ) {
 
@@ -727,11 +732,25 @@ void InteractiveChart::CheckOptions_v2() {
     strikeItm = chainBack.Call_Itm( mid );
     pOption = chainBack.GetStrike( strikeItm ).call.pOption;
     UpdateSynthetic( m_synthLong.pBackBuy, pOption );
+    {
+      const ou::tf::Quote& quote( pOption->LastQuote() );
+      format % quote.Ask();
+      data.m_sCall1Ask = std::move( format.str() );
+      format % quote.Bid();
+      data.m_sCall1Bid = std::move( format.str() );
+    }
 
     // long synth - short put
     strikeOtm = chainFront.Put_Otm( mid );
     pOption = chainFront.GetStrike( strikeOtm ).put.pOption;
     UpdateSynthetic( m_synthLong.pFrontSell, pOption );
+    {
+      const ou::tf::Quote& quote( pOption->LastQuote() );
+      format % quote.Ask();
+      data.m_sPut1Ask = std::move( format.str() );
+      format % quote.Bid();
+      data.m_sPut1Bid = std::move( format.str() );
+    }
 
     // TODO: test strikeItm == strikeOtm
 
@@ -739,11 +758,25 @@ void InteractiveChart::CheckOptions_v2() {
     strikeItm = chainBack.Put_Itm( mid );
     pOption = chainBack.GetStrike( strikeItm ).put.pOption;
     UpdateSynthetic( m_synthShort.pBackBuy, pOption );
+    {
+      const ou::tf::Quote& quote( pOption->LastQuote() );
+      format % quote.Ask();
+      data.m_sPut2Ask = std::move( format.str() );
+      format % quote.Bid();
+      data.m_sPut2Bid = std::move( format.str() );
+    }
 
     // short synth - short call
     strikeOtm = chainFront.Call_Otm( mid );
     pOption = chainFront.GetStrike( strikeOtm ).call.pOption;
     UpdateSynthetic( m_synthShort.pFrontSell, pOption );
+    {
+      const ou::tf::Quote& quote( pOption->LastQuote() );
+      format % quote.Ask();
+      data.m_sCall2Ask = std::move( format.str() );
+      format % quote.Bid();
+      data.m_sCall2Bid = std::move( format.str() );
+    }
 
     // TODO: test strikeItm == strikeOtm
 
