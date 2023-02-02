@@ -30,6 +30,8 @@
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
+#include <TFTrading/DBWrapper.h>
+
 #include <TFBitsNPieces/FrameWork02.hpp>
 
 #include "Choices.hpp"
@@ -73,10 +75,10 @@ private:
 
   pProviderIQFeed_t m_iqfeed; // live - data
 
+  std::unique_ptr<ou::tf::db> m_pdb;
+
   std::shared_ptr<ou::tf::ComposeInstrument> m_pComposeInstrument;
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
-
-  //std::unique_ptr<ou::tf::db> m_pdb;
 
   ou::ChartDataView m_dvChart; // the data
 

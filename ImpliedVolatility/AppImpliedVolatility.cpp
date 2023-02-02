@@ -76,9 +76,6 @@ bool AppImpliedVolatility::OnInit() {
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
 
-  m_iqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
-  //m_iqfeed->SetThreadCount( m_choices.nThreads );
-
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
 
@@ -104,6 +101,9 @@ bool AppImpliedVolatility::OnInit() {
 
   sizerUpper->Add( m_pPanelProviderControl, 0, wxALIGN_LEFT, 2);
 
+  m_iqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
+  //m_iqfeed->SetThreadCount( m_choices.nThreads );
+
   m_pPanelProviderControl->Add(
     m_iqfeed,
     true, false, false, false,
@@ -115,6 +115,9 @@ bool AppImpliedVolatility::OnInit() {
     [this](){ // fDisconnected
     }
   );
+
+  // this needs to be placed after the providers are registered
+  m_pdb = std::make_unique<ou::tf::db>( sDbName ); // construct database
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
   m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
@@ -240,6 +243,10 @@ void AppImpliedVolatility::LoadState() {
 }
 
 void AppImpliedVolatility::OnClose( wxCloseEvent& event ) {
+
   SaveState();
+
+  if ( m_pdb ) m_pdb.reset();
+
   event.Skip();  // auto followed by Destroy();
 }
