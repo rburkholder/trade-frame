@@ -148,7 +148,7 @@ private:
 
   pPortfolio_t m_pMasterPortfolio;
 
-  ou::tf::LiborFromIQFeed m_libor;
+  //ou::tf::LiborFromIQFeed m_libor;
   ou::tf::FedRateFromIQFeed m_fedrate;
   std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
 

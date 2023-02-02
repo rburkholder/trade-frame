@@ -86,7 +86,7 @@ bool Option::StartWatch() {
 
 void Option::CalcRate( // version 1, called by version 2, updates input
   ou::tf::option::binomial::structInput& input,
-  const ou::tf::LiborFromIQFeed& libor,
+  const ou::tf::NoRiskInterestRateSeries& riskfree,
   boost::posix_time::ptime dtUtcNow, boost::posix_time::ptime dtUtcExpiry
 ) {
 
@@ -105,14 +105,14 @@ void Option::CalcRate( // version 1, called by version 2, updates input
   double ratioToExpiry = (double) lSecToExpiry / (double) lSecForOneYear;
   input.T = ratioToExpiry;
 
-  double rate = libor.ValueAt( durToExpiry ) / 100.0;
+  double rate = riskfree.ValueAt( durToExpiry ) / 100.0;
   input.r = rate;
   input.b = rate; // is this correct?
 }
 
 void Option::CalcRate( // version 2, calls version 1, uses instrument expiry date
   ou::tf::option::binomial::structInput& input,
-        const boost::posix_time::ptime dtUtcNow, const ou::tf::LiborFromIQFeed& libor ) {
+        const boost::posix_time::ptime dtUtcNow, const ou::tf::NoRiskInterestRateSeries& riskfree ) {
 
   assert( boost::posix_time::not_a_date_time != dtUtcNow );
 
@@ -130,7 +130,7 @@ void Option::CalcRate( // version 2, calls version 1, uses instrument expiry dat
     throw std::runtime_error( s.str().c_str() );
   }
 
-  CalcRate( input, libor, dtUtcNow, dtUtcExpiry );
+  CalcRate( input, riskfree, dtUtcNow, dtUtcExpiry );
 }
 
 void Option::CalcGreeks( // TODO: need to not calc if quote is bad

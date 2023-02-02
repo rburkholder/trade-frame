@@ -159,7 +159,7 @@ MasterPortfolio::MasterPortfolio(
   // will need to make this generic if need some for multiple providers.
   m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
 
-  m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_libor );
+  m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
   m_pOptionEngine->m_fBuildWatch
     = [this](pInstrument_t pInstrument)->pWatch_t {
       // fix: need to look up and retrieve the pre-constructed watch
@@ -175,7 +175,7 @@ MasterPortfolio::MasterPortfolio(
         return pOption;
       };
 
-  m_libor.SetWatchOn( m_pIQ );
+  m_fedrate.SetWatchOn( m_pIQ );
 
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_pIQ, m_pIB );
 
@@ -196,7 +196,7 @@ MasterPortfolio::~MasterPortfolio() {
   m_mapStrategyCache.clear();
   m_mapUnderlyingWithStrategies.clear();
   m_pOptionEngine.reset();
-  m_libor.SetWatchOff();
+  m_fedrate.SetWatchOff();
 
   if ( m_pOptionChainQuery ) {
     m_pOptionChainQuery->Disconnect();
@@ -889,7 +889,7 @@ void MasterPortfolio::ClosePositions( void ) {
 
 void MasterPortfolio::SaveSeries( const std::string& sPrefix ) {
   std::string sPath( sPrefix + m_sTSDataStreamStarted );
-  m_libor.SaveSeries( sPath );
+  m_fedrate.SaveSeries( sPath );
   std::for_each(
     m_mapUnderlyingWithStrategies.begin(), m_mapUnderlyingWithStrategies.end(),
     [&sPath](mapUnderlyingWithStrategies_t::value_type& uws){
@@ -907,14 +907,14 @@ void MasterPortfolio::EmitInfo( void ) {
       dblNet += uws.EmitInfo();
     } );
   std::cout << "Active Portfolios net: " << dblNet << std::endl;
-  
+
   double dblPLUnRealized {};
   double dblPLRealized {};
   double dblCommissionPaid {};
   double dblPLCurrent {};
 
   m_pMasterPortfolio->QueryStats( dblPLUnRealized, dblPLRealized, dblCommissionPaid, dblPLCurrent );
-  std::cout 
+  std::cout
     << "Master Portfolio: "
     << "unrealized=" << dblPLUnRealized
     << ",realized=" << dblPLRealized

@@ -104,7 +104,7 @@ private:
 
 std::ostream& operator<<( std::ostream& os, const NoRiskInterestRateSeries& nrirs );
 
-class LiborFromIQFeed: public NoRiskInterestRateSeries {
+class LiborFromIQFeed: public NoRiskInterestRateSeries { // deprecated, use FedRate for now
 public:
   LiborFromIQFeed();
   virtual ~LiborFromIQFeed();

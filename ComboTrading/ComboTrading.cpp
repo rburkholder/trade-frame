@@ -140,7 +140,7 @@ bool AppComboTrading::OnInit() {
   m_pPanelCharts = nullptr;
   //m_pPanelOptionCombo = nullptr;
 
-  m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_libor );
+  m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
   m_pOptionEngine->m_fBuildWatch
     = [this](pInstrument_t pInstrument)->pWatch_t {
         ou::tf::Watch::pWatch_t pWatch( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
@@ -240,7 +240,7 @@ bool AppComboTrading::OnInit() {
   wxMenu* pMenuSymbols = m_pFrameMain->AddDynamicMenu( "Symbol List", vItemsSymbols );
 
   FrameMain::vpItems_t vItemsActions;
-  vItemsActions.push_back( new mi( "Libor Yield Curve", MakeDelegate( this, &AppComboTrading::HandleMenuActionEmitYieldCurve ) ) );
+  vItemsActions.push_back( new mi( "Federal Funss Yield Curve", MakeDelegate( this, &AppComboTrading::HandleMenuActionEmitYieldCurve ) ) );
   //vItems.push_back( new mi( "load weeklies", MakeDelegate( &m_process, &Process::LoadWeeklies ) ) );
   vItemsActions.push_back( new mi( "Save Series", MakeDelegate( this, &AppComboTrading::HandleMenuActionSaveSeries ) ) );
   //vItems.push_back( new mi( "Load DataBase", MakeDelegate( this, &AppComboTrading::HandleLoadDatabase ) ) );
@@ -1363,7 +1363,7 @@ void AppComboTrading::HandleSaveValues( void ) {
     static const std::string sPrefix( "/app/ComboTrading" );
     const std::string sPrefixSession( sPrefix + "/" + m_sTSDataStreamStarted );
     m_pPanelCharts->SaveSeries( sPrefixSession, sPrefix );
-    m_libor.SaveSeries( sPrefixSession );
+    m_fedrate.SaveSeries( sPrefixSession );
   }
   catch(...) {
     // TODO: will occur when attempting over-write, may need to try a delete first in the code above
@@ -1455,19 +1455,19 @@ void AppComboTrading::OnExecDisconnected( int status ) {
 }
 
 void AppComboTrading::OnIQFeedConnected( int status ) {
-  m_libor.SetWatchOn( m_iqfeed );
+  //m_libor.SetWatchOn( m_iqfeed );
   m_fedrate.SetWatchOn( m_iqfeed );
 }
 
 void AppComboTrading::OnIQFeedDisconnecting( int status ) {
-  m_libor.SetWatchOff();
+  //m_libor.SetWatchOff();
   m_fedrate.SetWatchOff();
 }
 
 void AppComboTrading::HandleMenuActionEmitYieldCurve( void ) {
   //ou::tf::libor::EmitYieldCurve();
   //m_libor.EmitYieldCurve();
-  std::cout << "Libor: " << std::endl << m_libor;
+  //std::cout << "Libor: " << std::endl << m_libor;
   std::cout << "FedRate: " << std::endl << m_fedrate;
 }
 

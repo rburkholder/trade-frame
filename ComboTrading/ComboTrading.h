@@ -124,7 +124,7 @@ private:
   double m_dblMaxPL;
   double m_dblMinPL;
 
-  ou::tf::LiborFromIQFeed m_libor;
+  //ou::tf::LiborFromIQFeed m_libor; // deprecated
   ou::tf::FedRateFromIQFeed m_fedrate;
 
   std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;

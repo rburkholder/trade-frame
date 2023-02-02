@@ -156,7 +156,7 @@ void OptionEntry::Calc( const fCalc_t& fCalc ) {
 
 // ====================
 
-Engine::Engine( const ou::tf::LiborFromIQFeed& feed ):
+Engine::Engine( const ou::tf::NoRiskInterestRateSeries& feed ):
   m_InterestRateFeed( feed ),
   m_srvcWork(boost::asio::make_work_guard( m_srvc )),
   m_timerScan( m_srvc )
@@ -322,7 +322,8 @@ void Engine::HandleTimerScan( const boost::system::error_code &ec ) {
 
     // other ways:
       //timer_.expires_at(timer_.expiry() + boost::asio::chrono::seconds(1));
-      m_timerScan.expires_after( boost::asio::chrono::milliseconds(250) );
+      //m_timerScan.expires_after( boost::asio::chrono::milliseconds(250) );
+      m_timerScan.expires_after( boost::asio::chrono::milliseconds(495) );
       //m_timerScan.expires_after( boost::asio::chrono::milliseconds(750) );
       m_timerScan.async_wait(
         boost::bind(

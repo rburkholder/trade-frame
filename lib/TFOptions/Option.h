@@ -52,10 +52,10 @@ public:
 
   static void CalcRate( // basic libor calcs
     ou::tf::option::binomial::structInput& input,
-    const ou::tf::LiborFromIQFeed& libor,
+    const ou::tf::NoRiskInterestRateSeries& libor,
     boost::posix_time::ptime dtUtcNow, boost::posix_time::ptime dtUtcExpiry );
   // calls static CalcRate with specific expiry info
-  void CalcRate( ou::tf::option::binomial::structInput& input, const ptime dtUtcNow, const ou::tf::LiborFromIQFeed& libor );
+  void CalcRate( ou::tf::option::binomial::structInput& input, const ptime dtUtcNow, const ou::tf::NoRiskInterestRateSeries& libor );
   // caller needs to have updated input with CalcRate
   void CalcGreeks( ou::tf::option::binomial::structInput& input, ptime dtUtcNow, bool bNeedsGuess = true ); // Calc and Append
 

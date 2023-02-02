@@ -121,7 +121,9 @@ public:
   using fBuildWatch_t = std::function<pWatch_t(pInstrument_t)>;  // constructed elsewhere as it needs provider
   using fBuildOption_t = std::function<pOption_t(pInstrument_t)>;  // constructed elsewhere as it needs provider
 
-  explicit Engine( const ou::tf::LiborFromIQFeed& );
+  //Engine( const ou::tf::LiborFromIQFeed& );
+  //Engine( const ou::tf::FedRateFromIQFeed& );
+  Engine( const ou::tf::NoRiskInterestRateSeries& );
   virtual ~Engine( );
 
   // these register the underlying, an option, or both [may deprecate the Find functions)
@@ -161,7 +163,9 @@ private:
 
 //  OptionEntry::fCalc_t m_fCalc;
 
-  const LiborFromIQFeed& m_InterestRateFeed;
+  //const LiborFromIQFeed& m_InterestRateFeed;
+  //const FedRateFromIQFeed& m_InterestRateFeed;
+  const NoRiskInterestRateSeries& m_InterestRateFeed;
 
   struct OptionEntryOperation {
     Action m_action;
