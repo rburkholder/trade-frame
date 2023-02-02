@@ -114,6 +114,7 @@ target_link_libraries(
     TFInteractiveBrokers
     TFSimulation
     TFIQFeed
+    TFOptions
     OUCommon
   )
 
