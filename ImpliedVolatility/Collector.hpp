@@ -36,4 +36,8 @@ protected:
 private:
 
   pWatch_t m_pWatch;
+
+  void HandleUnderlyingQuote( const ou::tf::Quote& );
+  void HandleUnderlyingTrade( const ou::tf::Trade& );
+
 };

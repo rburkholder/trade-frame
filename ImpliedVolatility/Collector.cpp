@@ -22,9 +22,19 @@
 #include "Collector.hpp"
 
 Collector::Collector( pWatch_t pWatch )
-: m_pWatch( pWatch )
+: m_pWatch( std::move( pWatch ) )
 {
+  m_pWatch->OnQuote.Add( MakeDelegate( this, &Collector::HandleUnderlyingQuote ) );
+  m_pWatch->OnTrade.Add( MakeDelegate( this, &Collector::HandleUnderlyingTrade ) );
 }
 
 Collector::~Collector() {
+  m_pWatch->OnQuote.Remove( MakeDelegate( this, &Collector::HandleUnderlyingQuote ) );
+  m_pWatch->OnTrade.Remove( MakeDelegate( this, &Collector::HandleUnderlyingTrade ) );
+}
+
+void Collector::HandleUnderlyingQuote( const ou::tf::Quote& ) {
+}
+
+void Collector::HandleUnderlyingTrade( const ou::tf::Trade& ) {
 }
