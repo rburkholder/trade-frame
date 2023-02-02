@@ -32,7 +32,6 @@
 // TODO: 200 day, 50 day, 20 day, 7 day moving average to understand direction of
 //   trend, then run options starting long or short, depending
 
-#include <TFOptions/Option.h>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
@@ -304,6 +303,8 @@ void AppIndicatorTrading::InitializeUnderlying( pInstrument_t pInstrument ) {
 
   pPosition_t pPosition = ConstructPosition( pInstrument );
   SetInteractiveChart( pPosition );
+
+  m_pOptionEngine->RegisterUnderlying( pPosition->GetWatch() );
 
 }
 
@@ -622,26 +623,8 @@ void AppIndicatorTrading::OnConnected( int ) {
   using pOption_t = ou::tf::option::Option::pOption_t;
   if ( m_bData1Connected & m_bExecConnected ) {
     if ( !m_pOptionEngine) {
-      m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
-      m_pOptionEngine->m_fBuildWatch
-        = [this](pInstrument_t pInstrument)->pWatch_t {
-          // fix: need to look up and retrieve the pre-constructed watch
-            //ou::tf::Watch::pWatch_t pWatch( new ou::tf::Watch( pInstrument, m_pData1 ) );
-            pWatch_t pWatch;  // will cause a fault, should not need to be used -- hmm?  check this!
-            assert( false );
-            return pWatch;
-          };
-      m_pOptionEngine->m_fBuildOption
-        = [this](pInstrument_t pInstrument)->pOption_t {
-          // fix: need to lookup and retrieve the pre-constructed option
-            //ou::tf::option::Otion::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1 ) );
-            pOption_t pOption; // will cause a fault, should not need to be used -- hmm?  check this!
-            assert( false );
-            return pOption;
-          };
-
       m_fedrate.SetWatchOn( m_iqfeed );
-
+      m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
     }
     ConstructUnderlying();
   }

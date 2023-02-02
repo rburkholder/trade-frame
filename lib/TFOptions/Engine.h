@@ -54,7 +54,6 @@ public:
   using size_type = size_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pOption_t = Option::pOption_t;
-  //typedef std::function<void(const ou::tf::Greek&)> fGreekResultCallback_t; // engine provides callback of greek calculation
   using fCallbackWithGreek_t = Option::fCallbackWithGreek_t;
   using fCalc_t = std::function<void(pOption_t, const ou::tf::Quote&, fCallbackWithGreek_t&)>; // underlying quote
 
@@ -127,16 +126,15 @@ public:
   virtual ~Engine( );
 
   // these register the underlying, an option, or both [may deprecate the Find functions)
-  void RegisterWatch( const pWatch_t& ); // register an underlying
+  void RegisterUnderlying( const pWatch_t& ); // register an underlying
   void RegisterOption( const pOption_t& ); // register an option
-//  void Register( pOption_t&, pWatch_t& ); // register an option and its underlying
 
   // these start the calculation process, the option and underlying need to be pre-registered
   void Addv1( pOption_t pOption, pWatch_t pUnderlying, fCallbackWithGreek_t&& ); // reference counted(will be a problem with multiple callback destinations, first one wins currently
   void Add( pOption_t pOption, pWatch_t pUnderlying );  // this is better, the option already has a delegate for callback
   void Remove( pOption_t pOption, pWatch_t pUnderlying ); // part of the reference counting, will change reference count on associated underlying and auto remove
 
-  // these effectively handle registration of underlying and option, using a callback
+  // these effectively handle registration of underlying and option, using a callback - deprecated, use Register... above
   fBuildWatch_t m_fBuildWatch;
   pWatch_t FindWatch( const pInstrument_t pInstrument );  // if Watch not found, construct one.  Then provide the watch.
 
@@ -161,8 +159,6 @@ private:
   boost::thread_group m_threads;
   boost::asio::executor_work_guard<boost::asio::io_context::executor_type> m_srvcWork;
   boost::asio::steady_timer m_timerScan;
-
-//  OptionEntry::fCalc_t m_fCalc;
 
   //const LiborFromIQFeed& m_InterestRateFeed;
   //const FedRateFromIQFeed& m_InterestRateFeed;

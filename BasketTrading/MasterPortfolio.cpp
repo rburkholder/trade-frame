@@ -492,7 +492,7 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
           ps.GetPivotValue( PS::S1 ), ps.GetPivotValue( PS::S2 )
           );
 
-        m_pOptionEngine->RegisterWatch( uws.pUnderlying->GetWatch() );
+        m_pOptionEngine->RegisterUnderlying( uws.pUnderlying->GetWatch() );
 
         uws.pti = m_ptiTreeUnderlying->AppendChild(
           sUnderlying,

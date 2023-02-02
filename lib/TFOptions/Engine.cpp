@@ -164,11 +164,6 @@ Engine::Engine( const ou::tf::NoRiskInterestRateSeries& feed ):
 
   for ( std::size_t ix = 0; ix < 1; ix++ ) {  // change the final value to add threads, and fix the TODO further down
     m_threads.create_thread( boost::bind( &boost::asio::io_context::run, &m_srvc ) ); // add handlers
-
-    // not sure what this does or did, commented out for now, may be was a default no-op placeholder
-//    m_fCalc =
-//      [](ou::tf::option::Option::pOption_t pOption, const ou::tf::Quote& quoteUnderlying, fCallbackWithGreek_t& fGreek){
-//    };
   }
 
   m_timerScan.expires_after( boost::asio::chrono::milliseconds(1000) );
@@ -202,7 +197,7 @@ Engine::~Engine( ) {
   m_mapKnownWatches.clear();
 }
 
-void Engine::RegisterWatch( const pWatch_t& pWatch ) {
+void Engine::RegisterUnderlying( const pWatch_t& pWatch ) {
   assert( pWatch );
   std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   const std::string& sInstrumentName( pWatch->GetInstrument()->GetInstrumentName() );
