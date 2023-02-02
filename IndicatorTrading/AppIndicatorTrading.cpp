@@ -345,11 +345,16 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
   m_pExecModel = std::make_shared<ExecModel>();
   m_pExecutionControl = std::make_shared<ou::tf::l2::ExecutionControl>( pPosition, m_config.nBlockSize );
 
+  namespace ph = std::placeholders;
+
+  using pOption_t = ou::tf::option::Option::pOption_t;
+
   m_pInteractiveChart->SetPosition(
     pPosition,
     m_config,
     m_pComposeInstrument->OptionChainQuery(),
-    [this]( const std::string& sIQFeedOptionSymbol, InteractiveChart::fOption_t&& fOption ){ // fBuildOption_t
+  // fBuildOption_t:
+    [this]( const std::string& sIQFeedOptionSymbol, InteractiveChart::fOption_t&& fOption ){
       m_pComposeInstrument->Compose(
         sIQFeedOptionSymbol,
         [this,fOption_=std::move( fOption )](pInstrument_t pInstrument){
@@ -363,23 +368,40 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
         }
       );
     },
-    std::bind( &AppIndicatorTrading::ConstructPosition, this, std::placeholders::_1 ), // fBuildPosition_t
-    [this]( double value ) { // m_fClickLeft
+  // fBuildPosition_t:
+    std::bind( &AppIndicatorTrading::ConstructPosition, this, std::placeholders::_1 ),
+  // ManageStrategy::fRegisterOption_t:
+    std::bind( &ou::tf::option::Engine::RegisterOption, m_pOptionEngine.get(), ph::_1 ),
+  // ManageStrategy::fStartCalc_t:
+    [this]( pOption_t pOption, pWatch_t pUnderlying ){
+      m_pOptionEngine->Add( pOption, pUnderlying );
+    },
+  // ManageStrategy::m_fStopCalc:
+    [this]( pOption_t pOption, pWatch_t pUnderlying ){
+      m_pOptionEngine->Remove( pOption, pUnderlying );
+    },
+  // m_fClickLeft:
+    [this]( double value ) {
       std::string s;
       s = boost::lexical_cast<std::string>( value );
       m_pPanelOrderButtons->SetPriceAtFocus( s );
     },
-    [this]( double value ) { // m_fClickRight
+  // m_fClickRight:
+    [this]( double value ) {
     },
+  //
     [this]( const ou::tf::PanelOrderButtons_Order::EOrderMethod method ) {
       m_pPanelOrderButtons->Trigger( method );
     },
-    [this]( const ou::tf::PanelOrderButtons_MarketData& market_data ) { // m_fUpdateMarketData
+  // m_fUpdateMarketData:
+    [this]( const ou::tf::PanelOrderButtons_MarketData& market_data ) {
       m_pPanelOrderButtons->Update( market_data );
     },
-    [this]( const ou::tf::PanelOrderButtons_PositionData& position_data ){ // m_fUpdatePosition
+  // m_fUpdatePosition:
+    [this]( const ou::tf::PanelOrderButtons_PositionData& position_data ){
       m_pPanelOrderButtons->Update( position_data );
     },
+  //
     m_pTreeItemRoot,
     m_cemReferenceLevels
   );
@@ -579,6 +601,8 @@ void AppIndicatorTrading::OnClose( wxCloseEvent& event ) {
   }
 
   m_pComposeInstrument.reset();
+
+  m_pOptionEngine.reset();
 
   DelinkFromPanelProviderControl();
 

@@ -29,7 +29,6 @@
 
 #include <boost/format.hpp>
 
-//#include <TFOptions/Engine.h>
 #include <TFOptions/Chains.h>
 #include <TFOptions/GatherOptions.h>
 
@@ -209,6 +208,9 @@ void InteractiveChart::SetPosition(
 , pOptionChainQuery_t pOptionChainQuery
 , fBuildOption_t&& fBuildOption
 , fBuildPosition_t&& fBuildPosition
+, fRegisterOption_t&& fRegisterOption
+, fStartCalc_t&& fStartCalc
+, fStopCalc_t&& fStopCalc
 , fClick_t&& fClickLeft
 , fClick_t&& fClickRight
 , fTriggerOrder_t&& fTriggerOrder
@@ -234,6 +236,10 @@ void InteractiveChart::SetPosition(
 
   m_fBuildOption = std::move( fBuildOption );
   m_fBuildPosition = std::move( fBuildPosition );
+
+  m_fRegisterOption = std::move( fRegisterOption );
+  m_fStartCalc = std::move( fStartCalc );
+  m_fStopCalc = std::move( fStopCalc );
 
   m_fClickLeft = std::move( fClickLeft );
   m_fClickRight = std::move( fClickRight );
@@ -693,18 +699,16 @@ void InteractiveChart::SelectChains() {
 }
 
 void InteractiveChart::UpdateSynthetic( pOption_t& pCurrent, pOption_t pSelected ) {
-
-    if ( !pCurrent ) {
+  if ( !pCurrent ) {
+    pCurrent = pSelected;
+  }
+  else {
+    if ( pCurrent->GetStrike() != pSelected->GetStrike() ) {
+      // stop current watch
       pCurrent = pSelected;
+      // start watch
     }
-    else {
-      if ( pCurrent->GetStrike() != pSelected->GetStrike() ) {
-        // stop current watch
-        pCurrent = pSelected;
-        // start watch
-      }
-    }
-
+  }
 }
 
 void InteractiveChart::CheckOptions_v2() {
@@ -979,17 +983,17 @@ void InteractiveChart::OptionWatchStart() {
 
         strike = chain.Call_Itm( mid );
         pOption = chain.GetStrike( strike ).call.pOption;
-        m_vOptionForQuote.push_back( pOption );
         pOption->OnQuote.Add( MakeDelegate( this, &InteractiveChart::HandleOptionWatchQuote ) );
         pOption->EnableStatsAdd();
         pOption->StartWatch();
+        m_vOptionForQuote.push_back( std::move( pOption ) );
 
         strike = chain.Put_Itm( mid );
         pOption = chain.GetStrike( strike ).put.pOption;
-        m_vOptionForQuote.push_back( pOption );
         pOption->OnQuote.Add( MakeDelegate( this, &InteractiveChart::HandleOptionWatchQuote ) );
         pOption->EnableStatsAdd();
         pOption->StartWatch();
+        m_vOptionForQuote.push_back( std::move( pOption ) );
 
       }
       std::cout << "OptionForQuote: started" << std::endl;

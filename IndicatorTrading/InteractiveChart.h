@@ -99,15 +99,20 @@ public:
 
   using TreeItem = ou::tf::TreeItem;
 
-  using idOrder_t = ou::tf::Order::idOrder_t;
-
-  using pOrder_t = ou::tf::Order::pOrder_t;
-  using pPosition_t = ou::tf::Position::pPosition_t;
-  using pOption_t = ou::tf::option::Option::pOption_t;
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pOption_t = ou::tf::option::Option::pOption_t;
+  using pPosition_t = ou::tf::Position::pPosition_t;
+
+  using idOrder_t = ou::tf::Order::idOrder_t;
+  using pOrder_t = ou::tf::Order::pOrder_t;
 
   using fOption_t = std::function<void(pOption_t)>;
   using fBuildOption_t = std::function<void(const std::string&,fOption_t&&)>;
+
+  using fRegisterOption_t = std::function<void(pOption_t&)>;
+  using fStartCalc_t = std::function<void(pOption_t,pWatch_t)>; // option, underlying
+  using fStopCalc_t =  std::function<void(pOption_t,pWatch_t)>; // option, underlying
 
   using fBuildPosition_t = std::function<pPosition_t(pInstrument_t)>;
 
@@ -127,6 +132,9 @@ public:
    , pOptionChainQuery_t
    , fBuildOption_t&&
    , fBuildPosition_t&&
+   , fRegisterOption_t&&
+   , fStartCalc_t&&
+   , fStopCalc_t&&
    , fClick_t&& left
    , fClick_t&& right
    , fTriggerOrder_t&&
@@ -199,7 +207,6 @@ protected:
 
 private:
 
-  using pWatch_t = ou::tf::Watch::pWatch_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
   bool m_bConnected;
@@ -281,6 +288,10 @@ private:
 
   mapChains_t::const_iterator m_iterChainFront;
   mapChains_t::const_iterator m_iterChainBack;
+
+  fRegisterOption_t m_fRegisterOption;
+  fStartCalc_t m_fStartCalc;
+  fStopCalc_t m_fStopCalc;
 
   struct Synthetic {
     pOption_t pBackBuy;   // for the hedge
