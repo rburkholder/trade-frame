@@ -37,6 +37,8 @@
 
 #include <TFTrading/DBWrapper.h>
 
+#include <TFOptions/NoRiskInterestRateSeries.h>
+
 #include <TFVuTrading/MarketDepth/ExecutionControl.hpp>
 
 #include <TFBitsNPieces/FrameWork01.h>
@@ -69,6 +71,9 @@ namespace l2 {
 namespace iqfeed {
   class OptionChainQuery;
 } // namespace iqfeed
+namespace option {
+  class Engine;
+} // namespace option
 } // namespace tf
 } // namespace ou
 
@@ -83,6 +88,7 @@ protected:
 private:
 
   using TreeItem = ou::tf::TreeItem;
+  using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
@@ -105,6 +111,10 @@ private:
 
   ou::tf::FrameControls* m_pFrameLadderTrade;
   ou::tf::l2::PanelTrade* m_pPanelTrade;
+
+  //ou::tf::LiborFromIQFeed m_libor; // deprecated
+  ou::tf::FedRateFromIQFeed m_fedrate;
+  std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
 
   std::shared_ptr<FeedModel> m_pFeedModel;
   std::shared_ptr<ExecModel> m_pExecModel;
