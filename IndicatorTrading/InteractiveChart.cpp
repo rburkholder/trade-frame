@@ -158,8 +158,9 @@ void InteractiveChart::Init() {
   m_ceVolumeDn.SetColour( ou::Colour::Red );
   m_ceVolumeDn.SetName( "Volume Down" );
 
-  m_ceImbalanceRawMean.SetName( "imbalance mean" );
+  m_ceImbalanceRawMean.SetName( "imbalance mean (raw)" );
   m_ceImbalanceRawMean.SetColour( ou::Colour::LightGreen );
+  m_ceImbalanceSmoothMean.SetName( "imbalance mean (smooth)" );
   m_ceImbalanceSmoothMean.SetColour( ou::Colour::DarkGreen );
 
   //m_ceImbalanceRawB1.SetName( "imbalance slope" );
@@ -302,7 +303,7 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
     case ou::tf::InstrumentType::Future:
       m_pOptionChainQuery->QueryFuturesOptionChain(
         sIQFeedUnderlying,
-        "cp", "", "234", "1",
+        "cp", "", "345", "1",
         std::bind( &InteractiveChart::PopulateChains, this, ph::_1 )
         );
       break;
@@ -712,31 +713,35 @@ void InteractiveChart::CheckOptions_v2() {
 
     const double mid( m_quote.Midpoint() );
 
-    double strike;
+    double strikeItm, strikeOtm;
     pOption_t pOption;
 
     chain_t& chainFront( const_cast<chain_t&>( m_iterChainFront->second ) );
     chain_t& chainBack(  const_cast<chain_t&>( m_iterChainBack->second ) );
 
     // long synth - long call
-    strike = chainBack.Call_Itm( mid );
-    pOption = chainBack.GetStrike( strike ).call.pOption;
+    strikeItm = chainBack.Call_Itm( mid );
+    pOption = chainBack.GetStrike( strikeItm ).call.pOption;
     UpdateSynthetic( m_synthLong.pBackBuy, pOption );
 
     // long synth - short put
-    strike = chainFront.Put_Otm( mid );
-    pOption = chainFront.GetStrike( strike ).put.pOption;
+    strikeOtm = chainFront.Put_Otm( mid );
+    pOption = chainFront.GetStrike( strikeOtm ).put.pOption;
     UpdateSynthetic( m_synthLong.pFrontSell, pOption );
 
+    // TODO: test strikeItm == strikeOtm
+
     // short synth - long put
-    strike = chainBack.Put_Itm( mid );
-    pOption = chainBack.GetStrike( strike ).put.pOption;
+    strikeItm = chainBack.Put_Itm( mid );
+    pOption = chainBack.GetStrike( strikeItm ).put.pOption;
     UpdateSynthetic( m_synthShort.pBackBuy, pOption );
 
     // short synth - short call
-    strike = chainFront.Call_Otm( mid );
-    pOption = chainFront.GetStrike( strike ).call.pOption;
+    strikeOtm = chainFront.Call_Otm( mid );
+    pOption = chainFront.GetStrike( strikeOtm ).call.pOption;
     UpdateSynthetic( m_synthShort.pFrontSell, pOption );
+
+    // TODO: test strikeItm == strikeOtm
 
     //if ( pOption ) { // iqfeed isn't filling strikes properly
   }
