@@ -25,6 +25,7 @@
 
  // 2022/08/20 use pivots to determine edge points for option entry
 
+#include <boost/lexical_cast.hpp>
 #include <memory>
 
 #include <boost/format.hpp>
@@ -698,7 +699,7 @@ void InteractiveChart::SelectChains() {
 
 }
 
-void InteractiveChart::UpdateSynthetic( pOption_t& pCurrent, pOption_t pSelected ) {
+bool InteractiveChart::UpdateSynthetic( pOption_t& pCurrent, pOption_t pSelected ) {
   bool bChanged( false );
   if ( !pCurrent ) {
     pCurrent = pSelected;
@@ -714,6 +715,7 @@ void InteractiveChart::UpdateSynthetic( pOption_t& pCurrent, pOption_t pSelected
   if ( bChanged ) {
     pCurrent->StartWatch();
   }
+  return bChanged;
 }
 
 void InteractiveChart::CheckOptions_v2( boost::format& format, ou::tf::PanelOrderButtons_MarketData& data ) {
@@ -731,8 +733,10 @@ void InteractiveChart::CheckOptions_v2( boost::format& format, ou::tf::PanelOrde
     // long synth - long call
     strikeItm = chainBack.Call_Itm( mid );
     pOption = chainBack.GetStrike( strikeItm ).call.pOption;
-    UpdateSynthetic( m_synthLong.pBackBuy, pOption );
-    {
+    if ( UpdateSynthetic( m_synthLong.pBackBuy, pOption ) ) {
+    }
+    else{
+      data.m_sCall1 = "C" + boost::lexical_cast<std::string>( strikeItm ) + "L";
       const ou::tf::Quote& quote( pOption->LastQuote() );
       format % quote.Ask();
       data.m_sCall1Ask = std::move( format.str() );
@@ -743,8 +747,10 @@ void InteractiveChart::CheckOptions_v2( boost::format& format, ou::tf::PanelOrde
     // long synth - short put
     strikeOtm = chainFront.Put_Otm( mid );
     pOption = chainFront.GetStrike( strikeOtm ).put.pOption;
-    UpdateSynthetic( m_synthLong.pFrontSell, pOption );
-    {
+    if ( UpdateSynthetic( m_synthLong.pFrontSell, pOption ) ) {
+    }
+    else {
+      data.m_sPut1 = "P" + boost::lexical_cast<std::string>( strikeOtm ) + "S";
       const ou::tf::Quote& quote( pOption->LastQuote() );
       format % quote.Ask();
       data.m_sPut1Ask = std::move( format.str() );
@@ -757,8 +763,10 @@ void InteractiveChart::CheckOptions_v2( boost::format& format, ou::tf::PanelOrde
     // short synth - long put
     strikeItm = chainBack.Put_Itm( mid );
     pOption = chainBack.GetStrike( strikeItm ).put.pOption;
-    UpdateSynthetic( m_synthShort.pBackBuy, pOption );
-    {
+    if ( UpdateSynthetic( m_synthShort.pBackBuy, pOption ) ) {
+    }
+    else {
+      data.m_sPut2 = "P" + boost::lexical_cast<std::string>( strikeItm ) + "L";
       const ou::tf::Quote& quote( pOption->LastQuote() );
       format % quote.Ask();
       data.m_sPut2Ask = std::move( format.str() );
@@ -769,14 +777,18 @@ void InteractiveChart::CheckOptions_v2( boost::format& format, ou::tf::PanelOrde
     // short synth - short call
     strikeOtm = chainFront.Call_Otm( mid );
     pOption = chainFront.GetStrike( strikeOtm ).call.pOption;
-    UpdateSynthetic( m_synthShort.pFrontSell, pOption );
-    {
+    if ( UpdateSynthetic( m_synthShort.pFrontSell, pOption ) ) {
+    }
+    else {
+      data.m_sCall2 = "C" + boost::lexical_cast<std::string>( strikeOtm ) + "S";
       const ou::tf::Quote& quote( pOption->LastQuote() );
       format % quote.Ask();
       data.m_sCall2Ask = std::move( format.str() );
       format % quote.Bid();
       data.m_sCall2Bid = std::move( format.str() );
     }
+
+    data.m_bOptionPresent = true;
 
     // TODO: test strikeItm == strikeOtm
 

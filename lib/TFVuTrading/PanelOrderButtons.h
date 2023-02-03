@@ -154,16 +154,12 @@ private:
     wxStaticText* m_txtBase;
     wxStaticText* m_txtBaseAsk;
     wxStaticText* m_txtBaseBid;
-    wxStaticText* m_txtCallItm;
     wxStaticText* m_txtCallItmAsk;
     wxStaticText* m_txtCallItmBid;
-    wxStaticText* m_txtPutOtm;
     wxStaticText* m_txtPutOtmAsk;
     wxStaticText* m_txtPutOtmBid;
-    wxStaticText* m_txtCallOtm;
     wxStaticText* m_txtCallOtmAsk;
     wxStaticText* m_txtCallOtmBid;
-    wxStaticText* m_txtPutItm;
     wxStaticText* m_txtPutItmAsk;
     wxStaticText* m_txtPutItmBid;
 

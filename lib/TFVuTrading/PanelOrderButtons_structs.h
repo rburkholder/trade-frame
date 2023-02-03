@@ -86,6 +86,8 @@ struct PanelOrderButtons_MarketData {
   std::string m_sBaseAsk;
   std::string m_sBaseBid;
 
+  bool m_bOptionPresent;
+
   std::string m_sCall1; // expiry & strike only?  with popup of full iqf & custom?
   std::string m_sCall1Ask;
   std::string m_sCall1Bid;
@@ -101,6 +103,8 @@ struct PanelOrderButtons_MarketData {
   std::string m_sPut2; // expiry & strike only?  with popup of full iqf & custom?
   std::string m_sPut2Ask;
   std::string m_sPut2Bid;
+
+  PanelOrderButtons_MarketData(): m_bOptionPresent( false ) {}
 
 };
 

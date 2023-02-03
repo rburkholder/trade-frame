@@ -470,44 +470,64 @@ void PanelOrderButtons::SetPriceAtFocus( const std::string& sText ) {
 
 void PanelOrderButtons::Update( const PanelOrderButtons_MarketData& data ) {
 
-  CallAfter(
-    [this,
-      //sBase = std::move( data.m_sBase ),
-      sBaseAsk = std::move(data.m_sBaseAsk )
-    , sBaseBid = std::move( data.m_sBaseBid )
+  if ( data.m_bOptionPresent ) {
+    CallAfter(
+      [this,
+        //sBase = std::move( data.m_sBase ),
+        sBaseAsk = std::move(data.m_sBaseAsk )
+      , sBaseBid = std::move( data.m_sBaseBid )
 
-    , sCallItmAsk = std::move( data.m_sCall1Ask )
-    , sCallItmBid = std::move( data.m_sCall1Bid )
+      , sCallItm    = std::move( data.m_sCall1 )
+      , sCallItmAsk = std::move( data.m_sCall1Ask )
+      , sCallItmBid = std::move( data.m_sCall1Bid )
 
-    , sPutOtmAsk = std::move( data.m_sPut1Ask )
-    , sPutOtmBid = std::move( data.m_sPut1Bid )
+      , sPutOtm    = std::move( data.m_sPut1 )
+      , sPutOtmAsk = std::move( data.m_sPut1Ask )
+      , sPutOtmBid = std::move( data.m_sPut1Bid )
 
-    , sPutItmAsk = std::move( data.m_sPut2Ask )
-    , sPutItmBid = std::move( data.m_sPut2Bid )
+      , sPutItm    = std::move( data.m_sPut2 )
+      , sPutItmAsk = std::move( data.m_sPut2Ask )
+      , sPutItmBid = std::move( data.m_sPut2Bid )
 
-    , sCallOtmAsk = std::move( data.m_sCall2Ask )
-    , sCallOtmBid = std::move( data.m_sCall2Bid )
-    ](){
-      //m_txtBase->SetLabel( sBase );
-      m_txtBaseAsk->SetLabel( std::move( sBaseAsk ) );
-      m_txtBaseBid->SetLabel( std::move( sBaseBid ) );
+      , sCallOtm    = std::move( data.m_sCall2 )
+      , sCallOtmAsk = std::move( data.m_sCall2Ask )
+      , sCallOtmBid = std::move( data.m_sCall2Bid )
+      ](){
+        //m_txtBase->SetLabel( sBase );
+        m_txtBaseAsk->SetLabel( sBaseAsk );
+        m_txtBaseBid->SetLabel( sBaseBid );
 
-      //m_txtCallItm->SetLabel( data.m_sCall1 );
-      m_txtCallItmAsk->SetLabel( sCallItmAsk );
-      m_txtCallItmBid->SetLabel( sCallItmBid );
+        m_radioCallItm->SetLabel( sCallItm );
+        m_txtCallItmAsk->SetLabel( sCallItmAsk );
+        m_txtCallItmBid->SetLabel( sCallItmBid );
 
-      //m_txtPutOtm->SetLabel( data.m_sPut1 );
-      m_txtPutOtmAsk->SetLabel( sPutOtmAsk );
-      m_txtPutOtmBid->SetLabel( sPutOtmBid);
+        m_radioPutOtm->SetLabel( sPutOtm );
+        m_txtPutOtmAsk->SetLabel( sPutOtmAsk );
+        m_txtPutOtmBid->SetLabel( sPutOtmBid);
 
-      //m_txtCallOtm->SetLabel( data.m_sCall2 );
-      m_txtCallOtmAsk->SetLabel( sCallOtmAsk );
-      m_txtCallOtmBid->SetLabel( sCallOtmBid );
+        m_radioPutItm->SetLabel( sPutItm );
+        m_txtPutItmAsk->SetLabel( sPutItmAsk );
+        m_txtPutItmBid->SetLabel( sPutItmBid );
 
-      //m_txtPutItm->SetLabel( data.m_sPut2 );
-      m_txtPutItmAsk->SetLabel( sPutItmAsk );
-      m_txtPutItmBid->SetLabel( sPutItmBid );
-    } );
+        m_radioCallOtm->SetLabel( sCallOtm );
+        m_txtCallOtmAsk->SetLabel( sCallOtmAsk );
+        m_txtCallOtmBid->SetLabel( sCallOtmBid );
+
+      } );
+  }
+  else {
+    CallAfter(
+      [this,
+        //sBase = std::move( data.m_sBase ),
+        sBaseAsk = std::move(data.m_sBaseAsk )
+      , sBaseBid = std::move( data.m_sBaseBid )
+      ](){
+        //m_txtBase->SetLabel( sBase );
+        m_txtBaseAsk->SetLabel( sBaseAsk );
+        m_txtBaseBid->SetLabel( sBaseBid );
+      } );
+  }
+
 
 
 }

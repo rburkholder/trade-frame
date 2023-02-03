@@ -375,7 +375,7 @@ private:
   void PopulateChains( const query_t::OptionList& );
   void SelectChains();
 
-  void UpdateSynthetic( pOption_t& pCurrent, pOption_t pSelected );
+  bool UpdateSynthetic( pOption_t& pCurrent, pOption_t pSelected );
 
   LifeCycle_Position& Lookup_LifeCycle_Position();
 
