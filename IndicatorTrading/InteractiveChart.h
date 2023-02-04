@@ -144,27 +144,8 @@ public:
    , ou::ChartEntryMark& cemReferenceLevels
     );
 
-  void EmitChainFull() const {
-    size_t cnt {};
-    std::cout << "underlying: " << m_pPositionUnderlying->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) << std::endl;
-    for ( const mapChains_t::value_type& vt: m_mapChains ) {
-      std::cout << "chain: " << vt.first << " has " << vt.second.Size() << " entries" << std::endl;
-      cnt += vt.second.EmitValues();
-      //vt.second.EmitSummary();
-    }
-    std::cout << "EmitChainFull total chain strikes=" << cnt << std::endl;
-  }
-
-  void EmitChainSummary() const {
-    size_t cnt {};
-    std::cout << "underlying: " << m_pPositionUnderlying->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) << std::endl;
-    for ( const mapChains_t::value_type& vt: m_mapChains ) {
-      std::cout << "chain: " << vt.first << " has " << vt.second.Size() << " entries" << std::endl;
-      //vt.second.EmitValues();
-      cnt += vt.second.EmitSummary();
-    }
-    std::cout << "EmitChainSummary total sum(call + put)=" << cnt << std::endl;
-  }
+  void EmitChainFull() const;
+  void EmitChainSummary() const;
 
   void ProcessChains();
 
