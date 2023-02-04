@@ -206,7 +206,7 @@ void Engine::RegisterUnderlying( const pWatch_t& pWatch ) {
     m_mapKnownWatches.insert( mapKnownWatches_t::value_type( sInstrumentName, pWatch ) );
   }
   else {
-    throw std::runtime_error( "Engine::Register( pWatch_t ): already exists - " + sInstrumentName );
+    throw std::runtime_error( "Engine::Register Underlying: already exists - " + sInstrumentName );
   }
 }
 
@@ -219,7 +219,7 @@ void Engine::RegisterOption( const pOption_t& pOption) {
     m_mapKnownOptions.insert( mapKnownOptions_t::value_type( sInstrumentName, pOption ) );
   }
   else {
-    throw std::runtime_error( "Engine::Register( pOption_t ): already exists - " + sInstrumentName );
+    throw std::runtime_error( "Engine::Register Option: already exists - " + sInstrumentName );
   }
 }
 
