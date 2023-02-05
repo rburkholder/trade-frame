@@ -51,6 +51,7 @@
 #include <TFIQFeed/Level2/Symbols.hpp>
 #include <TFIQFeed/Level2/FeatureSet.hpp>
 
+#include <TFBitsNPieces/Stochastic.hpp>
 #include <TFBitsNPieces/MovingAverage.hpp>
 
 #include "ConfigParser.hpp"
@@ -141,7 +142,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, Cycle, CycleSlope, SD, MASlope, MA, ImbalanceMean, FVS_v8_rel, PL1, PL2, ET, MarketDepth };
+  enum EChartSlot { Price, Volume, Cycle, CycleSlope, SD, MASlope, MA, ImbalanceMean, Stoch, FVS_v8_rel, PL1, PL2, ET, MarketDepth };
 
   enum class EStateTrade {
     Init,  // initiaize state in current market
@@ -245,6 +246,17 @@ private:
 
   using vMovingAverageSlope_t = std::vector<ou::tf::MovingAverageSlope>;
   vMovingAverageSlope_t m_vMovingAverageSlope;
+
+  // https://github.com/rburkholder/tf2/commit/8a9ed856d16b744df6becbe7ec6a18eb5df52644
+  using pStochastic_t = std::unique_ptr<Stochastic>;
+  using vStochastic_t = std::vector<pStochastic_t>;
+  vStochastic_t m_vStochastic;
+
+  //ou::tf::Prices m_pricesStochastic;
+  //ou::tf::hf::TSEMA<ou::tf::Price> m_emaStochastic;
+
+  ou::ChartEntryMark m_cemStochastic;
+  //ou::ChartEntryIndicator m_ceStochastic;
 
   struct HiPass {
 

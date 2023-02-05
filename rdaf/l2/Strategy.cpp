@@ -50,8 +50,8 @@ using pWatch_t = ou::tf::Watch::pWatch_t;
 
 namespace {
   static const unsigned int max_ix = 10; // TODO need to obtain from elsewhere & sync with Symbols
-  static const int k_up = 100;
-  static const int k_lo =   0;
+  static const int k_up = 85;
+  static const int k_lo = 15;
   static const boost::posix_time::time_duration filter_stoch( 0, 0, 1 );
 }
 
@@ -96,6 +96,12 @@ Strategy::Strategy(
   m_ceQuoteBid.SetName( "Bid" );
 
   m_ceVolume.SetName( "Volume" );
+
+  m_cemStochastic.AddMark(  100, ou::Colour::Black,    "" );
+  m_cemStochastic.AddMark( k_up, ou::Colour::Red,   boost::lexical_cast<std::string>( k_up ) + "%" );
+  m_cemStochastic.AddMark(   50, ou::Colour::Green, "50%" );
+  m_cemStochastic.AddMark( k_lo, ou::Colour::Blue,  boost::lexical_cast<std::string>( k_lo ) + "%" );
+  m_cemStochastic.AddMark(    0, ou::Colour::Black,    "" );
 
   m_ceRelativeMA1.SetName( "ma0-ma3" );
   m_ceRelativeMA2.SetName( "ma1-ma3" );
@@ -173,6 +179,12 @@ void Strategy::SetupChart() {
   //m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[2].m_ceEhlersHiPassFilterSlope );
   //m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[3].m_ceEhlersHiPassFilterSlope );
 
+  m_cdv.Add( EChartSlot::Stoch, &m_cemStochastic );
+
+  for ( vStochastic_t::value_type& vt: m_vStochastic ) {
+    vt->AddToView( m_cdv, EChartSlot::Price, EChartSlot::Stoch );
+  }
+
   m_cdv.Add( EChartSlot::MA, &m_cemZero );
   m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA1 );
   m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA2 );
@@ -186,6 +198,8 @@ void Strategy::SetupChart() {
 
   m_ceImbalanceSmoothMean.SetColour( ou::Colour::DarkGreen );
   m_cdv.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceSmoothMean );
+
+  m_cdv.Add( EChartSlot::PL1, &m_cemZero );
 
   m_cdv.Add( EChartSlot::PL1, &m_ceProfitUnRealized );
   m_cdv.Add( EChartSlot::PL2, &m_ceProfitRealized );
@@ -231,6 +245,13 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   //m_rHiPass[1].Init( m_config.nPeriodWidth, ou::Colour::Gold, "HP2" );
   m_rHiPass[2].Init( m_config.nPeriodWidth, ou::Colour::Brown, "HP3" );
   //m_rHiPass[3].Init( m_config.nMA1Periods, ou::Colour::Green, "HP4" );
+
+
+  // stochastic
+
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "1", m_quotes, m_config.nStochastic1Periods, td, ou::Colour::DeepSkyBlue ) );
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "2", m_quotes, m_config.nStochastic2Periods, td, ou::Colour::DodgerBlue ) );  // is dark: MediumSlateBlue; MediumAquamarine is greenish; MediumPurple is dark; Purple is dark
+  m_vStochastic.emplace_back( std::make_unique<Stochastic>( "3", m_quotes, m_config.nStochastic3Periods, td, ou::Colour::MediumSlateBlue ) ); // no MediumTurquoise, maybe Indigo
 
   // moving average
 
@@ -565,6 +586,8 @@ void Strategy::LoadHistory( TClass* tc ) {
 #endif
 
 void Strategy::Clear() {
+
+  m_vStochastic.clear();
 
   using pProvider_t = ou::tf::Watch::pProvider_t;
   if  ( m_pPosition ) {
@@ -1160,36 +1183,36 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   // Hi Pass - at one second intervals - continuous won't work with irregular intervals (ie quote/trade)
   // needs better integration
 
-  const double ma1( m_vMovingAverageSlope[1].EMA() );
+  //const double ma1( m_vMovingAverageSlope[1].EMA() );
 
   //m_rHiPass[0].Update( dt, ma0 );
   //m_rHiPass[1].Update( dt, ma1 );
-  m_rHiPass[2].Update( dt, ma1 );
+  //m_rHiPass[2].Update( dt, ma1 );
   //m_rHiPass[3].Update( dt, ma1 );
 
-  HiPass& hp( m_rHiPass[2] );
+  //HiPass& hp( m_rHiPass[2] );
 
   // ==
 
-  const bool bHP0Hi( 0.0 < hp.m_dblHPF0 );
-  const bool bHP0Lo( 0.0 > hp.m_dblHPF0 );
+  //const bool bHP0Hi( 0.0 < hp.m_dblHPF0 );
+  //const bool bHP0Lo( 0.0 > hp.m_dblHPF0 );
 
-  const bool bHP1Hi( 0.0 < hp.m_dblHPF1 );
-  const bool bHP1Lo( 0.0 > hp.m_dblHPF1 );
+  //const bool bHP1Hi( 0.0 < hp.m_dblHPF1 );
+  //const bool bHP1Lo( 0.0 > hp.m_dblHPF1 );
 
-  const bool bHPUpCross( bHP1Lo && bHP0Hi );
-  const bool bHPDnCross( bHP1Hi && bHP0Lo );
+  //const bool bHPUpCross( bHP1Lo && bHP0Hi );
+  //const bool bHPDnCross( bHP1Hi && bHP0Lo );
 
   // ==
 
-  const bool bHpSlope0Hi( 0.0 < hp.m_dblHPF_Slope0 );
-  const bool bHPSlope0Lo( 0.0 > hp.m_dblHPF_Slope0 );
+  //const bool bHpSlope0Hi( 0.0 < hp.m_dblHPF_Slope0 );
+  //const bool bHPSlope0Lo( 0.0 > hp.m_dblHPF_Slope0 );
 
-  const bool bHPSlope1Hi( 0.0 < hp.m_dblHPF_Slope1 );
-  const bool bHPSlope1Lo( 0.0 > hp.m_dblHPF_Slope1 );
+  //const bool bHPSlope1Hi( 0.0 < hp.m_dblHPF_Slope1 );
+  //const bool bHPSlope1Lo( 0.0 > hp.m_dblHPF_Slope1 );
 
-  const bool bHPSlopeUpCross( bHPSlope1Lo && bHpSlope0Hi );
-  const bool bHPSlopeDnCross( bHPSlope1Hi && bHPSlope0Lo );
+  //const bool bHPSlopeUpCross( bHPSlope1Lo && bHpSlope0Hi );
+  //const bool bHPSlopeDnCross( bHPSlope1Hi && bHPSlope0Lo );
 
   // ==
 
@@ -1202,20 +1225,20 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     //}
     //else {
       //if ( bMaRising && bHPSlopeUpCross ) {
-      if ( bHPSlopeUpCross ) {
+      //if ( bHPSlopeUpCross ) {
 //        stateDesired = EStateDesired::GoLong;
-      }
-      else {
+      //}
+      //else {
         //if ( bMaFalling && bHPSlopeDnCross ) {
-        if ( bHPSlopeDnCross ) {
+        //if ( bHPSlopeDnCross ) {
 //          stateDesired = EStateDesired::GoShort;
-        }
-        else {
-          if ( bHPUpCross || bHPDnCross ) {
+        //}
+        //else {
+          //if ( bHPUpCross || bHPDnCross ) {
 //            stateDesired = EStateDesired::Cancel;
-          }
-        }
-      }
+          //}
+        //}
+      //}
     //}
   //}
 
