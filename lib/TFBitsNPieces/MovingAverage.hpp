@@ -49,11 +49,15 @@ protected:
   ou::tf::hf::TSEMA<ou::tf::Quote> m_ema;
 private:
 
+  //double m_maLast;
+
   ou::tf::TSSWStatsMidQuote m_stats;
 
-  ou::ChartEntryIndicator m_ceMA;
-
   ou::ChartEntryIndicator m_ceStdDeviation;
+
+  //ou::ChartEntryIndicator m_ceStdDevUpper;
+  ou::ChartEntryIndicator m_ceMA;
+  //ou::ChartEntryIndicator m_ceStdDevLower;
 
   void HandleUpdateEma( const ou::tf::Price& );
   void HandleUpdateStats( const ou::tf::TSSWStatsMidQuote::Results& );
