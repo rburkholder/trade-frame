@@ -113,7 +113,7 @@ void WinChartView::BindEvents() {
   // this GuiRefresh initialization should come after all else
   m_timerGuiRefresh.SetOwner( this );
   Bind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  m_timerGuiRefresh.Start( 200 );
+  m_timerGuiRefresh.Start( 250 );
 
 }
 
@@ -129,7 +129,7 @@ void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView, bool bRe
   // TODO: need to sync with the gui refresh thread
   m_pChartDataView = pChartDataView; // TODO: need some additional tender loving care with this for the mutex
   if ( m_pChartDataView ) {
-    m_vpDataViewVisual = m_vpDataViewExtents = m_pChartDataView->GetExtents();
+    m_vpDataViewVisual = m_vpDataViewExtents = m_pChartDataView->GetExtents(); // TODO: may not want this if to maintain continuity across charts
   }
   else {
     m_vpDataViewVisual = m_vpDataViewExtents = ViewPort_t();
