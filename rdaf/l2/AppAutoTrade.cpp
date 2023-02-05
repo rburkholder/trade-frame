@@ -341,7 +341,7 @@ bool AppAutoTrade::OnInit() {
   for ( ou::tf::config::choices_t::mapInstance_t::value_type& vt: m_choices.mapInstance ) {
 
     auto& [sSymbol_IQFeed, choices] = vt;
-    BOOST_LOG_TRIVIAL(info) << "creating strategy for:  " << sSymbol_IQFeed;
+    BOOST_LOG_TRIVIAL(info) << " creating strategy for: " << sSymbol_IQFeed;
 
     std::string sSymbol;
 
