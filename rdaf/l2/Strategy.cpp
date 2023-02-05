@@ -189,7 +189,7 @@ void Strategy::SetupChart() {
 
   m_cdv.Add( EChartSlot::PL1, &m_ceProfitUnRealized );
   m_cdv.Add( EChartSlot::PL2, &m_ceProfitRealized );
-  m_cdv.Add( EChartSlot::PL1, &m_ceCommissionsPaid );
+  m_cdv.Add( EChartSlot::PL2, &m_ceCommissionsPaid );
   m_cdv.Add( EChartSlot::PL2, &m_ceProfit );
 
 #if FVS
