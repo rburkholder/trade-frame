@@ -23,6 +23,7 @@
 
 #include <atomic>
 #include <functional>
+#include <unordered_map>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -124,7 +125,7 @@ public:
 
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
 
-  enum EChartSlot { Price, Volume, StochInd, ImbalanceMean, ImbalanceB1, ImbalanceState, Sentiment, PL, Spread }; // IndMA = moving averate indicator
+  enum EChartSlot { Price, Volume, StochInd, ImbalanceMean, ImbalanceB1, ImbalanceState, IV, Sentiment, PL, Spread };
 
   void SetPosition(
      pPosition_t
@@ -246,6 +247,9 @@ private:
   //ou::ChartEntryIndicator m_ceImbalanceSmoothB1;
   //ou::ChartEntryIndicator m_ceImbalanceState;
 
+  ou::ChartEntryIndicator m_ceImpliedVolatilityCall;
+  ou::ChartEntryIndicator m_ceImpliedVolatilityPut;
+
   ou::ChartEntryIndicator m_ceProfitLoss;
 
   ou::ChartEntryMark m_cemStochastic;
@@ -334,6 +338,27 @@ private:
 
   std::unique_ptr<Strategy> m_pStrategy;
 
+  struct OptionStats {
+
+    pOption_t m_pOption;
+
+    OptionStats( pOption_t pOption )
+    : m_pOption( std::move( pOption ) )
+    {}
+    ~OptionStats() {
+    }
+  };
+
+  using pOptionStats_t = std::unique_ptr<OptionStats>;
+  using umapOptionStats_t = std::unordered_map<std::string,pOptionStats_t>;
+
+  using umapOptions_t = std::unordered_map<std::string,pOption_t>;
+
+  umapOptions_t m_umapOptionsRegistered; // options registered with the option engine
+
+  pOption_t m_pOptionIVCall;
+  pOption_t m_pOptionIVPut;
+
   void Init();
 
   void BindEvents();
@@ -356,7 +381,13 @@ private:
   void PopulateChains( const query_t::OptionList& );
   void SelectChains();
 
-  bool UpdateSynthetic( pOption_t& pCurrent, pOption_t pSelected );
+  bool UpdateSynthetic( pOption_t& pCurrent, pOption_t& pSelected );
+  void UpdateImpliedVolatility(
+    void (InteractiveChart::*f)( const ou::tf::Greek& ),
+    pOption_t& pCurrent, pOption_t& pSelected,
+    ou::ChartEntryIndicator& indicator );
+  void UpdateImpliedVolatilityCall( const ou::tf::Greek& );
+  void UpdateImpliedVolatilityPut( const ou::tf::Greek& );
 
   LifeCycle_Position& Lookup_LifeCycle_Position();
 

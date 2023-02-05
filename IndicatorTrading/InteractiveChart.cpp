@@ -25,10 +25,10 @@
 
  // 2022/08/20 use pivots to determine edge points for option entry
 
-#include <boost/lexical_cast.hpp>
 #include <memory>
 
 #include <boost/format.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <TFOptions/Chains.h>
 #include <TFOptions/GatherOptions.h>
@@ -125,6 +125,9 @@ void InteractiveChart::Init() {
 
   //m_dvChart.Add( EChartSlot::Sentiment, &m_ceVWAP ); // need to auto scale, then this won't distort the chart
 
+  m_dvChart.Add( EChartSlot::IV, &m_ceImpliedVolatilityCall );
+  m_dvChart.Add( EChartSlot::IV, &m_ceImpliedVolatilityPut );
+
   m_dvChart.Add( EChartSlot::Spread, &m_ceQuoteSpread );
 
   // need to present the marks prior to presenting the data
@@ -139,8 +142,10 @@ void InteractiveChart::Init() {
   m_bfPriceUp.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceUp ) );
   m_bfPriceDn.SetOnBarComplete( MakeDelegate( this, &InteractiveChart::HandleBarCompletionPriceDn ) );
 
-  m_ceVWAP.SetColour( ou::Colour::OrangeRed );
-  m_ceVWAP.SetName( "vwap" );
+  m_ceVolume.SetName( "Volume" );
+
+  //m_ceVWAP.SetColour( ou::Colour::OrangeRed );
+  //m_ceVWAP.SetName( "vwap" );
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
@@ -170,7 +175,11 @@ void InteractiveChart::Init() {
   //m_ceImbalanceState.SetName( "imbalance state" );
   //m_ceImbalanceState.SetColour( ou::Colour::Green );
 
-  m_ceVolume.SetName( "Volume" );
+  m_ceImpliedVolatilityCall.SetName( "IV Call" );
+  m_ceImpliedVolatilityPut.SetName( "IV Put" );
+
+  m_ceImpliedVolatilityCall.SetColour( ou::Colour::Green );
+  m_ceImpliedVolatilityPut.SetColour( ou::Colour::Blue );
 
   m_ceProfitLoss.SetName( "P/L" );
   m_dvChart.Add( EChartSlot::PL, &m_ceProfitLoss );
@@ -699,7 +708,51 @@ void InteractiveChart::SelectChains() {
 
 }
 
-bool InteractiveChart::UpdateSynthetic( pOption_t& pCurrent, pOption_t pSelected ) {
+void InteractiveChart::UpdateImpliedVolatilityCall( const ou::tf::Greek& greek ) {
+  m_ceImpliedVolatilityCall.Append( greek.DateTime(), greek.ImpliedVolatility() );
+}
+
+void InteractiveChart::UpdateImpliedVolatilityPut( const ou::tf::Greek& greek ) {
+  m_ceImpliedVolatilityPut.Append( greek.DateTime(), greek.ImpliedVolatility() );
+}
+
+using pOption_t = InteractiveChart::pOption_t;
+
+// https://stackoverflow.com/questions/3209225/how-to-pass-a-method-pointer-as-a-template-parameter
+//template<typename Object>
+//void UpdateImpliedVolatility( Object& object, void (Object::*f)( const ou::tf::Greek& ), pOption_t& pCurrent, pOption_t& pSelected, ou::ChartEntryIndicator& indicator ) {
+
+void InteractiveChart::UpdateImpliedVolatility( void (InteractiveChart::*f)( const ou::tf::Greek& ), pOption_t& pCurrent, pOption_t& pSelected, ou::ChartEntryIndicator& indicator ) {
+  bool bChanged( false );
+  if ( !pCurrent ) {
+    pCurrent = pSelected;
+    bChanged = true;
+  }
+  else {
+    if ( pCurrent->GetStrike() != pSelected->GetStrike() ) {
+      m_fStopCalc( pCurrent, m_pPositionUnderlying->GetWatch() );
+      pCurrent->StopWatch();
+      pCurrent->OnGreek.Remove( MakeDelegate( this, f ) );
+      pCurrent = pSelected;
+      bChanged = true;
+    }
+  }
+  if ( bChanged ) {
+    const ou::tf::Instrument::idInstrument_t& idInstrument( pCurrent->GetInstrumentName() );
+    umapOptions_t::iterator iter = m_umapOptionsRegistered.find( idInstrument );
+    if ( m_umapOptionsRegistered.end() == iter ) {
+      auto pair = m_umapOptionsRegistered.emplace( idInstrument, pCurrent );
+      assert( pair.second );
+      //iter = pair.first;
+      m_fRegisterOption( pCurrent );
+    }
+    pCurrent->OnGreek.Add( MakeDelegate( this, f ) );
+    pCurrent->StartWatch();
+    m_fStartCalc( pCurrent, m_pPositionUnderlying->GetWatch() );
+  }
+}
+
+bool InteractiveChart::UpdateSynthetic( pOption_t& pCurrent, pOption_t& pSelected ) {
   bool bChanged( false );
   if ( !pCurrent ) {
     pCurrent = pSelected;
@@ -724,7 +777,7 @@ void InteractiveChart::CheckOptions_v2( boost::format& format, ou::tf::PanelOrde
 
     const double mid( m_quote.Midpoint() );
 
-    double strikeItm, strikeOtm;
+    double strikeItm, strikeAtm, strikeOtm;
     pOption_t pOption;
 
     chain_t& chainFront( const_cast<chain_t&>( m_iterChainFront->second ) );
@@ -758,7 +811,7 @@ void InteractiveChart::CheckOptions_v2( boost::format& format, ou::tf::PanelOrde
       data.m_sPut1Bid = std::move( format.str() );
     }
 
-    // TODO: test strikeItm == strikeOtm
+    // TODO: test strikeItm == strikeOtm - no, far strikes are sometimes missing
 
     // short synth - long put
     strikeItm = chainBack.Put_Itm( mid );
@@ -790,9 +843,18 @@ void InteractiveChart::CheckOptions_v2( boost::format& format, ou::tf::PanelOrde
 
     data.m_bOptionPresent = true;
 
-    // TODO: test strikeItm == strikeOtm
+    // TODO: test strikeItm == strikeOtm - no, far strikes are sometimes missing
 
-    //if ( pOption ) { // iqfeed isn't filling strikes properly
+    // near call for IV
+    strikeAtm = chainFront.Call_Atm( mid );
+    pOption = chainFront.GetStrike( strikeAtm ).call.pOption;
+    UpdateImpliedVolatility( &InteractiveChart::UpdateImpliedVolatilityCall, pOption, m_pOptionIVCall, m_ceImpliedVolatilityCall );
+
+    // near put for IV
+    strikeAtm = chainFront.Put_Atm( mid );
+    pOption = chainFront.GetStrike( strikeAtm ).put.pOption;
+    UpdateImpliedVolatility( &InteractiveChart::UpdateImpliedVolatilityPut, pOption, m_pOptionIVPut, m_ceImpliedVolatilityPut );
+
   }
 }
 
@@ -877,6 +939,21 @@ void InteractiveChart::ReleaseResources() {
 }
 
 void InteractiveChart::OnDestroy( wxWindowDestroyEvent& event ) {
+
+  if ( m_pOptionIVCall ) {
+    m_fStopCalc( m_pOptionIVCall, m_pPositionUnderlying->GetWatch() );
+    m_pOptionIVCall->StopWatch();
+    m_pOptionIVCall->OnGreek.Remove( MakeDelegate( this, &InteractiveChart::UpdateImpliedVolatilityCall ) );
+    m_pOptionIVCall.reset();
+  }
+
+  if ( m_pOptionIVPut ) {
+    m_fStopCalc( m_pOptionIVPut, m_pPositionUnderlying->GetWatch() );
+    m_pOptionIVPut->StopWatch();
+    m_pOptionIVPut->OnGreek.Remove( MakeDelegate( this, &InteractiveChart::UpdateImpliedVolatilityPut ) );
+    m_pOptionIVPut.reset();
+  }
+
   UnBindEvents();
   event.Skip();  // auto followed by Destroy();
 }
