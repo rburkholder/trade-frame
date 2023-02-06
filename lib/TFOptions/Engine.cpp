@@ -372,10 +372,10 @@ void Engine::ProcessOptionEntryOperationQueue() {
       case Action::RemoveOption: {
           // should option and instrument be removed from m_mapKnownWatches, m_mapKnownOptions?
           // if so, then maps require counters, or use the pOption_t use_count?
-          std::cout << "Engine::RemoveOption: " << MapKey << std::endl;
+          //std::cout << "Engine::RemoveOption: " << MapKey << std::endl;
           mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( MapKey );
           if ( m_mapOptionEntry.end() == iterOption ) {
-            throw std::runtime_error( "Engine::Delete: can't find option" + MapKey );
+            throw std::runtime_error( "Engine::Remove: can't find option" + MapKey );
           }
 
           OptionEntry::size_type cnt = iterOption->second.Dec();
