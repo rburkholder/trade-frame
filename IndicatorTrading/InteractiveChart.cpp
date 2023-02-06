@@ -723,6 +723,7 @@ using pOption_t = InteractiveChart::pOption_t;
 //void UpdateImpliedVolatility( Object& object, void (Object::*f)( const ou::tf::Greek& ), pOption_t& pCurrent, pOption_t& pSelected, ou::ChartEntryIndicator& indicator ) {
 
 void InteractiveChart::UpdateImpliedVolatility( void (InteractiveChart::*f)( const ou::tf::Greek& ), pOption_t& pCurrent, pOption_t& pSelected, ou::ChartEntryIndicator& indicator ) {
+  assert( pSelected );
   bool bChanged( false );
   if ( !pCurrent ) {
     pCurrent = pSelected;
@@ -848,12 +849,12 @@ void InteractiveChart::CheckOptions_v2( boost::format& format, ou::tf::PanelOrde
     // near call for IV
     strikeAtm = chainFront.Call_Atm( mid );
     pOption = chainFront.GetStrike( strikeAtm ).call.pOption;
-    UpdateImpliedVolatility( &InteractiveChart::UpdateImpliedVolatilityCall, pOption, m_pOptionIVCall, m_ceImpliedVolatilityCall );
+    UpdateImpliedVolatility( &InteractiveChart::UpdateImpliedVolatilityCall, m_pOptionIVCall, pOption, m_ceImpliedVolatilityCall );
 
     // near put for IV
     strikeAtm = chainFront.Put_Atm( mid );
     pOption = chainFront.GetStrike( strikeAtm ).put.pOption;
-    UpdateImpliedVolatility( &InteractiveChart::UpdateImpliedVolatilityPut, pOption, m_pOptionIVPut, m_ceImpliedVolatilityPut );
+    UpdateImpliedVolatility( &InteractiveChart::UpdateImpliedVolatilityPut, m_pOptionIVPut, pOption, m_ceImpliedVolatilityPut );
 
   }
 }
