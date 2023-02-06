@@ -871,10 +871,13 @@ void InteractiveChart::HandleBarCompletionPriceDn( const ou::tf::Bar& bar ) {
 
 void InteractiveChart::SaveWatch( const std::string& sPrefix ) {
   m_pPositionUnderlying->GetWatch()->SaveSeries( sPrefix );
-  for ( mapStrikes_t::value_type& strike: m_mapStrikes ) {
-    for ( mapOptionTracker_t::value_type& tracker: strike.second ) {
-      tracker.second->SaveWatch( sPrefix );
-    }
+  //for ( mapStrikes_t::value_type& strike: m_mapStrikes ) {
+  //  for ( mapOptionTracker_t::value_type& tracker: strike.second ) {
+  //    tracker.second->SaveWatch( sPrefix );
+  //  }
+  //}
+  for ( umapOptions_t::value_type& entry: m_umapOptionsRegistered ) {
+    entry.second->SaveSeries( sPrefix );
   }
 }
 
