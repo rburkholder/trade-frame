@@ -935,14 +935,6 @@ void InteractiveChart::UnBindEvents() {
 }
 
 void InteractiveChart::ReleaseResources() {
-  Disconnect();
-  SetChartDataView( nullptr );
-  m_mapLifeCycle_Trade.clear();
-  m_pStrategy.reset();
-  m_pOptionChainQuery.reset();
-}
-
-void InteractiveChart::OnDestroy( wxWindowDestroyEvent& event ) {
 
   if ( m_pOptionIVCall ) {
     m_fStopCalc( m_pOptionIVCall, m_pPositionUnderlying->GetWatch() );
@@ -957,6 +949,19 @@ void InteractiveChart::OnDestroy( wxWindowDestroyEvent& event ) {
     m_pOptionIVPut->OnGreek.Remove( MakeDelegate( this, &InteractiveChart::UpdateImpliedVolatilityPut ) );
     m_pOptionIVPut.reset();
   }
+
+  m_umapOptionsRegistered.clear();
+
+  Disconnect();
+  SetChartDataView( nullptr );
+
+  m_mapLifeCycle_Trade.clear();
+  m_pStrategy.reset();
+  m_pOptionChainQuery.reset();
+}
+
+void InteractiveChart::OnDestroy( wxWindowDestroyEvent& event ) {
+  // ReleaseResources() comes explicitly earlier in caller
 
   UnBindEvents();
   event.Skip();  // auto followed by Destroy();
