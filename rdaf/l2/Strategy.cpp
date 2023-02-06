@@ -26,7 +26,7 @@
 #include <array>
 #include <chrono>
 
-// no longer use iostream, std::cout has a multithread contention problem
+// no longer use iostream:  std::cout has a multithread contention problem
 //   due to it being captured to the gui, and is not thread safe
 #include <boost/log/trivial.hpp>
 
@@ -50,8 +50,8 @@ using pWatch_t = ou::tf::Watch::pWatch_t;
 
 namespace {
   static const unsigned int max_ix = 10; // TODO need to obtain from elsewhere & sync with Symbols
-  static const int k_up = 85;
-  static const int k_lo = 15;
+  static const int k_up = 80;
+  static const int k_lo = 20;
   static const boost::posix_time::time_duration filter_stoch( 0, 0, 1 );
 }
 
@@ -243,7 +243,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   //m_rHiPass[0].Init( m_config.nPeriodWidth, ou::Colour::Coral, "HP1" );
   //m_rHiPass[1].Init( m_config.nPeriodWidth, ou::Colour::Gold, "HP2" );
-  m_rHiPass[2].Init( m_config.nPeriodWidth, ou::Colour::Brown, "HP3" );
+//  m_rHiPass[2].Init( m_config.nPeriodWidth, ou::Colour::Brown, "HP3" );
   //m_rHiPass[3].Init( m_config.nMA1Periods, ou::Colour::Green, "HP4" );
 
 

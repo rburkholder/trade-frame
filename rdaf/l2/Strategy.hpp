@@ -348,7 +348,7 @@ private:
 
   };
 
-  HiPass m_rHiPass[4];
+  //HiPass m_rHiPass[4];
 
   struct State {
 
