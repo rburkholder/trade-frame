@@ -28,16 +28,11 @@ SimulationSymbol::SimulationSymbol(
   pInstrument_cref pInstrument,
   const std::string &sGroup
   )
-: Symbol<SimulationSymbol>(pInstrument), m_sDirectory( sGroup )
+: Symbol<SimulationSymbol>( pInstrument ), m_sDirectory( sGroup )
 {
-  // this is dealt with in the SimulationProvider, but we don't have a .Remove
-  // m_OnTrade.Add( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
 }
 
 SimulationSymbol::~SimulationSymbol() {
-  // we don't yet have a .Remove for this in SimulationProvider.
-  // m_OnTrade.Remove( MakeDelegate( &m_simExec, &CSimulateOrderExecution::NewTrade ) );
-
 }
 
 void SimulationSymbol::StartTradeWatch() {

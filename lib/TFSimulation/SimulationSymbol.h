@@ -16,9 +16,9 @@
 
 #include <string>
 
-#include "TFTimeSeries/TimeSeries.h"
+#include <TFTimeSeries/TimeSeries.h>
 
-#include "TFTrading/Symbol.h"
+#include <TFTrading/Symbol.h>
 
 #include "SimulateOrderExecution.h"
 
@@ -72,7 +72,7 @@ private:
   DepthsByOrder m_depths_order;
   Greeks m_greeks;
 
-  SimulateOrderExecution m_simExec;
+  SimulateOrderExecution m_simExec; // managed by SimulationProvider
 
 };
 
