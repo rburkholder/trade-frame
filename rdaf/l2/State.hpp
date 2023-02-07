@@ -45,13 +45,21 @@ public:
 protected:
 private:
 
-  enum class EValue { bid, ask, ma0, ma1, ma2, ma3 };
+  enum class EValue { unknown, bid, ask, ma0, ma1, ma2, ma3 };
 
-  using vRelative_t = std::vector<EValue>;
-  using mapRelative_t = std::map<double,vRelative_t>;
+  struct MAOrder {
+    EValue type;
+    double value;
+    MAOrder() : type( EValue::unknown ), value {} {}
+    MAOrder( EValue type_, double value_ )
+    : type( type_ ), value( value_ )
+    {}
+    bool operator<( const MAOrder& rhs ) const { return value < rhs.value; }
+    bool operator==( const MAOrder& rhs ) const { return type == rhs.type; }
+  };
 
-  using rEValue_t = std::array<EValue,6>;
-  rEValue_t m_rEValue;
+  using rMAOrder_t = std::array<MAOrder,6>;
+  rMAOrder_t m_rMAOrder;
 
   double m_slope0 {};
   double m_slope1 {};
@@ -60,7 +68,10 @@ private:
 
   double m_stop {};
 
-  void Insert( mapRelative_t& map, EValue e, const double value );
+  inline void Insert( rMAOrder_t::iterator& iter, const MAOrder& mao ) {
+    *iter = mao;
+    ++iter;
+  }
 
 };
 

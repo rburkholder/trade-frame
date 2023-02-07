@@ -19,6 +19,8 @@
  * Created: February 6, 2023 18:34:54
  */
 
+#include <algorithm>
+
 #include "State.hpp"
 
 State::State(
@@ -28,48 +30,33 @@ State::State(
 )
 : m_slope0( slope0 ), m_slope1( slope1 ), m_slope2( slope2 ), m_slope3( slope3 )
 {
-  mapRelative_t mapRelative;
 
-  Insert( mapRelative, EValue::bid, bid );
-  Insert( mapRelative, EValue::ask, ask );
-  Insert( mapRelative, EValue::ma0, ma0 );
-  Insert( mapRelative, EValue::ma1, ma1 );
-  Insert( mapRelative, EValue::ma2, ma2 );
-  Insert( mapRelative, EValue::ma3, ma3 );
+  rMAOrder_t::iterator iter( m_rMAOrder.begin() );
 
-  m_stop = mapRelative.rbegin()->first - mapRelative.begin()->first;
+  Insert( iter, MAOrder( EValue::bid, bid ) );
+  Insert( iter, MAOrder( EValue::ask, ask ) );
+  Insert( iter, MAOrder( EValue::ma0, ma0 ) );
+  Insert( iter, MAOrder( EValue::ma1, ma1 ) );
+  Insert( iter, MAOrder( EValue::ma2, ma2 ) );
+  Insert( iter, MAOrder( EValue::ma3, ma3 ) );
+
+  std::sort( m_rMAOrder.begin(), m_rMAOrder.end() );
+
+  m_stop = m_rMAOrder.rbegin()->value - m_rMAOrder.begin()->value;
 
   // TODO:
   //   ratio of mid two related to min/max
   //   slope > 0, slope < 0
 
-  //rEValue_t::iterator iterEValue( rEValue.begin() );
-  //for ( const mapRelative_t::value_type& vt_map: mapRelative ) {
-  //  for ( const vRelative_t::value_type vt_vector: vt_map.second ) {
-  //    *iterEValue = vt_vector;
-  //    iterEValue++;
-  //  }
-  //}
-
-}
-
-void State::Insert( mapRelative_t& map, EValue e, const double value ) {
-  mapRelative_t::iterator iter = map.find( value );
-  if ( map.end() == iter ) {
-    auto pair =  map.emplace( mapRelative_t::value_type( value, std::move( vRelative_t() ) ));
-    assert( pair.second );
-    iter = pair.first;
-  }
-  iter->second.push_back( e );
 }
 
 bool State::operator==( const State& rhs ) {
   bool bResult( true );
-  rEValue_t::const_iterator iterLhs = m_rEValue.begin();
-  rEValue_t::const_iterator iterRhs = rhs.m_rEValue.begin();
+  rMAOrder_t::const_iterator iterLhs = m_rMAOrder.begin();
+  rMAOrder_t::const_iterator iterRhs = rhs.m_rMAOrder.begin();
   for (
     ;
-    iterLhs != m_rEValue.end();
+    iterLhs != m_rMAOrder.end();
     iterLhs++, iterRhs++
   ) {
     bResult &= ( *iterLhs == *iterRhs );
