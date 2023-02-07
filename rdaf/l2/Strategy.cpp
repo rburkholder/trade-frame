@@ -772,7 +772,7 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 }
 
 /*
-  // template to submit GTC limit order
+  // template to submit GTC limit order (for Interactive Brokers)
   // strip off fractional seconds
   boost::posix_time::ptime dtQuote
     = quote.DateTime()
@@ -783,9 +783,6 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   m_pOrder->SetGoodTillDate( dtQuote + boost::posix_time::seconds( 30 ) );
   m_pOrder->SetTimeInForce( ou::tf::TimeInForce::GoodTillDate );
 */
-
-// try using limit orders instead, will simulator work on limit orders?
-//   therefore, need some sort of predictive ability
 
 void Strategy::EnterLong( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
   double dblMidPoint( quote.Midpoint() );
