@@ -71,6 +71,7 @@ public:
   void CancelOrder( Order::idOrder_t nOrderId );
 
 protected:
+private:
 
   struct structCancelOrder {
     ptime dtCancellation;
@@ -117,7 +118,6 @@ protected:
   static int m_nExecId;  // static provides unique number across universe of symbols
   std::string GetExecId();
 
-private:
 };
 
 } // namespace tf
