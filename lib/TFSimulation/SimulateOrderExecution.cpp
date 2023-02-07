@@ -145,7 +145,7 @@ bool SimulateOrderExecution::ProcessMarketOrders( const Quote& quote ) {
     }
 
     // execute order
-    if ( 0 != OnOrderFill ) {
+    if ( nullptr != OnOrderFill ) {
       std::string id;
       int nId( m_nExecId );  // before it gets incremented in next function
       GetExecId( &id );
@@ -185,7 +185,7 @@ bool SimulateOrderExecution::ProcessLimitOrders( const Quote& quote ) {
       nOrderQuanRemaining = pOrderFrontOfQueue->GetQuanRemaining();
       assert( 0 != nOrderQuanRemaining );
       Trade::tradesize_t quanAvail = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.BidSize() );
-      if ( 0 != OnOrderFill ) {
+      if ( nullptr != OnOrderFill ) {
         std::string id;
         GetExecId( &id );
         Execution exec( quote.Bid(), quanAvail, OrderSide::Sell, "SIMLmtSell", id );
@@ -205,7 +205,7 @@ bool SimulateOrderExecution::ProcessLimitOrders( const Quote& quote ) {
       nOrderQuanRemaining = pOrderFrontOfQueue->GetQuanRemaining();
       assert( 0 != nOrderQuanRemaining );
       Trade::tradesize_t quanAvail = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.AskSize() );
-      if ( 0 != OnOrderFill ) {
+      if ( nullptr != OnOrderFill ) {
         std::string id;
         GetExecId( &id );
         Execution exec( quote.Ask(), quanAvail, OrderSide::Buy, "SIMLmtBuy", id );
@@ -264,7 +264,7 @@ void SimulateOrderExecution::ProcessDelayQueue( const Quote& quote ) {
             }
             else {
               // can't have market orders in two different directions
-              if ( 0 != OnOrderCancelled ) OnOrderCancelled( pOrderFrontOfQueue->GetOrderId() );
+              if ( nullptr != OnOrderCancelled ) OnOrderCancelled( pOrderFrontOfQueue->GetOrderId() );
             }
           }
 
@@ -403,10 +403,10 @@ void SimulateOrderExecution::ProcessCancelQueue( const Quote& quote ) {
       if ( !bOrderFound ) {  // need an event for this, as it could be legitimate crossing execution prior to cancel
 //        std::cout << "no order found to cancel: " << co.nOrderId << std::endl;
         // todo:  propogate this into the OrderManager
-        if ( 0 != OnNoOrderFound ) OnNoOrderFound( co.nOrderId );
+        if ( nullptr != OnNoOrderFound ) OnNoOrderFound( co.nOrderId );
       }
       else {
-        if ( 0 != OnOrderCancelled ) OnOrderCancelled( co.nOrderId );
+        if ( nullptr != OnOrderCancelled ) OnOrderCancelled( co.nOrderId );
       }
       m_lCancelDelay.pop_front();  // remove from list
     }
