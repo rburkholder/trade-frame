@@ -115,7 +115,7 @@ protected:
   bool ProcessLimitOrders( const Trade& trade );
 
   static int m_nExecId;  // static provides unique number across universe of symbols
-  void GetExecId( std::string* sId );
+  std::string GetExecId();
 
 private:
 };

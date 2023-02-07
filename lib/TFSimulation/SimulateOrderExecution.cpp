@@ -32,10 +32,10 @@ SimulateOrderExecution::SimulateOrderExecution()
 SimulateOrderExecution::~SimulateOrderExecution() {
 }
 
-void SimulateOrderExecution::GetExecId( std::string* sId ) {
-  *sId = boost::lexical_cast<std::string>( m_nExecId++ );
-  assert( 0 != sId->length() );
-  return;
+std::string SimulateOrderExecution::GetExecId() {
+  std::string sId = boost::lexical_cast<std::string>( m_nExecId++ );
+  assert( 0 != sId.length() );
+  return sId;
 }
 
 void SimulateOrderExecution::NewQuote( const Quote& quote ) {
@@ -154,9 +154,8 @@ bool SimulateOrderExecution::ProcessMarketOrders( const Quote& quote ) {
 
     // execute order
     if ( nullptr != OnOrderFill ) {
-      std::string id;
       int nId( m_nExecId );  // before it gets incremented in next function
-      GetExecId( &id );
+      std::string id = GetExecId();
       // using id in first parameter may or may not work
       Execution exec( nId, pOrderFrontOfQueue->GetOrderId(), dblPrice, quanAvail, orderSide, "SIMMkt", id );
       OnOrderFill( pOrderFrontOfQueue->GetOrderId(), exec );
@@ -194,8 +193,7 @@ bool SimulateOrderExecution::ProcessLimitOrders( const Quote& quote ) {
       assert( 0 != nOrderQuanRemaining );
       Trade::tradesize_t quanAvail = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.BidSize() );
       if ( nullptr != OnOrderFill ) {
-        std::string id;
-        GetExecId( &id );
+        std::string id = GetExecId();
         Execution exec( quote.Bid(), quanAvail, OrderSide::Sell, "SIMLmtSell", id );
         OnOrderFill( pOrderFrontOfQueue->GetOrderId(), exec );
         nOrderQuanRemaining -= quanAvail;
@@ -214,8 +212,7 @@ bool SimulateOrderExecution::ProcessLimitOrders( const Quote& quote ) {
       assert( 0 != nOrderQuanRemaining );
       Trade::tradesize_t quanAvail = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.AskSize() );
       if ( nullptr != OnOrderFill ) {
-        std::string id;
-        GetExecId( &id );
+        std::string id = GetExecId();
         Execution exec( quote.Ask(), quanAvail, OrderSide::Buy, "SIMLmtBuy", id );
         OnOrderFill( pOrderFrontOfQueue->GetOrderId(), exec );
         nOrderQuanRemaining -= quanAvail;
