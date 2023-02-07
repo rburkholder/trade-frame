@@ -243,7 +243,6 @@ void Strategy::Start( const std::string& sSymbolPath ) {  // simulated trading
   //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-06 18:54:22.184889" );
   //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-07 18:53:31.016760" );
   //m_sim->SetGroupDirectory( "/app/semiauto/2011-Nov-08 18:58:29.396624" );
-//  m_sim->SetExecuteAgainst( ou::tf::CSimulateOrderExecution::EAQuotes );
 
   m_dtEnd = boost::posix_time::ptime( date( 2012, 7, 23 ), time_duration( 17, 45, 0 ) );  // put in time start
   
