@@ -25,6 +25,7 @@ set(
   file_h
     AppAutoTrade.hpp
     ConfigParser.hpp
+    HiPass.hpp
     State.hpp
     Strategy.hpp
   )
@@ -33,6 +34,7 @@ set(
   file_cpp
     AppAutoTrade.cpp
     ConfigParser.cpp
+    HiPass.cpp
     State.cpp
     Strategy.cpp
   )
