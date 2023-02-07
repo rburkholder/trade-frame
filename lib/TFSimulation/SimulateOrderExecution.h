@@ -23,8 +23,6 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include <boost/lexical_cast.hpp>
-
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
@@ -117,11 +115,7 @@ protected:
   bool ProcessLimitOrders( const Trade& trade );
 
   static int m_nExecId;  // static provides unique number across universe of symbols
-  void GetExecId( std::string* sId ) {
-    *sId = boost::lexical_cast<std::string>( m_nExecId++ );
-    assert( 0 != sId->length() );
-    return;
-  }
+  void GetExecId( std::string* sId );
 
 private:
 };

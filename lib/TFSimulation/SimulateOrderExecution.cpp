@@ -12,6 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <boost/lexical_cast.hpp>
+
 #include <OUCommon/TimeSource.h>
 
 #include "SimulateOrderExecution.h"
@@ -28,6 +30,12 @@ SimulateOrderExecution::SimulateOrderExecution()
 }
 
 SimulateOrderExecution::~SimulateOrderExecution() {
+}
+
+void SimulateOrderExecution::GetExecId( std::string* sId ) {
+  *sId = boost::lexical_cast<std::string>( m_nExecId++ );
+  assert( 0 != sId->length() );
+  return;
 }
 
 void SimulateOrderExecution::NewQuote( const Quote& quote ) {
