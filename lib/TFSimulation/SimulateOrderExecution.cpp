@@ -228,19 +228,22 @@ bool SimulateOrderExecution::ProcessLimitOrders( const Quote& quote ) {
 }
 
 bool SimulateOrderExecution::ProcessLimitOrders( const Trade& trade ) {
-  //bool bAllow( true );
-  double bid( trade.Price() );
+  // will need analysis of quote/trade, quotes should reflect results of depletion by a trade
+
   double ask( trade.Price() );
   if ( !m_mapAsks.empty() ) {
     if ( m_lastQuote.Ask() <= m_mapAsks.begin()->first ) {
       ask = m_lastQuote.Ask();
     }
   }
+
+  double bid( trade.Price() );
   if ( !m_mapBids.empty() ) {
     if ( m_lastQuote.Bid() >= m_mapBids.rbegin()->first ) {
       bid = m_lastQuote.Bid();
     }
   }
+
   Quote quote( trade.DateTime(), bid, trade.Volume(), ask, trade.Volume() );
   return ProcessLimitOrders( quote );
 }
