@@ -75,16 +75,6 @@ public:
   void PlaceOrder( pOrder_t pOrder );
   void CancelOrder( pOrder_t pOrder );
 
-  void AddQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler );
-  void RemoveQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler );
-  void AddTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler );
-  void RemoveTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler );
-
-  void AddDepthByMMHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbymmhandler_t handler );
-  void RemoveDepthByMMHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbymmhandler_t handler );
-  void AddDepthByOrderHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbyorderhandler_t handler );
-  void RemoveDepthByOrderHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbyorderhandler_t handler );
-
   void EmitStats( std::stringstream& ss );
 
   using OnSimulationThreadStarted_t = FastDelegate0<>; // Allows Singleton LocalCommonInstances to be set, called within new thread
@@ -114,6 +104,16 @@ protected:
   MergeDatedDatums* m_pMerge;
 
   pSymbol_t NewCSymbol( SimulationSymbol::pInstrument_t pInstrument );
+
+  void AddQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler );
+  void RemoveQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler );
+  void AddTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler );
+  void RemoveTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler );
+
+  void AddDepthByMMHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbymmhandler_t handler );
+  void RemoveDepthByMMHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbymmhandler_t handler );
+  void AddDepthByOrderHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbyorderhandler_t handler );
+  void RemoveDepthByOrderHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbyorderhandler_t handler );
 
   void StartQuoteWatch( pSymbol_t pSymbol );
   void StopQuoteWatch( pSymbol_t Symbol );
