@@ -82,6 +82,9 @@ private:
 
   void UpdateQuoteTradeWatch( char command, IQFeedSymbol::WatchState next, IQFeedSymbol *pSymbol );
 
+  void HandleExecution( Order::idOrder_t orderId, const Execution &exec );
+  void HandleCommission( Order::idOrder_t orderId, double commission );
+  void HandleCancellation( Order::idOrder_t orderId );
 };
 
 } // namespace iqfeed

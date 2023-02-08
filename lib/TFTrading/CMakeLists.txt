@@ -115,6 +115,8 @@ target_link_libraries(
     TFSimulation
     TFIQFeed
     TFOptions
+    OUSQL
+    OUSqlite
     OUCommon
   )
 

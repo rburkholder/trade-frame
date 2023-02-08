@@ -15,6 +15,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <TFTrading/KeyTypes.h>
+#include <TFTrading/OrderManager.h>
 
 #include "Provider.h"
 
@@ -26,12 +27,12 @@ Provider::Provider()
 : ProviderInterface<Provider,IQFeedSymbol>()
 , IQFeed<Provider>()
 {
-  m_sName = "IQF";
+  m_sName = "IQFeed";
   m_nID = keytypes::EProviderIQF;
   m_bProvidesQuotes = true;
   m_bProvidesTrades = true;
   m_bProvidesDepths = true;
-
+  m_bProvidesBrokerInterface = false; // simulated, false until code is completed
 }
 
 Provider::~Provider() {
@@ -71,6 +72,9 @@ void Provider::OnIQFeedError( size_t e ) {
 
 Provider::pSymbol_t Provider::NewCSymbol( pInstrument_t pInstrument ) {
   pSymbol_t pSymbol( new IQFeedSymbol( pInstrument->GetInstrumentName( ID() ), pInstrument ) );
+  pSymbol->m_simExec.SetOnOrderFill( MakeDelegate( this, &Provider::HandleExecution ) );
+  pSymbol->m_simExec.SetOnCommission( MakeDelegate( this, &Provider::HandleCommission ) );
+  pSymbol->m_simExec.SetOnOrderCancelled( MakeDelegate( this, &Provider::HandleCancellation ) );
   inherited_t::AddCSymbol( pSymbol );
   return pSymbol;
 }
@@ -309,6 +313,28 @@ void Provider::OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMessage *p
   //map<string, CSymbol*>::iterator m_mapSymbols_Iter;
   this->SystemDone( pBuffer, pMsg );
 }
+
+void Provider::HandleExecution( Order::idOrder_t orderId, const Execution &exec ) {
+  OrderManager::LocalCommonInstance().ReportExecution( orderId, exec );
+}
+
+void Provider::HandleCommission( Order::idOrder_t orderId, double commission ) {
+  OrderManager::LocalCommonInstance().ReportCommission( orderId, commission );
+}
+
+void Provider::HandleCancellation( Order::idOrder_t orderId ) {
+  OrderManager::LocalCommonInstance().ReportCancellation( orderId );
+}
+
+//void Provider::SetCommission( const std::string& sSymbol, double commission ) {
+//  mapSymbols_t::iterator iter = m_mapSymbols.find( sSymbol );
+//  if ( m_mapSymbols.end() == iter ) {
+//    assert( false );
+//  }
+//  else {
+//    iter->second->m_simExec.SetCommission( commission );
+//  }
+//}
 
 } // namespace iqfeed
 } // namespace tf

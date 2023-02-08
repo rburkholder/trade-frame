@@ -21,7 +21,7 @@
 
 #include <TFTrading/Symbol.h>
 
-//#include <TFSimulation/SimulateOrderExecution.h>
+#include <TFSimulation/SimulateOrderExecution.h>
 
 #include "Messages.h"
 #include "Fundamentals.h"
@@ -132,7 +132,7 @@ private:
   pFundamentals_t m_pFundamentals;
   pSummary_t m_pSummary;
 
-  //SimulateOrderExecution m_simExec; // managed by ou::tf::iqfeed::Provider
+  ou::tf::SimulateOrderExecution m_simExec; // managed by ou::tf::iqfeed::Provider
 
 };
 

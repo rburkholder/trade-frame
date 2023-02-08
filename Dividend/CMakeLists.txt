@@ -70,13 +70,10 @@ target_link_libraries(
       TFTrading
       TFInteractiveBrokers
       TFHDF5TimeSeries
-      OUSQL
-      OUSqlite
       TFIQFeed
       TFTimeSeries
       TFTrading
       OUCommon
-      TFTrading
       dl
       z
       ${Boost_LIBRARIES}
