@@ -376,7 +376,7 @@ void ProviderInterface<P,S>::RemoveQuoteHandler(pInstrument_cref pInstrument, qu
   typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
-    assert( 1 == 0 );
+    assert( false );
   }
   else {
     if ( iter->second->RemoveQuoteHandler( handler ) ) {
@@ -398,7 +398,7 @@ void ProviderInterface<P,S>::RemoveTradeHandler(pInstrument_cref pInstrument, tr
   typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
-    assert( 1 == 0 );
+    assert( false );
   }
   else {
     if ( iter->second->RemoveTradeHandler( handler ) ) {
@@ -418,7 +418,7 @@ void ProviderInterface<P,S>::RemoveOnOpenHandler(pInstrument_cref pInstrument, t
   typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
-    assert( 0 );
+    assert( false );
   }
   else {
     iter->second->RemoveOnOpenHandler( handler );
@@ -438,7 +438,7 @@ void ProviderInterface<P,S>::RemoveDepthByMMHandler(pInstrument_cref pInstrument
   typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
-    assert( 1 == 0 );
+    assert( false );
   }
   else {
     if ( iter->second->RemoveDepthByMMHandler( handler ) ) {
@@ -460,7 +460,7 @@ void ProviderInterface<P,S>::RemoveDepthByOrderHandler(pInstrument_cref pInstrum
   typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
-    assert( 1 == 0 );
+    assert( false );
   }
   else {
     if ( iter->second->RemoveDepthByOrderHandler( handler ) ) {
@@ -482,7 +482,7 @@ void ProviderInterface<P,S>::RemoveGreekHandler(pInstrument_cref pInstrument, gr
   typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
-    assert( 1 == 0 );
+    assert( false );
   }
   else {
     if ( iter->second->RemoveGreekHandler( handler ) ) {
