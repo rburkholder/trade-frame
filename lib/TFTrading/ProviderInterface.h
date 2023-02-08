@@ -121,6 +121,7 @@ public:
   bool ProvidesDepth()  const { return m_bProvidesDepths; };
   bool ProvidesGreeks() const { return m_bProvidesGreeks; };
 
+  // TODO: convert to protected and use GetSymbol instead?
   virtual void     AddQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler ) = 0;
   virtual void  RemoveQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler ) = 0;
 
@@ -130,14 +131,14 @@ public:
   virtual void     AddTradeHandler( pInstrument_cref pInstrument, tradehandler_t handler ) = 0;
   virtual void  RemoveTradeHandler( pInstrument_cref pInstrument, tradehandler_t handler ) = 0;
 
-  virtual void     AddDepthByMMHandler( pInstrument_cref pInstrument, depthbymmhandler_t handler ) = 0;
-  virtual void  RemoveDepthByMMHandler( pInstrument_cref pInstrument, depthbymmhandler_t handler ) = 0;
-
-  virtual void     AddDepthByOrderHandler( pInstrument_cref pInstrument, depthbyorderhandler_t handler ) = 0;
-  virtual void  RemoveDepthByOrderHandler( pInstrument_cref pInstrument, depthbyorderhandler_t handler ) = 0;
-
   virtual void     AddGreekHandler( pInstrument_cref pInstrument, greekhandler_t handler ) = 0;
   virtual void  RemoveGreekHandler( pInstrument_cref pInstrument, greekhandler_t handler ) = 0;
+
+  virtual void    AddDepthByMMHandler( pInstrument_cref pInstrument, depthbymmhandler_t handler ) = 0;
+  virtual void RemoveDepthByMMHandler( pInstrument_cref pInstrument, depthbymmhandler_t handler ) = 0;
+
+  virtual void    AddDepthByOrderHandler( pInstrument_cref pInstrument, depthbyorderhandler_t handler ) = 0;
+  virtual void RemoveDepthByOrderHandler( pInstrument_cref pInstrument, depthbyorderhandler_t handler ) = 0;
 
   virtual void PlaceOrder( pOrder_t pOrder ) = 0;
   virtual void CancelOrder( pOrder_t pOrder ) = 0;
@@ -196,23 +197,23 @@ public:
   ProviderInterface();
   virtual ~ProviderInterface();
 
-  void    AddOnOpenHandler( pInstrument_cref pInstrument, tradehandler_t handler );
-  void RemoveOnOpenHandler( pInstrument_cref pInstrument, tradehandler_t handler );
+  virtual void    AddOnOpenHandler( pInstrument_cref pInstrument, tradehandler_t handler );
+  virtual void RemoveOnOpenHandler( pInstrument_cref pInstrument, tradehandler_t handler );
 
-  void     AddQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler );
-  void  RemoveQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler );
+  virtual void     AddQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler );
+  virtual void  RemoveQuoteHandler( pInstrument_cref pInstrument, quotehandler_t handler );
 
-  void     AddTradeHandler( pInstrument_cref pInstrument, tradehandler_t handler );
-  void  RemoveTradeHandler( pInstrument_cref pInstrument, tradehandler_t handler );
+  virtual void     AddTradeHandler( pInstrument_cref pInstrument, tradehandler_t handler );
+  virtual void  RemoveTradeHandler( pInstrument_cref pInstrument, tradehandler_t handler );
 
-  void     AddDepthByMMHandler( pInstrument_cref pInstrument, depthbymmhandler_t handler );
-  void  RemoveDepthByMMHandler( pInstrument_cref pInstrument, depthbymmhandler_t handler );
+  virtual void     AddGreekHandler( pInstrument_cref pInstrument, greekhandler_t handler );
+  virtual void  RemoveGreekHandler( pInstrument_cref pInstrument, greekhandler_t handler );
 
-  void     AddDepthByOrderHandler( pInstrument_cref pInstrument, depthbyorderhandler_t handler );
-  void  RemoveDepthByOrderHandler( pInstrument_cref pInstrument, depthbyorderhandler_t handler );
+  virtual void    AddDepthByMMHandler( pInstrument_cref pInstrument, depthbymmhandler_t handler );
+  virtual void RemoveDepthByMMHandler( pInstrument_cref pInstrument, depthbymmhandler_t handler );
 
-  void     AddGreekHandler( pInstrument_cref pInstrument, greekhandler_t handler );
-  void  RemoveGreekHandler( pInstrument_cref pInstrument, greekhandler_t handler );
+  virtual void    AddDepthByOrderHandler( pInstrument_cref pInstrument, depthbyorderhandler_t handler );
+  virtual void RemoveDepthByOrderHandler( pInstrument_cref pInstrument, depthbyorderhandler_t handler );
 
   bool Exists( pInstrument_cref pInstrument );
   pSymbol_t Add( pInstrument_cref pInstrument );
@@ -220,8 +221,8 @@ public:
   pSymbol_t GetSymbol( const idSymbol_t& );
   pSymbol_t GetSymbol( const pInstrument_t );
 
-  void  PlaceOrder( Order::pOrder_t pOrder );
-  void CancelOrder( Order::pOrder_t pOrder );
+  virtual void  PlaceOrder( Order::pOrder_t pOrder );
+  virtual void CancelOrder( Order::pOrder_t pOrder );
 
 protected:
 
