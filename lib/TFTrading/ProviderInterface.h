@@ -67,9 +67,10 @@ public:
 
   using eidProvider_t = keytypes::eidProvider_t;
 
+  inline eidProvider_t ID() const { assert( keytypes::EProviderUnknown != m_nID ); return m_nID; };
+
   const std::string& GetName() const { return m_sName; };
   void SetName( const std::string& sName ) { m_sName = sName; };
-  eidProvider_t ID() const { assert( keytypes::EProviderUnknown != m_nID ); return m_nID; };
 
   ProviderInterfaceBase()
   : m_nID( keytypes::EProviderUnknown ), m_bConnected( false )
@@ -340,7 +341,7 @@ typename ProviderInterface<P,S>::mapSymbols_t::iterator ProviderInterface<P,S>::
   typename mapSymbols_t::iterator iter;
   if ( !Exists( pInstrument, iter ) ) {
     Add( pInstrument );
-    iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+    iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
     assert( m_mapSymbols.end() != iter );
   }
   return iter;
@@ -373,7 +374,7 @@ void ProviderInterface<P,S>::AddQuoteHandler(pInstrument_cref pInstrument, quote
 template <typename P, typename S>
 void ProviderInterface<P,S>::RemoveQuoteHandler(pInstrument_cref pInstrument, quotehandler_t handler) {
   typename mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( 1 == 0 );
   }
@@ -395,7 +396,7 @@ void ProviderInterface<P,S>::AddTradeHandler(pInstrument_cref pInstrument, trade
 template <typename P, typename S>
 void ProviderInterface<P,S>::RemoveTradeHandler(pInstrument_cref pInstrument, tradehandler_t handler) {
   typename mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( 1 == 0 );
   }
@@ -415,7 +416,7 @@ void ProviderInterface<P,S>::AddOnOpenHandler(pInstrument_cref pInstrument, trad
 template <typename P, typename S>
 void ProviderInterface<P,S>::RemoveOnOpenHandler(pInstrument_cref pInstrument, tradehandler_t handler) {
   typename mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( 0 );
   }
@@ -435,7 +436,7 @@ void ProviderInterface<P,S>::AddDepthByMMHandler(pInstrument_cref pInstrument, d
 template <typename P, typename S>
 void ProviderInterface<P,S>::RemoveDepthByMMHandler(pInstrument_cref pInstrument, depthbymmhandler_t handler) {
   typename mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( 1 == 0 );
   }
@@ -457,7 +458,7 @@ void ProviderInterface<P,S>::AddDepthByOrderHandler(pInstrument_cref pInstrument
 template <typename P, typename S>
 void ProviderInterface<P,S>::RemoveDepthByOrderHandler(pInstrument_cref pInstrument, depthbyorderhandler_t handler) {
   typename mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( 1 == 0 );
   }
@@ -479,7 +480,7 @@ void ProviderInterface<P,S>::AddGreekHandler(pInstrument_cref pInstrument, greek
 template <typename P, typename S>
 void ProviderInterface<P,S>::RemoveGreekHandler(pInstrument_cref pInstrument, greekhandler_t handler) {
   typename mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( 1 == 0 );
   }
