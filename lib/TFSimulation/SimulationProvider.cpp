@@ -98,8 +98,8 @@ void SimulationProvider::AddQuoteHandler( pInstrument_cref pInstrument, Simulati
   inherited_t::mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   assert( m_mapSymbols.end() != iter );
-  pSymbol_t pSymSymbol( iter->second );
   if ( 1 == iter->second->GetQuoteHandlerCount() ) { // on first assignment, add our own assignment
+    pSymbol_t& pSymSymbol( iter->second );
     inherited_t::AddQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewQuote ) );
   }
 }
@@ -108,14 +108,10 @@ void SimulationProvider::RemoveQuoteHandler( pInstrument_cref pInstrument, Simul
   inherited_t::RemoveQuoteHandler( pInstrument, handler );
   inherited_t::mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
-  if ( m_mapSymbols.end() == iter ) {
-    assert( false );  // this shouldn't occur
-  }
-  else {
-    if ( 1 == iter->second->GetQuoteHandlerCount() ) { // on last removal, remove our own assignment
-      pSymbol_t pSymSymbol( iter->second );
-      inherited_t::RemoveQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewQuote ) );
-    }
+  assert( m_mapSymbols.end() != iter );
+  if ( 1 == iter->second->GetQuoteHandlerCount() ) { // on last removal, remove our own assignment
+    pSymbol_t& pSymSymbol( iter->second );
+    inherited_t::RemoveQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewQuote ) );
   }
 }
 
@@ -124,8 +120,8 @@ void SimulationProvider::AddTradeHandler( pInstrument_cref pInstrument, Simulati
   inherited_t::mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   assert( m_mapSymbols.end() != iter );
-  pSymbol_t pSymSymbol( iter->second );
   if ( 1 == iter->second->GetTradeHandlerCount() ) { // on first assignment, add our own assignment
+    pSymbol_t& pSymSymbol( iter->second );
     inherited_t::AddTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewTrade ) );
   }
 }
@@ -134,14 +130,10 @@ void SimulationProvider::RemoveTradeHandler( pInstrument_cref pInstrument, Simul
   inherited_t::RemoveTradeHandler( pInstrument, handler );
   inherited_t::mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
-  if ( m_mapSymbols.end() == iter ) {
-    assert( false );  // this shouldn't occur
-  }
-  else {
-    if ( 1 == iter->second->GetTradeHandlerCount() ) { // on last removal, remove our own assignment
-      pSymbol_t pSymSymbol( iter->second );
-      inherited_t::RemoveTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewTrade ) );
-    }
+  assert( m_mapSymbols.end() != iter );
+  if ( 1 == iter->second->GetTradeHandlerCount() ) { // on last removal, remove our own assignment
+    pSymbol_t& pSymSymbol( iter->second );
+    inherited_t::RemoveTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewTrade ) );
   }
 }
 
@@ -150,8 +142,8 @@ void SimulationProvider::AddDepthByMMHandler( pInstrument_cref pInstrument, Simu
   inherited_t::mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   assert( m_mapSymbols.end() != iter );
-  pSymbol_t pSymSymbol( iter->second );
   if ( 1 == iter->second->GetDepthByMMHandlerCount() ) { // on first assignment, add our own assignment
+    pSymbol_t& pSymSymbol( iter->second );
     inherited_t::AddDepthByMMHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByMM ) );
   }
 }
@@ -160,14 +152,10 @@ void SimulationProvider::RemoveDepthByMMHandler( pInstrument_cref pInstrument, S
   inherited_t::RemoveDepthByMMHandler( pInstrument, handler );
   inherited_t::mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
-  if ( m_mapSymbols.end() == iter ) {
-    assert( false );  // this shouldn't occur
-  }
-  else {
-    if ( 1 == iter->second->GetDepthByMMHandlerCount() ) { // on last removal, remove our own assignment
-      pSymbol_t pSymSymbol( iter->second );
-      inherited_t::RemoveDepthByMMHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByMM ) );
-    }
+  assert( m_mapSymbols.end() != iter );
+  if ( 1 == iter->second->GetDepthByMMHandlerCount() ) { // on last removal, remove our own assignment
+    pSymbol_t& pSymSymbol( iter->second );
+    inherited_t::RemoveDepthByMMHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByMM ) );
   }
 }
 
@@ -176,8 +164,8 @@ void SimulationProvider::AddDepthByOrderHandler( pInstrument_cref pInstrument, S
   inherited_t::mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   assert( m_mapSymbols.end() != iter );
-  pSymbol_t pSymSymbol( iter->second );
   if ( 1 == iter->second->GetDepthByOrderHandlerCount() ) { // on first assignment, add our own assignment
+    pSymbol_t& pSymSymbol( iter->second );
     inherited_t::AddDepthByOrderHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByOrder ) );
   }
 }
@@ -186,14 +174,10 @@ void SimulationProvider::RemoveDepthByOrderHandler( pInstrument_cref pInstrument
   inherited_t::RemoveDepthByOrderHandler( pInstrument, handler );
   inherited_t::mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
-  if ( m_mapSymbols.end() == iter ) {
-    assert( false );  // this shouldn't occur
-  }
-  else {
-    if ( 1 == iter->second->GetDepthByOrderHandlerCount() ) { // on last removal, remove our own assignment
-      pSymbol_t pSymSymbol( iter->second );
-      inherited_t::RemoveDepthByOrderHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByOrder ) );
-    }
+  assert( m_mapSymbols.end() != iter );
+  if ( 1 == iter->second->GetDepthByOrderHandlerCount() ) { // on last removal, remove our own assignment
+    pSymbol_t& pSymSymbol( iter->second );
+    inherited_t::RemoveDepthByOrderHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByOrder ) );
   }
 }
 
