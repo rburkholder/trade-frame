@@ -23,8 +23,8 @@ using namespace fastdelegate;
 
 #include <OUCommon/TimeSource.h>
 
-#include <TFTrading/ProviderInterface.h>
 #include <TFTrading/Order.h>
+#include <TFTrading/ProviderInterface.h>
 
 #include "SimulationSymbol.h"
 
