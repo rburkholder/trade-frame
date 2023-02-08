@@ -33,14 +33,15 @@ using namespace fastdelegate;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace sim { // simulation
 
-class SimulateOrderExecution {  // one object per symbol
+class OrderExecution {  // one object per symbol
 public:
 
   using pOrder_t = Order::pOrder_t;
 
-  SimulateOrderExecution();
-  ~SimulateOrderExecution();
+  OrderExecution();
+  ~OrderExecution();
 
   using OnOrderCancelledHandler = FastDelegate1<Order::idOrder_t>;
   void SetOnOrderCancelled( OnOrderCancelledHandler function ) {
@@ -120,5 +121,6 @@ private:
 
 };
 
+} // namespace simulation
 } // namespace tf
 } // namespace ou

@@ -20,53 +20,54 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace sim { // simulation
 
-int SimulateOrderExecution::m_nExecId( 1000 );
+int OrderExecution::m_nExecId( 1000 );
 
-SimulateOrderExecution::SimulateOrderExecution()
+OrderExecution::OrderExecution()
 : m_dtQueueDelay( milliseconds( 250 ) )
 , m_dblCommission( 1.00 )
 {
 }
 
-SimulateOrderExecution::~SimulateOrderExecution() {
+OrderExecution::~OrderExecution() {
 }
 
-std::string SimulateOrderExecution::GetExecId() {
+std::string OrderExecution::GetExecId() {
   std::string sId = boost::lexical_cast<std::string>( m_nExecId++ );
   assert( 0 != sId.length() );
   return sId;
 }
 
-void SimulateOrderExecution::NewQuote( const Quote& quote ) {
+void OrderExecution::NewQuote( const Quote& quote ) {
   ProcessOrderQueues( quote );
   m_lastQuote = quote;
 }
 
-void SimulateOrderExecution::NewDepthByMM( const DepthByMM& depth ) {
+void OrderExecution::NewDepthByMM( const DepthByMM& depth ) {
 //  ProcessOrderQueues( quote );
 //  m_lastQuote = quote;
 }
 
-void SimulateOrderExecution::NewDepthByOrder( const DepthByOrder& depth ) {
+void OrderExecution::NewDepthByOrder( const DepthByOrder& depth ) {
 //  ProcessOrderQueues( quote );
 //  m_lastQuote = quote;
 }
 
-void SimulateOrderExecution::NewTrade( const Trade& trade ) {
+void OrderExecution::NewTrade( const Trade& trade ) {
   ProcessLimitOrders( trade );
 }
 
-void SimulateOrderExecution::SubmitOrder( pOrder_t pOrder ) {
+void OrderExecution::SubmitOrder( pOrder_t pOrder ) {
   m_lOrderDelay.push_back( pOrder );
 }
 
-void SimulateOrderExecution::CancelOrder( Order::idOrder_t nOrderId ) {
+void OrderExecution::CancelOrder( Order::idOrder_t nOrderId ) {
   structCancelOrder co( ou::TimeSource::LocalCommonInstance().Internal(), nOrderId );
   m_lCancelDelay.push_back( co );
 }
 
-void SimulateOrderExecution::CalculateCommission( Order* pOrder, Trade::tradesize_t quan ) {
+void OrderExecution::CalculateCommission( Order* pOrder, Trade::tradesize_t quan ) {
   // Order or Instrument should have commission calculation?
   if ( 0 != quan ) {
     if ( nullptr != OnCommission ) {
@@ -96,7 +97,7 @@ void SimulateOrderExecution::CalculateCommission( Order* pOrder, Trade::tradesiz
   }
 }
 
-void SimulateOrderExecution::ProcessOrderQueues( const Quote &quote ) {
+void OrderExecution::ProcessOrderQueues( const Quote &quote ) {
 
   //if ( !quote.IsValid() ) {
   //  return;
@@ -116,11 +117,11 @@ void SimulateOrderExecution::ProcessOrderQueues( const Quote &quote ) {
 
 }
 
-void SimulateOrderExecution::ProcessStopOrders( const Quote& quote ) {
+void OrderExecution::ProcessStopOrders( const Quote& quote ) {
   // not yet implemented
 }
 
-bool SimulateOrderExecution::ProcessMarketOrders( const Quote& quote ) {
+bool OrderExecution::ProcessMarketOrders( const Quote& quote ) {
 
   pOrder_t pOrderFrontOfQueue;  // change this so we reference the order directly, makes things a bit faster
   bool bProcessed = false;
@@ -177,7 +178,7 @@ bool SimulateOrderExecution::ProcessMarketOrders( const Quote& quote ) {
   return bProcessed;
 }
 
-bool SimulateOrderExecution::ProcessLimitOrders( const Quote& quote ) {
+bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
 
   pOrder_t pOrderFrontOfQueue; // change this so we reference the order directly, makes things a bit faster
   bool bProcessed = false;
@@ -227,7 +228,7 @@ bool SimulateOrderExecution::ProcessLimitOrders( const Quote& quote ) {
   return bProcessed;
 }
 
-bool SimulateOrderExecution::ProcessLimitOrders( const Trade& trade ) {
+bool OrderExecution::ProcessLimitOrders( const Trade& trade ) {
   // will need analysis of quote/trade, quotes should reflect results of depletion by a trade
 
   double ask( trade.Price() );
@@ -248,7 +249,7 @@ bool SimulateOrderExecution::ProcessLimitOrders( const Trade& trade ) {
   return ProcessLimitOrders( quote );
 }
 
-void SimulateOrderExecution::ProcessDelayQueue( const Quote& quote ) {
+void OrderExecution::ProcessDelayQueue( const Quote& quote ) {
 
   pOrder_t pOrderFrontOfQueue;  // change this so we reference the order directly, makes things a bit faster
 
@@ -313,7 +314,7 @@ void SimulateOrderExecution::ProcessDelayQueue( const Quote& quote ) {
 
 }
 
-void SimulateOrderExecution::ProcessCancelQueue( const Quote& quote ) {
+void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
 
   // process cancels list
   while ( !m_lCancelDelay.empty() ) {
@@ -422,5 +423,6 @@ void SimulateOrderExecution::ProcessCancelQueue( const Quote& quote ) {
 
 }
 
+} // namespace simulation
 } // namespace tf
 } // namespace ou

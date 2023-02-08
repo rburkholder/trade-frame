@@ -100,7 +100,7 @@ void SimulationProvider::AddQuoteHandler( pInstrument_cref pInstrument, Simulati
   assert( m_mapSymbols.end() != iter );
   pSymbol_t& pSymSymbol( iter->second );
   if ( 1 == pSymSymbol->GetQuoteHandlerCount() ) { // on first assignment, add our own assignment
-    inherited_t::AddQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewQuote ) );
+    inherited_t::AddQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewQuote ) );
   }
 }
 
@@ -111,7 +111,7 @@ void SimulationProvider::RemoveQuoteHandler( pInstrument_cref pInstrument, Simul
   assert( m_mapSymbols.end() != iter );
   pSymbol_t& pSymSymbol( iter->second );
   if ( 1 == pSymSymbol->GetQuoteHandlerCount() ) { // on last removal, remove our own assignment
-    inherited_t::RemoveQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewQuote ) );
+    inherited_t::RemoveQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewQuote ) );
   }
 }
 
@@ -122,7 +122,7 @@ void SimulationProvider::AddTradeHandler( pInstrument_cref pInstrument, Simulati
   assert( m_mapSymbols.end() != iter );
   pSymbol_t& pSymSymbol( iter->second );
   if ( 1 == pSymSymbol->GetTradeHandlerCount() ) { // on first assignment, add our own assignment
-    inherited_t::AddTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewTrade ) );
+    inherited_t::AddTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewTrade ) );
   }
 }
 
@@ -133,7 +133,7 @@ void SimulationProvider::RemoveTradeHandler( pInstrument_cref pInstrument, Simul
   assert( m_mapSymbols.end() != iter );
   pSymbol_t& pSymSymbol( iter->second );
   if ( 1 == pSymSymbol->GetTradeHandlerCount() ) { // on last removal, remove our own assignment
-    inherited_t::RemoveTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewTrade ) );
+    inherited_t::RemoveTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewTrade ) );
   }
 }
 
@@ -144,7 +144,7 @@ void SimulationProvider::AddDepthByMMHandler( pInstrument_cref pInstrument, Simu
   assert( m_mapSymbols.end() != iter );
   pSymbol_t& pSymSymbol( iter->second );
   if ( 1 == pSymSymbol->GetDepthByMMHandlerCount() ) { // on first assignment, add our own assignment
-    inherited_t::AddDepthByMMHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByMM ) );
+    inherited_t::AddDepthByMMHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewDepthByMM ) );
   }
 }
 
@@ -155,7 +155,7 @@ void SimulationProvider::RemoveDepthByMMHandler( pInstrument_cref pInstrument, S
   assert( m_mapSymbols.end() != iter );
   pSymbol_t& pSymSymbol( iter->second );
   if ( 1 == pSymSymbol->GetDepthByMMHandlerCount() ) { // on last removal, remove our own assignment
-    inherited_t::RemoveDepthByMMHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByMM ) );
+    inherited_t::RemoveDepthByMMHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewDepthByMM ) );
   }
 }
 
@@ -166,7 +166,7 @@ void SimulationProvider::AddDepthByOrderHandler( pInstrument_cref pInstrument, S
   assert( m_mapSymbols.end() != iter );
   pSymbol_t& pSymSymbol( iter->second );
   if ( 1 == pSymSymbol->GetDepthByOrderHandlerCount() ) { // on first assignment, add our own assignment
-    inherited_t::AddDepthByOrderHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByOrder ) );
+    inherited_t::AddDepthByOrderHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewDepthByOrder ) );
   }
 }
 
@@ -177,7 +177,7 @@ void SimulationProvider::RemoveDepthByOrderHandler( pInstrument_cref pInstrument
   assert( m_mapSymbols.end() != iter );
   pSymbol_t& pSymSymbol( iter->second );
   if ( 1 == pSymSymbol->GetDepthByOrderHandlerCount() ) { // on last removal, remove our own assignment
-    inherited_t::RemoveDepthByOrderHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByOrder ) );
+    inherited_t::RemoveDepthByOrderHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewDepthByOrder ) );
   }
 }
 

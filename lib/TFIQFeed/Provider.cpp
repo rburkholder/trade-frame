@@ -345,7 +345,7 @@ void Provider::AddQuoteHandler( pInstrument_cref pInstrument, Provider::quotehan
     assert( m_mapSymbols.end() != iter );
     pSymbol_t& pSymSymbol( iter->second );
     if ( 1 == pSymSymbol->GetQuoteHandlerCount() ) { // on first assignment, add our own assignment
-      inherited_t::AddQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewQuote ) );
+      inherited_t::AddQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewQuote ) );
     }
   }
 }
@@ -358,7 +358,7 @@ void Provider::RemoveQuoteHandler( pInstrument_cref pInstrument, Provider::quote
     assert( m_mapSymbols.end() != iter );
     pSymbol_t& pSymSymbol( iter->second );
     if ( 1 == pSymSymbol->GetQuoteHandlerCount() ) { // on last removal, remove our own assignment
-      inherited_t::RemoveQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewQuote ) );
+      inherited_t::RemoveQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewQuote ) );
     }
   }
 }
@@ -371,7 +371,7 @@ void Provider::AddTradeHandler( pInstrument_cref pInstrument, Provider::tradehan
     assert( m_mapSymbols.end() != iter );
     pSymbol_t& pSymSymbol( iter->second );
     if ( 1 == pSymSymbol->GetTradeHandlerCount() ) { // on first assignment, add our own assignment
-      inherited_t::AddTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewTrade ) );
+      inherited_t::AddTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewTrade ) );
     }
   }
 }
@@ -384,7 +384,7 @@ void Provider::RemoveTradeHandler( pInstrument_cref pInstrument, Provider::trade
     assert( m_mapSymbols.end() != iter );
     pSymbol_t& pSymSymbol( iter->second );
     if ( 1 == pSymSymbol->GetTradeHandlerCount() ) { // on last removal, remove our own assignment
-      inherited_t::RemoveTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewTrade ) );
+      inherited_t::RemoveTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewTrade ) );
     }
   }
 }

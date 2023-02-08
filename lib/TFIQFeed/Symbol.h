@@ -132,7 +132,7 @@ private:
   pFundamentals_t m_pFundamentals;
   pSummary_t m_pSummary;
 
-  ou::tf::SimulateOrderExecution m_simExec; // managed by ou::tf::iqfeed::Provider
+  ou::tf::sim::OrderExecution m_simExec; // managed by ou::tf::iqfeed::Provider
 
 };
 

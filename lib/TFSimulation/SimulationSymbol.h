@@ -72,7 +72,7 @@ private:
   DepthsByOrder m_depths_order;
   Greeks m_greeks;
 
-  SimulateOrderExecution m_simExec; // managed by SimulationProvider
+  sim::OrderExecution m_simExec; // managed by SimulationProvider
 
 };
 
