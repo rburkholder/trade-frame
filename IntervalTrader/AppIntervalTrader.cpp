@@ -147,7 +147,7 @@ bool AppIntervalTrader::OnInit() {
           "trader", "self", "aggregate", ou::tf::Portfolio::EPortfolioType::Basket, "USD", "aggregate" );
 
       m_bIQFeedConnected = false;
-      m_pIQFeed = std::make_shared<ou::tf::iqfeed::IQFeedProvider>(); // use ProviderManager::Construct?
+      m_pIQFeed = std::make_shared<ou::tf::iqfeed::Provider>(); // use ProviderManager::Construct?
       m_pIQFeed->OnConnecting.Add( MakeDelegate( this, &AppIntervalTrader::HandleIQFeedConnecting ) );
       m_pIQFeed->OnConnected.Add( MakeDelegate( this, &AppIntervalTrader::HandleIQFeedConnected ) );
       m_pIQFeed->OnDisconnecting.Add( MakeDelegate( this, &AppIntervalTrader::HandleIQFeedDisconnecting ) );

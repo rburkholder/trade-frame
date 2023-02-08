@@ -84,7 +84,7 @@ private:
 
   using pProviderSim_t = ou::tf::SimulationProvider::pProvider_t;
   using pProviderAlpaca_t = ou::tf::alpaca::Provider::pProvider_t;
-  using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
+  using pProviderIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
 
   using fInstrumentConstructed_t = std::function<void(const std::string&)>;
 

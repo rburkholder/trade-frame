@@ -27,7 +27,7 @@ Process::Process( const config::Choices& choices, vSymbols_t& vSymbols )
 : m_choices( choices ), m_vSymbols( vSymbols ), m_bDone( false )
 {
 
-  m_piqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
+  m_piqfeed = ou::tf::iqfeed::Provider::Factory();
 
   m_piqfeed->OnConnected.Add( MakeDelegate( this, &Process::HandleConnected ) );
   m_piqfeed->Connect();

@@ -101,7 +101,7 @@ bool AppImpliedVolatility::OnInit() {
 
   sizerUpper->Add( m_pPanelProviderControl, 0, wxALIGN_LEFT, 2);
 
-  m_iqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
+  m_iqfeed = ou::tf::iqfeed::Provider::Factory();
   //m_iqfeed->SetThreadCount( m_choices.nThreads );
 
   m_pPanelProviderControl->Add(

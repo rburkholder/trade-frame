@@ -118,7 +118,7 @@ private:
   using pOrder_t = ou::tf::Order::pOrder_t;
 
   using pProviderIBTWS_t = ou::tf::ib::TWS::pProvider_t;
-  using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
+  using pProviderIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
   //using pProviderSim_t =  ou::tf::SimulationProvider::pProvider_t;
 
   using pInstrument_t = ou::tf::ib::TWS::pInstrument_t;

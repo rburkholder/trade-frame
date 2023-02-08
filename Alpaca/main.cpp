@@ -79,8 +79,8 @@ int main( int argc, char** argv )
     pProviderAlpaca->Set( choices.m_sAlpacaDomain, choices.m_sAlpacaKey, choices.m_sAlpacaSecret );
     pProviderAlpaca->Connect();
 
-    using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
-    pProviderIQFeed_t pProviderIQFeed = ou::tf::iqfeed::IQFeedProvider::Factory();
+    using pProviderIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
+    pProviderIQFeed_t pProviderIQFeed = ou::tf::iqfeed::Provider::Factory();
     pProviderIQFeed->SetName( "iqfeed" ); // needs to match name in database
     providers.Register( pProviderIQFeed );
     pProviderIQFeed->Connect();

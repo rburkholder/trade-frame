@@ -232,7 +232,7 @@ bool AppIntervalSampler::OnInit() {
     }
 
     if ( bOk ) {
-      m_pIQFeed = std::make_shared<ou::tf::iqfeed::IQFeedProvider>(); // use ProviderManager::Construct?
+      m_pIQFeed = std::make_shared<ou::tf::iqfeed::Provider>(); // use ProviderManager::Construct?
       m_bIQFeedConnected = false;
 
       m_pIQFeed->OnConnecting.Add( MakeDelegate( this, &AppIntervalSampler::HandleIQFeedConnecting ) );

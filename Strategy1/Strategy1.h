@@ -34,7 +34,7 @@ private:
   typedef ou::tf::eProviderState_t eProviderState_t;
 
   typedef ou::tf::IBTWS::pProvider_t pProviderIBTWS_t;
-  typedef ou::tf::IQFeedProvider::pProvider_t pProviderIQFeed_t;
+  typedef ou::tf::iqfeedProvider::pProvider_t pProviderIQFeed_t;
   typedef ou::tf::SimulationProvider::pProvider_t pProviderSim_t;
 
   Strategy* m_pStrategy;

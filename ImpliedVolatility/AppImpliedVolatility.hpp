@@ -62,7 +62,7 @@ protected:
 private:
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-  using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
+  using pProviderIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
 
   config::Choices m_choices;
 

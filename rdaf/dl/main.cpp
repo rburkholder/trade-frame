@@ -227,7 +227,7 @@ public:
     m_fSecurity = std::move( fSecurity );
     m_fDone = std::move( fDone );
 
-    m_piqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
+    m_piqfeed = ou::tf::iqfeed::Provider::Factory();
     m_piqfeed->OnConnected.Add( MakeDelegate( this, &Symbols::HandleConnected ) );
     m_piqfeed->Connect();
 
@@ -257,7 +257,7 @@ private:
   fSecurity_t m_fSecurity;
   fDone_t m_fDone;
 
-  using pIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
+  using pIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
   pIQFeed_t m_piqfeed;
 
   size_t m_countSymbols {};

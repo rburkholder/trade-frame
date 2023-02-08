@@ -30,7 +30,7 @@ ProviderManager::pProvider_t ProviderManager::Construct( const idProvider_t& key
     pProvider = Construct<ou::tf::ib::TWS>( key );
     break;
   case keytypes::EProviderIQF:
-    pProvider = Construct<ou::tf::iqfeed::IQFeedProvider>( key );
+    pProvider = Construct<ou::tf::iqfeed::Provider>( key );
     break;
   case keytypes::EProviderSimulator:
     pProvider = Construct<SimulationProvider>( key );

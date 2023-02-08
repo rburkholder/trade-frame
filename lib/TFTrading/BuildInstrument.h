@@ -44,7 +44,7 @@ public:
   using fInstrument_t = std::function<void(pInstrument_t)>;
 
   using pProviderIBTWS_t = ou::tf::ib::TWS::pProvider_t;
-  using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
+  using pProviderIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
 
   BuildInstrument( pProviderIQFeed_t );
   BuildInstrument( pProviderIQFeed_t, pProviderIBTWS_t );

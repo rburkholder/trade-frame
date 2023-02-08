@@ -23,29 +23,29 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-class IQFeedProvider :
-  public ProviderInterface<IQFeedProvider,IQFeedSymbol>
-, public IQFeed<IQFeedProvider>
+class Provider :
+  public ProviderInterface<Provider,IQFeedSymbol>
+, public IQFeed<Provider>
 {
-  friend IQFeed<IQFeedProvider>;
+  friend IQFeed<Provider>;
 public:
 
-  using pProvider_t = std::shared_ptr<IQFeedProvider>;
-  using inherited_t = ProviderInterface<IQFeedProvider,IQFeedSymbol>;
+  using pProvider_t = std::shared_ptr<Provider>;
+  using inherited_t = ProviderInterface<Provider,IQFeedSymbol>;
   using idSymbol_t = inherited_t::idSymbol_t ;
   using pSymbol_t = inherited_t::pSymbol_t;
   using pInstrument_t = inherited_t::pInstrument_t;
-  using IQFeed_t = IQFeed<IQFeedProvider>;
+  using IQFeed_t = IQFeed<Provider>;
 
-  IQFeedProvider();
-  virtual ~IQFeedProvider();
+  Provider();
+  virtual ~Provider();
 
   static pProvider_t Factory() {
-    return std::make_shared<IQFeedProvider>();
+    return std::make_shared<Provider>();
   }
 
   static pProvider_t Cast( inherited_t::pProvider_t pProvider ) {
-    return std::dynamic_pointer_cast<IQFeedProvider>( pProvider );
+    return std::dynamic_pointer_cast<Provider>( pProvider );
   }
 
   // do these need to be virtual?  use crtp?

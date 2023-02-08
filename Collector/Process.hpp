@@ -62,7 +62,7 @@ private:
 
   const config::Choices& m_choices;
 
-  using pIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
+  using pIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
   pIQFeed_t m_piqfeed;
 
   std::unique_ptr<ou::tf::ComposeInstrument> m_pComposeInstrumentIQFeed;

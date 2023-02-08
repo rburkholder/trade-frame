@@ -70,7 +70,7 @@ Process::~Process() {
 // need control c handler to terminate, as this is an ongoing process
 
 void Process::StartIQFeed() {
-  m_piqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
+  m_piqfeed = ou::tf::iqfeed::Provider::Factory();
 
   m_piqfeed->OnConnected.Add( MakeDelegate( this, &Process::HandleIQFeedConnected ) );
   m_piqfeed->Connect();

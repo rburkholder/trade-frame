@@ -109,7 +109,7 @@ bool AppAutoTrade::OnInit() {
     return 0;
   }
 
-  m_iqfeed = ou::tf::iqfeed::IQFeedProvider::Factory();
+  m_iqfeed = ou::tf::iqfeed::Provider::Factory();
   m_alpaca = ou::tf::alpaca::Provider::Factory();
 
   m_iqfeed->SetThreadCount( m_choices.nThreads );

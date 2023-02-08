@@ -89,8 +89,8 @@ Server_impl::Server_impl( int ib_client_id, unsigned int ib_client_port )
   m_pProviderTWS->OnConnected.Add( MakeDelegate( this, &Server_impl::Connected_TWS ) );
   m_pProviderTWS->OnDisconnected.Add( MakeDelegate( this, &Server_impl::Disconnected_TWS ) );
 
-  //using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
-  m_pProviderIQFeed = ou::tf::iqfeed::IQFeedProvider::Factory();
+  //using pProviderIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
+  m_pProviderIQFeed = ou::tf::iqfeed::Provider::Factory();
   m_pProviderIQFeed->SetName( sIQFeed ); // needs to match name in database
   providers.Register( m_pProviderIQFeed );
   m_pProviderIQFeed->OnConnected.Add( MakeDelegate( this, &Server_impl::Connected_IQFeed ) );

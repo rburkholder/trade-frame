@@ -52,7 +52,7 @@ private:
   using vSymbol_t = std::vector<std::string>;
   using vInstance_t = std::vector<Instance>;
 
-  using pProviderIQFeed_t = ou::tf::iqfeed::IQFeedProvider::pProvider_t;
+  using pProviderIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
   using pProviderIB_t = ou::tf::ib::TWS::pProvider_t;
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;

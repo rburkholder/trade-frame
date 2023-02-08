@@ -38,7 +38,7 @@ namespace tf {
   class db;
   class BuildInstrument;
 namespace iqfeed {
-  class IQFeedProvider;
+  class Provider;
   class OptionChainQuery;
 } // namespace iqfeed
 namespace ib {
@@ -154,7 +154,7 @@ private:
   // EStateEngine::init
 
   std::shared_ptr<ou::tf::ib::TWS> m_pProviderTWS;
-  std::shared_ptr<ou::tf::iqfeed::IQFeedProvider> m_pProviderIQFeed;
+  std::shared_ptr<ou::tf::iqfeed::Provider> m_pProviderIQFeed;
 
   std::unique_ptr<ou::tf::db> m_pdb;
 

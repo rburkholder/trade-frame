@@ -105,7 +105,7 @@ MasterPortfolio::MasterPortfolio(
 
   switch ( pData1->ID() ) {
     case ou::tf::keytypes::EProviderIQF:
-      m_pIQ = ou::tf::iqfeed::IQFeedProvider::Cast( pData1 );
+      m_pIQ = ou::tf::iqfeed::Provider::Cast( pData1 );
       break;
     default:
       assert( false ); // need the iqfeed provider

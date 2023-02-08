@@ -21,6 +21,8 @@
 
 #include <TFTrading/Symbol.h>
 
+//#include <TFSimulation/SimulateOrderExecution.h>
+
 #include "Messages.h"
 #include "Fundamentals.h"
 
@@ -28,12 +30,12 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-class IQFeedProvider;
+class Provider;
 
 class IQFeedSymbol
 : public Symbol<IQFeedSymbol>
 {
-  friend class IQFeedProvider;
+  friend class Provider;
 public:
 
   using inherited_t = Symbol<IQFeedSymbol>;
@@ -129,6 +131,8 @@ private:
 
   pFundamentals_t m_pFundamentals;
   pSummary_t m_pSummary;
+
+  //SimulateOrderExecution m_simExec; // managed by ou::tf::iqfeed::Provider
 
 };
 

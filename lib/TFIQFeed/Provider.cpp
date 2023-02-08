@@ -22,9 +22,9 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
-IQFeedProvider::IQFeedProvider()
-: ProviderInterface<IQFeedProvider,IQFeedSymbol>()
-, IQFeed<IQFeedProvider>()
+Provider::Provider()
+: ProviderInterface<Provider,IQFeedSymbol>()
+, IQFeed<Provider>()
 {
   m_sName = "IQF";
   m_nID = keytypes::EProviderIQF;
@@ -34,10 +34,10 @@ IQFeedProvider::IQFeedProvider()
 
 }
 
-IQFeedProvider::~IQFeedProvider() {
+Provider::~Provider() {
 }
 
-void IQFeedProvider::Connect() {
+void Provider::Connect() {
   if ( !m_bConnected ) {
     ProviderInterfaceBase::OnConnecting( 0 );
     inherited_t::Connect();
@@ -45,13 +45,13 @@ void IQFeedProvider::Connect() {
   }
 }
 
-void IQFeedProvider::OnIQFeedConnected() {
+void Provider::OnIQFeedConnected() {
   m_bConnected = true;
   inherited_t::ConnectionComplete();
   ProviderInterfaceBase::OnConnected( 0 );
 }
 
-void IQFeedProvider::Disconnect() {
+void Provider::Disconnect() {
   if ( m_bConnected ) {
     ProviderInterfaceBase::OnDisconnecting( 0 ); // watches are regsitered here
     inherited_t::Disconnecting();  // provider then cleans up
@@ -60,16 +60,16 @@ void IQFeedProvider::Disconnect() {
   }
 }
 
-void IQFeedProvider::OnIQFeedDisConnected() {
+void Provider::OnIQFeedDisConnected() {
   m_bConnected = false;
   ProviderInterfaceBase::OnDisconnected( 0 );
 }
 
-void IQFeedProvider::OnIQFeedError( size_t e ) {
+void Provider::OnIQFeedError( size_t e ) {
   OnError( e );
 }
 
-IQFeedProvider::pSymbol_t IQFeedProvider::NewCSymbol( pInstrument_t pInstrument ) {
+Provider::pSymbol_t Provider::NewCSymbol( pInstrument_t pInstrument ) {
   pSymbol_t pSymbol( new IQFeedSymbol( pInstrument->GetInstrumentName( ID() ), pInstrument ) );
   inherited_t::AddCSymbol( pSymbol );
   return pSymbol;
@@ -86,16 +86,16 @@ namespace {
       // reverse diagonal is illegal as it includes two simultaneous watch changes
 }
 
-void IQFeedProvider::UpdateQuoteTradeWatch( char command, IQFeedSymbol::WatchState next, IQFeedSymbol* pSymbol ) {
+void Provider::UpdateQuoteTradeWatch( char command, IQFeedSymbol::WatchState next, IQFeedSymbol* pSymbol ) {
   if ( '-' != command ) {
     std::string s = command + pSymbol->GetId() + "\n";
     //std::cout << command + pSymbol->GetId() << std::endl;
-    IQFeed<IQFeedProvider>::Send( s );
+    IQFeed<Provider>::Send( s );
   }
   pSymbol->SetWatchState( next );
 }
 
-void IQFeedProvider::StartQuoteWatch( pSymbol_t pSymbol ) {
+void Provider::StartQuoteWatch( pSymbol_t pSymbol ) {
   IQFeedSymbol::WatchState current = pSymbol->GetWatchState();
   IQFeedSymbol::WatchState next = IQFeedSymbol::WatchState::None;
   switch ( current ) {
@@ -116,19 +116,19 @@ void IQFeedProvider::StartQuoteWatch( pSymbol_t pSymbol ) {
   }
 }
 
-void IQFeedProvider::StopQuoteWatch(pSymbol_t pSymbol) {
+void Provider::StopQuoteWatch(pSymbol_t pSymbol) {
   IQFeedSymbol::WatchState current = pSymbol->GetWatchState();
   IQFeedSymbol::WatchState next = IQFeedSymbol::WatchState::None;
   switch ( current ) {
     case IQFeedSymbol::WatchState::None:
-      std::cout << "IQFeedProvider::StopQuoteWatch error with None: " << pSymbol->GetId() << std::endl;
+      std::cout << "iqfeed::Provider::StopQuoteWatch error with None: " << pSymbol->GetId() << std::endl;
       break;
     case IQFeedSymbol::WatchState::WSQuote:
       next = IQFeedSymbol::WatchState::None;
       UpdateQuoteTradeWatch( transition[current][next], next, dynamic_cast<IQFeedSymbol*>( pSymbol.get() ) );
       break;
     case IQFeedSymbol::WatchState::WSTrade:
-      std::cout << "IQFeedProvider::StopQuoteWatch error with Trade: " << pSymbol->GetId() << std::endl;
+      std::cout << "iqfeed::Provider::StopQuoteWatch error with Trade: " << pSymbol->GetId() << std::endl;
       break;
     case IQFeedSymbol::WatchState::Both:
       next = IQFeedSymbol::WatchState::WSTrade;
@@ -137,7 +137,7 @@ void IQFeedProvider::StopQuoteWatch(pSymbol_t pSymbol) {
   }
 }
 
-void IQFeedProvider::StartTradeWatch(pSymbol_t pSymbol) {
+void Provider::StartTradeWatch(pSymbol_t pSymbol) {
   IQFeedSymbol::WatchState current = pSymbol->GetWatchState();
   IQFeedSymbol::WatchState next = IQFeedSymbol::WatchState::None;
   switch ( current ) {
@@ -158,15 +158,15 @@ void IQFeedProvider::StartTradeWatch(pSymbol_t pSymbol) {
   }
 }
 
-void IQFeedProvider::StopTradeWatch(pSymbol_t pSymbol) {
+void Provider::StopTradeWatch(pSymbol_t pSymbol) {
   IQFeedSymbol::WatchState current = pSymbol->GetWatchState();
   IQFeedSymbol::WatchState next = IQFeedSymbol::WatchState::None;
   switch ( current ) {
     case IQFeedSymbol::WatchState::None:
-      std::cout << "IQFeedProvider::StopTradeWatch error with None: " << pSymbol->GetId() << std::endl;
+      std::cout << "iqfeed::Provider::StopTradeWatch error with None: " << pSymbol->GetId() << std::endl;
       break;
     case IQFeedSymbol::WatchState::WSQuote:
-      std::cout << "IQFeedProvider::StopTradeWatch error with Quote: " << pSymbol->GetId() << std::endl;
+      std::cout << "iqfeed::Provider::StopTradeWatch error with Quote: " << pSymbol->GetId() << std::endl;
       break;
     case IQFeedSymbol::WatchState::WSTrade:
       next = IQFeedSymbol::WatchState::None;
@@ -179,7 +179,7 @@ void IQFeedProvider::StopTradeWatch(pSymbol_t pSymbol) {
   }
 }
 
-void IQFeedProvider::OnIQFeedDynamicFeedUpdateMessage( linebuffer_t* pBuffer, IQFDynamicFeedUpdateMessage *pMsg ) {
+void Provider::OnIQFeedDynamicFeedUpdateMessage( linebuffer_t* pBuffer, IQFDynamicFeedUpdateMessage *pMsg ) {
   inherited_t::mapSymbols_t::iterator mapSymbols_iter;
   mapSymbols_iter = m_mapSymbols.find( pMsg->Field( IQFDynamicFeedUpdateMessage::DFSymbol ) );
   pSymbol_t pSym;
@@ -190,7 +190,7 @@ void IQFeedProvider::OnIQFeedDynamicFeedUpdateMessage( linebuffer_t* pBuffer, IQ
   this->DynamicFeedUpdateDone( pBuffer, pMsg );
 }
 
-void IQFeedProvider::OnIQFeedDynamicFeedSummaryMessage( linebuffer_t* pBuffer, IQFDynamicFeedSummaryMessage *pMsg ) {
+void Provider::OnIQFeedDynamicFeedSummaryMessage( linebuffer_t* pBuffer, IQFDynamicFeedSummaryMessage *pMsg ) {
   inherited_t::mapSymbols_t::iterator mapSymbols_iter;
   mapSymbols_iter = m_mapSymbols.find( pMsg->Field( IQFDynamicFeedSummaryMessage::DFSymbol ) );
   pSymbol_t pSym;
@@ -201,7 +201,7 @@ void IQFeedProvider::OnIQFeedDynamicFeedSummaryMessage( linebuffer_t* pBuffer, I
   this->DynamicFeedSummaryDone( pBuffer, pMsg );
 }
 
-void IQFeedProvider::OnIQFeedUpdateMessage( linebuffer_t* pBuffer, IQFUpdateMessage *pMsg ) {
+void Provider::OnIQFeedUpdateMessage( linebuffer_t* pBuffer, IQFUpdateMessage *pMsg ) {
   inherited_t::mapSymbols_t::iterator mapSymbols_iter;
   mapSymbols_iter = m_mapSymbols.find( pMsg->Field( IQFUpdateMessage::QPSymbol ) );
   pSymbol_t pSym;
@@ -212,7 +212,7 @@ void IQFeedProvider::OnIQFeedUpdateMessage( linebuffer_t* pBuffer, IQFUpdateMess
   this->UpdateDone( pBuffer, pMsg );
 }
 
-void IQFeedProvider::OnIQFeedSummaryMessage( linebuffer_t* pBuffer, IQFSummaryMessage *pMsg ) {
+void Provider::OnIQFeedSummaryMessage( linebuffer_t* pBuffer, IQFSummaryMessage *pMsg ) {
   inherited_t::mapSymbols_t::iterator mapSymbols_iter;
   mapSymbols_iter = m_mapSymbols.find( pMsg->Field( IQFSummaryMessage::QPSymbol ) );
   pSymbol_t pSym;
@@ -223,7 +223,7 @@ void IQFeedProvider::OnIQFeedSummaryMessage( linebuffer_t* pBuffer, IQFSummaryMe
   this->SummaryDone( pBuffer, pMsg );
 }
 
-void IQFeedProvider::OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, IQFFundamentalMessage *pMsg ) {
+void Provider::OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, IQFFundamentalMessage *pMsg ) {
   inherited_t::mapSymbols_t::iterator mapSymbols_iter;
   mapSymbols_iter = m_mapSymbols.find( pMsg->Field( IQFFundamentalMessage::FSymbol ) );
   pSymbol_t pSym;
@@ -260,7 +260,7 @@ void IQFeedProvider::OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, IQFFunda
   this->FundamentalDone( pBuffer, pMsg );
 }
 
-void IQFeedProvider::OnIQFeedNewsMessage( linebuffer_t* pBuffer, IQFNewsMessage *pMsg ) {
+void Provider::OnIQFeedNewsMessage( linebuffer_t* pBuffer, IQFNewsMessage *pMsg ) {
 
   inherited_t::mapSymbols_t::iterator mapSymbols_iter;
 /*
@@ -300,12 +300,12 @@ void IQFeedProvider::OnIQFeedNewsMessage( linebuffer_t* pBuffer, IQFNewsMessage 
   this->NewsDone( pBuffer, pMsg );
 }
 
-void IQFeedProvider::OnIQFeedTimeMessage( linebuffer_t* pBuffer, IQFTimeMessage *pMsg ) {
+void Provider::OnIQFeedTimeMessage( linebuffer_t* pBuffer, IQFTimeMessage *pMsg ) {
   //map<string, CSymbol*>::iterator m_mapSymbols_Iter;
   this->TimeDone( pBuffer, pMsg );
 }
 
-void IQFeedProvider::OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMessage *pMsg ) {
+void Provider::OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMessage *pMsg ) {
   //map<string, CSymbol*>::iterator m_mapSymbols_Iter;
   this->SystemDone( pBuffer, pMsg );
 }
