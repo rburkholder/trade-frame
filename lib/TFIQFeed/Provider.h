@@ -48,13 +48,28 @@ public:
     return std::dynamic_pointer_cast<Provider>( pProvider );
   }
 
+  void EnableExecution( bool bEnable ) { m_bExecutionEnabled = bEnable; }
+  bool ExecutionEnabled() const { return m_bExecutionEnabled; }
+
   // do these need to be virtual?  use crtp?
   virtual void Connect();
   virtual void Disconnect();
 
   std::string ListedMarket( key_t nListedMarket ) const { return LookupListedMarket( nListedMarket ); }
 
+  void SetCommission( const std::string& sSymbol, double commission );
+
 protected:
+
+  void AddQuoteHandler( pInstrument_cref pInstrument, Provider::quotehandler_t handler );
+  void RemoveQuoteHandler( pInstrument_cref pInstrument, Provider::quotehandler_t handler );
+  void AddTradeHandler( pInstrument_cref pInstrument, Provider::tradehandler_t handler );
+  void RemoveTradeHandler( pInstrument_cref pInstrument, Provider::tradehandler_t handler );
+
+  //void AddDepthByMMHandler( pInstrument_cref pInstrument, Provider::depthbymmhandler_t handler );
+  //void RemoveDepthByMMHandler( pInstrument_cref pInstrument, Provider::depthbymmhandler_t handler );
+  //void AddDepthByOrderHandler( pInstrument_cref pInstrument, Provider::depthbyorderhandler_t handler );
+  //void RemoveDepthByOrderHandler( pInstrument_cref pInstrument, Provider::depthbyorderhandler_t handler );
 
   // overridden from ProviderInterface, called when application adds/removes watches
   virtual void StartQuoteWatch( pSymbol_t pSymbol );
@@ -79,6 +94,8 @@ protected:
   void OnIQFeedError( size_t );
 
 private:
+
+  bool m_bExecutionEnabled;
 
   void UpdateQuoteTradeWatch( char command, IQFeedSymbol::WatchState next, IQFeedSymbol *pSymbol );
 

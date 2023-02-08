@@ -26,13 +26,14 @@ namespace iqfeed { // IQFeed
 Provider::Provider()
 : ProviderInterface<Provider,IQFeedSymbol>()
 , IQFeed<Provider>()
+, m_bExecutionEnabled( false )
 {
   m_sName = "IQFeed";
   m_nID = keytypes::EProviderIQF;
   m_bProvidesQuotes = true;
   m_bProvidesTrades = true;
   m_bProvidesDepths = true;
-  m_bProvidesBrokerInterface = false; // simulated, false until code is completed
+  m_bProvidesBrokerInterface = true; // simulated
 }
 
 Provider::~Provider() {
@@ -326,15 +327,67 @@ void Provider::HandleCancellation( Order::idOrder_t orderId ) {
   OrderManager::LocalCommonInstance().ReportCancellation( orderId );
 }
 
-//void Provider::SetCommission( const std::string& sSymbol, double commission ) {
-//  mapSymbols_t::iterator iter = m_mapSymbols.find( sSymbol );
-//  if ( m_mapSymbols.end() == iter ) {
-//    assert( false );
-//  }
-//  else {
-//    iter->second->m_simExec.SetCommission( commission );
-//  }
-//}
+void Provider::SetCommission( const std::string& sSymbol, double commission ) {
+  mapSymbols_t::iterator iter = m_mapSymbols.find( sSymbol );
+  if ( m_mapSymbols.end() == iter ) {
+    assert( false );
+  }
+  else {
+    iter->second->m_simExec.SetCommission( commission );
+  }
+}
+
+void Provider::AddQuoteHandler( pInstrument_cref pInstrument, Provider::quotehandler_t handler ) {
+  inherited_t::AddQuoteHandler( pInstrument, handler );
+  if ( m_bExecutionEnabled ) {
+    inherited_t::mapSymbols_t::iterator iter;
+    iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
+    assert( m_mapSymbols.end() != iter );
+    pSymbol_t& pSymSymbol( iter->second );
+    if ( 1 == pSymSymbol->GetQuoteHandlerCount() ) { // on first assignment, add our own assignment
+      inherited_t::AddQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewQuote ) );
+    }
+  }
+}
+
+void Provider::RemoveQuoteHandler( pInstrument_cref pInstrument, Provider::quotehandler_t handler ) {
+  inherited_t::RemoveQuoteHandler( pInstrument, handler );
+  if ( m_bExecutionEnabled ) {
+    inherited_t::mapSymbols_t::iterator iter;
+    iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
+    assert( m_mapSymbols.end() != iter );
+    pSymbol_t& pSymSymbol( iter->second );
+    if ( 1 == pSymSymbol->GetQuoteHandlerCount() ) { // on last removal, remove our own assignment
+      inherited_t::RemoveQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewQuote ) );
+    }
+  }
+}
+
+void Provider::AddTradeHandler( pInstrument_cref pInstrument, Provider::tradehandler_t handler ) {
+  inherited_t::AddTradeHandler( pInstrument, handler );
+  if ( m_bExecutionEnabled ) {
+    inherited_t::mapSymbols_t::iterator iter;
+    iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
+    assert( m_mapSymbols.end() != iter );
+    pSymbol_t& pSymSymbol( iter->second );
+    if ( 1 == pSymSymbol->GetTradeHandlerCount() ) { // on first assignment, add our own assignment
+      inherited_t::AddTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewTrade ) );
+    }
+  }
+}
+
+void Provider::RemoveTradeHandler( pInstrument_cref pInstrument, Provider::tradehandler_t handler ) {
+  inherited_t::RemoveTradeHandler( pInstrument, handler );
+  if ( m_bExecutionEnabled ) {
+    inherited_t::mapSymbols_t::iterator iter;
+    iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
+    assert( m_mapSymbols.end() != iter );
+    pSymbol_t& pSymSymbol( iter->second );
+    if ( 1 == pSymSymbol->GetTradeHandlerCount() ) { // on last removal, remove our own assignment
+      inherited_t::RemoveTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewTrade ) );
+    }
+  }
+}
 
 } // namespace iqfeed
 } // namespace tf
