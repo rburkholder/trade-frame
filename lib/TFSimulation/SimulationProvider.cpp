@@ -85,7 +85,7 @@ void SimulationProvider::Disconnect() {
 }
 
 SimulationProvider::pSymbol_t SimulationProvider::NewCSymbol( SimulationSymbol::pInstrument_t pInstrument ) {
-  pSymbol_t pSymbol( new SimulationSymbol(pInstrument->GetInstrumentName(), pInstrument, m_sGroupDirectory) );
+  pSymbol_t pSymbol( new SimulationSymbol( pInstrument->GetInstrumentName( ID() ), pInstrument, m_sGroupDirectory) );
   pSymbol->m_simExec.SetOnOrderFill( MakeDelegate( this, &SimulationProvider::HandleExecution ) );
   pSymbol->m_simExec.SetOnCommission( MakeDelegate( this, &SimulationProvider::HandleCommission ) );
   pSymbol->m_simExec.SetOnOrderCancelled( MakeDelegate( this, &SimulationProvider::HandleCancellation ) );
@@ -96,7 +96,7 @@ SimulationProvider::pSymbol_t SimulationProvider::NewCSymbol( SimulationSymbol::
 void SimulationProvider::AddQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler ) {
   inherited_t::AddQuoteHandler( pInstrument, handler );
   inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   assert( m_mapSymbols.end() != iter );
   pSymbol_t pSymSymbol( iter->second );
   if ( 1 == iter->second->GetQuoteHandlerCount() ) {
@@ -107,7 +107,7 @@ void SimulationProvider::AddQuoteHandler( pInstrument_cref pInstrument, Simulati
 void SimulationProvider::RemoveQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler ) {
   inherited_t::RemoveQuoteHandler( pInstrument, handler );
   inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( false );  // this shouldn't occur
   }
@@ -122,7 +122,7 @@ void SimulationProvider::RemoveQuoteHandler( pInstrument_cref pInstrument, Simul
 void SimulationProvider::AddTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler ) {
   inherited_t::AddTradeHandler( pInstrument, handler );
   inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   assert( m_mapSymbols.end() != iter );
   pSymbol_t pSymSymbol( iter->second );
   if ( 1 == iter->second->GetTradeHandlerCount() ) {
@@ -133,7 +133,7 @@ void SimulationProvider::AddTradeHandler( pInstrument_cref pInstrument, Simulati
 void SimulationProvider::RemoveTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler ) {
   inherited_t::RemoveTradeHandler( pInstrument, handler );
   inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( false );  // this shouldn't occur
   }
@@ -148,7 +148,7 @@ void SimulationProvider::RemoveTradeHandler( pInstrument_cref pInstrument, Simul
 void SimulationProvider::AddDepthByMMHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbymmhandler_t handler ) {
   inherited_t::AddDepthByMMHandler( pInstrument, handler );
   inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   assert( m_mapSymbols.end() != iter );
   pSymbol_t pSymSymbol( iter->second );
   if ( 1 == iter->second->GetDepthByMMHandlerCount() ) {
@@ -159,7 +159,7 @@ void SimulationProvider::AddDepthByMMHandler( pInstrument_cref pInstrument, Simu
 void SimulationProvider::RemoveDepthByMMHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbymmhandler_t handler ) {
   inherited_t::RemoveDepthByMMHandler( pInstrument, handler );
   inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( false );  // this shouldn't occur
   }
@@ -174,7 +174,7 @@ void SimulationProvider::RemoveDepthByMMHandler( pInstrument_cref pInstrument, S
 void SimulationProvider::AddDepthByOrderHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbyorderhandler_t handler ) {
   inherited_t::AddDepthByOrderHandler( pInstrument, handler );
   inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   assert( m_mapSymbols.end() != iter );
   pSymbol_t pSymSymbol( iter->second );
   if ( 1 == iter->second->GetDepthByOrderHandlerCount() ) {
@@ -185,7 +185,7 @@ void SimulationProvider::AddDepthByOrderHandler( pInstrument_cref pInstrument, S
 void SimulationProvider::RemoveDepthByOrderHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbyorderhandler_t handler ) {
   inherited_t::RemoveDepthByOrderHandler( pInstrument, handler );
   inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( m_nID ) );
+  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
     assert( false );  // this shouldn't occur
   }
@@ -352,9 +352,9 @@ void SimulationProvider::Stop() {
 
 void SimulationProvider::PlaceOrder( pOrder_t pOrder ) {
   inherited_t::PlaceOrder( pOrder ); // any underlying initialization
-  mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName() );
+  mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
-    std::cout << "Can't place order, can't find symbol: " << pOrder->GetInstrument()->GetInstrumentName( m_nID ) << std::endl;
+    std::cout << "Can't place order, can't find symbol: " << pOrder->GetInstrument()->GetInstrumentName( ID() ) << std::endl;
   }
   else {
     iter->second->m_simExec.SubmitOrder( pOrder );
@@ -363,9 +363,9 @@ void SimulationProvider::PlaceOrder( pOrder_t pOrder ) {
 
 void SimulationProvider::CancelOrder( pOrder_t pOrder ) {
   inherited_t::CancelOrder( pOrder );
-  mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName() );
+  mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
-    std::cout << "Can't cancel order, can't find symbol: " << pOrder->GetInstrument()->GetInstrumentName( m_nID ) << std::endl;
+    std::cout << "Can't cancel order, can't find symbol: " << pOrder->GetInstrument()->GetInstrumentName( ID() ) << std::endl;
   }
   else {
     iter->second->m_simExec.CancelOrder( pOrder->GetOrderId() );
