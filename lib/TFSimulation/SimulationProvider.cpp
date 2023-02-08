@@ -99,7 +99,7 @@ void SimulationProvider::AddQuoteHandler( pInstrument_cref pInstrument, Simulati
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   assert( m_mapSymbols.end() != iter );
   pSymbol_t pSymSymbol( iter->second );
-  if ( 1 == iter->second->GetQuoteHandlerCount() ) {
+  if ( 1 == iter->second->GetQuoteHandlerCount() ) { // on first assignment, add our own assignment
     inherited_t::AddQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewQuote ) );
   }
 }
@@ -112,7 +112,7 @@ void SimulationProvider::RemoveQuoteHandler( pInstrument_cref pInstrument, Simul
     assert( false );  // this shouldn't occur
   }
   else {
-    if ( 1 == iter->second->GetQuoteHandlerCount() ) {
+    if ( 1 == iter->second->GetQuoteHandlerCount() ) { // on last removal, remove our own assignment
       pSymbol_t pSymSymbol( iter->second );
       inherited_t::RemoveQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewQuote ) );
     }
@@ -125,7 +125,7 @@ void SimulationProvider::AddTradeHandler( pInstrument_cref pInstrument, Simulati
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   assert( m_mapSymbols.end() != iter );
   pSymbol_t pSymSymbol( iter->second );
-  if ( 1 == iter->second->GetTradeHandlerCount() ) {
+  if ( 1 == iter->second->GetTradeHandlerCount() ) { // on first assignment, add our own assignment
     inherited_t::AddTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewTrade ) );
   }
 }
@@ -138,7 +138,7 @@ void SimulationProvider::RemoveTradeHandler( pInstrument_cref pInstrument, Simul
     assert( false );  // this shouldn't occur
   }
   else {
-    if ( 1 == iter->second->GetTradeHandlerCount() ) {
+    if ( 1 == iter->second->GetTradeHandlerCount() ) { // on last removal, remove our own assignment
       pSymbol_t pSymSymbol( iter->second );
       inherited_t::RemoveTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewTrade ) );
     }
@@ -151,7 +151,7 @@ void SimulationProvider::AddDepthByMMHandler( pInstrument_cref pInstrument, Simu
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   assert( m_mapSymbols.end() != iter );
   pSymbol_t pSymSymbol( iter->second );
-  if ( 1 == iter->second->GetDepthByMMHandlerCount() ) {
+  if ( 1 == iter->second->GetDepthByMMHandlerCount() ) { // on first assignment, add our own assignment
     inherited_t::AddDepthByMMHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByMM ) );
   }
 }
@@ -164,7 +164,7 @@ void SimulationProvider::RemoveDepthByMMHandler( pInstrument_cref pInstrument, S
     assert( false );  // this shouldn't occur
   }
   else {
-    if ( 1 == iter->second->GetDepthByMMHandlerCount() ) {
+    if ( 1 == iter->second->GetDepthByMMHandlerCount() ) { // on last removal, remove our own assignment
       pSymbol_t pSymSymbol( iter->second );
       inherited_t::RemoveDepthByMMHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByMM ) );
     }
@@ -177,7 +177,7 @@ void SimulationProvider::AddDepthByOrderHandler( pInstrument_cref pInstrument, S
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   assert( m_mapSymbols.end() != iter );
   pSymbol_t pSymSymbol( iter->second );
-  if ( 1 == iter->second->GetDepthByOrderHandlerCount() ) {
+  if ( 1 == iter->second->GetDepthByOrderHandlerCount() ) { // on first assignment, add our own assignment
     inherited_t::AddDepthByOrderHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByOrder ) );
   }
 }
@@ -190,7 +190,7 @@ void SimulationProvider::RemoveDepthByOrderHandler( pInstrument_cref pInstrument
     assert( false );  // this shouldn't occur
   }
   else {
-    if ( 1 == iter->second->GetDepthByOrderHandlerCount() ) {
+    if ( 1 == iter->second->GetDepthByOrderHandlerCount() ) { // on last removal, remove our own assignment
       pSymbol_t pSymSymbol( iter->second );
       inherited_t::RemoveDepthByOrderHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &SimulateOrderExecution::NewDepthByOrder ) );
     }
@@ -354,7 +354,7 @@ void SimulationProvider::PlaceOrder( pOrder_t pOrder ) {
   inherited_t::PlaceOrder( pOrder ); // any underlying initialization
   mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
-    std::cout << "Can't place order, can't find symbol: " << pOrder->GetInstrument()->GetInstrumentName( ID() ) << std::endl;
+    std::cout << "SimulationProvider::PlaceOrder - can't find symbol, an't place order: " << pOrder->GetInstrument()->GetInstrumentName( ID() ) << std::endl;
   }
   else {
     iter->second->m_simExec.SubmitOrder( pOrder );
@@ -365,7 +365,7 @@ void SimulationProvider::CancelOrder( pOrder_t pOrder ) {
   inherited_t::CancelOrder( pOrder );
   mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
-    std::cout << "Can't cancel order, can't find symbol: " << pOrder->GetInstrument()->GetInstrumentName( ID() ) << std::endl;
+    std::cout << "SimulationProvider::CancelOrder - can't find symbol, can't cancel order: " << pOrder->GetInstrument()->GetInstrumentName( ID() ) << std::endl;
   }
   else {
     iter->second->m_simExec.CancelOrder( pOrder->GetOrderId() );
