@@ -35,7 +35,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace sim { // simulation
 
-class OrderExecution {  // one object per symbol
+class OrderExecution {  // one instance per symbol
 public:
 
   using pOrder_t = Order::pOrder_t;
@@ -121,6 +121,6 @@ private:
 
 };
 
-} // namespace simulation
+} // namespace sim
 } // namespace tf
 } // namespace ou

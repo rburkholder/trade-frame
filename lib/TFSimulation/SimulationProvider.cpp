@@ -27,8 +27,8 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 SimulationProvider::SimulationProvider()
-: ProviderInterface<SimulationProvider,SimulationSymbol>(),
-  m_pMerge( nullptr )
+: sim::SimulationInterface<SimulationProvider,SimulationSymbol>()
+, m_pMerge( nullptr )
 {
   m_sName = "Simulator";
   m_nID = keytypes::EProviderSimulator;
@@ -84,101 +84,10 @@ void SimulationProvider::Disconnect() {
   }
 }
 
-SimulationProvider::pSymbol_t SimulationProvider::NewCSymbol( SimulationSymbol::pInstrument_t pInstrument ) {
+SimulationProvider::pSymbol_t SimulationProvider::NewCSymbol( pInstrument_t pInstrument ) {
   pSymbol_t pSymbol( new SimulationSymbol( pInstrument->GetInstrumentName( ID() ), pInstrument, m_sGroupDirectory) );
-  pSymbol->m_simExec.SetOnOrderFill( MakeDelegate( this, &SimulationProvider::HandleExecution ) );
-  pSymbol->m_simExec.SetOnCommission( MakeDelegate( this, &SimulationProvider::HandleCommission ) );
-  pSymbol->m_simExec.SetOnOrderCancelled( MakeDelegate( this, &SimulationProvider::HandleCancellation ) );
   inherited_t::AddCSymbol( pSymbol );
   return pSymbol;
-}
-
-void SimulationProvider::AddQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler ) {
-  inherited_t::AddQuoteHandler( pInstrument, handler );
-  inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
-  assert( m_mapSymbols.end() != iter );
-  pSymbol_t& pSymSymbol( iter->second );
-  if ( 1 == pSymSymbol->GetQuoteHandlerCount() ) { // on first assignment, add our own assignment
-    inherited_t::AddQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewQuote ) );
-  }
-}
-
-void SimulationProvider::RemoveQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler ) {
-  inherited_t::RemoveQuoteHandler( pInstrument, handler );
-  inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
-  assert( m_mapSymbols.end() != iter );
-  pSymbol_t& pSymSymbol( iter->second );
-  if ( 1 == pSymSymbol->GetQuoteHandlerCount() ) { // on last removal, remove our own assignment
-    inherited_t::RemoveQuoteHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewQuote ) );
-  }
-}
-
-void SimulationProvider::AddTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler ) {
-  inherited_t::AddTradeHandler( pInstrument, handler );
-  inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
-  assert( m_mapSymbols.end() != iter );
-  pSymbol_t& pSymSymbol( iter->second );
-  if ( 1 == pSymSymbol->GetTradeHandlerCount() ) { // on first assignment, add our own assignment
-    inherited_t::AddTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewTrade ) );
-  }
-}
-
-void SimulationProvider::RemoveTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler ) {
-  inherited_t::RemoveTradeHandler( pInstrument, handler );
-  inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
-  assert( m_mapSymbols.end() != iter );
-  pSymbol_t& pSymSymbol( iter->second );
-  if ( 1 == pSymSymbol->GetTradeHandlerCount() ) { // on last removal, remove our own assignment
-    inherited_t::RemoveTradeHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewTrade ) );
-  }
-}
-
-void SimulationProvider::AddDepthByMMHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbymmhandler_t handler ) {
-  inherited_t::AddDepthByMMHandler( pInstrument, handler );
-  inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
-  assert( m_mapSymbols.end() != iter );
-  pSymbol_t& pSymSymbol( iter->second );
-  if ( 1 == pSymSymbol->GetDepthByMMHandlerCount() ) { // on first assignment, add our own assignment
-    inherited_t::AddDepthByMMHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewDepthByMM ) );
-  }
-}
-
-void SimulationProvider::RemoveDepthByMMHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbymmhandler_t handler ) {
-  inherited_t::RemoveDepthByMMHandler( pInstrument, handler );
-  inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
-  assert( m_mapSymbols.end() != iter );
-  pSymbol_t& pSymSymbol( iter->second );
-  if ( 1 == pSymSymbol->GetDepthByMMHandlerCount() ) { // on last removal, remove our own assignment
-    inherited_t::RemoveDepthByMMHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewDepthByMM ) );
-  }
-}
-
-void SimulationProvider::AddDepthByOrderHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbyorderhandler_t handler ) {
-  inherited_t::AddDepthByOrderHandler( pInstrument, handler );
-  inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
-  assert( m_mapSymbols.end() != iter );
-  pSymbol_t& pSymSymbol( iter->second );
-  if ( 1 == pSymSymbol->GetDepthByOrderHandlerCount() ) { // on first assignment, add our own assignment
-    inherited_t::AddDepthByOrderHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewDepthByOrder ) );
-  }
-}
-
-void SimulationProvider::RemoveDepthByOrderHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbyorderhandler_t handler ) {
-  inherited_t::RemoveDepthByOrderHandler( pInstrument, handler );
-  inherited_t::mapSymbols_t::iterator iter;
-  iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
-  assert( m_mapSymbols.end() != iter );
-  pSymbol_t& pSymSymbol( iter->second );
-  if ( 1 == pSymSymbol->GetDepthByOrderHandlerCount() ) { // on last removal, remove our own assignment
-    inherited_t::RemoveDepthByOrderHandler( pInstrument, MakeDelegate( &pSymSymbol->m_simExec, &sim::OrderExecution::NewDepthByOrder ) );
-  }
 }
 
 // these need to open the data file, load the data, and prepare to simulate
@@ -334,28 +243,6 @@ void SimulationProvider::Stop() {
   }
 }
 
-void SimulationProvider::PlaceOrder( pOrder_t pOrder ) {
-  inherited_t::PlaceOrder( pOrder ); // any underlying initialization
-  mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName( ID() ) );
-  if ( m_mapSymbols.end() == iter ) {
-    std::cout << "SimulationProvider::PlaceOrder - can't find symbol, an't place order: " << pOrder->GetInstrument()->GetInstrumentName( ID() ) << std::endl;
-  }
-  else {
-    iter->second->m_simExec.SubmitOrder( pOrder );
-  }
-}
-
-void SimulationProvider::CancelOrder( pOrder_t pOrder ) {
-  inherited_t::CancelOrder( pOrder );
-  mapSymbols_t::iterator iter = m_mapSymbols.find( pOrder->GetInstrument()->GetInstrumentName( ID() ) );
-  if ( m_mapSymbols.end() == iter ) {
-    std::cout << "SimulationProvider::CancelOrder - can't find symbol, can't cancel order: " << pOrder->GetInstrument()->GetInstrumentName( ID() ) << std::endl;
-  }
-  else {
-    iter->second->m_simExec.CancelOrder( pOrder->GetOrderId() );
-  }
-}
-
 void SimulationProvider::HandleExecution( Order::idOrder_t orderId, const Execution &exec ) {
   OrderManager::LocalCommonInstance().ReportExecution( orderId, exec );
 }
@@ -366,16 +253,6 @@ void SimulationProvider::HandleCommission( Order::idOrder_t orderId, double comm
 
 void SimulationProvider::HandleCancellation( Order::idOrder_t orderId ) {
   OrderManager::LocalCommonInstance().ReportCancellation( orderId );
-}
-
-void SimulationProvider::SetCommission( const std::string& sSymbol, double commission ) {
-  mapSymbols_t::iterator iter = m_mapSymbols.find( sSymbol );
-  if ( m_mapSymbols.end() == iter ) {
-    assert( false );
-  }
-  else {
-    iter->second->m_simExec.SetCommission( commission );
-  }
 }
 
 } // namespace tf

@@ -24,9 +24,9 @@ using namespace fastdelegate;
 #include <OUCommon/TimeSource.h>
 
 #include <TFTrading/Order.h>
-#include <TFTrading/ProviderInterface.h>
 
 #include "SimulationSymbol.h"
+#include "SimulationInterface.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -42,16 +42,19 @@ class MergeDatedDatums;
 //    subsequent times through, scan a vector
 
 class SimulationProvider
-: public ProviderInterface<SimulationProvider,SimulationSymbol>
+: public sim::SimulationInterface<SimulationProvider,SimulationSymbol>
 {
+  friend sim::SimulationInterface<SimulationProvider,SimulationSymbol>;
 public:
 
-  using pProvider_t = std::shared_ptr<SimulationProvider>;
-  using inherited_t = ProviderInterface<SimulationProvider,SimulationSymbol>;
+  using inherited_t = sim::SimulationInterface<SimulationProvider,SimulationSymbol>;
+
+  using pSymbol_t = inherited_t::pSymbol_t;
+
+  using pOrder_t = Order::pOrder_t;
   using pInstrument_t = Instrument::pInstrument_t;
   using pInstrument_cref = Instrument::pInstrument_cref;
-  using pOrder_t = Order::pOrder_t;
-  using pSymbol_t = inherited_t::pSymbol_t;
+  using pProvider_t = std::shared_ptr<SimulationProvider>;
 
   SimulationProvider();
   virtual ~SimulationProvider();
@@ -60,7 +63,7 @@ public:
     return std::make_shared<SimulationProvider>();
   }
 
-  static pProvider_t Cast( inherited_t::pProvider_t pProvider ) {
+  static pProvider_t Cast( pProvider_t pProvider ) {
     return std::dynamic_pointer_cast<SimulationProvider>( pProvider );
   }
 
@@ -72,10 +75,6 @@ public:
 
   void Run( bool bAsync = true );
   void Stop();
-  void PlaceOrder( pOrder_t pOrder );
-  void CancelOrder( pOrder_t pOrder );
-
-  void EmitStats( std::stringstream& ss );
 
   using OnSimulationThreadStarted_t = FastDelegate0<>; // Allows Singleton LocalCommonInstances to be set, called within new thread
   void SetOnSimulationThreadStarted( OnSimulationThreadStarted_t function ) {
@@ -91,7 +90,7 @@ public:
     m_OnSimulationComplete = function;
   }
 
-  void SetCommission( const std::string& sSymbol, double commission );
+  void EmitStats( std::stringstream& ss );
 
 protected:
 
@@ -103,17 +102,7 @@ protected:
 
   MergeDatedDatums* m_pMerge;
 
-  pSymbol_t NewCSymbol( SimulationSymbol::pInstrument_t pInstrument );
-
-  void AddQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler );
-  void RemoveQuoteHandler( pInstrument_cref pInstrument, SimulationSymbol::quotehandler_t handler );
-  void AddTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler );
-  void RemoveTradeHandler( pInstrument_cref pInstrument, SimulationSymbol::tradehandler_t handler );
-
-  void AddDepthByMMHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbymmhandler_t handler );
-  void RemoveDepthByMMHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbymmhandler_t handler );
-  void AddDepthByOrderHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbyorderhandler_t handler );
-  void RemoveDepthByOrderHandler( pInstrument_cref pInstrument, SimulationSymbol::depthbyorderhandler_t handler );
+  pSymbol_t virtual NewCSymbol( pInstrument_t pInstrument );
 
   void StartQuoteWatch( pSymbol_t pSymbol );
   void StopQuoteWatch( pSymbol_t Symbol );

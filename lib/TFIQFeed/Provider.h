@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include <TFTrading/ProviderInterface.h>
+#include <TFSimulation/SimulationInterface.hpp>
 
 #include "IQFeed.h"
 #include "Symbol.h"
@@ -24,17 +24,20 @@ namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
 class Provider :
-  public ProviderInterface<Provider,IQFeedSymbol>
+  public ou::tf::sim::SimulationInterface<Provider,IQFeedSymbol>
 , public IQFeed<Provider>
 {
+  friend ou::tf::sim::SimulationInterface<Provider,IQFeedSymbol>;
   friend IQFeed<Provider>;
 public:
 
-  using pProvider_t = std::shared_ptr<Provider>;
-  using inherited_t = ProviderInterface<Provider,IQFeedSymbol>;
+  using inherited_t = ou::tf::sim::SimulationInterface<Provider,IQFeedSymbol>;
+
   using idSymbol_t = inherited_t::idSymbol_t ;
   using pSymbol_t = inherited_t::pSymbol_t;
   using pInstrument_t = inherited_t::pInstrument_t;
+
+  using pProvider_t = std::shared_ptr<Provider>;
   using IQFeed_t = IQFeed<Provider>;
 
   Provider();
@@ -57,19 +60,7 @@ public:
 
   std::string ListedMarket( key_t nListedMarket ) const { return LookupListedMarket( nListedMarket ); }
 
-  void SetCommission( const std::string& sSymbol, double commission );
-
 protected:
-
-  void AddQuoteHandler( pInstrument_cref pInstrument, Provider::quotehandler_t handler );
-  void RemoveQuoteHandler( pInstrument_cref pInstrument, Provider::quotehandler_t handler );
-  void AddTradeHandler( pInstrument_cref pInstrument, Provider::tradehandler_t handler );
-  void RemoveTradeHandler( pInstrument_cref pInstrument, Provider::tradehandler_t handler );
-
-  //void AddDepthByMMHandler( pInstrument_cref pInstrument, Provider::depthbymmhandler_t handler );
-  //void RemoveDepthByMMHandler( pInstrument_cref pInstrument, Provider::depthbymmhandler_t handler );
-  //void AddDepthByOrderHandler( pInstrument_cref pInstrument, Provider::depthbyorderhandler_t handler );
-  //void RemoveDepthByOrderHandler( pInstrument_cref pInstrument, Provider::depthbyorderhandler_t handler );
 
   // overridden from ProviderInterface, called when application adds/removes watches
   virtual void StartQuoteWatch( pSymbol_t pSymbol );
@@ -78,7 +69,7 @@ protected:
   virtual void StartTradeWatch( pSymbol_t pSymbol );
   virtual void  StopTradeWatch( pSymbol_t pSymbol );
 
-  pSymbol_t NewCSymbol( pInstrument_t pInstrument );  // used by Add/Remove x handlers in base class
+  pSymbol_t virtual NewCSymbol( pInstrument_t pInstrument );  // used by Add/Remove x handlers in base class
 
   void OnIQFeedDynamicFeedUpdateMessage( linebuffer_t* pBuffer, IQFDynamicFeedUpdateMessage *pMsg );
   void OnIQFeedDynamicFeedSummaryMessage( linebuffer_t* pBuffer, IQFDynamicFeedSummaryMessage *pMsg );
@@ -94,8 +85,6 @@ protected:
   void OnIQFeedError( size_t );
 
 private:
-
-  bool m_bExecutionEnabled;
 
   void UpdateQuoteTradeWatch( char command, IQFeedSymbol::WatchState next, IQFeedSymbol *pSymbol );
 

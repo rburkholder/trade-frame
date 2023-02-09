@@ -54,16 +54,15 @@ public:
   using pProvider_t = std::shared_ptr<ProviderInterfaceBase>;
 
   using pOrder_t = Order::pOrder_t;
-//  typedef keytypes::idProvider_t idProvider_t;
 
-  using quotehandler_t = SymbolBase::quotehandler_t;
-  using tradehandler_t = SymbolBase::tradehandler_t ;
-  using depthbymmhandler_t = SymbolBase::depthbymmhandler_t;
+  using quotehandler_t        = SymbolBase::quotehandler_t;
+  using tradehandler_t        = SymbolBase::tradehandler_t ;
+  using depthbymmhandler_t    = SymbolBase::depthbymmhandler_t;
   using depthbyorderhandler_t = SymbolBase::depthbyorderhandler_t;
-  using greekhandler_t = SymbolBase::greekhandler_t;
+  using greekhandler_t        = SymbolBase::greekhandler_t;
 
-  using pInstrument_t = SymbolBase::pInstrument_t;
-  using pInstrument_cref =  SymbolBase::pInstrument_cref;
+  using pInstrument_t         = SymbolBase::pInstrument_t;
+  using pInstrument_cref      = SymbolBase::pInstrument_cref;
 
   using eidProvider_t = keytypes::eidProvider_t;
 
@@ -252,7 +251,7 @@ protected:
   bool Exists( pInstrument_cref pInstrument, typename mapSymbols_t::iterator& iter );
 
   virtual pSymbol_t NewCSymbol( pInstrument_t pInstrument ) = 0;
-  pSymbol_t AddCSymbol( pSymbol_t pSymbol );
+  pSymbol_t AddCSymbol( pSymbol_t pSymbol ); // turn virtual (CRTP is probably fine)
 
 private:
 

@@ -12,6 +12,7 @@ set(
     MergeDatedDatumCarrier.h
     MergeDatedDatums.h    
     SimulateOrderExecution.h
+    SimulationInterface.hpp
     SimulationProvider.h
     SimulationSymbol.h
   )

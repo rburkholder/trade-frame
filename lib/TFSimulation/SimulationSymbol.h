@@ -20,8 +20,6 @@
 
 #include <TFTrading/Symbol.h>
 
-#include "SimulateOrderExecution.h"
-
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -71,8 +69,6 @@ private:
   DepthsByMM m_depths_mm;
   DepthsByOrder m_depths_order;
   Greeks m_greeks;
-
-  sim::OrderExecution m_simExec; // managed by SimulationProvider
 
 };
 
