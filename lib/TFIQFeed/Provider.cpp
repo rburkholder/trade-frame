@@ -29,11 +29,11 @@ Provider::Provider()
 {
   m_sName = "IQFeed";
   m_nID = keytypes::EProviderIQF;
-  m_bExecutionEnabled = false;
   m_bProvidesQuotes = true;
   m_bProvidesTrades = true;
   m_bProvidesDepths = true;
-  m_bProvidesBrokerInterface = false; // simulated
+  m_bProvidesBrokerInterface = true; // simulated trades
+  m_bExecutionEnabled = false; // true required for simulating trades
 }
 
 Provider::~Provider() {
