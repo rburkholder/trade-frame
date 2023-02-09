@@ -26,6 +26,7 @@
 #include <TFIQFeed/OptionChainQuery.h>
 
 #include <TFTrading/InstrumentManager.h>
+#include <TFTrading/ComposeInstrument.hpp>
 
 #include <TFOptions/Engine.h>
 
@@ -183,14 +184,16 @@ MasterPortfolio::~MasterPortfolio() {
   m_pOptionEngine.reset();
   m_fedrate.SetWatchOff();
 
+  m_pBuildInstrument.reset();
+  m_pComposeInstrument.reset();
+
+  m_pHistoryRequest.reset(); // TODO: surface the disconnect and make synchronous
+
   if ( m_pOptionChainQuery ) {
     m_pOptionChainQuery->Disconnect();
     m_pOptionChainQuery.reset();
   }
 
-  m_pHistoryRequest.reset(); // TODO: surface the disconnect and make synchronous
-
-  m_pBuildInstrument.reset();
 }
 
 // auto loading portfolio from database into the map stratetgy cache
@@ -385,7 +388,12 @@ void MasterPortfolio::Load( ptime dtLatestEod ) {
       [this](){
         m_pHistoryRequest = ou::tf::iqfeed::HistoryRequest::Construct(
           [this](){ // fConnected_t
-            ProcessSeedList();
+            m_pComposeInstrument = std::make_shared<ou::tf::ComposeInstrument>(
+              m_pIQ, m_pIB,
+              [this](){
+                ProcessSeedList();
+              }
+            );
           }
         );
         m_pHistoryRequest->Connect();
@@ -397,6 +405,7 @@ void MasterPortfolio::Load( ptime dtLatestEod ) {
 }
 
 void MasterPortfolio::ProcessSeedList() {
+  // process one name per invocation here
 
   if ( 0 == m_setSymbols.size() ) {
     // TODO: when m_setSymbols is empty, disconnect m_pHistoryRequest, m_pOptionChainQuery?
@@ -406,12 +415,14 @@ void MasterPortfolio::ProcessSeedList() {
     const std::string sSymbol( *iterSetSymbols );
     m_setSymbols.erase( iterSetSymbols );
 
-    m_pBuildInstrument->Queue(
+    m_pComposeInstrument->Compose(
       sSymbol,
       [this]( pInstrument_t pInstrument ){
+        assert( pInstrument );
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
         AddUnderlying( pWatch );
-      } );
+      }
+    );
   }
 }
 

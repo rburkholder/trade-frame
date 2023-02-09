@@ -75,9 +75,9 @@ bool Load( Options& options ) {
     if ( 0 < vm.count( sOption_Symbol ) ) {
       options.vSymbol = std::move( vm[sOption_Symbol].as<vSymbol_t>() );
       for ( vSymbol_t::value_type& value: options.vSymbol ) {
+        std::replace_if( value.begin(), value.end(), [](char ch)->bool{return '~' == ch;}, '#' );
         BOOST_LOG_TRIVIAL(info) << "symbol " << value;
       }
-
     }
     else {
       BOOST_LOG_TRIVIAL(error) << sFilename << " missing '" << sOption_Symbol << "='";

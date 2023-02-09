@@ -48,6 +48,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
   class TreeItem;
+  class ComposeInstrument;
 namespace iqfeed { // IQFeed
   class HistoryRequest;
   class OptionChainQuery;
@@ -133,6 +134,8 @@ private:
 
   // need to unify this with m_setSymbol;
   vSymbol_t m_vSymbol;
+
+  std::shared_ptr<ou::tf::ComposeInstrument> m_pComposeInstrument;
 
   ou::tf::DatedDatum::volume_t m_nSharesTrading;
 
