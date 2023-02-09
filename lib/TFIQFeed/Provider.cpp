@@ -39,6 +39,11 @@ Provider::Provider()
 Provider::~Provider() {
 }
 
+void Provider::EnableExecution( bool bEnable ) {
+  assert( 0 == MonitoredSymbolsCount() ); // at startup only, when no symbols are watched
+  m_bExecutionEnabled = bEnable;
+}
+
 void Provider::Connect() {
   if ( !m_bConnected ) {
     ProviderInterfaceBase::OnConnecting( 0 );

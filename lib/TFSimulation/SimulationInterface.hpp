@@ -72,6 +72,8 @@ protected:
   virtual void AddDepthByOrderHandler( pInstrument_cref pInstrument, typename S::depthbyorderhandler_t );
   virtual void RemoveDepthByOrderHandler( pInstrument_cref pInstrument, typename S::depthbyorderhandler_t );
 
+  size_t MonitoredSymbolsCount() const { return m_mapOrderExecution.size(); }
+
 private:
 
   struct EventHolders {
@@ -89,31 +91,35 @@ private:
   using fOrderExecution_t = std::function<void(EventHolders&)>;
 
   void Update( const std::string& sName, fOrderExecution_t&& f ) {
-    typename mapOrderExecution_t::iterator iter = m_mapOrderExecution.find( sName );
-    assert( m_mapOrderExecution.end() != iter );
-    EventHolders& eh( iter->second );
-    f( eh );
+    if ( m_bExecutionEnabled ) {
+      typename mapOrderExecution_t::iterator iter = m_mapOrderExecution.find( sName );
+      assert( m_mapOrderExecution.end() != iter );
+      EventHolders& eh( iter->second );
+      f( eh );
+    }
   }
 };
 
 template <typename P, typename S>
 typename SimulationInterface<P,S>::pSymbol_t SimulationInterface<P,S>::AddCSymbol( pSymbol_t pSymbol ) {
 
-  const std::string& sName( pSymbol->GetInstrument()->GetInstrumentName( inherited_t::ID() ) );
+  if ( m_bExecutionEnabled ) {
+    const std::string& sName( pSymbol->GetInstrument()->GetInstrumentName( inherited_t::ID() ) );
 
-  typename mapOrderExecution_t::iterator iter = m_mapOrderExecution.find( sName );
-  if ( m_mapOrderExecution.end() == iter ) {
-    auto pair = m_mapOrderExecution.emplace( sName, EventHolders( pSymbol ) );
-    assert( pair.second );
-    iter = pair.first;
-    EventHolders& eh( iter->second );
-    OrderExecution& oe( eh.oe );
-    oe.SetOnOrderFill( MakeDelegate( dynamic_cast<P*>( this ), &P::HandleExecution ) );
-    oe.SetOnCommission( MakeDelegate( dynamic_cast<P*>( this ), &P::HandleCommission ) );
-    oe.SetOnOrderCancelled( MakeDelegate( dynamic_cast<P*>( this ), &P::HandleCancellation ) );
-  }
-  else {
-    assert( false );  // need better handling, this will be a duplicate
+    typename mapOrderExecution_t::iterator iter = m_mapOrderExecution.find( sName );
+    if ( m_mapOrderExecution.end() == iter ) {
+      auto pair = m_mapOrderExecution.emplace( sName, EventHolders( pSymbol ) );
+      assert( pair.second );
+      iter = pair.first;
+      EventHolders& eh( iter->second );
+      OrderExecution& oe( eh.oe );
+      oe.SetOnOrderFill( MakeDelegate( dynamic_cast<P*>( this ), &P::HandleExecution ) );
+      oe.SetOnCommission( MakeDelegate( dynamic_cast<P*>( this ), &P::HandleCommission ) );
+      oe.SetOnOrderCancelled( MakeDelegate( dynamic_cast<P*>( this ), &P::HandleCancellation ) );
+    }
+    else {
+      assert( false );  // need better handling, this will be a duplicate
+    }
   }
 
   return inherited_t::AddCSymbol( pSymbol );
@@ -249,7 +255,6 @@ void SimulationInterface<P,S>::RemoveDepthByOrderHandler( pInstrument_cref pInst
 
 template <typename P, typename S>
 void SimulationInterface<P,S>::SetCommission( const std::string& sSymbol, double commission ) {
-  // ensure sSymbol is native name
 
   Update(
     sSymbol,
@@ -262,20 +267,15 @@ void SimulationInterface<P,S>::SetCommission( const std::string& sSymbol, double
 template <typename P, typename S>
 void SimulationInterface<P,S>::PlaceOrder( pOrder_t pOrder ) {
 
-  inherited_t::PlaceOrder( pOrder ); // any underlying initialization
-
+  inherited_t::PlaceOrder( pOrder );
   const std::string& sName( pOrder->GetInstrument()->GetInstrumentName( inherited_t::ID() ) );
 
-  Update(  // TODO: assert if not available
+  Update(
     sName,
     [pOrder]( EventHolders& eh ){
       eh.oe.SubmitOrder( pOrder );
     } );
 
-    //std::cout
-    //  << "SimulationInterface::PlaceOrder - can't find symbol, an't place order: "
-    //  << pOrder->GetInstrument()->GetInstrumentName( inherited_t::ID() )
-    //  << std::endl;
 }
 
 template <typename P, typename S>
@@ -285,16 +285,12 @@ void SimulationInterface<P,S>::CancelOrder( pOrder_t pOrder ) {
 
   const std::string& sName( pOrder->GetInstrument()->GetInstrumentName( inherited_t::ID() ) );
 
-  Update(  // TODO: assert if not available
+  Update(
     sName,
     [pOrder]( EventHolders& eh ){
       eh.oe.CancelOrder( pOrder->GetOrderId() );
     } );
 
-    //std::cout
-    //  << "SimulationInterface::CancelOrder - can't find symbol, can't cancel order: "
-    //  << pOrder->GetInstrument()->GetInstrumentName( inherited_t::ID() )
-    //  << std::endl;
 }
 
 } // namespace sim

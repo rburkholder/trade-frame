@@ -51,7 +51,7 @@ public:
     return std::dynamic_pointer_cast<Provider>( pProvider );
   }
 
-  void EnableExecution( bool bEnable ) { m_bExecutionEnabled = bEnable; }
+  void EnableExecution( bool bEnable );
   bool ExecutionEnabled() const { return m_bExecutionEnabled; }
 
   // do these need to be virtual?  use crtp?
