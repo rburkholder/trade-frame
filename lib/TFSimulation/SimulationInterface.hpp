@@ -51,8 +51,6 @@ public:
   : m_bExecutionEnabled( true )
   {}
 
-  pSymbol_t AddCSymbol( pSymbol_t );
-
   void SetCommission( const std::string& sSymbol, double commission );
 
   void PlaceOrder( pOrder_t pOrder );
@@ -61,6 +59,8 @@ public:
 protected:
 
   bool m_bExecutionEnabled;
+
+  pSymbol_t AddCSymbol( pSymbol_t );
 
   virtual void AddQuoteHandler( pInstrument_cref pInstrument, typename S::quotehandler_t );
   virtual void RemoveQuoteHandler( pInstrument_cref pInstrument, typename S::quotehandler_t );
