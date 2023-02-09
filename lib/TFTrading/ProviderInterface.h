@@ -218,7 +218,7 @@ public:
   pSymbol_t Add( pInstrument_cref pInstrument );
 
   pSymbol_t GetSymbol( const idSymbol_t& );
-  pSymbol_t GetSymbol( const pInstrument_t );
+  pSymbol_t GetSymbol( const pInstrument_t& );
 
   virtual void  PlaceOrder( Order::pOrder_t pOrder );
   virtual void CancelOrder( Order::pOrder_t pOrder );
@@ -255,7 +255,7 @@ protected:
 
 private:
 
-  typename mapSymbols_t::iterator Find( const pInstrument_t );
+  typename mapSymbols_t::iterator Find( const pInstrument_t& );
 
 };
 
@@ -337,7 +337,7 @@ typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::AddCSymbol( p
 }
 
 template <typename P, typename S>
-typename ProviderInterface<P,S>::mapSymbols_t::iterator ProviderInterface<P,S>:: Find( const pInstrument_t pInstrument ) {
+typename ProviderInterface<P,S>::mapSymbols_t::iterator ProviderInterface<P,S>:: Find( const pInstrument_t& pInstrument ) {
   typename mapSymbols_t::iterator iter;
   if ( !Exists( pInstrument, iter ) ) {
     Add( pInstrument );
@@ -359,7 +359,7 @@ typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::GetSymbol( co
 }
 
 template <typename P, typename S>
-typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>:: GetSymbol( const pInstrument_t pInstrument ) {
+typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>:: GetSymbol( const pInstrument_t& pInstrument ) {
   return Find( pInstrument )->second;
 }
 
