@@ -536,9 +536,11 @@ void FrameWork01<CRTP>::HandleProviderSelectX( ou::tf::PanelProviderControl::Pro
     m_pExecutionProvider->OnDisconnecting.Remove( MakeDelegate( this, &FrameWork01<CRTP>::HandleOnExecDisconnecting ) );
     m_pExecutionProvider->OnDisconnected.Remove( MakeDelegate( this, &FrameWork01<CRTP>::HandleOnExecDisconnected ) );
   }
+  m_iqfeed->EnableExecution( false );
   switch ( provider ) {
   case ou::tf::PanelProviderControl::Provider_t::EIQFeed:
     m_pExecutionProvider = m_iqfeed;
+    m_iqfeed->EnableExecution( true );
     break;
   case ou::tf::PanelProviderControl::Provider_t::EIB:
     m_pExecutionProvider = m_tws;
