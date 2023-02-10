@@ -141,11 +141,10 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
   pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, sIQFeedSymbol );
   pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
 
-  BOOST_LOG_TRIVIAL(debug)
-    << "BuildInstrument acquire: "
-    << pInstrument-GetInstrumentName() << ","
-    << sIQFeedSymbol
-    << std::endl;
+  //BOOST_LOG_TRIVIAL(debug)
+  //  << "BuildInstrument: "
+  //  << sIQFeedSymbol
+  //  ;
 
   AcquireFundamentals::pAcquireFundamentals_t pAcquireFundamentals
     = std::make_shared<AcquireFundamentals>(
