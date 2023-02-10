@@ -54,8 +54,6 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC -D_FILE_OFFSET_BITS=64 )
 target_include_directories(
   ${PROJECT_NAME} SYSTEM PUBLIC
     "../lib"
-#    "/usr/local/lib/wx/include/gtk3-unicode-3.0"
-#    "/usr/local/include/wx-3.0"
   )
 
 target_link_directories(
@@ -84,11 +82,7 @@ target_link_libraries(
       TFTrading
       dl
       z
-#      curl
       ${Boost_LIBRARIES}
-#      wx_gtk3u_adv-3.0
-#      wx_gtk3u_core-3.0
-#      wx_baseu-3.0
       pthread
       crypto
       ssl

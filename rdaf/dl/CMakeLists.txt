@@ -57,8 +57,6 @@ target_include_directories(
   ${PROJECT_NAME} SYSTEM PUBLIC
     "../lib"
     "/usr/local/include/rdaf"
-#    "/usr/local/lib/wx/include/gtk3-unicode-3.0"
-#    "/usr/local/include/wx-3.0"
   )
 
 target_link_directories(
@@ -69,16 +67,10 @@ target_link_directories(
 
 target_link_libraries(
   ${PROJECT_NAME}
-#      TFBitsNPieces
       TFTrading
-#      TFSimulation
-#      TFVuTrading
-#      TFOptions
       TFHDF5TimeSeries
       OUSQL
       OUSqlite
-#      OUCharting
-#      TFIndicators
       TFIQFeed
       TFTimeSeries
       TFTrading

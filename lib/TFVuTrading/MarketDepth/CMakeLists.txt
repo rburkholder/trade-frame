@@ -54,7 +54,7 @@ target_include_directories(
   ${PROJECT_NAME} PUBLIC
     ".."
     "../.."
-    "/usr/local/lib/wx/include/gtk3-unicode-3.1"
-    "/usr/local/include/wx-3.1"
+    "/usr/local/lib/wx/include/gtk3-unicode-${WX_VERSION_MAJOR}"
+    "/usr/local/include/wx-${WX_VERSION_MAJOR}"
   )
 

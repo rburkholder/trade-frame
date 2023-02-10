@@ -49,8 +49,8 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC -D__WXGTK__ )
 target_include_directories(
   ${PROJECT_NAME} PUBLIC
     "../lib"
-    "/usr/local/lib/wx/include/gtk3-unicode-3.1"
-    "/usr/local/include/wx-3.1"
+    "/usr/local/lib/wx/include/gtk3-unicode-${WX_VERSION_MAJOR}"
+    "/usr/local/include/wx-${WX_VERSION_MAJOR}"
   )
 
 target_link_directories(
@@ -68,9 +68,9 @@ target_link_libraries(
       TFHDF5TimeSeries
       OUCommon
       ${Boost_LIBRARIES}
-      wx_gtk3u_adv-3.1
-      wx_gtk3u_core-3.1
-      wx_baseu-3.1
+#      wx_gtk3u_adv-3.1
+      wx_gtk3u_core-${WX_VERSION_MAJOR}
+      wx_baseu-${WX_VERSION_MAJOR}
       pthread
   )
 

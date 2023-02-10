@@ -53,8 +53,6 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_LOG_DYN_LINK )
 target_include_directories(
   ${PROJECT_NAME} SYSTEM PUBLIC
     "../lib"
-#    "/usr/local/lib/wx/include/gtk3-unicode-3.0"
-#    "/usr/local/include/wx-3.0"
 )
 
 target_link_directories(

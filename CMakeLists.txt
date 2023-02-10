@@ -9,7 +9,9 @@ add_definitions(-pthread)
 
 # can't use 20 yet, seems to be many errors created
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID, "x64")
+set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID "x64")
+
+set(WX_VERSION_MAJOR "3.2")
 
 add_subdirectory(Alpaca)
 add_subdirectory(ArmsIndex)
