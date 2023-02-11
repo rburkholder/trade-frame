@@ -93,7 +93,7 @@ private:
   pOptionChainQuery_t m_pOptionChainQuery;
 
   void Initialize();
-  void StartChainQuery();
+  void ConstructChainQuery();
   void Finish( pMapQuery_t::iterator );
 };
 

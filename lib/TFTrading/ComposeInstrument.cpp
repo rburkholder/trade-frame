@@ -26,7 +26,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-// basic instrument composition
+// instrument composition as IQFeed only
 ComposeInstrument::ComposeInstrument(
   pProviderIQFeed_t pProviderIQFeed
 , fInitDone_t&& fInitDone )
@@ -39,7 +39,7 @@ ComposeInstrument::ComposeInstrument(
   Initialize();
 }
 
-// instrument composition with contract
+// instrument composition as IQFeed with IB contract
 ComposeInstrument::ComposeInstrument(
   pProviderIQFeed_t pProviderIQFeed
 , pProviderIBTWS_t  pProviderIBTWS
@@ -53,7 +53,6 @@ ComposeInstrument::ComposeInstrument(
   assert( m_fInitDone );
 
   m_pBuildInstrumentBoth = std::make_unique<ou::tf::BuildInstrument>( m_pProviderIQFeed, m_pProviderIBTWS );
-
   Initialize();
 }
 
@@ -66,12 +65,12 @@ ComposeInstrument::~ComposeInstrument() {
   m_pBuildInstrumentIQFeed.reset();
 }
 
-void ComposeInstrument::Initialize() {
+void ComposeInstrument::Initialize() { // part of constructor
   m_pBuildInstrumentIQFeed = std::make_unique<ou::tf::BuildInstrument>( m_pProviderIQFeed );
-  StartChainQuery();
+  ConstructChainQuery();
 }
 
-void ComposeInstrument::StartChainQuery() {
+void ComposeInstrument::ConstructChainQuery() { // part of constructor
   if ( m_pOptionChainQuery ) {
     assert( false );
   }
@@ -82,7 +81,7 @@ void ComposeInstrument::StartChainQuery() {
         m_fInitDone = nullptr;
       }
     );
-    m_pOptionChainQuery->Connect(); // TODO: auto-connect instead?
+    m_pOptionChainQuery->Connect();
   }
 }
 
@@ -102,7 +101,7 @@ void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, fInstrument_t
       iterQuery = result.first;
     }
 
-    m_pBuildInstrumentIQFeed->Queue( // obtain basic symbol information
+    m_pBuildInstrumentIQFeed->Queue( // confirm instrument type is a future
       sIQFeedSymbol,
       [this,iterQuery]( pInstrument_t pInstrument ) {
 
@@ -112,10 +111,10 @@ void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, fInstrument_t
         else {
           const std::string& sName( pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
           const std::string sBase( sName.substr( 0, sName.size() - 1 ) ); // remove trailing #
-          boost::gregorian::date expiry( pInstrument->GetExpiry() );
+          boost::gregorian::date expiry( pInstrument->GetExpiry() ); // will be matching expiry of this continous future
 
           m_pOptionChainQuery->QueryFuturesChain(  // obtain a list of futures
-            sBase, "", "234" /* 2022, 2023, 2024 */ , "4" /* 4 months */,
+            sBase, "", "345" /* 2023, 2024, 2025 */ , "4" /* 4 months */,
             [this,expiry,iterQuery]( const iqfeed::OptionChainQuery::FuturesList& list ) mutable {
 
               if ( 0 == list.vSymbol.size() ) {
@@ -151,6 +150,7 @@ void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, fInstrument_t
     );
   }
   else {
+    // process as a regular build instrument
     if ( m_pBuildInstrumentBoth ) {
       m_pBuildInstrumentBoth->Queue( sIQFeedSymbol, std::move( fInstrument ) );
     }
@@ -160,9 +160,9 @@ void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, fInstrument_t
   }
 }
 
-void ComposeInstrument::Finish( pMapQuery_t::iterator iter ) {
+void ComposeInstrument::Finish( pMapQuery_t::iterator iterQuery ) {
 
-  Query& query( iter->second );
+  Query& query( iterQuery->second );
   assert( query.pInstrument );
 
   if ( m_pBuildInstrumentBoth ) {
@@ -176,7 +176,7 @@ void ComposeInstrument::Finish( pMapQuery_t::iterator iter ) {
   }
 
   std::lock_guard<std::mutex> lock( m_mutexMap );
-  m_pMapQuery.erase( iter );
+  m_pMapQuery.erase( iterQuery );
 }
 
 } // namespace tf
