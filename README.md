@@ -13,8 +13,8 @@ but the focus changed towards supporting a Linux environment.  Some work will be
 
 CMake is used for build management.
 
-Note the use of '-march=native' in the root CMakeFiles.txt.  This will cause code to be not necessarily transportable across CPU types'.  Comment out th eoption if you intend to compile across CPU types, ie, various releases of the Intel instruction set.  See the referenced
-URL for the variety of instructions across CPU releases.
+Note the use of '-march=native' in the root CMakeFiles.txt.  This will cause code to be not necessarily transportable across CPU types'.  Comment out the option if you intend to compile across CPU types, ie, various releases of the Intel instruction set.  
+See the referenced URL for the variety of instructions across CPU releases.
 
 ## Example
 
@@ -36,18 +36,18 @@ There are some wxWidget requirements for using a GTK variation of video drivers 
 You'll need to have about 10G drive space free to build the project, the related libraries, 
 as well as the installs (from my libs-build repository).
 
-Debian Bullseye is used as the platform.  The library installer is specific to this distribution.  The installer may or may not work with other 
-distributions or flavours.
+Debian Bookworm is used as the platform.  The library installer is specific to this distribution.  
+The installer may or may not work with other distributions or flavours.
 
 DTN/IQFeed requires Wine to run.  Starting with the 6.2 release of IQFeed, wine32 is no longer required.  
-The installation of wine may generate some wine32 messages and errors, but they can be ignored.
+An x64-only installation of wine may generate some wine32 messages and errors, but they can be ignored.
 
 
 ```
 # run with bash
 # create working directory
-mkdir rburkholder
-cd rburkholder
+mkdir tradeframe
+cd tradeframe
 # git for latest code, wine for IQFeed daemon
 sudo apt-get update && apt-get install git wine wget
 wget http://www.iqfeed.net/iqfeed_client_6_2_0_25.exe
@@ -61,7 +61,7 @@ sh tws-stable-linux-x64.sh
 git clone https://github.com/rburkholder/libs-build.git
 cd libs-build
 ./build.sh tradeframe
-# rdaf is required for the project in the rdaf subdirectory
+# rdaf is required for the projects in the rdaf subdirectory
 ./build.sh rdaf
 cd ..
 
