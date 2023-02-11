@@ -14,8 +14,6 @@
 
 // Started 2012/10/14
 
-//#include "StdAfx.h"
-
 #include <stdexcept>
 
 #include <fstream>
@@ -42,7 +40,7 @@ typedef MarketSymbol::TableRowDef trd_t;
 void LoadMktSymbols( InMemoryMktSymbolList& symbols, MktSymbolLoadType::Enum e, bool bSaveTextToDisk, const std::string& sName ) {
   // valid combinations:
   // bDownload            t t f
-  // bLoadTextFromDisk    f f t 
+  // bLoadTextFromDisk    f f t
   // bSaveTextToDisk      f t f
   if (
     (   MktSymbolLoadType::Download == e ) ||
@@ -63,7 +61,7 @@ void LoadMktSymbols( InMemoryMktSymbolList& symbols, MktSymbolLoadType::Enum e, 
     try {
 
       CurlGetMktSymbols cgms;
-      
+
       UnZipMktSymbolsFile uzmsf;
       UnZipMktSymbolsFile::pUnZippedFile_t pUnZippedFile = uzmsf.UnZip( cgms.Buffer(), cgms.Size() );
 
@@ -87,7 +85,7 @@ void LoadMktSymbols( InMemoryMktSymbolList& symbols, MktSymbolLoadType::Enum e, 
       validator.ParseHeaderLine( pBegin, pEnd );
       while ( pBegin != pEnd ) {
         validator.Parse( pBegin, pEnd );
-      } 
+      }
     }
     catch( ... ) {
       std::cout << "Some Sort of failure in Download" << std::endl;
