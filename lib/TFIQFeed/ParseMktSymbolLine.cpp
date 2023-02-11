@@ -28,7 +28,7 @@ void doout( const std::string& s ) {
 
 // http://www.relisoft.com/book/tech/6lib.html
 class LessThan
-    : public std::binary_function<char const *, char const *, bool> {
+    : public std::function<bool(char const *, char const *)> {
 public:
     bool operator () (char const * str1, 
                       char const * str2) const {
