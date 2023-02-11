@@ -24,12 +24,11 @@
 #include <vector>
 #include <cassert>
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_bind.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
+
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/bind.hpp>
+#include <boost/phoenix/operator.hpp>
 
 namespace qi = boost::spirit::qi;
 namespace ascii = boost::spirit::ascii;

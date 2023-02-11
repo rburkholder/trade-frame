@@ -14,9 +14,6 @@
 
 #pragma once
 
-// https://github.com/boostorg/spirit/commit/c0537c8251d04773a24bafdab8363b1cba350d07
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 #include <string>
 #include <vector>
 
@@ -24,10 +21,10 @@
 
 #include <boost/spirit/include/qi.hpp>
 
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_bind.hpp>
-//#include <boost/spirit/include/phoenix_stl.hpp>
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/bind.hpp>
+#include <boost/phoenix/operator.hpp>
+//#include <boost/spirit/include/phoenix/stl.hpp>
 
 // will need to use the flex field capability where we get only the fields we need
 // field offsets are 1 based, in order to easily match up with documentation

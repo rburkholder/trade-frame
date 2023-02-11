@@ -12,18 +12,18 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 #include <stdexcept>
 
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_fusion.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
-#include <boost/spirit/include/phoenix_bind.hpp>
+
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/operator.hpp>
+#include <boost/phoenix/fusion.hpp>
+#include <boost/phoenix/bind.hpp>
 //#include <boost/phoenix/bind/bind_member_variable.hpp>
 #include <boost/phoenix/object/construct.hpp>
+
+#include <boost/phoenix/stl.hpp>
 #include <boost/phoenix/stl/container.hpp>
 //#include <boost/fusion/include/adapt_struct.hpp>
 
@@ -51,9 +51,6 @@ template<typename Iterator>
 struct WeeklyOptionsParser: qi::grammar<Iterator, WeeklyOptions()> {
 
   WeeklyOptionsParser(): WeeklyOptionsParser::base_type( start ) {
-
-    using boost::phoenix::push_back;
-    using boost::phoenix::bind;
 
     rDigit %= qi::char_( "0-9" );
     rNotAQuote %= +( qi::char_ - '"' );
@@ -100,6 +97,9 @@ struct WeeklyOptionsParser: qi::grammar<Iterator, WeeklyOptions()> {
 
     // some background at http://boost-spirit.com/home/2010/01/15/how-do-rules-propagate-attributes/
     // something more to read: http://boost-spirit.com/home/2010/01/21/what-are-rule-bound-semantic-actions/
+
+    using boost::phoenix::bind;
+    using boost::phoenix::push_back;
 
     start
       = rHeader [push_back(bind( &WeeklyOptions::vHeader, qi::labels::_val), qi::labels::_1 ) ] > qi::eol

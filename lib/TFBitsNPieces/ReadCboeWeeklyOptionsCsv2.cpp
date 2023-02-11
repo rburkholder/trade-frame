@@ -12,12 +12,11 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 #include <stdexcept>
 
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
+
+#include <boost/phoenix/core.hpp>
 
 //https://www.boost.org/doc/libs/1_75_0/libs/spirit/classic/example/fundamental/file_parser.cpp
 #include <boost/spirit/include/classic_file_iterator.hpp>

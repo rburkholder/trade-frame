@@ -16,7 +16,7 @@
 #include <boost/assign/std/vector.hpp>
 using namespace boost::assign;
 
-#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/phoenix/core.hpp>
 #include <boost/phoenix/bind.hpp> 
 #include <boost/phoenix/bind/bind_member_function.hpp>
 

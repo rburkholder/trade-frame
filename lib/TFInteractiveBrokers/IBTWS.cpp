@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 #include <limits>
 #include <memory>
 #include <string>

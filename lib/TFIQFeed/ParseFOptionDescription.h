@@ -17,13 +17,11 @@
 // slight modifications to the original ParseOptionDescripion
 // to handle different names in description:  full month, full option side
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_symbols.hpp>
 
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/stl.hpp>
 
 #include "MarketSymbol.h"
 

@@ -21,15 +21,13 @@
 
 #pragma once
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 #include <string>
 
- #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include <boost/spirit/include/qi.hpp>
 
-#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/phoenix/core.hpp>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

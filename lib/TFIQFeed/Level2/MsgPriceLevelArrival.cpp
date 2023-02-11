@@ -19,18 +19,16 @@
  * Created on October 16, 2021 20:02
  */
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 #include <string>
 
- #include <boost/date_time/gregorian/gregorian_types.hpp>
- #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time/gregorian/gregorian_types.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include <boost/spirit/include/qi.hpp>
 
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_bind.hpp>
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/operator.hpp>
+#include <boost/phoenix/bind.hpp>
 
 #include "MsgOrderArrival.h"
 

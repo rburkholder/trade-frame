@@ -23,8 +23,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/spirit/include/qi.hpp>
 //#include <boost/spirit/include/qi/string/symbols.hpp>

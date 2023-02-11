@@ -19,19 +19,18 @@
  * Created: January 1, 2021, 15:50
  */
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 #include <stdexcept>
 #include <sstream>
 
-#include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/qi_symbols.hpp>
 #include <boost/spirit/include/qi_numeric.hpp>
 #include <boost/spirit/include/qi.hpp>
 
- #include "LegNote.h"
+#include <boost/phoenix/core.hpp>
 
- using values_t = ou::tf::option::LegNote::values_t;
+#include "LegNote.h"
+
+using values_t = ou::tf::option::LegNote::values_t;
 
  BOOST_FUSION_ADAPT_STRUCT(
   values_t,

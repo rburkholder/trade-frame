@@ -19,8 +19,6 @@
  * Created: March 15, 2022 12:56
  */
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 #include <iostream>
 
 #include <boost/spirit/include/qi.hpp>
