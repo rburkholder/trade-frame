@@ -18,10 +18,12 @@
 
 #include <stdexcept>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/type_traits/is_enum.hpp>
 #include <boost/type_traits/is_signed.hpp>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+
+#include <boost/lexical_cast.hpp>
 
 #include <OUCommon/Decimal.h>
 
