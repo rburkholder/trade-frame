@@ -835,6 +835,8 @@ void AppDoM::BuildPosition() {
         m_config.sSymbolName,
         [this]( pInstrument_t pInstrument ){
           if ( pInstrument ) {
+            ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+            im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
             InitializePosition( pInstrument );
           }
           else {

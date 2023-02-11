@@ -280,6 +280,8 @@ void AppIndicatorTrading::ConstructUnderlying() {
             m_config.sSymbol,
             [this]( pInstrument_t pInstrument ){
               assert( pInstrument );
+              ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+              im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
               InitializeUnderlying( pInstrument );
             }
           );
@@ -294,6 +296,8 @@ void AppIndicatorTrading::ConstructUnderlying() {
             m_config.sSymbol,
             [this]( pInstrument_t pInstrument ){
               assert( pInstrument );
+              ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+              im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
               InitializeUnderlying( pInstrument );
             }
           );
@@ -343,6 +347,7 @@ AppIndicatorTrading::pPosition_t AppIndicatorTrading::ConstructPosition( pInstru
   else {
     using pWatch_t = ou::tf::Watch::pWatch_t;
     pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+
     switch ( m_pExecutionProvider->ID() ) {
       case ou::tf::keytypes::EProviderIQF:
         pPosition = pm.ConstructPosition(
@@ -393,6 +398,8 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
         sIQFeedOptionSymbol,
         [this,fOption_=std::move( fOption )](pInstrument_t pInstrument){
           if ( pInstrument ) {
+            ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+            im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
             fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_iqfeed ) );
             // instrument is registered during transit through BuildInstrument
           }

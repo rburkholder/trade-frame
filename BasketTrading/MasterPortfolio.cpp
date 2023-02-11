@@ -419,6 +419,8 @@ void MasterPortfolio::ProcessSeedList() {
       sSymbol,
       [this]( pInstrument_t pInstrument ){
         assert( pInstrument );
+        ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+        im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
         AddUnderlying( pWatch );
       }
@@ -533,6 +535,8 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
                     value,
                     [this,&uws,fOption_]( pInstrument_t pInstrument ) {
                       if ( pInstrument ) {
+                        ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+                        im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
                         //std::cout << "  Option Name: " << pInstrument->GetInstrumentName() << std::endl;
                         fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_pIQ ) );
                       }
@@ -599,6 +603,8 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
           m_pBuildInstrument->Queue(
             sIQFeedOptionName,
             [this,fOption_=std::move(fOption)](pInstrument_t pInstrument ){
+              ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+              im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
               pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1 ) );
               fOption_( pOption );
               // TODO: cache the option for SaveSeries?

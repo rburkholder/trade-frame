@@ -197,6 +197,8 @@ void AppImpliedVolatility::ConstructUnderlying() {
         m_choices.sSymbol,
         [this]( pInstrument_t pInstrument ){
           assert( pInstrument );
+          ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+          im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
           InitializeUnderlying( pInstrument );
         }
       );

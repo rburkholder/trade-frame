@@ -214,8 +214,12 @@ void AppAutoTrade::ConstructIBInstrument() {
   m_pBuildInstrument->Queue(
     m_sSymbol,
     [this]( pInstrument_t pInstrument ){
-      const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+      ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+      im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+
       ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+      const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+
       pPosition_t pPosition;
       if ( pm.PositionExists( "USD", idInstrument ) ) {
         pPosition = pm.GetPosition( "USD", idInstrument );

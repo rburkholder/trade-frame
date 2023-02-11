@@ -194,8 +194,8 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
                 //BOOST_LOG_TRIVIAL(debug) << "BuildInstrument::Build contract: " << pInstrument->GetInstrumentName();
                 assert( 0 != pInstrument->GetContract() );
                 m_pIB->Sync( pInstrument );
-                ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
-                im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+                //ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+                //im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
                 iterInProgress->second.fInstrument( pInstrument );
               },
               [this,iterInProgress]( bool bStatus ) {
