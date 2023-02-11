@@ -261,8 +261,8 @@ bool AppIndicatorTrading::OnInit() {
   CallAfter(
     [this](){
       LoadState();
-      m_splitterRow->Layout(); // the sash does not appear to update
       m_pFrameMain->Layout();
+      m_splitterRow->Layout(); // the sash does not appear to update
       m_sizerFrame->Layout(); // seems to make it consistent
     }
   );
@@ -271,18 +271,39 @@ bool AppIndicatorTrading::OnInit() {
 }
 
 void AppIndicatorTrading::ConstructUnderlying() {
-  m_pComposeInstrument = std::make_shared<ou::tf::ComposeInstrument>(
-    m_iqfeed, m_tws,
-    [this](){
-      m_pComposeInstrument->Compose(
-        m_config.sSymbol,
-        [this]( pInstrument_t pInstrument ){
-          assert( pInstrument );
-          InitializeUnderlying( pInstrument );
+  switch ( m_pExecutionProvider->ID() ) {
+    case ou::tf::keytypes::EProviderIQF:
+      m_pComposeInstrument = std::make_shared<ou::tf::ComposeInstrument>(
+        m_iqfeed,
+        [this](){
+          m_pComposeInstrument->Compose(
+            m_config.sSymbol,
+            [this]( pInstrument_t pInstrument ){
+              assert( pInstrument );
+              InitializeUnderlying( pInstrument );
+            }
+          );
         }
       );
-    }
-  );
+      break;
+    case ou::tf::keytypes::EProviderIB:
+      m_pComposeInstrument = std::make_shared<ou::tf::ComposeInstrument>(
+        m_iqfeed, m_tws,
+        [this](){
+          m_pComposeInstrument->Compose(
+            m_config.sSymbol,
+            [this]( pInstrument_t pInstrument ){
+              assert( pInstrument );
+              InitializeUnderlying( pInstrument );
+            }
+          );
+        }
+      );
+      break;
+    default:
+      assert( false );
+      break;
+  }
 }
 
 void AppIndicatorTrading::InitializeUnderlying( pInstrument_t pInstrument ) {
@@ -322,11 +343,24 @@ AppIndicatorTrading::pPosition_t AppIndicatorTrading::ConstructPosition( pInstru
   else {
     using pWatch_t = ou::tf::Watch::pWatch_t;
     pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
-    pPosition = pm.ConstructPosition(
-      m_pPortfolio->Id(), idInstrument, "manual",
-      "ib01", "iq01", m_pExecutionProvider,
-      pWatch
-    );
+    switch ( m_pExecutionProvider->ID() ) {
+      case ou::tf::keytypes::EProviderIQF:
+        pPosition = pm.ConstructPosition(
+          m_pPortfolio->Id(), idInstrument, "manual-iq",
+          "iq01", "iq01", m_pExecutionProvider,
+          pWatch
+        );
+        break;
+      case ou::tf::keytypes::EProviderIB:
+        pPosition = pm.ConstructPosition(
+          m_pPortfolio->Id(), idInstrument, "manual-ib",
+          "ib01", "iq01", m_pExecutionProvider,
+          pWatch
+        );
+        break;
+      default:
+        assert( false );
+    }
     std::cout << "position constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   }
 
