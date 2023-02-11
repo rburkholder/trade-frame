@@ -12,6 +12,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID "x64")
 
 set(WX_VERSION_MAJOR "3.2")
+# TF prefix prevents clash with similar names
+set(TF_BOOST_VERSION "1.81.0" )
 
 add_subdirectory(Alpaca)
 add_subdirectory(ArmsIndex)

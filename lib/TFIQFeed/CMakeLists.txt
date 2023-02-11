@@ -79,6 +79,9 @@ add_library(
 
 add_subdirectory(Level2)
 
+# issue with boost 1.81.0, maybe fix when 1.81.1 or 1.82 is available
+# https://github.com/boostorg/phoenix/issues/111
+target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_PHOENIX_STL_TUPLE_H_)
 target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_LOG_DYN_LINK )
 
 target_include_directories(

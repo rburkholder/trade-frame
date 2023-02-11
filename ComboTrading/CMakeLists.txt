@@ -17,7 +17,7 @@ set(BOOST_USE_STATIC_RUNTIME OFF)
 #set(Boost_DETAILED_FAILURE_MSG ON)
 set(BOOST_INCLUDEDIR "/usr/local/include/boost")
 
-find_package(Boost 1.77.0 REQUIRED COMPONENTS system date_time program_options thread filesystem serialization regex log log_setup)
+find_package(Boost ${TF_BOOST_VERSION} REQUIRED COMPONENTS system date_time program_options thread filesystem serialization regex log log_setup)
 
 #message("boost lib: ${Boost_LIBRARIES}")
 
@@ -58,7 +58,7 @@ add_executable(
   )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_LOG_DYN_LINK )
-target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_SPIRIT_USE_PHOENIX_V3 )
+#target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_SPIRIT_USE_PHOENIX_V3 )
 target_compile_definitions(${PROJECT_NAME} PUBLIC wxUSE_GUI )
 # need to figure out how to make this work
 #add_compile_options(`/usr/local/bin/wx-config --cxxflags`)
