@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-//#include "StdAfx.h"
-
 #include "MarketSymbols.h"
 
 namespace ou { // One Unified
