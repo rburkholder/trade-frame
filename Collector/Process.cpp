@@ -89,7 +89,7 @@ void Process::ConstructUnderlying() {
       m_pComposeInstrumentIQFeed->Compose(
         sName,
         [this]( pInstrument_t pInstrument ){
-          m_pInstrument = pInstrument;
+          m_pInstrument = std::move( pInstrument );
           StartWatch();
         }
       );
