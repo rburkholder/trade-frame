@@ -74,10 +74,10 @@ public:
 protected:
 private:
 
-  struct structCancelOrder {
+  struct QueuedCancelOrder {
     ptime dtCancellation;
     Order::idOrder_t nOrderId;
-    structCancelOrder( const ptime &dtCancellation_, unsigned long nOrderId_ )
+    QueuedCancelOrder( const ptime &dtCancellation_, unsigned long nOrderId_ )
       : dtCancellation( dtCancellation_ ), nOrderId( nOrderId_ ) {};
   };
   boost::posix_time::time_duration m_dtQueueDelay; // used to simulate network / handling delays
@@ -93,7 +93,7 @@ private:
   using lOrderQueue_t = std::list<pOrder_t>;
   using lOrderQueue_iter_t = lOrderQueue_t::iterator;
 
-  std::list<structCancelOrder> m_lCancelDelay; // separate structure for the cancellations, since not an order
+  std::list<QueuedCancelOrder> m_lCancelDelay; // separate structure for the cancellations, since not an order
 
   lOrderQueue_t m_lOrderDelay;  // all orders put in delay queue, taken out then processed as limit or market or stop
   lOrderQueue_t m_lOrderMarket;  // market orders to be processed

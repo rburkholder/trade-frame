@@ -63,8 +63,8 @@ void OrderExecution::SubmitOrder( pOrder_t pOrder ) {
 }
 
 void OrderExecution::CancelOrder( Order::idOrder_t nOrderId ) {
-  structCancelOrder co( ou::TimeSource::LocalCommonInstance().Internal(), nOrderId );
-  m_lCancelDelay.push_back( co );
+  QueuedCancelOrder qco( ou::TimeSource::LocalCommonInstance().Internal(), nOrderId );
+  m_lCancelDelay.push_back( qco );
 }
 
 void OrderExecution::CalculateCommission( Order* pOrder, Trade::tradesize_t quan ) {
@@ -322,14 +322,14 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
       break;  // havn't waited long enough to simulate cancel submission
     }
     else {
-      structCancelOrder& co = m_lCancelDelay.front();  // capture the information
+      QueuedCancelOrder& qco = m_lCancelDelay.front();  // capture the information
       bool bOrderFound = false;
 
       // need a fusion array based upon orders so can zero in on order without looping through all the structures
 
       // check the delay queue
       for ( lOrderQueue_iter_t iter = m_lOrderDelay.begin(); iter != m_lOrderDelay.end(); ++iter ) {
-        if ( co.nOrderId == (*iter)->GetOrderId() ) {
+        if ( qco.nOrderId == (*iter)->GetOrderId() ) {
           m_lOrderDelay.erase( iter );
           bOrderFound = true;
           break;
@@ -339,8 +339,8 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
       // check the market order queue
       if ( !bOrderFound ) {
         for ( lOrderQueue_iter_t iter = m_lOrderMarket.begin(); iter != m_lOrderMarket.end(); ++iter ) {
-          if ( co.nOrderId == (*iter)->GetOrderId() ) {
-            if ( co.nOrderId == m_lOrderMarket.front()->GetOrderId() ) { // check order front of queue
+          if ( qco.nOrderId == (*iter)->GetOrderId() ) {
+            if ( qco.nOrderId == m_lOrderMarket.front()->GetOrderId() ) { // check order front of queue
               boost::uint32_t nOrderQuanProcessed = (*iter)->GetQuanFilled();
               if ( 0 != nOrderQuanProcessed ) {  // partially processed order, so commission it out before full cancel
                 CalculateCommission( (*iter).get(), nOrderQuanProcessed );
@@ -356,8 +356,8 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
       // need to check orders in ask limit list
       if ( !bOrderFound ) {
         for ( mapOrderBook_iter_t iter = m_mapAsks.begin(); iter != m_mapAsks.end(); ++iter ) {
-          if ( co.nOrderId == iter->second->GetOrderId() ) {
-            if ( co.nOrderId == m_mapAsks.begin()->second->GetOrderId() ) {
+          if ( qco.nOrderId == iter->second->GetOrderId() ) {
+            if ( qco.nOrderId == m_mapAsks.begin()->second->GetOrderId() ) {
               boost::uint32_t nOrderQuanProcessed = iter->second->GetQuanFilled();
               if ( 0 != nOrderQuanProcessed ) {  // partially processed order, so commission it out before full cancel
                 CalculateCommission( iter->second.get(), nOrderQuanProcessed );
@@ -373,8 +373,8 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
       // need to check orders in bid limit list
       if ( !bOrderFound ) {
         for ( mapOrderBook_iter_t iter = m_mapBids.begin(); iter != m_mapBids.end(); ++iter ) {
-          if ( co.nOrderId == iter->second->GetOrderId() ) {
-            if ( co.nOrderId == m_mapBids.rbegin()->second->GetOrderId() ) {
+          if ( qco.nOrderId == iter->second->GetOrderId() ) {
+            if ( qco.nOrderId == m_mapBids.rbegin()->second->GetOrderId() ) {
               boost::uint32_t nOrderQuanProcessed = iter->second->GetQuanFilled();
               if ( 0 != nOrderQuanProcessed ) {  // partially processed order, so commission it out before full cancel
                 CalculateCommission( iter->second.get(), nOrderQuanProcessed );
@@ -390,7 +390,7 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
       // need to check orders in stop list sells
       if ( !bOrderFound ) {
         for ( mapOrderBook_iter_t iter = m_mapSellStops.begin(); iter != m_mapSellStops.end(); ++iter ) {
-          if ( co.nOrderId == iter->second->GetOrderId() ) {
+          if ( qco.nOrderId == iter->second->GetOrderId() ) {
             m_mapSellStops.erase( iter );
             bOrderFound = true;
             break;
@@ -401,7 +401,7 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
       // need to check orders in stop list buys
       if ( !bOrderFound ) {
         for ( mapOrderBook_iter_t iter = m_mapBuyStops.begin(); iter != m_mapBuyStops.end(); ++iter ) {
-          if ( co.nOrderId == iter->second->GetOrderId() ) {
+          if ( qco.nOrderId == iter->second->GetOrderId() ) {
             m_mapBuyStops.erase( iter );
             bOrderFound = true;
             break;
@@ -412,10 +412,10 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
       if ( !bOrderFound ) {  // need an event for this, as it could be legitimate crossing execution prior to cancel
 //        std::cout << "no order found to cancel: " << co.nOrderId << std::endl;
         // todo:  propogate this into the OrderManager
-        if ( nullptr != OnNoOrderFound ) OnNoOrderFound( co.nOrderId );
+        if ( nullptr != OnNoOrderFound ) OnNoOrderFound( qco.nOrderId );
       }
       else {
-        if ( nullptr != OnOrderCancelled ) OnOrderCancelled( co.nOrderId );
+        if ( nullptr != OnOrderCancelled ) OnOrderCancelled( qco.nOrderId );
       }
       m_lCancelDelay.pop_front();  // remove from list
     }
