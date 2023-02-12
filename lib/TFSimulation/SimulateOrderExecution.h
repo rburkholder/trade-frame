@@ -108,7 +108,7 @@ private:
   mapOrderBook_t m_mapBuyStops;  // pending buy stops, turned into market order when touched
 
   void ProcessOrderQueues( const Quote& quote );
-  void CalculateCommission( Order* pOrder, Trade::tradesize_t quan );
+  void CalculateCommission( Order&, Trade::tradesize_t quan );
   void ProcessCancelQueue( const Quote& quote );
   void ProcessDelayQueue( const Quote& quote );
   void ProcessStopOrders( const Quote& quote ); // true if order executed, not yet implemented
