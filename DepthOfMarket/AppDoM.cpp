@@ -833,10 +833,12 @@ void AppDoM::BuildPosition() {
       m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
       m_pBuildInstrument->Queue(
         m_config.sSymbolName,
-        [this]( pInstrument_t pInstrument ){
+        [this]( pInstrument_t pInstrument, bool bConstructed ){
           if ( pInstrument ) {
-            ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
-            im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+            if ( bConstructed ) {
+              ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+              im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+            }
             InitializePosition( pInstrument );
           }
           else {

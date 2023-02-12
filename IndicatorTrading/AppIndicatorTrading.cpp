@@ -278,10 +278,12 @@ void AppIndicatorTrading::ConstructUnderlying() {
         [this](){
           m_pComposeInstrument->Compose(
             m_config.sSymbol,
-            [this]( pInstrument_t pInstrument ){
+            [this]( pInstrument_t pInstrument, bool bConstructed ){
               assert( pInstrument );
-              ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
-              im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+              if ( bConstructed ) {
+                ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+                im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+              }
               InitializeUnderlying( pInstrument );
             }
           );
@@ -294,10 +296,12 @@ void AppIndicatorTrading::ConstructUnderlying() {
         [this](){
           m_pComposeInstrument->Compose(
             m_config.sSymbol,
-            [this]( pInstrument_t pInstrument ){
+            [this]( pInstrument_t pInstrument, bool bConstructed ){
               assert( pInstrument );
-              ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
-              im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+              if ( bConstructed ) {
+                ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+                im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+              }
               InitializeUnderlying( pInstrument );
             }
           );
@@ -396,10 +400,12 @@ void AppIndicatorTrading::SetInteractiveChart( pPosition_t pPosition ) {
     [this]( const std::string& sIQFeedOptionSymbol, InteractiveChart::fOption_t&& fOption ){
       m_pComposeInstrument->Compose(
         sIQFeedOptionSymbol,
-        [this,fOption_=std::move( fOption )](pInstrument_t pInstrument){
+        [this,fOption_=std::move( fOption )]( pInstrument_t pInstrument, bool bConstructed ){
           if ( pInstrument ) {
-            ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
-            im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+            if ( bConstructed ) {
+              ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+              im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+            }
             fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_iqfeed ) );
             // instrument is registered during transit through BuildInstrument
           }

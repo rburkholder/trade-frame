@@ -103,7 +103,7 @@ void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, fInstrument_t
 
     m_pBuildInstrumentIQFeed->Queue( // confirm instrument type is a future
       sIQFeedSymbol,
-      [this,iterQuery]( pInstrument_t pInstrument ) {
+      [this,iterQuery]( pInstrument_t pInstrument, bool bExists ) {
 
         if ( InstrumentType::Future != pInstrument->GetInstrumentType() ) {
           assert( false ); // needs to be a future, if something else, process accordingly, maybe case statement
@@ -128,10 +128,11 @@ void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, fInstrument_t
 
                   m_pBuildInstrumentIQFeed->Queue(
                     sSymbol,
-                    [this,expiry,iterQuery]( pInstrument_t pInstrument ){
+                    [this,expiry,iterQuery]( pInstrument_t pInstrument, bool bConstructed ){
                       Query& query( iterQuery->second );
                       if ( expiry == pInstrument->GetExpiry() ) {
                         // over-write continuous instrument
+                        query.bConstructed = bConstructed;
                         query.pInstrument = pInstrument;
                         // even when found, need to process all remaining arrivals
                       }
@@ -172,7 +173,7 @@ void ComposeInstrument::Finish( pMapQuery_t::iterator iterQuery ) {
   }
   else {
     //m_pBuildInstrumentIQFeed->Queue( sName, std::move( query.fInstrument ) );
-    query.fInstrument( query.pInstrument );
+    query.fInstrument( query.pInstrument, query.bConstructed );
   }
 
   std::lock_guard<std::mutex> lock( m_mutexMap );

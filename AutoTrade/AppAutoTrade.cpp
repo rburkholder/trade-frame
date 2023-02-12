@@ -213,9 +213,11 @@ void AppAutoTrade::ConstructIBInstrument() {
   m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
   m_pBuildInstrument->Queue(
     m_sSymbol,
-    [this]( pInstrument_t pInstrument ){
-      ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
-      im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+    [this]( pInstrument_t pInstrument, bool bConstructed ){
+      if ( bConstructed ) {
+        ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+        im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+      }
 
       ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
       const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );

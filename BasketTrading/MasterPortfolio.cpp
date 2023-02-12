@@ -417,10 +417,12 @@ void MasterPortfolio::ProcessSeedList() {
 
     m_pComposeInstrument->Compose(
       sSymbol,
-      [this]( pInstrument_t pInstrument ){
+      [this]( pInstrument_t pInstrument, bool bConstructed ){
         assert( pInstrument );
-        ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
-        im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+        if ( bConstructed ) {
+          ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+          im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+        }
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQ );
         AddUnderlying( pWatch );
       }
@@ -533,10 +535,12 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
                   uws.m_nQuery++;
                   m_pBuildInstrument->Queue(
                     value,
-                    [this,&uws,fOption_]( pInstrument_t pInstrument ) {
+                    [this,&uws,fOption_]( pInstrument_t pInstrument, bool bConstructed ) {
                       if ( pInstrument ) {
-                        ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
-                        im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+                        if ( bConstructed ) {
+                          ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+                          im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+                        }
                         //std::cout << "  Option Name: " << pInstrument->GetInstrumentName() << std::endl;
                         fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_pIQ ) );
                       }
@@ -602,9 +606,11 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
           // TODO: there is an assert inside the method which will need to be remedied
           m_pBuildInstrument->Queue(
             sIQFeedOptionName,
-            [this,fOption_=std::move(fOption)](pInstrument_t pInstrument ){
-              ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
-              im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+            [this,fOption_=std::move(fOption)](pInstrument_t pInstrument, bool bConstructed ){
+              if ( bConstructed) {
+                ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+                im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+              }
               pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1 ) );
               fOption_( pOption );
               // TODO: cache the option for SaveSeries?

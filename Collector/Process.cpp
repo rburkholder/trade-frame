@@ -88,7 +88,7 @@ void Process::ConstructUnderlying() {
       const std::string& sName( m_choices.m_sSymbolName );
       m_pComposeInstrumentIQFeed->Compose(
         sName,
-        [this]( pInstrument_t pInstrument ){
+        [this]( pInstrument_t pInstrument, bool bConstructed ){
           m_pInstrument = std::move( pInstrument );
           StartWatch();
         }

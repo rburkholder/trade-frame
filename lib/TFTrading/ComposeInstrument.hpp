@@ -38,7 +38,7 @@ class ComposeInstrument {
 public:
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-  using fInstrument_t = std::function<void( pInstrument_t )>;
+  using fInstrument_t = ou::tf::BuildInstrument::fInstrument_t;
 
   using pProviderIBTWS_t = ou::tf::ib::TWS::pProvider_t;
   using pProviderIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
@@ -59,17 +59,20 @@ protected:
 private:
 
   struct Query {
+    bool bConstructed;
     fInstrument_t fInstrument;
     pInstrument_t pInstrument;
     size_t cntInstrumentsProcessed;
 
     Query( fInstrument_t&& fInstrument_ )
-    : fInstrument( std::move( fInstrument_ ) )
+    : bConstructed( false )
+    , fInstrument( std::move( fInstrument_ ) )
     , cntInstrumentsProcessed {}
     {}
 
     Query( Query&& query )
-    : fInstrument( std::move( query.fInstrument ) )
+    : bConstructed( false )
+    , fInstrument( std::move( query.fInstrument ) )
     , pInstrument( std::move( query.pInstrument ) )
     , cntInstrumentsProcessed( query.cntInstrumentsProcessed )
     {}

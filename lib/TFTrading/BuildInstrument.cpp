@@ -63,7 +63,7 @@ void BuildInstrument::Queue( const std::string& sIQFeedSymbol, fInstrument_t&& f
     if ( m_pIB ) {
       m_pIB->Sync( pInstrument );
     }
-    fInstrument( pInstrument );
+    fInstrument( pInstrument, false );
   }
   else { // build a new instrument
 
@@ -196,7 +196,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
                 m_pIB->Sync( pInstrument );
                 //ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
                 //im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-                iterInProgress->second.fInstrument( pInstrument );
+                iterInProgress->second.fInstrument( pInstrument, true );
               },
               [this,iterInProgress]( bool bStatus ) {
                 if ( bStatus ) {
@@ -214,7 +214,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
                     << "," << m_mapSymbol.size()
                     << "," << m_mapInProgress.size()
                     ;
-                  iterInProgress->second.fInstrument( nullptr );
+                  iterInProgress->second.fInstrument( nullptr, false );
                 }
                 {
                   std::lock_guard<std::mutex> lock( m_mutexMap );
@@ -227,7 +227,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
           else {
             //ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
             //im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-            iterInProgress->second.fInstrument( pInstrument );
+            iterInProgress->second.fInstrument( pInstrument, true );
             pInstrument.reset();
             Update( iterInProgress );
           }
