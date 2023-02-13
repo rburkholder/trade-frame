@@ -185,6 +185,7 @@ private:
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
+    ar & *m_pPanelProviderControl;
     ar & m_splitterRow->GetSashPosition();
     ar & *m_pFrameOrderButtons;
     ar & *m_pPanelOrderButtons;
@@ -198,6 +199,9 @@ private:
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
+    if ( 7 <= version ) {
+      ar & *m_pPanelProviderControl;
+    }
     int x;
     ar & x;
     m_splitterRow->SetSashPosition( x );
@@ -224,7 +228,7 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(AppIndicatorTrading, 6)
+BOOST_CLASS_VERSION(AppIndicatorTrading, 7)
 
 DECLARE_APP(AppIndicatorTrading)
 
