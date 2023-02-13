@@ -112,6 +112,8 @@ private:
 //  void OnData2Disconnteted( int ) {};
   void OnExecDisconnected( int );
 
+  void OnConnected();
+
   void BuildMasterPortfolio();
 
   void HandleButtonLoad();

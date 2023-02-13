@@ -156,29 +156,6 @@ void AppBasketTrading::Init() {
   pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppBasketTrading::HandlePortfolioLoad ) );
   pm.OnPositionLoaded.Add( MakeDelegate( this, &AppBasketTrading::HandlePositionLoad ) );
 
-  try {
-    // try for day to day continuity
-    //if ( boost::filesystem::exists( m_sDbName ) ) {
-    //  boost::filesystem::remove( m_sDbName );
-    //}
-
-    m_db.OnLoad.Add( MakeDelegate( this, &AppBasketTrading::HandleDbOnLoad ) );
-    m_db.OnPopulate.Add( MakeDelegate( this, &AppBasketTrading::HandleDbOnPopulate ) );
-    m_db.OnRegisterTables.Add( MakeDelegate( this, &AppBasketTrading::HandleRegisterTables ) );
-    m_db.OnRegisterRows.Add( MakeDelegate( this, &AppBasketTrading::HandleRegisterRows ) );
-    m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppBasketTrading::HandlePopulateDatabase ) );
-    m_db.SetOnLoadDatabaseHandler( MakeDelegate( this, &AppBasketTrading::HandleLoadDatabase ) );
-
-    m_db.Open( m_sDbName );
-  }
-  catch(...) {
-    std::cout << "database fault on " << m_sDbName << std::endl;
-  }
-
-  if ( !m_pMasterPortfolio ) {
-    BuildMasterPortfolio();
-  }
-
   // build menu last
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
   FrameMain::vpItems_t vItems;
@@ -367,16 +344,12 @@ void AppBasketTrading::HandleButtonSave(void) {
 
 void AppBasketTrading::OnData1Connected( int ) {
   m_bData1Connected = true;
-  if ( m_bData1Connected & m_bExecConnected ) {
-    // set start to enabled
-  }
+  OnConnected();
 }
 
 void AppBasketTrading::OnExecConnected( int ) {
   m_bExecConnected = true;
-  if ( m_bData1Connected & m_bExecConnected ) {
-    // set start to enabled
-  }
+  OnConnected();
 }
 
 void AppBasketTrading::OnData1Disconnected( int ) {
@@ -385,6 +358,37 @@ void AppBasketTrading::OnData1Disconnected( int ) {
 
 void AppBasketTrading::OnExecDisconnected( int ) {
   m_bExecConnected = false;
+}
+
+void AppBasketTrading::OnConnected() {
+  if ( m_bData1Connected & m_bExecConnected ) {
+
+    if ( !m_pMasterPortfolio ) {
+      try {
+        // try for day to day continuity
+        //if ( boost::filesystem::exists( m_sDbName ) ) {
+        //  boost::filesystem::remove( m_sDbName );
+        //}
+
+        // m_db loading uses BuildMasterPortfolio()
+        m_db.OnLoad.Add( MakeDelegate( this, &AppBasketTrading::HandleDbOnLoad ) );
+        m_db.OnPopulate.Add( MakeDelegate( this, &AppBasketTrading::HandleDbOnPopulate ) );
+        m_db.OnRegisterTables.Add( MakeDelegate( this, &AppBasketTrading::HandleRegisterTables ) );
+        m_db.OnRegisterRows.Add( MakeDelegate( this, &AppBasketTrading::HandleRegisterRows ) );
+        m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppBasketTrading::HandlePopulateDatabase ) );
+        m_db.SetOnLoadDatabaseHandler( MakeDelegate( this, &AppBasketTrading::HandleLoadDatabase ) );
+
+        m_db.Open( m_sDbName );
+      }
+      catch(...) {
+        std::cout << "database fault on " << m_sDbName << std::endl;
+      }
+
+      if ( !m_pMasterPortfolio ) { //
+        BuildMasterPortfolio();
+      }
+    }
+  }
 }
 
 void AppBasketTrading::SaveState() {
