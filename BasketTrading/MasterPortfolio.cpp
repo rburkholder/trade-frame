@@ -34,7 +34,6 @@
 
 #include "MoneyManager.h"
 #include "MasterPortfolio.h"
-#include "TFIndicators/Pivots.h"
 
 namespace {
   const std::string sUnderlyingPortfolioPrefix( "portfolio-" );
@@ -82,9 +81,9 @@ MasterPortfolio::MasterPortfolio(
 , m_fChartRoot( std::move( fChartRoot ) )
 , m_fSetChartDataView( std::move( fSetChartDataView ) )
 , m_pMasterPortfolio( pMasterPortfolio )
-, m_pExec( pExec )
-, m_pData1( pData1 )
-, m_pData2( pData2 )
+, m_pExec( std::move( pExec ) ) // IB or IQF
+, m_pData1( std::move( pData1 ) )  // IQF
+, m_pData2( std::move( pData2 ) )  // not used
     //m_eAllocate( EAllocate::Waiting )
 {
   assert( 0 < m_vSymbol.size() );
@@ -93,23 +92,28 @@ MasterPortfolio::MasterPortfolio(
   assert( m_fSetChartDataView );
 
   assert( pMasterPortfolio );
-  assert( pExec );
-  assert( pData1 );
+  assert( m_pExec );
+  assert( m_pData1 );
 
-  switch ( pExec->ID() ) {
+  switch ( m_pExec->ID() ) {
     case ou::tf::keytypes::EProviderIB:
-      m_pIB = ou::tf::ib::TWS::Cast( pExec );
+      m_pIB = ou::tf::ib::TWS::Cast( m_pExec );
+      break;
+    case ou::tf::keytypes::EProviderIQF:
+      // m_pIQ composed with m_pData1
       break;
     default:
-      assert( false ); // need the IB provider, or at least some provider
+      assert( false ); // need one of IB or IQF
   }
 
-  switch ( pData1->ID() ) {
+  switch ( m_pData1->ID() ) {
+    //case ou::tf::keytypes::EProviderIB:
+    //  break;
     case ou::tf::keytypes::EProviderIQF:
-      m_pIQ = ou::tf::iqfeed::Provider::Cast( pData1 );
+      m_pIQ = ou::tf::iqfeed::Provider::Cast( m_pData1 );
       break;
     default:
-      assert( false ); // need the iqfeed provider
+      assert( false ); // need the IQF provider
   }
 
   m_cePLCurrent.SetColour( ou::Colour::Fuchsia );
@@ -160,10 +164,17 @@ MasterPortfolio::MasterPortfolio(
   // will need to make this generic if need some for multiple providers.
   m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
 
+  assert( m_pIQ );
+
   m_fedrate.SetWatchOn( m_pIQ );
   m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
 
-  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_pIQ, m_pIB );
+  if ( m_pIB ) {
+    m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_pIQ, m_pIB );
+  }
+  else {
+    m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_pIQ );
+  }
 
 }
 
@@ -388,12 +399,27 @@ void MasterPortfolio::Load( ptime dtLatestEod ) {
       [this](){
         m_pHistoryRequest = ou::tf::iqfeed::HistoryRequest::Construct(
           [this](){ // fConnected_t
-            m_pComposeInstrument = std::make_shared<ou::tf::ComposeInstrument>(
-              m_pIQ, m_pIB,
-              [this](){
-                ProcessSeedList();
-              }
-            );
+            assert( m_pIQ );
+            switch ( m_pExec->ID() ) {
+              case ou::tf::keytypes::eidProvider_t::EProviderIB:
+                m_pComposeInstrument = std::make_shared<ou::tf::ComposeInstrument>(
+                  m_pIQ, m_pIB,
+                  [this](){
+                    ProcessSeedList();
+                  }
+                );
+                break;
+              case ou::tf::keytypes::eidProvider_t::EProviderIQF:
+                m_pComposeInstrument = std::make_shared<ou::tf::ComposeInstrument>(
+                  m_pIQ,
+                  [this](){
+                    ProcessSeedList();
+                  }
+                );
+                break;
+              default:
+                assert( false );
+            }
           }
         );
         m_pHistoryRequest->Connect();
@@ -611,7 +637,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
                 ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
                 im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
               }
-              pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1 ) );
+              pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pIQ ) );
               fOption_( pOption );
               // TODO: cache the option for SaveSeries?
             } );
@@ -637,8 +663,16 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
               auto& manager( ou::tf::PortfolioManager::GlobalInstance() );
               if ( !pPosition ) {
                 const std::string& sInstrumentName( pWatch->GetInstrumentName() );
-                pPosition = manager.ConstructPosition(
-                  idPortfolio, sInstrumentName, "Basket", "ib01", "iq01", m_pExec, pWatch );
+                switch ( m_pExec->ID() ) {
+                  case ou::tf::keytypes::eidProvider_t::EProviderIB:
+                    pPosition = manager.ConstructPosition(
+                      idPortfolio, sInstrumentName, "Basket", "ib01", "iq01", m_pExec, pWatch );
+                    break;
+                  case ou::tf::keytypes::eidProvider_t::EProviderIQF:
+                    pPosition = manager.ConstructPosition(
+                      idPortfolio, sInstrumentName, "Basket", "iq01", "iq01", m_pExec, pWatch );
+                    break;
+                }
                 Add( pPosition );  // update the archive
               }
 
