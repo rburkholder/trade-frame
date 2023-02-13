@@ -13,7 +13,11 @@
 
 #pragma once
 
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <wx/panel.h>
+#include <wx/checkbox.h>
 
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
@@ -66,6 +70,7 @@ wxDECLARE_EVENT( EVT_ProviderSimulator, UpdateProviderStatusEvent );
 #define SYMBOL_PANELPROVIDERCONTROL_SIZE wxDefaultSize
 
 class PanelProviderControl: public wxPanel {
+  friend class boost::serialization::access;
 public:
 
   enum Provider_t {
@@ -200,7 +205,49 @@ private:
   void OnBtnD1Sim( wxCommandEvent& event );
   void OnBtnD2Sim( wxCommandEvent& event );
   void OnBtnXSim( wxCommandEvent& event );
+
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    ar & m_cbIQFeedD1->IsChecked();
+    ar & m_cbIQFeedD2->IsChecked();
+    ar & m_cbIQFeedX->IsChecked();
+
+    ar & m_cbIBD1->IsChecked();
+    ar & m_cbIBD2->IsChecked();
+    ar & m_cbIBX->IsChecked();
+
+    ar & m_cbSimD1->IsChecked();
+    ar & m_cbSimD2->IsChecked();
+    ar & m_cbSimX->IsChecked();
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+
+    bool b;
+
+    ar & b; m_cbIQFeedD1->SetValue( b );
+    ar & b; m_cbIQFeedD2->SetValue( b );
+    ar & b; m_cbIQFeedX->SetValue( b );
+
+    ar & b; m_cbIBD1->SetValue( b );
+    ar & b; m_cbIBD2->SetValue( b );
+    ar & b; m_cbIBX->SetValue( b );
+
+    ar & b; m_cbSimD1->SetValue( b );
+    ar & b; m_cbSimD2->SetValue( b );
+    ar & b; m_cbSimX->SetValue( b );
+
+    SyncInitialState();
+
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 };
 
 } // namespace tf
 } // namespace ou
+
+BOOST_CLASS_VERSION(ou::tf::PanelProviderControl, 1)
+

@@ -158,6 +158,7 @@ private:
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
+    ar & *m_pPanelProviderControl;
     ar & m_enumBuySell;
     ar & *m_pPanelFinancialChart;
     //ar & m_splitPanels->GetSashPosition();
@@ -166,6 +167,9 @@ private:
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
+    if ( 5 <= version ) {
+      ar & *m_pPanelProviderControl;
+    }
     if ( 2 <= version ) {
       ar & m_enumBuySell;
       switch ( m_enumBuySell ) {
@@ -193,6 +197,6 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(AppBasketTrading, 4)
+BOOST_CLASS_VERSION(AppBasketTrading, 5)
 DECLARE_APP(AppBasketTrading)
 
