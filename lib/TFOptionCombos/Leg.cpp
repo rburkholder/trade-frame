@@ -19,6 +19,8 @@
  * Created on May 25, 2019, 4:46 PM
  */
 
+#include <boost/log/trivial.hpp>
+
 #include "Leg.h"
 
 namespace ou {
@@ -59,11 +61,11 @@ Leg& Leg::operator=( Leg&& rhs ) {
 Leg::~Leg() {
   DelChartData();
   if ( m_pPosition ) {
-    //std::cout << "Leg destruction: " << m_pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+    //BOOST_LOG_TRIVIAL(info) << "Leg destruction: " << m_pPosition->GetInstrument()->GetInstrumentName();
     m_pPosition.reset();
   }
   else {
-    //std::cout << "Leg destruction: unknown" << std::endl;
+    //BOOST_LOG_TRIVIAL(info) << "Leg destruction: unknown";
   }
   assert( !m_monitor.IsOrderActive() );
 }
@@ -71,18 +73,18 @@ Leg::~Leg() {
 const ou::tf::option::LegNote::values_t& Leg::SetPosition( pPosition_t pPosition ) {
 
   if ( m_pPosition ) {
-    std::cout
+    BOOST_LOG_TRIVIAL(info)
       << "Leg::SetPosition over-write position "
       << m_pPosition->GetInstrument()->GetInstrumentName()
       << " with "
       << pPosition->GetInstrument()->GetInstrumentName()
-      << std::endl;
+      ;
 
     if ( m_monitor.IsOrderActive() ) {
-      std::cout
+      BOOST_LOG_TRIVIAL(info)
         << "Leg::SetPosition cancelling order for position "
         << m_pPosition->GetInstrument()->GetInstrumentName()
-        << std::endl;
+        ;
       m_monitor.CancelOrder();
       while ( m_monitor.IsOrderActive() );  // hopeufully this doesn't lock
     }
@@ -91,7 +93,7 @@ const ou::tf::option::LegNote::values_t& Leg::SetPosition( pPosition_t pPosition
     m_bOption = false;
   }
 
-  std::cout << "Leg::SetPosition: " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
+  BOOST_LOG_TRIVIAL(info) << "Leg::SetPosition: " << pPosition->GetInstrument()->GetInstrumentName();
 
   m_pPosition = pPosition;
   m_legNote.Decode( m_pPosition->Notes() );
