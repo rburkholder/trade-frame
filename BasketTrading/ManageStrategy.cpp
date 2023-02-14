@@ -356,10 +356,11 @@ ManageStrategy::ManageStrategy(
 
   try {
 
-    if ( 0 == pInstrumentUnderlying->GetContract() ) {
-      std::cout << pInstrumentUnderlying->GetInstrumentName() << " has no contract" << std::endl;
-      m_stateTrading = TSNoMore;
-    }
+    // perform this validation for the options instead (but only when IB is the execution provider)
+    //if ( 0 == pInstrumentUnderlying->GetContract() ) {
+    //  std::cout << pInstrumentUnderlying->GetInstrumentName() << " has no contract" << std::endl;
+    //  m_stateTrading = TSNoMore;
+    //}
 
     m_pOptionRepository->AssignWatchUnderlying( m_pWatchUnderlying );
 
