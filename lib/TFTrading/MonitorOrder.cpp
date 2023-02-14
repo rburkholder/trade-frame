@@ -99,14 +99,24 @@ void MonitorOrder::SetPosition( pPosition_t pPosition ) {
   m_state = State::Available;
 }
 
-double MonitorOrder::NormalizePrice( double price ) const {
+double MonitorOrder::NormalizePrice( double price ) const { // step #1
   double interval = PriceInterval( price );
   return m_pPosition->GetInstrument()->NormalizeOrderPrice( price, interval );
 }
 
-double MonitorOrder::PriceInterval( double price ) const {
-  auto idRule = m_pPosition->GetInstrument()->GetExchangeRule();
-  double interval = ou::tf::ib::TWS::Cast( m_pPosition->GetExecutionProvider() )->GetInterval( price, idRule );
+double MonitorOrder::PriceInterval( double price ) const { // step #2
+
+  double interval( 0.01 );
+  ou::tf::Instrument::pInstrument_t pInstrument( m_pPosition->GetInstrument() );
+
+  if ( pInstrument->ExchangeRuleAvailable() ) {
+    auto idRule = pInstrument->GetExchangeRule();
+    interval = ou::tf::ib::TWS::Cast( m_pPosition->GetExecutionProvider() )->GetInterval( price, idRule );
+  }
+  else {
+    interval = pInstrument->GetMinTick();
+  }
+
   return interval;
 }
 

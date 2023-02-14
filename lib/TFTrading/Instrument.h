@@ -299,7 +299,9 @@ public:
   void SetTimeTrading( const boost::posix_time::ptime& dtOpen, const boost::posix_time::ptime& dtClose ) { m_dtrTimeTrading = dtrMarketOpenClose_t( dtOpen, dtClose ); };
   const dtrMarketOpenClose_t& GetTimeTrading() const { return m_dtrTimeTrading; };
 
+  // supplied by IB
   void SetExchangeRules( const std::string& sExchangeRules ) { m_row.sExchangeRules = sExchangeRules; }
+  inline bool ExchangeRuleAvailable() const { return !m_row.sExchangeRules.empty(); }
   int GetExchangeRule();
 
   bool operator==( const Instrument& rhs ) const;
