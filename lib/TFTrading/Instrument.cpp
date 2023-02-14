@@ -331,6 +331,8 @@ int Instrument::GetExchangeRule() {
     using const_string_iter = std::string::const_iterator;
     ParseMarketRules<const_string_iter> grammarParseMarketRules;
 
+    assert( !m_row.sExchangeRules.empty() );
+
     const_string_iter bgn( m_row.sExchangeRules.begin() );
     const_string_iter end( m_row.sExchangeRules.end() );
 
