@@ -62,7 +62,7 @@ void OrderExecution::NewTrade( const Trade& trade ) {
 
 void OrderExecution::SubmitOrder( pOrder_t pOrder ) {
   BOOST_LOG_TRIVIAL(info)
-    << "simulate," << pOrder->GetOrderId() << ",queued,submit";
+    << "simulate," << pOrder->GetOrderId() << ",queued,submit," << pOrder->GetInstrument()->GetInstrumentName();
   m_lOrderDelay.push_back( pOrder );
 }
 
@@ -229,6 +229,7 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
           << ",lmt_ask"
           << "," << id
           << "," << nOrderQuanRemaining << "-" << quanApplied << "," << bid
+          << "," << order.GetInstrument()->GetInstrumentName()
           ;
         Execution exec( bid, quanApplied, OrderSide::Sell, "SIMLmtSell", id );
         OnOrderFill( order.GetOrderId(), exec );
@@ -260,6 +261,7 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
           << ",lmt_bid"
           << "," << id
           << "," << nOrderQuanRemaining << "-" << quanApplied << "," << ask
+          << "," << order.GetInstrument()->GetInstrumentName()
           ;
         Execution exec( ask, quanApplied, OrderSide::Buy, "SIMLmtBuy", id );
         OnOrderFill( order.GetOrderId(), exec );
