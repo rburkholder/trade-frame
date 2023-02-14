@@ -88,7 +88,10 @@ void OrderExecution::CalculateCommission( Order& order, Trade::tradesize_t quan 
           dblCommission = 0.95 * (double) quan;
           break;
         case InstrumentType::Future:
-          dblCommission = 2.50 * (double) quan;  // GC futures have this commission (is this per order, or per unit?)
+          dblCommission = 2.20 * (double) quan;  // ES-2.20 GC=2.50?
+          break;
+        case InstrumentType::FuturesOption:
+          dblCommission = 1.42 * (double) quan;  // ES=1.42
           break;
         case InstrumentType::Currency:
           break;
