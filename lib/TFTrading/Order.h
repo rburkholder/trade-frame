@@ -228,15 +228,6 @@ public:
   void SetGoodAfterTime( ptime dtGAT ) { m_row.dtGoodAfterTime = dtGAT; } // need to persist to db
   ptime GetGoodAfterTime() const { return m_row.dtGoodAfterTime; }
 
-  void SetInstrument( Instrument::pInstrument_cref pInstrument ) {  // used only when class created from database
-    if ( NULL != m_pInstrument.get() ) {
-      throw std::runtime_error( "Corder::SetInstrument: instrument already assigned" );
-    }
-    if ( m_idInstrument != pInstrument->GetInstrumentName() ) {
-      throw std::runtime_error( "Order::SetInstrument: instrument name does not match expected" );
-    }
-    m_pInstrument = pInstrument;
-  }
   Instrument::pInstrument_t GetInstrument() const {
     if ( NULL == m_pInstrument.get() ) {
       throw std::runtime_error( "Order::GetInstrument:  no instrument defined" );
@@ -296,7 +287,6 @@ public:
 protected:
 
   Instrument::pInstrument_t m_pInstrument;
-  idInstrument_t m_idInstrument;  // used temporarily in order to get instrument_t in place
 
   boost::uint32_t m_nNextExecutionId;  // when is this used?
 
