@@ -19,6 +19,8 @@
  * Created on May 25, 2019, 1:44 PM
  */
 
+#include <boost/log/trivial.hpp>
+
 #include <TFInteractiveBrokers/IBTWS.h>
 
 #include "MonitorOrder.h"
@@ -73,7 +75,7 @@ MonitorOrder& MonitorOrder::operator=( MonitorOrder&& rhs ) {
 
 void MonitorOrder::EnableStatsRemove() {
   if ( State::NoPosition == m_state ) {
-    //std::cout << "MonitorOrder::EnableStatsRemove has inconsistent State::NoPosition" << std::endl;
+    //BOOST_LOG_TRIVIAL(info) << "MonitorOrder::EnableStatsRemove has inconsistent State::NoPosition";
   }
   else {
     if ( m_bEnableStatsAdd ) {
@@ -84,7 +86,7 @@ void MonitorOrder::EnableStatsRemove() {
       }
       else {
         // also in debug, check the flag, possible problem in caller
-        std::cout << "MonitorOrder::EnableStatsRemove inconsistency" << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "MonitorOrder::EnableStatsRemove inconsistency";
       }
     }
   }
@@ -137,12 +139,12 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
 
         std::tie( bSpreadOk, best_count, best_spread ) = pWatch->SpreadStats();
         if ( !bSpreadOk ) {
-          std::cout
+          BOOST_LOG_TRIVIAL(info)
             << "MonitorOrder PlaceOrder without best spread: "
             << "count=" << best_count
             << ",spread=" << best_spread
             << ",mid=" << midQuote
-            << std::endl;
+            ;
         }
 
         const double dblNormalizedPrice = NormalizePrice( midQuote );
@@ -154,7 +156,7 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
           m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
           m_CountDownToAdjustment = nAdjustmentPeriods;
           m_pPosition->PlaceOrder( m_pOrder );
-          std::cout
+          BOOST_LOG_TRIVIAL(info)
             << "MonitorOrder "
             << m_pOrder->GetDateTimeOrderSubmitted().time_of_day() << " "
             << m_pOrder->GetOrderId() << " "
@@ -162,23 +164,23 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
             << m_pOrder->GetInstrument()->GetInstrumentName() << ": "
             << m_pOrder->GetOrderSideName()
             << " limit submitted at " << dblNormalizedPrice
-            << std::endl;
+            ;
           bOk = true;
         }
         else {
           m_state = State::Available;
-          std::cout
+          BOOST_LOG_TRIVIAL(info)
             << "MonitorOrder::PlaceOrder: "
             << m_pPosition->GetInstrument()->GetInstrumentName() << " failed to construct order"
-            << std::endl;
+            ;
         }
       }
       break;
     case State::Active:
-      std::cout << "MonitorOrder::PlaceOrder: " << m_pPosition->GetInstrument()->GetInstrumentName() << ": active, cannot place order" << std::endl;
+      BOOST_LOG_TRIVIAL(info) << "MonitorOrder::PlaceOrder: " << m_pPosition->GetInstrument()->GetInstrumentName() << ": active, cannot place order";
       break;
     case State::NoPosition:
-      std::cout << "MonitorOrder::PlaceOrder: " << m_pPosition->GetInstrument()->GetInstrumentName() << ": no position" << std::endl;
+      BOOST_LOG_TRIVIAL(info) << "MonitorOrder::PlaceOrder: " << m_pPosition->GetInstrument()->GetInstrumentName() << ": no position";
       break;
   }
   return bOk;
@@ -188,14 +190,14 @@ void MonitorOrder::ClosePosition() {
   if ( m_pPosition ) {
     const ou::tf::Position::TableRowDef& row( m_pPosition->GetRow() );
     if ( IsOrderActive() ) {
-      std::cout << row.sName << ": error, monitor has active order, no close possible" << std::endl;
+      BOOST_LOG_TRIVIAL(info) << row.sName << ": error, monitor has active order, no close possible";
     }
     else {
       if ( 0 != row.nPositionPending ) {
-        std::cout << row.sName << ": warning, has pending size of " << row.nPositionPending << " during close" << std::endl;
+        BOOST_LOG_TRIVIAL(info) << row.sName << ": warning, has pending size of " << row.nPositionPending << " during close";
       }
       if ( 0 != row.nPositionActive ) {
-        std::cout << row.sName << ": monitored closing position, side=" << row.eOrderSideActive << ", q=" << row.nPositionActive << std::endl;
+        BOOST_LOG_TRIVIAL(info) << row.sName << ": monitored closing position, side=" << row.eOrderSideActive << ", q=" << row.nPositionActive;
         switch ( row.eOrderSideActive ) {
           case ou::tf::OrderSide::Buy:
             PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Sell );
@@ -223,10 +225,10 @@ void MonitorOrder::CancelOrder() {  // TODO: need to fix this, and take the Orde
       break;
     case State::ManualCancel:
       if ( m_pOrder ) {
-        std::cout << "MonitorOrder::CancelOrder already issued a cancellation" << m_pOrder->GetOrderId()  << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "MonitorOrder::CancelOrder already issued a cancellation" << m_pOrder->GetOrderId();
       }
       else {
-        std::cout << "MonitorOrder::CancelOrder: no order to cancel"  << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "MonitorOrder::CancelOrder: no order to cancel";
       }
 
       break;
@@ -278,13 +280,13 @@ void MonitorOrder::UpdateOrder( ptime dt ) {
       const Quote& quote( pWatch->LastQuote() );
 
       if ( !bSpreadOk ) {
-        std::cout
+        BOOST_LOG_TRIVIAL(info)
           << "MonitorOrder PlaceOrder without best spread: "
           << "count=" << best_count
           << ",spread=" << best_spread
           << ",bid=" << quote.Bid()
           << ",ask=" << quote.Ask()
-          << std::endl;
+          ;
         m_CountDownToAdjustment = 1; // wait for next loop through for a better spread
       }
       else {
@@ -343,7 +345,7 @@ void MonitorOrder::UpdateOrder( ptime dt ) {
 
           auto tod = dt.time_of_day();
 
-          std::cout
+          BOOST_LOG_TRIVIAL(info)
             << "MonitorOrder "
             << tod << " "
             << m_pOrder->GetOrderId() << " "
@@ -354,7 +356,7 @@ void MonitorOrder::UpdateOrder( ptime dt ) {
             //<< " on " << dblNormalizedPrice
             << ", bid=" << quote.Bid()
             << ", ask=" << quote.Ask()
-            << std::endl;
+            ;
           m_pPosition->UpdateOrder( m_pOrder );
 
         }
@@ -375,13 +377,13 @@ void MonitorOrder::OrderCancelled( const ou::tf::Order& order ) { // TODO: deleg
       assert( order.GetOrderId() == m_pOrder->GetOrderId() );
       m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
       m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
-      std::cout
+      BOOST_LOG_TRIVIAL(info)
 //        << tod << " "
         << "MonitorOrder "
         << order.GetOrderId() << " "
         << order.GetInstrument()->GetInstrumentName()
         << ": exchange cancelled"
-        << std::endl;
+        ;
       m_pOrder.reset();
       m_state = State::Cancelled;
       break;
@@ -389,24 +391,24 @@ void MonitorOrder::OrderCancelled( const ou::tf::Order& order ) { // TODO: deleg
       assert( order.GetOrderId() == m_pOrder->GetOrderId() );
       m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
       m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
-      std::cout
+      BOOST_LOG_TRIVIAL(info)
 //        << tod << " "
         << "MonitorOrder "
         << order.GetOrderId() << " "
         << order.GetInstrument()->GetInstrumentName()
         << ": manual cancellation complete"
-        << std::endl;
+        ;
       m_pOrder.reset();
       m_state = State::Cancelled;
       break;
     default:
-      std::cout
+      BOOST_LOG_TRIVIAL(info)
 //        << tod << " "
         << "MonitorOrder "
         << order.GetOrderId() << " "
         << order.GetInstrument()->GetInstrumentName()
         << ": cancelled has no matching state (" << (int)m_state << ")"
-        << std::endl;
+        ;
   }
 }
 
@@ -417,24 +419,24 @@ void MonitorOrder::OrderFilled( const ou::tf::Order& order ) { // TODO: delegate
       assert( order.GetOrderId() == m_pOrder->GetOrderId() );
       m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
       m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
-      std::cout
+      BOOST_LOG_TRIVIAL(info)
         << "MonitorOrder "
         << tod << " "
         << order.GetOrderId() << " "
         << order.GetInstrument()->GetInstrumentName()
         << ": filled at " << m_pOrder->GetAverageFillPrice()
-        << std::endl;
+        ;
       m_pOrder.reset();
       m_state = State::Filled;
       break;
     default:
-      std::cout
+      BOOST_LOG_TRIVIAL(info)
         << "MonitorOrder "
         << tod << " "
         << order.GetOrderId() << " "
         << order.GetInstrument()->GetInstrumentName()
         << ": fillled has no matching state (" << (int)m_state << ")"
-        << std::endl;
+        ;
   }
 
 }
