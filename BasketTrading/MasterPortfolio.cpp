@@ -539,15 +539,18 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
               });
           });
 
+        // until iqfeed supplies the multiplier/contract_size in the fundamental record
+        uint32_t multiplier( uws.pUnderlying->GetWatch()->GetInstrument()->GetMultiplier() );
+
         // TODO: run this in a thread, takes a while to process large option lists
         uws.m_nQuery = 1; // initial lock of the loop, process each option, sync or async depending if cached
         uws.pUnderlying->PopulateChains(
-          [this,&uws](const std::string& sIQFeedUnderlying, ou::tf::option::fOption_t&& fOption ){
+          [this,&uws,multiplier](const std::string& sIQFeedUnderlying, ou::tf::option::fOption_t&& fOption ){
             using query_t = ou::tf::iqfeed::OptionChainQuery;
             m_pOptionChainQuery->QueryFuturesOptionChain( // TODO: need selection of equity vs futures
               sIQFeedUnderlying,
               "pc", "", "", "",
-              [this,&uws,fOption_=std::move( fOption )]( const query_t::OptionList& list ){
+              [this,&uws,multiplier,fOption_=std::move( fOption )]( const query_t::OptionList& list ){
                 std::cout
                   << "chain request " << list.sUnderlying << " has "
                   //<< chains.vCall.size() << " calls, "
@@ -561,9 +564,10 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
                   uws.m_nQuery++;
                   m_pBuildInstrument->Queue(
                     value,
-                    [this,&uws,fOption_]( pInstrument_t pInstrument, bool bConstructed ) {
+                    [this,&uws,multiplier,fOption_]( pInstrument_t pInstrument, bool bConstructed ) {
                       if ( pInstrument ) {
                         if ( bConstructed ) {
+                          pInstrument->SetMultiplier( multiplier );
                           ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
                           im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
                         }
@@ -602,6 +606,9 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
 
   //mapSpecs_t::const_iterator iterSpreadSpecs
   //  = m_mapSpecs.find( uws.pUnderlying->GetWatch()->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
+
+  // until iqfeed supplies contract_size/multiplier in futuresoptios fundamental
+  //int32_t multiplier( uws.pUnderlying->GetWatch()->GetInstrument()->GetMultiplier() );
 
   namespace ph = std::placeholders;
 
