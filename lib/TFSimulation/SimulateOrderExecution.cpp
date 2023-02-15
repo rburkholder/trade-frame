@@ -43,17 +43,16 @@ std::string OrderExecution::GetExecId() {
 
 void OrderExecution::NewQuote( const Quote& quote ) {
   ProcessOrderQueues( quote );
-  m_lastQuote = quote;
+  m_lastQuote = quote; // should this be: before or after?
 }
 
 void OrderExecution::NewDepthByMM( const DepthByMM& depth ) {
-//  ProcessOrderQueues( quote );
-//  m_lastQuote = quote;
 }
 
 void OrderExecution::NewDepthByOrder( const DepthByOrder& depth ) {
-//  ProcessOrderQueues( quote );
-//  m_lastQuote = quote;
+  // might use this to populate the bid/ask tables
+  // queue in the locally generated orders for proper execution sequencing
+  // then apply the ou::tf::Trade orders against this list
 }
 
 void OrderExecution::NewTrade( const Trade& trade ) {
@@ -61,16 +60,20 @@ void OrderExecution::NewTrade( const Trade& trade ) {
 }
 
 void OrderExecution::SubmitOrder( pOrder_t pOrder ) {
+  // these will be new orders as well as changed orders
+  Order::idOrder_t idOrder( pOrder->GetOrderId() );
   BOOST_LOG_TRIVIAL(info)
-    << "simulate," << pOrder->GetOrderId() << ",queued,submit," << pOrder->GetInstrument()->GetInstrumentName();
+    << "simulate," << idOrder << ",queued,submit," << pOrder->GetInstrument()->GetInstrumentName();
   m_lOrderDelay.push_back( pOrder );
+  TrackOrder( idOrder, OrderState::State::Delay ); // might be new or a change
 }
 
-void OrderExecution::CancelOrder( Order::idOrder_t nOrderId ) {
+void OrderExecution::CancelOrder( Order::idOrder_t idOrder ) {
   BOOST_LOG_TRIVIAL(info)
-    << "simulate," << nOrderId << ",queued,cancel";
-  QueuedCancelOrder qco( ou::TimeSource::LocalCommonInstance().Internal(), nOrderId );
+    << "simulate," << idOrder << ",queued,cancel";
+  QueuedCancelOrder qco( ou::TimeSource::LocalCommonInstance().Internal(), idOrder );
   m_lCancelDelay.push_back( qco );
+  TrackOrder( idOrder, OrderState::State::Delay ); // should match an existing order
 }
 
 void OrderExecution::CalculateCommission( Order& order, Trade::tradesize_t quan ) {
@@ -110,9 +113,9 @@ void OrderExecution::CalculateCommission( Order& order, Trade::tradesize_t quan 
 }
 
 void OrderExecution::ProcessOrderQueues( const Quote &quote ) {
+  // called with each new quote
 
   // TODO: may need some quality control: futures options are notoriously noisy
-
   //if ( !quote.IsValid() ) {
   //  return;
   //}
@@ -137,7 +140,6 @@ void OrderExecution::ProcessStopOrders( const Quote& quote ) {
 
 bool OrderExecution::ProcessMarketOrders( const Quote& quote ) {
 
-  //pOrder_t pOrderFrontOfQueue;  // change this so we reference the order directly, makes things a bit faster
   bool bProcessed = false;
 
   // process market orders
@@ -167,19 +169,23 @@ bool OrderExecution::ProcessMarketOrders( const Quote& quote ) {
         break;
     }
 
+    nOrderQuanRemaining -= quanApplied;
+
     // execute order
+    ou::tf::Order::idOrder_t idOrder( order.GetOrderId() );
+    int nId( m_nExecId );  // before it gets incremented in next function
+    std::string id = GetExecId();
+    BOOST_LOG_TRIVIAL(info)
+      << "simulate,"
+      << idOrder
+      << ",mkt"
+      << "," << nId
+      << "," << orderSide
+      << "," << nOrderQuanRemaining << "-" << quanApplied << "," << dblPrice
+      ;
+
+    // OrderManager should be calling Order::ReportExecution to update
     if ( nullptr != OnOrderFill ) {
-      ou::tf::Order::idOrder_t idOrder( order.GetOrderId() );
-      int nId( m_nExecId );  // before it gets incremented in next function
-      std::string id = GetExecId();
-      BOOST_LOG_TRIVIAL(info)
-        << "simulate,"
-        << idOrder
-        << ",mkt"
-        << "," << nId
-        << "," << orderSide
-        << "," << nOrderQuanRemaining << "-" << quanApplied << "," << dblPrice
-        ;
       // using id in first parameter may or may not work
       Execution exec( nId, idOrder, dblPrice, quanApplied, orderSide, "SIMMkt", id );
       OnOrderFill( idOrder, exec );
@@ -189,25 +195,24 @@ bool OrderExecution::ProcessMarketOrders( const Quote& quote ) {
       throw std::runtime_error( "no onorderfill to keep housekeeping in place" );
     }
 
-    nOrderQuanRemaining -= quanApplied;
+    CalculateCommission( order, quanApplied );
 
     // when order done, commission and toss away
     // what happens on cancelled orders and partial fills?
     if ( 0 == nOrderQuanRemaining ) {
-      CalculateCommission( order, order.GetQuanFilled() );
       m_lOrderMarket.pop_front();
+      MigrateActiveToArchive( idOrder );
     }
     else {
-      // OrderManager should be calling Order::ReportExecution to update
     }
   }
+
   return bProcessed;
 }
 
 bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
 
-  //pOrder_t pOrderFrontOfQueue; // change this so we reference the order directly, makes things a bit faster
-  bool bProcessed = false;
+  bool bProcessed( false );
   boost::uint32_t nOrderQuanRemaining {};
 
   // todo: what about self's own crossing orders, could fill with out qoute
@@ -216,62 +221,92 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
     mapOrderBook_t::value_type& entry( *m_mapAsks.begin() );
     const double bid( quote.Bid() );
     if ( bid >= entry.first ) {
-      bProcessed = true;
-      ou::tf::Order& order( *entry.second );
-      nOrderQuanRemaining = order.GetQuanRemaining();
-      assert( 0 != nOrderQuanRemaining );
-      Trade::tradesize_t quanApplied = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.BidSize() );
-      if ( nullptr != OnOrderFill ) {
+      if ( 0 < quote.BidSize() ) {
+
+        bProcessed = true;
+
+        ou::tf::Order& order( *entry.second );
+
+        nOrderQuanRemaining = order.GetQuanRemaining();
+        assert( 0 != nOrderQuanRemaining );
+
+        Trade::tradesize_t quanApplied = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.BidSize() );
+
+        ou::tf::Order::idOrder_t idOrder( order.GetOrderId() );
+        int nId( m_nExecId );  // before it gets incremented in next function
         std::string id = GetExecId();
+
         BOOST_LOG_TRIVIAL(info)
           << "simulate,"
-          << order.GetOrderId()
+          << idOrder
           << ",lmt_ask"
           << "," << id
           << "," << nOrderQuanRemaining << "-" << quanApplied << "," << bid
           << "," << order.GetInstrument()->GetInstrumentName()
           ;
-        Execution exec( bid, quanApplied, OrderSide::Sell, "SIMLmtSell", id );
-        OnOrderFill( order.GetOrderId(), exec );
         nOrderQuanRemaining -= quanApplied;
-        if ( 0 == nOrderQuanRemaining ) {
-          CalculateCommission( order, order.GetQuanFilled() );
-          m_mapAsks.erase( m_mapAsks.begin() );
+
+        if ( nullptr != OnOrderFill ) {
+          Execution exec( nId, idOrder, bid, quanApplied, OrderSide::Sell, "SIMLmtSell", id );
+          OnOrderFill( idOrder, exec );
         }
         else {
           // OrderManager should be calling Order::ReportExecution to update
         }
+
+        CalculateCommission( order, quanApplied );
+
+        if ( 0 == nOrderQuanRemaining ) {
+          m_mapAsks.erase( m_mapAsks.begin() );
+          MigrateActiveToArchive( idOrder );
+        }
+
       }
     }
   }
+
   if ( !m_mapBids.empty() && !bProcessed) {
     mapOrderBook_t::value_type& entry( *m_mapBids.rbegin() );
     const double ask( quote.Ask() );
     if ( ask <= entry.first ) {
-      bProcessed = true;
-      ou::tf::Order& order( *entry.second );
-      nOrderQuanRemaining = order.GetQuanRemaining();
-      assert( 0 != nOrderQuanRemaining );
-      Trade::tradesize_t quanApplied = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.AskSize() );
-      if ( nullptr != OnOrderFill ) {
+      if ( 0 < quote.AskSize() ) {
+
+        bProcessed = true;
+
+        ou::tf::Order& order( *entry.second );
+
+        nOrderQuanRemaining = order.GetQuanRemaining();
+        assert( 0 != nOrderQuanRemaining );
+
+        Trade::tradesize_t quanApplied = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.AskSize() );
+
+        ou::tf::Order::idOrder_t idOrder( order.GetOrderId() );
+        int nId( m_nExecId );  // before it gets incremented in next function
         std::string id = GetExecId();
+
         BOOST_LOG_TRIVIAL(info)
           << "simulate,"
-          << order.GetOrderId()
+          << idOrder
           << ",lmt_bid"
           << "," << id
           << "," << nOrderQuanRemaining << "-" << quanApplied << "," << ask
           << "," << order.GetInstrument()->GetInstrumentName()
           ;
-        Execution exec( ask, quanApplied, OrderSide::Buy, "SIMLmtBuy", id );
-        OnOrderFill( order.GetOrderId(), exec );
         nOrderQuanRemaining -= quanApplied;
-        if ( 0 == nOrderQuanRemaining ) {
-          CalculateCommission( order, order.GetQuanFilled() );
-          m_mapBids.erase( --m_mapBids.rbegin().base() );
+
+        if ( nullptr != OnOrderFill ) {
+          Execution exec( nId, idOrder, ask, quanApplied, OrderSide::Buy, "SIMLmtBuy", id );
+          OnOrderFill( idOrder, exec );
         }
         else {
           // OrderManager should be calling Order::ReportExecution to update
+        }
+
+        CalculateCommission( order, quanApplied );
+
+        if ( 0 == nOrderQuanRemaining ) {
+          m_mapBids.erase( --m_mapBids.rbegin().base() );
+          MigrateActiveToArchive( idOrder );
         }
       }
     }
@@ -283,91 +318,145 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
 bool OrderExecution::ProcessLimitOrders( const Trade& trade ) {
   // will need analysis of quote/trade, quotes should reflect results of depletion by a trade
 
-  double ask( trade.Price() );
-  if ( !m_mapAsks.empty() ) {
-    if ( m_lastQuote.Ask() <= m_mapAsks.begin()->first ) {
-      ask = m_lastQuote.Ask();
+  if ( false ) { // disable this for now
+    double ask( trade.Price() );
+    if ( !m_mapAsks.empty() ) {
+      if ( m_lastQuote.Ask() <= m_mapAsks.begin()->first ) {
+        ask = m_lastQuote.Ask();
+      }
     }
-  }
 
-  double bid( trade.Price() );
-  if ( !m_mapBids.empty() ) {
-    if ( m_lastQuote.Bid() >= m_mapBids.rbegin()->first ) {
-      bid = m_lastQuote.Bid();
+    double bid( trade.Price() );
+    if ( !m_mapBids.empty() ) {
+      if ( m_lastQuote.Bid() >= m_mapBids.rbegin()->first ) {
+        bid = m_lastQuote.Bid();
+      }
     }
-  }
 
-  Quote quote( trade.DateTime(), bid, trade.Volume(), ask, trade.Volume() );
-  return ProcessLimitOrders( quote );
+    Quote quote( trade.DateTime(), bid, trade.Volume(), ask, trade.Volume() );
+    //return ProcessLimitOrders( quote );
+  }
+  return false;
 }
 
 void OrderExecution::ProcessDelayQueue( const Quote& quote ) {
 
-  pOrder_t pOrderFrontOfQueue;  // change this so we reference the order directly, makes things a bit faster
-
   // process the delay list
   while ( !m_lOrderDelay.empty() ) {
-    if ( ( m_lOrderDelay.front()->GetDateTimeOrderSubmitted() + m_dtQueueDelay ) >= quote.DateTime() ) {
+
+    pOrder_t pOrderFrontOfQueue = m_lOrderDelay.front();
+    ou::tf::Order& order( *pOrderFrontOfQueue );
+
+    if ( ( order.GetDateTimeOrderSubmitted() + m_dtQueueDelay ) >= quote.DateTime() ) {
       break;
     }
     else {
-      pOrderFrontOfQueue = m_lOrderDelay.front();
-      ou::tf::Order& order( *pOrderFrontOfQueue );
 
       //BOOST_LOG_TRIVIAL(info)
-      //  << "simulate,"
+      //  << "simulate"
+      //  << ",dequeue,"
       //  << order.GetOrderId()
-      //  << ",dequeue"
       //  ;
 
       m_lOrderDelay.pop_front();
-      switch ( order.GetOrderType() ) {
-        case OrderType::Market:
-          // place into market order book
-          if ( 0 == m_lOrderMarket.size() ) {
-            m_lOrderMarket.push_back( pOrderFrontOfQueue );
-          }
-          else {
-            if ( order.GetOrderSide() == m_lOrderMarket.front()->GetOrderSide() ) {
-              m_lOrderMarket.push_back( pOrderFrontOfQueue );
-            }
-            else {
-              // can't have market orders in two different directions
-              if ( nullptr != OnOrderCancelled ) OnOrderCancelled( order.GetOrderId() );
-            }
-          }
 
-          break;
-        case OrderType::Limit:
-          // place into limit book
-          assert( 0 < order.GetPrice1() );
-          switch ( order.GetOrderSide() ) {
-            case OrderSide::Buy:
-              m_mapBids.insert( mapOrderBook_pair_t( order.GetPrice1(), pOrderFrontOfQueue ) );
+      Order::idOrder_t idOrder( order.GetOrderId() );
+
+      if ( IsOrderArchive( idOrder ) ) {
+        BOOST_LOG_TRIVIAL(info)
+          << "simulate,"
+          << idOrder
+          << ",archived"
+          ;
+      }
+      else {
+
+        if ( IsOrderActive( idOrder ) ) { // a change order is occuring, so remove old version
+          switch ( order.GetOrderType() ) {
+            case OrderType::Market:
+              assert( false ); // doesn't make sense to do anything else
               break;
-            case OrderSide::Sell:
-              m_mapAsks.insert( mapOrderBook_pair_t( order.GetPrice1(), pOrderFrontOfQueue ) );
+            case OrderType::Limit:
+              // update the order
+                {
+                  bool bFound( false );
+                  for ( mapOrderBook_iter_t iter = m_mapAsks.begin(); iter != m_mapAsks.end(); ++iter ) {
+                    if ( idOrder == order.GetOrderId() ) {
+                      ou::tf::Order& old( *iter->second );
+                      assert( OrderType::Limit == old.GetOrderType() );
+                      assert( order.GetOrderSide() == old.GetOrderSide() );
+                      m_mapAsks.erase( iter );
+                      bFound = true;
+                      break;
+                    }
+                  }
+                  if ( !bFound ) {
+                    for ( mapOrderBook_iter_t iter = m_mapBids.begin(); iter != m_mapBids.end(); ++iter ) {
+                      if ( idOrder == order.GetOrderId() ) {
+                        ou::tf::Order& old( *iter->second );
+                        assert( OrderType::Limit == old.GetOrderType() );
+                        assert( order.GetOrderSide() == old.GetOrderSide() );
+                        m_mapBids.erase( iter );
+                        break;
+                      }
+                    }
+                  }
+                }
+              break;
+            case OrderType::Stop:
+              // update the order
               break;
             default:
+              assert( false );
               break;
           }
-          break;
-        case OrderType::Stop:
-          // place into stop book
-          assert( 0 < order.GetPrice1() );
-          switch ( order.GetOrderSide() ) {
-            case OrderSide::Buy:
-              m_mapBuyStops.insert( mapOrderBook_pair_t( order.GetPrice1(), pOrderFrontOfQueue ) );
-              break;
-            case OrderSide::Sell:
-              m_mapSellStops.insert( mapOrderBook_pair_t( order.GetPrice1(), pOrderFrontOfQueue ) );
-              break;
-            default:
-              break;
-          }
-          break;
-        default:
-          break;
+        }
+        else {
+          MigrateDelayToActive( idOrder );
+        }
+
+        switch ( order.GetOrderType() ) {
+          case OrderType::Market:
+            // place into market order book
+            m_lOrderMarket.push_back( pOrderFrontOfQueue );
+            //if ( nullptr != OnOrderCancelled ) OnOrderCancelled( order.GetOrderId() );
+            break;
+          case OrderType::Limit:
+            // place into limit book
+            // TODO: can't have limit orders in two different directions
+            assert( 0 < order.GetPrice1() );
+
+            switch ( order.GetOrderSide() ) {
+              case OrderSide::Sell:
+                m_mapAsks.insert( mapOrderBook_pair_t( order.GetPrice1(), pOrderFrontOfQueue ) );
+                break;
+              case OrderSide::Buy:
+                m_mapBids.insert( mapOrderBook_pair_t( order.GetPrice1(), pOrderFrontOfQueue ) );
+                break;
+              default:
+                assert( false );
+                break;
+            }
+            break;
+          case OrderType::Stop:
+            // place into stop book
+            assert( 0 < order.GetPrice1() );
+            switch ( order.GetOrderSide() ) {
+              case OrderSide::Sell:
+                m_mapSellStops.insert( mapOrderBook_pair_t( order.GetPrice1(), pOrderFrontOfQueue ) );
+                break;
+              case OrderSide::Buy:
+                m_mapBuyStops.insert( mapOrderBook_pair_t( order.GetPrice1(), pOrderFrontOfQueue ) );
+                break;
+              default:
+                assert( false );
+                break;
+            }
+            break;
+          default:
+            assert( false );
+            break;
+        }
       }
     }
   }
@@ -389,29 +478,21 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
 
       // check the delay queue - change this to a while do
       // not sure if this is even reachable as the cancel comes after an order, which should have no delay remaining
-      for ( lOrderQueue_iter_t iter = m_lOrderDelay.begin(); iter != m_lOrderDelay.end(); ++iter ) {
-        ou::tf::Order& order( **iter );
-        if ( qco.nOrderId == order.GetOrderId() ) {
-          m_lOrderDelay.erase( iter );
-          bOrderFound = true;
-          break;
-        }
-      }
+      // right, don't process the delay queue, doesn't make sense temporaly or logically
+      //for ( lOrderQueue_iter_t iter = m_lOrderDelay.begin(); iter != m_lOrderDelay.end(); ++iter ) {
+      //  ou::tf::Order& order( **iter );
+      //  if ( qco.nOrderId == order.GetOrderId() ) {
+      //    m_lOrderDelay.erase( iter );
+      //    bOrderFound = true;
+      //    break;
+      //  }
+      //}
 
       // check the market order queue
       if ( !bOrderFound ) {
         for ( lOrderQueue_iter_t iter = m_lOrderMarket.begin(); iter != m_lOrderMarket.end(); ++iter ) {
           ou::tf::Order& order( **iter );
           if ( qco.nOrderId == order.GetOrderId() ) {
-            if ( qco.nOrderId == m_lOrderMarket.front()->GetOrderId() ) { // check order front of queue
-              boost::uint32_t nOrderQuanProcessed = (*iter)->GetQuanFilled();
-              if ( 0 != nOrderQuanProcessed ) {  // partially processed order, so commission it out before full cancel
-                CalculateCommission( order, nOrderQuanProcessed );
-              }
-              else {
-                // is there an update to partially complete order? - no as order has been cancelled
-              }
-            }
             m_lOrderMarket.erase( iter );
             bOrderFound = true;
             break;
@@ -424,15 +505,6 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
         for ( mapOrderBook_iter_t iter = m_mapAsks.begin(); iter != m_mapAsks.end(); ++iter ) {
           ou::tf::Order& order( *iter->second );
           if ( qco.nOrderId == order.GetOrderId() ) {
-            if ( qco.nOrderId == m_mapAsks.begin()->second->GetOrderId() ) {
-              boost::uint32_t nOrderQuanProcessed = order.GetQuanFilled();
-              if ( 0 != nOrderQuanProcessed ) {  // partially processed order, so commission it out before full cancel
-                CalculateCommission( order, nOrderQuanProcessed );
-              }
-              else {
-                // is there an update to partially complete order? - no as order has been cancelled
-              }
-            }
             m_mapAsks.erase( iter );
             bOrderFound = true;
             break;
@@ -445,15 +517,6 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
         for ( mapOrderBook_iter_t iter = m_mapBids.begin(); iter != m_mapBids.end(); ++iter ) {
           ou::tf::Order& order( *iter->second );
           if ( qco.nOrderId == order.GetOrderId() ) {
-            if ( qco.nOrderId == m_mapBids.rbegin()->second->GetOrderId() ) {
-              boost::uint32_t nOrderQuanProcessed = order.GetQuanFilled();
-              if ( 0 != nOrderQuanProcessed ) {  // partially processed order, so commission it out before full cancel
-                CalculateCommission( order, nOrderQuanProcessed );
-              }
-              else {
-                // is there an update to partially complete order? - no as order has been cancelled
-              }
-            }
             m_mapBids.erase( iter );
             bOrderFound = true;
             break;
@@ -491,10 +554,55 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
       else {
         if ( nullptr != OnOrderCancelled ) OnOrderCancelled( qco.nOrderId );
       }
+
+      MigrateActiveToArchive( qco.nOrderId );
       m_lCancelDelay.pop_front();  // remove from list
     }
   }
 
+}
+
+void OrderExecution::TrackOrder( Order::idOrder_t idOrder, OrderState::State state ) {
+  mapOrderState_t::iterator iter = m_mapOrderState.find( idOrder );
+  //assert( m_mapOrderState.end() == iter );
+  if ( m_mapOrderState.end() == iter ) {
+    auto result = m_mapOrderState.emplace( mapOrderState_t::value_type( idOrder, OrderState( state ) ) );
+    assert( result.second );
+  }
+  else {
+    iter->second.nEncounter++;
+  }
+}
+
+bool OrderExecution::IsOrderArchive( Order::idOrder_t idOrder ) const {
+  mapOrderState_t::const_iterator iter = m_mapOrderState.find( idOrder );
+  assert( m_mapOrderState.end() != iter );
+  return ( OrderState::State::Archive == iter->second.state );
+}
+
+bool OrderExecution::IsOrderActive( Order::idOrder_t idOrder ) const {
+  mapOrderState_t::const_iterator iter = m_mapOrderState.find( idOrder );
+  assert( m_mapOrderState.end() != iter );
+  return ( OrderState::State::Active == iter->second.state );
+}
+
+bool OrderExecution::IsOrderExist( Order::idOrder_t idOrder ) const {
+  mapOrderState_t::const_iterator iter = m_mapOrderState.find( idOrder );
+  return ( m_mapOrderState.end() != iter );
+}
+
+void OrderExecution::MigrateDelayToActive( Order::idOrder_t idOrder ) {
+  mapOrderState_t::iterator iter = m_mapOrderState.find( idOrder );
+  assert( m_mapOrderState.end() != iter );
+  assert( OrderState::State::Delay == iter->second.state );
+  iter->second.state = OrderState::State::Active;
+}
+
+void OrderExecution::MigrateActiveToArchive( Order::idOrder_t idOrder ) {
+  mapOrderState_t::iterator iter = m_mapOrderState.find( idOrder );
+  assert( m_mapOrderState.end() != iter );
+  assert( OrderState::State::Active == iter->second.state );
+  iter->second.state = OrderState::State::Archive;
 }
 
 } // namespace simulation

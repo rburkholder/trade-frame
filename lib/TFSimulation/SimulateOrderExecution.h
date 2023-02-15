@@ -20,6 +20,7 @@
 #include <map>
 #include <list>
 #include <string>
+#include <unordered_map>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -73,6 +74,25 @@ public:
 
 protected:
 private:
+
+  struct OrderState {
+    // prevent repeats, changes, etc
+    enum State { Unknown, Delay, Active, Archive } state;
+    size_t nEncounter;
+    OrderState(): nEncounter( 1 ), state( State::Unknown ) {}
+    OrderState( State state_ ): nEncounter( 1 ), state( state_ ) {}
+    OrderState( const OrderState& rhs ): nEncounter( rhs.nEncounter ), state( rhs.state ) {}
+  };
+
+  using mapOrderState_t = std::unordered_map<Order::idOrder_t,OrderState>;
+  mapOrderState_t m_mapOrderState;
+
+  void TrackOrder( Order::idOrder_t, OrderState::State );
+  bool IsOrderArchive( Order::idOrder_t ) const;
+  bool IsOrderActive( Order::idOrder_t ) const;
+  bool IsOrderExist( Order::idOrder_t ) const;
+  void MigrateDelayToActive( Order::idOrder_t );
+  void MigrateActiveToArchive( Order::idOrder_t );
 
   struct QueuedCancelOrder {
     ptime dtCancellation;
