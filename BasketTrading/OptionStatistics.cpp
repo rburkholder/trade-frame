@@ -99,11 +99,13 @@ OptionStatistics::~OptionStatistics() {
 }
 
 void OptionStatistics::HandleQuote( const ou::tf::Quote& quote ) {
-  m_ceAsk.Append( quote.DateTime(), quote.Ask() );
-  m_ceBid.Append( quote.DateTime(), quote.Bid() );
-  m_ceAskVolume.Append( quote.DateTime(), +quote.AskSize() );
-  m_ceBidVolume.Append( quote.DateTime(), -quote.BidSize() );
-  m_ceSpread.Append( quote.DateTime(), quote.Ask() - quote.Bid() );
+  if ( 0.0 < quote.Bid() ) {
+    m_ceAsk.Append( quote.DateTime(), quote.Ask() );
+    m_ceBid.Append( quote.DateTime(), quote.Bid() );
+    m_ceAskVolume.Append( quote.DateTime(), +quote.AskSize() );
+    m_ceBidVolume.Append( quote.DateTime(), -quote.BidSize() );
+    m_ceSpread.Append( quote.DateTime(), quote.Ask() - quote.Bid() );
+  }
 
   if ( m_pPosition ) {
     double dblUnRealized;
