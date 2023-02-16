@@ -89,7 +89,7 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::Protect,
-      [this,date,pmapChains,days=specs.nDaysFront](){
+      [this,date,pmapChains,days=specs.nDaysBack](){
         // TODO: check that the leg is active
         InitTrackLongOption( LegNote::Type::Protect, pmapChains, date, days );
       }
@@ -100,7 +100,7 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::SynthShort,
-      [this,date,pmapChains,days= specs.nDaysBack](){
+      [this,date,pmapChains,days=specs.nDaysFront](){ // make money on the sold premium
         // TODO: check that the leg is active
         InitTrackShortOption( LegNote::Type::SynthShort, pmapChains, date, days );
       }
@@ -111,7 +111,7 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::Cover,
-      [this,date,pmapChains,days=specs.nDaysFront](){
+      [this,date,pmapChains,days=specs.nDaysFront](){ // make money on the sold premium
         // TODO: check that the leg is active
         InitTrackShortOption( LegNote::Type::Cover, pmapChains, date, days );
       }
@@ -300,8 +300,8 @@ size_t /* static */ Collar::LegCount() {
 )
 {
 
-  citerChain_t citerChainSynthetic = SelectChain( chains, date, specs.nDaysBack );
-  const chain_t& chainSynthetic( citerChainSynthetic->second );
+  citerChain_t citerChainBack = SelectChain( chains, date, specs.nDaysBack );
+  const chain_t& chainBack( citerChainBack->second );
 
   citerChain_t citerChainFront = SelectChain( chains, date, specs.nDaysFront );
   const chain_t& chainFront( citerChainFront->second );
@@ -313,25 +313,27 @@ size_t /* static */ Collar::LegCount() {
       break;
     case E20DayDirection::Rising:
       {
-        const double strikeSyntheticItm( chainSynthetic.Call_Itm( priceUnderlying ) );
+        const double strikeSyntheticBack(  chainBack.Call_Itm( priceUnderlying ) ); // long call
+        const double strikeSyntheticFront( chainFront.Put_Atm( strikeSyntheticBack ) ); // short put
 
-        double strikeCovered( chainFront.Call_Otm( strikeSyntheticItm ) );
+        double strikeCovered( chainFront.Call_Otm( strikeSyntheticBack ) );
         strikeCovered = chainFront.Call_Otm( strikeCovered ); // two strikes up
 
-        const double strikeProtective( chainFront.Put_Atm( strikeSyntheticItm ) ); // rounding problem across chains
+        const double strikeProtective( chainBack.Put_Atm( strikeSyntheticBack ) ); // rounding problem across chains
 
         if ( strikeCovered > priceUnderlying ) {
-          fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
-          fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
-          fLegSelected( strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNameCall( strikeCovered ) );
-          fLegSelected( strikeProtective,   citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeProtective ) );
+          fLegSelected( strikeSyntheticBack,  citerChainBack->first,  chainBack.GetIQFeedNameCall(  strikeSyntheticBack ) );
+          fLegSelected( strikeSyntheticFront, citerChainFront->first, chainFront.GetIQFeedNamePut(  strikeSyntheticFront ) );
+          fLegSelected( strikeCovered,        citerChainFront->first, chainFront.GetIQFeedNameCall( strikeCovered ) );
+          fLegSelected( strikeProtective,     citerChainBack->first,  chainBack.GetIQFeedNamePut(   strikeProtective ) );
         }
         else {
           bOk = false;
           std::cout
             << "Collar::ChooseLegs rising mismatch: "
             << priceUnderlying << ","
-            << strikeSyntheticItm << ","
+            << strikeSyntheticBack << ","
+            << strikeSyntheticFront << ","
             << strikeCovered << ","
             << strikeProtective
             << std::endl;
@@ -341,25 +343,27 @@ size_t /* static */ Collar::LegCount() {
       break;
     case E20DayDirection::Falling:
       {
-        const double strikeSyntheticItm( chainSynthetic.Put_Itm( priceUnderlying ) );
+        const double strikeSyntheticBack(  chainBack.Put_Itm( priceUnderlying ) ); // long put
+        const double strikeSyntheticFront( chainFront.Call_Atm( strikeSyntheticBack ) ); // short call
 
-        double strikeCovered( chainFront.Put_Otm( strikeSyntheticItm ) );
+        double strikeCovered( chainFront.Put_Otm( strikeSyntheticBack ) );
         strikeCovered = chainFront.Put_Otm( strikeCovered ); // two strikes down
 
-        const double strikeProtective( chainFront.Call_Atm( strikeSyntheticItm ) ); // rounding problem across chains
+        const double strikeProtective( chainBack.Call_Atm( strikeSyntheticBack ) ); // rounding problem across chains
 
         if ( strikeCovered < priceUnderlying ) {
-          fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNamePut(  strikeSyntheticItm ) );
-          fLegSelected( strikeSyntheticItm, citerChainSynthetic->first, chainSynthetic.GetIQFeedNameCall( strikeSyntheticItm ) );
-          fLegSelected( strikeCovered,      citerChainFront->first,         chainFront.GetIQFeedNamePut(  strikeCovered ) );
-          fLegSelected( strikeProtective,   citerChainFront->first,         chainFront.GetIQFeedNameCall( strikeProtective ) );
+          fLegSelected( strikeSyntheticBack,  citerChainBack->first,  chainBack.GetIQFeedNamePut(   strikeSyntheticBack ) );
+          fLegSelected( strikeSyntheticFront, citerChainFront->first, chainFront.GetIQFeedNameCall( strikeSyntheticFront ) );
+          fLegSelected( strikeCovered,        citerChainFront->first, chainFront.GetIQFeedNamePut(  strikeCovered ) );
+          fLegSelected( strikeProtective,     citerChainBack->first,  chainBack.GetIQFeedNameCall(  strikeProtective ) );
         }
         else {
           bOk = false;
           std::cout
             << "Collar::ChooseLegs falling mismatch: "
             << priceUnderlying << ","
-            << strikeSyntheticItm << ","
+            << strikeSyntheticBack << ","
+            << strikeSyntheticFront << ","
             << strikeCovered << ","
             << strikeProtective
             << std::endl;
