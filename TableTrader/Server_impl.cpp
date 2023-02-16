@@ -229,7 +229,7 @@ void Server_impl::Underlying_Acquire(
 
   m_pBuildInstrumentBoth->Queue(
     sIQFeedUnderlying,
-    [this]( pInstrument_t pInstrument ){
+    [this]( pInstrument_t pInstrument, bool bConstructed ){
       UnderlyingInitialize( pInstrument );
     } );
 }
@@ -304,7 +304,7 @@ void Server_impl::UnderlyingFundamentals( const ou::tf::Watch::Fundamentals& fun
               else {
                 m_pBuildInstrumentIQFeed->Queue(
                   sSymbol,
-                  [this,&im]( pInstrument_t pInstrument ) {
+                  [this,&im]( pInstrument_t pInstrument, bool bConstructed ) {
 
                     assert( pInstrument->IsFuturesOption() );
 
