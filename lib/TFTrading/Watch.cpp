@@ -249,69 +249,69 @@ void Watch::HandleQuote( const Quote& quote ) {
   //   * sliding window for n quotes or n seconds?
   //   * need to filter quotes when value is at zero as end of life otm
   //   * build map for mean/median/mode to filter, emit values for review
-  if ( 0 < m_nEnableStats ) {
+  if ( quote.IsNonZero() ) {
+    if ( 0 < m_nEnableStats ) {
 
-    double spread = quote.Spread();
+      double spread = quote.Spread();
 
-    // TODO: need a periodic sampler to evaluate median
-    //   Them implement a query call to go/no-go value usage for ordering
-    // NOTE: spread may change in and out of regular trading hours
-    //   may require a reset on the calcuation
+      // TODO: need a periodic sampler to evaluate median
+      //   Them implement a query call to go/no-go value usage for ordering
+      // NOTE: spread may change in and out of regular trading hours
+      //   may require a reset on the calcuation
 
-    mapQuoteDistribution_t::iterator iterMapQuoteDistribution = m_mapQuoteDistribution.find( spread );
-    if ( m_mapQuoteDistribution.end() == iterMapQuoteDistribution ) {
-      auto pair = m_mapQuoteDistribution.emplace( std::make_pair( spread, 1 ) );
-      assert( pair.second );
-      iterMapQuoteDistribution = pair.first;
-    }
-    else {
-      iterMapQuoteDistribution->second++;
-    }
-    m_cntTotalSpread++;
+      mapQuoteDistribution_t::iterator iterMapQuoteDistribution = m_mapQuoteDistribution.find( spread );
+      if ( m_mapQuoteDistribution.end() == iterMapQuoteDistribution ) {
+        auto pair = m_mapQuoteDistribution.emplace( std::make_pair( spread, 1 ) );
+        assert( pair.second );
+        iterMapQuoteDistribution = pair.first;
+      }
+      else {
+        iterMapQuoteDistribution->second++;
+      }
+      m_cntTotalSpread++;
 
-    // keep track of most used spread
-    if ( m_cntBestSpread < iterMapQuoteDistribution->second ) {
-      m_dblBestSpread = iterMapQuoteDistribution->first;
-      m_cntBestSpread = iterMapQuoteDistribution->second;
-    }
-    else {
-      if ( m_cntBestSpread == iterMapQuoteDistribution->second ) {
-        if ( spread < m_dblBestSpread ) {
-          // use smaller spread when count is same as larger spread
-          m_dblBestSpread = iterMapQuoteDistribution->first;
-          m_cntBestSpread = iterMapQuoteDistribution->second;
+      // keep track of most used spread
+      if ( m_cntBestSpread < iterMapQuoteDistribution->second ) {
+        m_dblBestSpread = iterMapQuoteDistribution->first;
+        m_cntBestSpread = iterMapQuoteDistribution->second;
+      }
+      else {
+        if ( m_cntBestSpread == iterMapQuoteDistribution->second ) {
+          if ( spread < m_dblBestSpread ) {
+            // use smaller spread when count is same as larger spread
+            m_dblBestSpread = iterMapQuoteDistribution->first;
+            m_cntBestSpread = iterMapQuoteDistribution->second;
+          }
         }
       }
-    }
 
-    m_quote = quote;
-    if ( m_bRecordSeries ) {
-      m_quotes.Append( quote );
-    }
-
-    OnQuote( quote );
-  }
-  else {
-    if ( quote.IsNonZero() ) {
       m_quote = quote;
-      //OnPossibleResizeBegin( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
-      {
-        //boost::mutex::scoped_lock lock(m_mutexLockAppend);
-        if ( m_bRecordSeries ) m_quotes.Append( quote );
+      if ( m_bRecordSeries ) {
+        m_quotes.Append( quote );
       }
 
-      //OnPossibleResizeEnd( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
       OnQuote( quote );
     }
     else {
-      //    std::cout
-      //      << quote.DateTime().time_of_day() << ","
-      //      << m_pInstrument->GetInstrumentName()
-      //      << " zero quote "
-      //      << "b=" << quote.Bid() << "x" << quote.BidSize() << ","
-      //      << "a=" << quote.Ask() << "x" << quote.AskSize()
-      //      << std::endl;
+        m_quote = quote;
+        //OnPossibleResizeBegin( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
+        {
+          //boost::mutex::scoped_lock lock(m_mutexLockAppend);
+          if ( m_bRecordSeries ) m_quotes.Append( quote );
+        }
+
+        //OnPossibleResizeEnd( stateTimeSeries_t( m_quotes.Capacity(), m_quotes.Size() ) );
+        OnQuote( quote );
     }
+  }
+  else {
+        //    std::cout
+        //      << quote.DateTime().time_of_day() << ","
+        //      << m_pInstrument->GetInstrumentName()
+        //      << " zero quote "
+        //      << "b=" << quote.Bid() << "x" << quote.BidSize() << ","
+        //      << "a=" << quote.Ask() << "x" << quote.AskSize()
+        //      << std::endl;
   }
 }
 
