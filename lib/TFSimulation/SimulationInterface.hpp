@@ -90,6 +90,7 @@ private:
 
   using fOrderExecution_t = std::function<void(EventHolders&)>;
 
+  // TODO: may need to run valgrind on this, had a segmentation fault
   void Update( const std::string& sName, fOrderExecution_t&& f ) {
     if ( m_bExecutionEnabled ) {
       typename mapOrderExecution_t::iterator iter = m_mapOrderExecution.find( sName );
