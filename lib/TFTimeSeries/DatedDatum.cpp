@@ -100,9 +100,10 @@ bool Quote::IsValid() const {
 };
 
 bool Quote::IsNonZero() const {
-  bool bOk( true );
-  bOk &= ( 0.0 != m_dblBid );
-  bOk &= ( 0.0 != m_dblAsk );
+  bool bOk( false );
+  bOk |= ( 0.0 < m_dblAsk );
+  bOk |= ( 0.0 < m_dblBid ); // can be zero for far out of the money options
+  // TODO: maybe make flag to accept for OTM options?
   //bOk &= ( ( 0 == m_nBidSize ) && ( 0.0 == m_dblBid ) ); // NOTE: some options are zero bid
   //bOk &= ( ( 0 != m_nAskSize ) && ( 0.0 != m_dblAsk ) );
   // TODO: what other tests?
