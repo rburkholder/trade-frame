@@ -967,8 +967,8 @@ void MasterPortfolio::EmitInfo( void ) {
     << "Master Portfolio: "
     << "unrealized=" << dblPLUnRealized
     << ",realized=" << dblPLRealized
-    << ",commission" << dblCommissionPaid
-    << ",current" << dblPLCurrent
+    << ",commission=" << dblCommissionPaid
+    << ",current=" << dblPLCurrent
     << std::endl;
 }
 
