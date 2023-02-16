@@ -315,12 +315,12 @@ double Instrument::NormalizeOrderPrice( double price, double interval ) {
   const double multiple_floor = std::floor( multiple_rough );
   const double lower = multiple_floor * interval;
   double dblResult = ( price < ( lower + round ) ) ? lower : ( lower + interval );
-  std::cout
-    << "Instrument::NormalizeOrderPrice: "
-    << "interval=" << interval << ","
-    << "price=" << price << ","
-    << "result=" << dblResult
-    << std::endl;
+  //std::cout
+  //  << "Instrument::NormalizeOrderPrice: "
+  //  << "interval=" << interval << ","
+  //  << "price=" << price << ","
+  //  << "result=" << dblResult
+  //  << std::endl;
   return dblResult;
 }
 
