@@ -41,9 +41,9 @@ add_subdirectory(Weeklies)
 
 add_subdirectory(lib)
 
-#if(EXISTS /usr/local/lib/libwt.so)
-#  add_subdirectory(TableTrader)
-#endif()
+if(EXISTS /usr/local/lib/libwt.so)
+  add_subdirectory(TableTrader)
+endif()
 
 if(EXISTS /usr/local/lib/rdaf)
   add_subdirectory(rdaf)
