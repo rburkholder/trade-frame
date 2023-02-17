@@ -27,6 +27,7 @@
 
 #include <string>
 #include <memory>
+#include <thread>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -62,6 +63,8 @@ class FrameMain;
 class wxTreeCtrl;
 class wxTreeEvent;
 class wxTimerEvent;
+
+class TdExample;
 
 namespace ou {
 namespace tf {
@@ -121,6 +124,9 @@ private:
 
   std::unique_ptr<ou::tf::db> m_pdb;
 
+  std::thread m_threadTdExample;
+  std::unique_ptr<TdExample> m_pTdExample;
+
   ou::ChartEntryIndicator m_ceUnRealized;
   ou::ChartEntryIndicator m_ceRealized;
   ou::ChartEntryIndicator m_ceCommissionsPaid;
@@ -146,6 +152,7 @@ private:
 #endif
 
   void StartRdaf( const std::string& sFilePrefix );
+  void StartTdExample();
 
   virtual bool OnInit();
   virtual int OnExit();

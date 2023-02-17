@@ -1,7 +1,7 @@
 # trade-frame/rdaf/l2
 cmake_minimum_required (VERSION 3.13)
 
-PROJECT(rdaf_l2)
+PROJECT(rdaf_l2 VERSION 1.0 LANGUAGES CXX)
 
 #set(CMAKE_EXE_LINKER_FLAGS "--trace --verbose")
 #set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -15,9 +15,11 @@ set(BOOST_USE_STATIC_RUNTIME OFF)
 #set(Boost_REALPATH ON)
 #set(BOOST_ROOT "/usr/local")
 #set(Boost_DETAILED_FAILURE_MSG ON)
-set(BOOST_INCLUDEDIR "/usr/local/include/boost")
+#set(BOOST_INCLUDEDIR "/usr/local/include/boost")
 
 find_package(Boost ${TF_BOOST_VERSION} REQUIRED COMPONENTS system date_time program_options thread filesystem serialization regex log log_setup json)
+
+find_package(Td 1.8.11 REQUIRED)
 
 #message("boost lib: ${Boost_LIBRARIES}")
 
@@ -28,6 +30,7 @@ set(
     HiPass.hpp
     State.hpp
     Strategy.hpp
+    Telegram.hpp
   )
 
 set(
@@ -37,6 +40,7 @@ set(
     HiPass.cpp
     State.cpp
     Strategy.cpp
+    Telegram.cpp
   )
 
 add_executable(
@@ -91,6 +95,7 @@ target_link_libraries(
       z
       curl
       ${Boost_LIBRARIES}
+      Td::TdStatic
 #      wx_gtk3u_adv-3.1
       wx_gtk3u_core-${WX_VERSION_MAJOR}
       wx_baseu-${WX_VERSION_MAJOR}

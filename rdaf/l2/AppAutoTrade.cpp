@@ -59,6 +59,7 @@
 #include <TFVuTrading/PanelProviderControlv2.hpp>
 
 #include "Strategy.hpp"
+#include "Telegram.hpp"
 #include "AppAutoTrade.hpp"
 
 namespace {
@@ -147,6 +148,9 @@ bool AppAutoTrade::OnInit() {
   //   as it requires hdf5 formed timeseries, otherwise they need to be rebuilt from rdaf timeseries
   auto dt = ou::TimeSource::GlobalInstance().External();
   boost::gregorian::date dateSim( dt.date() ); // dateSim used later in a loop
+
+  FrameMain::vpItems_t vItems;
+  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
 
   if ( m_choices.bStartSimulator ) {
 
@@ -248,9 +252,6 @@ bool AppAutoTrade::OnInit() {
       } );
     //m_pL2Symbols->Connect();
 
-    FrameMain::vpItems_t vItems;
-    using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
-
     vItems.clear();
     vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppAutoTrade::HandleMenuActionCloseAndDone ) ) );
     if ( !m_choices.bStartSimulator ) {
@@ -267,9 +268,14 @@ bool AppAutoTrade::OnInit() {
 
   } // live configuration
 
-  m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
-  m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-  sizerUpper->Add(m_pPanelLogging, 2, wxEXPAND, 2);
+  vItems.clear();
+  vItems.push_back( new mi( "Start", MakeDelegate( this, &AppAutoTrade::StartTdExample ) ) );
+  m_pFrameMain->AddDynamicMenu( "Telegram", vItems );
+
+  // disable the panel for now, allows std::cout to be useful by Telegram testing
+  //m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+  //m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+  //sizerUpper->Add(m_pPanelLogging, 2, wxEXPAND, 2);
 
   sizerLower = new wxBoxSizer(wxVERTICAL);
   sizerFrame->Add(sizerLower, 1, wxEXPAND, 2);
@@ -457,6 +463,13 @@ void AppAutoTrade::HandleOneSecondTimer( wxTimerEvent& event ) {
     m_ceCommissionsPaid.Append( dt, dblCommissionsPaid );
     m_ceTotal.Append( dt, dblTotal );
   }
+}
+
+void AppAutoTrade::StartTdExample() {
+
+  m_pTdExample = std::make_unique<TdExample>();
+  m_threadTdExample = std::move( std::thread( std::bind( &TdExample::loop, &(*m_pTdExample) ) ) );
+
 }
 
 void AppAutoTrade::StartRdaf( const std::string& sFileName ) {
