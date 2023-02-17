@@ -964,8 +964,8 @@ void MasterPortfolio::EmitInfo( void ) {
 
   m_pMasterPortfolio->QueryStats( dblPLUnRealized, dblPLRealized, dblCommissionPaid, dblPLCurrent );
   std::cout
-    << "Master Portfolio: "
-    << "unrealized=" << dblPLUnRealized
+    << "Master Portfolio: " << ou::TimeSource::GlobalInstance().Internal()
+    << ",unrealized=" << dblPLUnRealized
     << ",realized=" << dblPLRealized
     << ",commission=" << dblCommissionPaid
     << ",current=" << dblPLCurrent
