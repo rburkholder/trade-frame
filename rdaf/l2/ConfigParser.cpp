@@ -64,6 +64,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::config::choices_t,
+  (std::string, sTelegramToken)
   (size_t, ib_client_id)
   (size_t, nThreads)
   (bool, bStartSimulator)
@@ -122,6 +123,12 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> qi::char_("0-9") >> qi::char_("0-9") // MM
       >> qi::char_("0-9") >> qi::char_("0-9") // SS
       ;
+
+    ruleTelegramToken
+      %= qi::lit("telegram_token")
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> +( qi::char_("A-Za-z0-9:") | qi::char_( '-' ) )
+      >> *qi::lit(' ') >> qi::eol;
 
     ruleIbClientId
       %= qi::lit("ib_client_id")
@@ -316,7 +323,8 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
     ruleMap %= +ruleMapEntry;
 
     start
-      %= ruleIbClientId
+      %= -ruleTelegramToken
+      >> ruleIbClientId
       >> ruleThreads
       >> ruleStartSimulator
       >> -ruleGroupDirectory
@@ -345,6 +353,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   qi::symbols<char, ou::tf::config::symbol_t::EFeed> luFeed;
   qi::symbols<char, ou::tf::InstrumentType::EInstrumentType> luInstrumentType;
 
+  qi::rule<Iterator, std::string()> ruleTelegramToken;
   qi::rule<Iterator, size_t()> ruleIbClientId;
   qi::rule<Iterator, size_t()> ruleThreads;
   qi::rule<Iterator, bool()> ruleStartSimulator;

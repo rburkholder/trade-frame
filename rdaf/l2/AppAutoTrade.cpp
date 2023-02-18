@@ -58,8 +58,9 @@
 #include <TFVuTrading/WinChartView.h>
 #include <TFVuTrading/PanelProviderControlv2.hpp>
 
+#include <Telegram/Bot.hpp>
+
 #include "Strategy.hpp"
-#include "Telegram.hpp"
 #include "AppAutoTrade.hpp"
 
 namespace {
@@ -269,7 +270,7 @@ bool AppAutoTrade::OnInit() {
   } // live configuration
 
   vItems.clear();
-  vItems.push_back( new mi( "Start", MakeDelegate( this, &AppAutoTrade::StartTdExample ) ) );
+  vItems.push_back( new mi( "Get Me", MakeDelegate( this, &AppAutoTrade::Telegram_GetMe ) ) );
   m_pFrameMain->AddDynamicMenu( "Telegram", vItems );
 
   // disable the panel for now, allows std::cout to be useful by Telegram testing
@@ -414,7 +415,7 @@ bool AppAutoTrade::OnInit() {
     pFile->Close();
     delete pFile;
   }
-*/
+  */
   m_treeSymbols->ExpandAll();
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppAutoTrade::OnClose, this );  // start close of windows and controls
@@ -442,6 +443,13 @@ bool AppAutoTrade::OnInit() {
   return 1;
 }
 
+void AppAutoTrade::Telegram_GetMe() {
+  if ( !m_telegram_bot ) {
+    m_telegram_bot = std::make_unique<telegram::Bot>( m_choices.sTelegramToken );
+  }
+  m_telegram_bot->GetMe();
+}
+
 void AppAutoTrade::HandleSimConnected( int ) {
   ConfirmProviders();
 }
@@ -463,13 +471,6 @@ void AppAutoTrade::HandleOneSecondTimer( wxTimerEvent& event ) {
     m_ceCommissionsPaid.Append( dt, dblCommissionsPaid );
     m_ceTotal.Append( dt, dblTotal );
   }
-}
-
-void AppAutoTrade::StartTdExample() {
-
-  m_pTdExample = std::make_unique<TdExample>();
-  m_threadTdExample = std::move( std::thread( std::bind( &TdExample::loop, &(*m_pTdExample) ) ) );
-
 }
 
 void AppAutoTrade::StartRdaf( const std::string& sFileName ) {

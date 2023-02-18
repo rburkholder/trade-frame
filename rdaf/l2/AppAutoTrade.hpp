@@ -27,7 +27,6 @@
 
 #include <string>
 #include <memory>
-#include <thread>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -64,7 +63,9 @@ class wxTreeCtrl;
 class wxTreeEvent;
 class wxTimerEvent;
 
-class TdExample;
+namespace telegram {
+  class Bot;
+}
 
 namespace ou {
 namespace tf {
@@ -124,9 +125,6 @@ private:
 
   std::unique_ptr<ou::tf::db> m_pdb;
 
-  std::thread m_threadTdExample;
-  std::unique_ptr<TdExample> m_pTdExample;
-
   ou::ChartEntryIndicator m_ceUnRealized;
   ou::ChartEntryIndicator m_ceRealized;
   ou::ChartEntryIndicator m_ceCommissionsPaid;
@@ -152,7 +150,9 @@ private:
 #endif
 
   void StartRdaf( const std::string& sFilePrefix );
-  void StartTdExample();
+
+  std::unique_ptr<telegram::Bot> m_telegram_bot;
+  void Telegram_GetMe();
 
   virtual bool OnInit();
   virtual int OnExit();

@@ -30,7 +30,6 @@ set(
     HiPass.hpp
     State.hpp
     Strategy.hpp
-    Telegram.hpp
   )
 
 set(
@@ -40,7 +39,6 @@ set(
     HiPass.cpp
     State.cpp
     Strategy.cpp
-    Telegram.cpp
   )
 
 add_executable(
@@ -91,15 +89,17 @@ target_link_libraries(
       OUCharting
       TFIndicators
       TFTimeSeries
+      Telegram
       dl
       z
       curl
       ${Boost_LIBRARIES}
-      Td::TdStatic
 #      wx_gtk3u_adv-3.1
       wx_gtk3u_core-${WX_VERSION_MAJOR}
       wx_baseu-${WX_VERSION_MAJOR}
       pthread
+      crypto
+      ssl
 # rdaf components:
 #      Core
 #      Gpad

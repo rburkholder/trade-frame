@@ -32,6 +32,8 @@ namespace ou {
 namespace tf {
 namespace config {
 
+// note: choices_t follows this and includes symbol_t
+
 struct symbol_t {
 
   enum EFeed {
@@ -104,6 +106,8 @@ struct symbol_t {
 };
 
 struct choices_t {
+
+  std::string sTelegramToken;
 
   bool bStartSimulator;
   std::string sGroupDirectory;
