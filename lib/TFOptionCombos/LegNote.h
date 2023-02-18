@@ -47,6 +47,7 @@ public:
     Option m_option;
     Momentum m_momentum;
     Algo m_algo;
+    double m_strike;
   };
 
   LegNote();

@@ -22,9 +22,10 @@
 #include <stdexcept>
 #include <sstream>
 
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/qi_real.hpp>
 #include <boost/spirit/include/qi_symbols.hpp>
 #include <boost/spirit/include/qi_numeric.hpp>
-#include <boost/spirit/include/qi.hpp>
 
 #include <boost/phoenix/core.hpp>
 
@@ -39,7 +40,8 @@ using values_t = ou::tf::option::LegNote::values_t;
   (ou::tf::option::LegNote::Option, m_option),
   (ou::tf::option::LegNote::Side, m_side),
   (ou::tf::option::LegNote::Momentum, m_momentum),
-  (ou::tf::option::LegNote::Algo, m_algo)
+  (ou::tf::option::LegNote::Algo, m_algo),
+  (double, m_strike)
   )
 
 namespace ou { // One Unified
@@ -93,6 +95,7 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
     side =     qi::lit( "side=" ) >> side_;
     momentum = qi::lit( "momentum=" ) >> momentum_;
     algo =     qi::lit( "algo=" ) >> algo_;
+    strike =   qi::lit( "strike=" ) >> qi::double_;
 
     // Todo: allow random order, partial list?
     start =
@@ -101,7 +104,9 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
       option   >> qi::lit( ',' ) >>
       side     >> qi::lit( ',' ) >>
       momentum >> qi::lit( ',' ) >>
-      algo >> qi::eps
+      algo
+      >> -( qi::lit( ',' ) >> strike )
+               >> qi::eps
       ;
 
   }
@@ -119,6 +124,7 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
   qi::rule<Iterator,LegNote::Side> side;
   qi::rule<Iterator,LegNote::Momentum> momentum;
   qi::rule<Iterator,LegNote::Algo> algo;
+  qi::rule<Iterator,double()> strike;
 
   qi::rule<Iterator, values_t()> start;
 };
@@ -226,6 +232,8 @@ const std::string LegNote::Encode() const {
       ss << "collar";
       break;
   }
+
+  ss << ",strike=" << m_values.m_strike;
 
   return ss.str();
 }
