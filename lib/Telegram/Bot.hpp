@@ -38,6 +38,8 @@ public:
   ~Bot();
 
   void GetMe();
+  void GetUpdates();
+  void SendMessage();
 
 protected:
 private:

@@ -271,6 +271,8 @@ bool AppAutoTrade::OnInit() {
 
   vItems.clear();
   vItems.push_back( new mi( "Get Me", MakeDelegate( this, &AppAutoTrade::Telegram_GetMe ) ) );
+  vItems.push_back( new mi( "Get Updates", MakeDelegate( this, &AppAutoTrade::Telegram_GetUpdates ) ) );
+  vItems.push_back( new mi( "Send Message", MakeDelegate( this, &AppAutoTrade::Telegram_SendMessage ) ) );
   m_pFrameMain->AddDynamicMenu( "Telegram", vItems );
 
   // disable the panel for now, allows std::cout to be useful by Telegram testing
@@ -448,6 +450,20 @@ void AppAutoTrade::Telegram_GetMe() {
     m_telegram_bot = std::make_unique<telegram::Bot>( m_choices.sTelegramToken );
   }
   m_telegram_bot->GetMe();
+}
+
+void AppAutoTrade::Telegram_GetUpdates() {
+  if ( !m_telegram_bot ) {
+    m_telegram_bot = std::make_unique<telegram::Bot>( m_choices.sTelegramToken );
+  }
+  m_telegram_bot->GetUpdates();
+}
+
+void AppAutoTrade::Telegram_SendMessage() {
+  if ( !m_telegram_bot ) {
+    m_telegram_bot = std::make_unique<telegram::Bot>( m_choices.sTelegramToken );
+  }
+  m_telegram_bot->SendMessage();
 }
 
 void AppAutoTrade::HandleSimConnected( int ) {

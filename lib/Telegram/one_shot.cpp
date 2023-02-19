@@ -52,14 +52,14 @@ one_shot::one_shot(
 , m_fWriteRequest( nullptr )
 , m_fDone( nullptr )
 {
-  std::cout << "alpaca::one_shot construction" << std::endl; // ensuring proper timing of handling
+  std::cout << "telegram_bot::one_shot construction" << std::endl; // ensuring proper timing of handling
 
   // Allow for an unlimited body size
   m_parser.body_limit( ( std::numeric_limits<std::uint64_t>::max )() );
   }
 
 one_shot::~one_shot() {
-  std::cout << "alpaca::one_shot destruction" << std::endl;  // ensuring proper timing of handling
+  std::cout << "telegram_bot::one_shot destruction" << std::endl;  // ensuring proper timing of handling
   //m_stream.shutdown();  // doesn't like this
   m_buffer.clear();
   m_response.clear();
@@ -130,12 +130,11 @@ void one_shot::get(
   m_request_empty.version( nVersion );
   m_request_empty.method( http::verb::get );
   m_request_empty.set( http::field::host, sHost );
-  //request_.set( http::field::user_agent, BOOST_BEAST_VERSION_STRING );
   m_request_empty.set( http::field::user_agent, sUserAgent );
 
   //m_request_empty.target( sTarget );
   const std::string s( "/bot" + sTelegramToken + "/" + sTarget );
-  std::cout << "get request: '" << s << "'" << std::endl;
+  //std::cout << "get request: '" << s << "'" << std::endl;
   m_request_empty.target( s );
 
   m_fWriteRequest = [this](){ write_empty(); };
@@ -175,9 +174,11 @@ void one_shot::get(
   m_request_body.version( nVersion );
   m_request_body.method( http::verb::get );
   m_request_body.set( http::field::host, sHost );
-  //request_.set( http::field::user_agent, BOOST_BEAST_VERSION_STRING );
   m_request_body.set( http::field::user_agent, sUserAgent );
+  m_request_body.set( http::field::content_type, "application/json" );
 
+  const std::string s( "/bot" + sTelegramToken + "/" + sTarget );
+  //std::cout << "get request: '" << s << "'" << std::endl;
   m_request_body.target( sTarget );
 
   m_request_body.body() = sBody;
@@ -220,10 +221,11 @@ void one_shot::post(
   m_request_body.version( nVersion );
   m_request_body.method( http::verb::post );
   m_request_body.set( http::field::host, sHost );
-  //request_.set( http::field::user_agent, BOOST_BEAST_VERSION_STRING );
   m_request_body.set( http::field::user_agent, sUserAgent );
-  //m_request_body.set( http::field::content_type, "application/json" );
+  m_request_body.set( http::field::content_type, "application/json" );
 
+  const std::string s( "/bot" + sTelegramToken + "/" + sTarget );
+  //std::cout << "get request: '" << s << "'" << std::endl;
   m_request_body.target( sTarget );
 
   m_request_body.body() = sBody;

@@ -153,6 +153,8 @@ private:
 
   std::unique_ptr<telegram::Bot> m_telegram_bot;
   void Telegram_GetMe();
+  void Telegram_GetUpdates();
+  void Telegram_SendMessage();
 
   virtual bool OnInit();
   virtual int OnExit();

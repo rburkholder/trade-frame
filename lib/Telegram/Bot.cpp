@@ -19,6 +19,9 @@
  * Created: February 17, 2023 18:22:02
  */
 
+// telegram bot api:  https://core.telegram.org/bots/api#sendmessage
+// @BotFather to obtain token: https://core.telegram.org/bots/tutorial
+
 #include <iostream>
 #include <functional>
 
@@ -62,6 +65,38 @@ void Bot::GetMe() {
   , "443"
   , m_sToken
   , "getMe"
+  , [this]( bool bStatus, const std::string& message ){
+      std::cout << message << std::endl;
+    }
+  );
+}
+
+void Bot::GetUpdates() {
+  auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
+  std::string sRequest( "{\"timeout\":1}" );
+  std::cout << "request='" << sRequest << "'" << std::endl;
+  request->get(
+    "api.telegram.org"
+  , "443"
+  , m_sToken
+  , "getUpdates"
+  , sRequest
+  , [this]( bool bStatus, const std::string& message ){
+      std::cout << message << std::endl;
+    }
+  );
+}
+
+void Bot::SendMessage() {
+  auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
+  std::string sRequest( "{\"chat_id\":\"@OneUnified\",\"text\":\"test message\"}" );
+  std::cout << "request='" << sRequest << "'" << std::endl;
+  request->post(
+    "api.telegram.org"
+  , "443"
+  , m_sToken
+  , "sendMessage"
+  , sRequest
   , [this]( bool bStatus, const std::string& message ){
       std::cout << message << std::endl;
     }
