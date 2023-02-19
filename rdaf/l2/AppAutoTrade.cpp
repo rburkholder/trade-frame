@@ -446,21 +446,21 @@ bool AppAutoTrade::OnInit() {
 }
 
 void AppAutoTrade::Telegram_GetMe() {
-  if ( !m_telegram_bot ) {
+  if ( !m_telegram_bot ) { // TODO: autostart in one place
     m_telegram_bot = std::make_unique<telegram::Bot>( m_choices.sTelegramToken );
   }
   m_telegram_bot->GetMe();
 }
 
 void AppAutoTrade::Telegram_GetUpdates() {
-  if ( !m_telegram_bot ) {
+  if ( !m_telegram_bot ) { // TODO: autostart in one place
     m_telegram_bot = std::make_unique<telegram::Bot>( m_choices.sTelegramToken );
   }
-  m_telegram_bot->GetUpdates();
+//  m_telegram_bot->GetUpdates();
 }
 
 void AppAutoTrade::Telegram_SendMessage() {
-  if ( !m_telegram_bot ) {
+  if ( !m_telegram_bot ) { // TODO: autostart in one place
     m_telegram_bot = std::make_unique<telegram::Bot>( m_choices.sTelegramToken );
   }
   m_telegram_bot->SendMessage();
@@ -885,6 +885,8 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
   //m_pChartData = nullptr;
 
   //m_pFrameControls->Close();
+
+  m_telegram_bot.reset();
 
   if ( !m_choices.bStartSimulator ) {
     m_timerOneSecond.Stop();
