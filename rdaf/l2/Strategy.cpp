@@ -58,11 +58,13 @@ namespace {
 Strategy::Strategy(
   const ou::tf::config::symbol_t& config
 , TreeItem* pTreeItem
+, fTelegram_t&& fTelegram
 //, pFile_t pFile
 //, pFile_t pFileUtility
 )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
 , m_pTreeItemSymbol( pTreeItem )
+, m_fTelegram( std::move( fTelegram ) )
 //, m_pFile( pFile )
 //, m_pFileUtility( pFileUtility )
 , m_stateTrade( EStateTrade::Init )

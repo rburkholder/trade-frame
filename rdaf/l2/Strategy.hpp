@@ -108,9 +108,12 @@ public:
   using pPosition_t = ou::tf::Position::pPosition_t;
   //using pFile_t = std::shared_ptr<TFile>;
 
+  using fTelegram_t = std::function<void(const std::string&)>;
+
   Strategy(
     const ou::tf::config::symbol_t&
   , TreeItem*
+  , fTelegram_t&&
 #if RDAF
   , pFile_t
   , pFile_t
@@ -174,6 +177,8 @@ private:
 
   TreeItem* m_pTreeItemSymbol;
   TreeItem* m_pTreeItemOrder;
+
+  fTelegram_t m_fTelegram;
 
   ou::tf::Quote m_quote;
   ou::tf::Quotes m_quotes; // used for stochastics, as storage for watch is off

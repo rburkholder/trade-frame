@@ -380,7 +380,15 @@ bool AppAutoTrade::OnInit() {
     );
 
     //pStrategy_t pStrategy = std::make_unique<Strategy>( choices, pTreeItem, m_pFile, m_pFileUtility );
-    pStrategy_t pStrategy = std::make_unique<Strategy>( choices, pTreeItem );
+    pStrategy_t pStrategy
+      = std::make_unique<Strategy>(
+        choices, pTreeItem,
+        [this](const std::string& sMessage){
+          if ( m_telegram_bot ) {
+            m_telegram_bot->SendMessage( sMessage );
+          }
+        }
+        );
 
     m_pWinChartView->SetChartDataView( &pStrategy->GetChartDataView() );
 
