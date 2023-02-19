@@ -25,6 +25,7 @@ The parameters are sourced in the configuration file (as an example):
 
 $ cat x64/debug/rdaf/at/choices.cfg
 ```
+telegram_token=6216......
 ib_client_id=7
 threads=3
 sim_start=yes
@@ -77,4 +78,14 @@ For testing purposes, delete or rename the database to start fresh.
 * change x64/debug/rdaf/at/choices.cfg to have sim_start=on
 * restart the application - simulation mode is auto-started
 * trades should show up in similar time frames
+
+### Telegram Messaging
+
+* [BotFather Token](https://core.telegram.org/bots/tutorial) - create bot, obtain token
+* populate the telegram_token in choices.cfg
+* start application
+* from your regular telegram account, send some text to the bot to register chat id
+* use menu SendMessage to send a test message to confirm chat id
+* chat id will persist in the state file for next startup
+* in strategy file, to send message: m_fTelegram( "message text" );
 
