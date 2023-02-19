@@ -52,14 +52,14 @@ one_shot::one_shot(
 , m_fWriteRequest( nullptr )
 , m_fDone( nullptr )
 {
-  std::cout << "telegram_bot::one_shot construction" << std::endl; // ensuring proper timing of handling
+  //std::cout << "telegram_bot::one_shot construction" << std::endl; // ensuring proper timing of handling
 
   // Allow for an unlimited body size
   m_parser.body_limit( ( std::numeric_limits<std::uint64_t>::max )() );
   }
 
 one_shot::~one_shot() {
-  std::cout << "telegram_bot::one_shot destruction" << std::endl;  // ensuring proper timing of handling
+  //std::cout << "telegram_bot::one_shot destruction" << std::endl;  // ensuring proper timing of handling
   //m_stream.shutdown();  // doesn't like this
   m_buffer.clear();
   m_response.clear();
@@ -153,7 +153,7 @@ void one_shot::get(
   const std::string& sHost
 , const std::string& sPort
 , const std::string& sTelegramToken
-, const std::string& sTarget
+, const std::string& sCommand
 , const std::string& sBody
 , fDone_t&& fDone
 ) {
@@ -177,7 +177,7 @@ void one_shot::get(
   m_request_body.set( http::field::user_agent, sUserAgent );
   m_request_body.set( http::field::content_type, "application/json" );
 
-  const std::string s( "/bot" + sTelegramToken + "/" + sTarget );
+  const std::string sTarget( "/bot" + sTelegramToken + "/" + sCommand );
   //std::cout << "get request: '" << s << "'" << std::endl;
   m_request_body.target( sTarget );
 
@@ -200,7 +200,7 @@ void one_shot::post(
   const std::string& sHost
 , const std::string& sPort
 , const std::string& sTelegramToken
-, const std::string& sTarget
+, const std::string& sCommand
 , const std::string& sBody
 , fDone_t&& fDone
 ) {
@@ -224,8 +224,8 @@ void one_shot::post(
   m_request_body.set( http::field::user_agent, sUserAgent );
   m_request_body.set( http::field::content_type, "application/json" );
 
-  const std::string s( "/bot" + sTelegramToken + "/" + sTarget );
-  //std::cout << "get request: '" << s << "'" << std::endl;
+  const std::string sTarget( "/bot" + sTelegramToken + "/" + sCommand );
+  //std::cout << "post target: '" << sTarget << "'" << std::endl;
   m_request_body.target( sTarget );
 
   m_request_body.body() = sBody;
@@ -455,8 +455,9 @@ void one_shot::on_shutdown( beast::error_code ec ) {
       // http://stackoverflow.com/questions/25587403/boost-asio-ssl-async-shutdown-always-finishes-with-an-error
       ec = {};
   }
-  if(ec)
-    return fail( ec, "os.shutdown" );
+  if ( ec ) {
+    //return fail( ec, "os.shutdown" );
+  }
 
   // If we get here then the connection is closed gracefully
 }

@@ -153,7 +153,6 @@ private:
 
   std::unique_ptr<telegram::Bot> m_telegram_bot;
   void Telegram_GetMe();
-  void Telegram_GetUpdates();
   void Telegram_SendMessage();
 
   virtual bool OnInit();
@@ -196,6 +195,7 @@ private:
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
     ar & m_splitterData->GetSashPosition();
+    ar & ( ( m_telegram_bot ) ? m_telegram_bot->GetChatId() : 0 );
   }
 
   template<typename Archive>
@@ -206,13 +206,20 @@ private:
       ar & x;
       m_splitterData->SetSashPosition( x );
     }
+    if ( 3 <= version ) {
+      uint64_t id;
+      ar & id;
+      if ( m_telegram_bot ) {
+        m_telegram_bot->SetChatId( id );
+      }
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
-BOOST_CLASS_VERSION(AppAutoTrade, 2)
+BOOST_CLASS_VERSION(AppAutoTrade, 3)
 
 DECLARE_APP(AppAutoTrade)
 

@@ -130,6 +130,7 @@ namespace telegram {
 
 Bot::Bot( const std::string& sToken )
 : m_sToken( sToken )
+, m_idChat {}
 , m_ssl_context( ssl::context::tlsv12_client )
 {
   // This holds the root certificate used for verification
@@ -178,7 +179,7 @@ void Bot::PollUpdate( uint64_t offset ) {
     }
     std::string sRequest = json::serialize( UpdateRequest );
     //std::string sRequest( "[\"timeout\":1]" );
-    std::cout << "request='" << sRequest << "'" << std::endl;
+    //std::cout << "request='" << sRequest << "'" << std::endl;
 
     auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
     request->get(
@@ -189,7 +190,7 @@ void Bot::PollUpdate( uint64_t offset ) {
     , sRequest
     , [this]( bool bStatus, const std::string& message ){
         if ( bStatus ) {
-          std::cout << "update received: '" << message << "'" << std::endl;
+          //std::cout << "update received: '" << message << "'" << std::endl;
           try {
 
             json::error_code jec;
@@ -206,6 +207,7 @@ void Bot::PollUpdate( uint64_t offset ) {
                 for ( const std::vector<Update>::value_type& vt: ur.result ) {
                   if ( vt.id > offset ) {
                     offset = vt.id;
+                    m_idChat = vt.message.chat.id;
                     std::cout
                       << "msg from="
                       << vt.message.from.id
@@ -243,25 +245,65 @@ void Bot::PollUpdates() {
   PollUpdate( 0 );
 }
 
-void Bot::SendMessage() {
+void Bot::SendMessage( const std::string& sMessage) {
+
   if ( m_pWorkGuard ) {
-    auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
-    //std::string sRequest( "{\"chat_id\":\"@OneUnified\",\"text\":\"Hello World 2\",\"parse_mode\":\"HTML\"}" );
-    std::string sRequest( "{\"chat_id\":5467345437,\"text\":\"<b>Hello World</b> 2\",\"parse_mode\":\"HTML\"}" );
-    //std::string sRequest( "[\"chat_id\":\"@OneUnified\",\"parse_mode\":\"HTML\"]" );
-    //std::string sRequest( "[\"text\":\"test message\",\"parse_mode\":\"HTML\"]" );
-    //std::cout << "request='" << sRequest << "'" << std::endl;
-    request->post(
-      "api.telegram.org"
-    , "443"
-    , m_sToken
-    , "sendMessage"
-    , sRequest
-    , [this]( bool bStatus, const std::string& message ){
-        std::cout << message << std::endl;
-      }
-    );
+    if ( 0 == m_idChat ) {
+      std::cout << "telegram send message: no chat id set" << std::endl;
+    }
+    else {
+
+      json::object UpdateRequest;
+      UpdateRequest[ "chat_id" ] = m_idChat;
+      UpdateRequest[ "parse_mode" ] = "HTML";
+      UpdateRequest[ "text" ] = sMessage;
+      std::string sRequest = json::serialize( UpdateRequest );
+      //std::cout << "request='" << sRequest << "'" << std::endl;
+
+      auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
+      request->post(
+        "api.telegram.org"
+      , "443"
+      , m_sToken
+      , "sendMessage"
+      , sRequest
+      , [this]( bool bStatus, const std::string& message ){
+          //std::cout << "telegram response: " << message << std::endl;
+        }
+      );
+    }
   }
 }
 
 } // namespace telegram
+
+/*
+'{"ok":true,
+  "result":[
+    {"update_id":771878720,
+      "message":
+        {"message_id":2,
+          "from":{
+              "id":5467345437,
+              "is_bot":false,
+              "first_name":"Raymond",
+              "last_name":"Burkholder",
+              "username":"OneUnified",
+              "language_code":"en"
+              },
+          "chat":{
+            "id":5467345437,
+            "first_name":"Raymond",
+            "last_name":"Burkholder",
+            "username":"OneUnified",
+            "type":"private"
+            },
+          "date":1676791780,
+          "text":"Test"
+          }
+        }
+      ]
+    }
+'
+
+*/

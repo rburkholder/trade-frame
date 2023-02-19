@@ -269,16 +269,9 @@ bool AppAutoTrade::OnInit() {
 
   } // live configuration
 
-  vItems.clear();
-  vItems.push_back( new mi( "Get Me", MakeDelegate( this, &AppAutoTrade::Telegram_GetMe ) ) );
-  vItems.push_back( new mi( "Get Updates", MakeDelegate( this, &AppAutoTrade::Telegram_GetUpdates ) ) );
-  vItems.push_back( new mi( "Send Message", MakeDelegate( this, &AppAutoTrade::Telegram_SendMessage ) ) );
-  m_pFrameMain->AddDynamicMenu( "Telegram", vItems );
-
-  // disable the panel for now, allows std::cout to be useful by Telegram testing
-  //m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
-  //m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-  //sizerUpper->Add(m_pPanelLogging, 2, wxEXPAND, 2);
+  m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+  m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+  sizerUpper->Add(m_pPanelLogging, 2, wxEXPAND, 2);
 
   sizerLower = new wxBoxSizer(wxVERTICAL);
   sizerFrame->Add(sizerLower, 1, wxEXPAND, 2);
@@ -300,6 +293,18 @@ bool AppAutoTrade::OnInit() {
     boost::filesystem::remove( sDbName );
     }
   //}
+
+  if ( m_choices.sTelegramToken.empty() ) {
+    std::cout << "telegram: no token available" << std::endl;
+  }
+  else {
+    m_telegram_bot = std::make_unique<telegram::Bot>( m_choices.sTelegramToken );
+
+    vItems.clear();
+    vItems.push_back( new mi( "Get Me", MakeDelegate( this, &AppAutoTrade::Telegram_GetMe ) ) );
+    vItems.push_back( new mi( "Send Message", MakeDelegate( this, &AppAutoTrade::Telegram_SendMessage ) ) );
+    m_pFrameMain->AddDynamicMenu( "Telegram", vItems );
+  }
 
   // this needs to be placed after the providers are registered
   m_pdb = std::make_unique<ou::tf::db>( sDbName ); // construct database
@@ -446,24 +451,21 @@ bool AppAutoTrade::OnInit() {
 }
 
 void AppAutoTrade::Telegram_GetMe() {
-  if ( !m_telegram_bot ) { // TODO: autostart in one place
-    m_telegram_bot = std::make_unique<telegram::Bot>( m_choices.sTelegramToken );
+  if ( m_telegram_bot ) {
+    m_telegram_bot->GetMe();
   }
-  m_telegram_bot->GetMe();
-}
-
-void AppAutoTrade::Telegram_GetUpdates() {
-  if ( !m_telegram_bot ) { // TODO: autostart in one place
-    m_telegram_bot = std::make_unique<telegram::Bot>( m_choices.sTelegramToken );
+  else {
+    std::cout << "telegram bot is not available" << std::endl;
   }
-//  m_telegram_bot->GetUpdates();
 }
 
 void AppAutoTrade::Telegram_SendMessage() {
-  if ( !m_telegram_bot ) { // TODO: autostart in one place
-    m_telegram_bot = std::make_unique<telegram::Bot>( m_choices.sTelegramToken );
+  if ( m_telegram_bot ) {
+    m_telegram_bot->SendMessage( "Menu Test" );
   }
-  m_telegram_bot->SendMessage();
+  else {
+    std::cout << "telegram bot is not available" << std::endl;
+  }
 }
 
 void AppAutoTrade::HandleSimConnected( int ) {
@@ -886,8 +888,6 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
 
   //m_pFrameControls->Close();
 
-  m_telegram_bot.reset();
-
   if ( !m_choices.bStartSimulator ) {
     m_timerOneSecond.Stop();
     Unbind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
@@ -913,5 +913,8 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a
   SaveState();
+
+  m_telegram_bot.reset(); // after SaveState - needs chat id
+
   event.Skip();  // auto followed by Destroy();
 }

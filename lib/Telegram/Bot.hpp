@@ -37,11 +37,17 @@ public:
   Bot( const std::string& sToken );
   ~Bot();
 
+  void SetChatId( uint64_t idChat ) { m_idChat = idChat; };
+  uint64_t GetChatId() const { return m_idChat; }
+
   void GetMe();
-  void SendMessage();
+
+  void SendMessage( const std::string& );
 
 protected:
 private:
+
+  uint64_t m_idChat;
 
   const std::string m_sToken;
 
