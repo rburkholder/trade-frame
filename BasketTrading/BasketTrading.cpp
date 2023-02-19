@@ -180,13 +180,13 @@ void AppBasketTrading::Init() {
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
 
   vItems.clear();
-  vItems.push_back( new mi( "Close Cover", MakeDelegate( this, &AppBasketTrading::HandleCloseCover ) ) );
-  vItems.push_back( new mi( "Close Synth Short", MakeDelegate( this, &AppBasketTrading::HandleCloseSynthShort ) ) );
-  vItems.push_back( new mi( "Lock Synth Long", MakeDelegate( this, &AppBasketTrading::HandleLockSynthLong ) ) );
-  vItems.push_back( new mi( "Lock Protection", MakeDelegate( this, &AppBasketTrading::HandleLockProtection ) ) );
+  vItems.push_back( new mi( "Close Cover (tbc)", MakeDelegate( this, &AppBasketTrading::HandleCloseCover ) ) );
+  vItems.push_back( new mi( "Close Synth Short (tbc)", MakeDelegate( this, &AppBasketTrading::HandleCloseSynthShort ) ) );
+  vItems.push_back( new mi( "Lock Synth Long (tbc)", MakeDelegate( this, &AppBasketTrading::HandleLockSynthLong ) ) );
+  vItems.push_back( new mi( "Lock Protection (tbc)", MakeDelegate( this, &AppBasketTrading::HandleLockProtection ) ) );
   // used to roll short in the money to next expiry to take premium and hopefully recoup loss
-  vItems.push_back( new mi( "Roll Cover", MakeDelegate( this, &AppBasketTrading::HandleRollCover ) ) );
-  vItems.push_back( new mi( "Roll Synth Short", MakeDelegate( this, &AppBasketTrading::HandleRollSynthShort ) ) );
+  vItems.push_back( new mi( "Roll Cover (tbc)", MakeDelegate( this, &AppBasketTrading::HandleRollCover ) ) );
+  vItems.push_back( new mi( "Roll Synth Short (tbc)", MakeDelegate( this, &AppBasketTrading::HandleRollSynthShort ) ) );
   m_pFrameMain->AddDynamicMenu( "Legs", vItems );
 
   LoadState();
