@@ -22,8 +22,14 @@
 // telegram bot api:  https://core.telegram.org/bots/api#sendmessage
 // @BotFather to obtain token: https://core.telegram.org/bots/tutorial
 
+#include <vector>
+#include <stdexcept>
+#include <string_view>
+
 #include <iostream>
 #include <functional>
+
+#include <boost/json.hpp>
 
 #include <boost/asio/strand.hpp>
 
@@ -32,6 +38,93 @@
 #include "root_certificates.hpp"
 
 #include "Bot.hpp"
+
+namespace json = boost::json;
+
+struct Update_Message_From {
+  uint64_t id;
+  bool bIsbot;
+  std::string_view svFirstName;
+  std::string_view svLastName;
+  std::string_view svUserName;
+  std::string_view svLanguageCode;
+};
+
+Update_Message_From tag_invoke( json::value_to_tag<Update_Message_From>, json::value const& jv ) {
+  json::object const& obj = jv.as_object();
+  return Update_Message_From {
+    json::value_to<uint64_t>( obj.at( "id" ) ),
+    json::value_to<bool>( obj.at( "is_bot" ) ),
+    json::value_to<std::string_view>( obj.at( "first_name" ) ),
+    json::value_to<std::string_view>( obj.at( "last_name" ) ),
+    json::value_to<std::string_view>( obj.at( "username" ) ),
+    json::value_to<std::string_view>( obj.at( "language_code" ) )
+  };
+}
+
+struct Update_Message_Chat {
+  uint64_t id;
+  std::string_view svFirstName;
+  std::string_view svLastName;
+  std::string_view svUserName;
+  std::string_view svType; // 'private'
+};
+
+Update_Message_Chat tag_invoke( json::value_to_tag<Update_Message_Chat>, json::value const& jv ) {
+  json::object const& obj = jv.as_object();
+  return Update_Message_Chat {
+    json::value_to<uint64_t>( obj.at( "id" ) ),
+    json::value_to<std::string_view>( obj.at( "first_name" ) ),
+    json::value_to<std::string_view>( obj.at( "last_name" ) ),
+    json::value_to<std::string_view>( obj.at( "username" ) ),
+    json::value_to<std::string_view>( obj.at( "type" ) )
+  };
+}
+
+struct Update_Message {
+  uint64_t id;
+  Update_Message_From from;
+  Update_Message_Chat chat;
+  uint64_t date;
+  std::string_view svText;
+};
+
+Update_Message tag_invoke( json::value_to_tag<Update_Message>, json::value const& jv ) {
+  json::object const& obj = jv.as_object();
+  return Update_Message {
+    json::value_to<uint64_t>( obj.at( "message_id" ) ),
+    json::value_to<Update_Message_From>( obj.at( "from" ) ),
+    json::value_to<Update_Message_Chat>( obj.at( "chat" ) ),
+    json::value_to<uint64_t>( obj.at( "date" ) ),
+    json::value_to<std::string_view>( obj.at( "text" ) )
+  };
+}
+
+struct Update {
+  uint64_t id;
+  Update_Message message;
+};
+
+Update tag_invoke( json::value_to_tag<Update>, json::value const& jv ) {
+  json::object const& obj = jv.as_object();
+  return Update {
+    json::value_to<uint64_t>( obj.at( "update_id" ) ),
+    json::value_to<Update_Message>( obj.at( "message" ) )
+  };
+}
+
+struct Update_Result {
+  bool bOk;
+  std::vector<Update> result;
+};
+
+Update_Result tag_invoke( json::value_to_tag<Update_Result>, json::value const& jv ) {
+  json::object const& obj = jv.as_object();
+  return Update_Result {
+    json::value_to<bool>( obj.at( "ok" ) ),
+    json::value_to<std::vector<Update> >( obj.at( "result" ) )
+  };
+}
 
 namespace telegram {
 
@@ -48,6 +141,8 @@ Bot::Bot( const std::string& sToken )
 
   m_pWorkGuard = std::make_unique<work_guard_t>( asio::make_work_guard( m_io ) );
   m_thread = std::move( std::thread( [this](){ m_io.run(); } ) );
+
+  PollUpdates();
 }
 
 Bot::~Bot() {
@@ -55,52 +150,118 @@ Bot::~Bot() {
   if ( m_thread.joinable() ) {
     m_thread.join();
   }
-
 }
 
 void Bot::GetMe() {
-  auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
-  request->get(
-    "api.telegram.org"
-  , "443"
-  , m_sToken
-  , "getMe"
-  , [this]( bool bStatus, const std::string& message ){
-      std::cout << message << std::endl;
-    }
-  );
+  if ( m_pWorkGuard ) {
+    auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
+    request->get(
+      "api.telegram.org"
+    , "443"
+    , m_sToken
+    , "getMe"
+    , [this]( bool bStatus, const std::string& message ){
+        std::cout << message << std::endl;
+      }
+    );
+
+  }
 }
 
-void Bot::GetUpdates() {
-  auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
-  std::string sRequest( "{\"timeout\":1}" );
-  std::cout << "request='" << sRequest << "'" << std::endl;
-  request->get(
-    "api.telegram.org"
-  , "443"
-  , m_sToken
-  , "getUpdates"
-  , sRequest
-  , [this]( bool bStatus, const std::string& message ){
-      std::cout << message << std::endl;
+void Bot::PollUpdate( uint64_t offset ) {
+  if ( m_pWorkGuard ) {
+
+    json::object UpdateRequest;
+    UpdateRequest[ "timeout" ] = 1;
+    if ( 0 < offset ) {
+      UpdateRequest[ "offset" ] = offset;
     }
-  );
+    std::string sRequest = json::serialize( UpdateRequest );
+    //std::string sRequest( "[\"timeout\":1]" );
+    std::cout << "request='" << sRequest << "'" << std::endl;
+
+    auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
+    request->get(
+      "api.telegram.org"
+    , "443"
+    , m_sToken
+    , "getUpdates"
+    , sRequest
+    , [this]( bool bStatus, const std::string& message ){
+        if ( bStatus ) {
+          std::cout << "update received: '" << message << "'" << std::endl;
+          try {
+
+            json::error_code jec;
+            json::value jv = json::parse( message, jec );
+
+            if ( jec.failed() ) {
+              std::cerr << "json convert problem: " << jec.what() << std::endl;
+            }
+            else {
+              Update_Result ur( json::value_to<Update_Result>( jv ) );
+
+              if ( ur.bOk ) {
+                uint64_t offset {};
+                for ( const std::vector<Update>::value_type& vt: ur.result ) {
+                  if ( vt.id > offset ) {
+                    offset = vt.id;
+                    std::cout
+                      << "msg from="
+                      << vt.message.from.id
+                      << "(" << vt.message.from.svUserName << ")"
+                      << ",chat=" << vt.message.chat.id
+                      << "(" << vt.message.chat.svUserName << ")"
+                      << ",type=" << vt.message.chat.svType
+                      << ",text=" << vt.message.svText
+                      << std::endl;
+                  }
+                }
+
+                PollUpdate( ( 0 == offset ) ? 0 : offset + 1 );
+              }
+            }
+
+          }
+          catch( std::invalid_argument ) {
+            std::cerr << "PollUpdate invalid argument" << std::endl;
+          }
+          catch (...) {
+            std::cerr << "PollUpdate: unknown issue" << std::endl;
+          }
+
+        }
+        else {
+          std::cerr << "PollUpdate bad status" << std::endl;
+        }
+      }
+    );
+  }
+}
+
+void Bot::PollUpdates() {
+  PollUpdate( 0 );
 }
 
 void Bot::SendMessage() {
-  auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
-  std::string sRequest( "{\"chat_id\":\"@OneUnified\",\"text\":\"test message\"}" );
-  std::cout << "request='" << sRequest << "'" << std::endl;
-  request->post(
-    "api.telegram.org"
-  , "443"
-  , m_sToken
-  , "sendMessage"
-  , sRequest
-  , [this]( bool bStatus, const std::string& message ){
-      std::cout << message << std::endl;
-    }
-  );
+  if ( m_pWorkGuard ) {
+    auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
+    //std::string sRequest( "{\"chat_id\":\"@OneUnified\",\"text\":\"Hello World 2\",\"parse_mode\":\"HTML\"}" );
+    std::string sRequest( "{\"chat_id\":5467345437,\"text\":\"<b>Hello World</b> 2\",\"parse_mode\":\"HTML\"}" );
+    //std::string sRequest( "[\"chat_id\":\"@OneUnified\",\"parse_mode\":\"HTML\"]" );
+    //std::string sRequest( "[\"text\":\"test message\",\"parse_mode\":\"HTML\"]" );
+    //std::cout << "request='" << sRequest << "'" << std::endl;
+    request->post(
+      "api.telegram.org"
+    , "443"
+    , m_sToken
+    , "sendMessage"
+    , sRequest
+    , [this]( bool bStatus, const std::string& message ){
+        std::cout << message << std::endl;
+      }
+    );
+  }
 }
 
 } // namespace telegram

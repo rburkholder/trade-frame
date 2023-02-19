@@ -38,7 +38,6 @@ public:
   ~Bot();
 
   void GetMe();
-  void GetUpdates();
   void SendMessage();
 
 protected:
@@ -46,16 +45,18 @@ private:
 
   const std::string m_sToken;
 
+  std::thread m_thread;
+
+  ssl::context m_ssl_context;
   boost::asio::io_context m_io;
 
   using work_guard_t = asio::executor_work_guard<boost::asio::io_context::executor_type>;
   using pWorkGuard_t = std::unique_ptr<work_guard_t>;
 
-  ssl::context m_ssl_context;
-
   pWorkGuard_t m_pWorkGuard;
 
-  std::thread m_thread;
+  void PollUpdate( uint64_t offset );
+  void PollUpdates();
 
 };
 
