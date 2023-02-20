@@ -41,6 +41,10 @@
 
 namespace json = boost::json;
 
+namespace telegram {
+
+// structure Update_Message_From, part of Update_Message
+
 struct Update_Message_From {
   uint64_t id;
   bool bIsbot;
@@ -62,6 +66,8 @@ Update_Message_From tag_invoke( json::value_to_tag<Update_Message_From>, json::v
   };
 }
 
+// structure Update_Message_Chat, part of Update_Message
+
 struct Update_Message_Chat {
   uint64_t id;
   std::string_view svFirstName;
@@ -80,6 +86,8 @@ Update_Message_Chat tag_invoke( json::value_to_tag<Update_Message_Chat>, json::v
     json::value_to<std::string_view>( obj.at( "type" ) )
   };
 }
+
+// structure Update_Message, part of Update
 
 struct Update_Message {
   uint64_t id;
@@ -100,6 +108,8 @@ Update_Message tag_invoke( json::value_to_tag<Update_Message>, json::value const
   };
 }
 
+// structure Update, part of Update_Result
+
 struct Update {
   uint64_t id;
   Update_Message message;
@@ -112,6 +122,8 @@ Update tag_invoke( json::value_to_tag<Update>, json::value const& jv ) {
     json::value_to<Update_Message>( obj.at( "message" ) )
   };
 }
+
+// structure Update_Result
 
 struct Update_Result {
   bool bOk;
@@ -126,7 +138,7 @@ Update_Result tag_invoke( json::value_to_tag<Update_Result>, json::value const& 
   };
 }
 
-namespace telegram {
+// class Bot
 
 Bot::Bot( const std::string& sToken )
 : m_sToken( sToken )
