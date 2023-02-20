@@ -294,16 +294,18 @@ bool AppAutoTrade::OnInit() {
     }
   //}
 
-  if ( m_choices.sTelegramToken.empty() ) {
-    std::cout << "telegram: no token available" << std::endl;
-  }
-  else {
-    m_telegram_bot = std::make_unique<telegram::Bot>( m_choices.sTelegramToken );
+  if ( !m_choices.bStartSimulator ) { // TODO: use separate config file flag for enabling the bot?
+    if ( m_choices.sTelegramToken.empty() ) {
+      std::cout << "telegram: no token available" << std::endl;
+    }
+    else {
+      m_telegram_bot = std::make_unique<telegram::Bot>( m_choices.sTelegramToken );
 
-    vItems.clear();
-    vItems.push_back( new mi( "Get Me", MakeDelegate( this, &AppAutoTrade::Telegram_GetMe ) ) );
-    vItems.push_back( new mi( "Send Message", MakeDelegate( this, &AppAutoTrade::Telegram_SendMessage ) ) );
-    m_pFrameMain->AddDynamicMenu( "Telegram", vItems );
+      vItems.clear();
+      vItems.push_back( new mi( "Get Me", MakeDelegate( this, &AppAutoTrade::Telegram_GetMe ) ) );
+      vItems.push_back( new mi( "Send Message", MakeDelegate( this, &AppAutoTrade::Telegram_SendMessage ) ) );
+      m_pFrameMain->AddDynamicMenu( "Telegram", vItems );
+    }
   }
 
   // this needs to be placed after the providers are registered
