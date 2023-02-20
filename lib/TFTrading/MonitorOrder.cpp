@@ -29,7 +29,7 @@ namespace ou {
 namespace tf {
 
 namespace {
-  const size_t nAdjustmentPeriods( 4 );
+  const size_t c_nAdjustmentPeriods( 4 );
 }
 
 MonitorOrder::MonitorOrder()
@@ -113,7 +113,13 @@ double MonitorOrder::PriceInterval( double price ) const { // step #2
 
   if ( pInstrument->ExchangeRuleAvailable() ) {
     auto idRule = pInstrument->GetExchangeRule();
-    interval = ou::tf::ib::TWS::Cast( m_pPosition->GetExecutionProvider() )->GetInterval( price, idRule );
+    switch ( m_pPosition->GetExecutionProvider()->ID() ) {
+      case ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIB:
+        interval = ou::tf::ib::TWS::Cast( m_pPosition->GetExecutionProvider() )->GetInterval( price, idRule );
+        break;
+      default:
+        assert( false );  // will need to work on alternate logic
+    }
   }
   else {
     interval = pInstrument->GetMinTick();
@@ -154,7 +160,7 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
           m_pOrder->SetSignalPrice( dblNormalizedPrice );
           m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
           m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
-          m_CountDownToAdjustment = nAdjustmentPeriods;
+          m_CountDownToAdjustment = c_nAdjustmentPeriods;
           m_pPosition->PlaceOrder( m_pOrder );
           BOOST_LOG_TRIVIAL(info)
             << "MonitorOrder "
@@ -181,6 +187,9 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
       break;
     case State::NoPosition:
       BOOST_LOG_TRIVIAL(info) << "MonitorOrder::PlaceOrder: " << m_pPosition->GetInstrument()->GetInstrumentName() << ": no position";
+      break;
+    case State::ManualCancel:
+      assert( false ); // will need to correct the logic?  or is this a fall-through?
       break;
   }
   return bOk;
@@ -337,7 +346,7 @@ void MonitorOrder::UpdateOrder( ptime dt ) {
             }
             break;
           default:
-            assert( 0 );
+            assert( false );
             break;
         }
         // TODO: need to cancel both legs if spread is not < something reasonable
@@ -360,9 +369,8 @@ void MonitorOrder::UpdateOrder( ptime dt ) {
           m_pPosition->UpdateOrder( m_pOrder );
 
         }
-        m_CountDownToAdjustment = nAdjustmentPeriods;
+        m_CountDownToAdjustment = c_nAdjustmentPeriods;
       }
-
     }
   }
 }
@@ -438,7 +446,6 @@ void MonitorOrder::OrderFilled( const ou::tf::Order& order ) { // TODO: delegate
         << ": fillled has no matching state (" << (int)m_state << ")"
         ;
   }
-
 }
 
 } // namespace ou

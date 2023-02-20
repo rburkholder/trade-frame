@@ -19,8 +19,14 @@
  * Created on May 25, 2019, 1:44 PM
  */
 
-#ifndef MONITORORDER_H
-#define MONITORORDER_H
+#ifndef OU_TF_MONITORORDER_H
+#define OU_TF_MONITORORDER_H
+
+/*
+  * manages the creation, submission, and adjustment of a limit order
+  * restricted to one order at a time
+  * NOTE: will require a tick between close/cancel and new order for state to change
+*/
 
 #include "Order.h"
 #include "Position.h"
@@ -28,8 +34,6 @@
 namespace ou {
 namespace tf {
 
-// devoted to one Order at a time, runs as limit order
-// NOTE: will require a tick between close/cancel and new order
 class MonitorOrder {
 public:
 
@@ -43,12 +47,11 @@ public:
 
   void SetPosition( pPosition_t pPosition );
 
-  // can only work on one order at a time
   bool PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide::EOrderSide side );
   void CancelOrder();
   void ClosePosition();
 
-  void Tick( ptime dt );
+  void Tick( ptime dt ); // one second interval
 
   bool IsOrderActive() const;
 
@@ -85,4 +88,4 @@ private:
 } // namespace ou
 } // namespace tf
 
-#endif /* MONITORORDER_H */
+#endif /* OU_TF_MONITORORDER_H */
