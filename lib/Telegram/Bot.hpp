@@ -64,6 +64,8 @@ private:
   void PollUpdate( uint64_t offset );
   void PollUpdates();
 
+  void SetMyCommands();
+
 };
 
 } // namespace telegram

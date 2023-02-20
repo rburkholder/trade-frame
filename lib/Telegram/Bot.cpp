@@ -43,6 +43,9 @@ namespace json = boost::json;
 
 namespace telegram {
 
+static const std::string c_sHost( "api.telegram.org" );
+static const std::string c_sPort( "443" );
+
 // structure Update_Message_From, part of Update_Message
 
 struct Update_Message_From {
@@ -87,6 +90,26 @@ Update_Message_Chat tag_invoke( json::value_to_tag<Update_Message_Chat>, json::v
   };
 }
 
+// structure MessageEntity, part of Update_Message
+
+struct MessageEntity {
+  std::string_view svType;
+  uint32_t offset;
+  uint32_t length;
+  std::string_view svUrl; // optional
+  //std::string_view svUser; // optional
+  //std::string_view svLanguage
+};
+
+MessageEntity tag_invoke( json::value_to_tag<MessageEntity>, json::value const& jv ) {
+  json::object const& obj = jv.as_object();
+  return MessageEntity {
+    json::value_to<std::string_view>( obj.at( "type" ) ),
+    json::value_to<uint32_t>( obj.at( "offset" ) ),
+    json::value_to<uint32_t>( obj.at( "length" ) ),
+  };
+}
+
 // structure Update_Message, part of Update
 
 struct Update_Message {
@@ -95,17 +118,22 @@ struct Update_Message {
   Update_Message_Chat chat;
   uint64_t date;
   std::string_view svText;
+  std::vector<MessageEntity> vMessageEntity;
 };
 
 Update_Message tag_invoke( json::value_to_tag<Update_Message>, json::value const& jv ) {
   json::object const& obj = jv.as_object();
-  return Update_Message {
+  Update_Message um {
     json::value_to<uint64_t>( obj.at( "message_id" ) ),
     json::value_to<Update_Message_From>( obj.at( "from" ) ),
     json::value_to<Update_Message_Chat>( obj.at( "chat" ) ),
     json::value_to<uint64_t>( obj.at( "date" ) ),
-    json::value_to<std::string_view>( obj.at( "text" ) )
+    json::value_to<std::string_view>( obj.at( "text" ) ),
   };
+  if ( obj.contains( "entities" ) ) {
+    um.vMessageEntity = json::value_to<std::vector<MessageEntity> >( obj.at( "entities" ) );
+  }
+  return um;
 }
 
 // structure Update, part of Update_Result
@@ -156,6 +184,7 @@ Bot::Bot( const std::string& sToken )
   m_thread = std::move( std::thread( [this](){ m_io.run(); } ) );
 
   PollUpdates();
+  SetMyCommands();
 }
 
 Bot::~Bot() {
@@ -169,8 +198,8 @@ void Bot::GetMe() {
   if ( m_pWorkGuard ) {
     auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
     request->get(
-      "api.telegram.org"
-    , "443"
+      c_sHost
+    , c_sPort
     , m_sToken
     , "getMe"
     , [this]( bool bStatus, const std::string& message ){
@@ -195,8 +224,8 @@ void Bot::PollUpdate( uint64_t offset ) {
 
     auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
     request->get(
-      "api.telegram.org"
-    , "443"
+      c_sHost
+    , c_sPort
     , m_sToken
     , "getUpdates"
     , sRequest
@@ -218,6 +247,7 @@ void Bot::PollUpdate( uint64_t offset ) {
                 uint64_t offset {};
                 for ( const std::vector<Update>::value_type& vt: ur.result ) {
                   if ( vt.id > offset ) {
+                    // extract the chat id
                     offset = vt.id;
                     m_idChat = vt.message.chat.id;
                     std::cout
@@ -229,6 +259,25 @@ void Bot::PollUpdate( uint64_t offset ) {
                       << ",type=" << vt.message.chat.svType
                       << ",text=" << vt.message.svText
                       << std::endl;
+
+                    // extract any message entities
+                    for ( const MessageEntity& me: vt.message.vMessageEntity ) {
+                      if ( "bot_command" == me.svType ) {
+                        std::cout
+                          << "  bot_command=" << vt.message.svText.substr( me.offset, me.length )
+                          << std::endl;
+                      }
+                      else {
+                        std::cout
+                          << "  other entity="
+                          << me.svType
+                          << "(" << vt.message.svText.substr( me.offset, me.length )
+                          << ")"
+                          //<< ",offset=" << me.offset
+                          //<< ",length=" << me.length
+                          << std::endl;
+                      }
+                    }
                   }
                 }
 
@@ -274,8 +323,8 @@ void Bot::SendMessage( const std::string& sMessage) {
 
       auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
       request->post(
-        "api.telegram.org"
-      , "443"
+        c_sHost
+      , c_sPort
       , m_sToken
       , "sendMessage"
       , sRequest
@@ -284,6 +333,52 @@ void Bot::SendMessage( const std::string& sMessage) {
         }
       );
     }
+  }
+}
+
+// this isn't actually required, as the update message has anything with '/' decoded as bot_command
+void Bot::SetMyCommands() {
+  if ( m_pWorkGuard ) {
+    json::object BotCommand;
+    json::array BotCommandList;
+
+    BotCommand[ "command" ] = "quote";
+    BotCommand[ "description" ] = "obtain quote of underlying";
+    BotCommandList.emplace_back( BotCommand );
+
+    BotCommand[ "command" ] = "buy";
+    BotCommand[ "description" ] = "market buy of underlying";
+    BotCommandList.emplace_back( BotCommand );
+
+    BotCommand[ "command" ] = "sell";
+    BotCommand[ "description" ] = "market sell of underlying";
+    BotCommandList.emplace_back( BotCommand );
+
+    BotCommand[ "command" ] = "position";
+    BotCommand[ "description" ] = "statistics of current position";
+    BotCommandList.emplace_back( BotCommand );
+
+    json::object BotCommandScope;
+    BotCommandScope[ "type" ] = "default";
+
+    json::object Parameters;
+    Parameters[ "commands" ] = BotCommandList;
+    Parameters[ "scope"] = BotCommandScope;
+
+    std::string sRequest = json::serialize( Parameters );
+    //std::cout << "setMyCommands request='" << sRequest << "'" << std::endl;
+
+    auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
+    request->post(
+      c_sHost
+    , c_sPort
+    , m_sToken
+    , "setMyCommands"
+    , sRequest
+    , [this]( bool bStatus, const std::string& message ){
+        //std::cout << "telegram setMyCommands response: " << message << std::endl;
+      }
+    );
   }
 }
 
