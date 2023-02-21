@@ -393,7 +393,8 @@ ManageStrategy::ManageStrategy(
         std::cout << "chain " << vt.first << " added with " << nStrikesTotal << " strikes" << std::endl;
       }
       else {
-        std::cout << "chain " << vt.first << " skipped with " << nStrikesTotal << " strikes" << std::endl;
+        std::cout << "chain " << vt.first << " skipped with " << nStrikesMatch << '/' << nStrikesTotal << " strikes" << std::endl;
+        // maybe remove odd strikes instead?
         vChainsToBeRemoved.push_back( vt.first );
       }
     }
@@ -712,10 +713,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               }
             ) ) {
 
-              // for a collar, always enter long, composition of legs indicates rising or falling momentum
-
               const idPortfolio_t idPortfolio
-                = combo_t::Name( sUnderlying, m_mapChains, dateBar, mid, direction, m_specsSpread );  // "collar-GLD-rise-20210730-165-20210630-167-165"
+                = combo_t::Name( sUnderlying, m_mapChains, dateBar, mid, direction, m_specsSpread );
 
               if ( m_fAuthorizeSimple( idPortfolio, sUnderlying, false ) ) {
 
@@ -736,7 +735,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 m_ptiSelf->UpdateText( idPortfolio );
                 m_pChartDataView->SetNames( idPortfolio, m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
 
-                m_pValidateOptions->Get(
+                m_pValidateOptions->Get( // process each option of set
                   [this,&idPortfolio,&combo,direction]( size_t ix, pOption_t pOption ){ // fValidatedOption_t -- need Strategy specific naming
                     // called for each of the legs
                     ou::tf::option::LegNote::values_t lnValues;
