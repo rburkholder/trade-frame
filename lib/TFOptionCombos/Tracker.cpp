@@ -51,16 +51,17 @@ Tracker::Tracker( Tracker&& rhs )
   m_transition( rhs.m_transition ),
   m_pChain( std::move( rhs.m_pChain ) ),
   m_pPosition( std::move( rhs.m_pPosition ) ),
-  m_pOption( std::move( rhs.m_pOption ) ),
+  m_pOptionCandidate( std::move( rhs.m_pOptionCandidate ) ),
   m_fConstructOption( std::move( rhs.m_fConstructOption ) ),
   m_fOpenLeg( std::move( rhs.m_fOpenLeg ) ),
   m_fCloseLeg( std::move( rhs.m_fCloseLeg ) )
 {
-  assert( !m_pOption );  // can't be watching
+  assert( !m_pOptionCandidate );  // can't be watching
 }
 
 Tracker::~Tracker() {
   Quiesce();
+  m_transition = ETransition::Done;
   m_pPosition.reset();
   m_fConstructOption = nullptr;
   m_fOpenLeg = nullptr;
@@ -82,6 +83,8 @@ void Tracker::Initialize(
   assert( fCloseLeg );
   assert( fOpenLeg );
   assert( ETransition::Initial == m_transition );
+  // this is for a premature roll, need better state management for this
+  //assert( ( ETransition::Initial == m_transition ) || ( ETransition::Roll == m_transition ) );
 
   m_pChain = pChain;
 
@@ -96,11 +99,11 @@ void Tracker::Initialize(
 
 void Tracker::Initialize( pPosition_t pPosition ) {
 
+  m_pPosition = std::move( pPosition );
+
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
-  m_pPosition = pPosition;
-
-  pInstrument_t pInstrument = m_pPosition->GetWatch()->GetInstrument();
+  pInstrument_t pInstrument = m_pPosition->GetInstrument();
   assert( pInstrument->IsOption() || pInstrument->IsFuturesOption() );
 
   m_dblStrikePosition = pInstrument->GetStrike();
@@ -132,12 +135,11 @@ void Tracker::TestLong( boost::posix_time::ptime dt, double dblUnderlyingSlope, 
 
         if ( m_compare( strikeItm, m_dblStrikePosition ) ) { // is new strike further itm?
           // TODO: refactor to remove the if/else and put Vacant/Construct together?
-          if ( m_pOption ) { // if already tracking the option
-            if ( m_compare( strikeItm, m_pOption->GetStrike() ) ) { // move further itm?
+          if ( m_pOptionCandidate ) { // if already tracking the option
+            if ( m_compare( strikeItm, m_pOptionCandidate->GetStrike() ) ) { // move further itm?
               m_transition = ETransition::Vacant;
-              m_pOption->StopWatch();
-              m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleLongOptionQuote ) );
-              m_pOption.reset();
+              OptionCandidate_StopWatch();
+              m_pOptionCandidate.reset();
               Construct( dt, strikeItm );
             }
             else {
@@ -173,7 +175,7 @@ void Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope,
         // close out when value close to zero
         const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
         if ( quote.IsNonZero() && ( quote.Ask() > quote.Bid() ) ) {
-          if ( 0.101 >= m_pPosition->GetWatch()->LastQuote().Ask() ) {
+          if ( 0.101 >= quote.Ask() ) {
             m_transition = ETransition::Fill;
             m_fCloseLeg( m_pPosition );
             m_transition = ETransition::Initial;
@@ -205,9 +207,8 @@ void Tracker::Construct( boost::posix_time::ptime dt, double strikeItm ) {
   m_fConstructOption(
     sName,
     [this]( pOption_t pOption ){
-      m_pOption = pOption;
-      m_pOption->OnQuote.Add( MakeDelegate( this, &Tracker::HandleLongOptionQuote ) );
-      m_pOption->StartWatch();
+      m_pOptionCandidate = pOption;
+      OptionCandidate_StartWatch();
       m_transition = ETransition::Track;
     } );
 }
@@ -232,25 +233,24 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
               // no one will buy our stuff
             }
             else {
-              auto pOld = m_pPosition->GetWatch();
+              auto pOldWatch = m_pPosition->GetWatch();
               std::cout
                 << quote.DateTime().time_of_day()
-                << ",old=" << pOld->GetInstrumentName()
-                << ",b=" << pOld->LastQuote().Bid()
-                << ",a=" << pOld->LastQuote().Ask()
-                << ",new=" << m_pOption->GetInstrument()->GetInstrumentName()
-                << ",b=" << m_pOption->LastQuote().Bid()
-                << ",a=" << m_pOption->LastQuote().Ask()
+                << ",old=" << pOldWatch->GetInstrumentName()
+                << ",b=" << pOldWatch->LastQuote().Bid()
+                << ",a=" << pOldWatch->LastQuote().Ask()
+                << ",new=" << m_pOptionCandidate->GetInstrument()->GetInstrumentName()
+                << ",b=" << m_pOptionCandidate->LastQuote().Bid()
+                << ",a=" << m_pOptionCandidate->LastQuote().Ask()
                 << ",roll-per-share-diff=" << diff
                 << ",underlying=" << m_dblUnderlyingPrice
                 << ",slope=" << m_dblUnderlyingSlope
                 << std::endl;
               m_transition = ETransition::Roll;
-              m_pOption->StopWatch();
-              m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleLongOptionQuote ) );
+              OptionCandidate_StopWatch();
               m_compare = nullptr;
               m_luStrike = nullptr;
-              pOption_t pOption( std::move( m_pOption ) );
+              pOption_t pOption( std::move( m_pOptionCandidate ) );
               std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
               m_fCloseLeg( m_pPosition );  // TODO: closer needs to use EnableStatsAdd
               // TODO: on opening a position, will need to extend states to handle order with errors
@@ -283,6 +283,7 @@ void Tracker::TestItmRoll( boost::gregorian::date date, boost::posix_time::time_
               m_compare = nullptr;
               m_luStrike = nullptr;
               std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
+
               m_fCloseLeg( m_pPosition );
 
               std::string sName;
@@ -317,12 +318,23 @@ void Tracker::TestItmRoll( boost::gregorian::date date, boost::posix_time::time_
   }
 }
 
-void Tracker::Quiesce() {
+void Tracker::OptionCandidate_StartWatch() {
+  assert( m_pOptionCandidate );
+  m_pOptionCandidate->OnQuote.Add( MakeDelegate( this, &Tracker::HandleLongOptionQuote ) );
+  m_pOptionCandidate->StartWatch();
+}
+
+void Tracker::OptionCandidate_StopWatch() {
+  assert( m_pOptionCandidate );
+  m_pOptionCandidate->StopWatch();
+  m_pOptionCandidate->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleLongOptionQuote ) );
+}
+
+void Tracker::Quiesce() { // called from destructor, Collar
   m_transition = ETransition::Quiesce;
-  if ( m_pOption ) {
-    m_pOption->StopWatch();
-    m_pOption->OnQuote.Remove( MakeDelegate( this, &Tracker::HandleLongOptionQuote ) );
-    m_pOption.reset();
+  if ( m_pOptionCandidate ) {
+    OptionCandidate_StopWatch();
+    m_pOptionCandidate.reset();
   }
 }
 

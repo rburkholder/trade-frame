@@ -31,8 +31,8 @@
 
 #include <TFTrading/Position.h>
 
-#include <TFOptions/Option.h>
 #include <TFOptions/Chain.h>
+#include <TFOptions/Option.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -69,7 +69,7 @@ public:
   void TestShort( boost::posix_time::ptime, double dblUnderlyingSlope, double dblUnderlyingPrice );
   void TestItmRoll( boost::gregorian::date, boost::posix_time::time_duration );
 
-  void Quiesce();
+  void Quiesce(); // called from Collar
 
 protected:
 private:
@@ -86,13 +86,22 @@ private:
   double m_dblUnderlyingPrice;
   double m_dblUnderlyingSlope;
 
-  enum class ETransition { Initial, Vacant, Fill, Acquire, Track, Roll, Quiesce, Done };
+  enum class ETransition {
+    Initial,   // on creation
+    Vacant,
+    Fill,
+    Acquire,
+    Track,
+    Roll,
+    Quiesce,
+    Done       // prepare for destruction
+    };
   ETransition m_transition;
 
   const chain_t* m_pChain;
 
   pPosition_t m_pPosition; // existing option / position
-  pOption_t m_pOption; // track an option for next position
+  pOption_t m_pOptionCandidate; // track an option for next position
 
   fConstructOption_t m_fConstructOption;
   fOpenLeg_t m_fOpenLeg;
@@ -101,6 +110,9 @@ private:
   void Construct( boost::posix_time::ptime, double strikeItm );
   void HandleLongOptionQuote( const ou::tf::Quote& );
   void Initialize( pPosition_t );
+
+  void OptionCandidate_StartWatch();
+  void OptionCandidate_StopWatch();
 
 };
 
