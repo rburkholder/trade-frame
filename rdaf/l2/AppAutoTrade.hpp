@@ -38,6 +38,8 @@
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
+#include <Telegram/Bot.hpp>
+
 #include <TFTrading/DBWrapper.h>
 
 #include <TFIQFeed/Provider.h>
@@ -62,10 +64,6 @@ class FrameMain;
 class wxTreeCtrl;
 class wxTreeEvent;
 class wxTimerEvent;
-
-namespace telegram {
-  class Bot;
-}
 
 namespace ou {
 namespace tf {

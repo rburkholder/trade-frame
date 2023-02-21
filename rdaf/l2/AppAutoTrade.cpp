@@ -58,8 +58,6 @@
 #include <TFVuTrading/WinChartView.h>
 #include <TFVuTrading/PanelProviderControlv2.hpp>
 
-#include <Telegram/Bot.hpp>
-
 #include "Strategy.hpp"
 #include "AppAutoTrade.hpp"
 
