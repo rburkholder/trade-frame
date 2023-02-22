@@ -25,6 +25,7 @@
 #include "OptionStatistics.hpp"
 
 // TODO: re-use the statistics in Leg?
+// TODO: remove spkes in charts
 
 OptionStatistics::OptionStatistics( pOption_t pOption )
 : m_ptiSelf( nullptr )
