@@ -34,7 +34,7 @@ class LegNote {
 public:
 
   enum class State { Open, Expired, Closed };
-  enum class Type { SynthLong, SynthShort, Cover, Protect };
+  enum class Type { SynthLong = 0, SynthShort = 1, Cover = 2, Protect = 3 };
   enum class Side { Long, Short };
   enum class Option { Call, Put };
   enum class Momentum { Rise, Fall };
@@ -57,6 +57,8 @@ public:
   LegNote& operator=( const LegNote&& );
   LegNote( const LegNote& ) = delete;
   virtual ~LegNote();
+
+  static std::string LU( Type );
 
   const values_t& Decode( const std::string& );
   const std::string Encode() const;

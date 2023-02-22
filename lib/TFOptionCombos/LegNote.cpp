@@ -31,6 +31,15 @@
 
 #include "LegNote.h"
 
+namespace {
+  static const char* Name_Type[] = {
+      "SynthLong"
+    , "SynthShort"
+    , "Cover"
+    , "Protect"
+  };
+}
+
 using values_t = ou::tf::option::LegNote::values_t;
 
  BOOST_FUSION_ADAPT_STRUCT(
@@ -275,6 +284,10 @@ void LegNote::Parse( const std::string& s ) {
 
   m_bValid = true;
 
+}
+
+std::string LegNote::LU( Type type ) {
+  return std::string( Name_Type[ (int)type ] );
 }
 
 } // namespace option
