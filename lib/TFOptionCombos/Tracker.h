@@ -49,7 +49,7 @@ public:
   using fConstructedOption_t = std::function<void(pOption_t)>;
   using fConstructOption_t   = std::function<void(const std::string&, fConstructedOption_t&&)>;
 
-  using fOpenLeg_t = std::function<pPosition_t/*new?*/(pOption_t,const std::string&)>;
+  using fOpenLeg_t = std::function<pPosition_t/*new?*/(pOption_t,const std::string& notes)>;
   using fCloseLeg_t = std::function<void(pPosition_t)>;
 
   Tracker();
@@ -68,6 +68,9 @@ public:
   void TestLong( boost::posix_time::ptime, double dblUnderlyingSlope, double dblUnderlyingPrice );
   void TestShort( boost::posix_time::ptime, double dblUnderlyingSlope, double dblUnderlyingPrice );
   void TestItmRoll( boost::gregorian::date, boost::posix_time::time_duration );
+
+  void Close();
+  void CalendarRoll();
 
   void Quiesce(); // called from Collar
 
@@ -88,12 +91,12 @@ private:
 
   enum class ETransition {
     Initial,   // on creation
-    Vacant,
-    Fill,
-    Acquire,
-    Track,
-    Roll,
-    Quiesce,
+    Vacant,    // constructing candidate
+    Fill,      // closing a leg
+    Acquire,   // during option candidate construction
+    Track,     // actively tracking price
+    Roll,      // needs to process the calendar roll at expiry
+    Quiesce,   // stop tracking
     Done       // prepare for destruction
     };
   ETransition m_transition;
@@ -107,7 +110,13 @@ private:
   fOpenLeg_t m_fOpenLeg;
   fCloseLeg_t m_fCloseLeg;
 
-  void Construct( boost::posix_time::ptime, double strikeItm );
+  using fOptionRoll_t = std::function<void()>;
+  using vOptionRollStack_t = std::vector<fOptionRoll_t>;
+  vOptionRollStack_t m_vOptionRollStack;
+
+  void PopOptionRollStack();
+
+  void ConstructOptionCandidate( boost::posix_time::ptime, double strikeItm );
   void HandleLongOptionQuote( const ou::tf::Quote& );
   void Initialize( pPosition_t );
 

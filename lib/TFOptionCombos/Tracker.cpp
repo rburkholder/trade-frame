@@ -19,6 +19,8 @@
  * Created: Novemeber 8, 2020, 11:41 AM
  */
 
+// 2023/02/22 TestShort has todo for rolling for premium
+
 #include "Tracker.h"
 
 namespace ou { // One Unified
@@ -83,8 +85,6 @@ void Tracker::Initialize(
   assert( fCloseLeg );
   assert( fOpenLeg );
   assert( ETransition::Initial == m_transition );
-  // this is for a premature roll, need better state management for this
-  //assert( ( ETransition::Initial == m_transition ) || ( ETransition::Roll == m_transition ) );
 
   m_pChain = pChain;
 
@@ -94,10 +94,11 @@ void Tracker::Initialize(
 
   Initialize( pPosition );
 
-  m_transition = ETransition::Track;
 }
 
 void Tracker::Initialize( pPosition_t pPosition ) {
+
+  m_transition = ETransition::Initial;
 
   m_pPosition = std::move( pPosition );
 
@@ -118,9 +119,12 @@ void Tracker::Initialize( pPosition_t pPosition ) {
       m_compare = &lt;
       m_luStrike = [pChain=m_pChain](double dblUnderlying){ return pChain->Put_Itm( dblUnderlying ); };
       break;
+    default:
+      assert( false );
   }
   assert( m_compare );
 
+  m_transition = ETransition::Track;
 }
 
 void Tracker::TestLong( boost::posix_time::ptime dt, double dblUnderlyingSlope, double dblUnderlyingPrice ) {
@@ -140,7 +144,7 @@ void Tracker::TestLong( boost::posix_time::ptime dt, double dblUnderlyingSlope, 
               m_transition = ETransition::Vacant;
               OptionCandidate_StopWatch();
               m_pOptionCandidate.reset();
-              Construct( dt, strikeItm );
+              ConstructOptionCandidate( dt, strikeItm );
             }
             else {
               // TODO: if retreating, stay pat, retreat, or try the roll?
@@ -150,13 +154,18 @@ void Tracker::TestLong( boost::posix_time::ptime dt, double dblUnderlyingSlope, 
           else {
             // need to obtain option, but track via state machine to request only once
             m_transition = ETransition::Vacant;
-            Construct( dt, strikeItm );
+            ConstructOptionCandidate( dt, strikeItm );
           }
         }
         else {
           // nothing to do, hasn't moved enough itm
         }
       }
+      break;
+    case ETransition::Roll:
+      PopOptionRollStack();
+      break;
+    default:
       break;
   }
 
@@ -176,44 +185,59 @@ void Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope,
         const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
         if ( quote.IsNonZero() && ( quote.Ask() > quote.Bid() ) ) {
           if ( 0.101 >= quote.Ask() ) {
+            // TODO: perform a calendar roll to regain premium? (but not on expiry date)
             m_transition = ETransition::Fill;
             m_fCloseLeg( m_pPosition );
+            m_pPosition.reset();
             m_transition = ETransition::Initial;
           }
         }
       }
       break;
+    case ETransition::Roll:
+      PopOptionRollStack();
     default:
       break;
   }
 }
 
-void Tracker::Construct( boost::posix_time::ptime dt, double strikeItm ) {
+void Tracker::ConstructOptionCandidate( boost::posix_time::ptime dt, double strike ) {
+
+  // TODO: need to enable greeks to track IV, Delta
+
   m_transition = ETransition::Acquire;
+
   std::string sName;
   switch ( m_sidePosition ) {
     case ou::tf::OptionSide::Call:
-      sName = m_pChain->GetIQFeedNameCall( strikeItm );
+      sName = m_pChain->GetIQFeedNameCall( strike );
       break;
     case ou::tf::OptionSide::Put:
-      sName = m_pChain->GetIQFeedNamePut( strikeItm );
+      sName = m_pChain->GetIQFeedNamePut( strike );
       break;
+    default:
+      assert( false );
   }
+
   std::cout
     << dt.time_of_day() << " "
     << "Tracker::Construct: "
     << sName
+    << " at " << strike
     << std::endl;
+
   m_fConstructOption(
     sName,
     [this]( pOption_t pOption ){
-      m_pOptionCandidate = pOption;
+      m_pOptionCandidate = std::move( pOption );
       OptionCandidate_StartWatch();
       m_transition = ETransition::Track;
     } );
 }
 
+// called when m_pOptionCandidate exists (via OnQuote)
 void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
+
   switch ( m_transition ) {
     case ETransition::Track:
       {
@@ -233,30 +257,32 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
               // no one will buy our stuff
             }
             else {
-              auto pOldWatch = m_pPosition->GetWatch();
-              std::cout
-                << quote.DateTime().time_of_day()
-                << ",old=" << pOldWatch->GetInstrumentName()
-                << ",b=" << pOldWatch->LastQuote().Bid()
-                << ",a=" << pOldWatch->LastQuote().Ask()
-                << ",new=" << m_pOptionCandidate->GetInstrument()->GetInstrumentName()
-                << ",b=" << m_pOptionCandidate->LastQuote().Bid()
-                << ",a=" << m_pOptionCandidate->LastQuote().Ask()
-                << ",roll-per-share-diff=" << diff
-                << ",underlying=" << m_dblUnderlyingPrice
-                << ",slope=" << m_dblUnderlyingSlope
-                << std::endl;
-              m_transition = ETransition::Roll;
-              OptionCandidate_StopWatch();
-              m_compare = nullptr;
-              m_luStrike = nullptr;
-              pOption_t pOption( std::move( m_pOptionCandidate ) );
-              std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
-              m_fCloseLeg( m_pPosition );  // TODO: closer needs to use EnableStatsAdd
-              // TODO: on opening a position, will need to extend states to handle order with errors
-              m_transition = ETransition::Initial;  // this is going to recurse back in here (TODO: think about kill & rebuild?)
-              Initialize( m_fOpenLeg( std::move( pOption ), sNotes ) ); // with new position, NOTE: opener needs to use EnableStatsAdd
-              //m_transition = ETransition::Track;  // start all over again - this will get set in Initialize [TODO: how or why did this work before?]
+              if ( 0 == m_vOptionRollStack.size() ) {
+                auto pOldWatch = m_pPosition->GetWatch();
+                std::cout
+                  << quote.DateTime().time_of_day()
+                  << ",roll"
+                  << ",old=" << pOldWatch->GetInstrumentName()
+                  << ",b=" << pOldWatch->LastQuote().Bid()
+                  << ",a=" << pOldWatch->LastQuote().Ask()
+                  << ",new=" << m_pOptionCandidate->GetInstrument()->GetInstrumentName()
+                  << ",b=" << m_pOptionCandidate->LastQuote().Bid()
+                  << ",a=" << m_pOptionCandidate->LastQuote().Ask()
+                  << ",roll-per-share-diff=" << diff
+                  << ",underlying=" << m_dblUnderlyingPrice
+                  << ",slope=" << m_dblUnderlyingSlope
+                  << std::endl;
+                m_transition = ETransition::Roll;
+                OptionCandidate_StopWatch();
+                m_compare = nullptr;
+                m_luStrike = nullptr;
+                pOption_t pOption( std::move( m_pOptionCandidate ) );
+                std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
+                m_fCloseLeg( m_pPosition );  // TODO: closer needs to use EnableStatsAdd
+                m_pPosition.reset();
+                // TODO: on opening a position, will need to extend states to handle order with errors
+                Initialize( m_fOpenLeg( std::move( pOption ), sNotes ) ); // with new position, NOTE: opener needs to use EnableStatsAdd
+              }
             }
           }
         }
@@ -264,6 +290,73 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
       break;
     default:
       break;
+  }
+}
+
+void Tracker::PopOptionRollStack() {
+  if ( 0 < m_vOptionRollStack.size() ) {
+
+    if ( m_pOptionCandidate ) {
+      OptionCandidate_StopWatch();
+      m_pOptionCandidate.reset();
+    }
+
+    m_vOptionRollStack.back()();
+    m_vOptionRollStack.pop_back();
+
+  }
+}
+
+void Tracker::Close() {
+  std::cout << "Tracker::Close() not implemented" << std::endl;
+}
+
+//
+void Tracker::CalendarRoll() {
+  if ( m_pPosition ) {
+    if ( m_pPosition->IsActive() ) {
+
+      m_transition = ETransition::Roll;
+
+      fOptionRoll_t f =  // stack it for background loop
+        [this](){
+
+          m_compare = nullptr;
+          m_luStrike = nullptr;
+
+          double strike( m_dblStrikePosition );
+          ou::tf::OptionSide::EOptionSide sidePosition( m_sidePosition );
+
+          std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
+          std::string sName_Old( m_pPosition->GetInstrument()->GetInstrumentName() );
+
+          m_fCloseLeg( m_pPosition );
+          m_pPosition.reset();
+
+          std::string sName_New;
+          switch ( sidePosition ) {
+            case ou::tf::OptionSide::Call:
+              sName_New = m_pChain->GetIQFeedNameCall( strike );
+              break;
+            case ou::tf::OptionSide::Put:
+              sName_New = m_pChain->GetIQFeedNamePut( strike );
+              break;
+            default:
+              break;
+          }
+
+          std::cout << "Tracker::CalendarRoll: " << sName_Old << " to " << sName_New << std::endl;
+
+          m_fConstructOption(
+            sName_New,
+            [this,sNotes_=std::move(sNotes)]( pOption_t pOption ){
+              Initialize( m_fOpenLeg( std::move( pOption ), sNotes_ ) ); // with new position
+            } );
+        };
+
+      m_vOptionRollStack.emplace_back( std::move( f ) );
+
+    }
   }
 }
 
@@ -275,36 +368,8 @@ void Tracker::TestItmRoll( boost::gregorian::date date, boost::posix_time::time_
           if ( m_pPosition->IsActive() ) {
             if ( m_pPosition->GetInstrument()->GetExpiry() == date ) {
 
-              m_transition = ETransition::Roll;
+              CalendarRoll();
 
-              double strike( m_dblStrikePosition );
-              ou::tf::OptionSide::EOptionSide sidePosition( m_sidePosition );
-
-              m_compare = nullptr;
-              m_luStrike = nullptr;
-              std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
-
-              m_fCloseLeg( m_pPosition );
-
-              std::string sName;
-              switch ( sidePosition ) {
-                case ou::tf::OptionSide::Call:
-                  sName = m_pChain->GetIQFeedNameCall( strike );
-                  break;
-                case ou::tf::OptionSide::Put:
-                  sName = m_pChain->GetIQFeedNamePut( strike );
-                  break;
-                default:
-                  break;
-              }
-              std::cout << "Tracker::TestItmRoll: " << sName << std::endl;
-
-              m_fConstructOption(
-                sName,
-                [this,sNotes_=std::move(sNotes)]( pOption_t pOption ){
-                  Initialize( m_fOpenLeg( std::move( pOption ), sNotes_ ) ); // with new position
-                  m_transition = ETransition::Quiesce;
-                } );
             }
           }
         }
