@@ -102,7 +102,20 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
 
     pWatch_t pWatch = pPositionNew->GetWatch();
     pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
-    m_fActivateOption( pOption, pPositionNew );
+
+    const std::string& sName( pWatch->GetInstrumentName() );
+
+    vMenuActivation_t ma;
+    ma.emplace_back( MenuActivation( "close",    [this,&sName,type=legValues.m_type](){
+      std::cout << "Close: " << sName << " (todo)" << std::endl;
+      Close( type );
+      } ) );
+    ma.emplace_back( MenuActivation( "calendar", [this,&sName,type=legValues.m_type](){
+      std::cout << "Calendar Roll: " << sName << " (todo)" << std::endl;
+      CalendarRoll( type );
+      } ) );
+
+    m_fActivateOption( pOption, pPositionNew, ou::tf::option::LegNote::LU( legValues.m_type ), std::move( ma ) );
 
     if ( State::Initializing == m_state ) {
       m_state = State::Positions;

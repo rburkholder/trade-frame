@@ -222,6 +222,20 @@ void Collar::Init( LegNote::Type type ) {
   iter->second();
 }
 
+void Collar::Close( LegNote::Type type ) {
+  mapCollarLeg_t::iterator iter = m_mapCollarLeg.find( type );
+  assert( m_mapCollarLeg.end() != iter );
+  CollarLeg& leg( iter->second );
+  leg.m_tracker.Close();
+}
+
+void Collar::CalendarRoll( LegNote::Type type ) {
+  mapCollarLeg_t::iterator iter = m_mapCollarLeg.find( type );
+  assert( m_mapCollarLeg.end() != iter );
+  CollarLeg& leg( iter->second );
+  leg.m_tracker.CalendarRoll();
+}
+
 void Collar::CancelOrders() {
   Combo::CancelOrders();
   for ( mapCollarLeg_t::value_type& cleg: m_mapCollarLeg ) {
@@ -234,7 +248,8 @@ void Collar::GoNeutral( boost::gregorian::date date, boost::posix_time::time_dur
   // relies on tracker having been quiesced
   // TODO: is the tracker/position active?
   for ( mapCollarLeg_t::value_type& cleg: m_mapCollarLeg ) {
-    cleg.second.m_tracker.TestItmRoll( date, time );
+    // will need improved timing, rather than just end of day
+    //cleg.second.m_tracker.TestItmRoll( date, time );
   }
 }
 

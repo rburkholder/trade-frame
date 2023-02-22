@@ -162,7 +162,8 @@ void AppBasketTrading::Init() {
 
   vItems.clear();
   vItems.push_back( new mi( "a1 Load", MakeDelegate( this, &AppBasketTrading::HandleButtonLoad ) ) );
-//  vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleButtonStart ) ) );
+  //vItems.push_back( new mi( "a2 Start", MakeDelegate( this, &AppBasketTrading::HandleButtonStart ) ) );
+  // close positions needs to mark the position as in-active to prevent re-loading
   vItems.push_back( new mi( "a3 Close Positions", MakeDelegate( this, &AppBasketTrading::HandleButtonClosePositions ) ) );
   vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleButtonSave ) ) );
   vItems.push_back( new mi( "a5 Emit Info", MakeDelegate( this, &AppBasketTrading::HandleEmitInfo ) ) );
@@ -171,23 +172,10 @@ void AppBasketTrading::Init() {
 
   vItems.clear();
   vItems.push_back( new mi( "a1 Take Profits", MakeDelegate( this, &AppBasketTrading::HandleTakeProfits ) ) );
-  //vItems.push_back( new mi( "a2 Close Expiry ITM", MakeDelegate( this, &AppBasketTrading::HandleCloseExpiryItm ) ) );
-  //vItems.push_back( new mi( "a3 Close far ITM", MakeDelegate( this, &AppBasketTrading::HandleCloseFarItm ) ) );
   vItems.push_back( new mi( "a4 Close leg for profits", MakeDelegate( this, &AppBasketTrading::HandleCloseForProfits ) ) );
-  //vItems.push_back( new mi( "a5 Close ITM leg", MakeDelegate( this, &AppBasketTrading::HandleCloseItmLeg ) ) );
   vItems.push_back( new mi( "a6 Add combo - allowed", MakeDelegate( this, &AppBasketTrading::HandleAddComboAllowed ) ) );
   vItems.push_back( new mi( "a7 Add combo - forced", MakeDelegate( this, &AppBasketTrading::HandleAddComboForced ) ) );
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
-
-  vItems.clear();
-  vItems.push_back( new mi( "Close Cover (tbc)", MakeDelegate( this, &AppBasketTrading::HandleCloseCover ) ) );
-  vItems.push_back( new mi( "Close Synth Short (tbc)", MakeDelegate( this, &AppBasketTrading::HandleCloseSynthShort ) ) );
-  vItems.push_back( new mi( "Lock Synth Long (tbc)", MakeDelegate( this, &AppBasketTrading::HandleLockSynthLong ) ) );
-  vItems.push_back( new mi( "Lock Protection (tbc)", MakeDelegate( this, &AppBasketTrading::HandleLockProtection ) ) );
-  // used to roll short in the money to next expiry to take premium and hopefully recoup loss
-  vItems.push_back( new mi( "Roll Cover (tbc)", MakeDelegate( this, &AppBasketTrading::HandleRollCover ) ) );
-  vItems.push_back( new mi( "Roll Synth Short (tbc)", MakeDelegate( this, &AppBasketTrading::HandleRollSynthShort ) ) );
-  m_pFrameMain->AddDynamicMenu( "Legs", vItems );
 
   LoadState();
   m_pFrameMain->Show( true );
@@ -227,20 +215,8 @@ void AppBasketTrading::HandleTakeProfits() {
   CallAfter( std::bind( &MasterPortfolio::TakeProfits, m_pMasterPortfolio.get() ) );
 }
 
-void AppBasketTrading::HandleCloseExpiryItm() {
-  CallAfter( std::bind( &MasterPortfolio::CloseExpiryItm, m_pMasterPortfolio.get(), boost::gregorian::day_clock::local_day() ) );
-}
-
-void AppBasketTrading::HandleCloseFarItm() {
-  CallAfter( std::bind( &MasterPortfolio::CloseFarItm, m_pMasterPortfolio.get() ) );
-}
-
 void AppBasketTrading::HandleCloseForProfits() {
   CallAfter( std::bind( &MasterPortfolio::CloseForProfits, m_pMasterPortfolio.get() ) );
-}
-
-void AppBasketTrading::HandleCloseItmLeg() {
-  CallAfter( std::bind( &MasterPortfolio::CloseItmLeg, m_pMasterPortfolio.get() ) );
 }
 
 void AppBasketTrading::HandleAddComboAllowed() {

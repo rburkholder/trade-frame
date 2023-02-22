@@ -100,15 +100,13 @@ public:
   void ClosePositions( void );
   void SaveSeries( const std::string& sPath );
 
-  void Test( void );
+  void EmitInfo();
 
   void TakeProfits();
-  void CloseExpiryItm( boost::gregorian::date );
-  void CloseFarItm();
   void CloseForProfits();
-  void CloseItmLeg();
   void AddCombo( bool bForced );
-  void EmitInfo();
+
+  void Test( void );
 
 protected:
 private:

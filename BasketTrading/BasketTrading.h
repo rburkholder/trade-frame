@@ -124,17 +124,7 @@ private:
   void HandleButtonTest();
 
   void HandleTakeProfits();
-  void HandleCloseExpiryItm();
-  void HandleCloseFarItm();
   void HandleCloseForProfits();
-  void HandleCloseItmLeg();
-
-  void HandleCloseCover() {}
-  void HandleCloseSynthShort() {}
-  void HandleLockSynthLong() {}
-  void HandleLockProtection() {}
-  void HandleRollCover() {}
-  void HandleRollSynthShort() {}
 
   void HandleAddComboAllowed();
   void HandleAddComboForced();

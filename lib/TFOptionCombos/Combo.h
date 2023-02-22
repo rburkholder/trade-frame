@@ -75,7 +75,23 @@ public:
   using fConstructWatch_t  = std::function<void(const std::string&, fConstructedWatch_t&&)>;
   using fConstructOption_t = std::function<void(const std::string&, fConstructedOption_t&&)>;  // source from IQFeed Symbol Name
 
-  using fActivateOption_t = std::function<void(pOption_t,pPosition_t)>;
+  // TODO: ActivateOption to return lambda to update menu
+  using fMenuActivation_t = std::function<void()>;
+  struct MenuActivation {
+    std::string sLabel;
+    fMenuActivation_t fMenuActivation;
+
+    MenuActivation() = delete;
+    MenuActivation( MenuActivation& rhs ) = delete;
+    MenuActivation( const MenuActivation& rhs ) //= delete; // compiler needs it this way for OptionsRepository::Add
+    : sLabel( std::move( rhs.sLabel ) ), fMenuActivation( std::move( rhs.fMenuActivation ) ) {}
+    MenuActivation( MenuActivation&& rhs )
+    : sLabel( std::move( rhs.sLabel ) ), fMenuActivation( std::move( rhs.fMenuActivation ) ) {}
+    MenuActivation( const std::string& sLabel_, fMenuActivation_t&& f )
+    : sLabel( sLabel_ ), fMenuActivation( std::move( f ) ) {}
+  };
+  using vMenuActivation_t = std::vector<MenuActivation>;
+  using fActivateOption_t = std::function<void(pOption_t,pPosition_t,const std::string& legname, vMenuActivation_t&& )>;
   using fOpenPosition_t = std::function<pPosition_t(Combo*,pOption_t,const std::string&)>; // string is Note from previous position
   using fDeactivateOption_t = std::function<void(pOption_t)>;
 
@@ -149,6 +165,9 @@ protected:
 
   virtual void Init( boost::gregorian::date date, const mapChains_t*, const SpreadSpecs& ) = 0;
   virtual void Init( LegNote::Type ) = 0;
+
+  virtual void Close( LegNote::Type ) = 0;
+  virtual void CalendarRoll( LegNote::Type ) = 0;
 
   void DeactivatePositionOption( pPosition_t );
 

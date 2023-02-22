@@ -155,7 +155,7 @@ public:
     m_ptiParent = ptiParent;
   }
 
-  void Add( pOption_t pOption, pPosition_t pPosition ) {
+  void Add( pOption_t pOption, pPosition_t pPosition, const std::string& sLegName, ou::tf::option::Combo::vMenuActivation_t&& ma ) {
 
     const std::string& sOptionName( pOption->GetInstrument()->GetInstrumentName() );
 
@@ -173,11 +173,21 @@ public:
       pOptionStatistics_t pOptionStatistics = OptionStatistics::Factory( pOption );
       m_mapOption[ sOptionName ] = pOptionStatistics;
       ou::tf::TreeItem* pti = m_ptiParent->AppendChild(
-        pOption->GetInstrumentName(),
+        pOption->GetInstrumentName() + " (" + sLegName + ")",
         [this,pOptionStatistics]( ou::tf::TreeItem* ){
           m_fSetChartDataView( pOptionStatistics->ChartDataView() );
         },
-        []( ou::tf::TreeItem* ){}
+        [this,&sOptionName, ma_=std::move(ma)]( ou::tf::TreeItem* pti ) {
+          pti->NewMenu();
+          for ( const ou::tf::option::Combo::vMenuActivation_t::value_type& vt: ma_  ) {
+            pti->AppendMenuItem(
+              vt.sLabel,
+              //[this,&sOptionName,ma_f=std::move( vt.fMenuActivation )]( ou::tf::TreeItem* pti ){
+              [this,&sOptionName,ma_f=&vt.fMenuActivation]( ou::tf::TreeItem* pti ){
+                (*ma_f)();
+              });
+          }
+        }
       );
       pOptionStatistics->Set( pti );
       pOptionStatistics->Set( pPosition );
@@ -651,9 +661,9 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
         }
       );
     },
-    [this]( pOption_t pOption, pPosition_t pPosition ) { // fActivateOption_t
+    [this]( pOption_t pOption, pPosition_t pPosition, const std::string& sLegType, ou::tf::option::Combo::vMenuActivation_t&& ma ) { // fActivateOption_t
       //std::cout << "Option repository: adding option " << pOption->GetInstrumentName() << std::endl;
-      m_pOptionRepository->Add( pOption, pPosition );
+      m_pOptionRepository->Add( pOption, pPosition, sLegType, std::move( ma ) );
     },
     [this]( ou::tf::option::Combo* p, pOption_t pOption, const std::string& note )->pPosition_t { // fOpenPosition_t
       combo_t* pCombo = reinterpret_cast<combo_t*>( p );
@@ -663,7 +673,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
       pCombo->PlaceOrder( ou::tf::OrderSide::Buy, 1, lnValues.m_type );  // TODO: perform this in the combo, rename to AddPosition?
       return pPosition;
     },
-    [this]( pOption_t pOption ){ // fDeactivateOption
+    [this]( pOption_t pOption ){ // fDeactivateOption_t
       //std::cout << "Option repository: removing option " << pOption->GetInstrumentName() << std::endl;
       //assert( pWatch->GetInstrument()->IsOption() );
       //pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
@@ -1153,4 +1163,3 @@ void ManageStrategy::TakeProfits() {
     }
   }
 }
-

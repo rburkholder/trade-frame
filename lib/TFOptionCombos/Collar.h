@@ -75,6 +75,10 @@ public:
 protected:
   virtual void Init( boost::gregorian::date, const mapChains_t*, const SpreadSpecs& );
   virtual void Init( LegNote::Type );
+
+  virtual void Close( LegNote::Type );
+  virtual void CalendarRoll( LegNote::Type );
+
 private:
 
   using fInitTrackOption_t = std::function<void(void)>;

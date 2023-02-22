@@ -972,48 +972,12 @@ void MasterPortfolio::EmitInfo( void ) {
     << std::endl;
 }
 
-void MasterPortfolio::CloseExpiryItm( boost::gregorian::date date ) {
-  std::cout << "Not Implemented: MasterPortfolio::CloseExpiryItm" << std::endl;
-  /*
-  std::for_each(
-    m_mapStrategy.begin(), m_mapStrategy.end(),
-    [&date](mapStrategy_t::value_type& pair){
-      Strategy& strategy( pair.second );
-        strategy.pManageStrategy->CloseExpiryItm( date );
-    } );
-    */
-}
-
-void MasterPortfolio::CloseFarItm() {
-  std::cout << "Not Implemented: MasterPortfolio::CloseFarItm" << std::endl;
-  /*
-  std::for_each(
-    m_mapStrategy.begin(), m_mapStrategy.end(),
-    [](mapStrategy_t::value_type& pair){
-      Strategy& strategy( pair.second );
-        strategy.pManageStrategy->CloseFarItm();
-    } );
-    */
-}
-
 void MasterPortfolio::CloseForProfits() {
   std::for_each(
     m_mapUnderlyingWithStrategies.begin(), m_mapUnderlyingWithStrategies.end(),
     [](mapUnderlyingWithStrategies_t::value_type& uws){
       uws.second.CloseForProfits();
     } );
-}
-
-void MasterPortfolio::CloseItmLeg() {
-  std::cout << "Not Implemented: MasterPortfolio::CloseItmLeg" << std::endl;
-  /*
-  std::for_each(
-    m_mapStrategy.begin(), m_mapStrategy.end(),
-    [](mapStrategy_t::value_type& pair){
-      Strategy& strategy( pair.second );
-        strategy.pManageStrategy->CloseItmLeg();
-    } );
-    */
 }
 
 void MasterPortfolio::AddCombo( bool bForced ) {
