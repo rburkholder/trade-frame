@@ -21,6 +21,8 @@
 
 // 2023/02/22 TestShort has todo for rolling for premium
 
+#include <boost/log/trivial.hpp>
+
 #include "Tracker.h"
 
 namespace ou { // One Unified
@@ -80,6 +82,8 @@ void Tracker::Initialize(
   fOpenLeg_t&& fOpenLeg
 ) {
 
+  //BOOST_LOG_TRIVIAL(info) << "Tracker::Initialize,external";
+
   assert( pPosition );
   assert( fConstructOption );
   assert( fCloseLeg );
@@ -98,7 +102,9 @@ void Tracker::Initialize(
 
 void Tracker::Initialize( pPosition_t pPosition ) {
 
-  m_transition = ETransition::Initial;
+  //BOOST_LOG_TRIVIAL(info) << "Tracker::Initialize,internal";
+
+  assert( ETransition::Initial == m_transition );  // needs to be set prior to entry
 
   m_pPosition = std::move( pPosition );
 
@@ -219,12 +225,12 @@ void Tracker::ConstructOptionCandidate( boost::posix_time::ptime dt, double stri
       assert( false );
   }
 
-  std::cout
+  BOOST_LOG_TRIVIAL(info)
     << dt.time_of_day() << " "
     << "Tracker::Construct: "
     << sName
     << " at " << strike
-    << std::endl;
+    ;
 
   m_fConstructOption(
     sName,
@@ -253,13 +259,14 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
           diff -= ( 2.0 * quote.Spread() );  // unrealized p/l incorporates entry spread, this calculates exit spread
           diff -= 0.10;  // subtract estimated commissions plus some spare change
           if ( 0.10 < diff ) { // desire at least 10 cents on the roll
-            if ( ( 0 == quote.BidSize() ) || ( 0.0 == quote.Bid() ) ) {
+            if ( ( 0 == quote.BidSize() ) || ( 0.0 == quote.Bid() ) || ( 0.0 == quote.Ask() )
+            ) {
               // no one will buy our stuff
             }
             else {
               if ( 0 == m_vOptionRollStack.size() ) {
                 auto pOldWatch = m_pPosition->GetWatch();
-                std::cout
+                BOOST_LOG_TRIVIAL(info)
                   << quote.DateTime().time_of_day()
                   << ",roll"
                   << ",old=" << pOldWatch->GetInstrumentName()
@@ -271,7 +278,7 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
                   << ",roll-per-share-diff=" << diff
                   << ",underlying=" << m_dblUnderlyingPrice
                   << ",slope=" << m_dblUnderlyingSlope
-                  << std::endl;
+                  ;
                 m_transition = ETransition::Roll;
                 OptionCandidate_StopWatch();
                 m_compare = nullptr;
@@ -281,7 +288,11 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
                 m_fCloseLeg( m_pPosition );  // TODO: closer needs to use EnableStatsAdd
                 m_pPosition.reset();
                 // TODO: on opening a position, will need to extend states to handle order with errors
-                Initialize( m_fOpenLeg( std::move( pOption ), sNotes ) ); // with new position, NOTE: opener needs to use EnableStatsAdd
+                m_transition = ETransition::Initial; // NEEDS to be here, prior to m_fOpenLeg, which calls back in
+                // NOTE: Initialize may not be required as m_fOpenLeg calls back into Tracker
+                //    as such, there may be a double init going on
+                //Initialize( m_fOpenLeg( std::move( pOption ), sNotes ) ); // with new position, NOTE: opener needs to use EnableStatsAdd
+                m_fOpenLeg( std::move( pOption ), sNotes );
               }
             }
           }
@@ -308,7 +319,7 @@ void Tracker::PopOptionRollStack() {
 }
 
 void Tracker::Close() {
-  std::cout << "Tracker::Close() not implemented" << std::endl;
+  BOOST_LOG_TRIVIAL(info) << "Tracker::Close() not implemented";
 }
 
 //
@@ -345,12 +356,16 @@ void Tracker::CalendarRoll() {
               break;
           }
 
-          std::cout << "Tracker::CalendarRoll: " << sName_Old << " to " << sName_New << std::endl;
+          BOOST_LOG_TRIVIAL(info) << "Tracker::CalendarRoll: " << sName_Old << " to " << sName_New;
 
           m_fConstructOption(
             sName_New,
             [this,sNotes_=std::move(sNotes)]( pOption_t pOption ){
-              Initialize( m_fOpenLeg( std::move( pOption ), sNotes_ ) ); // with new position
+              BOOST_LOG_TRIVIAL(info) << "Tracker::CalendarRoll::m_fConstructOption";
+              m_transition = ETransition::Initial; // NEEDS to be here, prior to m_fOpenLeg, which calls back in
+              // TODO: as above, may only need the m_fOpenLeg
+              //Initialize( m_fOpenLeg( std::move( pOption ), sNotes_ ) ); // with new position
+              m_fOpenLeg( std::move( pOption ), sNotes_ );
             } );
         };
 
