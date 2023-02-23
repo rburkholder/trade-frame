@@ -18,7 +18,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-Strike::Strike( void )
+Strike::Strike()
 : m_dblStrike( 0 ),
   m_bWatchable( false ), m_nWatching( 0 )
 {
@@ -38,7 +38,7 @@ Strike::Strike( const Strike& rhs )
   assert( 0 == rhs.m_nWatching );
 }
 
-Strike::~Strike( void ) {
+Strike::~Strike() {
 }
 
 Strike& Strike::operator=( const Strike& rhs ) {
@@ -90,7 +90,7 @@ void Strike::AssignPut( Instrument::pInstrument_t pInstrument, pProvider_t pData
   if ( 0 < m_nWatching ) m_put->StartWatch();
 };
 
-void Strike::EmitValues( void ) {
+void Strike::EmitValues() {
   if ( m_call ) m_call->EmitValues();
   std::cout << std::endl;
   if ( m_put  ) m_put->EmitValues();
@@ -102,14 +102,14 @@ void Strike::SaveSeries( const std::string& sPrefix ) {
   if ( m_put  ) m_put->SaveSeries( sPrefix );
 }
 
-void Strike::SetWatchableOn( void ) {
+void Strike::SetWatchableOn() {
   if ( !m_bWatchable ) {
     m_bWatchable = true;
     // won't be watching anything, as can't set watching without first having watchable
   }
 }
 
-void Strike::SetWatchableOff( void ) {
+void Strike::SetWatchableOff() {
   if ( m_bWatchable ) {
     m_bWatchable = false;
     if ( 0 != m_nWatching ) { // turn off watching, if enabled, or do we let this go down naturally instead?
@@ -119,7 +119,7 @@ void Strike::SetWatchableOff( void ) {
   }
 }
 
-void Strike::WatchStart( void ) {
+void Strike::WatchStart() {
   if ( m_bWatchable ) {
     ++m_nWatching;
     if ( 1 == m_nWatching ) {
@@ -129,7 +129,7 @@ void Strike::WatchStart( void ) {
   }
 }
 
-void Strike::WatchStop( void ) {
+void Strike::WatchStop() {
   assert( 0 != m_nWatching );
   -- m_nWatching;
   if ( 0 == m_nWatching ) {
@@ -137,7 +137,6 @@ void Strike::WatchStop( void ) {
     if ( m_put  ) m_put->StopWatch();
   }
 }
-
 
 } // namespace option
 } // namespace tf
