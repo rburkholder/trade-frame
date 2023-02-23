@@ -546,16 +546,22 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
         }
       }
 
-      if ( !bOrderFound ) {  // need an event for this, as it could be legitimate crossing execution prior to cancel
-        //std::cout << "no order found to cancel: " << co.nOrderId << std::endl;
-        // todo:  propogate this into the OrderManager
-        if ( nullptr != OnNoOrderFound ) OnNoOrderFound( qco.nOrderId );
+      if ( bOrderFound ) {  // need an event for this, as it could be legitimate crossing execution prior to cancel
+        if ( nullptr != OnOrderCancelled ) OnOrderCancelled( qco.nOrderId );
+        MigrateActiveToArchive( qco.nOrderId );
       }
       else {
-        if ( nullptr != OnOrderCancelled ) OnOrderCancelled( qco.nOrderId );
+        //std::cout << "no order found to cancel: " << co.nOrderId << std::endl;
+        // todo:  propogate this into the OrderManager
+        //   this actually means that cancel comes through, but order was actually processed
+        if ( nullptr != OnNoOrderFound ) OnNoOrderFound( qco.nOrderId );
+
+        // confirm that the order has already been processed
+        mapOrderState_t::iterator iter = m_mapOrderState.find( qco.nOrderId );
+        assert( m_mapOrderState.end() != iter );
+        assert( OrderState::State::Archive == iter->second.state );
       }
 
-      MigrateActiveToArchive( qco.nOrderId );
       m_lCancelDelay.pop_front();  // remove from list
     }
   }
