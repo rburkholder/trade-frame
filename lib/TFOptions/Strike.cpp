@@ -90,10 +90,10 @@ void Strike::AssignPut( Instrument::pInstrument_t pInstrument, pProvider_t pData
   if ( 0 < m_nWatching ) m_put->StartWatch();
 };
 
-void Strike::EmitValues() {
-  if ( m_call ) m_call->EmitValues();
+void Strike::EmitValues( double dblPriceUnderlying ) {
+  if ( m_call ) m_call->EmitValues( dblPriceUnderlying );
   std::cout << std::endl;
-  if ( m_put  ) m_put->EmitValues();
+  if ( m_put  ) m_put->EmitValues( dblPriceUnderlying );
   std::cout << std::endl;
 }
 

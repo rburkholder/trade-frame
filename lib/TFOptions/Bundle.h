@@ -76,7 +76,7 @@ public:
   void StopWatch( void );
 
   void SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec );
-  void EmitValues( void );
+  void EmitValues( double dblPriceUnderlying );
 
   void SetExpiry( ptime dt ); // utc
 
@@ -121,8 +121,8 @@ std::ostream& operator<<( std::ostream& os, const ExpiryBundle& );
 class ExpiryBundleWithUnderlying: public ExpiryBundle {
 public:
 
-  ExpiryBundleWithUnderlying( void );
-  ~ExpiryBundleWithUnderlying( void );
+  ExpiryBundleWithUnderlying();
+  ~ExpiryBundleWithUnderlying();
 
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
@@ -130,9 +130,9 @@ public:
 
   void SetUnderlying( pInstrument_t pInstrument, pProvider_t pProvider );
 
-  void StartWatch( void );
-  void StopWatch( void );
-  void EmitValues( void );
+  void StartWatch();
+  void StopWatch();
+  void EmitValues();
 
   void SaveSeries( const std::string& sPrefix60sec, const std::string& sPrefix86400sec );
 

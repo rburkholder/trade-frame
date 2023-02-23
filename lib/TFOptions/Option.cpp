@@ -178,8 +178,43 @@ bool Option::StopWatch() {
   return b;
 }
 
-void Option::EmitValues( bool bEmitName ) {
+void Option::EmitValues( double dblPriceUnderlying, bool bEmitName ) {
+
   Watch::EmitValues( bEmitName );
+
+  if ( 0.0 < dblPriceUnderlying ) { // calculate the premium components
+    double extrinsic {};
+    double intrinsic {};
+
+    switch ( m_pInstrument->GetOptionSide() ) {
+      case ou::tf::OptionSide::Call:
+        if ( m_dblStrike < dblPriceUnderlying ) { // ITM
+          intrinsic = dblPriceUnderlying - m_dblStrike;
+          extrinsic = m_quote.Midpoint() - intrinsic;
+        }
+        else { // OTM
+          extrinsic = m_quote.Midpoint();
+        }
+        break;
+      case ou::tf::OptionSide::Put:
+        if ( m_dblStrike > dblPriceUnderlying ) { // ITM
+          intrinsic = m_dblStrike - dblPriceUnderlying;
+          extrinsic = m_quote.Midpoint() - intrinsic;
+        }
+        else { // OTM
+          extrinsic = m_quote.Midpoint();
+        }
+        break;
+      default:
+        assert( false );
+    }
+
+    std::cout
+      << ","
+      << "Prm:" << intrinsic << "/" << extrinsic
+      ;
+  }
+
   std::cout
     << ","
     << "IV:" << m_greek.ImpliedVolatility() << ","

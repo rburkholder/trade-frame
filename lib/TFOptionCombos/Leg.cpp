@@ -365,7 +365,9 @@ void Leg::CloseExpiryOtm( const boost::gregorian::date date, double price ) {
 double Leg::GetNet( double price ) const {
   double dblValue {};
   if ( m_pPosition ) {
+
     dblValue = m_pPosition->GetUnRealizedPL();
+
     std::string sign;
     switch ( m_pPosition->GetRow().eOrderSideActive ) {
       case ou::tf::OrderSide::Buy:
@@ -374,7 +376,10 @@ double Leg::GetNet( double price ) const {
       case ou::tf::OrderSide::Sell:
         sign = "-";
         break;
+      default:
+        assert( false );
     }
+
     std::cout
       << "  leg: "
       << m_pPosition->GetInstrument()->GetInstrumentName()
@@ -383,6 +388,7 @@ double Leg::GetNet( double price ) const {
       << m_pPosition->GetActiveSize()
       << "@"
       << dblValue;
+
     if ( m_bOption ) {
       pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
       switch ( pOption->GetInstrument()->GetOptionSide() ) {
@@ -402,9 +408,11 @@ double Leg::GetNet( double price ) const {
             std::cout << "(otm)";
           }
           break;
+        default:
+          assert( false );
       }
       std::cout << ",";
-      pOption->EmitValues( false );
+      pOption->EmitValues( price, false );
       std::cout << ",";
     }
   }

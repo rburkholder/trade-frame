@@ -96,12 +96,9 @@ void ExpiryBundle::SaveAtmIv( const std::string& sPrefix60sec, const std::string
 
 }
 
-void ExpiryBundle::EmitValues( void ) {
-//  if ( 0 != m_pwatchUnderlying.get() ) {
-//    m_pwatchUnderlying->EmitValues();
-//  }
+void ExpiryBundle::EmitValues( double dblPriceUnderlying ) {
   for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
-    iter->second.EmitValues();
+    iter->second.EmitValues( dblPriceUnderlying );
   }
 }
 
@@ -468,11 +465,13 @@ void ExpiryBundleWithUnderlying::StopWatch( void ) {
 //  }
 }
 
-void ExpiryBundleWithUnderlying::EmitValues( void ) {
+void ExpiryBundleWithUnderlying::EmitValues() {
+  double price {};
   if ( 0 != m_pwatchUnderlying.get() ) {
     m_pwatchUnderlying->EmitValues();
+    price = m_pwatchUnderlying->LastTrade().Price();
   }
-  ExpiryBundle::EmitValues();
+  ExpiryBundle::EmitValues( price );
 //  for ( mapStrikes_t::iterator iter = m_mapStrikes.begin(); m_mapStrikes.end() != iter; ++iter ) {
 //    iter->second.EmitValues();
 //  }

@@ -71,7 +71,7 @@ public:
   virtual bool StartWatch();
   virtual bool StopWatch();
 
-  virtual void EmitValues( bool bEmitName = true );
+  virtual void EmitValues( double dblPriceUnderlying, bool bEmitName = true );
 
   // TODO: needs spinlock
   inline const Greek& LastGreek() const { return m_greek; };

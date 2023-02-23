@@ -54,7 +54,7 @@ public:
   bool IsWatching( void ) const { return 0 != m_nWatching; };
 
   void SaveSeries( const std::string& sPrefix );
-  void EmitValues();
+  void EmitValues( double dblPriceUnderlying );
 
 protected:
 
