@@ -19,6 +19,25 @@
  * Created: July 19, 2020, 05:43 PM
  */
 
+/*
+978-1499206074 2014 Trading Volatility, Correlation, Term Structure and Skew by Colin Bennett.pdf
+
+Collars are more sensitive to skew than implied volatility page 26
+
+Selling a call against a long put suffers from buying skew. The effect of skew is greater for a
+collar than for a put spread, as skew affects both legs of the structure the same way (whereas
+the effect of skew on the long and short put of a put spread partly cancels). If skew was flat,
+the cost of a collar typically reduces by 1% of spot. The level of volatility for near-zero cost
+collars is not normally significant, as the long volatility of the put cancels the short volatility
+of the call.
+
+Capping performance should only be used when a long rally is unlikely
+
+A collar or put spread collar caps the performance of the portfolio at the strike of the OTM
+call sold. They should only therefore be used when the likelihood of a strong, long-lasting
+rally (or significant bounce) is perceived to be relatively small.
+*/
+
 #include <array>
 
 #include <TFOptions/Chains.h>
