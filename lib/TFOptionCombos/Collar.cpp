@@ -351,7 +351,7 @@ size_t /* static */ Collar::LegCount() {
         const double strikeSyntheticFront( chainFront.Put_Atm( strikeSyntheticBack ) ); // short put
 
         double strikeCovered( chainFront.Call_Otm( strikeSyntheticBack ) );
-        strikeCovered = chainFront.Call_Otm( strikeCovered ); // two strikes up
+        //strikeCovered = chainFront.Call_Otm( strikeCovered ); // two strikes up
 
         const double strikeProtective( chainBack.Put_Atm( strikeSyntheticBack ) ); // rounding problem across chains
 
@@ -381,7 +381,7 @@ size_t /* static */ Collar::LegCount() {
         const double strikeSyntheticFront( chainFront.Call_Atm( strikeSyntheticBack ) ); // short call
 
         double strikeCovered( chainFront.Put_Otm( strikeSyntheticBack ) );
-        strikeCovered = chainFront.Put_Otm( strikeCovered ); // two strikes down
+        //strikeCovered = chainFront.Put_Otm( strikeCovered ); // two strikes down
 
         const double strikeProtective( chainBack.Call_Atm( strikeSyntheticBack ) ); // rounding problem across chains
 
