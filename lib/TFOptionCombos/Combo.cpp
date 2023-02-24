@@ -162,17 +162,24 @@ double Combo::GetNet( double price ) {
 
   double dblNet {};
   double dblConstructedValue {};
+  double dblDelta {};
+  double dblGamma {};
 
   for ( mapLeg_t::value_type& entry: m_mapLeg ) {
     Leg& leg( entry.second );
     dblNet += leg.GetNet( price );
+    leg.NetGreeks( dblDelta, dblGamma );
     double dblLegConstructedValue = leg.ConstructedValue();
     std::cout << ",constructed@" << dblLegConstructedValue;
     dblConstructedValue += dblLegConstructedValue;
     std::cout << std::endl;
   }
 
-  std::cout << "  combo constructed: " << dblConstructedValue << std::endl;
+  std::cout
+    << "  combo constructed=" << dblConstructedValue
+    << ",delta=" << dblDelta
+    << ",gamma=" << dblGamma
+    << std::endl;
   return dblNet;
 }
 

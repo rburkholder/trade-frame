@@ -227,6 +227,11 @@ void Option::EmitValues( double dblPriceUnderlying, bool bEmitName ) {
     ;
 }
 
+void Option::NetGreeks( const double quantity, double& delta, double& gamma ) const {
+  delta += quantity * m_greek.Delta();
+  gamma += quantity * m_greek.Gamma();
+}
+
 void Option::HandleGreek( const Greek& greek ) {
   m_greek = greek;
   m_greeks.Append( greek );

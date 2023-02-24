@@ -419,6 +419,27 @@ double Leg::GetNet( double price ) const {
   return dblValue;
 }
 
+void Leg::NetGreeks( double& delta, double& gamma ) const {
+  if ( m_pPosition ) {
+    double quantity {};
+    switch ( m_pPosition->GetRow().eOrderSideActive ) {
+      case ou::tf::OrderSide::Buy:
+        quantity = 1.0 * m_pPosition->GetActiveSize();
+        break;
+      case ou::tf::OrderSide::Sell:
+        quantity = -1.0 * m_pPosition->GetActiveSize();
+        break;
+      default:
+        assert( false );
+    }
+
+    if ( m_bOption ) {
+      pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
+      pOption->NetGreeks( quantity, delta, gamma );
+    }
+  }
+}
+
 double Leg::ConstructedValue() const {
   double value {};
   if ( m_pPosition ) {
@@ -430,6 +451,8 @@ double Leg::ConstructedValue() const {
       case ou::tf::OrderSide::Sell:
         value = -value; // turns the value positive, TODO use the negative at some point
         break;
+      default:
+        assert( false );
     }
   }
   return value;
