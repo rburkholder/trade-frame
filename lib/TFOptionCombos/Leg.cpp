@@ -363,60 +363,70 @@ void Leg::CloseExpiryOtm( const boost::gregorian::date date, double price ) {
 }
 
 double Leg::GetNet( double price ) const {
-  double dblValue {};
+  double dblValue_UnRealized {};
   if ( m_pPosition ) {
 
-    dblValue = m_pPosition->GetUnRealizedPL();
-
-    std::string sign;
-    switch ( m_pPosition->GetRow().eOrderSideActive ) {
-      case ou::tf::OrderSide::Buy:
-        sign = "+";
-        break;
-      case ou::tf::OrderSide::Sell:
-        sign = "-";
-        break;
-      default:
-        assert( false );
-    }
+    ou::tf::OrderSide::EOrderSide eOrderSide( m_pPosition->GetRow().eOrderSideActive );
 
     std::cout
       << "  leg: "
       << m_pPosition->GetInstrument()->GetInstrumentName()
-      << "=>"
-      << sign
-      << m_pPosition->GetActiveSize()
-      << "@"
-      << dblValue;
+      ;
 
-    if ( m_bOption ) {
-      pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
-      switch ( pOption->GetInstrument()->GetOptionSide() ) {
-        case ou::tf::OptionSide::Call:
-          if ( price >= m_pPosition->GetInstrument()->GetStrike() ) {
-            std::cout << "(ITM)";
-          }
-          else {
-            std::cout << "(otm)";
-          }
+    if ( ou::tf::OrderSide::Unknown == eOrderSide ) {
+      double dblValue_Realized = m_pPosition->GetRealizedPL();
+      std::cout << ",realized=" << dblValue_Realized;
+    }
+    else {
+      dblValue_UnRealized = m_pPosition->GetUnRealizedPL();
+      std::string sign;
+      switch ( eOrderSide ) {
+        case ou::tf::OrderSide::Buy:
+          sign = "+";
           break;
-        case ou::tf::OptionSide::Put:
-          if ( price <= m_pPosition->GetInstrument()->GetStrike() ) {
-            std::cout << "(ITM)";
-          }
-          else {
-            std::cout << "(otm)";
-          }
+        case ou::tf::OrderSide::Sell:
+          sign = "-";
           break;
         default:
           assert( false );
       }
-      std::cout << ",";
-      pOption->EmitValues( price, false );
-      std::cout << ",";
+
+      std::cout
+        << "=>"
+        << sign
+        << m_pPosition->GetActiveSize()
+        << "@"
+        << dblValue_UnRealized;
+
+      if ( m_bOption ) {
+        pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
+        switch ( pOption->GetInstrument()->GetOptionSide() ) {
+          case ou::tf::OptionSide::Call:
+            if ( price >= m_pPosition->GetInstrument()->GetStrike() ) {
+              std::cout << "(ITM)";
+            }
+            else {
+              std::cout << "(otm)";
+            }
+            break;
+          case ou::tf::OptionSide::Put:
+            if ( price <= m_pPosition->GetInstrument()->GetStrike() ) {
+              std::cout << "(ITM)";
+            }
+            else {
+              std::cout << "(otm)";
+            }
+            break;
+          default:
+            assert( false );
+        }
+        std::cout << ",";
+        pOption->EmitValues( price, false );
+        std::cout << ",";
+      }
     }
   }
-  return dblValue;
+  return dblValue_UnRealized;
 }
 
 void Leg::NetGreeks( double& delta, double& gamma ) const {
