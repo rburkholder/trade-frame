@@ -61,6 +61,7 @@ public:
   boost::posix_time::ptime GetMarketOpen() const { return m_dtMarketOpen; }
   boost::posix_time::ptime GetRegularHoursOpen() const { return m_dtRHOpen; }
   boost::posix_time::ptime GetStartTrading() const { return m_dtStartTrading; }
+  boost::posix_time::ptime GetNoon() const { return m_dtNoon; }
   boost::posix_time::ptime GetCancellation() const { return m_dtTimeForCancellation; }
   boost::posix_time::ptime GetGoNeutral() const { return m_dtGoNeutral; }
   boost::posix_time::ptime GetRegularHoursClose() const { return m_dtRHClose; }
@@ -94,6 +95,7 @@ private:
   boost::posix_time::ptime m_dtMarketOpen;
   boost::posix_time::ptime m_dtRHOpen;
   boost::posix_time::ptime m_dtStartTrading;
+  boost::posix_time::ptime m_dtNoon; // used for relative day calculations
   boost::posix_time::ptime m_dtTimeForCancellation;
   boost::posix_time::ptime m_dtGoNeutral;
   boost::posix_time::ptime m_dtWaitForRHClose;
@@ -125,6 +127,7 @@ void DailyTradeTimeFrame<T>::InitForUSEquityExchanges( boost::gregorian::date da
   m_dtMarketOpen          = Normalize( date, boost::posix_time::time_duration(  7,  0,  0 ), "America/New_York" );
   m_dtRHOpen              = Normalize( date, boost::posix_time::time_duration(  9, 30,  0 ), "America/New_York" );
   m_dtStartTrading        = Normalize( date, boost::posix_time::time_duration(  9, 30, 30 ), "America/New_York" );
+  m_dtNoon                = Normalize( date, boost::posix_time::time_duration( 12,  0,  0 ), "America/New_York" );
   m_dtTimeForCancellation = Normalize( date, boost::posix_time::time_duration( 15, 58,  0 ), "America/New_York" );
   m_dtGoNeutral           = Normalize( date, boost::posix_time::time_duration( 15, 58, 15 ), "America/New_York" );
   m_dtWaitForRHClose      = Normalize( date, boost::posix_time::time_duration( 15, 59,  0 ), "America/New_York" );
@@ -157,6 +160,7 @@ void DailyTradeTimeFrame<T>::InitForUS24HourFutures( boost::gregorian::date date
   m_dtMarketOpen          = Normalize( date                                     , boost::posix_time::time_duration( 17, 45,  0 ), "America/New_York" );
   m_dtRHOpen              = Normalize( date                                     , boost::posix_time::time_duration( 18,  0,  0 ), "America/New_York" );
   m_dtStartTrading        = Normalize( date                                     , boost::posix_time::time_duration( 18,  0, 30 ), "America/New_York" );
+  m_dtNoon                = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 12,  0,  0 ), "America/New_York" );
   // TO incorporate: ES has 15 minute break in the afternoon (15:15-15:30, then open till 16:00)
   m_dtTimeForCancellation = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 16, 57,  0 ), "America/New_York" );
   m_dtGoNeutral           = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 16, 57,  5 ), "America/New_York" );
