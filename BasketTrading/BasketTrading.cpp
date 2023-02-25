@@ -52,15 +52,15 @@ bool AppBasketTrading::OnInit() {
 
   bool code = true;
 
-  config::Options options;
+  config::Options config;
 
-  if ( Load( options ) ) {
+  if ( Load( config ) ) {
 
-    m_dateTrading = options.dateTrading;
-    m_spread_specs = ou::tf::option::SpreadSpecs( options.nDaysFront, options.nDaysBack );
-    m_dtLatestEod = boost::posix_time::ptime( options.dateHistory, time_duration( 23, 59, 59 ) );
-    m_vSymbol = std::move( options.vSymbol );
-    m_tws->SetClientId( options.ib_client_id );
+    m_dateTrading = config.dateTrading;
+    m_spread_specs = ou::tf::option::SpreadSpecs( config.nDaysFront, config.nDaysBack );
+    m_dtLatestEod = boost::posix_time::ptime( config.dateHistory, time_duration( 23, 59, 59 ) );
+    m_vSymbol = std::move( config.vSymbol );
+    m_tws->SetClientId( config.ib_client_id );
 
     Init();
 
