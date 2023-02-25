@@ -17,6 +17,7 @@ namespace ou {
 
 bool TimeSource::m_bTzLoaded( false );
 boost::local_time::tz_database TimeSource::m_tzDb;
+boost::local_time::time_zone_ptr TimeSource::m_tzChicago;
 boost::local_time::time_zone_ptr TimeSource::m_tzNewYork;
 
 TimeSource::TimeSource()
@@ -28,6 +29,7 @@ TimeSource::TimeSource()
   //    m_tzDb.load_from_file( "../../boost/libs/date_time/data/date_time_zonespec.csv" );
   //    m_tzDb.load_from_file( "..\\..\\boost\\libs\\date_time\\data\\date_time_zonespec.csv" );
       m_tzDb.load_from_file( "../date_time_zonespec.csv" );
+      m_tzChicago = m_tzDb.time_zone_from_region( "America/Chicago");
       m_tzNewYork = m_tzDb.time_zone_from_region( "America/New_York");
       m_bTzLoaded = true;
     }

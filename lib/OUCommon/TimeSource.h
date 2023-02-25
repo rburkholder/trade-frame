@@ -94,6 +94,7 @@ public:
   }
 
   // NOTE:  search for time_zone_ptr/TimeZoneNewYork in code for UTC to local/est conversions
+  static boost::local_time::time_zone_ptr TimeZoneChicago() { return m_tzChicago; }
   static boost::local_time::time_zone_ptr TimeZoneNewYork() { return m_tzNewYork; }
 
   boost::local_time::time_zone_ptr LoadTimeZone( const std::string& sRegion );
@@ -108,6 +109,7 @@ private:
 
   static bool m_bTzLoaded;
   static boost::local_time::tz_database m_tzDb;
+  static boost::local_time::time_zone_ptr m_tzChicago;
   static boost::local_time::time_zone_ptr m_tzNewYork;
 
   std::mutex m_mutex;
