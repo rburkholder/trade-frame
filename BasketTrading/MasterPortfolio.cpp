@@ -618,7 +618,6 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
         dblPivot, // gt is long, lt is short
         uws.pUnderlying->GetWatch(),
         uws.pUnderlying->GetPortfolio(),
-        m_dateTrading,
         m_spread_specs,
     // ManageStrategy::fGatherOptions_t
         [this]( const std::string& sIQFeedUnderlyingName, ou::tf::option::fOption_t&& fOption ){

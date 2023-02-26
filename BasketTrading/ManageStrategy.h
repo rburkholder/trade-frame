@@ -109,7 +109,6 @@ public:
     double dblPivot
   , pWatch_t // underlying
   , pPortfolio_t // owning portfolio
-  , boost::gregorian::date dateTrading
   , const ou::tf::option::SpreadSpecs&
   , fGatherOptions_t&&
     //fConstructWatch_t,
@@ -168,8 +167,6 @@ private:
     TSNoMore
   };
   ETradingState m_stateTrading;
-
-  boost::gregorian::date m_dateTrading;
 
   enum class ETradeDirection { None, Up, Down };
   ETradeDirection m_eTradeDirection;

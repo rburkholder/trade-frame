@@ -246,7 +246,6 @@ ManageStrategy::ManageStrategy(
   double dblPivot
 , pWatch_t pWatchUnderlying
 , pPortfolio_t pPortfolioOwning // => owning portfolio
-, boost::gregorian::date dateTrading
 , const ou::tf::option::SpreadSpecs& specSpread
 , fGatherOptions_t&& fGatherOptions
   //fConstructWatch_t fConstructWatch, // => m_fConstructWatch underlying
@@ -270,7 +269,6 @@ ManageStrategy::ManageStrategy(
   m_pWatchUnderlying( pWatchUnderlying ),
   m_pPortfolioOwning( pPortfolioOwning ),
 
-  m_dateTrading( dateTrading ),
   m_specsSpread( specSpread ),
 
   m_ptiSelf( nullptr ),
@@ -507,7 +505,7 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
 
           m_pCombo = std::make_unique<combo_t>();
 
-          ComboPrepare( m_dateTrading );
+          ComboPrepare( GetNoon().date() );
 
           pCombo = &dynamic_cast<combo_t&>( *m_pCombo );
           assert( pCombo );
@@ -733,7 +731,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 m_pCombo = std::make_unique<combo_t>();
                 assert( m_pCombo );
 
-                ComboPrepare( m_dateTrading );
+                ComboPrepare( GetNoon().date() );
 
                 combo_t& combo = dynamic_cast<combo_t&>( *m_pCombo );
 
