@@ -63,8 +63,8 @@ public:
   double Delta() const { return m_greek.Delta(); }
   double Gamma() const { return m_greek.Gamma(); }
   double Theta() const { return m_greek.Theta(); }
-  double Vega() const { return m_greek.Vega(); }
-  double Rho() const { return m_greek.Rho(); }
+  double Vega()  const { return m_greek.Vega(); }
+  double Rho()   const { return m_greek.Rho(); }
 
   ou::tf::Greeks* Greeks() { return &m_greeks; };
 
