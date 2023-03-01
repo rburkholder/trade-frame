@@ -258,7 +258,7 @@ void Tracker::HandleLongOptionQuote( const ou::tf::Quote& quote ) {
             ( m_pPosition->GetActiveSize() * m_pPosition->GetInstrument()->GetMultiplier() );
           diff -= ( 2.0 * quote.Spread() );  // unrealized p/l incorporates entry spread, this calculates exit spread
           diff -= 0.10;  // subtract estimated commissions plus some spare change
-          if ( 0.95 < diff ) { // minimum profit on the roll - but look at overall profit from all legs
+          if ( 1.10 < diff ) { // minimum profit on the roll - but look at overall profit from all legs
             if ( ( 0 == quote.BidSize() ) || ( 0.0 == quote.Bid() ) || ( 0.0 == quote.Ask() )
             ) {
               // is un-buyable, or is grotesquely bad
@@ -327,7 +327,7 @@ void Tracker::CalendarRoll() {
   if ( m_pPosition ) {
     if ( m_pPosition->IsActive() ) {
 
-      m_transition = ETransition::Roll;
+      m_transition = ETransition::Roll; // might over-write the Roll_Auto
 
       fOptionRoll_t f =  // stack it for background loop
         [this](){
