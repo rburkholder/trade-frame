@@ -90,14 +90,14 @@ private:
   double m_dblUnderlyingSlope;
 
   enum class ETransition {
-    Initial,   // on creation
-    Vacant,    // constructing candidate
-    Fill,      // closing a leg
-    Acquire,   // during option candidate construction
-    Track,     // actively tracking price
-    Roll,      // needs to process the calendar roll at expiry
-    Quiesce,   // stop tracking
-    Done       // prepare for destruction
+    Initial   // on creation
+  , Vacant    // constructing candidate
+  , Fill      // closing a leg
+  , Acquire   // during option candidate construction
+  , Track     // actively tracking price
+  , Roll      // needs to process the calendar roll at expiry
+  , Quiesce   // stop tracking
+  , Done       // prepare for destruction
     };
   ETransition m_transition;
 
