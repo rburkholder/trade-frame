@@ -180,6 +180,12 @@ void AppBasketTrading::Init() {
   LoadState();
   m_pFrameMain->Show( true );
 
+  CallAfter(
+    [this](){
+      LoadState();
+      m_pFrameMain->Layout();
+    }
+  );
 }
 
 void AppBasketTrading::BuildMasterPortfolio() {
