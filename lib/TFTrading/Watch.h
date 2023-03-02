@@ -111,7 +111,7 @@ public:
   void EnableStatsAdd();
   void EnableStatsRemove();
 
-  using tupleSpreadStats_t = std::tuple<bool, size_t,double>;
+  using tupleSpreadStats_t = std::tuple<bool, size_t, double>;
   tupleSpreadStats_t SpreadStats() const {
     return std::make_tuple( m_cntBestSpread > ( m_cntTotalSpread / 5 ), m_cntBestSpread, m_dblBestSpread );
   }
