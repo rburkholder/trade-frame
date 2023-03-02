@@ -95,9 +95,12 @@ private:
   , Fill      // closing a leg
   , Acquire   // during option candidate construction
   , Track     // actively tracking price
-  , Roll      // needs to process the calendar roll at expiry
+  , Roll_profit
+  , Roll_init
+  , Roll_start  // needs to process the calendar roll at expiry
+  , Roll_warmup // wait for quotes (needed for limit order)
   , Quiesce   // stop tracking
-  , Done       // prepare for destruction
+  , Done      // prepare for destruction
     };
   ETransition m_transition;
 
@@ -110,18 +113,21 @@ private:
   fOpenLeg_t m_fOpenLeg;
   fCloseLeg_t m_fCloseLeg;
 
-  using fOptionRoll_t = std::function<void()>;
-  using vOptionRollStack_t = std::vector<fOptionRoll_t>;
-  vOptionRollStack_t m_vOptionRollStack;
+  using fOptionRoll_Construct_t = std::function<void()>;
+  fOptionRoll_Construct_t m_fOptionRoll_Construct;
 
-  void PopOptionRollStack();
+  using fOptionRoll_Open_t = std::function<void()>;
+  fOptionRoll_Open_t m_fOptionRoll_Open;
 
-  void ConstructOptionCandidate( boost::posix_time::ptime, double strikeItm );
-  void HandleLongOptionQuote( const ou::tf::Quote& );
   void Initialize( pPosition_t );
+
+  void OptionCandidate_Construct( boost::posix_time::ptime, double strikeItm );
+  void OptionCandidate_HandleQuote( const ou::tf::Quote& );
 
   void OptionCandidate_StartWatch();
   void OptionCandidate_StopWatch();
+
+  void StartOptionRoll();
 
 };
 

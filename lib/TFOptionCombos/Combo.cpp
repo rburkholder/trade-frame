@@ -111,7 +111,7 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
       Close( type );
       } ) );
     ma.emplace_back( MenuActivation( "calendar", [this,&sName,type=legValues.m_type](){
-      std::cout << "Calendar Roll: " << sName << " (todo)" << std::endl;
+      std::cout << "Calendar Roll: " << sName << std::endl;
       CalendarRoll( type );
       } ) );
 
