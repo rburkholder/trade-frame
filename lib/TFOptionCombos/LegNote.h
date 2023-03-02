@@ -48,6 +48,7 @@ public:
     Momentum m_momentum;
     Algo m_algo;
     double m_strike;
+    values_t(): m_strike {} {}
   };
 
   LegNote();
