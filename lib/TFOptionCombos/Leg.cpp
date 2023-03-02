@@ -439,13 +439,18 @@ void Leg::NetGreeks( double& delta, double& gamma ) const {
       case ou::tf::OrderSide::Sell:
         quantity = -1.0 * m_pPosition->GetActiveSize();
         break;
+      case ou::tf::OrderSide::Unknown:
+        // not active
+        break;
       default:
         assert( false );
     }
 
-    if ( m_bOption ) {
-      pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
-      pOption->NetGreeks( quantity, delta, gamma );
+    if ( 0.0 != quantity ) {
+      if ( m_bOption ) {
+        pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
+        pOption->NetGreeks( quantity, delta, gamma );
+      }
     }
   }
 }
