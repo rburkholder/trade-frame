@@ -125,7 +125,7 @@ void WinChartView::ThreadDrawChart() { // thread for initiating chart, work is p
 // called from PanelCharts::HandleInstrumentLiveChart
 // called from PanelFinancialChart::HandleTreeEventitemActivated
 void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView, bool bReCalcViewPort ) {
-  std::scoped_lock<std::mutex> lock( m_mutexChartDataView );
+  std::scoped_lock<std::mutex> lock( m_mutexChartDataView );   // PROBLEM
   // TODO: need to sync with the gui refresh thread
   m_pChartDataView = pChartDataView; // TODO: need some additional tender loving care with this for the mutex
   if ( m_pChartDataView ) {
@@ -502,7 +502,7 @@ void WinChartView::DrawChart() {
 
               m_pChartDataView->SetViewPort( m_vpDataViewVisual );
 
-              UpdateChartMaster();
+              UpdateChartMaster();  // PROBLEM in lock 1
 
               m_bInDrawChart = false;
             });
@@ -539,7 +539,7 @@ void WinChartView::UpdateChartMaster() { // in worker thread with DrawChart star
       });
     });
 
-  m_chartMaster.DrawChart();
+  m_chartMaster.DrawChart();   // PROBLEM in lock 2
 }
 
 void WinChartView::UnbindEvents() {

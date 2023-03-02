@@ -203,7 +203,7 @@ void ChartMaster::DrawChart() {
     if ( m_pCdv ) { // DataView has something to draw
 
       ChartData( m_pXY0 );
-      RenderChart();
+      RenderChart();   // PROBLEM in lock 3
 
     }
   }
@@ -215,7 +215,7 @@ void ChartMaster::RenderChart() {
     if ( m_bCrossHair ) {
       bCursor = DrawDynamicLayer();
     }
-    MemBlock m = m_pChart->makeChart( Chart::BMP );
+    MemBlock m = m_pChart->makeChart( Chart::BMP );   // PROBLEM in lock 4
     if ( m_fOnDrawChart ) m_fOnDrawChart( bCursor, m );
   }
 }
