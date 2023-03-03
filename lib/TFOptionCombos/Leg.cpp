@@ -466,6 +466,8 @@ double Leg::ConstructedValue() const {
       case ou::tf::OrderSide::Sell:
         value = -value; // turns the value positive, TODO use the negative at some point
         break;
+      case ou::tf::OrderSide::Unknown:
+        break; // position is closed
       default:
         assert( false );
     }
