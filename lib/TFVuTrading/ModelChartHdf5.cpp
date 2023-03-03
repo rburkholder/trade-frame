@@ -18,7 +18,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 namespace {
-  static const size_t nMaxElements { 25000 };
+  static const size_t c_nMaxElements { 25000 };
 }
 
 ModelChartHdf5::ModelChartHdf5( void ) {
@@ -55,7 +55,7 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
 
   DefineChartBars( pChartDataView );
 
-  size_t skip = 1 + ( bars.Size() / nMaxElements );
+  size_t skip = 1 + ( bars.Size() / c_nMaxElements );
 
   for ( ou::tf::Bars::const_iterator iter = bars.begin(); iter < bars.end(); iter = iter += skip ) {
     m_ceBars.AppendBar( *iter );
@@ -84,7 +84,7 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const o
 
   DefineChartQuotes( pChartDataView );
 
-  size_t skip = 1 + ( quotes.Size() / nMaxElements );
+  size_t skip = 1 + ( quotes.Size() / c_nMaxElements );
 
   for ( ou::tf::Quotes::const_iterator iter = quotes.begin(); iter < quotes.end(); iter = iter += skip ) {
     m_ceQuoteUpper.Append( iter->DateTime(), iter->Ask() );
@@ -108,7 +108,7 @@ void ModelChartHdf5::DefineChartTrades( ou::ChartDataView* pChartDataView ) {
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Trades& trades ) {
   DefineChartTrades( pChartDataView );
 
-  size_t skip = 1 + ( trades.Size() / nMaxElements );
+  size_t skip = 1 + ( trades.Size() / c_nMaxElements );
 
   for ( ou::tf::Trades::const_iterator iter = trades.begin(); iter < trades.end(); iter = iter += skip ) {
     m_ceTrade.Append( iter->DateTime(), iter->Price() );
@@ -131,7 +131,7 @@ void ModelChartHdf5::DefineChartPriceIVs( ou::ChartDataView* pChartDataView ) {
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::PriceIVExpirys& ivs ) {
   DefineChartPriceIVs( pChartDataView );
 
-  size_t skip = 1 + ( ivs.Size() / nMaxElements );
+  size_t skip = 1 + ( ivs.Size() / c_nMaxElements );
 
   for ( ou::tf::PriceIVExpirys::const_iterator iter = ivs.begin(); iter < ivs.end(); iter = iter += skip ) {
     m_ceTrade.Append( iter->DateTime(), iter->Value() );
@@ -161,7 +161,7 @@ void ModelChartHdf5::DefineChartGreeks( ou::ChartDataView* pChartDataView ) {
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::Greeks& greeks ) {
   DefineChartGreeks( pChartDataView );
 
-  size_t skip = 1 + ( greeks.Size() / nMaxElements );
+  size_t skip = 1 + ( greeks.Size() / c_nMaxElements );
 
   for ( ou::tf::Greeks::const_iterator iter = greeks.begin(); iter < greeks.end(); iter = iter += skip ) {
     m_ceImpVol.Append( iter->DateTime(), iter->ImpliedVolatility() );
@@ -207,7 +207,7 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const E
   // Quotes
 
   {
-    size_t skipQuotes = 1 + ( equities.quotes.Size() / nMaxElements );
+    size_t skipQuotes = 1 + ( equities.quotes.Size() / c_nMaxElements );
 
     for ( ou::tf::Quotes::const_iterator iter = equities.quotes.begin();
           iter < equities.quotes.end(); iter = iter += skipQuotes ) {
@@ -222,7 +222,7 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const E
   // Trades
 
   {
-    size_t skipTrades = 1 + ( equities.trades.Size() / nMaxElements );
+    size_t skipTrades = 1 + ( equities.trades.Size() / c_nMaxElements );
 
     for ( ou::tf::Trades::const_iterator iter = equities.trades.begin();
           iter < equities.trades.end(); iter = iter += skipTrades ) {
@@ -259,7 +259,7 @@ void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const O
   Equities equities( options.quotes, options.trades );
   AddChartEntries( pChartDataView, equities );
 
-  size_t skip = 1 + ( options.greeks.Size() / nMaxElements );
+  size_t skip = 1 + ( options.greeks.Size() / c_nMaxElements );
 
   for ( ou::tf::Greeks::const_iterator iter = options.greeks.begin();
         iter < options.greeks.end(); iter = iter += skip ) {
