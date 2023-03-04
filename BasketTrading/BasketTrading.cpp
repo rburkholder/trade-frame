@@ -108,6 +108,8 @@ void AppBasketTrading::Init() {
   wxBoxSizer* sizerControls = new wxBoxSizer( wxHORIZONTAL );
   sizerLeft->Add( sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 2 );
 
+  m_pFrameMain->Show( true );
+
   // populate variable in FrameWork01
   m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
   sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxRIGHT, 5);
@@ -177,11 +179,11 @@ void AppBasketTrading::Init() {
   vItems.push_back( new mi( "a7 Add combo - forced", MakeDelegate( this, &AppBasketTrading::HandleAddComboForced ) ) );
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
 
+  //m_pFrameMain->Layout();
+
   CallAfter(
     [this](){
       LoadState();
-      m_pFrameMain->Layout();
-      m_pFrameMain->Show( true );
     }
   );
 }
