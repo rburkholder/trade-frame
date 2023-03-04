@@ -78,6 +78,7 @@ protected:
 
   virtual void Close( LegNote::Type );
   virtual void CalendarRoll( LegNote::Type );
+  virtual void DiagonalRoll( LegNote::Type );
 
 private:
 

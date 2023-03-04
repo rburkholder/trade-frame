@@ -168,6 +168,7 @@ protected:
 
   virtual void Close( LegNote::Type ) = 0;
   virtual void CalendarRoll( LegNote::Type ) = 0;
+  virtual void DiagonalRoll( LegNote::Type ) = 0;
 
   void DeactivatePositionOption( pPosition_t );
 

@@ -255,6 +255,13 @@ void Collar::CalendarRoll( LegNote::Type type ) {
   leg.m_tracker.CalendarRoll();
 }
 
+void Collar::DiagonalRoll( LegNote::Type type ) {
+  mapCollarLeg_t::iterator iter = m_mapCollarLeg.find( type );
+  assert( m_mapCollarLeg.end() != iter );
+  CollarLeg& leg( iter->second );
+  leg.m_tracker.DiagonalRoll();
+}
+
 void Collar::CancelOrders() {
   Combo::CancelOrders();
   for ( mapCollarLeg_t::value_type& cleg: m_mapCollarLeg ) {

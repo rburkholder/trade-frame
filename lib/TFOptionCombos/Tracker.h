@@ -71,6 +71,7 @@ public:
 
   void Close();
   void CalendarRoll();
+  void DiagonalRoll();
 
   void Quiesce(); // called from Collar
 
@@ -81,7 +82,7 @@ private:
   compare_t m_compare;
 
   using lu_strike_t = std::function<double(double)>;
-  lu_strike_t m_luStrike;
+  lu_strike_t m_luItmStrike;
 
   double m_dblStrikePosition;
   ou::tf::OptionSide::EOptionSide m_sidePosition;
@@ -126,6 +127,8 @@ private:
 
   void OptionCandidate_StartWatch();
   void OptionCandidate_StopWatch();
+
+  void GenericRoll( double strike );
 
   void StartOptionRoll();
 

@@ -40,7 +40,7 @@ namespace {
 Tracker::Tracker()
 : m_transition( ETransition::Initial )
 , m_compare( nullptr )
-, m_luStrike( nullptr )
+, m_luItmStrike( nullptr )
 , m_pChain( nullptr )
 , m_dblUnderlyingSlope {}, m_dblUnderlyingPrice {}
 , m_fOptionRoll_Construct( nullptr )
@@ -50,7 +50,7 @@ Tracker::Tracker()
 Tracker::Tracker( Tracker&& rhs )
 : m_transition( rhs.m_transition )
 , m_compare( std::move( rhs.m_compare ) )
-, m_luStrike( std::move( rhs.m_luStrike ) )
+, m_luItmStrike( std::move( rhs.m_luItmStrike ) )
 , m_pChain( std::move( rhs.m_pChain ) )
 , m_dblStrikePosition( rhs.m_dblStrikePosition )
 , m_sidePosition( rhs.m_sidePosition )
@@ -71,7 +71,7 @@ Tracker::~Tracker() {
   Quiesce();
   m_transition = ETransition::Done;
   m_compare = nullptr;
-  m_luStrike = nullptr;
+  m_luItmStrike = nullptr;
   m_pPosition.reset();
   m_fConstructOption = nullptr;
   m_fOpenLeg = nullptr;
@@ -125,11 +125,11 @@ void Tracker::Initialize( pPosition_t pPosition ) {
   switch ( m_sidePosition ) {
     case ou::tf::OptionSide::Call:
       m_compare = &gt;
-      m_luStrike = [pChain=m_pChain](double dblUnderlying){ return pChain->Call_Itm( dblUnderlying ); };
+      m_luItmStrike = [pChain=m_pChain](double dblUnderlying){ return pChain->Call_Itm( dblUnderlying ); };
       break;
     case ou::tf::OptionSide::Put:
       m_compare = &lt;
-      m_luStrike = [pChain=m_pChain](double dblUnderlying){ return pChain->Put_Itm( dblUnderlying ); };
+      m_luItmStrike = [pChain=m_pChain](double dblUnderlying){ return pChain->Put_Itm( dblUnderlying ); };
       break;
     default:
       assert( false );
@@ -147,7 +147,7 @@ void Tracker::TestLong( boost::posix_time::ptime dt, double dblUnderlyingSlope, 
         m_dblUnderlyingPrice = dblUnderlyingPrice;
         m_dblUnderlyingSlope = dblUnderlyingSlope;
 
-        double strikeItm = m_luStrike( dblUnderlyingPrice );
+        double strikeItm = m_luItmStrike( dblUnderlyingPrice );
 
         if ( m_compare( strikeItm, m_dblStrikePosition ) ) { // is new strike further itm?
           // TODO: refactor to remove the if/else and put Vacant/Construct together?
@@ -291,7 +291,7 @@ void Tracker::OptionCandidate_HandleQuote( const ou::tf::Quote& quote ) {
                 m_transition = ETransition::Roll_profit;
                 OptionCandidate_StopWatch();
                 m_compare = nullptr;
-                m_luStrike = nullptr;
+                m_luItmStrike = nullptr;
                 pOption_t pOption( std::move( m_pOptionCandidate ) );
                 std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
                 m_fCloseLeg( m_pPosition );  // TODO: closer needs to use EnableStatsAdd
@@ -342,8 +342,7 @@ void Tracker::Close() {
   BOOST_LOG_TRIVIAL(info) << "Tracker::Close() not implemented";
 }
 
-//
-void Tracker::CalendarRoll() {
+void Tracker::GenericRoll( double strike ) {
   if ( m_pPosition ) {
     if ( m_pPosition->IsActive() ) {
 
@@ -351,12 +350,11 @@ void Tracker::CalendarRoll() {
 
       assert( nullptr == m_fOptionRoll_Construct );
       m_fOptionRoll_Construct =  // for background loop
-        [this](){
+        [this,strike](){
 
           m_compare = nullptr;
-          m_luStrike = nullptr;
+          m_luItmStrike = nullptr;
 
-          double strike( m_dblStrikePosition );
           ou::tf::OptionSide::EOptionSide sidePosition( m_sidePosition );
 
           std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
@@ -403,6 +401,18 @@ void Tracker::CalendarRoll() {
 
     }
   }
+}
+
+void Tracker::CalendarRoll() {
+  assert( 0.0 < m_dblStrikePosition );
+  GenericRoll( m_dblStrikePosition );
+}
+
+void Tracker::DiagonalRoll() {
+  assert( m_luItmStrike );
+  assert( 0.0 < m_dblUnderlyingPrice );
+  double strike = m_luItmStrike( m_dblUnderlyingPrice );
+  GenericRoll( strike );
 }
 
 void Tracker::TestItmRoll( boost::gregorian::date date, boost::posix_time::time_duration time ) {
