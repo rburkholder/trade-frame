@@ -105,9 +105,9 @@ namespace {
   };
 }
 
-// == OptionRepository
+// == OptionRegistry
 
-class OptionRepository {
+class OptionRegistry {
 public:
 
   using pWatch_t     = ou::tf::option::Option::pWatch_t;
@@ -121,7 +121,7 @@ public:
   using fStartCalc_t = ManageStrategy::fStartCalc_t;
   using fStopCalc_t  = ManageStrategy::fStopCalc_t;
 
-  OptionRepository(
+  OptionRegistry(
     fRegisterOption_t&& fRegisterOption
   , fStartCalc_t&& fStartCalc
   , fStopCalc_t&& fStopCalc
@@ -137,7 +137,7 @@ public:
     assert( nullptr != m_fRegisterOption );
   }
 
-  ~OptionRepository() {
+  ~OptionRegistry() {
     for ( mapOption_t::value_type& vt: m_mapOption ) { // TODO: fix, isn't the best place?
       m_fStopCalc( vt.second->Option(), m_pWatchUnderlying );
     }
@@ -345,7 +345,7 @@ ManageStrategy::ManageStrategy(
   m_pChartDataView->Add( EChartSlot::Price, &m_ceShortExits );
   m_pChartDataView->Add( EChartSlot::Price, &m_ceLongExits );
 
-  m_pOptionRepository = std::make_unique<OptionRepository>(
+  m_pOptionRegistry = std::make_unique<OptionRegistry>(
     std::move( fRegisterOption ),
     std::move( fStartCalc ),
     std::move( fStopCalc ),
@@ -370,7 +370,7 @@ ManageStrategy::ManageStrategy(
     //  m_stateTrading = TSNoMore;
     //}
 
-    m_pOptionRepository->AssignWatchUnderlying( m_pWatchUnderlying );
+    m_pOptionRegistry->AssignWatchUnderlying( m_pWatchUnderlying );
 
     // collect option chains for the underlying
     // TODO: this will be passed in
@@ -439,13 +439,13 @@ ManageStrategy::~ManageStrategy( ) {
   m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
 
   m_pCombo.reset();
-  m_pOptionRepository.reset();
+  m_pOptionRegistry.reset();
   m_vEMA.clear();
 }
 
 void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
   m_ptiSelf = ptiSelf;
-  m_pOptionRepository->SetTreeItem( ptiSelf );
+  m_pOptionRegistry->SetTreeItem( ptiSelf );
   }
 
 void ManageStrategy::Run() {
@@ -661,7 +661,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
     },
     [this]( pOption_t pOption, pPosition_t pPosition, const std::string& sLegType, ou::tf::option::Combo::vMenuActivation_t&& ma ) { // fActivateOption_t
       //std::cout << "Option repository: adding option " << pOption->GetInstrumentName() << std::endl;
-      m_pOptionRepository->Add( pOption, pPosition, sLegType, std::move( ma ) );
+      m_pOptionRegistry->Add( pOption, pPosition, sLegType, std::move( ma ) );
     },
     [this]( ou::tf::option::Combo* p, pOption_t pOption, const std::string& note )->pPosition_t { // fOpenPosition_t
       combo_t* pCombo = reinterpret_cast<combo_t*>( p );
@@ -675,7 +675,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
       //std::cout << "Option repository: removing option " << pOption->GetInstrumentName() << std::endl;
       //assert( pWatch->GetInstrument()->IsOption() );
       //pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
-      m_pOptionRepository->Remove( pOption );
+      m_pOptionRegistry->Remove( pOption );
     }
     );
 

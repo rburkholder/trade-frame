@@ -58,7 +58,7 @@ namespace tf { // TradeFrame
 } // namespace tf
 } // namespace ou
 
-class OptionRepository;
+class OptionRegistry;
 
 class ManageStrategy:
   public ou::tf::DailyTradeTimeFrame<ManageStrategy>
@@ -209,7 +209,7 @@ private:
   fAuthorizeUnderlying_t m_fAuthorizeUnderlying;
   fAuthorizeOption_t m_fAuthorizeOption;
 
-  std::unique_ptr<OptionRepository> m_pOptionRepository;
+  std::unique_ptr<OptionRegistry> m_pOptionRegistry;
 
   fFirstTrade_t m_fFirstTrade;
   fBar_t m_fBar;
