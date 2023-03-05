@@ -83,7 +83,7 @@ private:
   ou::tf::TreeItem* m_ptiParent;
 
   using pOptionStatistics_t = OptionStatistics::pOptionStatistics_t;
-  using mapOption_t = std::map<std::string,pOptionStatistics_t>; // for m_fStartCalc, m_fStopCalc
-  mapOption_t m_mapOption;
+  using mapOptionStatistics_t = std::map<std::string,pOptionStatistics_t>; // for m_fStartCalc, m_fStopCalc
+  mapOptionStatistics_t m_mapOptionStatistics;
 
 };

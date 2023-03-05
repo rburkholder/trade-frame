@@ -40,10 +40,10 @@ OptionRegistry::OptionRegistry(
   }
 
   OptionRegistry::~OptionRegistry() {
-    for ( mapOption_t::value_type& vt: m_mapOption ) { // TODO: fix, isn't the best place?
+    for ( mapOptionStatistics_t::value_type& vt: m_mapOptionStatistics ) { // TODO: fix, isn't the best place?
       m_fStopCalc( vt.second->Option(), m_pWatchUnderlying );
     }
-    m_mapOption.clear();
+    m_mapOptionStatistics.clear();
   }
 
   // don't worry about reference counting, options in a strategy need to be unique
@@ -53,8 +53,8 @@ OptionRegistry::OptionRegistry(
 
     const std::string& sOptionName( pOption->GetInstrument()->GetInstrumentName() );
 
-    mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
-    if ( m_mapOption.end() == iterOption ) {
+    mapOptionStatistics_t::iterator iterOption = m_mapOptionStatistics.find( sOptionName );
+    if ( m_mapOptionStatistics.end() == iterOption ) {
 
       try {
         m_fRegisterOption( pOption );
@@ -65,7 +65,7 @@ OptionRegistry::OptionRegistry(
       }
 
       pOptionStatistics_t pOptionStatistics = OptionStatistics::Factory( pOption );
-      m_mapOption[ sOptionName ] = pOptionStatistics;
+      m_mapOptionStatistics[ sOptionName ] = pOptionStatistics;
       ou::tf::TreeItem* pti = m_ptiParent->AppendChild(
         pOption->GetInstrumentName() + " (" + sLegName + ")",
         [this,pOptionStatistics]( ou::tf::TreeItem* ){
@@ -101,12 +101,12 @@ OptionRegistry::OptionRegistry(
     const std::string& sOptionName( pOption->GetInstrument()->GetInstrumentName() );
     std::cout << "OptionRepository::Remove: " <<sOptionName << std::endl;
 
-    mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
-    if ( m_mapOption.end() != iterOption ) {
+    mapOptionStatistics_t::iterator iterOption = m_mapOptionStatistics.find( sOptionName );
+    if ( m_mapOptionStatistics.end() != iterOption ) {
 
       m_fStopCalc( pOption, m_pWatchUnderlying );
       //iterOption->second->GetTreeItem()->Delete(); // this needs to be tested prior to activation, what happens if this treeitem is visible?
-      m_mapOption.erase( iterOption );
+      m_mapOptionStatistics.erase( iterOption );
 
     }
     else {
