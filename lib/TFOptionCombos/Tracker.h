@@ -84,6 +84,9 @@ private:
   using lu_strike_t = std::function<double(double)>;
   lu_strike_t m_luItmStrike;
 
+  using lu_name_t = std::function<std::string(double)>;
+  lu_name_t m_luItmName;
+
   double m_dblStrikePosition;
   ou::tf::OptionSide::EOptionSide m_sidePosition;
 

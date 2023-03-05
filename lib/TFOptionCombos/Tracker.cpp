@@ -41,6 +41,7 @@ Tracker::Tracker()
 : m_transition( ETransition::Initial )
 , m_compare( nullptr )
 , m_luItmStrike( nullptr )
+, m_luItmName( nullptr )
 , m_pChain( nullptr )
 , m_dblUnderlyingSlope {}, m_dblUnderlyingPrice {}
 , m_fOptionRoll_Construct( nullptr )
@@ -51,6 +52,7 @@ Tracker::Tracker( Tracker&& rhs )
 : m_transition( rhs.m_transition )
 , m_compare( std::move( rhs.m_compare ) )
 , m_luItmStrike( std::move( rhs.m_luItmStrike ) )
+, m_luItmName( std::move( rhs.m_luItmName ) )
 , m_pChain( std::move( rhs.m_pChain ) )
 , m_dblStrikePosition( rhs.m_dblStrikePosition )
 , m_sidePosition( rhs.m_sidePosition )
@@ -72,6 +74,7 @@ Tracker::~Tracker() {
   m_transition = ETransition::Done;
   m_compare = nullptr;
   m_luItmStrike = nullptr;
+  m_luItmName = nullptr;
   m_pPosition.reset();
   m_fConstructOption = nullptr;
   m_fOpenLeg = nullptr;
@@ -126,10 +129,12 @@ void Tracker::Initialize( pPosition_t pPosition ) {
     case ou::tf::OptionSide::Call:
       m_compare = &gt;
       m_luItmStrike = [pChain=m_pChain](double dblUnderlying){ return pChain->Call_Itm( dblUnderlying ); };
+      m_luItmName =   [pChain=m_pChain](double strike) { return pChain->GetIQFeedNameCall( strike ); };
       break;
     case ou::tf::OptionSide::Put:
       m_compare = &lt;
       m_luItmStrike = [pChain=m_pChain](double dblUnderlying){ return pChain->Put_Itm( dblUnderlying ); };
+      m_luItmName =   [pChain=m_pChain](double strike) { return pChain->GetIQFeedNamePut( strike ); };
       break;
     default:
       assert( false );
@@ -220,16 +225,8 @@ void Tracker::OptionCandidate_Construct( boost::posix_time::ptime dt, double str
   m_transition = ETransition::Acquire;
 
   std::string sName;
-  switch ( m_sidePosition ) {
-    case ou::tf::OptionSide::Call:
-      sName = m_pChain->GetIQFeedNameCall( strike );
-      break;
-    case ou::tf::OptionSide::Put:
-      sName = m_pChain->GetIQFeedNamePut( strike );
-      break;
-    default:
-      assert( false );
-  }
+  assert( m_luItmName );
+  sName = m_luItmName( strike );
 
   BOOST_LOG_TRIVIAL(info)
     << dt.time_of_day() << " "
@@ -292,6 +289,7 @@ void Tracker::OptionCandidate_HandleQuote( const ou::tf::Quote& quote ) {
                 OptionCandidate_StopWatch();
                 m_compare = nullptr;
                 m_luItmStrike = nullptr;
+                m_luItmName = nullptr;
                 pOption_t pOption( std::move( m_pOptionCandidate ) );
                 std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
                 m_fCloseLeg( m_pPosition );  // TODO: closer needs to use EnableStatsAdd
@@ -354,6 +352,7 @@ void Tracker::GenericRoll( double strike ) {
 
           m_compare = nullptr;
           m_luItmStrike = nullptr;
+          m_luItmName = nullptr;
 
           ou::tf::OptionSide::EOptionSide sidePosition( m_sidePosition );
 
@@ -364,16 +363,8 @@ void Tracker::GenericRoll( double strike ) {
           m_pPosition.reset();
 
           std::string sName_New;
-          switch ( sidePosition ) {
-            case ou::tf::OptionSide::Call:
-              sName_New = m_pChain->GetIQFeedNameCall( strike );
-              break;
-            case ou::tf::OptionSide::Put:
-              sName_New = m_pChain->GetIQFeedNamePut( strike );
-              break;
-            default:
-              assert( false );
-          }
+          assert( m_luItmName );
+          sName_New = m_luItmName( strike );
 
           BOOST_LOG_TRIVIAL(info) << "Tracker::CalendarRoll: " << sName_Old << " to " << sName_New;
 
