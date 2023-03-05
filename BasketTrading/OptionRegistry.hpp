@@ -22,6 +22,7 @@
 #pragma once
 
 #include <functional>
+#include <unordered_map>
 
 #include <TFTrading/Position.h>
 
@@ -67,8 +68,9 @@ public:
     m_ptiParent = ptiParent;
   }
 
+  void Add( pOption_t pOption );
   void Add( pOption_t pOption, pPosition_t pPosition, const std::string& sLegName, ou::tf::option::Combo::vMenuActivation_t&& ma );
-  void Remove( pOption_t pOption );
+  void Remove( pOption_t pOption, bool bRemoveStatistics );
 
 protected:
 private:
@@ -83,7 +85,20 @@ private:
   ou::tf::TreeItem* m_ptiParent;
 
   using pOptionStatistics_t = OptionStatistics::pOptionStatistics_t;
-  using mapOptionStatistics_t = std::map<std::string,pOptionStatistics_t>; // for m_fStartCalc, m_fStopCalc
-  mapOptionStatistics_t m_mapOptionStatistics;
+
+  struct RegistryEntry {
+    size_t nReference;
+    pOption_t pOption;
+    pOptionStatistics_t pOptionStatistics;
+    RegistryEntry( pOption_t pOption_ )
+    : nReference( 1 ), pOption( std::move( pOption_ ) ) {}
+    RegistryEntry( pOption_t pOption_, pOptionStatistics_t pOptionStatistics_ )
+    : nReference( 1 ), pOption( std::move( pOption_ ) ), pOptionStatistics( std::move( pOptionStatistics_ ) ) {}
+  };
+
+  using mapOption_t = std::unordered_map<std::string,RegistryEntry>; // for m_fStartCalc, m_fStopCalc
+  mapOption_t m_mapOption;
+
+  mapOption_t::iterator Check( pOption_t pOption );
 
 };

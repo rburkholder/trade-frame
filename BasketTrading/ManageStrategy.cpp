@@ -541,7 +541,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
       //std::cout << "Option repository: removing option " << pOption->GetInstrumentName() << std::endl;
       //assert( pWatch->GetInstrument()->IsOption() );
       //pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
-      m_pOptionRegistry->Remove( pOption );
+      m_pOptionRegistry->Remove( pOption, true );
     }
     );
 

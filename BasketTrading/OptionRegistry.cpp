@@ -40,77 +40,107 @@ OptionRegistry::OptionRegistry(
   }
 
   OptionRegistry::~OptionRegistry() {
-    for ( mapOptionStatistics_t::value_type& vt: m_mapOptionStatistics ) { // TODO: fix, isn't the best place?
-      m_fStopCalc( vt.second->Option(), m_pWatchUnderlying );
+    for ( mapOption_t::value_type& vt: m_mapOption ) { // TODO: fix, isn't the best place?
+      m_fStopCalc( vt.second.pOption, m_pWatchUnderlying );
+      vt.second.pOptionStatistics.reset();
     }
-    m_mapOptionStatistics.clear();
+    m_mapOption.clear();
   }
 
-  // don't worry about reference counting, options in a strategy need to be unique
-  // however, may need to worry about the option if from previous time frame
-
-  void OptionRegistry::Add( pOption_t pOption, pPosition_t pPosition, const std::string& sLegName, ou::tf::option::Combo::vMenuActivation_t&& ma ) {
+  OptionRegistry::mapOption_t::iterator OptionRegistry::Check( pOption_t pOption ) {
 
     const std::string& sOptionName( pOption->GetInstrument()->GetInstrumentName() );
+    mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
+    if ( m_mapOption.end() == iterOption ) {
 
-    mapOptionStatistics_t::iterator iterOption = m_mapOptionStatistics.find( sOptionName );
-    if ( m_mapOptionStatistics.end() == iterOption ) {
+      auto pair = m_mapOption.emplace( sOptionName, RegistryEntry( pOption ) );
+      assert( pair.second );
+      iterOption = std::move( pair.first );
 
       try {
         m_fRegisterOption( pOption );
       }
       catch( std::runtime_error& e ) {
-        std::cout << "OptionRepository::Add: " << e.what() << std::endl;
+        std::cout << "OptionRegistry::Add error: " << e.what() << std::endl;
         // simply telling us we are already registered, convert from error to status?
       }
 
-      pOptionStatistics_t pOptionStatistics = OptionStatistics::Factory( pOption );
-      m_mapOptionStatistics[ sOptionName ] = pOptionStatistics;
-      ou::tf::TreeItem* pti = m_ptiParent->AppendChild(
-        pOption->GetInstrumentName() + " (" + sLegName + ")",
-        [this,pOptionStatistics]( ou::tf::TreeItem* ){
-          m_fSetChartDataView( pOptionStatistics->ChartDataView() );
-        },
-        [this,&sOptionName, ma_=std::move(ma)]( ou::tf::TreeItem* pti ) {
-          pti->NewMenu();
-          for ( const ou::tf::option::Combo::vMenuActivation_t::value_type& vt: ma_  ) {
-            pti->AppendMenuItem(
-              vt.sLabel,
-              //[this,&sOptionName,ma_f=std::move( vt.fMenuActivation )]( ou::tf::TreeItem* pti ){
-              [this,&sOptionName,ma_f=&vt.fMenuActivation]( ou::tf::TreeItem* pti ){
-                (*ma_f)();
-              });
-          }
-        }
-      );
-      pOptionStatistics->Set( pti );
-      pOptionStatistics->Set( pPosition );
-
-      std::cout << "OptionRepository::Add " << pOption->GetInstrumentName() << std::endl;
-
+      assert( m_pWatchUnderlying );
       m_fStartCalc( pOption, m_pWatchUnderlying );
+
     }
     else {
-      std::cout << "OptionRepository::Add: error, duplicate entry: " << sOptionName << std::endl;
+      iterOption->second.nReference++;
     }
+
+    std::cout << "OptionRegistry::Add " << pOption->GetInstrumentName() << std::endl;
+    return iterOption;
+  }
+
+  void OptionRegistry::Add( pOption_t pOption ) {
+    Check( pOption );
+    //std::cout << "OptionRegistry::Add(simple) " << pOption->GetInstrumentName() << std::endl;
+  }
+
+  void OptionRegistry::Add( pOption_t pOption, pPosition_t pPosition, const std::string& sLegName, ou::tf::option::Combo::vMenuActivation_t&& ma ) {
+
+    const std::string& sOptionName( pOption->GetInstrument()->GetInstrumentName() );
+
+    pOptionStatistics_t pOptionStatistics = OptionStatistics::Factory( pOption );
+
+    ou::tf::TreeItem* pti = m_ptiParent->AppendChild(
+      pOption->GetInstrumentName() + " (" + sLegName + ")",
+      [this,pOptionStatistics]( ou::tf::TreeItem* ){
+        m_fSetChartDataView( pOptionStatistics->ChartDataView() );
+      },
+      [this,&sOptionName, ma_=std::move(ma)]( ou::tf::TreeItem* pti ) {
+        pti->NewMenu();
+        for ( const ou::tf::option::Combo::vMenuActivation_t::value_type& vt: ma_  ) {
+          pti->AppendMenuItem(
+            vt.sLabel,
+            //[this,&sOptionName,ma_f=std::move( vt.fMenuActivation )]( ou::tf::TreeItem* pti ){
+            [this,&sOptionName,ma_f=&vt.fMenuActivation]( ou::tf::TreeItem* pti ){
+              (*ma_f)();
+            });
+        }
+      }
+    );
+    pOptionStatistics->Set( pti );
+    pOptionStatistics->Set( pPosition );
+
+    mapOption_t::iterator iterOption = Check( pOption );
+    assert( !iterOption->second.pOptionStatistics );
+    iterOption->second.pOptionStatistics = pOptionStatistics;
+
+    //std::cout << "OptionRegistry::Add(stats) " << pOption->GetInstrumentName() << std::endl;
 
   }
 
-  void OptionRegistry::Remove( pOption_t pOption ) {
+  void OptionRegistry::Remove( pOption_t pOption, bool bRemoveStatistics ) {
 
     const std::string& sOptionName( pOption->GetInstrument()->GetInstrumentName() );
-    std::cout << "OptionRepository::Remove: " <<sOptionName << std::endl;
+    std::cout << "OptionRegistry::Remove: " << sOptionName << std::endl;
 
-    mapOptionStatistics_t::iterator iterOption = m_mapOptionStatistics.find( sOptionName );
-    if ( m_mapOptionStatistics.end() != iterOption ) {
+    mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
 
-      m_fStopCalc( pOption, m_pWatchUnderlying );
-      //iterOption->second->GetTreeItem()->Delete(); // this needs to be tested prior to activation, what happens if this treeitem is visible?
-      m_mapOptionStatistics.erase( iterOption );
-
+    if ( m_mapOption.end() != iterOption ) {
+      RegistryEntry& entry( iterOption->second );
+      assert( 0 != entry.nReference );
+      entry.nReference--;
+      if ( 0 == entry.nReference ) {
+        m_fStopCalc( pOption, m_pWatchUnderlying );
+      }
+      if ( bRemoveStatistics ) {
+        assert( entry.pOptionStatistics );
+        entry.pOptionStatistics.reset();
+      }
+      if ( 0 == entry.nReference ) {
+        assert( !entry.pOptionStatistics );
+        m_mapOption.erase( iterOption );
+      }
     }
     else {
-      std::cout << "OptionRepository::Remove: error, option not found: " << sOptionName << std::endl;
+      std::cout << "OptionRegistry::Remove error, option not found: " << sOptionName << std::endl;
     }
 
   }
