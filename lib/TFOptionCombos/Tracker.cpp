@@ -366,12 +366,12 @@ void Tracker::GenericRoll( double strike ) {
           assert( m_luItmName );
           sName_New = m_luItmName( strike );
 
-          BOOST_LOG_TRIVIAL(info) << "Tracker::CalendarRoll: " << sName_Old << " to " << sName_New;
+          BOOST_LOG_TRIVIAL(info) << "Tracker::GenericRoll: " << sName_Old << " to " << sName_New;
 
           m_fConstructOption(
             sName_New,
             [this,sNotes_=std::move(sNotes)]( pOption_t pOption ){
-              BOOST_LOG_TRIVIAL(info) << "Tracker::CalendarRoll::m_fConstructOption";
+              BOOST_LOG_TRIVIAL(info) << "Tracker::GenericRoll::m_fConstructOption" << " " << sNotes_;
               assert( nullptr == m_fOptionRoll_Open );
               m_fOptionRoll_Open =
                 [this,sNotes__=std::move(sNotes_)](){
