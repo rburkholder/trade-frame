@@ -22,11 +22,11 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include <map>
 #include <queue>
 #include <mutex>
 #include <chrono>
 #include <functional>
+#include <unordered_map>
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
@@ -90,6 +90,7 @@ public:
 
   pWatch_t GetUnderlying() { return m_pUnderlying; }
   pOption_t GetOption() { return m_pOption; }
+
 private:
 
   void HandleUnderlyingQuote( const ou::tf::Quote& );
@@ -148,9 +149,9 @@ private:
 
   using idInstrument_t = ou::tf::Instrument::idInstrument_t;
 
-  using mapKnownWatches_t = std::map<idInstrument_t, pWatch_t>;
-  using mapKnownOptions_t = std::map<idInstrument_t, pOption_t>;
-  using mapOptionEntry_t  = std::map<idInstrument_t, OptionEntry>;
+  using mapKnownWatches_t = std::unordered_map<idInstrument_t, pWatch_t>;
+  using mapKnownOptions_t = std::unordered_map<idInstrument_t, pOption_t>;
+  using mapOptionEntry_t  = std::unordered_map<idInstrument_t, OptionEntry>;
 
   //std::atomic<size_t> m_cntOptionEntryOperationQueueCount;
   std::mutex m_mutexOptionEntryOperationQueue;
