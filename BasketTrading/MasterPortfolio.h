@@ -97,16 +97,17 @@ public:
 
   double UpdateChart();
 
-  void ClosePositions( void );
+  void ClosePositions();
   void SaveSeries( const std::string& sPath );
 
   void EmitInfo();
+  void EmitIV();
 
   void TakeProfits();
   void CloseForProfits();
   void AddCombo( bool bForced );
 
-  void Test( void );
+  void Test();
 
 protected:
 private:
@@ -247,6 +248,12 @@ private:
         sum += pStrategy->pManageStrategy->EmitInfo();
       }
       return sum;
+    }
+    void EmitIV() {
+      for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {
+        pStrategy_t& pStrategy( vt.second );
+        pStrategy->pManageStrategy->EmitIV();
+      }
     }
     void CloseForProfits() {
       for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {

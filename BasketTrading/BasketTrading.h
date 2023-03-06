@@ -121,6 +121,7 @@ private:
   void HandleButtonClosePositions();
   void HandleButtonSave();
   void HandleEmitInfo();
+  void HandleEmitIV();
   void HandleButtonTest();
 
   void HandleTakeProfits();

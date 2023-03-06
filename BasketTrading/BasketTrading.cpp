@@ -169,6 +169,7 @@ void AppBasketTrading::Init() {
   vItems.push_back( new mi( "a3 Close Positions", MakeDelegate( this, &AppBasketTrading::HandleButtonClosePositions ) ) );
   vItems.push_back( new mi( "a4 Save Series", MakeDelegate( this, &AppBasketTrading::HandleButtonSave ) ) );
   vItems.push_back( new mi( "a5 Emit Info", MakeDelegate( this, &AppBasketTrading::HandleEmitInfo ) ) );
+  vItems.push_back( new mi( "a6 Emit IV", MakeDelegate( this, &AppBasketTrading::HandleEmitIV ) ) );
   //vItems.push_back( new mi( "a5 Test", MakeDelegate( this, &AppBasketTrading::HandleTestButton ) ) ); // tests itm/atm/otm selector
   m_pFrameMain->AddDynamicMenu( "Manage", vItems );
 
@@ -235,6 +236,10 @@ void AppBasketTrading::HandleAddComboForced() {
 
 void AppBasketTrading::HandleEmitInfo() {
   CallAfter( std::bind( &MasterPortfolio::EmitInfo, m_pMasterPortfolio.get() ) );
+}
+
+void AppBasketTrading::HandleEmitIV() {
+  CallAfter( std::bind( &MasterPortfolio::EmitIV, m_pMasterPortfolio.get() ) );
 }
 
 void AppBasketTrading::HandleGuiRefresh( wxTimerEvent& event ) {

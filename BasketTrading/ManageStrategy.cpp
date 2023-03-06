@@ -149,6 +149,9 @@ ManageStrategy::ManageStrategy(
   m_fAuthorizeSimple( fAuthorizeSimple ),
   m_fBar( fBar ),
 
+  m_dblStrikeCurrent {},
+  m_dblPriceCurrent {},
+
   m_fSetChartDataView( std::move( fSetChartDataView ) ),
 
   m_eTradeDirection( ETradeDirection::None ),
@@ -301,6 +304,10 @@ ManageStrategy::ManageStrategy(
 
 ManageStrategy::~ManageStrategy( ) {
 
+  m_stateTrading = ETradingState::TSNoMore;
+
+  ManageIVTracker_End();
+
   m_pWatchUnderlying->OnQuote.Remove( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
   m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
 
@@ -435,6 +442,9 @@ void ManageStrategy::HandleTradeUnderlying( const ou::tf::Trade& trade ) {
 //  if ( trade.Price() < m_TradeLatest.Price() ) m_cntDnReturn--;
 //  m_trades.Append( trade );
   //m_bfTicks06sec.Add( trade.DateTime(), 0, 1 );
+
+  m_dblPriceCurrent = trade.Price();
+
   m_bfTrades01Sec.Add( trade );
   m_bfTrades06Sec.Add( trade );
 //  m_bfTrades60Sec.Add( trade );
@@ -505,6 +515,8 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
 
   //const double mid = m_QuoteUnderlyingLatest.Midpoint();
   // BollingerTransitions::Crossing( mid ) // TODO: needs to be migrated to Underlying
+
+  ManageIVTracker_RH();
 
   RHOption( bar );
 }
@@ -702,6 +714,70 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
   }
 }
 
+void ManageStrategy::ManageIVTracker_BuildRow() {
+
+  auto fAddOption =
+    [this]( pOption_t pOption ) {
+      m_vOptions.push_back( pOption );
+      m_pOptionRegistry->Add( pOption );
+    };
+
+  for ( const mapChains_t::value_type& vt: m_mapChains ) {
+    try {
+      const std::string sCall = vt.second.GetIQFeedNameCall( m_dblStrikeCurrent );
+      const std::string sPut = vt.second.GetIQFeedNamePut( m_dblStrikeCurrent );
+      // ensure both strings are available prior to construction
+      m_fConstructOption( sCall, fAddOption );
+      m_fConstructOption( sPut,  fAddOption );
+    }
+    catch ( const std::runtime_error& e ) {
+      // skip it, maybe emit message
+    }
+  }
+}
+
+void ManageStrategy::ManageIVTracker_RH() { // once a second
+  if ( 0.0 < m_dblPriceCurrent ) {
+
+    mapChains_t::const_iterator iterChains = m_mapChains.begin();
+    const chain_t& chain( iterChains->second );
+    const double strike = chain.Atm( m_dblPriceCurrent );
+
+    if ( 0.0 == m_dblStrikeCurrent ) { // initial population of options
+      m_dblStrikeCurrent = strike;
+      ManageIVTracker_BuildRow();
+    }
+    else {
+      if ( strike != m_dblStrikeCurrent ) {
+        double diffStrike = strike - m_dblStrikeCurrent;
+        if ( 0.0 > diffStrike ) diffStrike = -diffStrike;
+        double diffPrice = m_dblPriceCurrent - m_dblStrikeCurrent;
+        if ( 0.0 > diffPrice ) diffPrice = -diffPrice;
+
+        if ( ( 0.66 * diffStrike ) < diffPrice ) { // hysterisis
+          m_dblStrikeCurrent = strike;
+          ManageIVTracker_End();
+          ManageIVTracker_BuildRow();
+        }
+      }
+    }
+  }
+}
+
+void ManageStrategy::ManageIVTracker_Emit() {
+  for ( vOptions_t::value_type& vt: m_vOptions ) {
+    vt->EmitValues( m_dblPriceCurrent );
+    std::cout << std::endl;
+  }
+}
+
+void ManageStrategy::ManageIVTracker_End() {
+  for ( vOptions_t::value_type& vt: m_vOptions ) {
+    m_pOptionRegistry->Remove( vt, false );
+  }
+  m_vOptions.clear();
+}
+
 void ManageStrategy::RHEquity( const ou::tf::Bar& bar ) {
   switch ( m_stateTrading ) {
     case TSWaitForEntry:
@@ -815,6 +891,7 @@ void ManageStrategy::HandleGoNeutral( boost::gregorian::date date, boost::posix_
       }
       break;
   }
+  ManageIVTracker_End();
 }
 
 void ManageStrategy::HandleGoingNeutral( const ou::tf::Bar& bar ) {

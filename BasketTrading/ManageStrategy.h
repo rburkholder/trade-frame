@@ -150,6 +150,7 @@ public:
   void CloseItmLeg(); // leg needs to be positive, but overall combo may not be in the profit
 
   double EmitInfo();
+  void EmitIV() { ManageIVTracker_Emit(); };
 
 protected:
 private:
@@ -210,6 +211,12 @@ private:
   fAuthorizeOption_t m_fAuthorizeOption;
 
   std::unique_ptr<OptionRegistry> m_pOptionRegistry;
+
+  // for ManageIVTracker_
+  double m_dblStrikeCurrent;
+  double m_dblPriceCurrent;
+  using vOptions_t = std::vector<pOption_t>;
+  vOptions_t m_vOptions; // tracking IV
 
   fFirstTrade_t m_fFirstTrade;
   fBar_t m_fBar;
@@ -370,6 +377,11 @@ private:
   void HandleAfterRH( const ou::tf::Quote& quote );
   void HandleAfterRH( const ou::tf::Trade& trade );
   void HandleAfterRH( const ou::tf::Bar& bar );
+
+  void ManageIVTracker_BuildRow();
+  void ManageIVTracker_RH();
+  void ManageIVTracker_Emit();
+  void ManageIVTracker_End();
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

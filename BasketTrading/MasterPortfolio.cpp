@@ -937,7 +937,7 @@ void MasterPortfolio::AddAsActiveStrategy( UnderlyingWithStrategies& uws, pStrat
 
 }
 
-void MasterPortfolio::ClosePositions( void ) {
+void MasterPortfolio::ClosePositions() {
   std::for_each(
     m_mapUnderlyingWithStrategies.begin(), m_mapUnderlyingWithStrategies.end(),
     [](mapUnderlyingWithStrategies_t::value_type& uws){
@@ -956,7 +956,7 @@ void MasterPortfolio::SaveSeries( const std::string& sPrefix ) {
   std::cout << "done." << std::endl;
 }
 
-void MasterPortfolio::EmitInfo( void ) {
+void MasterPortfolio::EmitInfo() {
   double dblNet {};
   std::for_each(
     m_mapUnderlyingWithStrategies.begin(), m_mapUnderlyingWithStrategies.end(),
@@ -979,6 +979,15 @@ void MasterPortfolio::EmitInfo( void ) {
     << ",commission=" << dblCommissionPaid
     << ",current=" << dblPLCurrent
     << std::endl;
+}
+
+void MasterPortfolio::EmitIV() {
+  std::for_each(
+    m_mapUnderlyingWithStrategies.begin(), m_mapUnderlyingWithStrategies.end(),
+    [](mapUnderlyingWithStrategies_t::value_type& vt){
+      UnderlyingWithStrategies& uws( vt.second );
+      uws.EmitIV();
+    } );
 }
 
 void MasterPortfolio::CloseForProfits() {
