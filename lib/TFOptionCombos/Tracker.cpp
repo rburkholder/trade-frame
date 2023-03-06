@@ -350,21 +350,21 @@ void Tracker::GenericRoll( double strike ) {
       m_fOptionRoll_Construct =  // for background loop
         [this,strike](){
 
-          m_compare = nullptr;
-          m_luItmStrike = nullptr;
-          m_luItmName = nullptr;
+          std::string sName_New;
+          assert( m_luItmName );
+          sName_New = m_luItmName( strike );
 
           ou::tf::OptionSide::EOptionSide sidePosition( m_sidePosition );
 
           std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
           std::string sName_Old( m_pPosition->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
 
+          m_compare = nullptr;
+          m_luItmStrike = nullptr;
+          m_luItmName = nullptr;
+
           m_fCloseLeg( m_pPosition );
           m_pPosition.reset();
-
-          std::string sName_New;
-          assert( m_luItmName );
-          sName_New = m_luItmName( strike );
 
           BOOST_LOG_TRIVIAL(info) << "Tracker::GenericRoll: " << sName_Old << " to " << sName_New;
 
