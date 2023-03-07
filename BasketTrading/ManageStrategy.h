@@ -150,7 +150,7 @@ public:
   void CloseItmLeg(); // leg needs to be positive, but overall combo may not be in the profit
 
   double EmitInfo();
-  void EmitIV() { ManageIVTracker_Emit(); };
+  void EmitIV() { ManageIVTracker_Emit(); /* hide the return value */ };
 
 protected:
 private:
