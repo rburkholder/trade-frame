@@ -718,8 +718,10 @@ void ManageStrategy::ManageIVTracker_BuildRow() {
 
   auto fAddOption =
     [this]( pOption_t pOption ) {
-      m_vOptions.push_back( pOption );
-      m_pOptionRegistry->Add( pOption );
+      if ( pOption->GetExpiry() >= GetNoon().date() ) { // skip stale dated expiries
+        m_vOptions.push_back( pOption );
+        m_pOptionRegistry->Add( pOption );
+      }
     };
 
   for ( const mapChains_t::value_type& vt: m_mapChains ) {
