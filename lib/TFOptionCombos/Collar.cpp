@@ -241,13 +241,6 @@ void Collar::Init( LegNote::Type type ) {
   iter->second();
 }
 
-void Collar::Close( LegNote::Type type ) {
-  mapCollarLeg_t::iterator iter = m_mapCollarLeg.find( type );
-  assert( m_mapCollarLeg.end() != iter );
-  CollarLeg& leg( iter->second );
-  leg.m_tracker.Close();
-}
-
 void Collar::CalendarRoll( LegNote::Type type ) {
   mapCollarLeg_t::iterator iter = m_mapCollarLeg.find( type );
   assert( m_mapCollarLeg.end() != iter );
@@ -260,6 +253,20 @@ void Collar::DiagonalRoll( LegNote::Type type ) {
   assert( m_mapCollarLeg.end() != iter );
   CollarLeg& leg( iter->second );
   leg.m_tracker.DiagonalRoll();
+}
+
+void Collar::LockLeg( LegNote::Type type ) {
+  mapCollarLeg_t::iterator iter = m_mapCollarLeg.find( type );
+  assert( m_mapCollarLeg.end() != iter );
+  CollarLeg& leg( iter->second );
+  leg.m_tracker.Lock( false ); // TODO: need to upate LegNote
+}
+
+void Collar::Close( LegNote::Type type ) {
+  mapCollarLeg_t::iterator iter = m_mapCollarLeg.find( type );
+  assert( m_mapCollarLeg.end() != iter );
+  CollarLeg& leg( iter->second );
+  leg.m_tracker.Close();
 }
 
 void Collar::CancelOrders() {

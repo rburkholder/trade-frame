@@ -34,7 +34,7 @@ class LegNote {
 public:
 
   enum class State { Open, Expired, Closed };
-  enum class Type { SynthLong = 0, SynthShort = 1, Cover = 2, Protect = 3 };
+  enum class Type { SynthLong = 0, SynthShort = 1, Cover = 2, Protect = 3, Other = 9 };
   enum class Side { Long, Short };
   enum class Option { Call, Put };
   enum class Momentum { Rise, Fall };
@@ -47,8 +47,8 @@ public:
     Option m_option;
     Momentum m_momentum;
     Algo m_algo;
-    double m_strike;
-    values_t(): m_strike {} {}
+    bool m_lock;
+    values_t(): m_lock( false ) {}
   };
 
   LegNote();

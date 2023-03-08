@@ -166,9 +166,10 @@ protected:
   virtual void Init( boost::gregorian::date date, const mapChains_t*, const SpreadSpecs& ) = 0;
   virtual void Init( LegNote::Type ) = 0;
 
-  virtual void Close( LegNote::Type ) = 0;
   virtual void CalendarRoll( LegNote::Type ) = 0;
   virtual void DiagonalRoll( LegNote::Type ) = 0;
+  virtual void LockLeg( LegNote::Type ) = 0;
+  virtual void Close( LegNote::Type ) = 0;
 
   void DeactivatePositionOption( pPosition_t );
 

@@ -69,14 +69,17 @@ public:
   void TestShort( boost::posix_time::ptime, double dblUnderlyingSlope, double dblUnderlyingPrice );
   void TestItmRoll( boost::gregorian::date, boost::posix_time::time_duration );
 
-  void Close();
   void CalendarRoll();
   void DiagonalRoll();
+  void Lock( bool );
+  void Close();
 
   void Quiesce(); // called from Collar
 
 protected:
 private:
+
+  bool m_bLock;  // do not roll longs up or down
 
   using compare_t = std::function<bool(double,double)>;
   compare_t m_compare;

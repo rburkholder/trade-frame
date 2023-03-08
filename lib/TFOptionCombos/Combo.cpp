@@ -106,10 +106,6 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
     const std::string& sName( pWatch->GetInstrumentName() );
 
     vMenuActivation_t ma;
-    ma.emplace_back( MenuActivation( "Close Leg",    [this,&sName,type=legValues.m_type](){
-      std::cout << "Close: " << sName << " (todo)" << std::endl;
-      Close( type );
-      } ) );
     ma.emplace_back( MenuActivation( "Calendar Roll", [this,&sName,type=legValues.m_type](){
       std::cout << "Calendar Roll: " << sName << std::endl;
       CalendarRoll( type );
@@ -117,6 +113,14 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
     ma.emplace_back( MenuActivation( "Diagonal Roll", [this,&sName,type=legValues.m_type](){
       std::cout << "Diagonal Roll: " << sName << std::endl;
       DiagonalRoll( type );
+      } ) );
+    ma.emplace_back( MenuActivation( "Lock Leg",    [this,&sName,type=legValues.m_type](){
+      std::cout << "Lock Leg: " << sName << " (todo)" << std::endl;
+      LockLeg( type );
+      } ) );
+    ma.emplace_back( MenuActivation( "Close Leg",    [this,&sName,type=legValues.m_type](){
+      std::cout << "Close: " << sName << " (todo)" << std::endl;
+      Close( type );
       } ) );
 
     m_fActivateOption( pOption, pPositionNew, ou::tf::option::LegNote::LU( legValues.m_type ), std::move( ma ) );

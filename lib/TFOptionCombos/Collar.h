@@ -76,9 +76,10 @@ protected:
   virtual void Init( boost::gregorian::date, const mapChains_t*, const SpreadSpecs& );
   virtual void Init( LegNote::Type );
 
-  virtual void Close( LegNote::Type );
   virtual void CalendarRoll( LegNote::Type );
   virtual void DiagonalRoll( LegNote::Type );
+  virtual void LockLeg( LegNote::Type );
+  virtual void Close( LegNote::Type );
 
 private:
 

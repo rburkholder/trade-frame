@@ -19,8 +19,8 @@
  * Created: January 1, 2021, 15:50
  */
 
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_real.hpp>
@@ -50,7 +50,7 @@ using values_t = ou::tf::option::LegNote::values_t;
   (ou::tf::option::LegNote::Side, m_side),
   (ou::tf::option::LegNote::Momentum, m_momentum),
   (ou::tf::option::LegNote::Algo, m_algo),
-  (double, m_strike)
+  (bool, m_lock)
   )
 
 namespace ou { // One Unified
@@ -71,6 +71,7 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
       ( "synthshort", LegNote::Type::SynthShort )
       ( "cover",      LegNote::Type::Cover )
       ( "protect",    LegNote::Type::Protect )
+      ( "other",      LegNote::Type::Other )
       ;
 
     state_.add
@@ -104,7 +105,7 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
     side =     qi::lit( "side=" ) >> side_;
     momentum = qi::lit( "momentum=" ) >> momentum_;
     algo =     qi::lit( "algo=" ) >> algo_;
-    strike =   qi::lit( "strike=" ) >> qi::double_;
+    lock =     qi::lit( "lock=" ) >> qi::bool_;
 
     // Todo: allow random order, partial list?
     start =
@@ -114,7 +115,7 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
       side     >> qi::lit( ',' ) >>
       momentum >> qi::lit( ',' ) >>
       algo
-      >> -( qi::lit( ',' ) >> strike )
+      >> -( qi::lit( ',' ) >> lock )
                >> qi::eps
       ;
 
@@ -133,7 +134,7 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
   qi::rule<Iterator,LegNote::Side> side;
   qi::rule<Iterator,LegNote::Momentum> momentum;
   qi::rule<Iterator,LegNote::Algo> algo;
-  qi::rule<Iterator,double()> strike;
+  qi::rule<Iterator,bool()> lock;
 
   qi::rule<Iterator, values_t()> start;
 };
@@ -242,7 +243,7 @@ const std::string LegNote::Encode() const {
       break;
   }
 
-  ss << ",strike=" << m_values.m_strike;
+  ss << ",lock=" << m_values.m_lock;
 
   return ss.str();
 }

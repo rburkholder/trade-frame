@@ -39,6 +39,7 @@ namespace {
 
 Tracker::Tracker()
 : m_transition( ETransition::Initial )
+, m_bLock( false )
 , m_compare( nullptr )
 , m_luItmStrike( nullptr )
 , m_luItmName( nullptr )
@@ -50,6 +51,7 @@ Tracker::Tracker()
 
 Tracker::Tracker( Tracker&& rhs )
 : m_transition( rhs.m_transition )
+, m_bLock( false )
 , m_compare( std::move( rhs.m_compare ) )
 , m_luItmStrike( std::move( rhs.m_luItmStrike ) )
 , m_luItmName( std::move( rhs.m_luItmName ) )
@@ -268,7 +270,7 @@ void Tracker::OptionCandidate_HandleQuote( const ou::tf::Quote& quote ) {
               // is un-buyable, or is grotesquely bad
             }
             else {
-              //if ( 0 == m_vOptionRollStack.size() ) {
+              if ( !m_bLock ) {
                 assert( nullptr == m_fOptionRoll_Construct );
                 assert( nullptr == m_fOptionRoll_Open );
                 auto pOldWatch = m_pPosition->GetWatch();
@@ -301,7 +303,7 @@ void Tracker::OptionCandidate_HandleQuote( const ou::tf::Quote& quote ) {
                 //Initialize( m_fOpenLeg( std::move( pOption ), sNotes ) ); // with new position, NOTE: opener needs to use EnableStatsAdd
                 m_fOpenLeg( std::move( pOption ), sNotes );
               }
-            //}
+            }
           }
         }
       }
@@ -334,10 +336,6 @@ void Tracker::StartOptionRoll() {
     m_fOptionRoll_Construct();  // call the function
     m_fOptionRoll_Construct = nullptr;
   }
-}
-
-void Tracker::Close() {
-  BOOST_LOG_TRIVIAL(info) << "Tracker::Close() not implemented";
 }
 
 void Tracker::GenericRoll( double strike ) {
@@ -404,6 +402,15 @@ void Tracker::DiagonalRoll() {
   assert( 0.0 < m_dblUnderlyingPrice );
   double strike = m_luItmStrike( m_dblUnderlyingPrice );
   GenericRoll( strike );
+}
+
+void Tracker::Lock( bool bLock ) {
+  BOOST_LOG_TRIVIAL(info) << "Tracker::Lock() not implemented";
+  m_bLock = bLock;
+}
+
+void Tracker::Close() {
+  BOOST_LOG_TRIVIAL(info) << "Tracker::Close() not implemented";
 }
 
 void Tracker::TestItmRoll( boost::gregorian::date date, boost::posix_time::time_duration time ) {
