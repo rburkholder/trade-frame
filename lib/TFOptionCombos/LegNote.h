@@ -34,7 +34,10 @@ class LegNote {
 public:
 
   enum class State { Open, Expired, Closed };
-  enum class Type { SynthLong = 0, SynthShort = 1, Cover = 2, Protect = 3, Other = 9 };
+  enum class Type {
+    SynthLong = 0, SynthShort = 1, Cover = 2, Protect = 3,
+    DltaPlsCl = 5, DltaPlsPt = 6, DltaMnsCl = 7, DltaMnsPt = 8
+    };
   enum class Side { Long, Short };
   enum class Option { Call, Put };
   enum class Momentum { Rise, Fall };

@@ -71,7 +71,10 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
       ( "synthshort", LegNote::Type::SynthShort )
       ( "cover",      LegNote::Type::Cover )
       ( "protect",    LegNote::Type::Protect )
-      ( "other",      LegNote::Type::Other )
+      ( "dltapc",     LegNote::Type::DltaPlsCl )
+      ( "dltapp",     LegNote::Type::DltaPlsPt )
+      ( "dltamc",     LegNote::Type::DltaMnsCl )
+      ( "dltamp",     LegNote::Type::DltaMnsPt )
       ;
 
     state_.add
@@ -243,7 +246,7 @@ const std::string LegNote::Encode() const {
       break;
   }
 
-  ss << ",lock=" << m_values.m_lock;
+  ss << ",lock=" << ( m_values.m_lock ? "true" : "false" );
 
   return ss.str();
 }
