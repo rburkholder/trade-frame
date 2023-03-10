@@ -62,20 +62,20 @@
 #include "AppAutoTrade.hpp"
 
 namespace {
-  static const std::string sAppName( "ROOT AutoTrade (rdaf_l2)" );
-  static const std::string sVendorName( "One Unified Net Limited" );
+  static const std::string c_sAppName( "ROOT AutoTrade (rdaf_l2)" );
+  static const std::string c_sVendorName( "One Unified Net Limited" );
 
-  static const std::string sDirectory( "rdaf/l2" );
-  static const std::string sDbName( sDirectory + "/example.db" );
-  static const std::string sStateFileName( sDirectory + "/example.state" );
-  static const std::string sChoicesFilename( sDirectory + "/choices.cfg" );
-  static const std::string sFileNameUtility( sDirectory + "/utility.root" );
+  static const std::string c_sDirectory( "rdaf/l2" );
+  static const std::string c_sDbName( c_sDirectory + "/example.db" );
+  static const std::string c_sStateFileName( c_sDirectory + "/example.state" );
+  static const std::string c_sChoicesFilename( c_sDirectory + "/choices.cfg" );
+  static const std::string c_sFileNameUtility( c_sDirectory + "/utility.root" );
 
-  static const std::string sMenuItemPortfolio( "_USD" );
+  static const std::string c_sMenuItemPortfolio( "_USD" );
 
   static const std::string c_sPortfolioCurrencyName( "USD" ); // pre-created, needs to be uppercase
   static const std::string c_sPortfolioSimulationName( "sim" );
-  static const std::string c_sPortfolioRealTimeName( "ib" );
+  static const std::string c_sPortfolioRealTimeName( "live" );
   static const std::string c_sPortfolioName( "l2" );
 }
 
@@ -106,15 +106,15 @@ IMPLEMENT_APP(AppAutoTrade)
 
 bool AppAutoTrade::OnInit() {
 
-  wxApp::SetVendorName( sVendorName );
-  wxApp::SetAppDisplayName( sAppName );
-  wxApp::SetVendorDisplayName( "(c)2022 " + sVendorName );
+  wxApp::SetVendorName( c_sVendorName );
+  wxApp::SetAppDisplayName( c_sAppName );
+  wxApp::SetVendorDisplayName( "(c)2022 " + c_sVendorName );
 
   wxApp::OnInit();
 
   m_bL2Connected = false;
 
-  if ( !ou::tf::config::Load( sChoicesFilename, m_choices ) ) {
+  if ( !ou::tf::config::Load( c_sChoicesFilename, m_choices ) ) {
     return false;
   }
 
@@ -124,7 +124,7 @@ bool AppAutoTrade::OnInit() {
   m_tws = ou::tf::ib::TWS::Factory();
   m_tws->SetClientId( m_choices.ib_client_id );
 
-  m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
+  m_pFrameMain = new FrameMain( 0, wxID_ANY,c_sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
 
   m_pFrameMain->SetSize( 800, 500 );
@@ -295,8 +295,8 @@ bool AppAutoTrade::OnInit() {
 
   //if ( m_options.bSimStart ) {
     // just always delete it, keep it fresh for each run
-    if ( boost::filesystem::exists( sDbName ) ) {
-    boost::filesystem::remove( sDbName );
+    if ( boost::filesystem::exists( c_sDbName ) ) {
+    boost::filesystem::remove( c_sDbName );
     }
   //}
 
@@ -315,7 +315,7 @@ bool AppAutoTrade::OnInit() {
   }
 
   // this needs to be placed after the providers are registered
-  m_pdb = std::make_unique<ou::tf::db>( sDbName ); // construct database
+  m_pdb = std::make_unique<ou::tf::db>( c_sDbName ); // construct database
 
   m_ceUnRealized.SetName( "unrealized" );
   m_ceRealized.SetName( "realized" );
@@ -339,12 +339,12 @@ bool AppAutoTrade::OnInit() {
 
   TreeItem::Bind( m_pFrameMain, m_treeSymbols );
   m_pTreeItemRoot = new TreeItem( m_treeSymbols, "/" ); // initialize tree
-  //wxTreeItemId idPortfolio = m_treeSymbols->AppendItem( idRoot, sMenuItemPortfolio, -1, -1, new CustomItemData( sMenuItemPortfolio ) );
+  //wxTreeItemId idPortfolio = m_treeSymbols->AppendItem( idRoot, c_sMenuItemPortfolio, -1, -1, new CustomItemData( c_sMenuItemPortfolio ) );
   //m_treeSymbols->Bind( wxEVT_TREE_ITEM_MENU, &AppAutoTrade::HandleTreeEventItemMenu, this, m_treeSymbols->GetId() );
   //m_treeSymbols->Bind( wxEVT_TREE_ITEM_RIGHT_CLICK, &AppAutoTrade::HandleTreeEventItemRightClick, this, m_treeSymbols->GetId() );
   //m_treeSymbols->Bind( wxEVT_TREE_SEL_CHANGED, &AppAutoTrade::HandleTreeEventItemChanged, this, m_treeSymbols->GetId() );
   m_pTreeItemPortfolio = m_pTreeItemRoot->AppendChild(
-    sMenuItemPortfolio,
+    c_sMenuItemPortfolio,
     [this]( TreeItem* pTreeItem ){
       if ( m_choices.bStartSimulator ) { // set sim mode prior to assigning data view
         m_pWinChartView->SetSim( true );
@@ -356,7 +356,7 @@ bool AppAutoTrade::OnInit() {
   // NOTE: during simulation, this subsystem is going to have to be temporary
   //   otherwise, the same data is read in multiple times when the simulation is run multiple times
   #if RDAF
-    StartRdaf( sDirectory + m_sTSDataStreamStarted );
+    StartRdaf( c_sDirectory + m_sTSDataStreamStarted );
   #endif
 
   // construct strategy for each symbol name in the configuration file
@@ -523,8 +523,8 @@ void AppAutoTrade::StartRdaf( const std::string& sFileName ) {
 #endif
   namespace fs = boost::filesystem;
   namespace algo = boost::algorithm;
-  if ( fs::is_directory( sDirectory ) ) {
-    for ( fs::directory_entry& entry : fs::directory_iterator( sDirectory ) ) {
+  if ( fs::is_directory( c_sDirectory ) ) {
+    for ( fs::directory_entry& entry : fs::directory_iterator( c_sDirectory ) ) {
       if ( algo::ends_with( entry.path().string(), std::string( ".root" ) ) ) {
         std::string datetime( entry.path().filename().string() );
         algo::erase_last( datetime, ".root" );
@@ -538,7 +538,7 @@ void AppAutoTrade::StartRdaf( const std::string& sFileName ) {
         if ( 0 < result.size() ) {
           ptime dt( boost::posix_time::from_iso_extended_string( datetime ) );
           if ( ( m_choices.dtLower <= dt ) && ( m_choices.dtUpper > dt ) ) {
-            const std::string sFileName( sDirectory + '/' + datetime + ".root" );
+            const std::string sFileName( c_sDirectory + '/' + datetime + ".root" );
 #if RDAF
             TFile* pFile = new TFile( sFileName.c_str(), "READ" );
             if ( nullptr != pFile ) {
@@ -595,7 +595,7 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
     [this](){
       m_nTSDataStreamSequence++; // sequence number on each save
       std::string sPath(
-        "/app/" + sDirectory + "/" +
+        "/app/" + c_sDirectory + "/" +
         m_sTSDataStreamStarted + "-" +
         boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) );
       std::cout << sPath << std::endl;
@@ -724,7 +724,7 @@ void AppAutoTrade::ConstructInstrument_Sim( const std::string& sRunPortfolioName
   strategy.SetPosition( pPosition );
 
   m_OnSimulationComplete.Add( MakeDelegate( &strategy, &Strategy::FVSStreamStop ) );
-  strategy.FVSStreamStart( sDirectory + "/" + m_sSimulationDateTime + ".fvs.csv" );
+  strategy.FVSStreamStart( c_sDirectory + "/" + m_sSimulationDateTime + ".fvs.csv" );
 
 }
 
@@ -747,7 +747,7 @@ void AppAutoTrade::HandleMenuActionSimStop() {
 // don't use this, as the pointer changes, and needs to be redistributed into the objects
 //void AppAutoTrade::RecreateUtilityFile() {
 //  m_pFileUtility = std::make_shared<TFile>(
-//    sFileNameUtility.c_str(),
+//    c_sFileNameUtility.c_str(),
 //    "RECREATE",
 //    "tradeframe rdaf/at utility"
 //  );
@@ -755,7 +755,7 @@ void AppAutoTrade::HandleMenuActionSimStop() {
 
 //void AppAutoTrade::UpdateUtilityFile() {
 //  m_pFileUtility = std::make_shared<TFile>(
-//    sFileNameUtility.c_str(),
+//    c_sFileNameUtility.c_str(),
 //    "UPDATE",
 //    "tradeframe rdaf/at utility"
 //  );
@@ -909,7 +909,7 @@ void AppAutoTrade::HandleSimComplete() {
 
 void AppAutoTrade::SaveState() {
   std::cout << "Saving Config ..." << std::endl;
-  std::ofstream ofs( sStateFileName );
+  std::ofstream ofs( c_sStateFileName );
   boost::archive::text_oarchive oa(ofs);
   oa & *this;
   std::cout << "  done." << std::endl;
@@ -918,7 +918,7 @@ void AppAutoTrade::SaveState() {
 void AppAutoTrade::LoadState() {
   try {
     std::cout << "Loading Config ..." << std::endl;
-    std::ifstream ifs( sStateFileName );
+    std::ifstream ifs( c_sStateFileName );
     boost::archive::text_iarchive ia(ifs);
     ia & *this;
     std::cout << "  done." << std::endl;
