@@ -118,8 +118,8 @@ bool AppAutoTrade::OnInit() {
     return false;
   }
 
-  m_iqfeed = ou::tf::iqfeed::Provider::Factory();
-  m_iqfeed->SetThreadCount( m_choices.nThreads );
+  m_iqf = ou::tf::iqfeed::Provider::Factory();
+  m_iqf->SetThreadCount( m_choices.nThreads );
 
   m_tws = ou::tf::ib::TWS::Factory();
   m_tws->SetClientId( m_choices.ib_client_id );
@@ -211,8 +211,8 @@ bool AppAutoTrade::OnInit() {
     sizerUpper->Add( m_pPanelProviderControl, 0, wxALIGN_LEFT, 2);
 
     m_pPanelProviderControl->Add(
-      m_iqfeed,
-      true, false, false, false,
+      m_iqf,
+      true, false, true, false,
       [](){}, // fConnecting
       [this](){ // fConnected
         if (m_pL2Symbols ) {
@@ -450,7 +450,7 @@ bool AppAutoTrade::OnInit() {
     );
   }
   else {
-    m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
+    m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqf, m_tws );
   }
 
   m_pFrameMain->Show( true );
@@ -624,7 +624,7 @@ void AppAutoTrade::ConstructInstrument_IB(
         BOOST_LOG_TRIVIAL(info) << "position loaded " << pPosition->GetInstrument()->GetInstrumentName();
       }
       else {
-        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqf );
         pPosition = pm.ConstructPosition(
           sRunPortfolioName, idInstrument, c_sPortfolioName,
           "ib01", "iq01", m_tws,
@@ -797,7 +797,7 @@ void AppAutoTrade::ConfirmProviders() {
     //m_sim->Run();
   }
   else {
-    if ( m_iqfeed->Connected() && m_tws->Connected() ) {
+    if ( m_iqf->Connected() && m_tws->Connected() ) {
       if ( m_bL2Connected ) {
         bValidCombo = true;
         std::cout << "ConfirmProviders: using iqfeed and ib for data/execution" << std::endl;
@@ -811,7 +811,7 @@ void AppAutoTrade::ConfirmProviders() {
               //mapStrategy_t::iterator iter = m_mapStrategy.find( sSymbol );
               //Strategy& strategy( *iter->second );
               using EFeed = ou::tf::config::symbol_t::EFeed;
-              auto symbol = m_iqfeed->GetSymbol( sSymbol );
+              auto symbol = m_iqf->GetSymbol( sSymbol );
               if ( m_pL2Symbols ) {
                 switch ( strategy.Feed() ) {
                   case EFeed::L1:

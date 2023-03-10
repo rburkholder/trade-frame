@@ -113,7 +113,7 @@ private:
 
   pProviderSim_t    m_sim;    // simulation
   pProviderIB_t     m_tws;    // live - execution
-  pProviderIQFeed_t m_iqfeed; // live - data
+  pProviderIQFeed_t m_iqf; // live - data
 
   bool m_bL2Connected;
   std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pL2Symbols;
