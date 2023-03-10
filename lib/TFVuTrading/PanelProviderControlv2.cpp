@@ -36,7 +36,8 @@ struct ProviderWidgets {
 
   enum ProviderState { Off, GoingOn, On, GoingOff } m_state;
 
-  using fCallBack_t = PanelProviderControl::fCallBack_t;
+  using fCallBack1_t = PanelProviderControl::fCallBack1_t;
+  using fCallBack2_t = PanelProviderControl::fCallBack2_t;
   using fSetExclusive_t = std::function<void(ProviderWidgets&)>;
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
 
@@ -49,7 +50,7 @@ struct ProviderWidgets {
   wxCheckBox* m_cbD2;
   wxCheckBox* m_cbX1;
   wxCheckBox* m_cbX2;
-  wxToggleButton* m_btnState;
+  wxToggleButton* m_btnState; // TODO: need callback, global state disable controls while any state is on
   wxStaticText* m_textProvider;
 
   fSetExclusive_t m_fSetD1;
@@ -57,10 +58,10 @@ struct ProviderWidgets {
   fSetExclusive_t m_fSetX1;
   fSetExclusive_t m_fSetX2;
 
-  fCallBack_t m_fConnecting;
-  fCallBack_t m_fConnected;
-  fCallBack_t m_fDisconnecting;
-  fCallBack_t m_fDisconnected;
+  fCallBack1_t m_fConnecting;
+  fCallBack2_t m_fConnected;
+  fCallBack1_t m_fDisconnecting;
+  fCallBack1_t m_fDisconnected;
 
   ProviderWidgets(): m_state( ProviderState::Off ) {}
   ~ProviderWidgets(){
@@ -75,8 +76,8 @@ struct ProviderWidgets {
   void Set(
     wxWindow* owner
   , pProvider_t pProvider
-  , fCallBack_t&& fConnecting, fCallBack_t&& fConnected
-  , fCallBack_t&& fDisconnecting, fCallBack_t&& fDisconnected
+  , fCallBack1_t&& fConnecting,    fCallBack2_t&& fConnected
+  , fCallBack1_t&& fDisconnecting, fCallBack1_t&& fDisconnected
   ) {
     m_owner = owner;
 
@@ -161,7 +162,7 @@ struct ProviderWidgets {
 
   void Connected( int ) { // handle event
     m_owner->CallAfter( [this](){ SetState( ProviderState::On ); });
-    if ( m_fConnected ) m_fConnected();
+    if ( m_fConnected ) m_fConnected( m_cbD1->IsChecked(), m_cbD2->IsChecked(), m_cbX1->IsChecked(), m_cbX2->IsChecked() );
   }
 
   void Disconnecting( int ) { // handle event
@@ -231,8 +232,8 @@ void PanelProviderControl::CreateControls() {
 void PanelProviderControl::Add(
   pProvider_t pProvider
 , bool bD1, bool bD2, bool bX1, bool bX2
-, fCallBack_t&& fConnecting, fCallBack_t&& fConnected
-, fCallBack_t&& fDisconnecting, fCallBack_t&& fDisconnected
+, fCallBack1_t&& fConnecting,    fCallBack2_t&& fConnected
+, fCallBack1_t&& fDisconnecting, fCallBack1_t&& fDisconnected
 ) {
 
   auto result = m_mapProviderWidgets.emplace( pProvider->ID(), std::make_shared<ProviderWidgets>() );

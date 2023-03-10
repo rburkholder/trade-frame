@@ -210,12 +210,23 @@ bool AppAutoTrade::OnInit() {
 
     sizerUpper->Add( m_pPanelProviderControl, 0, wxALIGN_LEFT, 2);
 
+    // perform this with iqfeed connection instead?
+    m_pL2Symbols = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
+      [this](){
+        m_bL2Connected = true;
+        ConfirmProviders();
+      } );
+    //m_pL2Symbols->Connect();
+
     m_pPanelProviderControl->Add(
-      m_iqf,
-      true, false, true, false,
+      m_iqf,  // m_iqf->EnableExecution( true ) when used as execution simulator
+      true, false, false, false,
       [](){}, // fConnecting
-      [this](){ // fConnected
-        if (m_pL2Symbols ) {
+      [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
+        if ( bX1 || bX2 ) {
+          m_iqf->EnableExecution( true );
+        }
+        if ( m_pL2Symbols ) {
           m_pL2Symbols->Connect();
         }
         ConfirmProviders();
@@ -225,14 +236,17 @@ bool AppAutoTrade::OnInit() {
         if ( m_pL2Symbols ) {
           m_pL2Symbols->Disconnect();
         }
+        if ( m_iqf->ExecutionEnabled() ) {
+          m_iqf->EnableExecution( false );
+        }
       }
     );
 
     m_pPanelProviderControl->Add(
       m_tws,
-      false, true, true, false,
+      false, false, true, false,
       [](){}, // fConnecting
-      [this](){ // fConnected
+      [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
         ConfirmProviders();
       },
       [](){}, // fDisconnecting
@@ -242,14 +256,6 @@ bool AppAutoTrade::OnInit() {
     m_timerOneSecond.SetOwner( this );
     Bind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
     m_timerOneSecond.Start( 500 );
-
-    // perform this with iqfeed connection instead?
-    m_pL2Symbols = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
-      [this](){
-        m_bL2Connected = true;
-        ConfirmProviders();
-      } );
-    //m_pL2Symbols->Connect();
 
     vItems.clear();
     vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppAutoTrade::HandleMenuActionCloseAndDone ) ) );
@@ -796,7 +802,7 @@ void AppAutoTrade::ConfirmProviders() {
     m_sim->SetOnSimulationComplete( MakeDelegate( this, &AppAutoTrade::HandleSimComplete ) );
     //m_sim->Run();
   }
-  else {
+  else { // live trading
     if ( m_iqf->Connected() && m_tws->Connected() ) {
       if ( m_bL2Connected ) {
         bValidCombo = true;

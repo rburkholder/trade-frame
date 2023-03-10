@@ -147,8 +147,11 @@ bool AppAutoTrade::OnInit() {
     m_iqfeed,
     true, false, false, false,
     [](){}, // fConnecting
-    [this](){ // fConnected
-      if (m_pL2Symbols ) {
+    [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
+      if ( bX1 || bX2 ) {
+        m_iqfeed->EnableExecution( true );
+      }
+      if ( m_pL2Symbols ) {
         m_pL2Symbols->Connect();
       }
       ConfirmProviders();
@@ -158,6 +161,9 @@ bool AppAutoTrade::OnInit() {
       if ( m_pL2Symbols ) {
         m_pL2Symbols->Disconnect();
       }
+      if ( m_iqfeed->ExecutionEnabled() ) {
+        m_iqfeed->EnableExecution( false );
+      }
     }
   );
 
@@ -165,7 +171,7 @@ bool AppAutoTrade::OnInit() {
     m_alpaca,
     false, false, true, false,
     [](){}, // fConnecting
-    [this](){ // fConnected
+    [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
       ConfirmProviders();
     },
     [](){}, // fDisconnecting

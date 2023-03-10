@@ -47,7 +47,8 @@ class PanelProviderControl: public wxPanel {
 public:
 
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
-  using fCallBack_t = std::function<void()>;
+  using fCallBack1_t = std::function<void()>;
+  using fCallBack2_t = std::function<void( bool bD1, bool bD2, bool bX1, bool bX2 )>;
 
   PanelProviderControl();
   PanelProviderControl(
@@ -69,8 +70,8 @@ public:
   void Add(
     pProvider_t
   , bool bD1, bool bD2, bool bX1, bool bX2
-  , fCallBack_t&& fConnecting, fCallBack_t&& fConnected // cross thread events
-  , fCallBack_t&& fDisconnecting, fCallBack_t&& fDisconnected // cross thread events
+  , fCallBack1_t&& fConnecting,    fCallBack2_t&& fConnected // cross thread events
+  , fCallBack1_t&& fDisconnecting, fCallBack1_t&& fDisconnected // cross thread events
   );
 
 protected:
