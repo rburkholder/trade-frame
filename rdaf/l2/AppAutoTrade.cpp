@@ -223,9 +223,9 @@ bool AppAutoTrade::OnInit() {
       true, false, false, false,
       [](){}, // fConnecting
       [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
-        if ( bX1 || bX2 ) {
-          m_iqf->EnableExecution( true );
-        }
+        if ( bD1 ) m_data = m_iqf;
+        if ( bX1 ) m_exec = m_iqf;
+        m_iqf->EnableExecution( bX1 || bX2 );
         if ( m_pL2Symbols ) {
           m_pL2Symbols->Connect();
         }
@@ -247,6 +247,8 @@ bool AppAutoTrade::OnInit() {
       false, false, true, false,
       [](){}, // fConnecting
       [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
+        if ( bD1 ) m_data = m_tws;
+        if ( bX1 ) m_exec = m_tws;
         ConfirmProviders();
       },
       [](){}, // fDisconnecting
@@ -365,12 +367,17 @@ bool AppAutoTrade::OnInit() {
 
     std::string sSymbol;
 
-    if ( choices.sSymbol_Generic.empty() ) {
-      sSymbol = sSymbol_IQFeed;
+    if ( m_choices.bStartSimulator ) {
+      if ( choices.sSymbol_Generic.empty() ) {
+        sSymbol = sSymbol_IQFeed;
+      }
+      else {
+        sSymbol = choices.sSymbol_Generic;
+        BOOST_LOG_TRIVIAL(info) << "  using generic symbol: " << sSymbol;
+      }
     }
     else {
-      sSymbol = choices.sSymbol_Generic;
-      BOOST_LOG_TRIVIAL(info) << "  using generic symbol: " << sSymbol;
+      sSymbol = sSymbol_IQFeed;
     }
 
     TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
@@ -456,7 +463,7 @@ bool AppAutoTrade::OnInit() {
     );
   }
   else {
-    m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqf, m_tws );
+    //m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqf, m_tws );
   }
 
   m_pFrameMain->Show( true );
@@ -603,7 +610,7 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
   );
 }
 
-void AppAutoTrade::ConstructInstrument_IB(
+void AppAutoTrade::ConstructInstrument_Live(
   const std::string& sRunPortfolioName
 , const std::string& sSymbol
 , fInstrumentConstructed_t&& fConstructed
@@ -631,11 +638,25 @@ void AppAutoTrade::ConstructInstrument_IB(
       }
       else {
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqf );
-        pPosition = pm.ConstructPosition(
-          sRunPortfolioName, idInstrument, c_sPortfolioName,
-          "ib01", "iq01", m_tws,
-          pWatch
-        );
+        switch ( m_exec->ID() ) {
+          case ou::tf::keytypes::EProviderIB:
+            pPosition = pm.ConstructPosition(
+              sRunPortfolioName, idInstrument, c_sPortfolioName,
+              "ib01", "iq01", m_tws,
+              pWatch
+            );
+            break;
+          case ou::tf::keytypes::EProviderIQF:
+            pPosition = pm.ConstructPosition(
+              sRunPortfolioName, idInstrument, c_sPortfolioName,
+              "iq01", "iq01", m_iqf,
+              pWatch
+            );
+            break;
+          default:
+            assert( false );
+
+        }
         BOOST_LOG_TRIVIAL(info) << "real time position constructed: " << pPosition->GetInstrument()->GetInstrumentName();
       }
 
@@ -644,7 +665,6 @@ void AppAutoTrade::ConstructInstrument_IB(
       iterStrategy->second->SetPosition( pPosition );
       fConstructed_( sSymbol );
     } );
-
 }
 
 void AppAutoTrade::ConstructInstrument_Sim( const std::string& sRunPortfolioName, const std::string& sSymbol ) {
@@ -803,54 +823,76 @@ void AppAutoTrade::ConfirmProviders() {
     //m_sim->Run();
   }
   else { // live trading
-    if ( m_iqf->Connected() && m_tws->Connected() ) {
-      if ( m_bL2Connected ) {
-        bValidCombo = true;
-        std::cout << "ConfirmProviders: using iqfeed and ib for data/execution" << std::endl;
+    if ( m_data && m_exec ) {
+      if ( m_data->Connected() && m_exec->Connected() ) {
+        assert( ou::tf::keytypes::EProviderIQF == m_data->ID() );
 
-        LoadPortfolio( c_sPortfolioRealTimeName );
-        for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-          Strategy& strategy( *vt.second );
-          ConstructInstrument_IB(
-            c_sPortfolioRealTimeName, vt.first,
-            [this,&strategy]( const std::string& sSymbol ){
-              //mapStrategy_t::iterator iter = m_mapStrategy.find( sSymbol );
-              //Strategy& strategy( *iter->second );
-              using EFeed = ou::tf::config::symbol_t::EFeed;
-              auto symbol = m_iqf->GetSymbol( sSymbol );
-              if ( m_pL2Symbols ) {
-                switch ( strategy.Feed() ) {
-                  case EFeed::L1:
-                    break;
-                  case EFeed::L2M:
-                    BOOST_LOG_TRIVIAL(info) << "ConfirmProviders starting L2M for: " << sSymbol;
-                    m_pL2Symbols->WatchAdd(
-                      sSymbol,
-                      [symbol]( const ou::tf::DepthByMM& md ){
-                        symbol->SubmitMarketDepthByMM( md );
-                      }
-                      );
-                    break;
-                  case EFeed::L2O:
-                    BOOST_LOG_TRIVIAL(info) << "ConfirmProviders starting L2O for: " << sSymbol;
-                    m_pL2Symbols->WatchAdd(
-                      sSymbol,
-                      [symbol]( const ou::tf::DepthByOrder& md ){
-                        symbol->SubmitMarketDepthByOrder( md );
-                      }
-                      );
-                    break;
+        if ( m_bL2Connected ) {
+          bValidCombo = true;
+
+          std::cout
+            << "ConfirmProviders: data(" << m_data->GetName() << ") "
+            << "& execution(" << m_exec->GetName() << ") "
+            << "providers available"
+            << std::endl;
+
+          LoadPortfolio( c_sPortfolioRealTimeName );
+
+          for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
+            Strategy& strategy( *vt.second );
+
+            switch ( m_exec->ID() ) {
+              case ou::tf::keytypes::EProviderIB:
+                m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqf, m_tws );
+                break;
+              case ou::tf::keytypes::EProviderIQF:
+                m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqf );
+                break;
+              default:
+                assert( false );
+            }
+
+            ConstructInstrument_Live(
+              c_sPortfolioRealTimeName, vt.first,
+              [this,&strategy]( const std::string& sSymbol ){
+                //mapStrategy_t::iterator iter = m_mapStrategy.find( sSymbol );
+                //Strategy& strategy( *iter->second );
+                using EFeed = ou::tf::config::symbol_t::EFeed;
+                auto symbol = m_iqf->GetSymbol( sSymbol );
+                if ( m_pL2Symbols ) {
+                  switch ( strategy.Feed() ) {
+                    case EFeed::L1:
+                      break;
+                    case EFeed::L2M:
+                      BOOST_LOG_TRIVIAL(info) << "ConfirmProviders starting L2M for: " << sSymbol;
+                      m_pL2Symbols->WatchAdd(
+                        sSymbol,
+                        [symbol]( const ou::tf::DepthByMM& md ){
+                          symbol->SubmitMarketDepthByMM( md );
+                        }
+                        );
+                      break;
+                    case EFeed::L2O:
+                      BOOST_LOG_TRIVIAL(info) << "ConfirmProviders starting L2O for: " << sSymbol;
+                      m_pL2Symbols->WatchAdd(
+                        sSymbol,
+                        [symbol]( const ou::tf::DepthByOrder& md ){
+                          symbol->SubmitMarketDepthByOrder( md );
+                        }
+                        );
+                      break;
+                  }
                 }
-              }
-              else {
-                assert( false ); // m_pL2Symbols needs to be available
-              }
+                else {
+                  assert( false ); // m_pL2Symbols needs to be available
+                }
+            }
+            );
           }
-          );
         }
-      }
-      else {
-        std::cout << "ConfirmProviders: waiting for iqfeed level 2 connection" << std::endl;
+        else {
+          std::cout << "ConfirmProviders: waiting for iqfeed level 2 connection" << std::endl;
+        }
       }
     }
   }

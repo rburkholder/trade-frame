@@ -90,6 +90,7 @@ private:
   using TreeItem = ou::tf::TreeItem;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
 
+  using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
   using pProviderSim_t = ou::tf::SimulationProvider::pProvider_t;
   using pProviderIB_t = ou::tf::ib::TWS::pProvider_t;
   using pProviderIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
@@ -111,11 +112,15 @@ private:
 
   wxTimer m_timerOneSecond;
 
-  pProviderSim_t    m_sim;    // simulation
-  pProviderIB_t     m_tws;    // live - execution
-  pProviderIQFeed_t m_iqf; // live - data
+  pProvider_t       m_data;
+  pProvider_t       m_exec;
+
+  pProviderSim_t    m_sim;    // simulation - [ data,execution ]
+  pProviderIB_t     m_tws;    // live - [ execution ]
+  pProviderIQFeed_t m_iqf;    // live - [ data ], simulation - [ execution ]
 
   bool m_bL2Connected;
+
   std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pL2Symbols;
   std::string m_sSimulationDateTime;  // used for l2 output streaming file name
 
@@ -168,7 +173,7 @@ private:
   //void HandleMenuActionUtilitySave();
   //void HandleMenuActionUtilityClear();
 
-  void ConstructInstrument_IB(
+  void ConstructInstrument_Live(
     const std::string& sNamePortfolio
   , const std::string& sSymbol
   , fInstrumentConstructed_t&&
