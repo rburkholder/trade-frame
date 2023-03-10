@@ -1,0 +1,9 @@
+2023/02/07
+
+heavy math version of the c++ book:
+0262358069 2020 (Adaptive computation and machine learning) Ethem Alpaydin - Introduction to machine learning-MIT Press.epub
+
+2023/02/04
+
+_148423314X 2018 Data Mining Algorithms in C++.pdf    principle component analysis with eigenvectors, very readable
+_1138626783 2018 Introduction to Machine Learning with Applications in Information Security.pdf   more eigenvectors, markov, ...
