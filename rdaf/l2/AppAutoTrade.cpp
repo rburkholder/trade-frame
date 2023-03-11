@@ -109,20 +109,20 @@ bool AppAutoTrade::OnInit() {
 
   wxApp::SetVendorName( c_sVendorName );
   wxApp::SetAppDisplayName( c_sAppName );
-  wxApp::SetVendorDisplayName( "(c)2022 " + c_sVendorName );
+  wxApp::SetVendorDisplayName( "(c)2023 " + c_sVendorName );
 
   wxApp::OnInit();
 
   if ( boost::filesystem::exists( c_sChoicesFilename_Old ) ) {
     std::cout << c_sChoicesFilename_Old << " needs to be renamed to " << c_sChoicesFilename << std::endl;
-    return( false );
+    return false;
   }
-
-  m_bL2Connected = false;
 
   if ( !ou::tf::config::Load( c_sChoicesFilename, m_choices ) ) {
     return false;
   }
+
+  m_bL2Connected = false;
 
   m_iqf = ou::tf::iqfeed::Provider::Factory();
   m_iqf->SetThreadCount( m_choices.nThreads );
