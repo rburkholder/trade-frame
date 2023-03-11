@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    Strategy.hpp
+ * File:    StrategyFutures.hpp
  * Author:  raymond@burkholder.net
  * Project: rdaf/l2
  * Created: December 9, 2022  16:18:19

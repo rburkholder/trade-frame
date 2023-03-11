@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    Strategy.cpp
+ * File:    StrategyFutures.cpp
  * Author:  raymond@burkholder.net
  * Project: rdaf/l2
  * Created: December 9, 2022  16:18:19
@@ -44,7 +44,7 @@
 
 #include <TFVuTrading/TreeItem.hpp>
 
-#include "Strategy.hpp"
+#include "StrategyFutures.hpp"
 
 using pWatch_t = ou::tf::Watch::pWatch_t;
 

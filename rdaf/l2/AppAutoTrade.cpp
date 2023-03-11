@@ -58,7 +58,7 @@
 #include <TFVuTrading/WinChartView.h>
 #include <TFVuTrading/PanelProviderControlv2.hpp>
 
-#include "Strategy.hpp"
+#include "StrategyFutures.hpp"
 #include "AppAutoTrade.hpp"
 
 namespace {

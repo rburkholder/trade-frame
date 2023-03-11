@@ -29,7 +29,7 @@ set(
     ConfigParser.hpp
     HiPass.hpp
     State.hpp
-    Strategy.hpp
+    StrategyFutures.hpp
   )
 
 set(
@@ -38,7 +38,7 @@ set(
     ConfigParser.cpp
     HiPass.cpp
     State.cpp
-    Strategy.cpp
+    StrategyFutures.cpp
   )
 
 add_executable(
