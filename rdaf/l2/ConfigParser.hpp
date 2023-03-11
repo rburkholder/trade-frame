@@ -36,7 +36,7 @@ namespace config {
 
 struct symbol_t {
 
-  enum EFeed {
+  enum class EFeed {
     L1   // L1 quotes/trades
   , L2M  // L1 + L2 market maker (nasdaq equities) - not used in futures l2 activity
   , L2O  // L1 + L2 orders (CME [es, nq ..], ICE futures)
