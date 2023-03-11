@@ -71,27 +71,6 @@ namespace tf {
 } // namespace tf
 } // namespace ou
 
-using pOrder_t = ou::tf::Order::pOrder_t;
-
-// =========
-
-class Cycle {
-public:
-  using fDone_t = std::function<void()>;
-  Cycle( pOrder_t pEntry, pOrder_t pExit, fDone_t&& fDone )
-  : m_pOrderEntry( std::move( pEntry ) )
-  , m_pOrderExit( std::move( pExit ) )
-  , m_fDone( std::move( fDone ) )
-  {}
-  void PlaceEntry() {}
-  void PlaceExit() {}
-protected:
-private:
-  pOrder_t m_pOrderEntry;
-  pOrder_t m_pOrderExit;
-  fDone_t m_fDone;
-};
-
 // =========
 
 class Strategy:
@@ -109,6 +88,8 @@ public:
   //using pFile_t = std::shared_ptr<TFile>;
 
   using fTelegram_t = std::function<void(const std::string&)>;
+
+  using pOrder_t = ou::tf::Order::pOrder_t;
 
   Strategy(
     const ou::tf::config::symbol_t&
@@ -146,7 +127,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, Cycle, CycleSlope, SD, MASlope, MA, ImbalanceMean, Stoch, FVS_v8_rel, PL1, PL2, ET, MarketDepth };
+  enum EChartSlot { Price, Volume, SD, MASlope, MA, ImbalanceMean, Stoch, FVS_v8_rel, PL1, PL2, ET, MarketDepth };
 
   enum class EStateTrade {
     Init,  // initiaize state in current market

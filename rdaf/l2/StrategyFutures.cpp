@@ -169,18 +169,6 @@ void Strategy::SetupChart() {
     mas.AddToView( m_cdv, EChartSlot::Price, EChartSlot::SD, EChartSlot::MASlope );
   }
 
-  //m_cdv.Add( EChartSlot::Cycle, &m_cemZero );
-  //m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[0].m_ceEhlersHiPassFilter );
-  //m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[1].m_ceEhlersHiPassFilter );
-  //m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[2].m_ceEhlersHiPassFilter );
-  //m_cdv.Add( EChartSlot::Cycle, &m_rHiPass[3].m_ceEhlersHiPassFilter );
-
-  //m_cdv.Add( EChartSlot::CycleSlope, &m_cemZero );
-  //m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[0].m_ceEhlersHiPassFilterSlope );
-  //m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[1].m_ceEhlersHiPassFilterSlope );
-  //m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[2].m_ceEhlersHiPassFilterSlope );
-  //m_cdv.Add( EChartSlot::CycleSlope, &m_rHiPass[3].m_ceEhlersHiPassFilterSlope );
-
   m_cdv.Add( EChartSlot::Stoch, &m_cemStochastic );
 
   for ( vStochastic_t::value_type& vt: m_vStochastic ) {
