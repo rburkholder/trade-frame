@@ -66,9 +66,10 @@ namespace {
   static const std::string c_sVendorName( "One Unified Net Limited" );
 
   static const std::string c_sDirectory( "rdaf/l2" );
-  static const std::string c_sDbName( c_sDirectory + "/example.db" );
-  static const std::string c_sStateFileName( c_sDirectory + "/example.state" );
-  static const std::string c_sChoicesFilename( c_sDirectory + "/choices.cfg" );
+  static const std::string c_sDbName( c_sDirectory + "/app.db" );
+  static const std::string c_sStateFileName( c_sDirectory + "/app.state" );
+  static const std::string c_sChoicesFilename( c_sDirectory + "/app.cfg" );
+  static const std::string c_sChoicesFilename_Old( c_sDirectory + "/choices.cfg" );
   static const std::string c_sFileNameUtility( c_sDirectory + "/utility.root" );
 
   static const std::string c_sMenuItemPortfolio( "_USD" );
@@ -111,6 +112,11 @@ bool AppAutoTrade::OnInit() {
   wxApp::SetVendorDisplayName( "(c)2022 " + c_sVendorName );
 
   wxApp::OnInit();
+
+  if ( boost::filesystem::exists( c_sChoicesFilename_Old ) ) {
+    std::cout << c_sChoicesFilename_Old << " needs to be renamed to " << c_sChoicesFilename << std::endl;
+    return( false );
+  }
 
   m_bL2Connected = false;
 
