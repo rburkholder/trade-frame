@@ -45,7 +45,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   (double, dblCommission)
   (bool, bTradable)
   (bool, bEmitFVS)
-  (std::string, sAlgorithm)
+  (ou::tf::config::symbol_t::EAlgorithm, eAlgorithm)
   (std::string, sSignalFrom)
   (int, nPeriodWidth)
   (int, nMA1Periods)
@@ -96,6 +96,11 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       ( "no", false )
       ( "Yes", true )
       ( "No", false )
+      ;
+
+    luAlgorithm.add
+      ( "future", ou::tf::config::symbol_t::EAlgorithm::future )
+      ( "equity_option", ou::tf::config::symbol_t::EAlgorithm::equity_option )
       ;
 
     luFeed.add
@@ -213,7 +218,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
     ruleAlgorithm
       %= qi::lit("algorithm")
       >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
-      >> +qi::char_("A-Za-z0-9_")
+      >> luAlgorithm
       >> *qi::lit(' ') >> qi::eol;
 
     ruleSignalFrom
@@ -351,6 +356,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
 
   qi::symbols<char, bool> luBool;
   qi::symbols<char, ou::tf::config::symbol_t::EFeed> luFeed;
+  qi::symbols<char, ou::tf::config::symbol_t::EAlgorithm> luAlgorithm;
   qi::symbols<char, ou::tf::InstrumentType::EInstrumentType> luInstrumentType;
 
   qi::rule<Iterator, std::string()> ruleTelegramToken;
@@ -359,7 +365,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   qi::rule<Iterator, bool()> ruleStartSimulator;
   qi::rule<Iterator, std::string()> ruleGroupDirectory;
   qi::rule<Iterator, size_t()> ruleTimeBins;
-  qi::rule<Iterator, std::string()> ruleAlgorithm;
+  qi::rule<Iterator, ou::tf::config::symbol_t::EAlgorithm()> ruleAlgorithm;
   qi::rule<Iterator, std::string()> ruleSignalFrom;
   qi::rule<Iterator, int()> rulePeriodWidth;
   qi::rule<Iterator, int()> ruleMovingAverage1Periods;

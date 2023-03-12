@@ -23,22 +23,22 @@ libraries for analysing live data as it arrives.
 
 The parameters are sourced in the configuration file (as an example): 
 
-$ cat x64/debug/rdaf/at/choices.cfg
+$ cat x64/debug/rdaf/l2/app.cfg
 ```
 telegram_token=6216......
 ib_client_id=7
 threads=3
-sim_start=yes
+sim_start=no
 group_directory=/app/collector/20221220-09:20:13.187534
 time_bins=3600
 time_upper=20221220T220000
 time_lower=20221219T220000
 [@ESH23]
-feed=l2o
+feed=<l1|l2m|l2o>
 sym_symbol=ES-20230317
 trade=yes
 emit_fvs=yes
-algorithm=ES
+algorithm=<future|equity_option>
 period_width=3
 ma1_periods=5
 ma2_periods=13
@@ -52,15 +52,33 @@ price_lower=3000
 volume_bins=100
 volume_upper=500000
 volume_lower=0
+[SPY]
+feed=l1
+trade=yes
+algorithm=equity_option
+signal_from=@ESH23
+period_width=3
+ma1_periods=5
+ma2_periods=13
+ma3_periods=31
+stochastic1_periods=13
+stochastic2_periods=47
+stochastic3_periods=87
+price_bins=1000
+price_upper=600
+price_lower=200
+volume_bins=100
+volume_upper=500000
+volume_lower=0
 ```
 * group_directory is optional if sim_start is off.
 
-### x64/debug/rdaf/l2/example.db
+### x64/debug/rdaf/l2/app.db
 
 The database has a number of tables, and can be accessed in a manner similar to this example:
 
 ```
-$ sqlite3 x64/debug/rdaf/l2/example.db
+$ sqlite3 x64/debug/rdaf/l2/app.db
 SQLite version 3.34.1 2021-01-20 14:10:07
 Enter ".help" for usage hints.
 sqlite> select * from portfolios;

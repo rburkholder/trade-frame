@@ -57,6 +57,8 @@
 #include <TFVuTrading/PanelProviderControlv2.hpp>
 
 #include "StrategyFutures.hpp"
+#include "StrategyEquityOption.hpp"
+
 #include "AppAutoTrade.hpp"
 
 namespace {
@@ -396,25 +398,38 @@ bool AppAutoTrade::OnInit() {
       }
     );
 
-    //pStrategy_t pStrategy = std::make_unique<Strategy>( choices, pTreeItem, m_pFile, m_pFileUtility );
-    pStrategyFutures_t pStrategy
-      = std::make_unique<Strategy::Futures>(
-        choices, pTreeItem,
-        [this](const std::string& sMessage){
-          if ( m_telegram_bot ) {
-            m_telegram_bot->SendMessage( sMessage );
-          }
+    pStrategyBase_t pStrategy;
+    pStrategyFutures_t pStrategyFutures;
+    pStrategyEquityOption_t pStrategyEquityOption;
+    switch ( choices.eAlgorithm ) {
+      case ou::tf::config::symbol_t::EAlgorithm::future:
+        pStrategyFutures
+          = std::make_unique<Strategy::Futures>(
+            choices, pTreeItem,
+            [this](const std::string& sMessage){
+              if ( m_telegram_bot ) {
+                m_telegram_bot->SendMessage( sMessage );
+              }
+            }
+            );
+
+        if ( m_choices.bStartSimulator ) {
+          // need to vefify proper period when collector starts at 5:30est
+          //pStrategy->InitForUSEquityExchanges( dateSim );
+          pStrategyFutures->InitForUS24HourFutures( dateSim );
+          m_pWinChartView->SetSim( true );
         }
-        );
+
+        pStrategy = std::move( pStrategyFutures );
+        break;
+      case ou::tf::config::symbol_t::EAlgorithm::equity_option:
+        assert( !m_choices.bStartSimulator );  // cannot run simulator with options
+        pStrategyEquityOption = std::make_unique<Strategy::EquityOption>();
+        pStrategy = std::move( pStrategyEquityOption );
+        break;
+    }
 
     m_pWinChartView->SetChartDataView( &pStrategy->GetChartDataView() );
-
-    if ( m_choices.bStartSimulator ) {
-      // need to vefify proper period when collector starts at 5:30est
-      //pStrategy->InitForUSEquityExchanges( dateSim );
-      pStrategy->InitForUS24HourFutures( dateSim );
-      m_pWinChartView->SetSim( true );
-    }
 
     m_mapStrategy.emplace( sSymbol, std::move( pStrategy ) );
     BOOST_LOG_TRIVIAL(info) << "strategy installed for: " << sSymbol;

@@ -79,6 +79,7 @@ namespace v2 {
 namespace Strategy {
   class Base;
   class Futures;
+  class EquityOption;
 }
 
 class AppAutoTrade:
@@ -143,6 +144,7 @@ private:
 
   using pStrategyBase_t = std::unique_ptr<Strategy::Base>;
   using pStrategyFutures_t = std::unique_ptr<Strategy::Futures>;
+  using pStrategyEquityOption_t = std::unique_ptr<Strategy::EquityOption>;
 
   using mapStrategy_t = std::map<std::string,pStrategyBase_t>;
   mapStrategy_t m_mapStrategy;

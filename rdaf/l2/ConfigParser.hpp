@@ -36,6 +36,11 @@ namespace config {
 
 struct symbol_t {
 
+  enum class EAlgorithm {
+    future
+  , equity_option
+  };
+
   enum class EFeed {
     L1   // L1 quotes/trades
   , L2M  // L1 + L2 market maker (nasdaq equities) - not used in futures l2 activity
@@ -45,13 +50,14 @@ struct symbol_t {
   // directly parsed
 
   EFeed eFeed;
+  EAlgorithm eAlgorithm;
   ou::tf::InstrumentType::EInstrumentType eInstrumentType;
+
   bool bTradable;
   bool bEmitFVS;
 
   double dblCommission;
 
-  std::string sAlgorithm;
   std::string sSignalFrom; // link one instrument to another
 
   int nPeriodWidth;  // units:  seconds

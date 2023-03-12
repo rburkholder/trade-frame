@@ -238,7 +238,6 @@ void Futures::SetPosition( pPosition_t pPosition ) {
 //  m_rHiPass[2].Init( m_config.nPeriodWidth, ou::Colour::Brown, "HP3" );
   //m_rHiPass[3].Init( m_config.nMA1Periods, ou::Colour::Green, "HP4" );
 
-
   // stochastic
 
   m_vStochastic.emplace_back( std::make_unique<Stochastic>( "1", m_quotes, m_config.nStochastic1Periods, td, ou::Colour::DeepSkyBlue ) );
@@ -307,8 +306,8 @@ void Futures::SetPosition( pPosition_t pPosition ) {
 
   BOOST_LOG_TRIVIAL(info)
     << "Strategy::SetPosition " << m_config.sSymbol_IQFeed
-    << ": algorithm='" << m_config.sAlgorithm
-    << "' signal_from='" <<m_config.sSignalFrom
+    //<< ": algorithm='" << m_config.sAlgorithm
+    << " signal_from='" <<m_config.sSignalFrom
     << "'"
     ;
 
