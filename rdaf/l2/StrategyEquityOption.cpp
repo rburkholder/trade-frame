@@ -29,6 +29,25 @@ EquityOption::EquityOption(
 : Base( config )
 {}
 
-EquityOption::~EquityOption() {}
+EquityOption::~EquityOption() {
+  if ( m_pPosition ) {
+    pWatch_t pWatch = m_pPosition->GetWatch();
+    pWatch->OnQuote.Remove( MakeDelegate( this, &EquityOption::HandleQuote ) );
+    pWatch->OnTrade.Remove( MakeDelegate( this, &EquityOption::HandleTrade ) );
+  }
+}
+
+void EquityOption::SetPosition( pPosition_t pPosition ) {
+
+  Base::SetPosition( pPosition );
+
+  pWatch_t pWatch = m_pPosition->GetWatch();
+  pWatch->OnQuote.Add( MakeDelegate( this, &EquityOption::HandleQuote ) );
+  pWatch->OnTrade.Add( MakeDelegate( this, &EquityOption::HandleTrade ) );
+}
+
+void EquityOption::HandleQuote( const ou::tf::Quote& quote ) {}
+
+void EquityOption::HandleTrade( const ou::tf::Trade& trade ) {}
 
 } // namespace Strategy

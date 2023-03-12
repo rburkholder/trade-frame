@@ -19,7 +19,9 @@
  * Created: March 11, 2034  10:58:03
  */
 
- #include "StrategyBase.hpp"
+#include <boost/log/trivial.hpp>
+
+#include "StrategyBase.hpp"
 
 namespace Strategy {
 
@@ -28,5 +30,21 @@ Base::Base( const ou::tf::config::symbol_t& config )
  {}
 
 Base::~Base() {}
+
+void Base::SetPosition( pPosition_t pPosition ) {
+
+  assert( pPosition );
+  m_pPosition = pPosition;
+
+  m_cdv.SetNames( "AutoTrade", pPosition->GetInstrument()->GetInstrumentName() );
+
+  BOOST_LOG_TRIVIAL(info)
+    << "Strategy::SetPosition " << m_config.sSymbol_IQFeed
+    //<< ": algorithm='" << m_config.sAlgorithm
+    << " signal_from='" <<m_config.sSignalFrom
+    << "'"
+    ;
+
+}
 
 } // namespace Strategy

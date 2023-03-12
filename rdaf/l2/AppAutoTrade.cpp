@@ -216,7 +216,7 @@ bool AppAutoTrade::OnInit() {
 
     sizerUpper->Add( m_pPanelProviderControl, 0, wxALIGN_LEFT, 2);
 
-    // perform this with iqfeed connection instead?
+    // perform this with iqfeed connection instead? and within Strategy::Futures?
     m_pL2Symbols = std::make_unique<ou::tf::iqfeed::l2::Symbols>(
       [this](){
         m_bL2Connected = true;
@@ -706,18 +706,8 @@ void AppAutoTrade::ConstructInstrument_Live(
       mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( sSymbol );
       assert( m_mapStrategy.end() != iterStrategy );
 
-      // TODO: factor out SetPosition appropirately for each type
       Strategy::Base& base( *iterStrategy->second  );
-      switch ( base.Choices().eAlgorithm ) {
-        case ou::tf::config::symbol_t::EAlgorithm::future:
-          {
-            Strategy::Futures& strategy( dynamic_cast<Strategy::Futures&>( *iterStrategy->second ) );
-            strategy.SetPosition( pPosition );
-          }
-          break;
-        case ou::tf::config::symbol_t::EAlgorithm::equity_option:
-          break;
-      }
+      base.SetPosition( pPosition );
       fConstructed_( sSymbol );
     } );
 }

@@ -27,10 +27,21 @@ namespace Strategy {
 
 class EquityOption: public Base {
 public:
+
+  using pPosition_t = ou::tf::Position::pPosition_t;
+
   EquityOption( const ou::tf::config::symbol_t& );
   virtual ~EquityOption();
+
+  virtual void SetPosition( pPosition_t );
+
 protected:
 private:
+
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+
+  void HandleQuote( const ou::tf::Quote& );
+  void HandleTrade( const ou::tf::Trade& );
 };
 
 } // namespace Strategy

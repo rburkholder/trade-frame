@@ -43,7 +43,6 @@
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFTrading/Order.h>
-#include <TFTrading/Position.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
 #include <TFIQFeed/Level2/Symbols.hpp>
@@ -103,7 +102,7 @@ public:
   );
   virtual ~Futures();
 
-  void SetPosition( pPosition_t );
+  virtual void SetPosition( pPosition_t );
 
   void FVSStreamStart( const std::string& sPath );
   void FVSStreamStop( int );
@@ -163,8 +162,6 @@ private:
   pFile_t m_pFile;
   pFile_t m_pFileUtility;
 #endif
-
-  pPosition_t m_pPosition;
 
   pOrder_t m_pOrderPending;
   //pOrder_t m_pOrderDone;

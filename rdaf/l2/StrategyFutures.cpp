@@ -218,17 +218,11 @@ void Futures::SetupChart() {
 
 void Futures::SetPosition( pPosition_t pPosition ) {
 
-  using pProvider_t = ou::tf::Watch::pProvider_t;
-
-  assert( pPosition );
-
   Clear();
 
-  m_pPosition = pPosition;
-  pWatch_t pWatch = m_pPosition->GetWatch();
-  pProvider_t pDataProvider = pWatch->GetProvider();
+  Base::SetPosition( pPosition );
 
-  m_cdv.SetNames( "AutoTrade", pWatch->GetInstrument()->GetInstrumentName() );
+  pWatch_t pWatch = m_pPosition->GetWatch();
 
   assert( 0 < m_config.nPeriodWidth );
   time_duration td = time_duration( 0, 0, m_config.nPeriodWidth );
@@ -303,13 +297,6 @@ void Futures::SetPosition( pPosition_t pPosition ) {
     BOOST_LOG_TRIVIAL(info) << "Strategy::SetPosition " << m_config.sSymbol_IQFeed << ": no trading";
     m_stateTrade = EStateTrade::NoTrade;
   }
-
-  BOOST_LOG_TRIVIAL(info)
-    << "Strategy::SetPosition " << m_config.sSymbol_IQFeed
-    //<< ": algorithm='" << m_config.sAlgorithm
-    << " signal_from='" <<m_config.sSignalFrom
-    << "'"
-    ;
 
 }
 

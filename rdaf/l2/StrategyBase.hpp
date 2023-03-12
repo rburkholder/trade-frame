@@ -23,12 +23,16 @@
 
 #include <OUCharting/ChartDataView.h>
 
+#include <TFTrading/Position.h>
+
 #include "ConfigParser.hpp"
 
 namespace Strategy {
 
 class Base {
 public:
+
+  using pPosition_t = ou::tf::Position::pPosition_t;
 
   Base( const ou::tf::config::symbol_t& );
   virtual ~Base();
@@ -38,11 +42,15 @@ public:
 
   ou::ChartDataView& GetChartDataView() { return m_cdv; }
 
+  virtual void SetPosition( pPosition_t );
+
 protected:
 
   const ou::tf::config::symbol_t& m_config;
 
   ou::ChartDataView m_cdv;
+
+  pPosition_t m_pPosition;
 
 private:
 };
