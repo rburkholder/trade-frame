@@ -73,11 +73,13 @@ namespace tf {
 
 // =========
 
-class Strategy:
-  public ou::tf::DailyTradeTimeFrame<Strategy>
+namespace Strategy {
+
+class Futures:
+  public ou::tf::DailyTradeTimeFrame<Futures>
 {
   friend class boost::serialization::access;
-  friend ou::tf::DailyTradeTimeFrame<Strategy>;
+  friend ou::tf::DailyTradeTimeFrame<Futures>;
 public:
 
   using price_t = ou::tf::Trade::price_t;
@@ -91,7 +93,7 @@ public:
 
   using pOrder_t = ou::tf::Order::pOrder_t;
 
-  Strategy(
+  Futures(
     const ou::tf::config::symbol_t&
   , TreeItem*
   , fTelegram_t&&
@@ -100,7 +102,7 @@ public:
   , pFile_t
 #endif
   );
-  virtual ~Strategy();
+  virtual ~Futures();
 
   const ou::tf::config::symbol_t& Choices() const { return m_config; }
 
@@ -324,4 +326,6 @@ private:
   void Clear();
   void SetupChart();
 
-};
+}; // class Futures
+
+} // namespace Strategy

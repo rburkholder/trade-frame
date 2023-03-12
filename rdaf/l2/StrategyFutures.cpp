@@ -55,14 +55,16 @@ namespace {
   static const boost::posix_time::time_duration filter_stoch( 0, 0, 1 );
 }
 
-Strategy::Strategy(
+namespace Strategy {
+
+Futures::Futures(
   const ou::tf::config::symbol_t& config
 , TreeItem* pTreeItem
 , fTelegram_t&& fTelegram
 //, pFile_t pFile
 //, pFile_t pFileUtility
 )
-: ou::tf::DailyTradeTimeFrame<Strategy>()
+: ou::tf::DailyTradeTimeFrame<Futures>()
 , m_pTreeItemSymbol( pTreeItem )
 , m_fTelegram( std::move( fTelegram ) )
 //, m_pFile( pFile )
@@ -116,7 +118,7 @@ Strategy::Strategy(
 
   //m_ceExecutionTime.SetName( "Execution Time" );
 
-  m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
+  m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Futures::HandleBarQuotes01Sec ) );
 
   m_cdMarketDepthAsk.SetName( "MarketDepth Ask" );
   m_cdMarketDepthAsk.SetColour( ou::Colour::Red );
@@ -142,11 +144,11 @@ Strategy::Strategy(
 #endif
 }
 
-Strategy::~Strategy() {
+Futures::~Futures() {
   Clear();
 }
 
-void Strategy::SetupChart() {
+void Futures::SetupChart() {
 
   m_cdv.Add( EChartSlot::Price, &m_ceQuoteAsk );
   m_cdv.Add( EChartSlot::Price, &m_ceTrade );
@@ -214,7 +216,7 @@ void Strategy::SetupChart() {
 
 }
 
-void Strategy::SetPosition( pPosition_t pPosition ) {
+void Futures::SetPosition( pPosition_t pPosition ) {
 
   using pProvider_t = ou::tf::Watch::pProvider_t;
 
@@ -273,14 +275,14 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 #endif
 
   pWatch->RecordSeries( false ); // use Collector for keeping data
-  pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
-  pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
+  pWatch->OnQuote.Add( MakeDelegate( this, &Futures::HandleQuote ) );
+  pWatch->OnTrade.Add( MakeDelegate( this, &Futures::HandleTrade ) );
 
   switch ( m_config.eFeed ) {
     case ou::tf::config::symbol_t::EFeed::L1:
       break;
     case ou::tf::config::symbol_t::EFeed::L2M:  // L2 via MarketMaker (nasdaq equities)
-      pWatch->OnDepthByMM.Add( MakeDelegate( this, &Strategy::HandleDepthByMM ) );
+      pWatch->OnDepthByMM.Add( MakeDelegate( this, &Futures::HandleDepthByMM ) );
 
       m_pMarketMaker = ou::tf::iqfeed::l2::MarketMaker::Factory();
       m_pMarketMaker->Set(
@@ -312,7 +314,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
 }
 
-void Strategy::FVSStreamStart( const std::string& sPath ) {
+void Futures::FVSStreamStart( const std::string& sPath ) {
 
   if ( m_config.bEmitFVS ) {
 
@@ -346,12 +348,12 @@ void Strategy::FVSStreamStart( const std::string& sPath ) {
   }
 }
 
-void Strategy::FVSStreamStop( int ) {
+void Futures::FVSStreamStop( int ) {
   m_streamFVS.close();
 }
 
 // from IndicatorTrading/FeedModel.cpp
-void Strategy::StartDepthByOrder() {
+void Futures::StartDepthByOrder() {
 
   using EState = ou::tf::iqfeed::l2::OrderBased::EState;
 
@@ -514,11 +516,11 @@ void Strategy::StartDepthByOrder() {
   );
 
   pWatch_t pWatch = m_pPosition->GetWatch();
-  pWatch->OnDepthByOrder.Add( MakeDelegate( this, &Strategy::HandleDepthByOrder ) );
+  pWatch->OnDepthByOrder.Add( MakeDelegate( this, &Futures::HandleDepthByOrder ) );
 
 }
 
-void Strategy::Imbalance( const ou::tf::Depth& depth ) {
+void Futures::Imbalance( const ou::tf::Depth& depth ) {
   // from IndicatorTrading/FeedModel.cpp
 
   static const double w1( 19.0 / 20.0 );
@@ -575,7 +577,7 @@ void Strategy::LoadHistory( TClass* tc ) {
 }
 #endif
 
-void Strategy::Clear() {
+void Futures::Clear() {
 
   m_vStochastic.clear();
 
@@ -589,22 +591,22 @@ void Strategy::Clear() {
       case ou::tf::config::symbol_t::EFeed::L2M:
         if ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == pDataProvider->ID() ) {
           m_pMarketMaker.reset();
-          pWatch->OnDepthByMM.Remove( MakeDelegate( this, &Strategy::HandleDepthByMM ) );
+          pWatch->OnDepthByMM.Remove( MakeDelegate( this, &Futures::HandleDepthByMM ) );
         }
         break;
       case ou::tf::config::symbol_t::EFeed::L2O:
         break;
     }
 
-    pWatch->OnQuote.Remove( MakeDelegate( this, &Strategy::HandleQuote ) );
-    pWatch->OnTrade.Remove( MakeDelegate( this, &Strategy::HandleTrade ) );
+    pWatch->OnQuote.Remove( MakeDelegate( this, &Futures::HandleQuote ) );
+    pWatch->OnTrade.Remove( MakeDelegate( this, &Futures::HandleTrade ) );
 
     m_cdv.Clear();
     //m_pPosition.reset(); // need to fix relative to thread
   }
 }
 
-void Strategy::InitRdaf() {
+void Futures::InitRdaf() {
 #if RDAF
   pWatch_t pWatch = m_pPosition->GetWatch();
   const std::string& sSymbol( pWatch->GetInstrumentName() );
@@ -654,7 +656,7 @@ void Strategy::InitRdaf() {
 //   are there top of book l2 changes not reflected as l1 quote changes?
 //   use top of book changes instead of using quote as event?
 
-void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
+void Futures::HandleQuote( const ou::tf::Quote& quote ) {
 
   ptime dt( quote.DateTime() );
 
@@ -670,7 +672,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
 }
 
-void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
+void Futures::HandleTrade( const ou::tf::Trade& trade ) {
 
   ptime dt( trade.DateTime() );
 
@@ -714,7 +716,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
 }
 
-void Strategy::HandleDepthByMM( const ou::tf::DepthByMM& depth ) {
+void Futures::HandleDepthByMM( const ou::tf::DepthByMM& depth ) {
 
   assert( m_pMarketMaker );
   m_pMarketMaker->MarketDepth( depth );
@@ -732,19 +734,19 @@ void Strategy::HandleDepthByMM( const ou::tf::DepthByMM& depth ) {
 
 }
 
-void Strategy::HandleDepthByOrder( const ou::tf::DepthByOrder& depth ) {
+void Futures::HandleDepthByOrder( const ou::tf::DepthByOrder& depth ) {
   m_pOrderBased->MarketDepth( depth );
 }
 
 // l2 market maker only
-void Strategy::HandleUpdateL2Ask( price_t price, volume_t volume, bool bAdd ) {
+void Futures::HandleUpdateL2Ask( price_t price, volume_t volume, bool bAdd ) {
 }
 
 // l2 market maker only
-void Strategy::HandleUpdateL2Bid( price_t price, volume_t volume, bool bAdd ) {
+void Futures::HandleUpdateL2Bid( price_t price, volume_t volume, bool bAdd ) {
 }
 
-void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
+void Futures::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 
   double dblRealized, dblCommissionsPaid, dblTotal;
 
@@ -774,15 +776,15 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   m_pOrder->SetTimeInForce( ou::tf::TimeInForce::GoodTillDate );
 */
 
-void Strategy::EnterLong( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
+void Futures::EnterLong( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
   pOrder->SetSignalPrice( dblMidPoint );
-  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-  pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Futures::HandleOrderCancelled ) );
+  pOrder->OnOrderFilled.Add( MakeDelegate( this, &Futures::HandleOrderFilled ) );
   m_ceLongEntry.AddLabel( quote.DateTime(), dblMidPoint, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   m_stateTrade = EStateTrade::LongSubmitted;
   m_pOrderPending = pOrder;
@@ -790,15 +792,15 @@ void Strategy::EnterLong( const ou::tf::Quote& quote ) { // limit orders, in rea
   //ShowOrder( pOrder );
 }
 
-void Strategy::EnterShort( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
+void Futures::EnterShort( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
   pOrder->SetSignalPrice( dblMidPoint );
-  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-  pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Futures::HandleOrderCancelled ) );
+  pOrder->OnOrderFilled.Add( MakeDelegate( this, &Futures::HandleOrderFilled ) );
   m_ceShortEntry.AddLabel( quote.DateTime(), dblMidPoint, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   m_stateTrade = EStateTrade::ShortSubmitted;
   m_pOrderPending = pOrder;
@@ -806,14 +808,14 @@ void Strategy::EnterShort( const ou::tf::Quote& quote ) { // limit orders, in re
   //ShowOrder( pOrder );
 }
 
-void Strategy::ExitLong( const ou::tf::Quote& quote ) {
+void Futures::ExitLong( const ou::tf::Quote& quote ) {
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
   pOrder->SetSignalPrice( dblMidPoint );
-  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-  pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Futures::HandleOrderCancelled ) );
+  pOrder->OnOrderFilled.Add( MakeDelegate( this, &Futures::HandleOrderFilled ) );
   m_ceLongExit.AddLabel( quote.DateTime(), dblMidPoint, "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   m_stateTrade = EStateTrade::LongExitSubmitted;
   m_pOrderPending = pOrder;
@@ -821,14 +823,14 @@ void Strategy::ExitLong( const ou::tf::Quote& quote ) {
   //ShowOrder( pOrder );
 }
 
-void Strategy::ExitShort( const ou::tf::Quote& quote ) {
+void Futures::ExitShort( const ou::tf::Quote& quote ) {
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
   pOrder->SetSignalPrice( dblMidPoint );
-  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-  pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Futures::HandleOrderCancelled ) );
+  pOrder->OnOrderFilled.Add( MakeDelegate( this, &Futures::HandleOrderFilled ) );
   m_ceShortExit.AddLabel( quote.DateTime(), dblMidPoint, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   m_stateTrade = EStateTrade::ShortExitSubmitted;
   m_pOrderPending = pOrder;
@@ -836,7 +838,7 @@ void Strategy::ExitShort( const ou::tf::Quote& quote ) {
   //ShowOrder( pOrder );
 }
 
-void Strategy::ExitPosition( const ou::tf::Quote& quote ) {
+void Futures::ExitPosition( const ou::tf::Quote& quote ) {
   pOrder_t pOrder;
   double dblMidPoint( quote.Midpoint() );
 
@@ -853,8 +855,8 @@ void Strategy::ExitPosition( const ou::tf::Quote& quote ) {
           + boost::lexical_cast<std::string>( m_dblProfitMax - m_dblUnRealized ) + ","
           + boost::lexical_cast<std::string>( m_dblProfitMax )
           );
-        pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
-        pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
+        pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Futures::HandleExitOrderCancelled ) );
+        pOrder->OnOrderFilled.Add( MakeDelegate( this, &Futures::HandleExitOrderFilled ) );
         m_ceLongExit.AddLabel( quote.DateTime(), dblMidPoint, "LxS2-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
         m_stateTrade = EStateTrade::LongExitSubmitted;
         m_pPosition->PlaceOrder( pOrder );
@@ -870,8 +872,8 @@ void Strategy::ExitPosition( const ou::tf::Quote& quote ) {
           + boost::lexical_cast<std::string>( m_dblProfitMax - m_dblUnRealized ) + ","
           + boost::lexical_cast<std::string>( m_dblProfitMax )
           );
-        pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
-        pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
+        pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Futures::HandleExitOrderCancelled ) );
+        pOrder->OnOrderFilled.Add( MakeDelegate( this, &Futures::HandleExitOrderFilled ) );
         m_ceShortExit.AddLabel( quote.DateTime(), dblMidPoint, "SxS2-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
         m_stateTrade = EStateTrade::ShortExitSubmitted;
         m_pPosition->PlaceOrder( pOrder );
@@ -886,14 +888,14 @@ void Strategy::ExitPosition( const ou::tf::Quote& quote ) {
   }
 }
 
-void Strategy::ShowOrder( pOrder_t pOrder ) {
+void Futures::ShowOrder( pOrder_t pOrder ) {
   //m_pTreeItemOrder = m_pTreeItemSymbol->AppendChild(
   //    "Order "
   //  + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() )
   //  );
 }
 
-void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
+void Futures::HandleRHTrading( const ou::tf::Quote& quote ) {
 
   ptime dt( quote.DateTime() );
 
@@ -1160,7 +1162,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
 }
 
 // not called at the moment
-void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
+void Futures::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   //const std::chrono::time_point<std::chrono::system_clock> begin
   //  = std::chrono::system_clock::now();
@@ -1238,10 +1240,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
 }
 
-void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
+void Futures::HandleOrderCancelled( const ou::tf::Order& order ) {
   ou::tf::Order& order_( const_cast<ou::tf::Order&>( order ) );
-  order_.OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-  order_.OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  order_.OnOrderCancelled.Remove( MakeDelegate( this, &Futures::HandleOrderCancelled ) );
+  order_.OnOrderFilled.Remove( MakeDelegate( this, &Futures::HandleOrderFilled ) );
 
   switch ( m_stateTrade ) {
     case EStateTrade::EndOfDayCancel:
@@ -1260,10 +1262,10 @@ void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
   m_pOrderPending.reset();
 }
 
-void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
+void Futures::HandleOrderFilled( const ou::tf::Order& order ) {
   ou::tf::Order& order_( const_cast<ou::tf::Order&>( order ) );
-  order_.OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-  order_.OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  order_.OnOrderCancelled.Remove( MakeDelegate( this, &Futures::HandleOrderCancelled ) );
+  order_.OnOrderFilled.Remove( MakeDelegate( this, &Futures::HandleOrderFilled ) );
 
   //m_dblStopActiveActual = order.GetAverageFillPrice(); // needs adjustment with delta
 
@@ -1296,10 +1298,10 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
   m_pOrderPending.reset();
 }
 
-void Strategy::HandleExitOrderCancelled( const ou::tf::Order& order ) {
+void Futures::HandleExitOrderCancelled( const ou::tf::Order& order ) {
   ou::tf::Order& order_( const_cast<ou::tf::Order&>( order ) );
-  order_.OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
-  order_.OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
+  order_.OnOrderCancelled.Remove( MakeDelegate( this, &Futures::HandleExitOrderCancelled ) );
+  order_.OnOrderFilled.Remove( MakeDelegate( this, &Futures::HandleExitOrderFilled ) );
 
   switch ( order.GetOrderSide() ) {
     case ou::tf::OrderSide::EOrderSide::Buy: // is dt filled at 'internal' time?
@@ -1315,10 +1317,10 @@ void Strategy::HandleExitOrderCancelled( const ou::tf::Order& order ) {
   }
 }
 
-void Strategy::HandleExitOrderFilled( const ou::tf::Order& order ) {
+void Futures::HandleExitOrderFilled( const ou::tf::Order& order ) {
   ou::tf::Order& order_( const_cast<ou::tf::Order&>( order ) );
-  order_.OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
-  order_.OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
+  order_.OnOrderCancelled.Remove( MakeDelegate( this, &Futures::HandleExitOrderCancelled ) );
+  order_.OnOrderFilled.Remove( MakeDelegate( this, &Futures::HandleExitOrderFilled ) );
 
   switch ( order.GetOrderSide() ) {
     case ou::tf::OrderSide::EOrderSide::Buy:
@@ -1342,14 +1344,14 @@ void Strategy::HandleExitOrderFilled( const ou::tf::Order& order ) {
   }
 }
 
-void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
+void Futures::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
   m_stateTrade = EStateTrade::EndOfDayCancel;
   if ( m_pPosition ) {
     m_pPosition->CancelOrders();
   }
 }
 
-void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
+void Futures::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
   switch ( m_stateTrade ) {
     case EStateTrade::NoTrade:
       // do nothing
@@ -1363,7 +1365,7 @@ void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_
   }
 }
 
-void Strategy::SaveWatch( const std::string& sPrefix ) {
+void Futures::SaveWatch( const std::string& sPrefix ) {
   // RecordSeries has been set to false
   if ( m_pPosition ) {
     m_pPosition->GetWatch()->SaveSeries( sPrefix );
@@ -1374,7 +1376,7 @@ void Strategy::SaveWatch( const std::string& sPrefix ) {
   }
 }
 
-void Strategy::CloseAndDone() {
+void Futures::CloseAndDone() {
   std::cout << "Sending Close & Done" << std::endl;
   switch ( m_stateTrade ) {
     case EStateTrade::NoTrade:
@@ -1388,3 +1390,5 @@ void Strategy::CloseAndDone() {
       break;
   }
 }
+
+} // namespace Strategy

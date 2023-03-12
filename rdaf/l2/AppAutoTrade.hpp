@@ -58,7 +58,6 @@ class TRint;
 class TFile;
 #endif
 
-class Strategy;
 class FrameMain;
 
 class wxTreeCtrl;
@@ -76,6 +75,10 @@ namespace v2 {
 }
 } // namespace tf
 } // namespace ou
+
+namespace Strategy {
+  class Futures;
+}
 
 class AppAutoTrade:
   public wxApp,
@@ -137,7 +140,7 @@ private:
 
   pPortfolio_t m_pPortfolioUSD;
 
-  using pStrategy_t = std::unique_ptr<Strategy>;
+  using pStrategy_t = std::unique_ptr<Strategy::Futures>;
   using mapStrategy_t = std::map<std::string,pStrategy_t>;
   mapStrategy_t m_mapStrategy;
 

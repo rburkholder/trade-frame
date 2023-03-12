@@ -193,7 +193,7 @@ bool AppAutoTrade::OnInit() {
       boost::local_time::local_date_time lt( dtUTC, ou::TimeSource::TimeZoneNewYork() );
       boost::posix_time::ptime dtStart = lt.local_time();
       std::cout << "times: " << dtUTC << "(UTC) is " << dtStart << "(eastern)" << std::endl;
-      dateSim = Strategy::MarketOpenDate( dtUTC );
+      dateSim = Strategy::Futures::MarketOpenDate( dtUTC );
       std::cout << "simulation date: " << dateSim << std::endl;
 
       m_sSimulationDateTime = boost::posix_time::to_iso_string( dtUTC );
@@ -400,7 +400,7 @@ bool AppAutoTrade::OnInit() {
 
     //pStrategy_t pStrategy = std::make_unique<Strategy>( choices, pTreeItem, m_pFile, m_pFileUtility );
     pStrategy_t pStrategy
-      = std::make_unique<Strategy>(
+      = std::make_unique<Strategy::Futures>(
         choices, pTreeItem,
         [this](const std::string& sMessage){
           if ( m_telegram_bot ) {
@@ -690,7 +690,7 @@ void AppAutoTrade::ConstructInstrument_Sim( const std::string& sRunPortfolioName
   mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( sSymbol );
   assert( m_mapStrategy.end() != iterStrategy );
 
-  Strategy& strategy( *iterStrategy->second );
+  Strategy::Futures& strategy( *iterStrategy->second );
 
   ou::tf::Instrument::pInstrument_t pInstrument;
 
@@ -729,7 +729,7 @@ void AppAutoTrade::ConstructInstrument_Sim( const std::string& sRunPortfolioName
 
   strategy.SetPosition( pPosition );
 
-  m_OnSimulationComplete.Add( MakeDelegate( &strategy, &Strategy::FVSStreamStop ) );
+  m_OnSimulationComplete.Add( MakeDelegate( &strategy, &Strategy::Futures::FVSStreamStop ) );
   strategy.FVSStreamStart( c_sDirectory + "/" + m_sSimulationDateTime + ".fvs.csv" );
 
 }
@@ -845,7 +845,7 @@ void AppAutoTrade::ConfirmProviders() {
           LoadPortfolio( c_sPortfolioRealTimeName );
 
           for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-            Strategy& strategy( *vt.second );
+            Strategy::Futures& strategy( *vt.second );
 
             switch ( m_exec->ID() ) {
               case ou::tf::keytypes::EProviderIB:
