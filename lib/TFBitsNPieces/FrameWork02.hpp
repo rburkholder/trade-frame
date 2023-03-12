@@ -21,8 +21,6 @@
 
 #pragma once
 
-#define BOOST_FILESYSTEM_NO_DEPRECATED
-
 #include <sstream>
 
 #include <boost/filesystem.hpp>

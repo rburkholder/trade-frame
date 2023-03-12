@@ -19,8 +19,6 @@
  * Created: December 9, 2022  16:14:50
  */
 
-#define BOOST_FILESYSTEM_NO_DEPRECATED
-
 #include <sstream>
 
 #include <boost/log/trivial.hpp>
