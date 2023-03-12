@@ -27,7 +27,7 @@ namespace Strategy {
 
 class EquityOption: public Base {
 public:
-  EquityOption();
+  EquityOption( const ou::tf::config::symbol_t& );
   virtual ~EquityOption();
 protected:
 private:

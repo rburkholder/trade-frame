@@ -64,13 +64,13 @@ Futures::Futures(
 //, pFile_t pFile
 //, pFile_t pFileUtility
 )
-: ou::tf::DailyTradeTimeFrame<Futures>()
+: Base( config )
+, ou::tf::DailyTradeTimeFrame<Futures>()
 , m_pTreeItemSymbol( pTreeItem )
 , m_fTelegram( std::move( fTelegram ) )
 //, m_pFile( pFile )
 //, m_pFileUtility( pFileUtility )
 , m_stateTrade( EStateTrade::Init )
-, m_config( config )
 , m_ceLongEntry( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
 //, m_ceLongFill( ou::ChartEntryShape::EShape::FillLong, ou::Colour::Blue )
 , m_ceLongExit( ou::ChartEntryShape::EShape::LongStop, ou::Colour::Blue )

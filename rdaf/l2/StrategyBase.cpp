@@ -23,7 +23,9 @@
 
 namespace Strategy {
 
-Base::Base() {}
+Base::Base( const ou::tf::config::symbol_t& config )
+: m_config( config )
+ {}
 
 Base::~Base() {}
 

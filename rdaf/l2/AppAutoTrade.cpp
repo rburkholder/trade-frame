@@ -424,7 +424,10 @@ bool AppAutoTrade::OnInit() {
         break;
       case ou::tf::config::symbol_t::EAlgorithm::equity_option:
         assert( !m_choices.bStartSimulator );  // cannot run simulator with options
-        pStrategyEquityOption = std::make_unique<Strategy::EquityOption>();
+        pStrategyEquityOption
+          = std::make_unique<Strategy::EquityOption>(
+              choices
+          );
         pStrategy = std::move( pStrategyEquityOption );
         break;
     }
@@ -603,8 +606,17 @@ void AppAutoTrade::HandleMenuActionCloseAndDone() {
   CallAfter(
     [this](){
       for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-        Strategy::Futures& strategy( dynamic_cast<Strategy::Futures&>( *vt.second ) );
-        strategy.CloseAndDone();
+        Strategy::Base& base( *vt.second );
+        switch ( base.Choices().eAlgorithm ) {
+          case ou::tf::config::symbol_t::EAlgorithm::future:
+            {
+              Strategy::Futures& strategy( dynamic_cast<Strategy::Futures&>( *vt.second ) );
+              strategy.CloseAndDone();
+            }
+            break;
+          case ou::tf::config::symbol_t::EAlgorithm::equity_option:
+            break;
+        }
       }
     } );
 }
@@ -620,9 +632,19 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
         boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) );
       std::cout << sPath << std::endl;
       for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-        Strategy::Futures& strategy( dynamic_cast<Strategy::Futures&>( *vt.second ) );
-        strategy.SaveWatch( sPath );
+        Strategy::Base& base( *vt.second );
+        switch ( base.Choices().eAlgorithm ) {
+          case ou::tf::config::symbol_t::EAlgorithm::future:
+            {
+              Strategy::Futures& strategy( dynamic_cast<Strategy::Futures&>( *vt.second ) );
+              strategy.SaveWatch( sPath );
+            }
+            break;
+          case ou::tf::config::symbol_t::EAlgorithm::equity_option:
+            break;
+        }
       }
+
       //if ( m_pFile ) { // performed at exit to ensure no duplication in file
       //  m_pFile->Write();
       //}
@@ -683,8 +705,19 @@ void AppAutoTrade::ConstructInstrument_Live(
 
       mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( sSymbol );
       assert( m_mapStrategy.end() != iterStrategy );
-      Strategy::Futures& strategy( dynamic_cast<Strategy::Futures&>( *iterStrategy->second ) );
-      strategy.SetPosition( pPosition );
+
+      // TODO: factor out SetPosition appropirately for each type
+      Strategy::Base& base( *iterStrategy->second  );
+      switch ( base.Choices().eAlgorithm ) {
+        case ou::tf::config::symbol_t::EAlgorithm::future:
+          {
+            Strategy::Futures& strategy( dynamic_cast<Strategy::Futures&>( *iterStrategy->second ) );
+            strategy.SetPosition( pPosition );
+          }
+          break;
+        case ou::tf::config::symbol_t::EAlgorithm::equity_option:
+          break;
+      }
       fConstructed_( sSymbol );
     } );
 }
@@ -861,7 +894,7 @@ void AppAutoTrade::ConfirmProviders() {
           LoadPortfolio( c_sPortfolioRealTimeName );
 
           for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-            Strategy::Futures& strategy( dynamic_cast<Strategy::Futures&>( *vt.second ) );
+            Strategy::Base& base( *vt.second  );
 
             switch ( m_exec->ID() ) {
               case ou::tf::keytypes::EProviderIB:
@@ -876,13 +909,13 @@ void AppAutoTrade::ConfirmProviders() {
 
             ConstructInstrument_Live(
               c_sPortfolioRealTimeName, vt.first,
-              [this,&strategy]( const std::string& sSymbol ){
+              [this,&base]( const std::string& sSymbol ){
                 //mapStrategy_t::iterator iter = m_mapStrategy.find( sSymbol );
                 //Strategy& strategy( *iter->second );
                 using EFeed = ou::tf::config::symbol_t::EFeed;
                 auto symbol = m_iqf->GetSymbol( sSymbol );
                 if ( m_pL2Symbols ) {
-                  switch ( strategy.Feed() ) {
+                  switch ( base.Feed() ) {
                     case EFeed::L1:
                       break;
                     case EFeed::L2M:

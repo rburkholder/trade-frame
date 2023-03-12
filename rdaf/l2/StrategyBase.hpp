@@ -23,17 +23,24 @@
 
 #include <OUCharting/ChartDataView.h>
 
+#include "ConfigParser.hpp"
+
 namespace Strategy {
 
 class Base {
 public:
 
-  Base();
+  Base( const ou::tf::config::symbol_t& );
   virtual ~Base();
+
+  const ou::tf::config::symbol_t& Choices() const { return m_config; }
+  ou::tf::config::symbol_t::EFeed Feed() const { return m_config.eFeed; }
 
   ou::ChartDataView& GetChartDataView() { return m_cdv; }
 
 protected:
+
+  const ou::tf::config::symbol_t& m_config;
 
   ou::ChartDataView m_cdv;
 

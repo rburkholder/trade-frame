@@ -23,7 +23,11 @@
 
 namespace Strategy {
 
-EquityOption::EquityOption() {}
+EquityOption::EquityOption(
+  const ou::tf::config::symbol_t& config
+)
+: Base( config )
+{}
 
 EquityOption::~EquityOption() {}
 

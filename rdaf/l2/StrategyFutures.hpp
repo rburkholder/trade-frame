@@ -53,7 +53,6 @@
 #include <TFBitsNPieces/MovingAverage.hpp>
 
 #include "State.hpp"
-#include "ConfigParser.hpp"
 #include "StrategyBase.hpp"
 
 #if RDAF
@@ -104,14 +103,10 @@ public:
   );
   virtual ~Futures();
 
-  const ou::tf::config::symbol_t& Choices() const { return m_config; }
-
   void SetPosition( pPosition_t );
 
   void FVSStreamStart( const std::string& sPath );
   void FVSStreamStop( int );
-
-  ou::tf::config::symbol_t::EFeed Feed() const { return m_config.eFeed; }
 
 #if RDAF
   void LoadHistory( TClass* );
@@ -163,8 +158,6 @@ private:
 
   ou::tf::Quote m_quote;
   ou::tf::Quotes m_quotes; // used for stochastics, as storage for watch is off
-
-  const ou::tf::config::symbol_t& m_config;
 
 #if RDAF
   pFile_t m_pFile;
