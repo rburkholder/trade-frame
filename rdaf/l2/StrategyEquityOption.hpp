@@ -21,9 +21,6 @@
 
 #pragma once
 
-#include <OUCharting/ChartEntryVolume.h>
-#include <OUCharting/ChartEntryIndicator.h>
-
 #include "StrategyBase.hpp"
 
 namespace Strategy {
@@ -33,7 +30,10 @@ public:
 
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  EquityOption( const ou::tf::config::symbol_t& );
+  EquityOption(
+    const ou::tf::config::symbol_t&
+  , ou::tf::TreeItem* pTreeItem
+  );
   virtual ~EquityOption();
 
   virtual void SetPosition( pPosition_t );
@@ -43,13 +43,6 @@ protected:
 private:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
-
-  ou::ChartEntryIndicator m_ceQuoteAsk;
-  ou::ChartEntryIndicator m_ceQuoteBid;
-
-  ou::ChartEntryIndicator m_ceTrade;
-  ou::ChartEntryVolume m_ceVolume;
-
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

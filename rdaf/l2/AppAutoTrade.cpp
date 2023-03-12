@@ -426,7 +426,7 @@ bool AppAutoTrade::OnInit() {
         assert( !m_choices.bStartSimulator );  // cannot run simulator with options
         pStrategyEquityOption
           = std::make_unique<Strategy::EquityOption>(
-              choices
+              choices, pTreeItem
           );
         pStrategy = std::move( pStrategyEquityOption );
         break;

@@ -22,10 +22,18 @@
 #pragma once
 
 #include <OUCharting/ChartDataView.h>
+#include <OUCharting/ChartEntryVolume.h>
+#include <OUCharting/ChartEntryIndicator.h>
 
 #include <TFTrading/Position.h>
 
 #include "ConfigParser.hpp"
+
+namespace ou {
+namespace tf {
+  class TreeItem;
+}
+}
 
 namespace Strategy {
 
@@ -34,7 +42,10 @@ public:
 
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  Base( const ou::tf::config::symbol_t& );
+  Base(
+    const ou::tf::config::symbol_t&
+  , ou::tf::TreeItem* pTreeItem
+  );
   virtual ~Base();
 
   const ou::tf::config::symbol_t& Choices() const { return m_config; }
@@ -51,7 +62,15 @@ protected:
 
   const ou::tf::config::symbol_t& m_config;
 
+  ou::tf::TreeItem* m_pTreeItemSymbol;
+
   ou::ChartDataView m_cdv;
+
+  ou::ChartEntryIndicator m_ceQuoteAsk;
+  ou::ChartEntryIndicator m_ceQuoteBid;
+
+  ou::ChartEntryIndicator m_ceTrade;
+  ou::ChartEntryVolume m_ceVolume;
 
   pPosition_t m_pPosition;
 

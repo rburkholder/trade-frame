@@ -25,9 +25,30 @@
 
 namespace Strategy {
 
-Base::Base( const ou::tf::config::symbol_t& config )
+Base::Base(
+  const ou::tf::config::symbol_t& config
+, ou::tf::TreeItem* m_pTreeItem
+)
 : m_config( config )
- {}
+, m_pTreeItemSymbol( m_pTreeItem )
+{
+  m_ceQuoteAsk.SetName( "Ask" );
+  m_ceTrade.SetName(    "Tick" );
+  m_ceQuoteBid.SetName( "Bid" );
+
+  m_ceVolume.SetName(   "Volume" );
+
+  m_ceQuoteAsk.SetColour( ou::Colour::Red );
+  m_ceTrade.SetColour( ou::Colour::DarkGreen );
+  m_ceQuoteBid.SetColour( ou::Colour::Blue );
+
+  m_cdv.Add( EChartSlot::Price, &m_ceQuoteAsk );
+  m_cdv.Add( EChartSlot::Price, &m_ceTrade );
+  m_cdv.Add( EChartSlot::Price, &m_ceQuoteBid );
+
+  m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
+
+}
 
 Base::~Base() {}
 

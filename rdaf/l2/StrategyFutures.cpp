@@ -64,9 +64,8 @@ Futures::Futures(
 //, pFile_t pFile
 //, pFile_t pFileUtility
 )
-: Base( config )
+: Base( config, pTreeItem )
 , ou::tf::DailyTradeTimeFrame<Futures>()
-, m_pTreeItemSymbol( pTreeItem )
 , m_fTelegram( std::move( fTelegram ) )
 //, m_pFile( pFile )
 //, m_pFileUtility( pFileUtility )
@@ -84,22 +83,12 @@ Futures::Futures(
 //  assert( m_pFile );
 //  assert( m_pFileUtility );
 
-  m_ceQuoteAsk.SetColour( ou::Colour::Red );
-  m_ceQuoteBid.SetColour( ou::Colour::Blue );
-  m_ceTrade.SetColour( ou::Colour::DarkGreen );
-
   m_cemZero.AddMark( 0, ou::Colour::Black,  "0" );
 
   m_ceProfitUnRealized.SetColour( ou::Colour::Purple );
   m_ceProfitRealized.SetColour( ou::Colour::DeepSkyBlue );
   m_ceCommissionsPaid.SetColour( ou::Colour::DarkGreen );
   m_ceProfit.SetColour( ou::Colour::Green );
-
-  m_ceQuoteAsk.SetName( "Ask" );
-  m_ceTrade.SetName( "Tick" );
-  m_ceQuoteBid.SetName( "Bid" );
-
-  m_ceVolume.SetName( "Volume" );
 
   m_cemStochastic.AddMark(  100, ou::Colour::Black,    "" );
   m_cemStochastic.AddMark( k_up, ou::Colour::Red,   boost::lexical_cast<std::string>( k_up ) + "%" );
@@ -150,10 +139,6 @@ Futures::~Futures() {
 
 void Futures::SetupChart() {
 
-  m_cdv.Add( EChartSlot::Price, &m_ceQuoteAsk );
-  m_cdv.Add( EChartSlot::Price, &m_ceTrade );
-  m_cdv.Add( EChartSlot::Price, &m_ceQuoteBid );
-
   m_cdv.Add( EChartSlot::Price, &m_ceLongEntry );
   //m_cdv.Add( EChartSlot::Price, &m_ceLongFill );
   m_cdv.Add( EChartSlot::Price, &m_ceLongExit );
@@ -162,8 +147,6 @@ void Futures::SetupChart() {
   m_cdv.Add( EChartSlot::Price, &m_ceShortExit );
 
   //m_cdv.Add( EChartSlot::Price, &m_ceEhlersLoPassFilter );
-
-  m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
   m_cdv.Add( EChartSlot::MASlope, &m_cemZero );
 

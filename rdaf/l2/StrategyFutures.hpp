@@ -148,7 +148,6 @@ private:
 
   EStateTrade m_stateTrade;
 
-  TreeItem* m_pTreeItemSymbol;
   TreeItem* m_pTreeItemOrder;
 
   fTelegram_t m_fTelegram;
@@ -163,12 +162,6 @@ private:
 
   pOrder_t m_pOrderPending;
   //pOrder_t m_pOrderDone;
-
-  ou::ChartEntryIndicator m_ceQuoteAsk;
-  ou::ChartEntryIndicator m_ceQuoteBid;
-
-  ou::ChartEntryIndicator m_ceTrade;
-  ou::ChartEntryVolume m_ceVolume;
 
   ou::ChartEntryShape m_ceLongEntry;
   //ou::ChartEntryShape m_ceLongFill;
