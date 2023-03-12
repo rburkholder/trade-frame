@@ -40,8 +40,6 @@
 #include <OUCharting/ChartEntryVolume.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
-#include <OUCharting/ChartDataView.h>
-
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFTrading/Order.h>
@@ -56,6 +54,7 @@
 
 #include "State.hpp"
 #include "ConfigParser.hpp"
+#include "StrategyBase.hpp"
 
 #if RDAF
 class TH2D;
@@ -76,6 +75,7 @@ namespace tf {
 namespace Strategy {
 
 class Futures:
+  public Base,
   public ou::tf::DailyTradeTimeFrame<Futures>
 {
   friend class boost::serialization::access;
@@ -121,8 +121,6 @@ public:
   void HandleUpdateL2Bid( price_t price, volume_t volume, bool bAdd );
 
   void SaveWatch( const std::string& );
-
-  ou::ChartDataView& GetChartDataView() { return m_cdv; }
 
   void CloseAndDone();
 
@@ -177,8 +175,6 @@ private:
 
   pOrder_t m_pOrderPending;
   //pOrder_t m_pOrderDone;
-
-  ou::ChartDataView m_cdv;
 
   ou::ChartEntryIndicator m_ceQuoteAsk;
   ou::ChartEntryIndicator m_ceQuoteBid;

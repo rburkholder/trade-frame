@@ -29,6 +29,8 @@ set(
     ConfigParser.hpp
     HiPass.hpp
     State.hpp
+    StrategyBase.hpp
+    StrategyEquityOption.hpp
     StrategyFutures.hpp
   )
 
@@ -38,6 +40,8 @@ set(
     ConfigParser.cpp
     HiPass.cpp
     State.cpp
+    StrategyBase.cpp
+    StrategyEquityOption.cpp
     StrategyFutures.cpp
   )
 

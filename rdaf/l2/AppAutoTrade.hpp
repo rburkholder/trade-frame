@@ -77,6 +77,7 @@ namespace v2 {
 } // namespace ou
 
 namespace Strategy {
+  class Base;
   class Futures;
 }
 
@@ -140,8 +141,10 @@ private:
 
   pPortfolio_t m_pPortfolioUSD;
 
-  using pStrategy_t = std::unique_ptr<Strategy::Futures>;
-  using mapStrategy_t = std::map<std::string,pStrategy_t>;
+  using pStrategyBase_t = std::unique_ptr<Strategy::Base>;
+  using pStrategyFutures_t = std::unique_ptr<Strategy::Futures>;
+
+  using mapStrategy_t = std::map<std::string,pStrategyBase_t>;
   mapStrategy_t m_mapStrategy;
 
   ou::Delegate<int> m_OnSimulationComplete;

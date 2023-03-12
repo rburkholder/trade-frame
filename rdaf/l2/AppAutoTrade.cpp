@@ -399,7 +399,7 @@ bool AppAutoTrade::OnInit() {
     );
 
     //pStrategy_t pStrategy = std::make_unique<Strategy>( choices, pTreeItem, m_pFile, m_pFileUtility );
-    pStrategy_t pStrategy
+    pStrategyFutures_t pStrategy
       = std::make_unique<Strategy::Futures>(
         choices, pTreeItem,
         [this](const std::string& sMessage){
@@ -590,7 +590,8 @@ void AppAutoTrade::HandleMenuActionCloseAndDone() {
   CallAfter(
     [this](){
       for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-        vt.second->CloseAndDone();
+        Strategy::Futures& strategy( dynamic_cast<Strategy::Futures&>( *vt.second ) );
+        strategy.CloseAndDone();
       }
     } );
 }
@@ -606,7 +607,8 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
         boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) );
       std::cout << sPath << std::endl;
       for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-        vt.second->SaveWatch( sPath );
+        Strategy::Futures& strategy( dynamic_cast<Strategy::Futures&>( *vt.second ) );
+        strategy.SaveWatch( sPath );
       }
       //if ( m_pFile ) { // performed at exit to ensure no duplication in file
       //  m_pFile->Write();
@@ -668,7 +670,8 @@ void AppAutoTrade::ConstructInstrument_Live(
 
       mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( sSymbol );
       assert( m_mapStrategy.end() != iterStrategy );
-      iterStrategy->second->SetPosition( pPosition );
+      Strategy::Futures& strategy( dynamic_cast<Strategy::Futures&>( *iterStrategy->second ) );
+      strategy.SetPosition( pPosition );
       fConstructed_( sSymbol );
     } );
 }
@@ -690,7 +693,7 @@ void AppAutoTrade::ConstructInstrument_Sim( const std::string& sRunPortfolioName
   mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( sSymbol );
   assert( m_mapStrategy.end() != iterStrategy );
 
-  Strategy::Futures& strategy( *iterStrategy->second );
+  Strategy::Futures& strategy( dynamic_cast<Strategy::Futures&>( *iterStrategy->second ) );
 
   ou::tf::Instrument::pInstrument_t pInstrument;
 
@@ -845,7 +848,7 @@ void AppAutoTrade::ConfirmProviders() {
           LoadPortfolio( c_sPortfolioRealTimeName );
 
           for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-            Strategy::Futures& strategy( *vt.second );
+            Strategy::Futures& strategy( dynamic_cast<Strategy::Futures&>( *vt.second ) );
 
             switch ( m_exec->ID() ) {
               case ou::tf::keytypes::EProviderIB:
