@@ -114,14 +114,12 @@ public:
   void HandleUpdateL2Ask( price_t price, volume_t volume, bool bAdd );
   void HandleUpdateL2Bid( price_t price, volume_t volume, bool bAdd );
 
-  void SaveWatch( const std::string& );
+  virtual void SaveWatch( const std::string& );
 
   void CloseAndDone();
 
 protected:
 private:
-
-  enum EChartSlot { Price, Volume, SD, MASlope, MA, ImbalanceMean, Stoch, FVS_v8_rel, PL1, PL2, ET, MarketDepth };
 
   enum class EStateTrade {
     Init,  // initiaize state in current market

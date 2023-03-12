@@ -50,4 +50,8 @@ void EquityOption::HandleQuote( const ou::tf::Quote& quote ) {}
 
 void EquityOption::HandleTrade( const ou::tf::Trade& trade ) {}
 
+void EquityOption::SaveWatch( const std::string& sPrefix ) {
+  Base::SaveWatch( sPrefix );
+}
+
 } // namespace Strategy

@@ -43,8 +43,11 @@ public:
   ou::ChartDataView& GetChartDataView() { return m_cdv; }
 
   virtual void SetPosition( pPosition_t );
+  virtual void SaveWatch( const std::string& sPrefix );
 
 protected:
+
+  enum EChartSlot { Price, Volume, SD, MASlope, MA, ImbalanceMean, Stoch, FVS_v8_rel, PL1, PL2, ET, MarketDepth };
 
   const ou::tf::config::symbol_t& m_config;
 

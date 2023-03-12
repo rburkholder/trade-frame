@@ -1353,13 +1353,14 @@ void Futures::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_d
 
 void Futures::SaveWatch( const std::string& sPrefix ) {
   // RecordSeries has been set to false
-  if ( m_pPosition ) {
-    m_pPosition->GetWatch()->SaveSeries( sPrefix );
+  Base::SaveWatch( sPrefix );
+  //if ( m_pPosition ) {
+    //m_pPosition->GetWatch()->SaveSeries( sPrefix );
     //if (m_pFile){ // don't do this, as the file is save on exit,
     //  this will create another version, which will cause problems during reload
     //  m_pFile->Write();
     //}
-  }
+  //}
 }
 
 void Futures::CloseAndDone() {

@@ -44,7 +44,12 @@ void Base::SetPosition( pPosition_t pPosition ) {
     << " signal_from='" <<m_config.sSignalFrom
     << "'"
     ;
+}
 
+void Base::SaveWatch( const std::string& sPrefix ) {
+  if ( m_pPosition ) {
+    m_pPosition->GetWatch()->SaveSeries( sPrefix );
+  }
 }
 
 } // namespace Strategy

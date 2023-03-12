@@ -633,16 +633,7 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
       std::cout << sPath << std::endl;
       for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
         Strategy::Base& base( *vt.second );
-        switch ( base.Choices().eAlgorithm ) {
-          case ou::tf::config::symbol_t::EAlgorithm::future:
-            {
-              Strategy::Futures& strategy( dynamic_cast<Strategy::Futures&>( *vt.second ) );
-              strategy.SaveWatch( sPath );
-            }
-            break;
-          case ou::tf::config::symbol_t::EAlgorithm::equity_option:
-            break;
-        }
+        base.SaveWatch( sPath );
       }
 
       //if ( m_pFile ) { // performed at exit to ensure no duplication in file
