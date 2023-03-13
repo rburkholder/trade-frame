@@ -51,10 +51,10 @@ public:
   const ou::tf::config::symbol_t& Choices() const { return m_config; }
   ou::tf::config::symbol_t::EFeed Feed() const { return m_config.eFeed; }
 
-  ou::ChartDataView& GetChartDataView() { return m_cdv; }
-
   virtual void SetPosition( pPosition_t );
   virtual void SaveWatch( const std::string& sPrefix );
+
+  ou::ChartDataView& GetChartDataView() { return m_cdv; }
 
 protected:
 
