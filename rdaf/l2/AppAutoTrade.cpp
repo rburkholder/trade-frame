@@ -866,27 +866,27 @@ void AppAutoTrade::ConfirmProviders() {
         if ( m_bL2Connected ) {
           bValidCombo = true;
 
-          std::cout
+          BOOST_LOG_TRIVIAL(info)
             << "ConfirmProviders: data(" << m_data->GetName() << ") "
             << "& execution(" << m_exec->GetName() << ") "
             << "providers available"
-            << std::endl;
+            ;
 
           LoadPortfolio( c_sPortfolioRealTimeName );
 
+          switch ( m_exec->ID() ) {
+            case ou::tf::keytypes::EProviderIB:
+              m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqf, m_tws );
+              break;
+            case ou::tf::keytypes::EProviderIQF:
+              m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqf );
+              break;
+            default:
+              assert( false );
+          }
+
           for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
             Strategy::Base& base( *vt.second  );
-
-            switch ( m_exec->ID() ) {
-              case ou::tf::keytypes::EProviderIB:
-                m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqf, m_tws );
-                break;
-              case ou::tf::keytypes::EProviderIQF:
-                m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqf );
-                break;
-              default:
-                assert( false );
-            }
 
             ConstructInstrument_Live(
               c_sPortfolioRealTimeName, vt.first,
