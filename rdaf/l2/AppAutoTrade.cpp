@@ -423,10 +423,22 @@ bool AppAutoTrade::OnInit() {
         pStrategy = std::move( pStrategyFutures );
         break;
       case ou::tf::config::symbol_t::EAlgorithm::equity_option:
+        using pInstrument_t = ou::tf::Instrument::pInstrument_t;
         assert( !m_choices.bStartSimulator );  // cannot run simulator with options
         pStrategyEquityOption
           = std::make_unique<Strategy::EquityOption>(
-              choices, pTreeItem
+              choices, pTreeItem,
+              [this]( const std::string& sName, Strategy::EquityOption::fConstructedInstrument_t&& f ) { // fBuildInstrument_t
+                m_pBuildInstrument->Queue(
+                  sName,
+                  [fConstructed=std::move(f)]( pInstrument_t pInstrument, bool bConstructed ){
+                    fConstructed( pInstrument );
+                  }
+                );
+              },
+              [this]( pInstrument_t pInstrument, Strategy::EquityOption::fConstructedOption_t&& fOption ){ // fConstructOption_t
+                fOption( std::make_shared<ou::tf::option::Option>( pInstrument, m_iqf ) );
+              }
           );
         pStrategy = std::move( pStrategyEquityOption );
         break;
@@ -483,9 +495,6 @@ bool AppAutoTrade::OnInit() {
         m_sim->Connect();
       }
     );
-  }
-  else {
-    //m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqf, m_tws );
   }
 
   m_pFrameMain->Show( true );

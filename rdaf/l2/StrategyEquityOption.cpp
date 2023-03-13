@@ -32,9 +32,15 @@ namespace Strategy {
 EquityOption::EquityOption(
   const ou::tf::config::symbol_t& config
 , ou::tf::TreeItem* pTreeItem
+, fBuildInstrument_t&& fBuildInstrument
+, fConstructOption_t&& fConstructOption
 )
 : Base( config, pTreeItem )
-{}
+, m_fBuildInstrument( std::move( fBuildInstrument ) )
+, m_fConstructOption( std::move( fConstructOption ) )
+{
+  assert( m_fConstructOption );
+}
 
 EquityOption::~EquityOption() {
   if ( m_pPosition ) {
@@ -67,9 +73,24 @@ void EquityOption::SetPosition( pPosition_t pPosition ) {
   m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
     [this,&sIQFeedUnderlying](){
       m_pOptionChainQuery->QueryEquityOptionChain(
-        sIQFeedUnderlying, "pc", "", "3", "", "", "",
-        []( const query_t::OptionList& list ) {
+        sIQFeedUnderlying, "pc", "", "2", "", "", "",
+        [this]( const query_t::OptionList& list ) {
           std::cout << "supplied list for " << list.sUnderlying << " has " << list.vSymbol.size() << " options" << std::endl;
+          for ( auto& name: list.vSymbol ) {
+            m_fBuildInstrument(
+              name,
+              [this]( pInstrument_t pInstrument ){
+                m_fConstructOption(
+                  pInstrument,
+                  [this]( pOption_t pOption ){
+                    mapChains_t::iterator iterChain = ou::tf::option::GetChain( m_mapChains, pOption );
+                    BuiltOption* pBuiltOption = ou::tf::option::UpdateOption<chain_t,BuiltOption>( iterChain->second, pOption );
+                    assert( pBuiltOption );
+
+                    pBuiltOption->pOption = pOption;
+                  } );
+              } );
+          }
         }
       );
     }

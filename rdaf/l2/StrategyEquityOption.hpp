@@ -21,6 +21,9 @@
 
 #pragma once
 
+#include <TFOptions/Chain.h>
+#include <TFOptions/Chains.h>
+#include <TFOptions/Option.h>
 #include <TFOptions/NoRiskInterestRateSeries.h>
 
 #include "StrategyBase.hpp"
@@ -43,9 +46,20 @@ public:
 
   using pPosition_t = ou::tf::Position::pPosition_t;
 
+  using pInstrument_t = ou::tf::Position::pInstrument_t;
+
+  using fConstructedInstrument_t = std::function<void(pInstrument_t)>;
+  using fBuildInstrument_t = std::function<void(const std::string&,fConstructedInstrument_t&&)>;
+
+  using pOption_t = ou::tf::option::Option::pOption_t;
+  using fConstructedOption_t = std::function<void(pOption_t)>;
+  using fConstructOption_t = std::function<void(pInstrument_t,fConstructedOption_t&&)>;
+
   EquityOption(
     const ou::tf::config::symbol_t&
   , ou::tf::TreeItem* pTreeItem
+  , fBuildInstrument_t&&
+  , fConstructOption_t&&
   );
   virtual ~EquityOption();
 
@@ -58,6 +72,17 @@ private:
   using pWatch_t = ou::tf::Watch::pWatch_t;
 
   std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery; // need to disconnect
+
+  fBuildInstrument_t m_fBuildInstrument;
+  fConstructOption_t m_fConstructOption;
+
+  struct BuiltOption: public ou::tf::option::chain::OptionName {
+    pOption_t pOption;
+  };
+
+  using chain_t = ou::tf::option::Chain<BuiltOption>;
+  using mapChains_t = std::map<boost::gregorian::date, chain_t>;
+  mapChains_t m_mapChains;
 
   //ou::tf::LiborFromIQFeed m_libor;
   ou::tf::FedRateFromIQFeed m_fedrate;
