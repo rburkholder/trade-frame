@@ -16,7 +16,7 @@
  * File:    Chains.h
  * Author:  raymond@burkholder.net
  * Project: TFOptions
- * Created on June 23, 2019, 9:49 PM
+ * Created: June 23, 2019, 9:49 PM
  */
 
 #ifndef CHAIN_H
@@ -41,6 +41,7 @@ namespace chain {
 
   struct OptionName { // inherit to add addtiional fields
     std::string sIQFeedSymbolName;
+
     OptionName() {}
     virtual ~OptionName() {}
     OptionName( const std::string& sName_ )
