@@ -56,6 +56,9 @@ void AcquireFundamentals::HandleFundamentals( const ou::tf::Watch::Fundamentals&
 void AcquireFundamentals::HandleSummary( const ou::tf::Watch::Summary& summary ) {
   // summary comes after fundamentals, so this should ensure both are obtained
   //std::cout << "AcquireFundamentals::HandleSummary() enter: " << m_pWatch->GetInstrumentName()  << std::endl;
+  //if ( 0 < summary.nOpenInterest ) {
+  //  std::cout << "acquire " << m_pWatch->GetInstrumentName() << " open interest " << summary.nOpenInterest << std::endl;
+  //}
   m_pWatch->StopWatch();
   m_pWatch->OnSummary.Remove( MakeDelegate( this, &AcquireFundamentals::HandleSummary ) );
   m_pWatch->OnTrade.Remove( MakeDelegate(this, &AcquireFundamentals::HandleTrade ) );
