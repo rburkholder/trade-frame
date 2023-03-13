@@ -311,7 +311,7 @@ bool ProviderInterface<P,S>::Exists( pInstrument_cref pInstrument, typename mapS
 
 template <typename P, typename S>
 typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::Add( pInstrument_cref pInstrument ) {
-  if ( Exists( pInstrument ) ) throw std::runtime_error( "Add:: Instrument already exists" );
+  if ( Exists( pInstrument ) ) throw std::runtime_error( "Add:: " + pInstrument->GetInstrumentName() + " already exists" );
   return NewCSymbol( pInstrument );
 }
 
