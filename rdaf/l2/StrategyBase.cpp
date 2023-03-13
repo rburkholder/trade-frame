@@ -55,6 +55,8 @@ Base::~Base() {}
 void Base::SetPosition( pPosition_t pPosition ) {
 
   assert( pPosition );
+  assert( !m_pPosition );
+
   m_pPosition = pPosition;
 
   m_cdv.SetNames( "AutoTrade", pPosition->GetInstrument()->GetInstrumentName() );
