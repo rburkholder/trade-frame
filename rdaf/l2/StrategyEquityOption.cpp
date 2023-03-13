@@ -19,6 +19,10 @@
  * Created: March 11, 2034  10:58:03
  */
 
+#include <TFIQFeed/OptionChainQuery.h>
+
+#include <TFOptions/Engine.h>
+
 #include <TFVuTrading/TreeItem.hpp>
 
 #include "StrategyEquityOption.hpp"
@@ -38,15 +42,39 @@ EquityOption::~EquityOption() {
     pWatch->OnQuote.Remove( MakeDelegate( this, &EquityOption::HandleQuote ) );
     pWatch->OnTrade.Remove( MakeDelegate( this, &EquityOption::HandleTrade ) );
   }
+
+  if ( m_pOptionChainQuery ) {
+    m_pOptionChainQuery->Disconnect();
+    m_pOptionChainQuery.reset();
+  }
 }
 
 void EquityOption::SetPosition( pPosition_t pPosition ) {
+
+  assert( pPosition );
+
+  ou::tf::Instrument::pInstrument_t pInstrument( pPosition->GetInstrument() );
+  assert( ou::tf::InstrumentType::Stock == pInstrument->GetInstrumentType() );
+  const std::string& sIQFeedUnderlying( pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
 
   Base::SetPosition( pPosition );
 
   pWatch_t pWatch = m_pPosition->GetWatch();
   pWatch->OnQuote.Add( MakeDelegate( this, &EquityOption::HandleQuote ) );
   pWatch->OnTrade.Add( MakeDelegate( this, &EquityOption::HandleTrade ) );
+
+  using query_t = ou::tf::iqfeed::OptionChainQuery;
+  m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
+    [this,&sIQFeedUnderlying](){
+      m_pOptionChainQuery->QueryEquityOptionChain(
+        sIQFeedUnderlying, "pc", "", "3", "", "", "",
+        []( const query_t::OptionList& list ) {
+          std::cout << "supplied list for " << list.sUnderlying << " has " << list.vSymbol.size() << " options" << std::endl;
+        }
+      );
+    }
+  );
+  m_pOptionChainQuery->Connect();
 }
 
 void EquityOption::HandleQuote( const ou::tf::Quote& quote ) {

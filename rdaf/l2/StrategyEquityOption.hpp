@@ -21,7 +21,20 @@
 
 #pragma once
 
+#include <TFOptions/NoRiskInterestRateSeries.h>
+
 #include "StrategyBase.hpp"
+
+namespace ou {
+namespace tf {
+namespace iqfeed {
+  class OptionChainQuery;
+}
+namespace option {
+  class Engine;
+}
+}
+}
 
 namespace Strategy {
 
@@ -43,6 +56,12 @@ protected:
 private:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
+
+  std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery; // need to disconnect
+
+  //ou::tf::LiborFromIQFeed m_libor;
+  ou::tf::FedRateFromIQFeed m_fedrate;
+  std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
