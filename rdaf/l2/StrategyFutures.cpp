@@ -76,6 +76,7 @@ Futures::Futures(
 , m_ceShortEntry( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
 //, m_ceShortFill( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red )
 , m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
+, m_dblProfitMax {}, m_dblUnRealized {}, m_dblProfitMin {}
 , m_dblStopDeltaProposed {}
 , m_dblStopActiveDelta {}, m_dblStopActiveActual {}
 , m_bfQuotes01Sec( 1 )
@@ -751,6 +752,7 @@ void Futures::EnterLong( const ou::tf::Quote& quote ) { // limit orders, in real
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
+  assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Futures::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &Futures::HandleOrderFilled ) );
@@ -767,6 +769,7 @@ void Futures::EnterShort( const ou::tf::Quote& quote ) { // limit orders, in rea
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
+  assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Futures::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &Futures::HandleOrderFilled ) );
@@ -782,6 +785,7 @@ void Futures::ExitLong( const ou::tf::Quote& quote ) {
   //assert( nullptr == m_pOrderPending.get() );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
+  assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Futures::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &Futures::HandleOrderFilled ) );
@@ -797,6 +801,7 @@ void Futures::ExitShort( const ou::tf::Quote& quote ) {
   //assert( nullptr == m_pOrderPending.get() );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
+  assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Futures::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &Futures::HandleOrderFilled ) );
