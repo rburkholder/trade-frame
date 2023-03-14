@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <boost/signals2.hpp>
+
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryVolume.h>
 #include <OUCharting/ChartEntryIndicator.h>
@@ -42,6 +44,10 @@ public:
 
   using pPosition_t = ou::tf::Position::pPosition_t;
 
+  enum class ESignal {
+    rising, nuetral, falling
+  };
+
   Base(
     const ou::tf::config::symbol_t&
   , ou::tf::TreeItem* pTreeItem
@@ -55,6 +61,9 @@ public:
   virtual void SaveWatch( const std::string& sPrefix );
 
   ou::ChartDataView& GetChartDataView() { return m_cdv; }
+
+  boost::signals2::signal<void(ESignal)> m_signal;
+  virtual void Signal( ESignal ) {}
 
 protected:
 

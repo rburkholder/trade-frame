@@ -20,6 +20,7 @@
  */
 
 #include <sstream>
+#include <functional>
 
 #include <boost/log/trivial.hpp>
 
@@ -450,6 +451,24 @@ bool AppAutoTrade::OnInit() {
     BOOST_LOG_TRIVIAL(info) << "strategy installed for: " << sSymbol;
 
     // TODO: use this to add an order list to the instrument: date, direction, type, limit
+  }
+
+  // link signals
+  for ( ou::tf::config::choices_t::mapInstance_t::value_type& vt: m_choices.mapInstance ) {
+    if ( 0 < vt.second.sSignalFrom.size() ) {
+      mapStrategy_t::iterator iter = m_mapStrategy.find( vt.second.sSignalFrom );
+      if ( m_mapStrategy.end() == iter ) {
+        BOOST_LOG_TRIVIAL(warning)
+          << "strategy signal from "
+          << vt.second.sSignalFrom
+          << " for " << vt.first
+          << " not found"
+          ;
+      }
+      else {
+        iter->second->m_signal.connect( std::bind( &Strategy::Base::Signal, &(*iter->second), std::placeholders::_1 ) );
+      }
+    }
   }
 
   // load list of rdaf files for historical use
