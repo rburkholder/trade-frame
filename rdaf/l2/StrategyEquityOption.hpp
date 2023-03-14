@@ -24,7 +24,6 @@
 #include <TFOptions/Chain.h>
 #include <TFOptions/Chains.h>
 #include <TFOptions/Option.h>
-#include <TFOptions/NoRiskInterestRateSeries.h>
 
 #include "StrategyBase.hpp"
 
@@ -32,9 +31,6 @@ namespace ou {
 namespace tf {
 namespace iqfeed {
   class OptionChainQuery;
-}
-namespace option {
-  class Engine;
 }
 }
 }
@@ -83,10 +79,6 @@ private:
   using chain_t = ou::tf::option::Chain<BuiltOption>;
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
   mapChains_t m_mapChains;
-
-  //ou::tf::LiborFromIQFeed m_libor;
-  ou::tf::FedRateFromIQFeed m_fedrate;
-  std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

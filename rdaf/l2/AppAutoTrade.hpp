@@ -47,6 +47,8 @@
 
 #include <TFInteractiveBrokers/IBTWS.h>
 
+#include <TFOptions/NoRiskInterestRateSeries.h>
+
 #include <TFSimulation/SimulationProvider.h>
 
 #include <TFBitsNPieces/FrameWork02.hpp>
@@ -72,6 +74,9 @@ namespace tf {
   class BuildInstrument;
 namespace v2 {
   class PanelProviderControl;
+}
+namespace option {
+  class Engine;
 }
 } // namespace tf
 } // namespace ou
@@ -125,6 +130,10 @@ private:
   pProviderIQFeed_t m_iqf;    // live - [ data ], simulation - [ execution ]
 
   bool m_bL2Connected;
+
+  //ou::tf::LiborFromIQFeed m_libor;
+  ou::tf::FedRateFromIQFeed m_fedrate;
+  std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
 
   std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pL2Symbols;
   std::string m_sSimulationDateTime;  // used for l2 output streaming file name

@@ -51,6 +51,8 @@
 #include <TFTrading/Position.h>
 #include <TFTrading/BuildInstrument.h>
 
+#include <TFOptions/Engine.h>
+
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/PanelLogging.h>
@@ -165,7 +167,7 @@ bool AppAutoTrade::OnInit() {
     //if ( m_options.bSimStart ) {
       // just always delete it, keep it fresh for each run
       if ( boost::filesystem::exists( c_sDbName ) ) {
-      boost::filesystem::remove( c_sDbName );
+        boost::filesystem::remove( c_sDbName );
       }
     //}
 
@@ -425,6 +427,7 @@ bool AppAutoTrade::OnInit() {
         break;
       case ou::tf::config::symbol_t::EAlgorithm::equity_option:
         using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+        using pWatch_t = ou::tf::Watch::pWatch_t;
         assert( !m_choices.bStartSimulator );  // cannot run simulator with options
         pStrategyEquityOption
           = std::make_unique<Strategy::EquityOption>(
@@ -440,6 +443,9 @@ bool AppAutoTrade::OnInit() {
               [this]( pInstrument_t pInstrument, Strategy::EquityOption::fConstructedOption_t&& fOption ){ // fConstructOption_t
                 fOption( std::make_shared<ou::tf::option::Option>( pInstrument, m_iqf ) );
               }
+                    // need register, addoption, deloption
+                    //pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqf );
+                    //m_pOptionEngine->RegisterUnderlying( pWatch );
           );
         pStrategy = std::move( pStrategyEquityOption );
         break;
@@ -913,6 +919,9 @@ void AppAutoTrade::ConfirmProviders() {
               assert( false );
           }
 
+          m_fedrate.SetWatchOn( m_iqf );
+          m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
+
           for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
             Strategy::Base& base( *vt.second  );
 
@@ -1012,6 +1021,11 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
     m_timerOneSecond.Stop();
     Unbind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
   }
+
+  m_mapStrategy.clear();
+
+  m_pOptionEngine.reset();
+  m_pBuildInstrument.reset();
 
   if ( m_pdb ) m_pdb.reset();
 
