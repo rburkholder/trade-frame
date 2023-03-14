@@ -600,7 +600,12 @@ void OrderManager::HandleLoadTables( ou::db::Session& session ) {
       = m_pSession->SQL<ou::db::NoBind>( "select max(orderid) as orderid from orders;" ); // immediately executed
     OrderManagerQueries::ColumnMaxOrderId result;
     m_pSession->Columns<ou::db::NoBind,OrderManagerQueries::ColumnMaxOrderId>( pQuery, result );
-    ou::tf::Order::idOrder_t id = CheckOrderId( result.idOrder ); // produces 0 when no orders present
+    ou::tf::Order::idOrder_t idOld = CheckOrderId( result.idOrder ); // produces 0 when no orders present
+    std::cout
+      << "OrderManager::HandleLoadTables order id: "
+      << idOld << "(default), "
+      << result.idOrder << "(table)"
+      << std::endl;
   }
   catch ( const std::runtime_error& error ) {
     std::cout << "OrderManager::HandleLoadTables: no orders found, " << error.what() << std::endl;
