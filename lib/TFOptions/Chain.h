@@ -370,7 +370,9 @@ template<typename Option>
 Option& Chain<Option>::SetIQFeedNameCall( double dblStrike, const std::string& sIQFeedSymbolName ) {
   typename mapChain_t::iterator iter = m_mapChain.find( dblStrike );
   if ( m_mapChain.end() == iter ) {
-    iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
+    auto result = m_mapChain.emplace( typename mapChain_t::value_type( dblStrike, strike_t() ) );
+    assert( result.second );
+    iter = result.first;
   }
   if ( !iter->second.call.sIQFeedSymbolName.empty() ) {
     //std::cout << "duplicate call: " << sIQFeedSymbolName << std::endl;
@@ -386,7 +388,9 @@ template<typename Option>
 Option& Chain<Option>::SetIQFeedNamePut( double dblStrike, const std::string& sIQFeedSymbolName ) {
   typename mapChain_t::iterator iter = m_mapChain.find( dblStrike );
   if ( m_mapChain.end() == iter ) {
-    iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
+    auto result = m_mapChain.emplace( typename mapChain_t::value_type( dblStrike, strike_t() ) );
+    assert( result.second );
+    iter = result.first;
   }
   if ( !iter->second.put.sIQFeedSymbolName.empty() ) {
     //std::cout << "duplicate put: " << sIQFeedSymbolName << std::endl;
@@ -432,7 +436,9 @@ template<typename Option>
 chain::Strike<Option>& Chain<Option>::GetStrike( double dblStrike ) {
   typename mapChain_t::iterator iter = m_mapChain.find( dblStrike );
   if ( m_mapChain.end() == iter ) {
-    iter = m_mapChain.insert( m_mapChain.begin(), std::move( typename mapChain_t::value_type( dblStrike, strike_t() ) ) );
+    auto result = m_mapChain.emplace( typename mapChain_t::value_type( dblStrike, strike_t() ) );
+    assert( result.second );
+    iter = result.first;
   }
   return iter->second;
 }
