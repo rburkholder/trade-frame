@@ -1031,7 +1031,11 @@ void AppAutoTrade::OnClose( wxCloseEvent& event ) {
 
   m_mapStrategy.clear();
 
-  m_pOptionEngine.reset();
+  if ( m_pOptionEngine ) {
+    m_fedrate.SetWatchOff();
+    m_pOptionEngine.reset();
+  }
+
   m_pBuildInstrument.reset();
 
   if ( m_pdb ) m_pdb.reset();
