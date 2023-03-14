@@ -438,6 +438,11 @@ bool AppAutoTrade::OnInit() {
                 m_pBuildInstrument->Queue(
                   sName,
                   [fConstructed=std::move(f)]( pInstrument_t pInstrument, bool bConstructed ){
+                    if ( bConstructed ) {
+                      //pInstrument->SetMultiplier( multiplier );
+                      ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+                      im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+                    }
                     fConstructed( pInstrument );
                   }
                 );
