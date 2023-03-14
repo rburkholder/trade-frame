@@ -135,6 +135,7 @@ Futures::Futures(
 }
 
 Futures::~Futures() {
+  m_pOrderBased.reset();
   Clear();
 }
 
