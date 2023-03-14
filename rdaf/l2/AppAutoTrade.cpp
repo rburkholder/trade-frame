@@ -162,6 +162,13 @@ bool AppAutoTrade::OnInit() {
 
     // m_sim does not need to be in PanelProviderControl
 
+    //if ( m_options.bSimStart ) {
+      // just always delete it, keep it fresh for each run
+      if ( boost::filesystem::exists( c_sDbName ) ) {
+      boost::filesystem::remove( c_sDbName );
+      }
+    //}
+
     if ( 0 == m_choices.sGroupDirectory.size() ) {
       std::cout << "simulation requires a group directory" << std::endl;
       return false;
@@ -299,13 +306,6 @@ bool AppAutoTrade::OnInit() {
 
   m_splitterData->SplitVertically(m_treeSymbols, m_pWinChartView, 50); // TODO: pull from state
   sizerLower->Add(m_splitterData, 1, wxGROW, 2);
-
-  //if ( m_options.bSimStart ) {
-    // just always delete it, keep it fresh for each run
-    if ( boost::filesystem::exists( c_sDbName ) ) {
-    boost::filesystem::remove( c_sDbName );
-    }
-  //}
 
   if ( !m_choices.bStartSimulator ) { // TODO: use separate config file flag for enabling the bot?
     if ( m_choices.sTelegramToken.empty() ) {
