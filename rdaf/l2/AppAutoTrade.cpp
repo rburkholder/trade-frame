@@ -128,9 +128,11 @@ bool AppAutoTrade::OnInit() {
   m_bL2Connected = false;
 
   m_iqf = ou::tf::iqfeed::Provider::Factory();
+  m_iqf->SetName( "iq01" );
   m_iqf->SetThreadCount( m_choices.nThreads );
 
   m_tws = ou::tf::ib::TWS::Factory();
+  m_tws->SetName( "ib01" );
   m_tws->SetClientId( m_choices.ib_client_id );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY,c_sAppName );
@@ -454,7 +456,7 @@ bool AppAutoTrade::OnInit() {
     m_pWinChartView->SetChartDataView( &pStrategy->GetChartDataView() );
 
     m_mapStrategy.emplace( sSymbol, std::move( pStrategy ) );
-    BOOST_LOG_TRIVIAL(info) << "strategy installed for: " << sSymbol;
+    //BOOST_LOG_TRIVIAL(info) << "strategy installed for: " << sSymbol;
 
     // TODO: use this to add an order list to the instrument: date, direction, type, limit
   }
@@ -710,14 +712,14 @@ void AppAutoTrade::ConstructInstrument_Live(
           case ou::tf::keytypes::EProviderIB:
             pPosition = pm.ConstructPosition(
               sRunPortfolioName, idInstrument, c_sPortfolioName,
-              "ib01", "iq01", m_tws,
+              m_tws->GetName(), m_iqf->GetName(), m_tws,
               pWatch
             );
             break;
           case ou::tf::keytypes::EProviderIQF:
             pPosition = pm.ConstructPosition(
               sRunPortfolioName, idInstrument, c_sPortfolioName,
-              "iq01", "iq01", m_iqf,
+              m_iqf->GetName(), m_iqf->GetName(), m_iqf,
               pWatch
             );
             break;
