@@ -34,15 +34,27 @@ EquityOption::EquityOption(
 , ou::tf::TreeItem* pTreeItem
 , fBuildInstrument_t&& fBuildInstrument
 , fConstructOption_t&& fConstructOption
+, fRegisterOption_t&& fRegisterOption
+, fStartCalc_t&& fStartCalc
+, fStopCalc_t&& fStopCalc
 )
 : Base( config, pTreeItem )
 , m_fBuildInstrument( std::move( fBuildInstrument ) )
 , m_fConstructOption( std::move( fConstructOption ) )
+, m_fRegisterOption( std::move( fRegisterOption ) )
+, m_fStartCalc( std::move( fStartCalc ) )
+, m_fStopCalc( std::move(  fStopCalc ) )
 {
   assert( m_fConstructOption );
 }
 
 EquityOption::~EquityOption() {
+
+  while ( !m_mapOptionGreeks.empty() ) {
+    StopGreeks( m_mapOptionGreeks.begin()->second );
+  }
+  m_mapOptionRegistered.clear();
+
   if ( m_pPosition ) {
     pWatch_t pWatch = m_pPosition->GetWatch();
     pWatch->OnQuote.Remove( MakeDelegate( this, &EquityOption::HandleQuote ) );
@@ -127,5 +139,38 @@ void EquityOption::Signal( ESignal signal ) {
       break;
   }
 }
+
+void EquityOption::StartGreeks( pOption_t pOption ) {
+  const std::string& sName( pOption->GetInstrumentName() );
+  mapOptionRegistered_t::iterator iterRegistry = m_mapOptionRegistered.find( sName );
+  if ( m_mapOptionRegistered.end() == iterRegistry ) {
+    m_mapOptionRegistered.emplace( mapOptionRegistered_t::value_type( sName, pOption ) );
+    m_fRegisterOption( pOption );
+  }
+  mapOptionGreeks_t::iterator iterGreeks = m_mapOptionGreeks.find( sName );
+  if ( m_mapOptionGreeks.end() == iterGreeks ) {
+    m_mapOptionGreeks.emplace( mapOptionGreeks_t::value_type( sName, pOption ) );
+    m_fStartCalc( pOption, m_pPosition->GetWatch() );
+  }
+  else {
+    std::cout << "option " << sName << " duplicate greeks request" << std::endl;
+  }
+}
+
+void EquityOption::StopGreeks( pOption_t pOption ) {
+  const std::string& sName( pOption->GetInstrumentName() );
+  mapOptionGreeks_t::iterator iterGreeks = m_mapOptionGreeks.find( sName );
+  if ( m_mapOptionGreeks.end() == iterGreeks ) {
+    std::cout << "option " << sName << " no greeks in progress" << std::endl;
+  }
+  else {
+    m_fStopCalc( iterGreeks->second, m_pPosition->GetWatch() );
+    m_mapOptionGreeks.erase( iterGreeks );
+  }
+}
+
+/*
+  accessing open interest: auto oi = pOption->GetSummary().nOpenInterest;
+*/
 
 } // namespace Strategy

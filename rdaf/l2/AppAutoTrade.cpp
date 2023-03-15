@@ -430,11 +430,14 @@ bool AppAutoTrade::OnInit() {
       case ou::tf::config::symbol_t::EAlgorithm::equity_option:
         using pInstrument_t = ou::tf::Instrument::pInstrument_t;
         using pWatch_t = ou::tf::Watch::pWatch_t;
+        using pOption_t = ou::tf::option::Option::pOption_t;
+        namespace ph = std::placeholders;
         assert( !m_choices.bStartSimulator );  // cannot run simulator with options
         pStrategyEquityOption
           = std::make_unique<Strategy::EquityOption>(
               choices, pTreeItem,
-              [this]( const std::string& sName, Strategy::EquityOption::fConstructedInstrument_t&& f ) { // fBuildInstrument_t
+            // fBuildInstrument_t
+              [this]( const std::string& sName, Strategy::EquityOption::fConstructedInstrument_t&& f ) {
                 m_pBuildInstrument->Queue(
                   sName,
                   [fConstructed=std::move(f)]( pInstrument_t pInstrument, bool bConstructed ){
@@ -447,12 +450,20 @@ bool AppAutoTrade::OnInit() {
                   }
                 );
               },
-              [this]( pInstrument_t pInstrument, Strategy::EquityOption::fConstructedOption_t&& fOption ){ // fConstructOption_t
+            // fConstructOption_t
+              [this]( pInstrument_t pInstrument, Strategy::EquityOption::fConstructedOption_t&& fOption ){
                 fOption( std::make_shared<ou::tf::option::Option>( pInstrument, m_iqf ) );
+              },
+            // ManageStrategy::fRegisterOption_t
+              std::bind( &ou::tf::option::Engine::RegisterOption, m_pOptionEngine.get(), ph::_1 ),
+            // ManageStrategy::fStartCalc_t
+              [this]( pOption_t pOption, pWatch_t pUnderlying ){
+                m_pOptionEngine->Add( pOption, pUnderlying );
+              },
+            // ManageStrategy::m_fStopCalc
+              [this]( pOption_t pOption, pWatch_t pUnderlying ){
+                m_pOptionEngine->Remove( pOption, pUnderlying );
               }
-                    // need register, addoption, deloption
-                    //pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqf );
-                    //m_pOptionEngine->RegisterUnderlying( pWatch );
           );
         pStrategy = std::move( pStrategyEquityOption );
         break;
@@ -739,6 +750,7 @@ void AppAutoTrade::ConstructInstrument_Live(
       assert( m_mapStrategy.end() != iterStrategy );
 
       Strategy::Base& base( *iterStrategy->second  );
+      m_pOptionEngine->RegisterUnderlying( pPosition->GetWatch() ); // TODO: work on filter for option_equity only
       base.SetPosition( pPosition );
       fConstructed_( sSymbol );
     } );
