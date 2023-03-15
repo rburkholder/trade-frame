@@ -60,6 +60,8 @@ struct symbol_t {
 
   std::string sSignalFrom; // link one instrument to another
 
+  boost::gregorian::days dte; // days to expiry
+
   int nPeriodWidth;  // units:  seconds
 
   // shortest to longest
@@ -100,6 +102,7 @@ struct symbol_t {
   , dblCommission( 0.01 )
   , bTradable( true )
   , bEmitFVS( false )
+  , dte( 7 )
   , nTimeBins {}
   , dblTimeUpper {}
   , dblTimeLower {}

@@ -47,6 +47,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   (bool, bEmitFVS)
   (ou::tf::config::symbol_t::EAlgorithm, eAlgorithm)
   (std::string, sSignalFrom)
+  (boost::gregorian::days, dte)
   (int, nPeriodWidth)
   (int, nMA1Periods)
   (int, nMA2Periods)
@@ -227,6 +228,12 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> -qi::char_('@') >> qi::char_("A-Z") >> *( qi::char_("A-Z0-9" ) )// >> *qi::char_('#')
       >> *qi::lit(' ') >> qi::eol;
 
+    ruleDaysToExpiry
+      %= qi::lit("dte")
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> boost::spirit::int_
+      >> *qi::lit(' ') >> qi::eol;
+
     rulePeriodWidth
       %= qi::lit( "period_width" )
       >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
@@ -306,6 +313,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> -ruleEmitFVS
       >> -ruleAlgorithm
       >> -ruleSignalFrom
+      >> -ruleDaysToExpiry
       >>  rulePeriodWidth
       >>  ruleMovingAverage1Periods
       >>  ruleMovingAverage2Periods
@@ -367,6 +375,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   qi::rule<Iterator, size_t()> ruleTimeBins;
   qi::rule<Iterator, ou::tf::config::symbol_t::EAlgorithm()> ruleAlgorithm;
   qi::rule<Iterator, std::string()> ruleSignalFrom;
+  qi::rule<Iterator, boost::gregorian::days()> ruleDaysToExpiry;
   qi::rule<Iterator, int()> rulePeriodWidth;
   qi::rule<Iterator, int()> ruleMovingAverage1Periods;
   qi::rule<Iterator, int()> ruleMovingAverage2Periods;

@@ -94,11 +94,16 @@ private:
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
   mapChains_t m_mapChains;
 
+  size_t m_nOptionsToProcess;
+  chain_t* m_pChain; // use this chain for option selection
+
   using mapOptionRegistered_t = std::unordered_map<std::string, pOption_t>;
   mapOptionRegistered_t m_mapOptionRegistered;
 
   using mapOptionGreeks_t = std::unordered_map<std::string,pOption_t>;
   mapOptionGreeks_t m_mapOptionGreeks;
+
+  void ProcessChains();
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

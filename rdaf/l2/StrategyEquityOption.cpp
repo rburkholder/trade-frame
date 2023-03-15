@@ -39,6 +39,8 @@ EquityOption::EquityOption(
 , fStopCalc_t&& fStopCalc
 )
 : Base( config, pTreeItem )
+, m_nOptionsToProcess {}
+, m_pChain( nullptr )
 , m_fBuildInstrument( std::move( fBuildInstrument ) )
 , m_fConstructOption( std::move( fConstructOption ) )
 , m_fRegisterOption( std::move( fRegisterOption ) )
@@ -88,6 +90,7 @@ void EquityOption::SetPosition( pPosition_t pPosition ) {
         sIQFeedUnderlying, "pc", "", "2", "", "", "",
         [this]( const query_t::OptionList& list ) {
           std::cout << "supplied list for " << list.sUnderlying << " has " << list.vSymbol.size() << " options" << std::endl;
+          m_nOptionsToProcess = list.vSymbol.size();
           for ( auto& name: list.vSymbol ) {
             m_fBuildInstrument(
               name,
@@ -100,6 +103,9 @@ void EquityOption::SetPosition( pPosition_t pPosition ) {
                     assert( pBuiltOption );
 
                     pBuiltOption->pOption = pOption;
+                    assert( 0 < m_nOptionsToProcess );
+                    m_nOptionsToProcess--;
+                    if ( 0 == m_nOptionsToProcess ) ProcessChains();
                   } );
               } );
           }
@@ -108,6 +114,28 @@ void EquityOption::SetPosition( pPosition_t pPosition ) {
     }
   );
   m_pOptionChainQuery->Connect();
+}
+
+void EquityOption::ProcessChains() {
+  assert( !m_mapChains.empty() );
+  mapChains_t::iterator iterChain = m_mapChains.begin();
+  boost::gregorian::date current( iterChain->first );
+  m_pChain = &iterChain->second;
+  const boost::gregorian::date expiry = current + m_config.dte;
+  while ( expiry > iterChain->first ) {
+    ++iterChain;
+    if ( m_mapChains.end() == iterChain ) {
+      break;
+    }
+    else {
+      current = iterChain->first;
+      m_pChain = &iterChain->second;
+    }
+  }
+  std::cout
+    << "chain selected: "
+    << m_config.dte << " day, "
+    << current << " with " << m_pChain->Size() << " options" << std::endl;
 }
 
 void EquityOption::HandleQuote( const ou::tf::Quote& quote ) {
