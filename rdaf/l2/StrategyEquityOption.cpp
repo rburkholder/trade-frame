@@ -114,4 +114,18 @@ void EquityOption::SaveWatch( const std::string& sPrefix ) {
   Base::SaveWatch( sPrefix );
 }
 
+void EquityOption::Signal( ESignal signal ) {
+  switch ( signal ) {
+    case ESignal::rising:
+      std::cout << "EquityOption::Signal rising" << std::endl;
+      break;
+    case ESignal::neutral:
+      std::cout << "EquityOption::Signal neutral" << std::endl;
+      break;
+    case ESignal::falling:
+      std::cout << "EquityOption::Signal falling" << std::endl;
+      break;
+  }
+}
+
 } // namespace Strategy

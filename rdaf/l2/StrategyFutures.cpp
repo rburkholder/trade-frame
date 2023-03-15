@@ -967,6 +967,8 @@ void Futures::HandleRHTrading( const ou::tf::Quote& quote ) {
       switch ( stateDesired ) {
         case EStateDesired::GoLong:
 
+          m_signal( ESignal::rising );
+
           m_dblStopActiveDelta = m_dblStopDeltaProposed;
           m_dblStopActiveActual = quote.Ask() - m_dblStopActiveDelta;
 
@@ -975,6 +977,8 @@ void Futures::HandleRHTrading( const ou::tf::Quote& quote ) {
           EnterLong( quote );
           break;
         case EStateDesired::GoShort:
+
+          m_signal( ESignal::falling );
 
           m_dblStopActiveDelta = m_dblStopDeltaProposed;
           m_dblStopActiveActual = quote.Bid() + m_dblStopActiveDelta;

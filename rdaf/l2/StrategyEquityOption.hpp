@@ -63,6 +63,7 @@ public:
   virtual void SaveWatch( const std::string& sPrefix );
 
 protected:
+  virtual void Signal( ESignal );
 private:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -82,6 +83,7 @@ private:
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
+
 };
 
 } // namespace Strategy

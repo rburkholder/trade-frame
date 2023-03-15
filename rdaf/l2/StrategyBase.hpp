@@ -45,7 +45,7 @@ public:
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   enum class ESignal {
-    rising, nuetral, falling
+    rising, neutral, falling
   };
 
   Base(
