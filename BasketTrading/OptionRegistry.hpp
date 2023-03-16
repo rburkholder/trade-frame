@@ -84,6 +84,9 @@ private:
 
   ou::tf::TreeItem* m_ptiParent;
 
+  using mapOptionRegistered_t = std::unordered_map<std::string, pOption_t>; // registered in option engine
+  mapOptionRegistered_t m_mapOptionRegistered;
+
   using pOptionStatistics_t = OptionStatistics::pOptionStatistics_t;
 
   struct RegistryEntry {

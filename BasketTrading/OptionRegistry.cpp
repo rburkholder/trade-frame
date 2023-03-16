@@ -44,6 +44,7 @@ OptionRegistry::~OptionRegistry() {
     m_fStopCalc( vt.second.pOption, m_pWatchUnderlying );
     vt.second.pOptionStatistics.reset();
   }
+  m_mapOptionRegistered.clear();
   m_mapOption.clear();
 }
 
@@ -57,12 +58,16 @@ OptionRegistry::mapOption_t::iterator OptionRegistry::Check( pOption_t pOption )
     assert( pair.second );
     iterOption = std::move( pair.first );
 
-    try {
-      m_fRegisterOption( pOption );
-    }
-    catch( std::runtime_error& e ) {
-      std::cout << "OptionRegistry::Add error: " << e.what() << std::endl;
-      // simply telling us we are already registered, convert from error to status?
+    mapOptionRegistered_t::iterator iterRegistry = m_mapOptionRegistered.find( sOptionName );
+    if ( m_mapOptionRegistered.end() == iterRegistry ) {
+      m_mapOptionRegistered.emplace( mapOptionRegistered_t::value_type( sOptionName, pOption ) );
+      try {
+        m_fRegisterOption( pOption );
+      }
+      catch( std::runtime_error& e ) {
+        std::cout << "OptionRegistry::Add error: " << e.what() << std::endl;
+        // simply telling us we are already registered, convert from error to status?
+      }
     }
 
     assert( m_pWatchUnderlying );
