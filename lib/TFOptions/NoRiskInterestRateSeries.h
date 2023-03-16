@@ -77,7 +77,7 @@ private:
     boost::posix_time::time_duration td;
     std::string Symbol;
     pWatch_t pWatch;
-    structInterestRate( void ) {};
+    structInterestRate() {};
     structInterestRate( const boost::posix_time::time_duration& td_, const std::string& Symbol_ )
       : td( td_ ), Symbol( Symbol_ ) {};
     structInterestRate( const structSymbol& symbol )
