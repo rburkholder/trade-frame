@@ -669,16 +669,8 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
               auto& manager( ou::tf::PortfolioManager::GlobalInstance() );
               if ( !pPosition ) {
                 const std::string& sInstrumentName( pWatch->GetInstrumentName() );
-                switch ( m_pExec->ID() ) {
-                  case ou::tf::keytypes::eidProvider_t::EProviderIB:
-                    pPosition = manager.ConstructPosition(
-                      idPortfolio, sInstrumentName, "Basket", "ib01", "iq01", m_pExec, pWatch );
-                    break;
-                  case ou::tf::keytypes::eidProvider_t::EProviderIQF:
-                    pPosition = manager.ConstructPosition(
-                      idPortfolio, sInstrumentName, "Basket", "iq01", "iq01", m_pExec, pWatch );
-                    break;
-                }
+                pPosition = manager.ConstructPosition(
+                  idPortfolio, sInstrumentName, "Basket", m_pExec->GetName(), m_pData1->GetName(), m_pExec, pWatch );
                 Add( pPosition );  // update the archive
               }
 
