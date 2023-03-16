@@ -163,7 +163,7 @@ public:
       idInstrument_t idInstrument_, InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
       boost::uint16_t nYear_, boost::uint16_t nMonth_, boost::uint16_t nDay_, // <= remove this at some point
       boost::posix_time::ptime dtExpiry_,
-      double dblStrike_, OptionSide::EOptionSide eOptionSide_
+      OptionSide::EOptionSide eOptionSide_, double dblStrike_
       )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
       eCurrency( Currency::USD ), eCounterCurrency( Currency::USD ),
@@ -220,7 +220,8 @@ public:
     idInstrument_cref sInstrumentName, InstrumentType::EInstrumentType type,
     const idExchange_t& sExchangeName,
     boost::posix_time::ptime dtExpiry,
-    double strike, OptionSide::EOptionSide side
+    OptionSide::EOptionSide side,
+    double strike
     );
   Instrument(  // currency
     const idInstrument_t& idInstrument,

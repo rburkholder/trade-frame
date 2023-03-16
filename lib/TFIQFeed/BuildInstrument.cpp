@@ -12,6 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <OUCommon/TimeSource.h>
+
 #include "BuildInstrument.h"
 
 namespace ou { // One Unified
@@ -165,18 +167,20 @@ pInstrument_t BuildInstrument( const Fundamentals& fundamentals ) {
       pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
       }
       break;
-    case ESecurityType::Future: { // may need to pull out the prefix
+    case ESecurityType::Future: {
       auto date( fundamentals.dateExpiration );
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Future, sExchange, date.year(), date.month().as_number(), date.day().as_number() );
       pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
       }
       break;
-    case ESecurityType::FOption: { // futures option doesn't require underlying?
-      auto date( fundamentals.dateExpiration );
-      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::FuturesOption, sExchange, date.year(), date.month().as_number(), date.day().as_number(), fundamentals.eOptionSide, fundamentals.dblStrikePrice );
+    case ESecurityType::FOption: {
+      //boost::posix_time::ptime dt( fundamentals.dateExpiration, fundamentals.timeSessionClose );
+      // timeSessionClose isn't actually expiry, but gets us closer
+      boost::posix_time::ptime dt = ou::TimeSource::ConvertRegionalToUtc( fundamentals.dateExpiration, fundamentals.timeSessionClose, "America/New_York" );
+      //std::string s( boost::lexical_cast<std::string>(dt) );
+      //std::string t( boost::lexical_cast<std::string>(fundamentals.timeSessionClose) ); "17:00:00"
+      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::FuturesOption, sExchange, dt, fundamentals.eOptionSide, fundamentals.dblStrikePrice );
       pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
-      pInstrument->SetMultiplier( 0 ); // varies, IB probably can set this, IQFeed doesn't have this for all/many/most
-      // or populate from the underlying future?
       }
       break;
     case ESecurityType::Index:

@@ -187,14 +187,15 @@ Instrument::Instrument(
 , InstrumentType::EInstrumentType eType
 , const idExchange_t& idExchange
 , boost::posix_time::ptime dtExpiry
-, double dblStrike
 , OptionSide::EOptionSide eOptionSide
+, double dblStrike
 )
 : m_row(
   idInstrument, eType, idExchange
 , dtExpiry.date().year(), dtExpiry.date().month(), dtExpiry.date().day()
 , dtExpiry
-, dblStrike, eOptionSide
+, eOptionSide
+, dblStrike
 )
 , m_dtrTimeLiquid( dtDefault, dtDefault )
 , m_dtrTimeTrading( dtDefault, dtDefault )

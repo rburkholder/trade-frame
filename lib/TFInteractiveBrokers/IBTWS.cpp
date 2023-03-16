@@ -1457,7 +1457,7 @@ void TWS::BuildInstrumentFromContractDetails( const ContractDetails& details, pI
             pInstrument = Instrument::pInstrument_t( new Instrument(
               sLocalSymbol, it, sExchange,
               dtExpiry,
-              contract.strike, os ) );
+              os, contract.strike ) );
           }
         }
         else {
