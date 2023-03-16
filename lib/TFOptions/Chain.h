@@ -374,7 +374,10 @@ Option& Chain<Option>::SetIQFeedNameCall( double dblStrike, const std::string& s
     assert( result.second );
     iter = result.first;
   }
-  if ( !iter->second.call.sIQFeedSymbolName.empty() ) {
+  if ( iter->second.call.sIQFeedSymbolName.empty() ) {
+    iter->second.call.sIQFeedSymbolName = sIQFeedSymbolName;
+  }
+  else {
     std::cout
       << "Chain<Option>::SetIQFeedNameCall duplicate existing: "
       << iter->second.call.sIQFeedSymbolName
@@ -382,11 +385,9 @@ Option& Chain<Option>::SetIQFeedNameCall( double dblStrike, const std::string& s
       << sIQFeedSymbolName
       << ", skipped"
       << std::endl;
+    throw std::runtime_error( "duplicate call" );
     // maybe throw an exception and let caller handle it: ignore or not
     //assert( iter->second.call.sIQFeedSymbolName == sIQFeedSymbolName );
-  }
-  else {
-    iter->second.call.sIQFeedSymbolName = sIQFeedSymbolName;
   }
   return iter->second.call;
 }
@@ -399,7 +400,10 @@ Option& Chain<Option>::SetIQFeedNamePut( double dblStrike, const std::string& sI
     assert( result.second );
     iter = result.first;
   }
-  if ( !iter->second.put.sIQFeedSymbolName.empty() ) {
+  if ( iter->second.put.sIQFeedSymbolName.empty() ) {
+    iter->second.put.sIQFeedSymbolName = sIQFeedSymbolName;
+  }
+  else {
     std::cout
       << "Chain<Option>::SetIQFeedNamePut duplicate existing: "
       << iter->second.put.sIQFeedSymbolName
@@ -407,11 +411,9 @@ Option& Chain<Option>::SetIQFeedNamePut( double dblStrike, const std::string& sI
       << sIQFeedSymbolName
       << ", skipped"
       << std::endl;
+    throw std::runtime_error( "duplicate put" );
     // maybe throw an exception and let caller handle it: ignore or not
     //assert( iter->second.put.sIQFeedSymbolName == sIQFeedSymbolName );
-  }
-  else {
-    iter->second.put.sIQFeedSymbolName = sIQFeedSymbolName;
   }
   return iter->second.put;
 }

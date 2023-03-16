@@ -20,6 +20,7 @@
  */
 
 #include "Aggregate.h"
+#include <stdexcept>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -74,12 +75,22 @@ void Aggregate::LoadChains( fGatherOptions_t&& fGatherOptions ) {
         try {
           switch ( pOption->GetOptionSide() ) {
             case ou::tf::OptionSide::Call:
-              chain.SetIQFeedNameCall( pOption->GetStrike(), sIQFeedSymbolName );
-              strike.call.pOption = pOption;
+              try {
+                chain.SetIQFeedNameCall( pOption->GetStrike(), sIQFeedSymbolName );
+                strike.call.pOption = pOption;
+              }
+              catch ( std::runtime_error& e ) {
+                // don't do anything with the duplicate
+              }
               break;
             case ou::tf::OptionSide::Put:
-              chain.SetIQFeedNamePut( pOption->GetStrike(), sIQFeedSymbolName );
-              strike.put.pOption = pOption;
+              try {
+                chain.SetIQFeedNamePut( pOption->GetStrike(), sIQFeedSymbolName );
+                strike.put.pOption = pOption;
+              }
+              catch( std::runtime_error& e ) {
+                // don't do anything with the duplicate
+              }
               break;
           }
         }
