@@ -277,14 +277,6 @@ Option::pOption_t Engine::FindOption( const pInstrument_t pInstrument ) {
   return pOption;
 }
 
-void Engine::Addv1( pOption_t pOption, pWatch_t pUnderlying, fCallbackWithGreek_t&& fGreek ) {
-//  if ( m_srvcWork.owns_work() ) {
-    OptionEntry oe( pUnderlying, pOption, std::move( fGreek ) );
-    std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
-    m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::AddOption, std::move(oe) ) );
-//  }
-}
-
 void Engine::Add( pOption_t pOption, pWatch_t pUnderlying ) {
 //  if ( m_srvcWork.owns_work() ) {
     assert( ( 0 != pOption.use_count() ) && ( 0 != pUnderlying.use_count() ) );

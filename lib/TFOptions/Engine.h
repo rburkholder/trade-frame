@@ -130,9 +130,8 @@ public:
   void RegisterUnderlying( const pWatch_t& ); // register an underlying
   void RegisterOption( const pOption_t& ); // register an option
 
-  // these start the calculation process, the option and underlying need to be pre-registered
-  void Addv1( pOption_t pOption, pWatch_t pUnderlying, fCallbackWithGreek_t&& ); // reference counted(will be a problem with multiple callback destinations, first one wins currently
-  void Add( pOption_t pOption, pWatch_t pUnderlying );  // this is better, the option already has a delegate for callback
+  // start the calculation process, the option and underlying need to be pre-registered
+  void Add( pOption_t pOption, pWatch_t pUnderlying );  // the option already has a delegate for callback
   void Remove( pOption_t pOption, pWatch_t pUnderlying ); // part of the reference counting, will change reference count on associated underlying and auto remove
 
   // these effectively handle registration of underlying and option, using a callback - deprecated, use Register... above
