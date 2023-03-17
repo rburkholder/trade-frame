@@ -244,7 +244,7 @@ void Provider::OnIQFeedFundamentalMessage( linebuffer_t* pBuffer, IQFFundamental
       [this](std::string sExchangeId)->std::string{ // supplied string is in hex
         int n {};
         int t {};
-        for ( std::string::const_reverse_iterator iter = sExchangeId.rbegin(); iter != sExchangeId.rend(); iter++ ) {
+        for ( std::string::iterator iter = sExchangeId.begin(); iter != sExchangeId.end(); iter++ ) {
           n = n << 4;
           char cur = *iter;
           if ( ( 'A' <= cur ) && ( 'F' >= cur ) ) {
