@@ -16,6 +16,9 @@
 
 // Started 2013/11/30
 
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <wx/app.h>
 #include <wx/timer.h>
 
@@ -35,6 +38,7 @@ class AppArmsIndex:
   public ou::tf::FrameWork01<AppArmsIndex>
 {
   friend ou::tf::FrameWork01<AppArmsIndex>;
+  friend class boost::serialization::access;
 public:
 protected:
 private:
@@ -56,6 +60,7 @@ private:
   ou::tf::PanelLogging* m_pPanelLogging;
 
   ou::tf::DBOps m_db;
+  std::string m_sStateFileName;
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -79,8 +84,23 @@ private:
   void HandleGuiRefresh( wxTimerEvent& event );
   void HandleProviderConnected( EventProviderConnected& );
 
+  void SaveState();
+  void LoadState();
+
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    ar & *m_pFrameMain;
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    ar & *m_pFrameMain;
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 };
 
-// Implements MyApp& wxGetApp()
+BOOST_CLASS_VERSION(AppArmsIndex, 1)
 DECLARE_APP(AppArmsIndex)
 

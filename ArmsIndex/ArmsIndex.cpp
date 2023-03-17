@@ -12,6 +12,9 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
 #include "ArmsIndex.h"
 
 IMPLEMENT_APP(AppArmsIndex)
@@ -20,8 +23,11 @@ bool AppArmsIndex::OnInit() {
 
   wxApp::OnInit();
   wxApp::SetAppDisplayName( "Arms Index" );
-  wxApp::SetVendorName( "OneUnified" );
-  wxApp:SetVendorDisplayName( "One Unified" );
+  wxApp::SetVendorName( "One Unified Net Limited" );
+  wxApp::SetVendorDisplayName( "(c) 2022 One Unified Net Limited" );
+
+  m_sDbName = "ArmsIndex.db";
+  m_sStateFileName = "ArmsIndex.state";
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Arms Index" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -67,35 +73,22 @@ bool AppArmsIndex::OnInit() {
   pSizerLower->Add( m_pPanelLogging, 1, wxGROW|wxALL|wxEXPAND, 1 );
   m_pPanelLogging->Show( true );
 
-    pSplitterPanels->SplitHorizontally(pPanelUpper, pPanelLower, 600);
-    m_sizerMain->Add(pSplitterPanels, 1, wxGROW|wxALL, 2);
-
-
+  pSplitterPanels->SplitHorizontally(pPanelUpper, pPanelLower, 600);
+  m_sizerMain->Add(pSplitterPanels, 1, wxGROW|wxALL, 2);
 
   //wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
   //m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
-  std::cout << "(c) 2017 One Unified Ltd.  All Rights Reserved.  info@oneunified.net" << std::endl;
+  std::cout << "(c) 2017-2023 One Unified Net Ltd.  All Rights Reserved.  info@oneunified.net" << std::endl;
 
   m_db.OnRegisterTables.Add( MakeDelegate( this, &AppArmsIndex::HandleRegisterTables ) );
   m_db.OnRegisterRows.Add( MakeDelegate( this, &AppArmsIndex::HandleRegisterRows ) );
   m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppArmsIndex::HandlePopulateDatabase ) );
   m_db.SetOnLoadDatabaseHandler( MakeDelegate( this, &AppArmsIndex::HandleLoadDatabase ) );
 
-  m_sDbName = "ArmsIndex.db";
   if ( boost::filesystem::exists( m_sDbName ) ) {
 //    boost::filesystem::remove( sDbName );
   }
-
-//  FrameMain::vpItems_t vItems;
-//  typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
-//  vItems.push_back( new mi( "a1 New Symbol List Remote", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::ObtainNewIQFeedSymbolListRemote ) ) );
-//  vItems.push_back( new mi( "a2 New Symbol List Local", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::ObtainNewIQFeedSymbolListLocal ) ) );
-//  vItems.push_back( new mi( "a3 Load Symbol List", MakeDelegate( m_pIQFeedSymbolListOps, &ou::tf::IQFeedSymbolListOps::LoadIQFeedSymbolList ) ) );
-//  vItems.push_back( new mi( "a4 Save Symbol Subset", MakeDelegate( this, &AppStickShift::HandleMenuActionSaveSymbolSubset ) ) );
-//  vItems.push_back( new mi( "a5 Load Symbol Subset", MakeDelegate( this, &AppStickShift::HandleMenuActionLoadSymbolSubset ) ) );
-//  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
-
 
   m_timerGuiRefresh.SetOwner( this );
 
@@ -113,8 +106,13 @@ bool AppArmsIndex::OnInit() {
   m_bExecConnected = false;
   m_bStarted = false;
 
-  //this->m_pData1Provider->Connect();
-  this->m_iqfeed->Connect();
+  CallAfter(
+    [this](){
+      LoadState();
+    }
+  );
+
+  m_iqfeed->Connect();
 
   return 1;
 
@@ -169,6 +167,27 @@ void AppArmsIndex::OnExecDisconnected( int ) {
   m_bExecConnected = false;
 }
 
+void AppArmsIndex::SaveState() {
+  std::cout << "Saving Config ..." << std::endl;
+  std::ofstream ofs( m_sStateFileName );
+  boost::archive::text_oarchive oa(ofs);
+  oa & *this;
+  std::cout << "  done." << std::endl;
+}
+
+void AppArmsIndex::LoadState() {
+  try {
+    std::cout << "Loading Config ..." << std::endl;
+    std::ifstream ifs( m_sStateFileName );
+    boost::archive::text_iarchive ia(ifs);
+    ia & *this;
+    std::cout << "  done." << std::endl;
+  }
+  catch(...) {
+    std::cout << "load exception" << std::endl;
+  }
+}
+
 void AppArmsIndex::OnClose( wxCloseEvent& event ) {
 //  pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
 //  pm.OnPositionLoaded.Remove( Mak
@@ -178,6 +197,8 @@ void AppArmsIndex::OnClose( wxCloseEvent& event ) {
   this->m_iqfeed->Disconnect();
 
   if ( m_db.IsOpen() ) m_db.Close();
+
+  SaveState();
 
   //DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
