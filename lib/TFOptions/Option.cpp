@@ -167,11 +167,12 @@ void Option::CalcGreeks( // TODO: need to not calc if quote is bad
     AppendGreek( greek );
   }
   catch ( const std::runtime_error& e ) {
-    std::cout
-      << "Option::CalcGreeks "
-      << m_pInstrument->GetInstrumentName() << " problem: "
-      << e.what()
-      << std::endl;
+    // TODO: need return a default or something -- no, it skips the greek event anyway
+    //std::cout
+    //  << "Option::CalcGreeks "
+    //  << m_pInstrument->GetInstrumentName() << " problem: "
+    //  << e.what()
+    //  << std::endl;
   }
   catch (...) {
     std::cout
