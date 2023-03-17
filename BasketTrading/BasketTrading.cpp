@@ -187,6 +187,7 @@ void AppBasketTrading::Init() {
       LoadState();
     }
   );
+
 }
 
 void AppBasketTrading::BuildMasterPortfolio() {
