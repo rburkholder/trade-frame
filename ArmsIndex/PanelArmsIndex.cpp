@@ -12,13 +12,15 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
+#include <wx/icon.h>
+#include <wx/button.h>
+#include <wx/dcclient.h>
 
 #include <boost/assign/std/vector.hpp>
 using namespace boost::assign;
 
-#include <wx/mstream.h>
 #include <wx/bitmap.h>
+#include <wx/mstream.h>
 
 #include "PanelArmsIndex.h"
 
@@ -61,7 +63,7 @@ void PanelArmsIndex::Init() {
 
   m_ixActiveChart = 0;
 
-    
+
 
 /*    m_vCollections.push_back( collection_t( "DOW" ) );
     collection_t& c( m_vCollections.back() );
@@ -72,12 +74,6 @@ void PanelArmsIndex::Init() {
       "NKE", "PFE", "PG", "TRV", "UTX",
       "UNH", "VZ", "V", "WMT", "DIS";
 */
-  // this should be set via OUCharting/ChartMaster
-  //bool b = Chart::setLicenseCode( "DEVP-2G22-4QPN-HDS6-925A-95C1" );
-  char code[2048];
-  bool b = Chart::setLicenseCode( "DEVP-2G22-4QPN-HDS6-925A-95C1 UDEV-23FP-5DWS-X22U-BBBD-FBD8", code );
-  assert( b );
-
 }
 
 void PanelArmsIndex::OnClose( wxCloseEvent& event ) {
@@ -97,12 +93,12 @@ void PanelArmsIndex::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
+  // event.CanVeto(); // if not a
   event.Skip();  // auto followed by Destroy();
 
 }
 
-void PanelArmsIndex::CreateControls() {    
+void PanelArmsIndex::CreateControls() {
 
     PanelArmsIndex* itemPanel1 = this;
 
@@ -140,7 +136,7 @@ void PanelArmsIndex::CreateControls() {
 
     m_splitterArmsIndex->SplitVertically(itemPanel4, itemPanel8, 150);
     m_sizerPanelArmsIndex->Add(m_splitterArmsIndex, 1, wxGROW|wxALL, 2);
-    
+
 //  Bind( wxEVT_SIZE, &PanelArmsIndex::HandleOnSize, this, this->GetId() );
   Bind( wxEVT_COMMAND_LISTBOX_SELECTED, &PanelArmsIndex::HandleListBoxSelection, this, m_lbArmsIndex->GetId() );
   Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelArmsIndex::HandleBtnToggleView, this, m_btnToggleView->GetId() );
@@ -165,7 +161,7 @@ void PanelArmsIndex::HandleListBoxSelection( wxCommandEvent& event ) {
   if ( wxNOT_FOUND != nSelection ) {
     m_ixActiveChart = nSelection;
   }
-  
+
 }
 
 void PanelArmsIndex::SetProvider( pProvider_t pProvider ) {
@@ -174,7 +170,7 @@ void PanelArmsIndex::SetProvider( pProvider_t pProvider ) {
     throw std::runtime_error( "provider already set" );
   }
   else {
-    m_pProvider = pProvider; 
+    m_pProvider = pProvider;
 
     m_vCollections.push_back( collection_t( pProvider, "Dow INDU", "@YM#", "JT1T.Z", "RI1T.Z" ) );
     m_vCollections.push_back( collection_t( pProvider, "NAS 100", "@NQ#", "JT5T.Z", "RI5T.Z" ) );
@@ -208,7 +204,7 @@ void PanelArmsIndex::DrawChartIndex( const MemBlock& m ) {
 }
 
 void PanelArmsIndex::DrawChartTick( const MemBlock& m ) {
-  DrawChart( m, m_panelTick );  
+  DrawChart( m, m_panelTick );
 }
 
 void PanelArmsIndex::DrawChartArms( const MemBlock& m ) {
