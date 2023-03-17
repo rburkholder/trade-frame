@@ -234,7 +234,9 @@ void Option::NetGreeks( const double quantity, double& delta, double& gamma ) co
 
 void Option::HandleGreek( const Greek& greek ) {
   m_greek = greek;
-  m_greeks.Append( greek );
+  if ( m_bRecordSeries ) {
+    m_greeks.Append( greek );
+  }
   OnGreek( greek );
 }
 
