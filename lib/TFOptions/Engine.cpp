@@ -36,6 +36,7 @@
 #include <OUCommon/TimeSource.h>
 
 #include "Engine.h"
+#include "Binomial.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
