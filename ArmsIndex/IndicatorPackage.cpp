@@ -16,16 +16,16 @@
 
 #include "IndicatorPackage.h"
 
-IndicatorPackage::IndicatorPackage( 
+IndicatorPackage::IndicatorPackage(
      pProvider_t pDataProvider,
      pInstrument_t pInstIndex, pInstrument_t pInstTick, pInstrument_t pInstTrin
-   ) 
+   )
    : m_bStarted( false ), m_pTrin( pInstTrin ), m_pTick( pInstTick ), m_pIndex( pInstIndex ), m_pProvider( pDataProvider ),
      m_zzTrin( 0.15), m_zzIndex( 5.0 ),
      m_bFirstIndexFound( false ), m_dblFirstIndex( 0.0 ),
-     m_nPixelsX( 600 ), m_nPixelsY( 200 ), 
-     m_dblTrin( 0 ), m_dblOfsIdx( 0 ), 
-     m_bIndexOfZZPairReady( false ), m_bTrinOfZZPairReady( false ), 
+     m_nPixelsX( 600 ), m_nPixelsY( 200 ),
+     m_dblTrin( 0 ), m_dblOfsIdx( 0 ),
+     m_bIndexOfZZPairReady( false ), m_bTrinOfZZPairReady( false ),
      m_dblZZTrin( 0.0 ), m_dblZZIndex( 0.0 ), m_bDayView( true )
 
 {
@@ -50,9 +50,9 @@ IndicatorPackage::IndicatorPackage(
   m_pProvider->AddTradeHandler( m_pIndex, MakeDelegate( this, &IndicatorPackage::HandleOnIndex ) );
 
   ptime now = ou::TimeSource::GlobalInstance().External();
-  ptime dtBegin( 
+  ptime dtBegin(
         ou::TimeSource::GlobalInstance().ConvertRegionalToUtc( now.date(), time_duration( 9, 30 , 0 ), "America/New_York" ) );
-  ptime dtEnd( 
+  ptime dtEnd(
         ou::TimeSource::GlobalInstance().ConvertRegionalToUtc( now.date(), time_duration( 16, 0 , 0 ), "America/New_York" ) );
 
   m_ctViewBegin = m_ctDayBegin = Chart::chartTime( dtBegin.date().year(), dtBegin.date().month(), dtBegin.date().day(),
@@ -60,9 +60,9 @@ IndicatorPackage::IndicatorPackage(
 
   m_ctViewEnd   = m_ctDayEnd   = Chart::chartTime( dtEnd.date().year(), dtEnd.date().month(), dtEnd.date().day(),
                                      dtEnd.time_of_day().hours(), dtEnd.time_of_day().minutes(), dtEnd.time_of_day().seconds() );
-  
-//  std::cout << pInstIndex->GetInstrumentName() 
-//            << ": " << dtBegin << "," << dtEnd 
+
+//  std::cout << pInstIndex->GetInstrumentName()
+//            << ": " << dtBegin << "," << dtEnd
 //            << "; " << m_ctViewBegin << "," << m_ctViewEnd
 //            << std::endl;
 
@@ -82,7 +82,7 @@ IndicatorPackage::~IndicatorPackage(void) {
 //}
 
 void IndicatorPackage::ToggleView( void ) {
-  
+
   if ( m_bDayView ) {
     if ( 1 <= m_bdIndex.m_vTime.size() ) {
       m_bDayView = false;  // switch to short view
@@ -199,10 +199,14 @@ void IndicatorPackage::DrawChart( BarDoubles& bd, const std::string& sName ) {
     XYChart chart( m_nPixelsX, m_nPixelsY );
     chart.addTitle( sName.c_str() );
     chart.setPlotArea( 40, 10, m_nPixelsX - 50, m_nPixelsY - 43, 0xffffff, -1, 0xc0c0c0, 0xc0c0c0, -1 );
-    CandleStickLayer *candle = chart.addCandleStickLayer( 
+    CandleStickLayer *candle = chart.addCandleStickLayer(
       bd.High(), bd.Low(), bd.Open(), bd.Close(), 0x0000ff00, 0x00ff0000, 0xFFFF0001 );  // 0xff000000
     candle->setXData( bd.Time() );
     chart.xAxis()->setDateScale( m_ctViewBegin, m_ctViewEnd, 0, 0 );
+    Mark* pmk = chart.yAxis()->addMark( 0.0, 0, "" );
+    pmk->setLineWidth( 1 );
+    pmk->setAlignment( Chart::Left );
+    pmk->setDrawOnTop( false );
     MemBlock m = chart.makeChart( Chart::BMP );
     if ( 0 != bd.m_cb ) bd.m_cb( m );
     bd.PopBack();
@@ -261,7 +265,7 @@ void IndicatorPackage::DrawChartArms( void ) {
     pLLIndu->setBorderColor( 0xff000000 );
     //pLLIndu->moveFront();
     ++iterx1; ++iterx2; ++itery1; ++itery2;
-    ++iterc;  
+    ++iterc;
     if ( m_vColours.end() == iterc ) --iterc;
   }
 
