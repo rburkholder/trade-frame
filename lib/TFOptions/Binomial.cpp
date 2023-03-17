@@ -13,12 +13,15 @@
  ************************************************************************/
 
 //#include <math.h>
+
 #include <cmath>
 #include <cstdlib>
 #include <vector>
 #include <iostream>
 #include <algorithm>
 #include <stdexcept>
+
+#include <boost/lexical_cast.hpp>
 
 #include "Binomial.h"
 
@@ -67,7 +70,7 @@ void CRR( const structInput& input, structOutput& output ) {
         break;
       }
       if ( 2 == j ) {
-        output.gamma = ( ( v[ 2 ] - v[ 1 ] ) / ( input.S * u * u - input.S ) 
+        output.gamma = ( ( v[ 2 ] - v[ 1 ] ) / ( input.S * u * u - input.S )
           - ( v[ 1 ] - v[ 0 ] ) / ( input.S - input.S * d * d ) )
           / ( 0.5 * ( input.S * u * u - input.S * d * d ) );
         output.theta = v[ 1 ];
@@ -84,7 +87,7 @@ void CRR( const structInput& input, structOutput& output ) {
 double CalcImpliedVolatility( const structInput& input_, double option, structOutput& output, double epsilon ) {
   // Black Scholes and Beyond, page 336  -- not sure if this is correct model used.  I didn't document model used
   // Option Pricing Formulas, page 453  -- or might have been this one
-  // New vega portion taken from top of page 288 (Option Pricing Formulas) , 
+  // New vega portion taken from top of page 288 (Option Pricing Formulas) ,
   // and uses the 1% description from pg 166 of Black Scholes and Beyond
 
   // page 163 - 164 provides vega calc
@@ -95,7 +98,7 @@ double CalcImpliedVolatility( const structInput& input_, double option, structOu
   ou::tf::option::binomial::CRR( input, output );
   double option1 = output.option;
 
-//  std::cout << "CRRp basic: P=" << output.option << ",D=" << output.delta << ",G=" << output.gamma << ",T=" << output.theta << std::endl;
+  //std::cout << "CRRp basic: P=" << output.option << ",D=" << output.delta << ",G=" << output.gamma << ",T=" << output.theta << std::endl;
 
   static double pct = 0.01;  // 1% change in volatility
 
@@ -120,9 +123,12 @@ double CalcImpliedVolatility( const structInput& input_, double option, structOu
 
     --cnt;
     if ( 0 == cnt ) {
-//      std::cout << "<IV problems>";
-      throw std::runtime_error( "problems with IVp in CRR" );
-//      break;
+      const std::string sError(
+        "IVp in CRR: "
+        + boost::lexical_cast<std::string>( epsilon)
+        + "," + boost::lexical_cast<std::string>( diff )
+      );
+      throw std::runtime_error( sError );
     }
   }
 

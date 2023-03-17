@@ -37,13 +37,13 @@ struct structInput {
   double b; // make same as r, carry rate
   double v; // volatility
   long n;  // number of time steps
-  structInput( void ):
+  structInput():
     optionStyle( ou::tf::OptionStyle::American ),
     optionSide( ou::tf::OptionSide::Unknown ),
     n( 91 ), // binomial steps
     S( 0.0 ), X( 0.0 ), r( 0.0 ), b( 0.0 ), v( 0.0 ),
     T( 0.0 ) {}
-  void Check( void ) {
+  void Check() {
     assert( 0.0 != v );
     assert( ou::tf::OptionSide::Unknown != optionSide );
     assert( 0.0 != S );
