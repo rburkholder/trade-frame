@@ -205,11 +205,13 @@ void Collar::InitTrackLongOption(
 
   CollarLeg& cleg( InitTracker( type, pmapChains, date, days_to_expiry ) );
 
+  namespace ph = std::placeholders;
   cleg.vfTest.emplace( // invalidates on new size() > capacity()
     cleg.vfTest.end(),
-    [ tracker = &cleg.m_tracker ]( boost::posix_time::ptime dt, double dblUnderlyingSlope, double dblUnderlyingPrice ){
-      tracker->TestLong( dt, dblUnderlyingSlope, dblUnderlyingPrice );
-    }
+    std::bind( &ou::tf::option::Tracker::TestLong, &cleg.m_tracker, ph::_1, ph::_2, ph::_3 ) // Tick
+//    [ tracker = &cleg.m_tracker ]( boost::posix_time::ptime dt, double dblUnderlyingSlope, double dblUnderlyingPrice ){
+//      tracker->TestLong( dt, dblUnderlyingSlope, dblUnderlyingPrice );
+//    }
   );
 }
 
@@ -226,11 +228,13 @@ void Collar::InitTrackShortOption(
   // b) rotate if itm (somewhere else, affects long & short)
   // c) stop monitoring out of hours
 
+  namespace ph = std::placeholders;
   cleg.vfTest.emplace(
     cleg.vfTest.end(),
-    [ tracker = &cleg.m_tracker ]( boost::posix_time::ptime dt,double dblUnderlyingSlope, double dblUnderlyingPrice ){
-      tracker->TestShort( dt, dblUnderlyingSlope, dblUnderlyingPrice );
-    }
+    std::bind( &ou::tf::option::Tracker::TestShort, &cleg.m_tracker, ph::_1, ph::_2, ph::_3 ) // Tick
+//    [ tracker = &cleg.m_tracker ]( boost::posix_time::ptime dt,double dblUnderlyingSlope, double dblUnderlyingPrice ){
+//      tracker->TestShort( dt, dblUnderlyingSlope, dblUnderlyingPrice );
+//    }
   );
 
 }
@@ -461,7 +465,7 @@ size_t /* static */ Collar::LegCount() {
 
 }
 
-/* static */ const std::string Collar::Name(
+/* static */ std::string Collar::Name(
      const std::string& sUnderlying,
      const mapChains_t& chains,
      boost::gregorian::date date,

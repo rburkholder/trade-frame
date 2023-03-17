@@ -53,7 +53,7 @@ public:
 
   static void FillLegNote( size_t ix, Combo::E20DayDirection, LegNote::values_t& );
 
-  static const std::string Name(
+  static std::string Name(
     const std::string& sUnderlying,
     const mapChains_t& chains,
     boost::gregorian::date date,
