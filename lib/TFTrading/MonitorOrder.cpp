@@ -154,31 +154,33 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
         }
 
         const double dblNormalizedPrice = NormalizePrice( midQuote );
-        m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, side, nOrderQuantity, dblNormalizedPrice );
-        if ( m_pOrder ) {
-          m_state = State::Active;
-          m_pOrder->SetSignalPrice( dblNormalizedPrice );
-          m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
-          m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
-          m_CountDownToAdjustment = c_nAdjustmentPeriods;
-          m_pPosition->PlaceOrder( m_pOrder );
-          BOOST_LOG_TRIVIAL(info)
-            << "MonitorOrder "
-            << m_pOrder->GetDateTimeOrderSubmitted().time_of_day() << " "
-            << m_pOrder->GetOrderId() << " "
-            << ou::tf::OrderSide::Name[ side ] << " "
-            << m_pOrder->GetInstrument()->GetInstrumentName() << ": "
-            << m_pOrder->GetOrderSideName()
-            << " limit submitted at " << dblNormalizedPrice
-            ;
-          bOk = true;
-        }
-        else {
-          m_state = State::Available;
-          BOOST_LOG_TRIVIAL(info)
-            << "MonitorOrder::PlaceOrder: "
-            << m_pPosition->GetInstrument()->GetInstrumentName() << " failed to construct order"
-            ;
+        if ( 0.0 < dblNormalizedPrice ) {
+          m_pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, side, nOrderQuantity, dblNormalizedPrice );
+          if ( m_pOrder ) {
+            m_state = State::Active;
+            m_pOrder->SetSignalPrice( dblNormalizedPrice );
+            m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
+            m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
+            m_CountDownToAdjustment = c_nAdjustmentPeriods;
+            m_pPosition->PlaceOrder( m_pOrder );
+            BOOST_LOG_TRIVIAL(info)
+              << "MonitorOrder "
+              << m_pOrder->GetDateTimeOrderSubmitted().time_of_day() << " "
+              << m_pOrder->GetOrderId() << " "
+              << ou::tf::OrderSide::Name[ side ] << " "
+              << m_pOrder->GetInstrument()->GetInstrumentName() << ": "
+              << m_pOrder->GetOrderSideName()
+              << " limit submitted at " << dblNormalizedPrice
+              ;
+            bOk = true;
+          }
+          else {
+            m_state = State::Available;
+            BOOST_LOG_TRIVIAL(info)
+              << "MonitorOrder::PlaceOrder: "
+              << m_pPosition->GetInstrument()->GetInstrumentName() << " failed to construct order"
+              ;
+          }
         }
       }
       break;

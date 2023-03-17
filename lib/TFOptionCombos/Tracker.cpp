@@ -200,10 +200,10 @@ void Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope,
 
         double diff = m_pPosition->GetUnRealizedPL();
 
-        // close out when value close to zero
+        // close out when value close to zero - or auto calendar roll?
         const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
         if ( quote.IsNonZero() && ( quote.Ask() > quote.Bid() ) ) {
-          if ( 0.101 >= quote.Ask() ) {
+          if ( 0.401 >= quote.Ask() && ( 0.0 < quote.Bid() ) ) {
             // TODO: perform a calendar roll to regain premium? (but not on expiry date)
             m_transition = ETransition::Fill;
             m_fCloseLeg( m_pPosition );
