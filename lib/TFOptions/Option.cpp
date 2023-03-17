@@ -165,7 +165,7 @@ void Option::CalcGreeks( // TODO: need to not calc if quote is bad
     AppendGreek( greek );
   }
   catch (...) {
-//      std::cout << iter->second.Put()->GetInstrument()->GetInstrumentName() << ": IV Calc problem" << std::endl;
+      std::cout << m_pInstrument->GetInstrumentName() << ": IV Calc problem" << std::endl;
   }
 }
 
