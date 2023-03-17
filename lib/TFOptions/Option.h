@@ -21,11 +21,13 @@
 #include <TFTrading/Watch.h>
 
 #include "NoRiskInterestRateSeries.h"
-#include "Binomial.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
+namespace binomial {
+  class structInput;
+}
 
 class Option: public ou::tf::Watch {
 public:

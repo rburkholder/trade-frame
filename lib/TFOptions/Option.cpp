@@ -12,7 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include <sstream>
+//#include <sstream>
+#include <stdexcept>
 
 #include <OUCommon/TimeSource.h>
 
@@ -22,6 +23,7 @@
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 
 #include "Option.h"
+#include "Binomial.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -164,8 +166,19 @@ void Option::CalcGreeks( // TODO: need to not calc if quote is bad
     ou::tf::Greek greek( dtUtcNow, output.iv, output.delta, output.gamma, output.theta, output.vega, output.rho );
     AppendGreek( greek );
   }
+  catch ( const std::runtime_error& e ) {
+    std::cout
+      << "Option::CalcGreeks "
+      << m_pInstrument->GetInstrumentName() << " problem: "
+      << e.what()
+      << std::endl;
+  }
   catch (...) {
-      std::cout << m_pInstrument->GetInstrumentName() << ": IV Calc problem" << std::endl;
+    std::cout
+      << "Option::CalcGreeks "
+      << m_pInstrument->GetInstrumentName() << " problem: "
+      << "unknown"
+      << std::endl;
   }
 }
 
