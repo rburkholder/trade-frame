@@ -32,10 +32,10 @@
 #include <TFIndicators/ZigZag.h>
 
 class IndicatorPackage {
-public: 
+public:
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
-  IndicatorPackage( 
+  IndicatorPackage(
      pProvider_t pDataProvider,
      pInstrument_t pInstIndex, pInstrument_t pInstTick, pInstrument_t pInstTrin
     );
@@ -119,12 +119,12 @@ private:
       m_vBarClose.push_back( bar.Close() );
       m_vBarLow.push_back( bar.Low() );
       boost::posix_time::ptime dt( bar.DateTime() );
-      m_vTime.push_back( 
-        Chart::chartTime( 
+      m_vTime.push_back(
+        Chart::chartTime(
           dt.date().year(), dt.date().month(), dt.date().day(),
           dt.time_of_day().hours(), dt.time_of_day().minutes(), dt.time_of_day().seconds() ) );
     }
-    void PopBack( void ) {
+    void PopBack() {
       m_vBarHigh.pop_back();
       m_vBarOpen.pop_back();
       m_vBarClose.pop_back();
@@ -134,14 +134,14 @@ private:
     void WorkingBar( const ou::tf::Bar& bar ) {
       m_barWorking = bar;
     }
-    void PushWorkingBar( void ) {
+    void PushWorkingBar() {
       PushBack( m_barWorking );
     }
-    DoubleArray High(void) { return DoubleArray( &m_vBarHigh.front(), m_vBarHigh.size() ); };
-    DoubleArray Open(void) { return DoubleArray( &m_vBarOpen.front(), m_vBarOpen.size() ); };
-    DoubleArray Close(void) { return DoubleArray( &m_vBarClose.front(), m_vBarClose.size() ); };
-    DoubleArray Low(void) { return DoubleArray( &m_vBarLow.front(), m_vBarLow.size() ); };
-    DoubleArray Time(void) { return DoubleArray( &m_vTime.front(), m_vTime.size() ); };
+    DoubleArray High() {  return DoubleArray( &m_vBarHigh.front(), m_vBarHigh.size() ); };
+    DoubleArray Open() {  return DoubleArray( &m_vBarOpen.front(), m_vBarOpen.size() ); };
+    DoubleArray Close() { return DoubleArray( &m_vBarClose.front(), m_vBarClose.size() ); };
+    DoubleArray Low() {   return DoubleArray( &m_vBarLow.front(), m_vBarLow.size() ); };
+    DoubleArray Time() {  return DoubleArray( &m_vTime.front(), m_vTime.size() ); };
   };
 
   BarDoubles m_bdIndex;
