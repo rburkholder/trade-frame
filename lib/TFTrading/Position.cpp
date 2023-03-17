@@ -99,23 +99,16 @@ Position::Position()
 }
 
 void Position::ConstructWatch( pInstrument_cref pInstrument, pProvider_t pDataProvider ) {
-  using pOption_t = ou::tf::option::Option::pOption_t;
   assert( nullptr == m_pWatch.get() );
   assert( nullptr != pInstrument.get() );
   assert( nullptr != pDataProvider.get() );
   switch ( pInstrument->GetInstrumentType() ) {
     case ou::tf::InstrumentType::Option:
     case ou::tf::InstrumentType::FuturesOption:
-      {
-        pOption_t pOption = std::make_shared<ou::tf::option::Option>( pInstrument, pDataProvider );
-        m_pWatch = std::move( pOption );
-      }
+      m_pWatch = std::make_shared<ou::tf::option::Option>( pInstrument, pDataProvider );
       break;
     default:
-      {
-        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pDataProvider );
-        m_pWatch = std::move( pWatch );
-      }
+      m_pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pDataProvider );
       break;
   }
 }
