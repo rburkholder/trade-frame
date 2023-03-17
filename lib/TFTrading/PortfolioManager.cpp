@@ -414,7 +414,7 @@ void PortfolioManager::LoadPositions( const idPortfolio_t& idPortfolio, mapPosit
   while ( m_pSession->Execute( pPositionQuery ) ) {
     Position::TableRowDef rowPosition;
     m_pSession->Columns<PortfolioManagerQueries::PortfolioKey, Position::TableRowDef>( pPositionQuery, rowPosition );
-    pPosition_t pPosition( new Position( rowPosition ) );
+    pPosition_t pPosition = std::make_shared<Position>( rowPosition );
     if ( nullptr == OnPositionNeedsDetails ) {  // fill in instrument, execution, data
       throw std::runtime_error( "PortfolioManager::LoadPositions has no Details Callback" );
     }
