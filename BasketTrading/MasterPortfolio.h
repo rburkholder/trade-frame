@@ -21,6 +21,7 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include <unordered_map>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -326,6 +327,9 @@ private:
 
   std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery; // need to disconnect
   std::unique_ptr<ou::tf::iqfeed::HistoryRequest> m_pHistoryRequest;  // TODO: need to disconnect
+
+  using mapOptions_t = std::unordered_map<std::string,pOption_t>; // keyed by sIQFeedName
+  mapOptions_t m_mapOptions;
 
   void ProcessSeedList();
   void AddUnderlying( pWatch_t );

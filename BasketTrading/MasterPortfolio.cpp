@@ -632,21 +632,29 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
           }
         },
     // ManageStrategy::fConstructOption_t
-        [this,idPortfolioUnderlying](const std::string& sIQFeedOptionName, ManageStrategy::fConstructedOption_t&& fOption ){
-          // NOTE: once considered use of the position caches, but won't work as, at this point,
-          //   idPortfolio is not known, and positions are dependent on the portfolio
-          // TODO: there is an assert inside the method which will need to be remedied
-          m_pBuildInstrument->Queue(
-            sIQFeedOptionName,
-            [this,fOption_=std::move(fOption)](pInstrument_t pInstrument, bool bConstructed ){
-              if ( bConstructed) {
-                ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
-                im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-              }
-              pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pIQ ) );
-              fOption_( pOption );
-              // TODO: cache the option for SaveSeries?
-            } );
+        [this](const std::string& sIQFeedOptionName, ManageStrategy::fConstructedOption_t&& fOption ){
+          //ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+          //pInstrument_t pInstrument = im.LoadInstrument( m_pIQ->ID(), sIQFeedOptionName ); // doesn't seem to be an exists by altinstrumentname, something to fix
+          mapOptions_t::iterator iter = m_mapOptions.find( sIQFeedOptionName );
+          if ( m_mapOptions.end() == iter ) {
+            m_pBuildInstrument->Queue( // isn't currently checking for duplicates
+              sIQFeedOptionName,
+              [this,fOption_=std::move(fOption)](pInstrument_t pInstrument, bool bConstructed ){
+                // bConstructed means that instrument was not found in database, instead was constructed
+                pOption_t pOption;
+                if ( bConstructed) {
+                  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+                  im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+                }
+                pOption = std::make_shared<ou::tf::option::Option>( pInstrument, m_pIQ );
+                m_mapOptions.emplace( mapOptions_t::value_type( pInstrument->GetInstrumentName( m_pIQ->ID() ), pOption ) );
+                fOption_( pOption );
+                // TODO: cache the option for SaveSeries?
+              } );
+          }
+          else {
+            fOption( iter->second );
+          }
         },
     // ManageStrategy::fConstructPosition_t
         [this]( const idPortfolio_t& idPortfolio, pWatch_t pWatch, const std::string& sNote )->ManageStrategy::pPosition_t{
@@ -860,8 +868,24 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
         Add_ManageStrategy_ToTree( idPortfolioStrategy, pManageStrategy );
 
         for ( mapPosition_t::value_type& vt: cacheCombo.m_mapPosition ) {
-          if ( vt.second->IsActive() ) {
-            pManageStrategy->AddPosition( vt.second );  // one or more active positions will move it
+          pPosition_t pPosition = vt.second;
+          if ( pPosition->IsActive() ) {
+            pInstrument_t pInstrument = pPosition->GetInstrument();
+            switch ( pInstrument->GetInstrumentType() ) {
+              case ou::tf::InstrumentType::Option:
+              case ou::tf::InstrumentType::FuturesOption: {
+                const std::string& sIQFeedName( pInstrument->GetInstrumentName( m_pIQ->ID() ) );
+                mapOptions_t::iterator iter = m_mapOptions.find( sIQFeedName );
+                if ( m_mapOptions.end() == iter ) {
+                  pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pPosition->GetWatch() );
+                  m_mapOptions.emplace( mapOptions_t::value_type( sIQFeedName, pOption ) );
+                }
+                }
+                break;
+              default:
+                break;
+            }
+            pManageStrategy->AddPosition( pPosition );  // one or more active positions will move it
           }
         }
 
