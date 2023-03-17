@@ -16,6 +16,9 @@
 
 // Started 2013/11/30
 
+#include <wx/app.h>
+#include <wx/timer.h>
+
 #include <TFBitsNPieces/FrameWork01.h>
 
 // may need to inherit and add more functionality to the class:
@@ -28,8 +31,10 @@
 #include "PanelArmsIndex.h"
 
 class AppArmsIndex:
-  public wxApp, public ou::tf::FrameWork01<AppArmsIndex> {
-    friend ou::tf::FrameWork01<AppArmsIndex>;
+  public wxApp,
+  public ou::tf::FrameWork01<AppArmsIndex>
+{
+  friend ou::tf::FrameWork01<AppArmsIndex>;
 public:
 protected:
 private:
@@ -56,7 +61,7 @@ private:
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );
 
-  void Start( void );
+  void Start();
 
   void OnIQFeedConnected( int );
 
@@ -65,8 +70,8 @@ private:
   void OnData1Disconnected( int );
   void OnExecDisconnected( int );
 
-  void HandlePopulateDatabase( void );
-  void HandleLoadDatabase( void );
+  void HandlePopulateDatabase();
+  void HandleLoadDatabase();
 
   void HandleRegisterTables( ou::db::Session& session );
   void HandleRegisterRows( ou::db::Session& session );

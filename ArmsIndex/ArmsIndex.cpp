@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include "ArmsIndex.h"
 
 IMPLEMENT_APP(AppArmsIndex)
@@ -48,7 +46,7 @@ bool AppArmsIndex::OnInit() {
   //m_pPanelProviderControl->Show( true );
 
   //LinkToPanelProviderControl();
-  
+
     auto pSplitterPanels = new wxSplitterWindow( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3DBORDER|wxSP_3DSASH|wxEXPAND );
     pSplitterPanels->SetMinimumPaneSize(100);
 
@@ -71,9 +69,9 @@ bool AppArmsIndex::OnInit() {
 
     pSplitterPanels->SplitHorizontally(pPanelUpper, pPanelLower, 600);
     m_sizerMain->Add(pSplitterPanels, 1, wxGROW|wxALL, 2);
-  
-  
-  
+
+
+
   //wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
   //m_sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
@@ -122,7 +120,7 @@ bool AppArmsIndex::OnInit() {
 
 }
 
-void AppArmsIndex::Start( void ) {
+void AppArmsIndex::Start() {
   if ( !m_bStarted ) {
     m_bStarted = true;
     m_pPanelArmsIndex->SetProvider( m_iqfeed );
@@ -174,17 +172,17 @@ void AppArmsIndex::OnExecDisconnected( int ) {
 void AppArmsIndex::OnClose( wxCloseEvent& event ) {
 //  pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppStickShift::HandlePortfolioLoad ) );
 //  pm.OnPositionLoaded.Remove( Mak
-  
+
   m_timerGuiRefresh.Stop();
-  
+
   this->m_iqfeed->Disconnect();
-  
+
   if ( m_db.IsOpen() ) m_db.Close();
-  
+
   //DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
+  // event.CanVeto(); // if not a
   event.Skip();  // auto followed by Destroy();
 }
 
@@ -192,24 +190,24 @@ int AppArmsIndex::OnExit() {
 
 //  DelinkFromPanelProviderControl();  generates stack errors
   //m_timerGuiRefresh.Stop();
-  
+
   //this->m_iqfeed->Disconnect();
-  
+
   //if ( m_db.IsOpen() ) m_db.Close();
 
   return wxApp::OnExit();
 }
 
-void AppArmsIndex::HandleRegisterTables(  ou::db::Session& session ) {
+void AppArmsIndex::HandleRegisterTables( ou::db::Session& session ) {
 }
 
-void AppArmsIndex::HandleRegisterRows(  ou::db::Session& session ) {
+void AppArmsIndex::HandleRegisterRows( ou::db::Session& session ) {
 }
 
-void AppArmsIndex::HandlePopulateDatabase( void ) {
+void AppArmsIndex::HandlePopulateDatabase() {
 }
 
-void AppArmsIndex::HandleLoadDatabase( void ) {
+void AppArmsIndex::HandleLoadDatabase() {
 //    ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
 //    pm.LoadActivePortfolios();
 }
