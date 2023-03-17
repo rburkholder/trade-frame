@@ -172,16 +172,17 @@ void PanelArmsIndex::SetProvider( pProvider_t pProvider ) {
   else {
     m_pProvider = pProvider;
 
-    m_vCollections.push_back( collection_t( pProvider, "Dow INDU", "@YM#", "JT1T.Z", "RI1T.Z" ) );
+    // more symbols at https://ws1.dtn.com/IQ/Search/# -- search for tick or trin
+    m_vCollections.push_back( collection_t( pProvider, "SP 500", "@ES#", "JT6T.Z", "RI6T.Z" ) );
     m_vCollections.push_back( collection_t( pProvider, "NAS 100", "@NQ#", "JT5T.Z", "RI5T.Z" ) );
+    m_vCollections.push_back( collection_t( pProvider, "DOW INDU", "@YM#", "JT1T.Z", "RI1T.Z" ) );
 //    m_vCollections.push_back( collection_t( pProvider, "S&P 100", "OEX.XO", "JT8T.Z", "RI8T.Z" ) ); // on delay so not useful at the moment
-    m_vCollections.push_back( collection_t( pProvider, "SPX 500", "@ES#", "JT6T.Z", "RI6T.Z" ) ); // on delay so not useful at the moment
 
     int ix( 0 );
     for ( vCollections_t::iterator iter = m_vCollections.begin(); m_vCollections.end() != iter; ++iter ) {
       iter->pip->SetOnDrawChartIndex( MakeDelegate( this, &PanelArmsIndex::DrawChartIndex ) );
-      iter->pip->SetOnDrawChartTick( MakeDelegate( this, &PanelArmsIndex::DrawChartTick ) );
-      iter->pip->SetOnDrawChartArms( MakeDelegate( this, &PanelArmsIndex::DrawChartArms ) );
+      iter->pip->SetOnDrawChartTick(  MakeDelegate( this, &PanelArmsIndex::DrawChartTick ) );
+      iter->pip->SetOnDrawChartArms(  MakeDelegate( this, &PanelArmsIndex::DrawChartArms ) );
       m_lbArmsIndex->Insert( iter->sName, ix );
       ++ix;
     }
