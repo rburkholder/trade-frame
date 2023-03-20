@@ -6,7 +6,7 @@
 
 A couple of snapshots:
 
-![Level I data with some indicators, P/L for the Level II trades](notes/pictures/IndicatorTrading_chart.png)
-![LevelII data ladder for direct long/short entry/exit](notes/pictures/IndicatorTrading_ladder.png)
+![Level I data with some indicators, P/L for the Level II trades](../notes/pictures/IndicatorTrading_chart.png)
+![LevelII data ladder for direct long/short entry/exit](../notes/pictures/IndicatorTrading_ladder.png)
 
 
