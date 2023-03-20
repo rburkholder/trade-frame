@@ -167,15 +167,17 @@ The lib directory has a series of libraries I use throughout the various project
 
 These are some of the currently supported applications:
 
-* IQFeedMarketSymbols - automatically download and decompress the latest mkt_symbol.txt file from dtn/iqfeed
-* IQFeedGetHistory - load up with historical data for looking for trading ideas
+* ![AutoTrade](AutoTrade/README.md) - code as template for automated trading
+* ![ComboTrading](ComboTrading/README.md) - basics of trading multiple securities, such as various options strategies
+* ![BasketTrading](BasketTrading/README.md) - a work in progress for trading futures based options combinations
+* ![IndicatorTrading](IndicatorTrading/README.md) - view and trade with futures level II data
+* ![Dividend](Dividend/README.md) - console app to query IQFeed for possible dividend based equity investments
 * Hdf5Chart - view the contents of the hdf5 data set
 * LiveChart - view an instrument in real time
-* ComboTrading - basics of trading multiple securities, such as various options strategies
+* ![IQFeedMarketSymbols](IQFeedMarketSymbols/README.md) - automatically download and decompress the latest mkt_symbol.txt file from dtn/iqfeed
+* ![IQFeedGetHistory](IQFeedGetHistory/README.md) - load up with historical data for looking for trading ideas
 * StickShift2 - some rough code for some option trading ideas
 * HedgedBollinger - some experiments in futures, mostly tracking at the money implied volatility
-* BasketTrading - a work in progress for trading futures based options combinations
-* ![IndicatorTrading](IndicatorTrading/README.md) - view and trade with futures level II data
 
 The announcement on my blog:  http://blog.raymond.burkholder.net/index.php?/archives/679-trade-frame-c++-securities-trading-software-development-framework.html
 
