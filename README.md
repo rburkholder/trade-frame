@@ -175,7 +175,7 @@ These are some of the currently supported applications:
 * StickShift2 - some rough code for some option trading ideas
 * HedgedBollinger - some experiments in futures, mostly tracking at the money implied volatility
 * BasketTrading - a work in progress for trading futures based options combinations
-* IndicatorTrading - view and trade with futures level II data
+* ![IndicatorTrading](IndicatorTrading/README.md) - view and trade with futures level II data
 
 The announcement on my blog:  http://blog.raymond.burkholder.net/index.php?/archives/679-trade-frame-c++-securities-trading-software-development-framework.html
 
