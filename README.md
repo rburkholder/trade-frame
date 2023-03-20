@@ -45,9 +45,6 @@ An x64-only installation of wine may generate some wine32 messages and errors, b
 
 ```
 # run with bash
-# create working directory
-mkdir tradeframe
-cd tradeframe
 # git for latest code, wine for IQFeed daemon
 sudo apt-get update && apt-get install git wine wget
 wget http://www.iqfeed.net/iqfeed_client_6_2_0_25.exe
@@ -59,15 +56,17 @@ sh tws-stable-linux-x64.sh
 
 # install and build initial environment and libraries
 git clone https://github.com/rburkholder/libs-build.git
-cd libs-build
+pushd libs-build
 ./build.sh tradeframe
-# rdaf is required for the projects in the rdaf subdirectory
+# rdaf is required for the projects in the rdaf subdirectory - optional
 ./build.sh rdaf
-cd ..
+# one example uses Wt web library as an interface - optional
+./build.sh wt
+popd
 
 # main trade-frame code
 git clone https://github.com/rburkholder/trade-frame.git
-# if you have access to the up-to-date private library:
+# if you have access to the up-to-date private library, use this instead:
 # git clone https://github.com/rburkholder/tf2.git
 
 # if you build manually (this is not required if you load the folder into vscode):
@@ -79,7 +78,6 @@ cmake ..
 cmake --build . --parallel 4 --config Debug
 # cmake --build . --parallel 4 --config Release   # alternate build flavour
 # cmake --build . --target clean  # clean for rebuild
-
 ```
 
 I use Visual Studio Code as my IDE.  I have the following extensions installed:
@@ -88,7 +86,7 @@ I use Visual Studio Code as my IDE.  I have the following extensions installed:
 * CMake [twxs]
 * CMake Tools [Microsoft]
 
-The clangd extenstion provides the language library to provide symbol lookup and cross-referencing.
+The clangd extension provides the language library to provide symbol lookup and cross-referencing.
 
 I have notes for this combination at 
   [Visual Studio Code with CMake and Clangd](https://blog.raymond.burkholder.net/index.php?/archives/1037-Visual-Studio-Code-with-CMake-and-Clangd.html)
@@ -98,7 +96,7 @@ I have notes for this combination at
 
 * Start the IQFeed daemon by starting Apps -> Wine -> Programs -> IQFeed -> Watchlist [or from the command line: wine ~/.wine/drive_c/Program\ Files/DTN/IQFeed/iqconnect.exe -autoconnect & ] Login with your credentials and checkbox the Save Username/Password and Autoconnect the first time
 * Start Interactive Brokers TWS and connect to a paper trading account 
-.* do not use an active account for testing
+.* Do Not use an active account for testing
 .* when connecting via an application, you will need to go into the settings to enable the API, and to activate the port
 * IQFeedMarketSymbols project:
   * run the app:
@@ -129,6 +127,8 @@ Current Market Data Providers and Execution vendors:
 
 * IQFeed: real time market data and historical data
 * Interactive Brokers:  real time market data, real time order execution
+* Alpaca: real time data and order execution
+* Phemex: real time data, order execution (work in progress)
 
 Securities types:
 
@@ -146,16 +146,16 @@ Libraries used (use my lib-build respository to download and build the various d
 * hdf5
 * sqlite (included in source)
 * exelformat (included in source)
-* rdaf aka ROOT - library from CERN providing the cling C++ interpreter
+* rdaf aka ROOT - library from CERN providing the cling C++ interpreter - optional
 
 NOTE: The code started out on Windows using Visual Studio, and is now predominately tested on Linux Debian.  Some work is required 
 to port back to Windows.  There are various Windows based artifacts in various directories.  They are not fully functional at the moment.
 
-The lib directory has a series of libraries I use throughout the various applications.  Primary libraries include:
+The lib directory has a series of libraries I use throughout the various projects/applications.  Primary libraries include:
 
 * TFTimeSeries - manage trades, quotes, greeks
 * TFSimulation - simulation engine
-* TFIQFeed - engine to talk to DTNIQ Feed (ask me for a referral)
+* TFIQFeed - engine to talk to DTNIQ Feed for Level1 & Level2 data (ask me for a referral)
 * TFInteractiveBrokers - engine to talk to IB
 * TFIndicators - some indicators
 * TFHDF5TimeSeries - wraps the HDF5 library for storing time series
@@ -167,13 +167,15 @@ The lib directory has a series of libraries I use throughout the various applica
 
 These are some of the currently supported applications:
 
-* IQFeedMarketSymbols - automatically download and decompress the latest mkt_symbol.txt file from dtn,iq
+* IQFeedMarketSymbols - automatically download and decompress the latest mkt_symbol.txt file from dtn/iqfeed
 * IQFeedGetHistory - load up with historical data for looking for trading ideas
 * Hdf5Chart - view the contents of the hdf5 data set
 * LiveChart - view an instrument in real time
 * ComboTrading - basics of trading multiple securities, such as various options strategies
 * StickShift2 - some rough code for some option trading ideas
 * HedgedBollinger - some experiments in futures, mostly tracking at the money implied volatility
+* BasketTrading - a work in progress for trading futures based options combinations
+* IndicatorTrading - view and trade with futures level II data
 
 The announcement on my blog:  http://blog.raymond.burkholder.net/index.php?/archives/679-trade-frame-c++-securities-trading-software-development-framework.html
 
