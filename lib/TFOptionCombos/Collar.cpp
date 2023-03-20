@@ -115,7 +115,7 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
     )
   );
 
-  // === close out at 0.10
+  // === close out at minium value
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::SynthShort,
@@ -126,7 +126,7 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
     )
   );
 
-  // === close out at 0.10
+  // === close out at minimum value
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::Cover,
