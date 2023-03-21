@@ -53,13 +53,13 @@ namespace option { // options
 
 namespace {
 
-  static const size_t nLegs( 4 );
+  static const size_t c_nLegs( 4 );
 
   using LegDef = ou::tf::option::LegDef;
-  using rLegDef_t = std::array<LegDef,nLegs>;
+  using rLegDef_t = std::array<LegDef,c_nLegs>;
 
   //long collar: synthetic long, covered call, long put
-  static const rLegDef_t m_rLegDefRise = { // rising momentum
+  static const rLegDef_t c_rLegDefRise = { // rising momentum
     LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Call ), // synthetic long
     LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Put  ), // synthetic long
     LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Call ), // covered
@@ -67,7 +67,7 @@ namespace {
   };
 
   //short collar: synthetic short, covered put, long call
-  static const rLegDef_t m_rLegDefFall = { // falling momentum
+  static const rLegDef_t c_rLegDefFall = { // falling momentum
     LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Put  ), // synthetic short
     LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Call ), // synthetic short
     LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Put  ), // covered
@@ -246,7 +246,7 @@ void Collar::Init( LegNote::Type type ) {
 }
 
 size_t /* static */ Collar::LegCount() {
-  return nLegs;
+  return c_nLegs;
 }
 
 /* static */ void Collar::ChooseLegs( // throw Chain exceptions
@@ -348,7 +348,7 @@ size_t /* static */ Collar::LegCount() {
 
 /* static */ void Collar::FillLegNote( size_t ix, Combo::E20DayDirection direction, LegNote::values_t& values ) {
 
-  assert( ix < nLegs );
+  assert( ix < c_nLegs );
 
   values.m_algo = LegNote::Algo::Collar;
   values.m_state = LegNote::State::Open;
@@ -358,15 +358,15 @@ size_t /* static */ Collar::LegCount() {
       break;
     case E20DayDirection::Rising:
       values.m_momentum = LegNote::Momentum::Rise;
-      values.m_type     = m_rLegDefRise[ix].type;
-      values.m_side     = m_rLegDefRise[ix].side;
-      values.m_option   = m_rLegDefRise[ix].option;
+      values.m_type     = c_rLegDefRise[ix].type;
+      values.m_side     = c_rLegDefRise[ix].side;
+      values.m_option   = c_rLegDefRise[ix].option;
       break;
     case E20DayDirection::Falling:
       values.m_momentum = LegNote::Momentum::Fall;
-      values.m_type     = m_rLegDefFall[ix].type;
-      values.m_side     = m_rLegDefFall[ix].side;
-      values.m_option   = m_rLegDefFall[ix].option;
+      values.m_type     = c_rLegDefFall[ix].type;
+      values.m_side     = c_rLegDefFall[ix].side;
+      values.m_option   = c_rLegDefFall[ix].option;
       break;
   }
 
