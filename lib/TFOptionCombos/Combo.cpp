@@ -73,7 +73,7 @@ void Combo::SetPortfolio( pPortfolio_t pPortfolio ) {
   m_pPortfolio = pPortfolio;
 }
 
-Combo::ComboLeg& Combo::operator[]( LegNote::Type type ) {
+Combo::ComboLeg& Combo::LU( LegNote::Type type ) {
   //auto pair = m_mapComboLeg.equal_range( type );
   //assert( m_mapComboLeg.end() != pair.first );
   //assert( pair.first != pair.second ); // at least one, check for only one?
@@ -276,7 +276,7 @@ double Combo::GetNet( double price ) {
   double dblGamma {};
 
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
-    Leg& leg( entry.second.m_leg );
+    ou::tf::Leg& leg( entry.second.m_leg );
     dblNet += leg.GetNet( price );
     leg.NetGreeks( dblDelta, dblGamma );
     double dblLegConstructedValue = leg.ConstructedValue();
@@ -295,7 +295,7 @@ double Combo::GetNet( double price ) {
 
 void Combo::PlaceOrder( LegNote::Type type, ou::tf::OrderSide::EOrderSide order_side, uint32_t nOrderQuantity ) {
 
-  ComboLeg& cleg( (*this)[type] );
+  ComboLeg& cleg( LU( type ) );
 
   LegNote::Side ln_side = cleg.m_leg.GetLegNote().Values().m_side; // this is normal entry with order_side as buy
 
@@ -374,7 +374,7 @@ void Combo::Close( LegNote::Type type ) {
 bool Combo::CloseItmLegForProfit( double price ) {
   bool bClosed( false );
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
-    Leg& leg( entry.second.m_leg );
+    ou::tf::Leg& leg( entry.second.m_leg );
     bClosed |= leg.CloseItmForProfit( price );
   }
   return bClosed;
@@ -400,7 +400,7 @@ void Combo::TakeProfits( double price ) {
 // so ... the logic needs changing, re-arranging
 void Combo::CloseExpiryItm( double price, const boost::gregorian::date date ) {
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
-    Leg& leg( entry.second.m_leg );
+    ou::tf::Leg& leg( entry.second.m_leg );
     leg.CloseExpiryItm( date, price );
   }
 }
@@ -430,7 +430,7 @@ void Combo::CancelOrders() {
 void Combo::ClosePositions() {
   m_state = State::Closing;
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
-    Leg& leg( entry.second.m_leg );
+    ou::tf::Leg& leg( entry.second.m_leg );
     if ( leg.IsActive() ) {
       pPosition_t pPosition = leg.ClosePosition();
       auto& instance( ou::tf::PortfolioManager::GlobalInstance() ); // NOTE this direct call!!
@@ -442,7 +442,7 @@ void Combo::ClosePositions() {
 bool Combo::AreOrdersActive() const { // TODO: is an external call still necessary?
   bool bOrdersActive( false );
   for ( const mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
-    const Leg& leg( entry.second.m_leg );
+    const ou::tf::Leg& leg( entry.second.m_leg );
     bOrdersActive |= leg.IsOrderActive();
   }
   return bOrdersActive;
@@ -452,7 +452,7 @@ void Combo::SaveSeries( const std::string& sPrefix ) {
   // TODO: after legs are closed, can they still be saved?
   //   should something else be used?  maybe OptionRepository instead?
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
-    Leg& leg( entry.second.m_leg );
+    ou::tf::Leg& leg( entry.second.m_leg );
     leg.SaveSeries( sPrefix );
   }
 }

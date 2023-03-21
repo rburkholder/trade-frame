@@ -194,7 +194,7 @@ protected:
   using mapComboLeg_t = std::multimap<LegNote::Type,ComboLeg>;
   mapComboLeg_t m_mapComboLeg;
 
-  ComboLeg& operator[]( LegNote::Type );
+  ComboLeg& LU( LegNote::Type );
 
   virtual void Init( boost::gregorian::date date, const mapChains_t*, const SpreadSpecs& ) = 0;
   virtual void Init( LegNote::Type ) = 0;

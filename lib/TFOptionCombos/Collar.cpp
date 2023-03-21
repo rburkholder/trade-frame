@@ -375,17 +375,17 @@ void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuan
       switch ( side ) {
         case ou::tf::OrderSide::Buy:
           // TODO: may or may not work - will need to ensure only one entry is present
-          (*this)[ LegNote::Type::SynthLong ]. m_leg.PlaceOrder( ou::tf::OrderSide::Buy,  nOrderQuantity );
-          (*this)[ LegNote::Type::SynthShort ].m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
-          (*this)[ LegNote::Type::Cover ].     m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
-          (*this)[ LegNote::Type::Protect ].   m_leg.PlaceOrder( ou::tf::OrderSide::Buy,  nOrderQuantity );
+          LU( LegNote::Type::SynthLong ). m_leg.PlaceOrder( ou::tf::OrderSide::Buy,  nOrderQuantity );
+          LU( LegNote::Type::SynthShort ).m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
+          LU( LegNote::Type::Cover ).     m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
+          LU( LegNote::Type::Protect ).   m_leg.PlaceOrder( ou::tf::OrderSide::Buy,  nOrderQuantity );
           break;
         case ou::tf::OrderSide::Sell:
           // TODO: may or may not work - will need to ensure only one entry is present
-          (*this)[ LegNote::Type::SynthLong ]. m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
-          (*this)[ LegNote::Type::SynthShort ].m_leg.PlaceOrder( ou::tf::OrderSide::Buy,  nOrderQuantity );
-          (*this)[ LegNote::Type::Cover ].     m_leg.PlaceOrder( ou::tf::OrderSide::Buy,  nOrderQuantity );
-          (*this)[ LegNote::Type::Protect ].   m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
+          LU( LegNote::Type::SynthLong ). m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
+          LU( LegNote::Type::SynthShort ).m_leg.PlaceOrder( ou::tf::OrderSide::Buy,  nOrderQuantity );
+          LU( LegNote::Type::Cover ).     m_leg.PlaceOrder( ou::tf::OrderSide::Buy,  nOrderQuantity );
+          LU( LegNote::Type::Protect ).   m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
           break;
       }
       m_state = State::Executing;
