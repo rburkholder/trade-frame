@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <mutex>
 #include <unordered_map>
 
 #include <TFTrading/Order.h>
@@ -90,9 +91,12 @@ private:
 
   using fOrderExecution_t = std::function<void(EventHolders&)>;
 
+  std::mutex m_mutex;
+
   // TODO: may need to run valgrind on this, had a segmentation fault
   void Update( const std::string& sName, fOrderExecution_t&& f ) {
     if ( m_bExecutionEnabled ) {
+      std::scoped_lock<std::mutex> lock( m_mutex );
       typename mapOrderExecution_t::iterator iter = m_mapOrderExecution.find( sName );
       assert( m_mapOrderExecution.end() != iter );
       EventHolders& eh( iter->second );
@@ -107,6 +111,7 @@ typename SimulationInterface<P,S>::pSymbol_t SimulationInterface<P,S>::AddCSymbo
   if ( m_bExecutionEnabled ) {
     const std::string& sName( pSymbol->GetInstrument()->GetInstrumentName( inherited_t::ID() ) );
 
+    std::scoped_lock<std::mutex> lock( m_mutex );
     typename mapOrderExecution_t::iterator iter = m_mapOrderExecution.find( sName );
     if ( m_mapOrderExecution.end() == iter ) {
       auto pair = m_mapOrderExecution.emplace( sName, EventHolders( pSymbol ) );
