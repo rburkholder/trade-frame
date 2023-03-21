@@ -77,12 +77,10 @@ Collar::Collar()
 : Combo() {}
 
 Collar::Collar( Collar&& rhs )
-: m_mapCollarLeg( std::move( rhs.m_mapCollarLeg ) ),
-  m_mapInitTrackOption( std::move( rhs.m_mapInitTrackOption ) )
+: m_mapInitTrackOption( std::move( rhs.m_mapInitTrackOption ) )
 {}
 
 Collar::~Collar() {
-  m_mapCollarLeg.clear();
 }
 
 // needs to happen before all Legs have been created
@@ -139,20 +137,19 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
 
 }
 
-Collar::CollarLeg& Collar::InitTracker(
+Combo::ComboLeg& Collar::InitTracker(
   LegNote::Type type,
   const mapChains_t* pmapChains,
   boost::gregorian::date date,
   boost::gregorian::days days_to_expiry
 ) {
 
-  mapCollarLeg_t::iterator iterMapCollarLeg = m_mapCollarLeg.find( type );
-  if ( m_mapCollarLeg.end() == iterMapCollarLeg ) {
-    auto pair = m_mapCollarLeg.emplace( std::make_pair( type, CollarLeg() ) );
-    assert( pair.second );
-    iterMapCollarLeg = pair.first;
+  // assumes only one of type
+  mapComboLeg_t::iterator iterMapComboLeg = m_mapComboLeg.find( type );
+  if ( m_mapComboLeg.end() == iterMapComboLeg ) {
+    iterMapComboLeg = m_mapComboLeg.emplace( std::make_pair( type, ComboLeg() ) ); // TODO: migrate this to Combo
   }
-  CollarLeg& cleg( iterMapCollarLeg->second );
+  ComboLeg& cleg( iterMapComboLeg->second );
 
   pPosition_t pPosition( (*this)[type].m_leg.GetPosition() );
   assert( pPosition );
@@ -203,11 +200,11 @@ void Collar::InitTrackLongOption(
     boost::gregorian::days days_to_expiry
     ) {
 
-  CollarLeg& cleg( InitTracker( type, pmapChains, date, days_to_expiry ) );
+  ComboLeg& cleg( InitTracker( type, pmapChains, date, days_to_expiry ) );
 
   namespace ph = std::placeholders;
-  cleg.vfTest.emplace( // invalidates on new size() > capacity()
-    cleg.vfTest.end(),
+  cleg.m_vfTest.emplace( // invalidates on new size() > capacity()
+    cleg.m_vfTest.end(),
     std::bind( &ou::tf::option::Tracker::TestLong, &cleg.m_tracker, ph::_1, ph::_2, ph::_3 ) // Tick
 //    [ tracker = &cleg.m_tracker ]( boost::posix_time::ptime dt, double dblUnderlyingSlope, double dblUnderlyingPrice ){
 //      tracker->TestLong( dt, dblUnderlyingSlope, dblUnderlyingPrice );
@@ -222,15 +219,15 @@ void Collar::InitTrackShortOption(
     boost::gregorian::days days_to_expiry
 ) {
 
-  CollarLeg& cleg( InitTracker( type, pmapChains, date, days_to_expiry ) );
+  ComboLeg& cleg( InitTracker( type, pmapChains, date, days_to_expiry ) );
 
   // a) buy out 0.10 (simply closing the position)
   // b) rotate if itm (somewhere else, affects long & short)
   // c) stop monitoring out of hours
 
   namespace ph = std::placeholders;
-  cleg.vfTest.emplace(
-    cleg.vfTest.end(),
+  cleg.m_vfTest.emplace(
+    cleg.m_vfTest.end(),
     std::bind( &ou::tf::option::Tracker::TestShort, &cleg.m_tracker, ph::_1, ph::_2, ph::_3 ) // Tick
 //    [ tracker = &cleg.m_tracker ]( boost::posix_time::ptime dt,double dblUnderlyingSlope, double dblUnderlyingPrice ){
 //      tracker->TestShort( dt, dblUnderlyingSlope, dblUnderlyingPrice );
@@ -246,36 +243,36 @@ void Collar::Init( LegNote::Type type ) {
 }
 
 void Collar::CalendarRoll( LegNote::Type type ) {
-  mapCollarLeg_t::iterator iter = m_mapCollarLeg.find( type );
-  assert( m_mapCollarLeg.end() != iter );
-  CollarLeg& leg( iter->second );
+  mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
+  assert( m_mapComboLeg.end() != iter );
+  ComboLeg& leg( iter->second );
   leg.m_tracker.CalendarRoll();
 }
 
 void Collar::DiagonalRoll( LegNote::Type type ) {
-  mapCollarLeg_t::iterator iter = m_mapCollarLeg.find( type );
-  assert( m_mapCollarLeg.end() != iter );
-  CollarLeg& leg( iter->second );
+  mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
+  assert( m_mapComboLeg.end() != iter );
+  ComboLeg& leg( iter->second );
   leg.m_tracker.DiagonalRoll();
 }
 
 void Collar::LockLeg( LegNote::Type type ) {
-  mapCollarLeg_t::iterator iter = m_mapCollarLeg.find( type );
-  assert( m_mapCollarLeg.end() != iter );
-  CollarLeg& leg( iter->second );
+  mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
+  assert( m_mapComboLeg.end() != iter );
+  ComboLeg& leg( iter->second );
   leg.m_tracker.Lock( false ); // TODO: need to upate LegNote
 }
 
 void Collar::Close( LegNote::Type type ) {
-  mapCollarLeg_t::iterator iter = m_mapCollarLeg.find( type );
-  assert( m_mapCollarLeg.end() != iter );
-  CollarLeg& leg( iter->second );
+  mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
+  assert( m_mapComboLeg.end() != iter );
+  ComboLeg& leg( iter->second );
   leg.m_tracker.Close();
 }
 
 void Collar::CancelOrders() {
   Combo::CancelOrders();
-  for ( mapCollarLeg_t::value_type& cleg: m_mapCollarLeg ) {
+  for ( mapComboLeg_t::value_type& cleg: m_mapComboLeg ) {
     cleg.second.m_tracker.Quiesce();
     cleg.second.m_monitor.CancelOrder(); // or wait for completion?
   }
@@ -284,7 +281,7 @@ void Collar::CancelOrders() {
 void Collar::GoNeutral( boost::gregorian::date date, boost::posix_time::time_duration time ) {
   // relies on tracker having been quiesced
   // TODO: is the tracker/position active?
-  for ( mapCollarLeg_t::value_type& cleg: m_mapCollarLeg ) {
+  for ( mapComboLeg_t::value_type& cleg: m_mapComboLeg ) {
     // will need improved timing, rather than just end of day
     //cleg.second.m_tracker.TestItmRoll( date, time );
   }
@@ -298,11 +295,11 @@ void Collar::AtClose() {
 void Collar::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {
   Combo::Tick( dblUnderlyingSlope, dblUnderlyingPrice, dt ); // first or last in sequence?
 
-  for ( mapCollarLeg_t::value_type& entry: m_mapCollarLeg ) {
-    CollarLeg& cleg( entry.second );
+  for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
+    ComboLeg& cleg( entry.second );
     if ( cleg.m_monitor.IsOrderActive() ) cleg.m_monitor.Tick( dt );
 
-    for ( vfTest_t::value_type& fTest: cleg.vfTest ) {
+    for ( vfTest_t::value_type& fTest: cleg.m_vfTest ) {
       fTest( dt, dblUnderlyingSlope, dblUnderlyingPrice );
     }
   }

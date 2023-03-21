@@ -90,16 +90,7 @@ private:
   using fTest_t = std::function<void(boost::posix_time::ptime,double,double)>; // underlying slope, price
   using vfTest_t = std::vector<fTest_t>;
 
-  struct CollarLeg { // TODO: migrate this to Combo, then rmeove
-    Tracker m_tracker;
-    ou::tf::MonitorOrder m_monitor; // used for closing, for now
-    vfTest_t vfTest; // functions to test & process leg
-  };
-
-  using mapCollarLeg_t = std::map<LegNote::Type,CollarLeg>; // TODO: migrate to Combo, then remove
-  mapCollarLeg_t m_mapCollarLeg;
-
-  CollarLeg& InitTracker(
+  ComboLeg& InitTracker(
     LegNote::Type type,
     const mapChains_t* pmapChains,
     boost::gregorian::date date,
