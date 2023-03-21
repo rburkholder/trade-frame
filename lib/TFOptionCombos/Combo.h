@@ -28,11 +28,13 @@
 
 #include <TFTrading/Position.h>
 #include <TFTrading/Portfolio.h>
+#include <TFTrading/MonitorOrder.h>
 
 #include <TFOptions/Chain.h>
 
 #include "Leg.h"
 #include "LegNote.h"
+#include "Tracker.h"
 #include "SpreadSpecs.h"
 
 namespace ou { // One Unified
@@ -149,7 +151,6 @@ public:
 
 protected:
 
-  static const double m_dblTwentyPercent;
   static const double m_dblMaxStrikeDelta;
   static const double m_dblMaxStrangleDelta;
 
@@ -160,8 +161,40 @@ protected:
 
   pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
 
-  using mapLeg_t = std::map<LegNote::Type,ou::tf::Leg>;
-  mapLeg_t m_mapLeg;
+  using fTest_t = std::function<void(boost::posix_time::ptime,double,double)>; // underlying slope, price
+  using vfTest_t = std::vector<fTest_t>; // do we need a vector of tests?  or just a single test?
+
+  struct ComboLeg { // migrating from CollarLeg
+
+    enum class State {
+      empty
+    , opening
+    , locked // does this mean an empty m_vfTest? would be useful to pause trading while awaiting a significant manual event
+    , tracking // evaluating vfTest
+    , rolling_in // when rolling from one leg to another (need to link legs?, or just by iterators?) maintain legs during calendar/diagonals, remove old when done, provides transactional view for paired entry/exit for margin maintenance
+    , rolling_out // second of pair when rolling
+    , closing // some cross over with 'rolling'?
+    , done // do no reuse empty, needs to be complete reset (deleted)
+    } m_state;
+
+    ou::tf::Leg m_leg;
+    Tracker m_tracker;
+    ou::tf::MonitorOrder m_monitor; // try for good deal on order
+    vfTest_t m_vfTest; // functions to test & process leg
+
+    ComboLeg(): m_state( State::empty ) {}
+    ComboLeg( ou::tf::Leg&& leg ): m_leg( std::move( leg ) ) {}
+    ComboLeg( ComboLeg&& rhs ): m_leg( std::move( rhs.m_leg ) ) {}
+    ~ComboLeg() { m_state = State::done; m_vfTest.clear(); }
+  };
+
+  // use lambdas to maintain local iterator for specific call types
+  //   eg, in the vfTest lambda, then can locally access tracker/monitor/etc
+
+  using mapComboLeg_t = std::multimap<LegNote::Type,ComboLeg>;
+  mapComboLeg_t m_mapComboLeg;
+
+  ComboLeg& operator[]( LegNote::Type );
 
   virtual void Init( boost::gregorian::date date, const mapChains_t*, const SpreadSpecs& ) = 0;
   virtual void Init( LegNote::Type ) = 0;

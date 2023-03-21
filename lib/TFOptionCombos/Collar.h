@@ -97,7 +97,6 @@ private:
   };
 
   using mapCollarLeg_t = std::map<LegNote::Type,CollarLeg>; // TODO: migrate to Combo, then remove
-  //using mapCollarLeg_t = std::map<std::string,CollarLeg>; // key = generic instrument name
   mapCollarLeg_t m_mapCollarLeg;
 
   CollarLeg& InitTracker(

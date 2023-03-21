@@ -154,7 +154,7 @@ Collar::CollarLeg& Collar::InitTracker(
   }
   CollarLeg& cleg( iterMapCollarLeg->second );
 
-  pPosition_t pPosition( m_mapLeg[type].GetPosition() );
+  pPosition_t pPosition( (*this)[type].m_leg.GetPosition() );
   assert( pPosition );
   citerChain_t citerChain = SelectChain( *pmapChains, date, days_to_expiry );
   const chain_t& chain( citerChain->second );
@@ -524,16 +524,18 @@ void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuan
     case State::Watching:
       switch ( side ) {
         case ou::tf::OrderSide::Buy:
-          m_mapLeg[ LegNote::Type::SynthLong ].PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
-          m_mapLeg[ LegNote::Type::SynthShort ].PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
-          m_mapLeg[ LegNote::Type::Cover ].PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
-          m_mapLeg[ LegNote::Type::Protect ].PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
+          // TODO: may or may not work - will need to ensure only one entry is present
+          (*this)[ LegNote::Type::SynthLong ].m_leg.PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
+          (*this)[ LegNote::Type::SynthShort ].m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
+          (*this)[ LegNote::Type::Cover ].m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
+          (*this)[ LegNote::Type::Protect ].m_leg.PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
           break;
         case ou::tf::OrderSide::Sell:
-          m_mapLeg[ LegNote::Type::SynthLong ].PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
-          m_mapLeg[ LegNote::Type::SynthShort ].PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
-          m_mapLeg[ LegNote::Type::Cover ].PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
-          m_mapLeg[ LegNote::Type::Protect ].PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
+          // TODO: may or may not work - will need to ensure only one entry is present
+          (*this)[ LegNote::Type::SynthLong ].m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
+          (*this)[ LegNote::Type::SynthShort ].m_leg.PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
+          (*this)[ LegNote::Type::Cover ].m_leg.PlaceOrder( ou::tf::OrderSide::Buy, nOrderQuantity );
+          (*this)[ LegNote::Type::Protect ].m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
           break;
       }
       m_state = State::Executing;
@@ -543,7 +545,7 @@ void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuan
 
 void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide order_side, uint32_t nOrderQuantity, LegNote::Type type ) {
 
-  LegNote::Side ln_side = m_mapLeg[type].GetLegNote().Values().m_side; // this is normal entry with order_side as buy
+  LegNote::Side ln_side = (*this)[type].m_leg.GetLegNote().Values().m_side; // this is normal entry with order_side as buy
 
   if ( ou::tf::OrderSide::Buy == order_side ) {
     switch ( ln_side ) { // normal mapping
@@ -569,7 +571,7 @@ void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide order_side, uint32_t nOrd
   switch ( m_state ) {
     case State::Positions: // doesn't confirm both put/call are available
     case State::Watching:
-      m_mapLeg[type].PlaceOrder( order_side, nOrderQuantity );
+      (*this)[type].m_leg.PlaceOrder( order_side, nOrderQuantity );
       m_state = State::Executing;
       break;
   }
