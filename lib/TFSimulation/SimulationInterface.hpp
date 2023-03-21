@@ -93,7 +93,6 @@ private:
 
   std::mutex m_mutex;
 
-  // TODO: may need to run valgrind on this, had a segmentation fault
   void Update( const std::string& sName, fOrderExecution_t&& f ) {
     if ( m_bExecutionEnabled ) {
       std::scoped_lock<std::mutex> lock( m_mutex );
