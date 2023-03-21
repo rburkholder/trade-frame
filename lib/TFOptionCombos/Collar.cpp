@@ -223,24 +223,10 @@ size_t /* static */ Collar::LegCount() {
 
         const double strikeProtective( chainBack.Put_Atm( strikeSyntheticBack ) ); // rounding problem across chains
 
-        //if ( strikeCovered > priceUnderlying ) { // no longer feasible with a 1 strike covered
-          fLegSelected( strikeSyntheticBack,  citerChainBack->first,  chainBack.GetIQFeedNameCall(  strikeSyntheticBack ) );
-          fLegSelected( strikeSyntheticFront, citerChainFront->first, chainFront.GetIQFeedNamePut(  strikeSyntheticFront ) );
-          fLegSelected( strikeCovered,        citerChainFront->first, chainFront.GetIQFeedNameCall( strikeCovered ) );
-          fLegSelected( strikeProtective,     citerChainBack->first,  chainBack.GetIQFeedNamePut(   strikeProtective ) );
-        //}
-        //else {
-        //  bOk = false;
-        //  std::cout
-        //    << "Collar::ChooseLegs rising mismatch: "
-        //    << priceUnderlying << ","
-        //    << strikeSyntheticBack << ","
-        //    << strikeSyntheticFront << ","
-        //    << strikeCovered << ","
-        //    << strikeProtective
-        //    << std::endl;
-        //}
-
+        fLegSelected( strikeSyntheticBack,  citerChainBack->first,  chainBack.GetIQFeedNameCall(  strikeSyntheticBack ) );
+        fLegSelected( strikeSyntheticFront, citerChainFront->first, chainFront.GetIQFeedNamePut(  strikeSyntheticFront ) );
+        fLegSelected( strikeCovered,        citerChainFront->first, chainFront.GetIQFeedNameCall( strikeCovered ) );
+        fLegSelected( strikeProtective,     citerChainBack->first,  chainBack.GetIQFeedNamePut(   strikeProtective ) );
       }
       break;
     case E20DayDirection::Falling:
@@ -253,24 +239,10 @@ size_t /* static */ Collar::LegCount() {
 
         const double strikeProtective( chainBack.Call_Atm( strikeSyntheticBack ) ); // rounding problem across chains
 
-        //if ( strikeCovered < priceUnderlying ) { // no longer feasible with a 1 strike covered
-          fLegSelected( strikeSyntheticBack,  citerChainBack->first,  chainBack.GetIQFeedNamePut(   strikeSyntheticBack ) );
-          fLegSelected( strikeSyntheticFront, citerChainFront->first, chainFront.GetIQFeedNameCall( strikeSyntheticFront ) );
-          fLegSelected( strikeCovered,        citerChainFront->first, chainFront.GetIQFeedNamePut(  strikeCovered ) );
-          fLegSelected( strikeProtective,     citerChainBack->first,  chainBack.GetIQFeedNameCall(  strikeProtective ) );
-        //}
-        //else {
-        //  bOk = false;
-        //  std::cout
-        //    << "Collar::ChooseLegs falling mismatch: "
-        //    << priceUnderlying << ","
-        //    << strikeSyntheticBack << ","
-        //    << strikeSyntheticFront << ","
-        //    << strikeCovered << ","
-        //    << strikeProtective
-        //    << std::endl;
-        //}
-
+        fLegSelected( strikeSyntheticBack,  citerChainBack->first,  chainBack.GetIQFeedNamePut(   strikeSyntheticBack ) );
+        fLegSelected( strikeSyntheticFront, citerChainFront->first, chainFront.GetIQFeedNameCall( strikeSyntheticFront ) );
+        fLegSelected( strikeCovered,        citerChainFront->first, chainFront.GetIQFeedNamePut(  strikeCovered ) );
+        fLegSelected( strikeProtective,     citerChainBack->first,  chainBack.GetIQFeedNameCall(  strikeProtective ) );
       }
       break;
   }
@@ -369,6 +341,7 @@ size_t /* static */ Collar::LegCount() {
 }
 
 void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuantity ) {
+  // TODO: place as multi-leg basket order
   switch ( m_state ) {
     case State::Positions: // doesn't confirm both put/call are available
     case State::Watching:
