@@ -270,8 +270,7 @@ void Tracker::OptionCandidate_HandleQuote( const ou::tf::Quote& quote ) {
               // is un-buyable, or is grotesquely bad
             }
             else {
-              //if ( !m_bLock ) {
-              if ( false ) {
+              if ( !m_bLock ) {
                 assert( nullptr == m_fOptionRoll_Construct );
                 assert( nullptr == m_fOptionRoll_Open );
                 auto pOldWatch = m_pPosition->GetWatch();
