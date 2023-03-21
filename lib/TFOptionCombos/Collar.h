@@ -22,10 +22,7 @@
 #ifndef COLLAR_H
 #define COLLAR_H
 
-#include <TFTrading/MonitorOrder.h>
-
 #include "Combo.h"
-#include "Tracker.h"
 #include "SpreadSpecs.h"
 
 namespace ou { // One Unified
@@ -74,13 +71,6 @@ private:
   using fInitTrackOption_t = std::function<void(void)>;
   using mapInitTrackOption_t = std::map<LegNote::Type,fInitTrackOption_t>;
   mapInitTrackOption_t m_mapInitTrackOption;
-
-  ComboLeg& InitTracker(
-    LegNote::Type type,
-    const mapChains_t* pmapChains,
-    boost::gregorian::date date,
-    boost::gregorian::days days_to_expiry
-  );
 
   void InitTrackLongOption(
     LegNote::Type type,

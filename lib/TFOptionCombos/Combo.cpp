@@ -19,7 +19,9 @@
  * Created on June 7, 2019, 5:08 PM
  */
 
- #include <TFTrading/PortfolioManager.h>
+#include <TFTrading/PortfolioManager.h>
+
+#include <TFOptions/Chains.h>
 
 #include "Combo.h"
 
@@ -145,6 +147,61 @@ void Combo::DeactivatePositionOption( pPosition_t pPosition ) {
   //assert( pWatch->GetInstrument()->IsOption() ); // TODO may need to change based upon other combo types
   pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
   m_fDeactivateOption( pOption );
+}
+
+Combo::ComboLeg& Combo::InitTracker(
+  LegNote::Type type,
+  const mapChains_t* pmapChains,
+  boost::gregorian::date date,
+  boost::gregorian::days days_to_expiry
+) {
+
+  // assumes only one of type
+  mapComboLeg_t::iterator iterMapComboLeg = m_mapComboLeg.find( type );
+  if ( m_mapComboLeg.end() == iterMapComboLeg ) {
+    iterMapComboLeg = m_mapComboLeg.emplace( std::make_pair( type, ComboLeg() ) ); // TODO: migrate this to Combo
+  }
+  ComboLeg& cleg( iterMapComboLeg->second );
+
+  pPosition_t pPosition( (*this)[type].m_leg.GetPosition() );
+  assert( pPosition );
+  citerChain_t citerChain = SelectChain( *pmapChains, date, days_to_expiry );
+  const chain_t& chain( citerChain->second );
+
+  cleg.m_tracker.Initialize(
+    pPosition, &chain,
+    [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
+      m_fConstructOption( sName, std::move( f ) );
+      },
+    [this,&cleg]( pPosition_t pPositionOld ) { // m_fCloseLeg
+
+      const std::string sNotes( pPositionOld->Notes() );
+      LegNote ln( sNotes );
+
+      LegNote::values_t values( ln.Values() );
+      values.m_state = LegNote::State::Closed;
+      ln.Assign( values );
+      pPositionOld->SetNotes( ln.Encode() );
+      auto& instance( ou::tf::PortfolioManager::GlobalInstance() ); // NOTE this direct call!!
+      instance.PositionUpdateNotes( pPositionOld );
+
+      cleg.m_monitor.SetPosition( pPositionOld );
+      cleg.m_monitor.ClosePosition();
+
+    },
+    [this]( pOption_t pOption, const std::string& sNotes )->pPosition_t { // m_fOpenLeg
+
+      // TODO: will need to supply previous option => stop calc, may need a clean up lambda
+      //   then the note change above can be performed elsewhere
+
+      pPosition_t pPosition = m_fOpenPosition( this, pOption, sNotes );
+      // Combo::OverwritePosition( pPosition ); - not needed, performed in fOpenPosition
+      return pPosition;
+    }
+  );
+
+  return cleg;
+
 }
 
 // TODO: make use of doubleUnderlyingSlope to trigger exit latch

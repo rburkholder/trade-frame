@@ -199,6 +199,13 @@ protected:
   virtual void Init( boost::gregorian::date date, const mapChains_t*, const SpreadSpecs& ) = 0;
   virtual void Init( LegNote::Type ) = 0;
 
+  ComboLeg& InitTracker(
+    LegNote::Type type,
+    const mapChains_t* pmapChains,
+    boost::gregorian::date date,
+    boost::gregorian::days days_to_expiry
+  );
+
   void CalendarRoll( LegNote::Type );
   void DiagonalRoll( LegNote::Type );
   void LockLeg( LegNote::Type );
