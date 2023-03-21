@@ -163,7 +163,7 @@ Combo::ComboLeg& Combo::InitTracker(
   }
   ComboLeg& cleg( iterMapComboLeg->second );
 
-  pPosition_t pPosition( (*this)[type].m_leg.GetPosition() );
+  pPosition_t pPosition( cleg.m_leg.GetPosition() );
   assert( pPosition );
   citerChain_t citerChain = SelectChain( *pmapChains, date, days_to_expiry );
   const chain_t& chain( citerChain->second );
@@ -293,9 +293,11 @@ double Combo::GetNet( double price ) {
   return dblNet;
 }
 
-void Combo::PlaceOrder( ou::tf::OrderSide::EOrderSide order_side, uint32_t nOrderQuantity, LegNote::Type type ) {
+void Combo::PlaceOrder( LegNote::Type type, ou::tf::OrderSide::EOrderSide order_side, uint32_t nOrderQuantity ) {
 
-  LegNote::Side ln_side = (*this)[type].m_leg.GetLegNote().Values().m_side; // this is normal entry with order_side as buy
+  ComboLeg& cleg( (*this)[type] );
+
+  LegNote::Side ln_side = cleg.m_leg.GetLegNote().Values().m_side; // this is normal entry with order_side as buy
 
   if ( ou::tf::OrderSide::Buy == order_side ) {
     switch ( ln_side ) { // normal mapping
@@ -321,7 +323,7 @@ void Combo::PlaceOrder( ou::tf::OrderSide::EOrderSide order_side, uint32_t nOrde
   switch ( m_state ) {
     case State::Positions: // doesn't confirm both put/call are available
     case State::Watching:
-      (*this)[type].m_leg.PlaceOrder( order_side, nOrderQuantity );
+      cleg.m_leg.PlaceOrder( order_side, nOrderQuantity );
       m_state = State::Executing;
       break;
   }

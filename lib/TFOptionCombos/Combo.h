@@ -129,7 +129,7 @@ public:
   void Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt );
 
   virtual void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity ) = 0;
-  void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity, LegNote::Type );
+  void PlaceOrder( LegNote::Type, ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity );
 
   virtual double GetNet( double price );
 
