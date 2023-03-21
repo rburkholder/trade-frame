@@ -546,7 +546,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
       pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, note );
       using LegNote = ou::tf::option::LegNote;
       const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
-      pCombo->PlaceOrder( ou::tf::OrderSide::Buy, 1, lnValues.m_type );  // TODO: perform this in the combo, rename to AddPosition?
+      p->PlaceOrder( ou::tf::OrderSide::Buy, 1, lnValues.m_type );  // TODO: perform this in the combo, rename to AddPosition?
       return pPosition;
     },
     [this]( pOption_t pOption ){ // fDeactivateOption_t

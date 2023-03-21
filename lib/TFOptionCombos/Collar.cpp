@@ -58,12 +58,15 @@ namespace {
   using LegDef = ou::tf::option::LegDef;
   using rLegDef_t = std::array<LegDef,nLegs>;
 
+  //long collar: synthetic long, covered call, long put
   static const rLegDef_t m_rLegDefRise = { // rising momentum
     LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Call ), // synthetic long
     LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Put  ), // synthetic long
     LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Call ), // covered
     LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Put  )  // protective
   };
+
+  //short collar: synthetic short, covered put, long call
   static const rLegDef_t m_rLegDefFall = { // falling momentum
     LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Put  ), // synthetic short
     LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Call ), // synthetic short
@@ -240,99 +243,6 @@ void Collar::Init( LegNote::Type type ) {
   mapInitTrackOption_t::iterator iter = m_mapInitTrackOption.find( type );
   assert( m_mapInitTrackOption.end() != iter );
   iter->second();
-}
-
-void Collar::CalendarRoll( LegNote::Type type ) {
-  mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
-  assert( m_mapComboLeg.end() != iter );
-  ComboLeg& leg( iter->second );
-  leg.m_tracker.CalendarRoll();
-}
-
-void Collar::DiagonalRoll( LegNote::Type type ) {
-  mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
-  assert( m_mapComboLeg.end() != iter );
-  ComboLeg& leg( iter->second );
-  leg.m_tracker.DiagonalRoll();
-}
-
-void Collar::LockLeg( LegNote::Type type ) {
-  mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
-  assert( m_mapComboLeg.end() != iter );
-  ComboLeg& leg( iter->second );
-  leg.m_tracker.Lock( false ); // TODO: need to upate LegNote
-}
-
-void Collar::Close( LegNote::Type type ) {
-  mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
-  assert( m_mapComboLeg.end() != iter );
-  ComboLeg& leg( iter->second );
-  leg.m_tracker.Close();
-}
-
-void Collar::CancelOrders() {
-  Combo::CancelOrders();
-  for ( mapComboLeg_t::value_type& cleg: m_mapComboLeg ) {
-    cleg.second.m_tracker.Quiesce();
-    cleg.second.m_monitor.CancelOrder(); // or wait for completion?
-  }
-}
-
-void Collar::GoNeutral( boost::gregorian::date date, boost::posix_time::time_duration time ) {
-  // relies on tracker having been quiesced
-  // TODO: is the tracker/position active?
-  for ( mapComboLeg_t::value_type& cleg: m_mapComboLeg ) {
-    // will need improved timing, rather than just end of day
-    //cleg.second.m_tracker.TestItmRoll( date, time );
-  }
-}
-
-// TODO: need to disable Tracker monitoring out of hours
-void Collar::AtClose() {
-  // maybe remove options?
-}
-
-void Collar::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {
-  Combo::Tick( dblUnderlyingSlope, dblUnderlyingPrice, dt ); // first or last in sequence?
-
-  for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
-    ComboLeg& cleg( entry.second );
-    if ( cleg.m_monitor.IsOrderActive() ) cleg.m_monitor.Tick( dt );
-
-    for ( vfTest_t::value_type& fTest: cleg.m_vfTest ) {
-      fTest( dt, dblUnderlyingSlope, dblUnderlyingPrice );
-    }
-  }
-
-  // TODO:
-  //   at expiry:
-  //     otm: accounting adjustment for expiring, enter new position (itm or at expiring strike?)
-  //     itm: horizontal calendar roll
-  //   buy back short options at 0.10? using GTC trade? (0.10 is probably easier) -- don't bother at expiry
-  //     re-enter, or just keep the leg expired?
-  //  position note needs to be updated on roll, and such
-
-  // manual accounting:
-  //  was otm, but crossed itm and was assigned
-
-  // 2021/01/03 set old positions to State=Expired/Closed
-  //  * trigger on Leg over-write
-  //  * should always have four active legs
-
-  // 2021/01/03 need to close combos, and no longer load them
-  //  those in the correct direction, keep
-  //  those in the wrong direction, close
-
-  // To Consider:
-
-  // 2020/11/12 when rolling a call up, buy a put for the downward journey?
-  //            when rolling a put down, buy a call for the upward journey?
-  // 2020/11/12 upon return to original strike, buy in again?
-
-  // change 20 day slope to 5 day slope
-
-  // when closing a dead short, consider going long on the same price (buy-out then buy-in)
-
 }
 
 size_t /* static */ Collar::LegCount() {
@@ -540,40 +450,6 @@ void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuan
   }
 }
 
-void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide order_side, uint32_t nOrderQuantity, LegNote::Type type ) {
-
-  LegNote::Side ln_side = (*this)[type].m_leg.GetLegNote().Values().m_side; // this is normal entry with order_side as buy
-
-  if ( ou::tf::OrderSide::Buy == order_side ) {
-    switch ( ln_side ) { // normal mapping
-      case LegNote::Side::Long:
-        order_side = ou::tf::OrderSide::Buy;
-        break;
-      case LegNote::Side::Short:
-        order_side = ou::tf::OrderSide::Sell;
-        break;
-    }
-  }
-  else { // reverse the mapping
-    switch ( ln_side ) {
-      case LegNote::Side::Long:
-        order_side = ou::tf::OrderSide::Sell;
-        break;
-      case LegNote::Side::Short:
-        order_side = ou::tf::OrderSide::Buy;
-        break;
-    }
-  }
-
-  switch ( m_state ) {
-    case State::Positions: // doesn't confirm both put/call are available
-    case State::Watching:
-      (*this)[type].m_leg.PlaceOrder( order_side, nOrderQuantity );
-      m_state = State::Executing;
-      break;
-  }
-}
-
 } // namespace option
 } // namespace tf
 } // namespace ou
@@ -585,9 +461,6 @@ void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide order_side, uint32_t nOrd
 Use Stochastic for entry at the edges, and improve the mean reversion
 
 2020/07/13
-
-long collar: synthetic long, covered call, long put
-short collar: synthetic short, covered put, long call
 
 trigger when to rollup / rolldown, then watch sma crossover for actual execution
 need to flag for day cross over, if it doesn't happen with in the trading day

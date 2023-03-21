@@ -153,6 +153,7 @@ void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt
     Leg& leg( entry.second.m_leg );
     leg.Tick( dt, dblUnderlyingPrice );
   }
+
   switch ( m_state ) {  // TODO: make this a per-leg test?  even need state management?
     case State::Executing:
       if ( !AreOrdersActive() ) {
@@ -163,7 +164,52 @@ void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt
       //Update( dblUnderlyingSlope, dblPriceUnderlying );
       break;
   }
+
+  // from original Collar
+  for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
+    ComboLeg& cleg( entry.second );
+    if ( cleg.m_monitor.IsOrderActive() ) cleg.m_monitor.Tick( dt );
+
+    for ( vfTest_t::value_type& fTest: cleg.m_vfTest ) {
+      fTest( dt, dblUnderlyingSlope, dblUnderlyingPrice );
+    }
+  }
 }
+
+//void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {
+//  Combo::Tick( dblUnderlyingSlope, dblUnderlyingPrice, dt ); // first or last in sequence?
+
+
+  // TODO:
+  //   at expiry:
+  //     otm: accounting adjustment for expiring, enter new position (itm or at expiring strike?)
+  //     itm: horizontal calendar roll
+  //   buy back short options at 0.10? using GTC trade? (0.10 is probably easier) -- don't bother at expiry
+  //     re-enter, or just keep the leg expired?
+  //  position note needs to be updated on roll, and such
+
+  // manual accounting:
+  //  was otm, but crossed itm and was assigned
+
+  // 2021/01/03 set old positions to State=Expired/Closed
+  //  * trigger on Leg over-write
+  //  * should always have four active legs
+
+  // 2021/01/03 need to close combos, and no longer load them
+  //  those in the correct direction, keep
+  //  those in the wrong direction, close
+
+  // To Consider:
+
+  // 2020/11/12 when rolling a call up, buy a put for the downward journey?
+  //            when rolling a put down, buy a call for the upward journey?
+  // 2020/11/12 upon return to original strike, buy in again?
+
+  // change 20 day slope to 5 day slope
+
+  // when closing a dead short, consider going long on the same price (buy-out then buy-in)
+
+//}
 
 double Combo::GetNet( double price ) {
 
@@ -190,6 +236,40 @@ double Combo::GetNet( double price ) {
   return dblNet;
 }
 
+void Combo::PlaceOrder( ou::tf::OrderSide::EOrderSide order_side, uint32_t nOrderQuantity, LegNote::Type type ) {
+
+  LegNote::Side ln_side = (*this)[type].m_leg.GetLegNote().Values().m_side; // this is normal entry with order_side as buy
+
+  if ( ou::tf::OrderSide::Buy == order_side ) {
+    switch ( ln_side ) { // normal mapping
+      case LegNote::Side::Long:
+        order_side = ou::tf::OrderSide::Buy;
+        break;
+      case LegNote::Side::Short:
+        order_side = ou::tf::OrderSide::Sell;
+        break;
+    }
+  }
+  else { // reverse the mapping
+    switch ( ln_side ) {
+      case LegNote::Side::Long:
+        order_side = ou::tf::OrderSide::Sell;
+        break;
+      case LegNote::Side::Short:
+        order_side = ou::tf::OrderSide::Buy;
+        break;
+    }
+  }
+
+  switch ( m_state ) {
+    case State::Positions: // doesn't confirm both put/call are available
+    case State::Watching:
+      (*this)[type].m_leg.PlaceOrder( order_side, nOrderQuantity );
+      m_state = State::Executing;
+      break;
+  }
+}
+
 bool Combo::CloseItmLeg( double price ) {
   bool bClosed( false );
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
@@ -199,6 +279,39 @@ bool Combo::CloseItmLeg( double price ) {
   return bClosed;
 }
 
+void Combo::CalendarRoll( LegNote::Type type ) {
+  mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
+  assert( m_mapComboLeg.end() != iter );
+  ComboLeg& leg( iter->second );
+  leg.m_tracker.CalendarRoll();
+}
+
+void Combo::DiagonalRoll( LegNote::Type type ) {
+  mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
+  assert( m_mapComboLeg.end() != iter );
+  ComboLeg& leg( iter->second );
+  leg.m_tracker.DiagonalRoll();
+}
+
+void Combo::LockLeg( LegNote::Type type ) {
+  mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
+  assert( m_mapComboLeg.end() != iter );
+  ComboLeg& leg( iter->second );
+  leg.m_tracker.Lock( false ); // TODO: need to upate LegNote
+}
+
+// TODO: need to disable Tracker monitoring out of hours
+void Combo::AtClose() {
+  // maybe remove options?
+}
+
+void Combo::Close( LegNote::Type type ) {
+  mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
+  assert( m_mapComboLeg.end() != iter );
+  ComboLeg& leg( iter->second );
+  leg.m_tracker.Close();
+}
+
 bool Combo::CloseItmLegForProfit( double price ) {
   bool bClosed( false );
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
@@ -206,6 +319,15 @@ bool Combo::CloseItmLegForProfit( double price ) {
     bClosed |= leg.CloseItmForProfit( price );
   }
   return bClosed;
+}
+
+void Combo::GoNeutral( boost::gregorian::date date, boost::posix_time::time_duration time ) {
+  // relies on tracker having been quiesced
+  // TODO: is the tracker/position active?
+  for ( mapComboLeg_t::value_type& cleg: m_mapComboLeg ) {
+    // will need improved timing, rather than just end of day
+    //cleg.second.m_tracker.TestItmRoll( date, time );
+  }
 }
 
 void Combo::CloseForProfits( double price ) {
@@ -237,7 +359,11 @@ void Combo::CloseFarItm( double price ) {
 void Combo::CancelOrders() {
   m_state = State::Canceled;
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
-    Leg& leg( entry.second.m_leg );
+    ComboLeg& cleg( entry.second );
+    cleg.m_tracker.Quiesce();
+    cleg.m_monitor.CancelOrder(); // or wait for completion?
+
+    Leg& leg( cleg.m_leg );
     leg.CancelOrder();
   }
 }

@@ -62,33 +62,18 @@ public:
     const SpreadSpecs&
     );
 
-  virtual void Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt );
-
   // long by default for entry, short doesn't make much sense due to combo type
   virtual void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity );
-  virtual void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity, LegNote::Type ); // needed?
-
-  virtual void CancelOrders();
-  virtual void GoNeutral( boost::gregorian::date date, boost::posix_time::time_duration time );
-  virtual void AtClose();
 
 protected:
   virtual void Init( boost::gregorian::date, const mapChains_t*, const SpreadSpecs& );
   virtual void Init( LegNote::Type );
-
-  virtual void CalendarRoll( LegNote::Type );
-  virtual void DiagonalRoll( LegNote::Type );
-  virtual void LockLeg( LegNote::Type );
-  virtual void Close( LegNote::Type );
 
 private:
 
   using fInitTrackOption_t = std::function<void(void)>;
   using mapInitTrackOption_t = std::map<LegNote::Type,fInitTrackOption_t>;
   mapInitTrackOption_t m_mapInitTrackOption;
-
-  using fTest_t = std::function<void(boost::posix_time::ptime,double,double)>; // underlying slope, price
-  using vfTest_t = std::vector<fTest_t>;
 
   ComboLeg& InitTracker(
     LegNote::Type type,

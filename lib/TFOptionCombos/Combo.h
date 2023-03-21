@@ -126,15 +126,15 @@ public:
 
   const LegNote::values_t& SetPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::EColour );
 
-  virtual void Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt );
+  void Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt );
 
   virtual void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity ) = 0;
-  virtual void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity, LegNote::Type ) = 0;
+  void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity, LegNote::Type );
 
   virtual double GetNet( double price );
 
-  virtual void GoNeutral( boost::gregorian::date date, boost::posix_time::time_duration time ) {}
-  virtual void AtClose() {}
+  void GoNeutral( boost::gregorian::date date, boost::posix_time::time_duration time );
+  void AtClose();
 
   void CloseForProfits( double price );
   void TakeProfits( double price );
@@ -143,7 +143,7 @@ public:
   bool CloseItmLeg( double price );
   bool CloseItmLegForProfit( double price );
 
-  virtual void CancelOrders();
+  void CancelOrders();
   void ClosePositions();  // TODO: adjust in superclass
 
   bool AreOrdersActive() const;
@@ -199,10 +199,10 @@ protected:
   virtual void Init( boost::gregorian::date date, const mapChains_t*, const SpreadSpecs& ) = 0;
   virtual void Init( LegNote::Type ) = 0;
 
-  virtual void CalendarRoll( LegNote::Type ) = 0;
-  virtual void DiagonalRoll( LegNote::Type ) = 0;
-  virtual void LockLeg( LegNote::Type ) = 0;
-  virtual void Close( LegNote::Type ) = 0;
+  void CalendarRoll( LegNote::Type );
+  void DiagonalRoll( LegNote::Type );
+  void LockLeg( LegNote::Type );
+  void Close( LegNote::Type );
 
   void DeactivatePositionOption( pPosition_t );
 
