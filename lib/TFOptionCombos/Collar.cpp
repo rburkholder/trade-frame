@@ -149,6 +149,7 @@ void Collar::InitTrackLongOption(
   ComboLeg& cleg( InitTracker( type, pmapChains, date, days_to_expiry ) );
 
   namespace ph = std::placeholders;
+
   cleg.m_vfTest.emplace( // invalidates on new size() > capacity()
     cleg.m_vfTest.end(),
     std::bind( &ou::tf::option::Tracker::TestLong, &cleg.m_tracker, ph::_1, ph::_2, ph::_3 ) // Tick
@@ -172,6 +173,7 @@ void Collar::InitTrackShortOption(
   // c) stop monitoring out of hours
 
   namespace ph = std::placeholders;
+
   cleg.m_vfTest.emplace(
     cleg.m_vfTest.end(),
     std::bind( &ou::tf::option::Tracker::TestShort, &cleg.m_tracker, ph::_1, ph::_2, ph::_3 ) // Tick
@@ -193,12 +195,12 @@ size_t /* static */ Collar::LegCount() {
 }
 
 /* static */ void Collar::ChooseLegs( // throw Chain exceptions
-    Combo::E20DayDirection direction,
-    const mapChains_t& chains,
-    boost::gregorian::date date,
-    double priceUnderlying,
-    const SpreadSpecs& specs,
-    const fLegSelected_t& fLegSelected
+  Combo::E20DayDirection direction
+, const mapChains_t& chains
+, boost::gregorian::date date
+, const SpreadSpecs& specs
+, double priceUnderlying
+, const fLegSelected_t& fLegSelected
 )
 {
 
@@ -288,13 +290,13 @@ size_t /* static */ Collar::LegCount() {
 }
 
 /* static */ std::string Collar::Name(
-     const std::string& sUnderlying,
-     const mapChains_t& chains,
-     boost::gregorian::date date,
-     double price,
-     Combo::E20DayDirection direction,
-     const SpreadSpecs& specs
-     ) {
+    Combo::E20DayDirection direction
+  , const mapChains_t& chains
+  , boost::gregorian::date date
+  , const SpreadSpecs& specs
+  , double price
+  , const std::string& sUnderlying
+  ) {
 
   std::string sName( "collar-" + sUnderlying );
   size_t ix {};
@@ -309,7 +311,7 @@ size_t /* static */ Collar::LegCount() {
   }
 
   ChooseLegs(
-    direction, chains, date, price, specs,
+    direction, chains, date, specs, price,
     [&sName,&ix]( double strike, boost::gregorian::date date, const std::string& sIQFeedName ){
       switch ( ix ) {
         case 0:
@@ -346,23 +348,26 @@ void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuan
     case State::Positions: // doesn't confirm both put/call are available
     case State::Watching:
       switch ( side ) {
-        case ou::tf::OrderSide::Buy:
-          // TODO: may or may not work - will need to ensure only one entry is present
+        case ou::tf::OrderSide::Buy: // typical entry
           LU( LegNote::Type::SynthLong ). m_leg.PlaceOrder( ou::tf::OrderSide::Buy,  nOrderQuantity );
           LU( LegNote::Type::SynthShort ).m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
           LU( LegNote::Type::Cover ).     m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
           LU( LegNote::Type::Protect ).   m_leg.PlaceOrder( ou::tf::OrderSide::Buy,  nOrderQuantity );
           break;
-        case ou::tf::OrderSide::Sell:
-          // TODO: may or may not work - will need to ensure only one entry is present
+        case ou::tf::OrderSide::Sell: // unusual
           LU( LegNote::Type::SynthLong ). m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
           LU( LegNote::Type::SynthShort ).m_leg.PlaceOrder( ou::tf::OrderSide::Buy,  nOrderQuantity );
           LU( LegNote::Type::Cover ).     m_leg.PlaceOrder( ou::tf::OrderSide::Buy,  nOrderQuantity );
           LU( LegNote::Type::Protect ).   m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
           break;
+        default:
+          assert( false );
       }
       m_state = State::Executing;
       break;
+    case State::Initializing:
+    case State::Executing:
+      assert( false );
   }
 }
 

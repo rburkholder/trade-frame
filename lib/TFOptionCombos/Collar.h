@@ -41,22 +41,23 @@ public:
   static size_t LegCount();
 
   static void ChooseLegs( // throw Chain exceptions
-    Combo::E20DayDirection direction,
-    const mapChains_t& chains,
-    boost::gregorian::date,
-    double priceUnderlying,
-    const SpreadSpecs&,
-    const fLegSelected_t& );
+    Combo::E20DayDirection
+  , const mapChains_t& chains
+  , boost::gregorian::date
+  , const SpreadSpecs&
+  , double priceUnderlying
+  , const fLegSelected_t&
+  );
 
   static void FillLegNote( size_t ix, Combo::E20DayDirection, LegNote::values_t& );
 
   static std::string Name(
-    const std::string& sUnderlying,
-    const mapChains_t& chains,
-    boost::gregorian::date date,
-    double price,
-    Combo::E20DayDirection,
-    const SpreadSpecs&
+    Combo::E20DayDirection
+  , const mapChains_t& chains
+  , boost::gregorian::date
+  , const SpreadSpecs&
+  , double price
+  , const std::string& sUnderlying
     );
 
   // long by default for entry, short doesn't make much sense due to combo type

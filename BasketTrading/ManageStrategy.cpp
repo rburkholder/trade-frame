@@ -595,12 +595,12 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             if ( m_pValidateOptions->ValidateBidAsk(
               dateBar, mid, 11,
               [this,mid,direction]( const mapChains_t& chains, boost::gregorian::date date, double price, combo_t::fLegSelected_t&& fLegSelected ){
-                combo_t::ChooseLegs( direction, chains, date, mid, m_specsSpread, fLegSelected );
+                combo_t::ChooseLegs( direction, chains, date, m_specsSpread, mid, fLegSelected );
               }
             ) ) {
 
               const idPortfolio_t idPortfolio
-                = combo_t::Name( sUnderlying, m_mapChains, dateBar, mid, direction, m_specsSpread );
+                = combo_t::Name( direction, m_mapChains, dateBar, m_specsSpread, mid ,sUnderlying );
 
               if ( m_fAuthorizeSimple( idPortfolio, sUnderlying, false ) ) {
 
