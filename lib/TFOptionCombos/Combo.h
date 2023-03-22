@@ -206,6 +206,20 @@ protected:
     boost::gregorian::days days_to_expiry
   );
 
+  void InitTrackLongOption(
+    LegNote::Type type,
+    const mapChains_t* pmapChains,
+    boost::gregorian::date date,
+    boost::gregorian::days days_to_expiry
+    );
+
+  void InitTrackShortOption(
+    LegNote::Type type,
+    const mapChains_t* pmapChains,
+    boost::gregorian::date date,
+    boost::gregorian::days days_to_expiry
+    );
+
   void CalendarRoll( LegNote::Type );
   void DiagonalRoll( LegNote::Type );
   void LockLeg( LegNote::Type );
@@ -216,6 +230,12 @@ protected:
 private:
 
 };
+
+// TODO:
+//  one time only leg use:
+//     do not overwrite a Leg,
+//     instead, create a new leg, perform an entry, and close, then remove old leg
+//     this allows a margin neutral roll - will need a multi-leg basket for this
 
 } // namespace option
 } // namespace tf

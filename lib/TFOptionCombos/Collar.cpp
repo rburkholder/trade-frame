@@ -114,7 +114,7 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
     )
   );
 
-  // === close out at minium value
+  // === close out at minium value, calendar roll to continue (auto or manual?)
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::SynthShort,
@@ -125,7 +125,7 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
     )
   );
 
-  // === close out at minimum value
+  // === close out at minimum value, calendar roll to continue (auto or manual?)
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::Cover,
@@ -134,52 +134,6 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
         InitTrackShortOption( LegNote::Type::Cover, pmapChains, date, days );
       }
     )
-  );
-
-}
-
-// NOTE: may require delayed reaction on this, as a roll will call back into this with new position
-void Collar::InitTrackLongOption(
-    LegNote::Type type,
-    const mapChains_t* pmapChains,
-    boost::gregorian::date date,
-    boost::gregorian::days days_to_expiry
-    ) {
-
-  ComboLeg& cleg( InitTracker( type, pmapChains, date, days_to_expiry ) );
-
-  namespace ph = std::placeholders;
-
-  cleg.m_vfTest.emplace( // invalidates on new size() > capacity()
-    cleg.m_vfTest.end(),
-    std::bind( &ou::tf::option::Tracker::TestLong, &cleg.m_tracker, ph::_1, ph::_2, ph::_3 ) // Tick
-//    [ tracker = &cleg.m_tracker ]( boost::posix_time::ptime dt, double dblUnderlyingSlope, double dblUnderlyingPrice ){
-//      tracker->TestLong( dt, dblUnderlyingSlope, dblUnderlyingPrice );
-//    }
-  );
-}
-
-void Collar::InitTrackShortOption(
-    LegNote::Type type,
-    const mapChains_t* pmapChains,
-    boost::gregorian::date date,
-    boost::gregorian::days days_to_expiry
-) {
-
-  ComboLeg& cleg( InitTracker( type, pmapChains, date, days_to_expiry ) );
-
-  // a) buy out 0.10 (simply closing the position)
-  // b) rotate if itm (somewhere else, affects long & short)
-  // c) stop monitoring out of hours
-
-  namespace ph = std::placeholders;
-
-  cleg.m_vfTest.emplace(
-    cleg.m_vfTest.end(),
-    std::bind( &ou::tf::option::Tracker::TestShort, &cleg.m_tracker, ph::_1, ph::_2, ph::_3 ) // Tick
-//    [ tracker = &cleg.m_tracker ]( boost::posix_time::ptime dt,double dblUnderlyingSlope, double dblUnderlyingPrice ){
-//      tracker->TestShort( dt, dblUnderlyingSlope, dblUnderlyingPrice );
-//    }
   );
 
 }

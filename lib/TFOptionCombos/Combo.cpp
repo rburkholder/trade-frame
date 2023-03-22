@@ -142,13 +142,6 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
   return legValues;
 }
 
-void Combo::DeactivatePositionOption( pPosition_t pPosition ) {
-  pWatch_t pWatch = pPosition->GetWatch();
-  //assert( pWatch->GetInstrument()->IsOption() ); // TODO may need to change based upon other combo types
-  pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
-  m_fDeactivateOption( pOption );
-}
-
 Combo::ComboLeg& Combo::InitTracker(
   LegNote::Type type,
   const mapChains_t* pmapChains,
@@ -157,11 +150,8 @@ Combo::ComboLeg& Combo::InitTracker(
 ) {
 
   // assumes only one of type
-  mapComboLeg_t::iterator iterMapComboLeg = m_mapComboLeg.find( type );
-  if ( m_mapComboLeg.end() == iterMapComboLeg ) {
-    iterMapComboLeg = m_mapComboLeg.emplace( std::make_pair( type, ComboLeg() ) ); // TODO: migrate this to Combo
-  }
-  ComboLeg& cleg( iterMapComboLeg->second );
+
+  ComboLeg& cleg( LU( type ) );
 
   pPosition_t pPosition( cleg.m_leg.GetPosition() );
   assert( pPosition );
@@ -202,6 +192,59 @@ Combo::ComboLeg& Combo::InitTracker(
 
   return cleg;
 
+}
+
+// NOTE: may require delayed reaction on this, as a roll will call back into this with new position
+void Combo::InitTrackLongOption(
+    LegNote::Type type,
+    const mapChains_t* pmapChains,
+    boost::gregorian::date date,
+    boost::gregorian::days days_to_expiry
+    ) {
+
+  ComboLeg& cleg( InitTracker( type, pmapChains, date, days_to_expiry ) );
+
+  namespace ph = std::placeholders;
+
+  cleg.m_vfTest.emplace( // invalidates on new size() > capacity()
+    cleg.m_vfTest.end(),
+    std::bind( &ou::tf::option::Tracker::TestLong, &cleg.m_tracker, ph::_1, ph::_2, ph::_3 ) // Tick
+//    [ tracker = &cleg.m_tracker ]( boost::posix_time::ptime dt, double dblUnderlyingSlope, double dblUnderlyingPrice ){
+//      tracker->TestLong( dt, dblUnderlyingSlope, dblUnderlyingPrice );
+//    }
+  );
+}
+
+void Combo::InitTrackShortOption(
+    LegNote::Type type,
+    const mapChains_t* pmapChains,
+    boost::gregorian::date date,
+    boost::gregorian::days days_to_expiry
+) {
+
+  ComboLeg& cleg( InitTracker( type, pmapChains, date, days_to_expiry ) );
+
+  // a) buy out 0.10 (simply closing the position)
+  // b) rotate if itm (somewhere else, affects long & short)
+  // c) stop monitoring out of hours
+
+  namespace ph = std::placeholders;
+
+  cleg.m_vfTest.emplace(
+    cleg.m_vfTest.end(),
+    std::bind( &ou::tf::option::Tracker::TestShort, &cleg.m_tracker, ph::_1, ph::_2, ph::_3 ) // Tick
+//    [ tracker = &cleg.m_tracker ]( boost::posix_time::ptime dt,double dblUnderlyingSlope, double dblUnderlyingPrice ){
+//      tracker->TestShort( dt, dblUnderlyingSlope, dblUnderlyingPrice );
+//    }
+  );
+
+}
+
+void Combo::DeactivatePositionOption( pPosition_t pPosition ) {
+  pWatch_t pWatch = pPosition->GetWatch();
+  //assert( pWatch->GetInstrument()->IsOption() ); // TODO may need to change based upon other combo types
+  pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
+  m_fDeactivateOption( pOption );
 }
 
 // TODO: make use of doubleUnderlyingSlope to trigger exit latch

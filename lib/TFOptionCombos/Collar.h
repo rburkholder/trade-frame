@@ -60,7 +60,7 @@ public:
   , const std::string& sUnderlying
     );
 
-  // long by default for entry, short doesn't make much sense due to combo type
+  // long by default for entry, short doesn't make much sense due to combo combinations
   virtual void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity );
 
 protected:
@@ -72,20 +72,6 @@ private:
   using fInitTrackOption_t = std::function<void(void)>;
   using mapInitTrackOption_t = std::map<LegNote::Type,fInitTrackOption_t>;
   mapInitTrackOption_t m_mapInitTrackOption;
-
-  void InitTrackLongOption(
-    LegNote::Type type,
-    const mapChains_t* pmapChains,
-    boost::gregorian::date date,
-    boost::gregorian::days days_to_expiry
-    );
-
-  void InitTrackShortOption(
-    LegNote::Type type,
-    const mapChains_t* pmapChains,
-    boost::gregorian::date date,
-    boost::gregorian::days days_to_expiry
-    );
 
 };
 
