@@ -179,11 +179,12 @@ protected:
 
     ou::tf::Leg m_leg;
     Tracker m_tracker;
-    ou::tf::MonitorOrder m_monitor; // try for good deal on order
+    ou::tf::MonitorOrder m_monitor; // used to close leg during roll ()
     vfTest_t m_vfTest; // functions to test & process leg
 
     ComboLeg(): m_state( State::empty ) {}
     ComboLeg( ou::tf::Leg&& leg ): m_leg( std::move( leg ) ) {}
+    ComboLeg( const ComboLeg& ) = delete;
     ComboLeg( ComboLeg&& rhs ): m_leg( std::move( rhs.m_leg ) ) {}
     ~ComboLeg() { m_state = State::done; m_vfTest.clear(); }
   };
