@@ -105,11 +105,11 @@ public:
   // to be deprecated by converting to new style ChooseLegs
   using strike_pair_t = std::pair<double,double>; // higher, lower
 
-  Combo( );
+  Combo();
   Combo( Combo&& ); // needs experiementation on why no const works, const does not
   Combo( const Combo& ) = delete;
   Combo& operator=( const Combo& ) = delete;
-  virtual ~Combo( );
+  virtual ~Combo();
 
   void Prepare(
     boost::gregorian::date date,

@@ -88,7 +88,7 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
   assert( pChartData );
   assert( m_pPortfolio->Id() == pPositionNew->GetRow().idPortfolio );
 
-  Leg leg;
+  ou::tf::Leg leg;
   const LegNote::values_t& legValues( leg.SetPosition( pPositionNew ) );
 
   if ( LegNote::State::Open == legValues.m_state ) {
