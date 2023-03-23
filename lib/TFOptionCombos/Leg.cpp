@@ -67,7 +67,7 @@ Leg::~Leg() {
   else {
     //BOOST_LOG_TRIVIAL(info) << "Leg destruction: unknown";
   }
-  assert( !m_monitor.IsOrderActive() );
+  assert( !m_monitor.IsActive() );
 }
 
 const ou::tf::option::LegNote::values_t& Leg::SetPosition( pPosition_t pPosition ) {
@@ -80,13 +80,13 @@ const ou::tf::option::LegNote::values_t& Leg::SetPosition( pPosition_t pPosition
       << pPosition->GetInstrument()->GetInstrumentName()
       ;
 
-    if ( m_monitor.IsOrderActive() ) {
+    if ( m_monitor.IsActive() ) {
       BOOST_LOG_TRIVIAL(info)
         << "Leg::SetPosition cancelling order for position "
         << m_pPosition->GetInstrument()->GetInstrumentName()
         ;
       m_monitor.CancelOrder();
-      while ( m_monitor.IsOrderActive() );  // hopeufully this doesn't lock
+      while ( m_monitor.IsActive() );  // hopeufully this doesn't lock
     }
     DelChartData();
     m_pPosition.reset();
@@ -169,7 +169,7 @@ bool Leg::IsActive() const {
   return bIsActive;
 }
 
-bool Leg::IsOrderActive() const { return m_monitor.IsOrderActive(); }
+bool Leg::IsOrderActive() const { return m_monitor.IsActive(); }
 
 void Leg::SaveSeries( const std::string& sPrefix ) {
   if ( m_pPosition ) {

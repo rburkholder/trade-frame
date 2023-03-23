@@ -40,12 +40,12 @@ public:
   using pPosition_t = Position::pPosition_t;
 
   MonitorOrder();
-  MonitorOrder( MonitorOrder&& rhs );
-  MonitorOrder( pPosition_t& pPosition );
+  MonitorOrder( MonitorOrder&& );
+  MonitorOrder( pPosition_t& );
   MonitorOrder& operator=( MonitorOrder&& );
-  MonitorOrder( const MonitorOrder& rhs ) = delete; // TODO: work on cleaning this up
+  MonitorOrder( const MonitorOrder& ) = delete; // TODO: work on cleaning this up
 
-  void SetPosition( pPosition_t pPosition );
+  void SetPosition( pPosition_t );
 
   bool PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide::EOrderSide side );
   void CancelOrder();
@@ -53,7 +53,8 @@ public:
 
   void Tick( ptime dt ); // one second interval
 
-  bool IsOrderActive() const;
+  bool IsActive() const;
+  bool IsDone() const;
 
 private:
 

@@ -200,7 +200,7 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
 void MonitorOrder::ClosePosition() {
   if ( m_pPosition ) {
     const ou::tf::Position::TableRowDef& row( m_pPosition->GetRow() );
-    if ( IsOrderActive() ) {
+    if ( IsActive() ) {
       BOOST_LOG_TRIVIAL(info) << row.sName << ": error, monitor has active order, no close possible";
     }
     else {
@@ -216,6 +216,8 @@ void MonitorOrder::ClosePosition() {
           case ou::tf::OrderSide::Sell:
             PlaceOrder( row.nPositionActive, ou::tf::OrderSide::Buy );
             break;
+          default:
+            assert( false );
         }
       }
     }
@@ -265,7 +267,8 @@ void MonitorOrder::Tick( ptime dt ) {
   }
 }
 
-bool MonitorOrder::IsOrderActive() const { return ( State::Active == m_state ); }
+bool MonitorOrder::IsActive() const { return ( State::Active == m_state ); }
+bool MonitorOrder::IsDone() const { return ( ( State::Filled == m_state ) || ( State::Cancelled == m_state ) ); }
 
 // To think about: use GTD Limit order to automate the count dow?
 //  means cancellation, and resubmission, which creates 'dead zones'

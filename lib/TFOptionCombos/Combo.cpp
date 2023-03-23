@@ -282,7 +282,8 @@ void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt
   // from original Collar
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
     ComboLeg& cleg( entry.second );
-    if ( cleg.m_monitor.IsOrderActive() ) cleg.m_monitor.Tick( dt );
+    //if ( cleg.m_monitor.IsActive() )
+    cleg.m_monitor.Tick( dt ); // needs this in multiple states
 
     for ( vfTest_t::value_type& fTest: cleg.m_vfTest ) {
       fTest( dt, dblUnderlyingSlope, dblUnderlyingPrice );
