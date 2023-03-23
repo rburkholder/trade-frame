@@ -97,10 +97,13 @@ bool OrderCombo_TrackLeg::Tick( ptime dt ) {
 
 OrderCombo::OrderCombo()
 : m_state( EState::bare )
+, m_fComboDone( nullptr )
 {
 }
 
 OrderCombo::~OrderCombo() {
+  m_vTrack.clear();
+  m_fComboDone = nullptr;
 }
 
 void OrderCombo::AddLeg( pPosition_t pPosition, uint32_t nOrderQuantity, ou::tf::OrderSide::EOrderSide side, fLegDone_t&& fLegDone ) {
@@ -168,9 +171,7 @@ void OrderCombo::Tick( ptime dt ) {
     default:
       break;
   }
-
 }
-
 
 } // namespace tf
 } // namespace ou
