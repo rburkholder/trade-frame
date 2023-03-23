@@ -93,9 +93,23 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
 
   if ( LegNote::State::Open == legValues.m_state ) {
 
-    mapComboLeg_t::iterator iterLeg = m_mapComboLeg.emplace( std::move( mapComboLeg_t::value_type( legValues.m_type, std::move( leg ) ) ) );
-    //DeactivatePositionOption( iterLeg->second.GetPosition() ); // old position
-    //iterLeg->second = std::move( leg ); // overwrite with new leg
+    // this will emplace duplicates, not ready for that yet
+    //mapComboLeg_t::iterator iterLeg = m_mapComboLeg.emplace( std::move( mapComboLeg_t::value_type( legValues.m_type, std::move( leg ) ) ) );
+
+    // this prevents duplicates for now until proper multi-leg rolls are implemented
+    mapComboLeg_t::iterator iterLeg = m_mapComboLeg.find( legValues.m_type );
+    if ( m_mapComboLeg.end() == iterLeg ) {
+      using result_t = std::pair<mapComboLeg_t::iterator, bool>;
+      result_t result;
+      //result = m_mapLeg.emplace( std::move( mapLeg_t::value_type( legValues.m_type, std::move( leg ) ) ) );
+      //assert( result.second );
+      //iterLeg = result.first;
+      iterLeg = m_mapComboLeg.emplace( std::move( mapComboLeg_t::value_type( legValues.m_type, std::move( leg ) ) ) );
+    }
+    else {
+      DeactivatePositionOption( iterLeg->second.m_leg.GetPosition() ); // old position
+      iterLeg->second.m_leg = std::move( leg ); // overwrite with new leg
+    }
 
     iterLeg->second.m_leg.SetChartData( pChartData, colour ); // comes after as there is no move on indicators
 
