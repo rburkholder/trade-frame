@@ -41,6 +41,8 @@ public:
   ~OrderCombo();
 
   void AddLeg( pPosition_t, uint32_t nOrderQuantity, ou::tf::OrderSide::EOrderSide, fLegDone_t&& );
+  void CloseLeg( pPosition_t, fLegDone_t&& );
+
   void Submit( fComboDone_t&& );
 
   void Tick( ptime dt ); // one second interval
@@ -52,7 +54,7 @@ private:
 
   struct Track {
 
-    enum class State { loaded, active, done } state;
+    enum class State { leg_add, leg_close, active, done } state;
 
     pPosition_t pPosition;
     uint32_t nQuantity;
@@ -62,8 +64,14 @@ private:
     MonitorOrder mo;
 
     Track( pPosition_t pPosition_, uint32_t nQuantity_, ou::tf::OrderSide::EOrderSide side_, fLegDone_t&& fLegDone_ )
-    : state( State::loaded )
+    : state( State::leg_add )
     , pPosition( pPosition_ ), nQuantity( nQuantity_ ), side( side_ ), fLegDone( std::move( fLegDone_ ) )
+    , mo( pPosition_ )
+    {}
+
+    Track( pPosition_t pPosition_, fLegDone_t&& fLegDone_ )
+    : state( State::leg_close )
+    , pPosition( pPosition_ ), nQuantity {}, fLegDone( std::move( fLegDone_ ) )
     , mo( pPosition_ )
     {}
   };

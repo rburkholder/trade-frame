@@ -74,7 +74,16 @@ void OrderCombo::Submit( fComboDone_t&& fComboDone ) {
   m_fComboDone = std::move( fComboDone );
 
   for ( vTrack_t::value_type& entry: m_vTrack ) {
-    entry.mo.PlaceOrder( entry.nQuantity, entry.side );
+    switch ( entry.state ) {
+      case Track::State::leg_add:
+        entry.mo.PlaceOrder( entry.nQuantity, entry.side );
+        break;
+      case Track::State::leg_close:
+        entry.mo.ClosePosition();
+        break;
+      default:
+        assert( false );
+    }
     entry.state = Track::State::active;
   }
 
@@ -89,7 +98,8 @@ void OrderCombo::Tick( ptime dt ) {
       for ( vTrack_t::value_type& entry: m_vTrack ) {
         entry.mo.Tick( dt );
         switch ( entry.state ) {
-          case Track::State::loaded:
+          case Track::State::leg_add:
+          case Track::State::leg_close:
             break;
           case Track::State::active:
             if ( entry.mo.IsActive() ) {
