@@ -35,6 +35,7 @@ set(
     Managers.h
     MonitorOrder.h
     Order.h
+    Order_Combo.hpp
     OrderManager.h
     OrdersOutstanding.h
     PortfolioGreek.h
@@ -80,6 +81,7 @@ set(
     Managers.cpp
     MonitorOrder.cpp
     Order.cpp
+    Order_Combo.cpp
     OrderManager.cpp
     OrdersOutstanding.cpp
     Portfolio.cpp
