@@ -36,6 +36,7 @@ set(
     MonitorOrder.h
     Order.h
     Order_Combo.hpp
+    Order_Bracket.hpp
     OrderManager.h
     OrdersOutstanding.h
     PortfolioGreek.h
@@ -82,6 +83,7 @@ set(
     MonitorOrder.cpp
     Order.cpp
     Order_Combo.cpp
+    Order_Bracket.cpp
     OrderManager.cpp
     OrdersOutstanding.cpp
     Portfolio.cpp
