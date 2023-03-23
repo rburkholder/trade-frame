@@ -41,6 +41,60 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+OrderCombo_TrackLeg::OrderCombo_TrackLeg( pPosition_t pPosition_, uint32_t nQuantity_, ou::tf::OrderSide::EOrderSide side_, fLegDone_t&& fLegDone_ )
+: state( State::leg_add )
+, pPosition( pPosition_ ), nQuantity( nQuantity_ ), side( side_ ), fLegDone( std::move( fLegDone_ ) )
+, mo( pPosition_ )
+{}
+
+OrderCombo_TrackLeg::OrderCombo_TrackLeg( pPosition_t pPosition_, fLegDone_t&& fLegDone_ )
+: state( State::leg_close )
+, pPosition( pPosition_ ), nQuantity {}, fLegDone( std::move( fLegDone_ ) )
+, mo( pPosition_ )
+{}
+
+void OrderCombo_TrackLeg::Submit() {
+
+  switch ( state ) {
+    case State::leg_add:
+      mo.PlaceOrder( nQuantity, side );
+      break;
+    case OrderCombo_TrackLeg::State::leg_close:
+      mo.ClosePosition();
+      break;
+    default:
+      assert( false );
+  }
+  state = State::active;
+}
+
+bool OrderCombo_TrackLeg::Tick( ptime dt ) {
+
+  bool bDone( true );
+
+  mo.Tick( dt );
+
+  switch ( state ) {
+    case State::leg_add:
+    case State::leg_close:
+      break;
+    case State::active:
+      if ( mo.IsActive() ) {
+        bDone = false;
+      }
+      else {
+        state = State::done;
+        fLegDone();
+      }
+      break;
+    case State::done:
+      break;
+  } // switch( state )
+  return bDone;
+}
+
+// ==================
+
 OrderCombo::OrderCombo()
 : m_state( EState::bare )
 {
@@ -55,7 +109,7 @@ void OrderCombo::AddLeg( pPosition_t pPosition, uint32_t nOrderQuantity, ou::tf:
       m_state = EState::loading;
       // fall through
     case EState::loading: {
-      Track& track( m_vTrack.emplace_back( std::move( Track( std::move( pPosition), nOrderQuantity, side, std::move( fLegDone ) ) ) ) );
+      OrderCombo_TrackLeg& track( m_vTrack.emplace_back( std::move( OrderCombo_TrackLeg( std::move( pPosition), nOrderQuantity, side, std::move( fLegDone ) ) ) ) );
       }
       break;
     case EState::placing:
@@ -64,7 +118,24 @@ void OrderCombo::AddLeg( pPosition_t pPosition, uint32_t nOrderQuantity, ou::tf:
       assert( false );
       break;
   }
-    }
+}
+
+void OrderCombo::CloseLeg( pPosition_t pPosition, fLegDone_t&& fLegDone ) {
+  switch ( m_state ) {
+    case EState::bare:
+      m_state = EState::loading;
+      // fall through
+    case EState::loading: {
+      OrderCombo_TrackLeg& track( m_vTrack.emplace_back( std::move( OrderCombo_TrackLeg( std::move( pPosition), std::move( fLegDone ) ) ) ) );
+      }
+      break;
+    case EState::placing:
+    case EState::monitoring:
+    case EState::done:
+      assert( false );
+      break;
+  }
+}
 
 void OrderCombo::Submit( fComboDone_t&& fComboDone ) {
 
@@ -74,17 +145,7 @@ void OrderCombo::Submit( fComboDone_t&& fComboDone ) {
   m_fComboDone = std::move( fComboDone );
 
   for ( vTrack_t::value_type& entry: m_vTrack ) {
-    switch ( entry.state ) {
-      case Track::State::leg_add:
-        entry.mo.PlaceOrder( entry.nQuantity, entry.side );
-        break;
-      case Track::State::leg_close:
-        entry.mo.ClosePosition();
-        break;
-      default:
-        assert( false );
-    }
-    entry.state = Track::State::active;
+    entry.Submit();
   }
 
   m_state = EState::monitoring;
@@ -96,26 +157,11 @@ void OrderCombo::Tick( ptime dt ) {
     case EState::monitoring: {
       bool bDone( true );
       for ( vTrack_t::value_type& entry: m_vTrack ) {
-        entry.mo.Tick( dt );
-        switch ( entry.state ) {
-          case Track::State::leg_add:
-          case Track::State::leg_close:
-            break;
-          case Track::State::active:
-            if ( entry.mo.IsActive() ) {
-              bDone = false;
-            }
-            else {
-              entry.state = Track::State::done;
-              entry.fLegDone();
-            }
-            break;
-          case Track::State::done:
-            break;
-        } // switch( state )
-      } // for( entry )
+        bDone &= entry.Tick( dt );
+      }
       if ( bDone ) {
         m_fComboDone();
+        m_state = EState::done;
       }
       }
       break;
