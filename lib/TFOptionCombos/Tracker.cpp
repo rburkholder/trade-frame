@@ -44,7 +44,13 @@ Tracker::Tracker()
 , m_luItmStrike( nullptr )
 , m_luItmName( nullptr )
 , m_pChain( nullptr )
+, m_dblStrikePosition {}
+, m_sidePosition( ou::tf::OptionSide::Unknown )
 , m_dblUnderlyingSlope {}, m_dblUnderlyingPrice {}
+, m_fConstructOption( nullptr )
+, m_fOpenLeg( nullptr )
+, m_fRollLeg( nullptr )
+, m_fCloseLeg( nullptr )
 , m_fOptionRoll_Construct( nullptr )
 , m_fOptionRoll_Open( nullptr )
 {}
@@ -64,6 +70,7 @@ Tracker::Tracker( Tracker&& rhs )
 , m_pOptionCandidate( std::move( rhs.m_pOptionCandidate ) )
 , m_fConstructOption( std::move( rhs.m_fConstructOption ) )
 , m_fOpenLeg( std::move( rhs.m_fOpenLeg ) )
+, m_fRollLeg( std::move( rhs.m_fRollLeg ) )
 , m_fCloseLeg( std::move( rhs.m_fCloseLeg ) )
 , m_fOptionRoll_Construct( std::move( rhs.m_fOptionRoll_Construct ) )
 , m_fOptionRoll_Open( std::move( rhs.m_fOptionRoll_Open ) )
@@ -80,32 +87,37 @@ Tracker::~Tracker() {
   m_pPosition.reset();
   m_fConstructOption = nullptr;
   m_fOpenLeg = nullptr;
+  m_fRollLeg = nullptr;
   m_fCloseLeg = nullptr;
   m_fOptionRoll_Construct = nullptr;
   m_fOptionRoll_Open = nullptr;
 }
 
 void Tracker::Initialize(
-  pPosition_t pPosition,
-  const chain_t* pChain,
-  fConstructOption_t&& fConstructOption,
-  fCloseLeg_t&& fCloseLeg,
-  fOpenLeg_t&& fOpenLeg
+  pPosition_t pPosition
+, const chain_t* pChain
+, fConstructOption_t&& fConstructOption
+, fOpenLeg_t&& fOpenLeg
+, fRollLeg_t&& fRollLeg
+, fCloseLeg_t&& fCloseLeg
 ) {
 
   //BOOST_LOG_TRIVIAL(info) << "Tracker::Initialize,external";
 
   assert( pPosition );
   assert( fConstructOption );
-  assert( fCloseLeg );
   assert( fOpenLeg );
+  assert( fRollLeg );
+  assert( fCloseLeg );
+
   assert( ETransition::Initial == m_transition );
 
   m_pChain = pChain;
 
   m_fConstructOption = std::move( fConstructOption );
-  m_fCloseLeg = std::move( fCloseLeg );
   m_fOpenLeg = std::move( fOpenLeg );
+  m_fRollLeg = std::move( fRollLeg );
+  m_fCloseLeg = std::move( fCloseLeg );
 
   Initialize( pPosition );
 
@@ -141,7 +153,6 @@ void Tracker::Initialize( pPosition_t pPosition ) {
     default:
       assert( false );
   }
-  assert( m_compare );
 
   m_transition = ETransition::Track;
 }
@@ -149,7 +160,7 @@ void Tracker::Initialize( pPosition_t pPosition ) {
 void Tracker::TestLong( boost::posix_time::ptime dt, double dblUnderlyingSlope, double dblUnderlyingPrice ) {
 
   switch ( m_transition ) {
-    case ETransition::Track:
+    case ETransition::Track: // TODO: collect as method, to be similar in nature to StartOptionRoll call
       {
         m_dblUnderlyingPrice = dblUnderlyingPrice;
         m_dblUnderlyingSlope = dblUnderlyingSlope;
@@ -174,6 +185,7 @@ void Tracker::TestLong( boost::posix_time::ptime dt, double dblUnderlyingSlope, 
             // need to obtain option, but track via state machine to request only once
             m_transition = ETransition::Vacant;
             OptionCandidate_Construct( dt, strikeItm );
+            // TODO: check that option is different from current option
           }
         }
         else {
@@ -182,7 +194,11 @@ void Tracker::TestLong( boost::posix_time::ptime dt, double dblUnderlyingSlope, 
       }
       break;
     case ETransition::Roll_start:
-      StartOptionRoll();
+      StartOptionRoll(); // delayed a tick to call in Tick thread
+      break;
+    case ETransition::Initial:
+      break;
+    case ETransition::Vacant:
       break;
     default:
       break;
@@ -193,28 +209,41 @@ void Tracker::TestLong( boost::posix_time::ptime dt, double dblUnderlyingSlope, 
 void Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope, double dblUnderlyingPrice ) {
 
   switch ( m_transition ) {
-    case ETransition::Track:
+    case ETransition::Track: // TODO: collect as method, to be similar in nature to StartOptionRoll call
       {
         m_dblUnderlyingPrice = dblUnderlyingPrice;
         m_dblUnderlyingSlope = dblUnderlyingSlope;
 
-        double diff = m_pPosition->GetUnRealizedPL();
+        if ( m_pOptionCandidate ) {
 
-        // close out when value close to zero - or auto calendar roll?
-        const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
-        if ( quote.IsNonZero() && ( quote.Ask() > quote.Bid() ) ) {
-          if ( 0.401 >= quote.Ask() && ( 0.0 < quote.Bid() ) ) {
-            // TODO: perform a calendar roll to regain premium? (but not on expiry date)
-            m_transition = ETransition::Fill;
-            m_fCloseLeg( m_pPosition );
-            m_pPosition.reset();
-            m_transition = ETransition::Initial;
+          // close out when value close to zero - or auto calendar roll?
+          const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
+          if ( quote.IsNonZero() && ( quote.Ask() > quote.Bid() ) ) {
+            if ( 0.401 >= quote.Ask() && ( 0.0 < quote.Bid() ) ) { // use 2xspread instead
+              // TODO: perform a calendar roll to regain premium? (but not on expiry date)
+              //   check if there is significant difference in premium from candidate
+              //m_transition = ETransition::Fill;
+              pPosition_t pPosition = std::move( m_pPosition );
+              m_pPosition.reset();
+              m_transition = ETransition::Initial; // this might be re-entrant, so get the state set properly
+              m_fCloseLeg( pPosition );
+            }
           }
         }
+        else {
+          m_transition = ETransition::Vacant;
+          OptionCandidate_Construct( dt, m_dblStrikePosition );
+          // TODO: check that option is different from current option
+        }
+
       }
       break;
-    case ETransition::Roll_start:
-      StartOptionRoll();
+    case ETransition::Roll_start: // used for Roll or Close
+      StartOptionRoll(); // delayed a tick to call in Tick thread
+    case ETransition::Initial:
+      break;
+    case ETransition::Vacant:
+      break;
     default:
       break;
   }

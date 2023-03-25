@@ -177,6 +177,20 @@ Combo::ComboLeg& Combo::InitTracker(
     [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
       },
+    [this]( pOption_t pOption, const std::string& sNotes )->pPosition_t { // m_fOpenLeg
+
+      // TODO: will need to supply previous option => stop calc, may need a clean up lambda
+      //   then the note change above can be performed elsewhere
+
+      pPosition_t pPosition = m_fOpenPosition( this, pOption, sNotes );
+      // Combo::OverwritePosition( pPosition ); - not needed, performed in fOpenPosition
+      return pPosition;
+    },
+    []( pPosition_t pPositionOld, pOption_t pOption, const std::string& sNotes )->pPosition_t { // fRollLeg_t
+      pPosition_t pPosition;  // empty for now as placeholder
+      assert( false );
+      return pPosition;
+    },
     [this,&cleg]( pPosition_t pPositionOld ) { // m_fCloseLeg
 
       const std::string sNotes( pPositionOld->Notes() );
@@ -191,16 +205,6 @@ Combo::ComboLeg& Combo::InitTracker(
 
       cleg.m_monitor.SetPosition( pPositionOld );
       cleg.m_monitor.ClosePosition();
-
-    },
-    [this]( pOption_t pOption, const std::string& sNotes )->pPosition_t { // m_fOpenLeg
-
-      // TODO: will need to supply previous option => stop calc, may need a clean up lambda
-      //   then the note change above can be performed elsewhere
-
-      pPosition_t pPosition = m_fOpenPosition( this, pOption, sNotes );
-      // Combo::OverwritePosition( pPosition ); - not needed, performed in fOpenPosition
-      return pPosition;
     }
   );
 

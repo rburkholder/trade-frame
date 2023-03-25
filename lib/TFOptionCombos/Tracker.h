@@ -49,7 +49,8 @@ public:
   using fConstructedOption_t = std::function<void(pOption_t)>;
   using fConstructOption_t   = std::function<void(const std::string&, fConstructedOption_t&&)>;
 
-  using fOpenLeg_t = std::function<pPosition_t/*new?*/(pOption_t,const std::string& notes)>;
+  using fOpenLeg_t = std::function<pPosition_t/*new?*/(pOption_t,const std::string& notes)>; // deprecated
+  using fRollLeg_t = std::function<pPosition_t(pPosition_t old, pOption_t, const std::string& notes )>;
   using fCloseLeg_t = std::function<void(pPosition_t)>;
 
   Tracker();
@@ -57,13 +58,14 @@ public:
   Tracker( Tracker&& );
   ~Tracker();
 
-  void Initialize( // use for call roll-up, put roll-down
-    pPosition_t pPosition,
-    const chain_t* pChain,
-    fConstructOption_t&&,
-    fCloseLeg_t&&,
-    fOpenLeg_t&&
-    );
+  void Initialize(
+    pPosition_t pPosition
+  , const chain_t* pChain
+  , fConstructOption_t&&
+  , fOpenLeg_t&&
+  , fRollLeg_t&&
+  , fCloseLeg_t&&
+  );
 
   void TestLong( boost::posix_time::ptime, double dblUnderlyingSlope, double dblUnderlyingPrice );
   void TestShort( boost::posix_time::ptime, double dblUnderlyingSlope, double dblUnderlyingPrice );
@@ -71,8 +73,9 @@ public:
 
   void CalendarRoll();
   void DiagonalRoll();
-  void Lock( bool );
   void Close();
+
+  void Lock( bool );
 
   void Quiesce(); // called from Collar
 
@@ -114,17 +117,20 @@ private:
   const chain_t* m_pChain;
 
   pPosition_t m_pPosition; // existing option / position
-  pOption_t m_pOptionCandidate; // track an option for next position
+  pOption_t m_pOptionCandidate; // track an option for next position with roll
+    // TestLong: vertical or diagonal change
+    // TestShort: calendar roll, if enough premium difference, else close leg
 
   fConstructOption_t m_fConstructOption;
-  fOpenLeg_t m_fOpenLeg;
-  fCloseLeg_t m_fCloseLeg;
+  fOpenLeg_t m_fOpenLeg; // deprecated
+  fRollLeg_t m_fRollLeg; // use two leg OrderCombo
+  fCloseLeg_t m_fCloseLeg; // use one leg OrderCombo
 
   using fOptionRoll_Construct_t = std::function<void()>;
   fOptionRoll_Construct_t m_fOptionRoll_Construct;
 
   using fOptionRoll_Open_t = std::function<void()>;
-  fOptionRoll_Open_t m_fOptionRoll_Open;
+  fOptionRoll_Open_t m_fOptionRoll_Open; //
 
   void Initialize( pPosition_t );
 
