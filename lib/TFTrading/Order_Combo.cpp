@@ -70,7 +70,7 @@ void OrderCombo_TrackLeg::Submit() {
 
 bool OrderCombo_TrackLeg::Tick( ptime dt ) {
 
-  bool bDone( true );
+  bool bDone( true ); // done once legs have transitioned away from 'active'
 
   mo.Tick( dt );
 
@@ -112,6 +112,7 @@ void OrderCombo::AddLeg( pPosition_t pPosition, uint32_t nOrderQuantity, ou::tf:
       m_state = EState::loading;
       // fall through
     case EState::loading: {
+      // implicit place order
       OrderCombo_TrackLeg& track( m_vTrack.emplace_back( std::move( OrderCombo_TrackLeg( std::move( pPosition), nOrderQuantity, side, std::move( fLegDone ) ) ) ) );
       }
       break;
@@ -129,6 +130,7 @@ void OrderCombo::CloseLeg( pPosition_t pPosition, fLegDone_t&& fLegDone ) {
       m_state = EState::loading;
       // fall through
     case EState::loading: {
+      // implicit close leg
       OrderCombo_TrackLeg& track( m_vTrack.emplace_back( std::move( OrderCombo_TrackLeg( std::move( pPosition), std::move( fLegDone ) ) ) ) );
       }
       break;
