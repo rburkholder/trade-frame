@@ -19,6 +19,8 @@
  * Created: March 22, 2023 13:38:52
  */
 
+#pragma once
+
 #include "Order.h"
 
 namespace ou { // One Unified
