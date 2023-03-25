@@ -516,7 +516,7 @@ void ManageStrategy::HandleRHTrading( const ou::tf::Bar& bar ) { // one second b
   //const double mid = m_QuoteUnderlyingLatest.Midpoint();
   // BollingerTransitions::Crossing( mid ) // TODO: needs to be migrated to Underlying
 
-  ManageIVTracker_RH();
+  //ManageIVTracker_RH();
 
   RHOption( bar );
 }
