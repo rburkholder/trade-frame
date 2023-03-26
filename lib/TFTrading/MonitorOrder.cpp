@@ -159,8 +159,8 @@ bool MonitorOrder::PlaceOrder( boost::uint32_t nOrderQuantity, ou::tf::OrderSide
           if ( m_pOrder ) {
             m_state = State::Active;
             m_pOrder->SetSignalPrice( dblNormalizedPrice );
-            m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
-            m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
+            m_pOrder->OnOrderFilled.Add( MakeDelegate( this, &MonitorOrder::HandleOrderFilled ) );
+            m_pOrder->OnOrderCancelled.Add( MakeDelegate( this, &MonitorOrder::HandleOrderCancelled ) );
             m_CountDownToAdjustment = c_nAdjustmentPeriods;
             m_pPosition->PlaceOrder( m_pOrder );
             BOOST_LOG_TRIVIAL(info)
@@ -380,7 +380,7 @@ void MonitorOrder::UpdateOrder( ptime dt ) {
   }
 }
 
-void MonitorOrder::OrderCancelled( const ou::tf::Order& order ) { // TODO: delegate should have const removed?
+void MonitorOrder::HandleOrderCancelled( const ou::tf::Order& order ) { // TODO: delegate should have const removed?
   //auto tod = order.GetDateTimeOrderFilled().time_of_day(); [not available in cancelled order]
   // look at TWS::openOrder, ~ line 718 to evaluate order status
   switch ( m_state ) {
@@ -388,8 +388,8 @@ void MonitorOrder::OrderCancelled( const ou::tf::Order& order ) { // TODO: deleg
       // TODO: rework this for order resubmission for GTD, are there any cancellation codes from the exchange?
       //   or not, as we currently simply perform an order update currently
       assert( order.GetOrderId() == m_pOrder->GetOrderId() );
-      m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
-      m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
+      m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::HandleOrderCancelled ) );
+      m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::HandleOrderFilled ) );
       BOOST_LOG_TRIVIAL(info)
 //        << tod << " "
         << "MonitorOrder "
@@ -402,8 +402,8 @@ void MonitorOrder::OrderCancelled( const ou::tf::Order& order ) { // TODO: deleg
       break;
     case State::ManualCancel:
       assert( order.GetOrderId() == m_pOrder->GetOrderId() );
-      m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
-      m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
+      m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::HandleOrderCancelled ) );
+      m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::HandleOrderFilled ) );
       BOOST_LOG_TRIVIAL(info)
 //        << tod << " "
         << "MonitorOrder "
@@ -425,13 +425,13 @@ void MonitorOrder::OrderCancelled( const ou::tf::Order& order ) { // TODO: deleg
   }
 }
 
-void MonitorOrder::OrderFilled( const ou::tf::Order& order ) { // TODO: delegate should have const removed?
+void MonitorOrder::HandleOrderFilled( const ou::tf::Order& order ) { // TODO: delegate should have const removed?
   auto tod = order.GetDateTimeOrderFilled().time_of_day();
   switch ( m_state ) {
     case State::Active:
       assert( order.GetOrderId() == m_pOrder->GetOrderId() );
-      m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::OrderCancelled ) );
-      m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::OrderFilled ) );
+      m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &MonitorOrder::HandleOrderCancelled ) );
+      m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &MonitorOrder::HandleOrderFilled ) );
       BOOST_LOG_TRIVIAL(info)
         << "MonitorOrder "
         << tod << " "

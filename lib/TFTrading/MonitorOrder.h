@@ -82,8 +82,8 @@ private:
 
   void EnableStatsRemove();
 
-  void OrderCancelled( const ou::tf::Order& order );
-  void OrderFilled( const ou::tf::Order& order );
+  void HandleOrderCancelled( const ou::tf::Order& order );
+  void HandleOrderFilled( const ou::tf::Order& order );
 };
 
 } // namespace ou
