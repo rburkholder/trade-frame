@@ -93,6 +93,10 @@ bool OrderCombo_TrackLeg::Tick( ptime dt ) {
   return bDone;
 }
 
+void OrderCombo_TrackLeg::Cancel() {
+  mo.CancelOrder();
+}
+
 // ==================
 
 OrderCombo::OrderCombo()
@@ -159,6 +163,7 @@ void OrderCombo::Submit( fComboDone_t&& fComboDone ) {
 
 void OrderCombo::Tick( ptime dt ) {
   switch ( m_state ) {
+    case EState::cancel: // need a tick or two to finish
     case EState::monitoring: {
       bool bDone( true );
       for ( vTrack_t::value_type& entry: m_vTrack ) {
@@ -171,6 +176,22 @@ void OrderCombo::Tick( ptime dt ) {
       }
       break;
     default:
+      break;
+  }
+}
+
+// may have a timing issue with the Active transition in MonitorOrder on each Tick
+void OrderCombo::Cancel( fComboDone_t&& fComboDone ) {
+  switch ( m_state ) {
+    case EState::monitoring:
+      m_state = EState::cancel;
+      m_fComboDone = std::move( fComboDone ); // overwrite previous flavour -
+      for ( vTrack_t::value_type& vt: m_vTrack ) {
+        vt.Cancel(); // TODO: this needs to force the completion
+      }
+      break;
+    default:
+      std::cout << "OrderCombo::Cancel is out of state" << std::endl;
       break;
   }
 }

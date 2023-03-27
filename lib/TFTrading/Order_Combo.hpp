@@ -44,6 +44,8 @@ public:
 
   bool Tick( ptime dt ); // one second interval
 
+  void Cancel();
+
 protected:
 private:
 
@@ -66,27 +68,32 @@ public:
   OrderCombo();
   ~OrderCombo();
 
+  using pOrderCombo_t = std::shared_ptr<OrderCombo>;
+
   using pPosition_t = Position::pPosition_t;
 
   using fLegDone_t = OrderCombo_TrackLeg::fLegDone_t;
   using fComboDone_t = std::function<void()>;
 
+  static pOrderCombo_t Factory() { return std::make_shared<OrderCombo>(); }
+
   void AddLeg( pPosition_t, uint32_t nOrderQuantity, ou::tf::OrderSide::EOrderSide, fLegDone_t&& );
   void CloseLeg( pPosition_t, fLegDone_t&& );
 
   void Submit( fComboDone_t&& );
+  void Cancel( fComboDone_t&& );
 
   void Tick( ptime dt ); // one second interval
 
 protected:
 private:
 
-  enum class EState { bare, loading, placing, monitoring, done } m_state;
+  enum class EState { bare, loading, placing, cancel, monitoring, done } m_state;
 
   using vTrack_t = std::vector<OrderCombo_TrackLeg>;
   vTrack_t m_vTrack;
 
-  fComboDone_t m_fComboDone;
+  fComboDone_t m_fComboDone; // TODO: needs a status:  filled, partial fill, all cancelled
 };
 
 } // namespace tf
