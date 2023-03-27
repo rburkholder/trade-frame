@@ -61,6 +61,15 @@ public:
   // caller needs to have updated input with CalcRate
   void CalcGreeks( ou::tf::option::binomial::structInput& input, ptime dtUtcNow, bool bNeedsGuess = true ); // Calc and Append
 
+  struct premium_t {
+    double intrinsic;
+    double extrinsic;
+    premium_t(): intrinsic {}, extrinsic {} {}
+    premium_t( double i, double e ): intrinsic( i ), extrinsic( e ) {}
+  };
+
+  premium_t Premium( double underlying ) const;
+
   double ImpliedVolatility() const { return m_greek.ImpliedVolatility(); };
   double Delta() const { return m_greek.Delta(); }
   double Gamma() const { return m_greek.Gamma(); }
