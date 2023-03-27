@@ -16,7 +16,7 @@
 
 #include <iostream>
 
-#include <boost/regex.hpp> 
+#include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "CurlGetMktSymbols.h"
@@ -46,12 +46,12 @@ CurlGetMktSymbols::CurlGetMktSymbols(void)
 
   m_hCurl = curl_easy_init();
   curl_easy_setopt(m_hCurl, CURLOPT_URL, "http://www.dtniq.com/product/mktsymbols_v2.zip");
-//  curl_easy_setopt(m_hCurl, CURLOPT_URL, "http://www.oneunified.net/files/diax093.zip");
   curl_easy_setopt(m_hCurl, CURLOPT_WRITEFUNCTION, &CurlGetMktSymbols::WriteMemoryCallback);
   curl_easy_setopt(m_hCurl, CURLOPT_WRITEDATA, this);
   curl_easy_setopt(m_hCurl, CURLOPT_HEADERFUNCTION, &CurlGetMktSymbols::HeaderFunctionCallback);
   curl_easy_setopt(m_hCurl, CURLOPT_HEADERDATA, this);
-  curl_easy_setopt(m_hCurl, CURLOPT_PROGRESSFUNCTION, &CurlGetMktSymbols::ProgressFunctionCallback);
+  //curl_easy_setopt(m_hCurl, CURLOPT_PROGRESSFUNCTION, &CurlGetMktSymbols::ProgressFunctionCallback);
+  curl_easy_setopt(m_hCurl, CURLOPT_XFERINFOFUNCTION, &CurlGetMktSymbols::ProgressFunctionCallback);
   curl_easy_setopt(m_hCurl, CURLOPT_PROGRESSDATA, this);
   curl_easy_setopt(m_hCurl, CURLOPT_NOPROGRESS, 0);
   curl_easy_setopt(m_hCurl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
@@ -105,7 +105,7 @@ size_t CurlGetMktSymbols::HeaderFunctionCallback(void* ptr, size_t size, size_t 
       // no errors as we are waiting for the header we need
       // flag is evaluated elsewhere
     }
-    else { 
+    else {
       p->m_size = boost::lexical_cast<size_t>( what[1].str() );
       p->m_bSizeFound = true;
       p->m_offset = p->m_buf = new char[ p->m_size ];
@@ -114,9 +114,16 @@ size_t CurlGetMktSymbols::HeaderFunctionCallback(void* ptr, size_t size, size_t 
   return size * nmemb;
 }
 
-int CurlGetMktSymbols::ProgressFunctionCallback( void *self, double dltotal, double dlnow, double ultotal, double ulnow ) {
+// uses curl_xferinfo_callback introduced in 7.32.0
+int CurlGetMktSymbols::ProgressFunctionCallback( void *self, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow ) {
   CurlGetMktSymbols* p = reinterpret_cast<CurlGetMktSymbols*>( self );
-  std::cout << dltotal << "," << dlnow << "," << ultotal << "," << ulnow << std::endl;
+  std::cout
+    << dltotal << ","
+    << dlnow << ","
+    << dltotal - dlnow << ","
+    << ultotal << ","
+    << ulnow
+    << std::endl;
   return 0;  // non zero will cause transfer abort
 }
 

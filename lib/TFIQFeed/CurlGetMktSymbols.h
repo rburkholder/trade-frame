@@ -39,7 +39,7 @@ private:
   size_t m_size;
   static size_t WriteMemoryCallback( void* contents, size_t size, size_t nmemb, void* self );
   static size_t HeaderFunctionCallback( void* ptr, size_t size, size_t nmemb, void* self );
-  static int ProgressFunctionCallback( void *self, double dltotal, double dlnow, double ultotal, double ulnow );
+  static int ProgressFunctionCallback( void *self, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow );
 };
 
 } // namespace iqfeed
