@@ -39,7 +39,6 @@ Leg::Leg( pPosition_t pPosition ) // implies candidate will not be used
 
 Leg::Leg( Leg&& rhs )
 : m_pPosition( std::move( rhs.m_pPosition ) ),
-  m_monitor( std::move( rhs.m_monitor ) ),
   m_legNote( std::move( rhs.m_legNote ) ),
   m_bOption( rhs.m_bOption ),
   m_pChartDataView( std::move( rhs.m_pChartDataView ) )
@@ -50,7 +49,6 @@ Leg& Leg::operator=( Leg&& rhs ) {
   if ( this != &rhs ) {
     DelChartData();
     m_pPosition = std::move( rhs.m_pPosition );
-    m_monitor = std::move( rhs.m_monitor );
     m_legNote = std::move( rhs.m_legNote );
     m_bOption = rhs.m_bOption;
     //m_pChartDataView = std::move( rhs.m_pChartDataView );
@@ -67,7 +65,6 @@ Leg::~Leg() {
   else {
     //BOOST_LOG_TRIVIAL(info) << "Leg destruction: unknown";
   }
-  assert( !m_monitor.IsActive() );
 }
 
 const ou::tf::option::LegNote::values_t& Leg::SetPosition( pPosition_t pPosition ) {
@@ -80,14 +77,6 @@ const ou::tf::option::LegNote::values_t& Leg::SetPosition( pPosition_t pPosition
       << pPosition->GetInstrument()->GetInstrumentName()
       ;
 
-    if ( m_monitor.IsActive() ) {
-      BOOST_LOG_TRIVIAL(info)
-        << "Leg::SetPosition cancelling order for position "
-        << m_pPosition->GetInstrument()->GetInstrumentName()
-        ;
-      m_monitor.CancelOrder();
-      while ( m_monitor.IsActive() );  // hopeufully this doesn't lock
-    }
     DelChartData();
     m_pPosition.reset();
     m_bOption = false;
@@ -97,8 +86,6 @@ const ou::tf::option::LegNote::values_t& Leg::SetPosition( pPosition_t pPosition
 
   m_pPosition = pPosition;
   m_legNote.Decode( m_pPosition->Notes() );
-
-  m_monitor.SetPosition( m_pPosition );
 
   ou::tf::Watch::pWatch_t pWatch = m_pPosition->GetWatch();
   // NOTE: this may generate error with non-option!
@@ -119,7 +106,6 @@ const ou::tf::option::LegNote::values_t& Leg::SetPosition( pPosition_t pPosition
 Leg::pPosition_t Leg::GetPosition() const { return m_pPosition; }
 
 void Leg::Tick( ptime dt, double dblUnderlyingPrice ) {
-  m_monitor.Tick( dt );
   if ( m_pPosition ) {
     double dblPL = m_pPosition->GetRealizedPL() + m_pPosition->GetUnRealizedPL() - m_pPosition->GetCommissionPaid();
     m_ceProfitLoss.Append( dt, dblPL );
@@ -135,32 +121,6 @@ void Leg::Tick( ptime dt, double dblUnderlyingPrice ) {
   }
 }
 
-void Leg::PlaceOrder( ou::tf::OrderSide::EOrderSide side, boost::uint32_t nOrderQuantity ) {
-  if ( m_pPosition ) {
-    m_monitor.PlaceOrder( nOrderQuantity, side );
-  }
-}
-
-void Leg::CancelOrder() {
-  if ( m_pPosition ) {
-    m_monitor.CancelOrder();
-  }
-}
-
-Leg::pPosition_t Leg::ClosePosition() {
-  if ( m_pPosition ) {
-    // m_legNote.Decode( m_pPosition->Notes() ); // TODO: validate legn notes are undisturbed
-    //option::LegNote::values_t values = m_legNote.Values();
-    //values.m_state = option::LegNote::State::Closed;
-    //m_legNote.Assign( values );
-    assert ( option::LegNote::State::Closed != m_legNote.GetState() );
-    m_legNote.SetState( option::LegNote::State::Closed );
-    m_pPosition->SetNotes( m_legNote.Encode() );
-    m_monitor.ClosePosition();
-  }
-  return m_pPosition;
-}
-
 bool Leg::IsActive() const {
   bool bIsActive( false );
   if ( m_pPosition ) {
@@ -168,8 +128,6 @@ bool Leg::IsActive() const {
   }
   return bIsActive;
 }
-
-bool Leg::IsOrderActive() const { return m_monitor.IsActive(); }
 
 void Leg::SaveSeries( const std::string& sPrefix ) {
   if ( m_pPosition ) {
@@ -256,110 +214,6 @@ void Leg::DelChartData() {
       m_pChartDataView.reset();
     }
   //}
-}
-
-bool Leg::CloseItm( const double price ) {
-  bool bClosed( false );
-  if ( m_pPosition ) {
-    if ( m_bOption ) {
-      if ( m_pPosition->IsActive() ) {
-        using pInstrument_t = Position::pInstrument_t;
-        pInstrument_t pInstrument = m_pPosition->GetInstrument();
-        switch ( pInstrument->GetOptionSide() ) {
-          case ou::tf::OptionSide::Call:
-            if ( price > pInstrument->GetStrike() ) {
-              ClosePosition();
-              bClosed = true;
-            }
-            break;
-          case ou::tf::OptionSide::Put:
-            if ( price < pInstrument->GetStrike() ) {
-              ClosePosition();
-              bClosed = true;
-            }
-            break;
-        }
-      }
-    }
-  }
-  return bClosed;
-}
-
-bool Leg::CloseItmForProfit( const double price ) {
-  bool bClosed( false );
-  if ( m_pPosition ) {
-    if ( m_bOption ) {
-      if ( m_pPosition->IsActive() ) {
-        using pInstrument_t = Position::pInstrument_t;
-        pInstrument_t pInstrument = m_pPosition->GetInstrument();
-        switch ( pInstrument->GetOptionSide() ) {
-          case ou::tf::OptionSide::Call:
-            if ( price > pInstrument->GetStrike() ) {
-              if ( ( 100 * m_pPosition->GetActiveSize() * 0.05 ) < m_pPosition->GetUnRealizedPL() ) {
-                ClosePosition();
-                bClosed = true;
-              }
-            }
-            break;
-          case ou::tf::OptionSide::Put:
-            if ( price < pInstrument->GetStrike() ) {
-              if ( ( 100 * m_pPosition->GetActiveSize() * 0.05 ) < m_pPosition->GetUnRealizedPL() ) {
-                ClosePosition();
-                bClosed = true;
-              }
-            }
-            break;
-        }
-      }
-    }
-  }
-  return bClosed;
-}
-
-void Leg::CloseExpiryItm( const boost::gregorian::date date, const double price ) {
-  using pInstrument_t = Position::pInstrument_t;
-  if ( m_pPosition ) {
-    pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
-    pInstrument_t pInstrument = pOption->GetInstrument();
-    if ( date == pInstrument->GetExpiry() ) {
-      const double strike = pInstrument->GetStrike();
-      switch ( pInstrument->GetOptionSide() ) {
-        case OptionSide::Call:
-          if ( price >= strike ) {
-            ClosePosition();
-          }
-          break;
-        case OptionSide::Put:
-          if ( price <= strike ) {
-            ClosePosition();
-          }
-          break;
-      }
-    }
-  }
-}
-
-void Leg::CloseExpiryOtm( const boost::gregorian::date date, double price ) {
-  using pInstrument_t = Position::pInstrument_t;
-  if ( m_pPosition ) {
-    pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
-    pInstrument_t pInstrument = pOption->GetInstrument();
-    if ( date == pInstrument->GetExpiry() ) {
-      const double strike = pInstrument->GetStrike();
-      switch ( pInstrument->GetOptionSide() ) {
-        case OptionSide::Call:
-          if ( price < strike ) {
-            ClosePosition();
-          }
-          break;
-        case OptionSide::Put:
-          if ( price > strike ) {
-            ClosePosition();
-          }
-          break;
-      }
-    }
-  }
 }
 
 double Leg::GetNet( double price ) const {

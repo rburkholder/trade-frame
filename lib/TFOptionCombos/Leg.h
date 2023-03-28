@@ -26,7 +26,6 @@
 #include <OUCharting/ChartEntryIndicator.h>
 
 #include <TFTrading/Position.h>
-#include <TFTrading/MonitorOrder.h>
 
 // TODO: may need option version inheritance
 #include <TFOptions/Option.h>
@@ -55,21 +54,12 @@ public:
 
   void Tick( ptime dt, double price );
 
-  void PlaceOrder( ou::tf::OrderSide::EOrderSide, boost::uint32_t nOrderQuantity );
-  void CancelOrder();
-  pPosition_t ClosePosition();
   bool IsActive() const;
-  bool IsOrderActive() const;
 
   void SaveSeries( const std::string& sPrefix );
 
   void SetChartData( pChartDataView_t pChartData, ou::Colour::EColour );
   void DelChartData();
-
-  bool CloseItm( const double price );
-  bool CloseItmForProfit( const double price );
-  void CloseExpiryItm( const boost::gregorian::date date, const double price );
-  void CloseExpiryOtm( const boost::gregorian::date date, const double price );
 
   double GetNet( double price ) const;
   double ConstructedValue() const;
@@ -83,8 +73,6 @@ private:
 
   pPosition_t m_pPosition;
   option::LegNote m_legNote;
-
-  ou::tf::MonitorOrder m_monitor;
 
   pChartDataView_t m_pChartDataView;
 

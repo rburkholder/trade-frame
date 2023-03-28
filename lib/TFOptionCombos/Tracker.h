@@ -49,9 +49,8 @@ public:
   using fConstructedOption_t = std::function<void(pOption_t)>;
   using fConstructOption_t   = std::function<void(const std::string&, fConstructedOption_t&&)>;
 
-  using fOpenLeg_t = std::function<pPosition_t/*new?*/(pOption_t,const std::string& notes)>; // deprecated
-  using fRollLeg_t = std::function<pPosition_t(pPosition_t old, pOption_t, const std::string& notes )>;
-  using fCloseLeg_t = std::function<void(pPosition_t)>;
+  using fLegRoll_t = std::function<pPosition_t(pPosition_t old, pOption_t )>;
+  using fLegClose_t = std::function<void(pPosition_t)>;
 
   Tracker();
   Tracker( const Tracker& ) = delete;
@@ -62,18 +61,13 @@ public:
     pPosition_t pPosition
   , const chain_t* pChain
   , fConstructOption_t&&
-  , fOpenLeg_t&&
-  , fRollLeg_t&&
-  , fCloseLeg_t&&
+  , fLegRoll_t&&
+  , fLegClose_t&&
   );
 
-  void TestLong( boost::posix_time::ptime, double dblUnderlyingSlope, double dblUnderlyingPrice );
-  void TestShort( boost::posix_time::ptime, double dblUnderlyingSlope, double dblUnderlyingPrice );
+  bool TestLong( boost::posix_time::ptime, double dblUnderlyingSlope, double dblUnderlyingPrice );
+  bool TestShort( boost::posix_time::ptime, double dblUnderlyingSlope, double dblUnderlyingPrice );
   void TestItmRoll( boost::gregorian::date, boost::posix_time::time_duration );
-
-  void CalendarRoll();
-  void DiagonalRoll();
-  void Close();
 
   void Lock( bool );
 
@@ -88,10 +82,10 @@ private:
   compare_t m_compare;
 
   using lu_strike_t = std::function<double(double)>;
-  lu_strike_t m_luItmStrike;
+  lu_strike_t m_luStrike;
 
   using lu_name_t = std::function<std::string(double)>;
-  lu_name_t m_luItmName;
+  lu_name_t m_luNameAtStrike;
 
   double m_dblStrikePosition;
   ou::tf::OptionSide::EOptionSide m_sidePosition;
@@ -100,19 +94,20 @@ private:
   double m_dblUnderlyingSlope;
 
   enum class ETransition {
-    Initial   // on creation
-  , Vacant    // constructing candidate
-  , Fill      // closing a leg
-  , Acquire   // during option candidate construction
-  , Track     // actively tracking price
-  , Roll_profit
-  , Roll_init
+    Unknown   // unused
+  , Initial   // on creation, waiting for basic position
+  , Vacant_Init
+  , Vacant    // candidate construction preparation
+  , Acquire   // candidate construction
+  , Spread    // candidate spread - wait for spread stats/stability
+  , Track_Long // actively tracking price
+  , Track_Short // actibvely tracking price
   , Roll_start  // needs to process the calendar roll at expiry
-  , Roll_warmup // wait for quotes (needed for limit order)
   , Quiesce   // stop tracking
   , Done      // prepare for destruction
     };
   ETransition m_transition;
+  ETransition m_track_type; // Track_Long or Track_Short
 
   const chain_t* m_pChain;
 
@@ -122,15 +117,8 @@ private:
     // TestShort: calendar roll, if enough premium difference, else close leg
 
   fConstructOption_t m_fConstructOption;
-  fOpenLeg_t m_fOpenLeg; // deprecated
-  fRollLeg_t m_fRollLeg; // use two leg OrderCombo
-  fCloseLeg_t m_fCloseLeg; // use one leg OrderCombo
-
-  using fOptionRoll_Construct_t = std::function<void()>;
-  fOptionRoll_Construct_t m_fOptionRoll_Construct;
-
-  using fOptionRoll_Open_t = std::function<void()>;
-  fOptionRoll_Open_t m_fOptionRoll_Open; //
+  fLegRoll_t m_fLegRoll; // use two leg OrderCombo
+  fLegClose_t m_fLegClose; // use one leg OrderCombo
 
   void Initialize( pPosition_t );
 
@@ -140,9 +128,8 @@ private:
   void OptionCandidate_StartWatch();
   void OptionCandidate_StopWatch();
 
-  void GenericRoll( double strike );
-
-  void StartOptionRoll();
+  void LegRoll();
+  void LegClose();
 
 };
 

@@ -541,12 +541,12 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
       //std::cout << "Option repository: adding option " << pOption->GetInstrumentName() << std::endl;
       m_pOptionRegistry->Add( pOption, pPosition, sLegType, std::move( ma ) );
     },
-    [this]( ou::tf::option::Combo* p, pOption_t pOption, const std::string& note )->pPosition_t { // fOpenPosition_t
+    [this]( ou::tf::option::Combo* p, pOption_t pOption, const std::string& note )->pPosition_t { // fConstructPosition_t
       combo_t* pCombo = reinterpret_cast<combo_t*>( p );
       pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, note );
       using LegNote = ou::tf::option::LegNote;
       const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
-      p->PlaceOrder( lnValues.m_type, ou::tf::OrderSide::Buy, 1 );  // TODO: perform this in the combo, rename to AddPosition?
+      //p->PlaceOrder( lnValues.m_type, ou::tf::OrderSide::Buy, 1 );  // TODO: perform this in the combo, rename to AddPosition?
       return pPosition;
     },
     [this]( pOption_t pOption ){ // fDeactivateOption_t

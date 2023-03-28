@@ -19,7 +19,10 @@
  * Created: Novemeber 8, 2020, 11:41 AM
  */
 
-// 2023/02/22 TestShort has todo for rolling for premium
+// non-re-usable, construct a new tracker with each new leg
+// otherwise need to work on state initialization
+
+#include <memory>
 
 #include <boost/log/trivial.hpp>
 
@@ -39,28 +42,27 @@ namespace {
 
 Tracker::Tracker()
 : m_transition( ETransition::Initial )
+, m_track_type( ETransition::Unknown )
 , m_bLock( false )
 , m_compare( nullptr )
-, m_luItmStrike( nullptr )
-, m_luItmName( nullptr )
+, m_luStrike( nullptr )
+, m_luNameAtStrike( nullptr )
 , m_pChain( nullptr )
 , m_dblStrikePosition {}
 , m_sidePosition( ou::tf::OptionSide::Unknown )
 , m_dblUnderlyingSlope {}, m_dblUnderlyingPrice {}
 , m_fConstructOption( nullptr )
-, m_fOpenLeg( nullptr )
-, m_fRollLeg( nullptr )
-, m_fCloseLeg( nullptr )
-, m_fOptionRoll_Construct( nullptr )
-, m_fOptionRoll_Open( nullptr )
+, m_fLegRoll( nullptr )
+, m_fLegClose( nullptr )
 {}
 
 Tracker::Tracker( Tracker&& rhs )
 : m_transition( rhs.m_transition )
+, m_track_type( rhs.m_track_type )
 , m_bLock( false )
 , m_compare( std::move( rhs.m_compare ) )
-, m_luItmStrike( std::move( rhs.m_luItmStrike ) )
-, m_luItmName( std::move( rhs.m_luItmName ) )
+, m_luStrike( std::move( rhs.m_luStrike ) )
+, m_luNameAtStrike( std::move( rhs.m_luNameAtStrike ) )
 , m_pChain( std::move( rhs.m_pChain ) )
 , m_dblStrikePosition( rhs.m_dblStrikePosition )
 , m_sidePosition( rhs.m_sidePosition )
@@ -69,55 +71,49 @@ Tracker::Tracker( Tracker&& rhs )
 , m_pPosition( std::move( rhs.m_pPosition ) )
 , m_pOptionCandidate( std::move( rhs.m_pOptionCandidate ) )
 , m_fConstructOption( std::move( rhs.m_fConstructOption ) )
-, m_fOpenLeg( std::move( rhs.m_fOpenLeg ) )
-, m_fRollLeg( std::move( rhs.m_fRollLeg ) )
-, m_fCloseLeg( std::move( rhs.m_fCloseLeg ) )
-, m_fOptionRoll_Construct( std::move( rhs.m_fOptionRoll_Construct ) )
-, m_fOptionRoll_Open( std::move( rhs.m_fOptionRoll_Open ) )
+, m_fLegRoll( std::move( rhs.m_fLegRoll ) )
+, m_fLegClose( std::move( rhs.m_fLegClose ) )
 {
   assert( !m_pOptionCandidate );  // can't be watching
 }
 
 Tracker::~Tracker() {
+  if ( m_pPosition ) {
+    m_pPosition->GetWatch()->EnableStatsRemove();
+  }
   Quiesce();
   m_transition = ETransition::Done;
   m_compare = nullptr;
-  m_luItmStrike = nullptr;
-  m_luItmName = nullptr;
-  m_pPosition.reset();
+  m_luStrike = nullptr;
+  m_luNameAtStrike = nullptr;
   m_fConstructOption = nullptr;
-  m_fOpenLeg = nullptr;
-  m_fRollLeg = nullptr;
-  m_fCloseLeg = nullptr;
-  m_fOptionRoll_Construct = nullptr;
-  m_fOptionRoll_Open = nullptr;
+  m_fLegRoll = nullptr;
+  m_fLegClose = nullptr;
+  m_pPosition.reset();
 }
 
 void Tracker::Initialize(
   pPosition_t pPosition
 , const chain_t* pChain
 , fConstructOption_t&& fConstructOption
-, fOpenLeg_t&& fOpenLeg
-, fRollLeg_t&& fRollLeg
-, fCloseLeg_t&& fCloseLeg
+, fLegRoll_t&& fLegRoll
+, fLegClose_t&& fLegClose
 ) {
 
   //BOOST_LOG_TRIVIAL(info) << "Tracker::Initialize,external";
 
   assert( pPosition );
   assert( fConstructOption );
-  assert( fOpenLeg );
-  assert( fRollLeg );
-  assert( fCloseLeg );
+  assert( fLegRoll );
+  assert( fLegClose );
 
   assert( ETransition::Initial == m_transition );
 
   m_pChain = pChain;
 
   m_fConstructOption = std::move( fConstructOption );
-  m_fOpenLeg = std::move( fOpenLeg );
-  m_fRollLeg = std::move( fRollLeg );
-  m_fCloseLeg = std::move( fCloseLeg );
+  m_fLegRoll = std::move( fLegRoll );
+  m_fLegClose = std::move( fLegClose );
 
   Initialize( pPosition );
 
@@ -128,6 +124,7 @@ void Tracker::Initialize( pPosition_t pPosition ) {
   //BOOST_LOG_TRIVIAL(info) << "Tracker::Initialize,internal";
 
   assert( ETransition::Initial == m_transition );  // needs to be set prior to entry
+  assert( !m_pPosition );
 
   m_pPosition = std::move( pPosition );
 
@@ -142,145 +139,238 @@ void Tracker::Initialize( pPosition_t pPosition ) {
   switch ( m_sidePosition ) {
     case ou::tf::OptionSide::Call:
       m_compare = &gt;
-      m_luItmStrike = [pChain=m_pChain](double dblUnderlying){ return pChain->Call_Itm( dblUnderlying ); };
-      m_luItmName =   [pChain=m_pChain](double strike) { return pChain->GetIQFeedNameCall( strike ); };
+      m_luNameAtStrike = [pChain=m_pChain](double strike) { return pChain->GetIQFeedNameCall( strike ); };
       break;
     case ou::tf::OptionSide::Put:
       m_compare = &lt;
-      m_luItmStrike = [pChain=m_pChain](double dblUnderlying){ return pChain->Put_Itm( dblUnderlying ); };
-      m_luItmName =   [pChain=m_pChain](double strike) { return pChain->GetIQFeedNamePut( strike ); };
+      m_luNameAtStrike = [pChain=m_pChain](double strike) { return pChain->GetIQFeedNamePut( strike ); };
       break;
     default:
       assert( false );
   }
 
-  m_transition = ETransition::Track;
+  m_pPosition->GetWatch()->EnableStatsAdd();
+
+  m_transition = ETransition::Vacant_Init;
 }
 
-void Tracker::TestLong( boost::posix_time::ptime dt, double dblUnderlyingSlope, double dblUnderlyingPrice ) {
+bool Tracker::TestLong( boost::posix_time::ptime dt, double dblUnderlyingSlope, double dblUnderlyingPrice ) {
+
+  bool bRemove( false );
+
+  m_dblUnderlyingPrice = dblUnderlyingPrice;
+  m_dblUnderlyingSlope = dblUnderlyingSlope;
 
   switch ( m_transition ) {
-    case ETransition::Track: // TODO: collect as method, to be similar in nature to StartOptionRoll call
-      {
-        m_dblUnderlyingPrice = dblUnderlyingPrice;
-        m_dblUnderlyingSlope = dblUnderlyingSlope;
 
-        double strikeItm = m_luItmStrike( dblUnderlyingPrice );
+    case ETransition::Vacant_Init:
+
+      assert( nullptr == m_luStrike );
+      m_track_type = ETransition::Track_Long;
+
+      switch ( m_sidePosition ) {
+        case ou::tf::OptionSide::Call:
+          m_luStrike = [pChain=m_pChain](double dblUnderlying){ return pChain->Call_Itm( dblUnderlying ); };
+          break;
+        case ou::tf::OptionSide::Put:
+          m_luStrike = [pChain=m_pChain](double dblUnderlying){ return pChain->Put_Itm( dblUnderlying ); };
+          break;
+        default:
+          assert( false );
+      }
+
+      m_transition = ETransition::Vacant;
+      // fall through
+    case ETransition::Vacant:
+      {
+        double strikeItm = m_luStrike( m_dblUnderlyingPrice );
 
         if ( m_compare( strikeItm, m_dblStrikePosition ) ) { // is new strike further itm?
-          // TODO: refactor to remove the if/else and put Vacant/Construct together?
-          if ( m_pOptionCandidate ) { // if already tracking the option
-            if ( m_compare( strikeItm, m_pOptionCandidate->GetStrike() ) ) { // move further itm?
-              m_transition = ETransition::Vacant;
-              OptionCandidate_StopWatch();
-              m_pOptionCandidate.reset();
-              OptionCandidate_Construct( dt, strikeItm );
-            }
-            else {
-              // TODO: if retreating, stay pat, retreat, or try the roll?
-              // nothing to do, track in existing option as quotes are updated
-            }
-          }
-          else {
-            // need to obtain option, but track via state machine to request only once
-            m_transition = ETransition::Vacant;
-            OptionCandidate_Construct( dt, strikeItm );
-            // TODO: check that option is different from current option
-          }
-        }
-        else {
-          // nothing to do, hasn't moved enough itm
+          OptionCandidate_Construct( dt, strikeItm );
         }
       }
       break;
+    case ETransition::Track_Long:
+
+      assert( m_luStrike );
+      assert( m_pOptionCandidate );
+
+      {
+        double strikeItm = m_luStrike( m_dblUnderlyingPrice );
+
+        if ( m_compare( strikeItm, m_dblStrikePosition ) ) { // is new strike further itm?
+        // TODO: refactor to remove the if/else and put Vacant/Construct together?
+          if ( m_compare( strikeItm, m_pOptionCandidate->GetStrike() ) ) {
+            m_transition = ETransition::Vacant;
+            OptionCandidate_StopWatch();
+            m_pOptionCandidate.reset();
+            //m_luStrike = nullptr;
+            //OptionCandidate_Construct( dt, strikeItm );
+          }
+          else {
+            // TODO: if retreating, stay pat, retreat, or try the roll?
+          }
+        }
+      }
+
+      break;
     case ETransition::Roll_start:
-      StartOptionRoll(); // delayed a tick to call in Tick thread
+      LegRoll(); // delayed a tick to call in Tick thread
+      bRemove = true;
       break;
-    case ETransition::Initial:
-      break;
-    case ETransition::Vacant:
-      break;
+    case ETransition::Track_Short: // mutually exclusive
+      assert( false );
     default:
       break;
   }
-
+  return bRemove;
 }
 
-void Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope, double dblUnderlyingPrice ) {
+bool Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope, double dblUnderlyingPrice ) {
+
+  bool bRemove( false );
+
+  m_dblUnderlyingPrice = dblUnderlyingPrice;
+  m_dblUnderlyingSlope = dblUnderlyingSlope;
 
   switch ( m_transition ) {
-    case ETransition::Track: // TODO: collect as method, to be similar in nature to StartOptionRoll call
+    case ETransition::Vacant_Init:
+
+      assert( nullptr == m_luStrike );
+      m_track_type = ETransition::Track_Short;
+
+      switch ( m_sidePosition ) {
+        case ou::tf::OptionSide::Call:
+          m_luStrike = [this,pChain=m_pChain](double strike ){ return pChain->Call_ItmAtm( strike ); };
+          break;
+        case ou::tf::OptionSide::Put:
+          m_luStrike = [this,pChain=m_pChain](double strike ){ return pChain->Put_ItmAtm( strike ); };
+          break;
+        default:
+          assert( false );
+      }
+      m_transition = ETransition::Vacant;
+      // fall through
+    case ETransition::Vacant:
       {
-        m_dblUnderlyingPrice = dblUnderlyingPrice;
-        m_dblUnderlyingSlope = dblUnderlyingSlope;
+        double strike = m_luStrike( m_dblStrikePosition );
+        OptionCandidate_Construct( dt, strike );
+      }
+      break;
+    case ETransition::Track_Short:
+      {
+        assert( m_pOptionCandidate );
 
-        if ( m_pOptionCandidate ) {
+        using pWatch_t = ou::tf::Watch::pWatch_t;
+        pWatch_t pWatchCurrent = m_pPosition->GetWatch();
 
-          // close out when value close to zero - or auto calendar roll?
-          const ou::tf::Quote& quote( m_pPosition->GetWatch()->LastQuote() );
-          if ( quote.IsNonZero() && ( quote.Ask() > quote.Bid() ) ) {
-            if ( 0.401 >= quote.Ask() && ( 0.0 < quote.Bid() ) ) { // use 2xspread instead
-              // TODO: perform a calendar roll to regain premium? (but not on expiry date)
-              //   check if there is significant difference in premium from candidate
-              //m_transition = ETransition::Fill;
-              pPosition_t pPosition = std::move( m_pPosition );
-              m_pPosition.reset();
-              m_transition = ETransition::Initial; // this might be re-entrant, so get the state set properly
-              m_fCloseLeg( pPosition );
+        const ou::tf::Quote& quote( pWatchCurrent->LastQuote() );
+        if ( quote.IsNonZero() && ( quote.Ask() > quote.Bid() ) ) {
+
+          bool bSpreadOk_current, bSpreadOk_candidate;
+          size_t nCount_current, nCount_candidate;
+          double dblSpread_current, dblSpread_candiate;
+
+          std::tie( bSpreadOk_current, nCount_current, dblSpread_current ) = pWatchCurrent->SpreadStats();
+          std::tie( bSpreadOk_candidate, nCount_candidate, dblSpread_candiate ) = m_pOptionCandidate->SpreadStats();
+
+          if ( bSpreadOk_current && bSpreadOk_candidate ) {
+
+            if ( 0.401 > quote.Bid() ) { // decision time
+
+              const std::string& sCurrent( pWatchCurrent->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
+              const std::string& sCandidate( m_pOptionCandidate->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
+
+              if ( sCurrent == sCandidate ) {
+                // perform exit, no roll available
+                LegClose();
+                bRemove = true;
+              }
+              else {
+                // exit or calendar roll, depending upon room and gained premium
+                pOption_t pOptionCurrent = std::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
+                ou::tf::option::Option::premium_t premiumCurrent( pOptionCurrent->Premium( m_dblUnderlyingPrice ) );
+                ou::tf::option::Option::premium_t premiumCandidate( m_pOptionCandidate->Premium( m_dblUnderlyingPrice ) );
+
+                if ( 0.20 < ( premiumCandidate.extrinsic < premiumCurrent.extrinsic ) ) {
+                  LegRoll(); // TODO: need to verify operation
+                  bRemove = true;
+                }
+                else {
+                  // exit, roll not economical
+                  LegClose();
+                  bRemove = true;
+                }
+              }
             }
           }
         }
-        else {
-          m_transition = ETransition::Vacant;
-          OptionCandidate_Construct( dt, m_dblStrikePosition );
-          // TODO: check that option is different from current option
-        }
-
       }
       break;
     case ETransition::Roll_start: // used for Roll or Close
-      StartOptionRoll(); // delayed a tick to call in Tick thread
-    case ETransition::Initial:
-      break;
-    case ETransition::Vacant:
-      break;
+      LegRoll(); // delayed a tick to call in Tick thread
+      bRemove = true;
+    case ETransition::Track_Long: // mutually exclusive
+      assert( false );
     default:
       break;
   }
+  return bRemove;
 }
 
 void Tracker::OptionCandidate_Construct( boost::posix_time::ptime dt, double strike ) {
 
-  // TODO: need to enable greeks to track IV, Delta
+  // TODO: need to enable greeks to track IV, Delta for Cobmo level aggregation
 
   m_transition = ETransition::Acquire;
 
-  std::string sName;
-  assert( m_luItmName );
-  sName = m_luItmName( strike );
+  assert( m_luNameAtStrike );
 
-  BOOST_LOG_TRIVIAL(info)
-    << dt.time_of_day() << " "
-    << "Tracker::Construct: "
-    << sName
-    << " at " << strike
-    ;
+  const std::string& sNameCandidate( m_luNameAtStrike( strike ) );
 
-  m_fConstructOption(
-    sName,
-    [this]( pOption_t pOption ){
-      assert( !m_pOptionCandidate );
-      m_pOptionCandidate = std::move( pOption );
-      OptionCandidate_StartWatch();
-      m_transition = ETransition::Track;
-    } );
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  pWatch_t pWatchCurrent = m_pPosition->GetWatch();
+
+  const std::string& sNameCurrent( pWatchCurrent->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
+
+  if ( sNameCurrent != sNameCandidate ) {
+    BOOST_LOG_TRIVIAL(info)
+      << dt.time_of_day() << " "
+      << "Tracker::Construct candidate "
+      << sNameCandidate
+      << " at " << strike
+      ;
+
+    m_fConstructOption(
+      sNameCandidate,
+      [this]( pOption_t pOption ){
+        assert( !m_pOptionCandidate );
+        m_pOptionCandidate = std::move( pOption );
+        OptionCandidate_StartWatch();
+        m_transition = ETransition::Spread;
+      } );
+  }
+
 }
 
-// called when m_pOptionCandidate exists (via OnQuote)
 void Tracker::OptionCandidate_HandleQuote( const ou::tf::Quote& quote ) {
+  // different thread than TestLong/TestShort
 
   switch ( m_transition ) {
-    case ETransition::Track:
+    case ETransition::Spread:
+      {
+        bool bSpreadOk;
+        size_t nCount;
+        double dblSpread;
+
+        std::tie( bSpreadOk, nCount, dblSpread ) = m_pOptionCandidate->SpreadStats();
+
+        if ( bSpreadOk ) {
+          m_transition = m_track_type;
+        }
+      }
+      break;
+    case ETransition::Track_Long:
       {
         if ( m_compare( m_dblUnderlyingSlope, 0.0 ) ) {
           // nothing if the slope is going in the right direction
@@ -300,146 +390,83 @@ void Tracker::OptionCandidate_HandleQuote( const ou::tf::Quote& quote ) {
             }
             else {
               if ( !m_bLock ) {
-                assert( nullptr == m_fOptionRoll_Construct );
-                assert( nullptr == m_fOptionRoll_Open );
                 auto pOldWatch = m_pPosition->GetWatch();
                 BOOST_LOG_TRIVIAL(info)
-                  << quote.DateTime().time_of_day()
-                  << ",roll"
-                  << ",old=" << pOldWatch->GetInstrumentName()
-                  << ",b=" << pOldWatch->LastQuote().Bid()
-                  << ",a=" << pOldWatch->LastQuote().Ask()
-                  << ",new=" << m_pOptionCandidate->GetInstrument()->GetInstrumentName()
-                  << ",b=" << m_pOptionCandidate->LastQuote().Bid()
-                  << ",a=" << m_pOptionCandidate->LastQuote().Ask()
+                  << pOldWatch->LastQuote().DateTime().time_of_day()
                   << ",roll-per-share-diff=" << diff
-                  << ",underlying=" << m_dblUnderlyingPrice
-                  << ",slope=" << m_dblUnderlyingSlope
                   ;
-                m_transition = ETransition::Roll_profit;
-                OptionCandidate_StopWatch();
-                m_compare = nullptr;
-                m_luItmStrike = nullptr;
-                m_luItmName = nullptr;
-                pOption_t pOption( std::move( m_pOptionCandidate ) );
-                std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
-                m_fCloseLeg( m_pPosition );  // TODO: closer needs to use EnableStatsAdd
-                m_pPosition.reset();
-                // TODO: on opening a position, will need to extend states to handle order with errors
-                m_transition = ETransition::Initial; // NEEDS to be here, prior to m_fOpenLeg, which calls back in
-                // NOTE: Initialize may not be required as m_fOpenLeg calls back into Tracker
-                //    as such, there may be a double init going on
-                //Initialize( m_fOpenLeg( std::move( pOption ), sNotes ) ); // with new position, NOTE: opener needs to use EnableStatsAdd
-                m_fOpenLeg( std::move( pOption ), sNotes );
+                m_transition = ETransition::Roll_start;
+                //LegRoll();
               }
             }
           }
         }
       }
       break;
-    case ETransition::Roll_warmup:
-      {
-        assert( m_pOptionCandidate );
-        ou::tf::Watch::tupleSpreadStats_t stats = m_pOptionCandidate->SpreadStats();
-
-        if ( std::get<bool>( stats ) ) {
-          assert( m_fOptionRoll_Open );
-          m_fOptionRoll_Open();
-          m_fOptionRoll_Open = nullptr;
-        }
-      }
+    case ETransition::Track_Short:
+      // anything to do here?
       break;
     default:
       break;
   }
 }
 
-void Tracker::StartOptionRoll() {
-  if ( m_fOptionRoll_Construct ) {
+void Tracker::LegRoll() {
 
-    if ( m_pOptionCandidate ) {
-      OptionCandidate_StopWatch();
-      m_pOptionCandidate.reset();
-    }
+  auto pOldWatch = m_pPosition->GetWatch();
+  BOOST_LOG_TRIVIAL(info)
+    << pOldWatch->LastQuote().DateTime().time_of_day()
+    << ",roll"
+    << ",old=" << pOldWatch->GetInstrumentName()
+    << ",b=" << pOldWatch->LastQuote().Bid()
+    << ",a=" << pOldWatch->LastQuote().Ask()
+    << ",new=" << m_pOptionCandidate->GetInstrument()->GetInstrumentName()
+    << ",b=" << m_pOptionCandidate->LastQuote().Bid()
+    << ",a=" << m_pOptionCandidate->LastQuote().Ask()
+    << ",underlying=" << m_dblUnderlyingPrice
+    << ",slope=" << m_dblUnderlyingSlope
+    ;
 
-    m_fOptionRoll_Construct();  // call the function
-    m_fOptionRoll_Construct = nullptr;
-  }
+  assert( m_pPosition );
+  m_transition = ETransition::Done;
+
+  OptionCandidate_StopWatch();
+  pOption_t pOption = std::move( m_pOptionCandidate );
+  m_pOptionCandidate.reset();
+
+  pPosition_t pPosition = std::move( m_pPosition );
+  m_pPosition.reset(); // might be redundant
+
+  m_fLegRoll( pPosition, pOption );
+  m_fLegRoll = nullptr;
 }
 
-void Tracker::GenericRoll( double strike ) {
-  if ( m_pPosition ) {
-    if ( m_pPosition->IsActive() ) {
+void Tracker::LegClose() {
 
-      m_transition = ETransition::Roll_init;
+  auto pOldWatch = m_pPosition->GetWatch();
+  BOOST_LOG_TRIVIAL(info)
+    << pOldWatch->LastQuote().DateTime().time_of_day()
+    << ",close"
+    << ",old=" << pOldWatch->GetInstrumentName()
+    << ",b=" << pOldWatch->LastQuote().Bid()
+    << ",a=" << pOldWatch->LastQuote().Ask()
+    ;
 
-      assert( nullptr == m_fOptionRoll_Construct );
-      m_fOptionRoll_Construct =  // for background loop
-        [this,strike](){
+  m_transition = ETransition::Done;
 
-          std::string sName_New;
-          assert( m_luItmName );
-          sName_New = m_luItmName( strike );
+  OptionCandidate_StopWatch();
+  m_pOptionCandidate.reset();
 
-          ou::tf::OptionSide::EOptionSide sidePosition( m_sidePosition );
+  pPosition_t pPosition = std::move( m_pPosition );
+  m_pPosition.reset(); // might be redundant
 
-          std::string sNotes( m_pPosition->Notes() ); // notes are needed for new position creation
-          std::string sName_Old( m_pPosition->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
-
-          m_compare = nullptr;
-          m_luItmStrike = nullptr;
-          m_luItmName = nullptr;
-
-          m_fCloseLeg( m_pPosition );
-          m_pPosition.reset();
-
-          BOOST_LOG_TRIVIAL(info) << "Tracker::GenericRoll: " << sName_Old << " to " << sName_New;
-
-          m_fConstructOption(
-            sName_New,
-            [this,sNotes_=std::move(sNotes)]( pOption_t pOption ){
-              BOOST_LOG_TRIVIAL(info) << "Tracker::GenericRoll::m_fConstructOption" << " " << sNotes_;
-              assert( nullptr == m_fOptionRoll_Open );
-              m_fOptionRoll_Open =
-                [this,sNotes__=std::move(sNotes_)](){
-                  m_transition = ETransition::Initial; // NEEDS to be here, prior to m_fOpenLeg, which calls back in
-                  // TODO: as above, may only need the m_fOpenLeg
-                  //Initialize( m_fOpenLeg( std::move( pOption ), sNotes_ ) ); // with new position
-                  OptionCandidate_StopWatch();
-                  m_fOpenLeg( std::move( m_pOptionCandidate ), sNotes__ );
-                };
-              m_transition = ETransition::Roll_warmup;
-              assert( !m_pOptionCandidate );
-              m_pOptionCandidate = std::move( pOption );
-              OptionCandidate_StartWatch();
-            } );
-        };
-
-      m_transition = ETransition::Roll_start;
-
-    }
-  }
-}
-
-void Tracker::CalendarRoll() {
-  assert( 0.0 < m_dblStrikePosition );
-  GenericRoll( m_dblStrikePosition );
-}
-
-void Tracker::DiagonalRoll() {
-  assert( m_luItmStrike );
-  assert( 0.0 < m_dblUnderlyingPrice );
-  double strike = m_luItmStrike( m_dblUnderlyingPrice );
-  GenericRoll( strike );
+  m_fLegClose( pPosition );
+  m_fLegClose = nullptr;
 }
 
 void Tracker::Lock( bool bLock ) {
-  BOOST_LOG_TRIVIAL(info) << "Tracker::Lock() not implemented";
+  //BOOST_LOG_TRIVIAL(info) << "Tracker::Lock()";
   m_bLock = bLock;
-}
-
-void Tracker::Close() {
-  BOOST_LOG_TRIVIAL(info) << "Tracker::Close() not implemented";
 }
 
 void Tracker::TestItmRoll( boost::gregorian::date date, boost::posix_time::time_duration time ) {
@@ -449,9 +476,7 @@ void Tracker::TestItmRoll( boost::gregorian::date date, boost::posix_time::time_
         if ( m_pPosition ) {
           if ( m_pPosition->IsActive() ) {
             if ( m_pPosition->GetInstrument()->GetExpiry() == date ) {
-
-              CalendarRoll();
-
+              //LegRoll();
             }
           }
         }

@@ -40,7 +40,7 @@ Combo::Combo( Combo&& rhs )
   m_pPortfolio( std::move( rhs.m_pPortfolio ) ),
   m_fConstructOption( std::move( rhs.m_fConstructOption ) ),
   m_fActivateOption( std::move( rhs.m_fActivateOption ) ),
-  m_fOpenPosition( std::move( rhs.m_fOpenPosition ) ),
+  m_fConstructPosition( std::move( rhs.m_fConstructPosition ) ),
   m_fDeactivateOption( std::move( rhs.m_fDeactivateOption ) )
 {
 }
@@ -58,12 +58,12 @@ void Combo::Prepare(
   const SpreadSpecs& specs,
   fConstructOption_t&& fConstructOption,
   fActivateOption_t&& fActivateOption,
-  fOpenPosition_t&& fOpenPosition,
+  fConstructPosition_t&& fConstructPosition,
   fDeactivateOption_t&& fDeactivateOption
 ) {
   m_fConstructOption = std::move( fConstructOption );
   m_fActivateOption = std::move( fActivateOption );
-  m_fOpenPosition = std::move( fOpenPosition );
+  m_fConstructPosition = std::move( fConstructPosition );
   m_fDeactivateOption = std::move( fDeactivateOption );
   Init( date, pmapChains, specs );
 }
@@ -73,13 +73,14 @@ void Combo::SetPortfolio( pPortfolio_t pPortfolio ) {
   m_pPortfolio = pPortfolio;
 }
 
-Combo::ComboLeg& Combo::LU( LegNote::Type type ) {
+Combo::mapComboLeg_t::iterator Combo::LU( LegNote::Type type ) {
   //auto pair = m_mapComboLeg.equal_range( type );
   //assert( m_mapComboLeg.end() != pair.first );
   //assert( pair.first != pair.second ); // at least one, check for only one?
   mapComboLeg_t::iterator iterLeg = m_mapComboLeg.lower_bound( type ); // look for first
   assert( m_mapComboLeg.end() != iterLeg );
-  return iterLeg->second;
+  //return iterLeg->second;
+  return iterLeg;
 }
 
 const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDataView_t pChartData, ou::Colour::EColour colour ) {
@@ -98,18 +99,18 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
 
     // this prevents duplicates for now until proper multi-leg rolls are implemented
     mapComboLeg_t::iterator iterLeg = m_mapComboLeg.find( legValues.m_type );
-    if ( m_mapComboLeg.end() == iterLeg ) {
+    //if ( m_mapComboLeg.end() == iterLeg ) {
       using result_t = std::pair<mapComboLeg_t::iterator, bool>;
       result_t result;
       //result = m_mapLeg.emplace( std::move( mapLeg_t::value_type( legValues.m_type, std::move( leg ) ) ) );
       //assert( result.second );
       //iterLeg = result.first;
       iterLeg = m_mapComboLeg.emplace( std::move( mapComboLeg_t::value_type( legValues.m_type, std::move( leg ) ) ) );
-    }
-    else {
-      DeactivatePositionOption( iterLeg->second.m_leg.GetPosition() ); // old position
-      iterLeg->second.m_leg = std::move( leg ); // overwrite with new leg
-    }
+    //}
+    //else {
+    //  DeactivatePositionOption( iterLeg->second.m_leg.GetPosition() ); // old position
+    //  iterLeg->second.m_leg = std::move( leg ); // overwrite with new leg
+    //}
 
     iterLeg->second.m_leg.SetChartData( pChartData, colour ); // comes after as there is no move on indicators
 
@@ -121,21 +122,29 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
     const std::string& sName( pWatch->GetInstrumentName() );
 
     vMenuActivation_t ma;
-    ma.emplace_back( MenuActivation( "Calendar Roll", [this,&sName,type=legValues.m_type](){
-      std::cout << "Calendar Roll: " << sName << std::endl;
-      CalendarRoll( type );
+    ma.emplace_back( MenuActivation(
+      "Calendar Roll",
+      [this,iterLeg,&sName,type=legValues.m_type](){
+        std::cout << "Calendar Roll: " << sName << std::endl;
+        CalendarRoll( type ); // use the iterator instead
       } ) );
-    ma.emplace_back( MenuActivation( "Diagonal Roll", [this,&sName,type=legValues.m_type](){
-      std::cout << "Diagonal Roll: " << sName << std::endl;
-      DiagonalRoll( type );
+    ma.emplace_back( MenuActivation(
+      "Diagonal Roll",
+      [this,iterLeg,&sName,type=legValues.m_type](){
+        std::cout << "Diagonal Roll: " << sName << std::endl;
+        DiagonalRoll( type ); // use the iterator instead
       } ) );
-    ma.emplace_back( MenuActivation( "Lock Leg",    [this,&sName,type=legValues.m_type](){
-      std::cout << "Lock Leg: " << sName << " (todo)" << std::endl;
-      LockLeg( type );
+    ma.emplace_back( MenuActivation(
+      "Lock Leg",
+      [this,iterLeg,&sName,type=legValues.m_type](){
+        std::cout << "Lock Leg: " << sName << " (todo)" << std::endl;
+        LegLock( type ); // use the iterator instead
       } ) );
-    ma.emplace_back( MenuActivation( "Close Leg",    [this,&sName,type=legValues.m_type](){
-      std::cout << "Close: " << sName << " (todo)" << std::endl;
-      Close( type );
+    ma.emplace_back( MenuActivation(
+      "Close Leg",
+      [this,iterLeg,&sName,type=legValues.m_type](){
+        std::cout << "Close Leg: " << sName << " (todo)" << std::endl;
+        LegClose( type ); // use the iterator instead
       } ) );
 
     m_fActivateOption( pOption, pPositionNew, ou::tf::option::LegNote::LU( legValues.m_type ), std::move( ma ) );
@@ -165,7 +174,9 @@ Combo::ComboLeg& Combo::InitTracker(
 
   // assumes only one of type
 
-  ComboLeg& cleg( LU( type ) );
+  mapComboLeg_t::iterator iterLeg = LU( type );
+
+  ComboLeg& cleg( iterLeg->second );
 
   pPosition_t pPosition( cleg.m_leg.GetPosition() );
   assert( pPosition );
@@ -176,40 +187,70 @@ Combo::ComboLeg& Combo::InitTracker(
     pPosition, &chain,
     [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
-      },
-    [this]( pOption_t pOption, const std::string& sNotes )->pPosition_t { // m_fOpenLeg
-
-      // TODO: will need to supply previous option => stop calc, may need a clean up lambda
-      //   then the note change above can be performed elsewhere
-
-      pPosition_t pPosition = m_fOpenPosition( this, pOption, sNotes );
-      // Combo::OverwritePosition( pPosition ); - not needed, performed in fOpenPosition
-      return pPosition;
     },
-    []( pPosition_t pPositionOld, pOption_t pOption, const std::string& sNotes )->pPosition_t { // fRollLeg_t
-      pPosition_t pPosition;  // empty for now as placeholder
-      assert( false );
-      return pPosition;
-    },
-    [this,&cleg]( pPosition_t pPositionOld ) { // m_fCloseLeg
+    [this,iterLeg]( pPosition_t pPositionOld, pOption_t pOption )->pPosition_t { // fRollLeg_t - response to Tick
+      // leg will be removed in Tick
 
       const std::string sNotes( pPositionOld->Notes() );
-      LegNote ln( sNotes );
 
-      LegNote::values_t values( ln.Values() );
-      values.m_state = LegNote::State::Closed;
-      ln.Assign( values );
-      pPositionOld->SetNotes( ln.Encode() );
-      auto& instance( ou::tf::PortfolioManager::GlobalInstance() ); // NOTE this direct call!!
-      instance.PositionUpdateNotes( pPositionOld );
+      assert( !m_pOrderCombo );
 
-      cleg.m_monitor.SetPosition( pPositionOld );
-      cleg.m_monitor.ClosePosition();
+      m_pOrderCombo = ou::tf::OrderCombo::Factory();
+      m_pOrderCombo->CloseLeg(
+        pPositionOld,
+        [this,iterLeg](){} );
+
+      pPosition_t pPosition;
+      pPosition = m_fConstructPosition( this, pOption, sNotes );
+      m_pOrderCombo->AddLeg(
+        pPosition,
+        pPositionOld->GetActiveSize(),  pPositionOld->GetActiveSide(),
+        [this,iterLeg](){});
+
+      PositionNote( pPositionOld, LegNote::State::Closed );
+      DeactivatePositionOption( pPositionOld );
+
+      m_pOrderCombo->Submit(
+        [this](){
+          m_pOrderCombo_Kill = std::move( m_pOrderCombo );
+        } );
+
+      return pPosition;
+    },
+    [this,iterLeg]( pPosition_t pPositionOld ) { // m_fCloseLeg - response to Tick
+      // leg will be removed in Tick
+
+      PositionNote( pPositionOld, LegNote::State::Closed );
+      DeactivatePositionOption( pPositionOld );
+
+      assert( !m_pOrderCombo );
+
+      m_pOrderCombo = ou::tf::OrderCombo::Factory();
+      m_pOrderCombo->CloseLeg(
+        pPositionOld,
+        [this,iterLeg](){} );
+      m_pOrderCombo->Submit(
+        [this](){
+          m_pOrderCombo_Kill = std::move( m_pOrderCombo );
+        } );
     }
   );
 
   return cleg;
 
+}
+
+void Combo::PositionNote( pPosition_t& pPosition, LegNote::State state ) {
+  const std::string sNotes( pPosition->Notes() );
+  LegNote ln( sNotes );
+  LegNote::values_t values( ln.Values() );
+
+  values.m_state = state;
+  ln.Assign( values );
+  pPosition->SetNotes( ln.Encode() );
+
+  auto& instance( ou::tf::PortfolioManager::GlobalInstance() ); // NOTE this direct call!!
+  instance.PositionUpdateNotes( pPosition );
 }
 
 // NOTE: may require delayed reaction on this, as a roll will call back into this with new position
@@ -267,37 +308,46 @@ void Combo::DeactivatePositionOption( pPosition_t pPosition ) {
 
 // TODO: make use of doubleUnderlyingSlope to trigger exit latch
 void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {
+
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
     Leg& leg( entry.second.m_leg );
     leg.Tick( dt, dblUnderlyingPrice );
   }
 
+  // may need vector?
+  if ( m_pOrderCombo ) m_pOrderCombo->Tick( dt );
+
   switch ( m_state ) {  // TODO: make this a per-leg test?  even need state management?
     case State::Executing:
-      if ( !AreOrdersActive() ) {
-        m_state = State::Watching;
-      }
+      // handled in Collar::PlaceOrder
+      //if ( !AreOrdersActive() ) {
+      //  m_state = State::Watching;
+      //}
       break;
     case State::Watching:
-      //Update( dblUnderlyingSlope, dblPriceUnderlying );
+      {
+        using vRemove_t = std::vector<mapComboLeg_t::iterator>;
+        vRemove_t vRemove;
+
+        for ( mapComboLeg_t::iterator iter = m_mapComboLeg.begin(); m_mapComboLeg.end() != iter; ++iter ) {
+          ComboLeg& cleg( iter->second );
+
+          bool bRemove( false );
+          for ( vfTest_t::value_type& fTest: cleg.m_vfTest ) {
+            bRemove |= fTest( dt, dblUnderlyingSlope, dblUnderlyingPrice );
+          }
+          if ( bRemove ) {
+            vRemove.push_back( iter );
+          }
+        }
+
+        for ( vRemove_t::value_type iter: vRemove ) { // NOTE: the lambdas above affect this
+          m_mapComboLeg.erase( iter );
+        };
+      }
       break;
   }
-
-  // from original Collar
-  for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
-    ComboLeg& cleg( entry.second );
-    //if ( cleg.m_monitor.IsActive() )
-    cleg.m_monitor.Tick( dt ); // needs this in multiple states
-
-    for ( vfTest_t::value_type& fTest: cleg.m_vfTest ) {
-      fTest( dt, dblUnderlyingSlope, dblUnderlyingPrice );
-    }
-  }
 }
-
-//void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {
-//  Combo::Tick( dblUnderlyingSlope, dblUnderlyingPrice, dt ); // first or last in sequence?
-
 
   // TODO:
   //   at expiry:
@@ -357,7 +407,7 @@ double Combo::GetNet( double price ) {
 
 void Combo::PlaceOrder( LegNote::Type type, ou::tf::OrderSide::EOrderSide order_side, uint32_t nOrderQuantity ) {
 
-  ComboLeg& cleg( LU( type ) );
+  ComboLeg& cleg( LU( type )->second );
 
   LegNote::Side ln_side = cleg.m_leg.GetLegNote().Values().m_side; // this is normal entry with order_side as buy
 
@@ -382,39 +432,43 @@ void Combo::PlaceOrder( LegNote::Type type, ou::tf::OrderSide::EOrderSide order_
     }
   }
 
+  // TODO: need to redo this using OrderCombo
   switch ( m_state ) {
     case State::Positions: // doesn't confirm both put/call are available
     case State::Watching:
-      cleg.m_leg.PlaceOrder( order_side, nOrderQuantity );
+      //cleg.m_leg.PlaceOrder( order_side, nOrderQuantity );
       m_state = State::Executing;
       break;
   }
 }
 
+// TODO: need to redo this using OrderCombo
 bool Combo::CloseItmLeg( double price ) {
   bool bClosed( false );
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
     Leg& leg( entry.second.m_leg );
-    bClosed |= leg.CloseItm( price );
+    //bClosed |= leg.CloseItm( price );
   }
   return bClosed;
 }
 
+// TODO: need to redo this using OrderCombo
 void Combo::CalendarRoll( LegNote::Type type ) {
   mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
   assert( m_mapComboLeg.end() != iter );
   ComboLeg& leg( iter->second );
-  leg.m_tracker.CalendarRoll();
+  //leg.m_tracker.CalendarRoll();
 }
 
+// TODO: need to redo this using OrderCombo
 void Combo::DiagonalRoll( LegNote::Type type ) {
   mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
   assert( m_mapComboLeg.end() != iter );
   ComboLeg& leg( iter->second );
-  leg.m_tracker.DiagonalRoll();
+  //leg.m_tracker.DiagonalRoll();
 }
 
-void Combo::LockLeg( LegNote::Type type ) {
+void Combo::LegLock( LegNote::Type type ) {
   mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
   assert( m_mapComboLeg.end() != iter );
   ComboLeg& leg( iter->second );
@@ -426,22 +480,25 @@ void Combo::AtClose() {
   // maybe remove options?
 }
 
-void Combo::Close( LegNote::Type type ) {
+// TODO: need to redo this using OrderCombo
+void Combo::LegClose( LegNote::Type type ) {
   mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
   assert( m_mapComboLeg.end() != iter );
   ComboLeg& leg( iter->second );
-  leg.m_tracker.Close();
+  //leg.m_tracker.Close();
 }
 
+// TODO: need to redo this using OrderCombo
 bool Combo::CloseItmLegForProfit( double price ) {
   bool bClosed( false );
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
     ou::tf::Leg& leg( entry.second.m_leg );
-    bClosed |= leg.CloseItmForProfit( price );
+    //bClosed |= leg.CloseItmForProfit( price );
   }
   return bClosed;
 }
 
+// TODO: need to redo this using OrderCombo, and test for delta/gamma
 void Combo::GoNeutral( boost::gregorian::date date, boost::posix_time::time_duration time ) {
   // relies on tracker having been quiesced
   // TODO: is the tracker/position active?
@@ -460,10 +517,11 @@ void Combo::TakeProfits( double price ) {
 // prevent exercise or assignment at expiry
 // however, the otm leg may need an exist or roll if there is premium remaining (>$0.05)
 // so ... the logic needs changing, re-arranging
+// TODO: need to redo this using OrderCombo
 void Combo::CloseExpiryItm( double price, const boost::gregorian::date date ) {
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
     ou::tf::Leg& leg( entry.second.m_leg );
-    leg.CloseExpiryItm( date, price );
+    //leg.CloseExpiryItm( date, price );
   }
 }
 
@@ -477,35 +535,38 @@ void Combo::CloseFarItm( double price ) {
 //  }
 }
 
-void Combo::CancelOrders() {
+// TODO: need to redo this using OrderCombo
+void Combo::CancelOrders() { // this might be a duplicate function from above
   m_state = State::Canceled;
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
     ComboLeg& cleg( entry.second );
     cleg.m_tracker.Quiesce();
-    cleg.m_monitor.CancelOrder(); // or wait for completion?
+    //cleg.m_monitor.CancelOrder(); // or wait for completion?
 
     Leg& leg( cleg.m_leg );
-    leg.CancelOrder();
+    //leg.CancelOrder();
   }
 }
 
+// TODO: need to redo this using OrderCombo
 void Combo::ClosePositions() {
   m_state = State::Closing;
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
     ou::tf::Leg& leg( entry.second.m_leg );
     if ( leg.IsActive() ) {
-      pPosition_t pPosition = leg.ClosePosition();
+      //pPosition_t pPosition = leg.ClosePosition();
       auto& instance( ou::tf::PortfolioManager::GlobalInstance() ); // NOTE this direct call!!
-      instance.PositionUpdateNotes( pPosition );
+      //instance.PositionUpdateNotes( pPosition );
     }
   }
 }
 
+// TODO: need to redo this using OrderCombo, and using state
 bool Combo::AreOrdersActive() const { // TODO: is an external call still necessary?
   bool bOrdersActive( false );
   for ( const mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
     const ou::tf::Leg& leg( entry.second.m_leg );
-    bOrdersActive |= leg.IsOrderActive();
+    //bOrdersActive |= leg.IsOrderActive();
   }
   return bOrdersActive;
 }

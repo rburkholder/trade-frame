@@ -28,7 +28,7 @@
 
 #include <TFTrading/Position.h>
 #include <TFTrading/Portfolio.h>
-#include <TFTrading/MonitorOrder.h>
+#include <TFTrading/Order_Combo.hpp>
 
 #include <TFOptions/Chain.h>
 
@@ -94,7 +94,7 @@ public:
   };
   using vMenuActivation_t = std::vector<MenuActivation>;
   using fActivateOption_t = std::function<void(pOption_t,pPosition_t,const std::string& legname, vMenuActivation_t&& )>;
-  using fOpenPosition_t = std::function<pPosition_t(Combo*,pOption_t,const std::string&)>; // string is Note from previous position
+  using fConstructPosition_t = std::function<pPosition_t(Combo*,pOption_t,const std::string&)>; // string is Note from previous position
   using fDeactivateOption_t = std::function<void(pOption_t)>;
 
   enum class E20DayDirection { Unknown, Rising, Falling };
@@ -117,7 +117,7 @@ public:
     const SpreadSpecs&,
     fConstructOption_t&&,
     fActivateOption_t&&,
-    fOpenPosition_t&&,
+    fConstructPosition_t&&,
     fDeactivateOption_t&&
   );
 
@@ -128,8 +128,7 @@ public:
 
   void Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt );
 
-  virtual void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity ) = 0;
-  void PlaceOrder( LegNote::Type, ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity );
+  virtual void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity ) = 0; // called by ManageStrategy to start Combo
 
   virtual double GetNet( double price );
 
@@ -154,14 +153,14 @@ protected:
   static const double m_dblMaxStrikeDelta;
   static const double m_dblMaxStrangleDelta;
 
-  fConstructOption_t m_fConstructOption;   // used in Collar
-  fActivateOption_t m_fActivateOption;     // used in Combo
-  fOpenPosition_t m_fOpenPosition;         // used in Collar
-  fDeactivateOption_t m_fDeactivateOption; // used in Combo
+  fConstructOption_t m_fConstructOption;
+  fActivateOption_t m_fActivateOption;
+  fConstructPosition_t m_fConstructPosition;
+  fDeactivateOption_t m_fDeactivateOption;
 
   pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
 
-  using fTest_t = std::function<void(boost::posix_time::ptime,double,double)>; // underlying slope, price
+  using fTest_t = std::function<bool(boost::posix_time::ptime,double,double)>; // underlying slope, price
   using vfTest_t = std::vector<fTest_t>; // do we need a vector of tests?  or just a single test?
 
   struct ComboLeg { // migrating from CollarLeg
@@ -179,7 +178,6 @@ protected:
 
     ou::tf::Leg m_leg;
     Tracker m_tracker;
-    ou::tf::MonitorOrder m_monitor; // used to close leg during roll ()
     vfTest_t m_vfTest; // functions to test & process leg
 
     ComboLeg(): m_state( State::empty ) {}
@@ -195,7 +193,12 @@ protected:
   using mapComboLeg_t = std::multimap<LegNote::Type,ComboLeg>;
   mapComboLeg_t m_mapComboLeg;
 
-  ComboLeg& LU( LegNote::Type );
+  //ComboLeg& LU( LegNote::Type );
+  mapComboLeg_t::iterator LU( LegNote::Type );
+
+  using pOrderCombo_t = ou::tf::OrderCombo::pOrderCombo_t;
+  pOrderCombo_t m_pOrderCombo;  // one order at a time for now
+  pOrderCombo_t m_pOrderCombo_Kill; // where OrderCombo goes to die inside the loop
 
   virtual void Init( boost::gregorian::date date, const mapChains_t*, const SpreadSpecs& ) = 0;
   virtual void Init( LegNote::Type ) = 0;
@@ -223,12 +226,17 @@ protected:
 
   void CalendarRoll( LegNote::Type );
   void DiagonalRoll( LegNote::Type );
-  void LockLeg( LegNote::Type );
-  void Close( LegNote::Type );
+  void LegLock( LegNote::Type );
+  void LegClose( LegNote::Type );
 
   void DeactivatePositionOption( pPosition_t );
 
 private:
+
+  void PositionNote( pPosition_t&, LegNote::State );
+
+  // not used at present, maybe for delta neutral trading
+  void PlaceOrder( LegNote::Type, ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity );
 
 };
 
