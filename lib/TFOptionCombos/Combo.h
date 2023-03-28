@@ -41,6 +41,58 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
+// == ComboLeg
+
+class ComboLeg { // migrating from CollarLeg
+public:
+
+  using fTest_t = std::function<bool(boost::posix_time::ptime,double,double)>; // underlying slope, price
+  using vfTest_t = std::vector<fTest_t>; // do we need a vector of tests?  or just a single test?
+
+  ou::tf::Leg m_leg;
+  Tracker m_tracker;
+
+  ComboLeg() = delete;
+  ComboLeg( const ComboLeg& ) = delete;
+  ComboLeg( ou::tf::Leg&& leg ): m_state( State::loaded ), m_leg( std::move( leg ) ) {}
+  ComboLeg( ComboLeg&& rhs )
+  : m_state( rhs.m_state)
+  , m_leg( std::move( rhs.m_leg ) )
+  {
+    assert( rhs.m_vfTest.empty() );
+  }
+  ~ComboLeg() { m_state = State::done; m_vfTest.clear(); }
+
+  void AddTest( fTest_t&& fTest ) {
+    m_vfTest.emplace_back( std::move( fTest ) );
+  }
+
+  bool Test( boost::posix_time::ptime dt, double slope, double price ) {
+    bool bRemove( false );
+    for ( vfTest_t::value_type& fTest: m_vfTest ) {
+      bRemove |= fTest( dt, slope, price );
+    }
+    return bRemove;
+  }
+
+protected:
+private:
+
+  enum class State {
+    empty
+  , opening
+  , loaded
+  , locked // does this mean an empty m_vfTest? would be useful to pause trading while awaiting a significant manual event
+  , tracking // evaluating vfTest, position is active (non-zero position)
+  , rolling_in // when rolling from one leg to another (need to link legs?, or just by iterators?) maintain legs during calendar/diagonals, remove old when done, provides transactional view for paired entry/exit for margin maintenance
+  , rolling_out // second of pair when rolling
+  , closing // some cross over with 'rolling'?
+  , done // do no reuse empty, needs to be complete reset (deleted)
+  } m_state;
+
+  vfTest_t m_vfTest; // functions to test & process leg
+};
+
 // == Combo
 
 class Combo {  // TODO: convert to CRTP?
@@ -99,13 +151,7 @@ public:
 
   enum class E20DayDirection { Unknown, Rising, Falling };
 
-  enum class State { Initializing, Positions, Executing, Watching, Canceled, Closing };
-  State m_state;
-
-  // to be deprecated by converting to new style ChooseLegs
-  using strike_pair_t = std::pair<double,double>; // higher, lower
-
-  Combo();
+  Combo() = default;
   Combo( Combo&& ); // needs experiementation on why no const works, const does not
   Combo( const Combo& ) = delete;
   Combo& operator=( const Combo& ) = delete;
@@ -159,33 +205,6 @@ protected:
   fDeactivateOption_t m_fDeactivateOption;
 
   pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
-
-  using fTest_t = std::function<bool(boost::posix_time::ptime,double,double)>; // underlying slope, price
-  using vfTest_t = std::vector<fTest_t>; // do we need a vector of tests?  or just a single test?
-
-  struct ComboLeg { // migrating from CollarLeg
-
-    enum class State {
-      empty
-    , opening
-    , locked // does this mean an empty m_vfTest? would be useful to pause trading while awaiting a significant manual event
-    , tracking // evaluating vfTest
-    , rolling_in // when rolling from one leg to another (need to link legs?, or just by iterators?) maintain legs during calendar/diagonals, remove old when done, provides transactional view for paired entry/exit for margin maintenance
-    , rolling_out // second of pair when rolling
-    , closing // some cross over with 'rolling'?
-    , done // do no reuse empty, needs to be complete reset (deleted)
-    } m_state;
-
-    ou::tf::Leg m_leg;
-    Tracker m_tracker;
-    vfTest_t m_vfTest; // functions to test & process leg
-
-    ComboLeg(): m_state( State::empty ) {}
-    ComboLeg( ou::tf::Leg&& leg ): m_leg( std::move( leg ) ) {}
-    ComboLeg( const ComboLeg& ) = delete;
-    ComboLeg( ComboLeg&& rhs ): m_leg( std::move( rhs.m_leg ) ) {}
-    ~ComboLeg() { m_state = State::done; m_vfTest.clear(); }
-  };
 
   // use lambdas to maintain local iterator for specific call types
   //   eg, in the vfTest lambda, then can locally access tracker/monitor/etc

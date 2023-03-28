@@ -302,45 +302,28 @@ void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuan
   m_pOrderCombo = ou::tf::OrderCombo::Factory();
   // legs are already in place, so create order for the position
 
-  switch ( m_state ) {
-    case State::Positions:
-    //case State::Watching:
-      switch ( side ) {
-        case ou::tf::OrderSide::Buy: // typical entry
-          //LU( LegNote::Type::SynthLong ). m_leg.PlaceOrder( ou::tf::OrderSide::Buy,  nOrderQuantity );
-          m_pOrderCombo->AddLeg( LU( LegNote::Type::SynthLong )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Buy, [](){} ); // fLegDone_t
-          //LU( LegNote::Type::SynthShort ).m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
-          m_pOrderCombo->AddLeg( LU( LegNote::Type::SynthShort )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Sell, [](){} ); // fLegDone_t
-          //LU( LegNote::Type::Cover ).     m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
-          m_pOrderCombo->AddLeg( LU( LegNote::Type::Cover )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Sell, [](){} ); // fLegDone_t
-          //LU( LegNote::Type::Protect ).   m_leg.PlaceOrder( ou::tf::OrderSide::Buy,  nOrderQuantity );
-          m_pOrderCombo->AddLeg( LU( LegNote::Type::Protect )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Buy, [](){} ); // fLegDone_t
-          break;
-        case ou::tf::OrderSide::Sell: // unusual
-          //LU( LegNote::Type::SynthLong ). m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
-          m_pOrderCombo->AddLeg( LU( LegNote::Type::SynthLong )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Sell, [](){} ); // fLegDone_t
-          //LU( LegNote::Type::SynthShort ).m_leg.PlaceOrder( ou::tf::OrderSide::Buy,  nOrderQuantity );
-          m_pOrderCombo->AddLeg( LU( LegNote::Type::SynthShort )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Buy, [](){} ); // fLegDone_t
-          //LU( LegNote::Type::Cover ).     m_leg.PlaceOrder( ou::tf::OrderSide::Buy,  nOrderQuantity );
-          m_pOrderCombo->AddLeg( LU( LegNote::Type::Cover )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Buy, [](){} ); // fLegDone_t
-          //LU( LegNote::Type::Protect ).   m_leg.PlaceOrder( ou::tf::OrderSide::Sell, nOrderQuantity );
-          m_pOrderCombo->AddLeg( LU( LegNote::Type::Protect )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Sell, [](){} ); // fLegDone_t
-          break;
-        default:
-          assert( false );
-      }
-      m_state = State::Executing;
-      m_pOrderCombo->Submit(
-        [this](){ // fComboDone_t
-          std::cout << "Collar::PlaceOrder complete" << std::endl;
-          m_pOrderCombo_Kill = std::move( m_pOrderCombo );
-          m_state = State::Watching;
-        } );
+  switch ( side ) {
+    case ou::tf::OrderSide::Buy: // typical entry
+      m_pOrderCombo->AddLeg( LU( LegNote::Type::SynthLong )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Buy, [](){} ); // fLegDone_t
+      m_pOrderCombo->AddLeg( LU( LegNote::Type::SynthShort )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Sell, [](){} ); // fLegDone_t
+      m_pOrderCombo->AddLeg( LU( LegNote::Type::Cover )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Sell, [](){} ); // fLegDone_t
+      m_pOrderCombo->AddLeg( LU( LegNote::Type::Protect )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Buy, [](){} ); // fLegDone_t
       break;
-    case State::Initializing:
-    case State::Executing:
+    case ou::tf::OrderSide::Sell: // unusual
+      m_pOrderCombo->AddLeg( LU( LegNote::Type::SynthLong )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Sell, [](){} ); // fLegDone_t
+      m_pOrderCombo->AddLeg( LU( LegNote::Type::SynthShort )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Buy, [](){} ); // fLegDone_t
+      m_pOrderCombo->AddLeg( LU( LegNote::Type::Cover )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Buy, [](){} ); // fLegDone_t
+      m_pOrderCombo->AddLeg( LU( LegNote::Type::Protect )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Sell, [](){} ); // fLegDone_t
+      break;
+    default:
       assert( false );
   }
+
+  m_pOrderCombo->Submit(
+    [this](){ // fComboDone_t
+      std::cout << "Collar::PlaceOrder complete" << std::endl;
+      m_pOrderCombo_Kill = std::move( m_pOrderCombo );
+    } );
 }
 
 } // namespace option

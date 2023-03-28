@@ -691,20 +691,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
         if ( 4 == m_vEMA.size() ) { // on second day, is m_vEMA built?
           double slope( m_vEMA[2]->dblEmaLatest - m_vEMA[3]->dblEmaLatest ); // fast - slow
-          switch ( m_pCombo->m_state ) {
-            case combo_t::State::Initializing:
-              break;
-            case combo_t::State::Positions:
-            case combo_t::State::Executing:
-            case combo_t::State::Watching:
-            case combo_t::State::Canceled:
-            case combo_t::State::Closing:
-              // TODO: maybe try send stochastic as well
-              m_pCombo->Tick( slope, mid, bar.DateTime() ); // TODO: need to pass slope of underlying
-              break;
-            default:
-              break;
-          }
+          m_pCombo->Tick( slope, mid, bar.DateTime() ); // TODO: need to pass slope of underlying
         }
 
       }

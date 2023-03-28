@@ -29,14 +29,10 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-Combo::Combo()
-: m_state( State::Initializing )
-{
-}
+//Combo::Combo(){}
 
 Combo::Combo( Combo&& rhs )
-: m_state( rhs.m_state ),
-  m_mapComboLeg( std::move( rhs.m_mapComboLeg ) ),
+: m_mapComboLeg( std::move( rhs.m_mapComboLeg ) ),
   m_pPortfolio( std::move( rhs.m_pPortfolio ) ),
   m_fConstructOption( std::move( rhs.m_fConstructOption ) ),
   m_fActivateOption( std::move( rhs.m_fActivateOption ) ),
@@ -149,10 +145,6 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
 
     m_fActivateOption( pOption, pPositionNew, ou::tf::option::LegNote::LU( legValues.m_type ), std::move( ma ) );
 
-    if ( State::Initializing == m_state ) {
-      m_state = State::Positions;
-    }
-
   }
   else {
     std::cout
@@ -165,7 +157,7 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
   return legValues;
 }
 
-Combo::ComboLeg& Combo::InitTracker(
+ComboLeg& Combo::InitTracker(
   LegNote::Type type,
   const mapChains_t* pmapChains,
   boost::gregorian::date date,
@@ -264,14 +256,7 @@ void Combo::InitTrackLongOption(
   ComboLeg& cleg( InitTracker( type, pmapChains, date, days_to_expiry ) );
 
   namespace ph = std::placeholders;
-
-  cleg.m_vfTest.emplace( // invalidates on new size() > capacity()
-    cleg.m_vfTest.end(),
-    std::bind( &ou::tf::option::Tracker::TestLong, &cleg.m_tracker, ph::_1, ph::_2, ph::_3 ) // Tick
-//    [ tracker = &cleg.m_tracker ]( boost::posix_time::ptime dt, double dblUnderlyingSlope, double dblUnderlyingPrice ){
-//      tracker->TestLong( dt, dblUnderlyingSlope, dblUnderlyingPrice );
-//    }
-  );
+  cleg.AddTest( std::bind( &ou::tf::option::Tracker::TestLong, &cleg.m_tracker, ph::_1, ph::_2, ph::_3 ) );
 }
 
 void Combo::InitTrackShortOption(
@@ -288,15 +273,7 @@ void Combo::InitTrackShortOption(
   // c) stop monitoring out of hours
 
   namespace ph = std::placeholders;
-
-  cleg.m_vfTest.emplace(
-    cleg.m_vfTest.end(),
-    std::bind( &ou::tf::option::Tracker::TestShort, &cleg.m_tracker, ph::_1, ph::_2, ph::_3 ) // Tick
-//    [ tracker = &cleg.m_tracker ]( boost::posix_time::ptime dt,double dblUnderlyingSlope, double dblUnderlyingPrice ){
-//      tracker->TestShort( dt, dblUnderlyingSlope, dblUnderlyingPrice );
-//    }
-  );
-
+  cleg.AddTest( std::bind( &ou::tf::option::Tracker::TestShort, &cleg.m_tracker, ph::_1, ph::_2, ph::_3 ) );
 }
 
 void Combo::DeactivatePositionOption( pPosition_t pPosition ) {
@@ -309,44 +286,28 @@ void Combo::DeactivatePositionOption( pPosition_t pPosition ) {
 // TODO: make use of doubleUnderlyingSlope to trigger exit latch
 void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {
 
-  for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
-    Leg& leg( entry.second.m_leg );
-    leg.Tick( dt, dblUnderlyingPrice );
-  }
-
   // may need vector?
   if ( m_pOrderCombo ) m_pOrderCombo->Tick( dt );
 
-  switch ( m_state ) {  // TODO: make this a per-leg test?  even need state management?
-    case State::Executing:
-      // handled in Collar::PlaceOrder
-      //if ( !AreOrdersActive() ) {
-      //  m_state = State::Watching;
-      //}
-      break;
-    case State::Watching:
-      {
-        using vRemove_t = std::vector<mapComboLeg_t::iterator>;
-        vRemove_t vRemove;
+  using vRemove_t = std::vector<mapComboLeg_t::iterator>;
+  vRemove_t vRemove;
 
-        for ( mapComboLeg_t::iterator iter = m_mapComboLeg.begin(); m_mapComboLeg.end() != iter; ++iter ) {
-          ComboLeg& cleg( iter->second );
+  for ( mapComboLeg_t::iterator iter = m_mapComboLeg.begin(); m_mapComboLeg.end() != iter; ++iter ) {
 
-          bool bRemove( false );
-          for ( vfTest_t::value_type& fTest: cleg.m_vfTest ) {
-            bRemove |= fTest( dt, dblUnderlyingSlope, dblUnderlyingPrice );
-          }
-          if ( bRemove ) {
-            vRemove.push_back( iter );
-          }
-        }
+    ComboLeg& cleg( iter->second );
+    Leg& leg( cleg.m_leg );
 
-        for ( vRemove_t::value_type iter: vRemove ) { // NOTE: the lambdas above affect this
-          m_mapComboLeg.erase( iter );
-        };
-      }
-      break;
+    leg.Tick( dt, dblUnderlyingPrice );
+
+    bool bRemove = cleg.Test( dt, dblUnderlyingSlope, dblUnderlyingPrice );
+    if ( bRemove ) {
+      vRemove.push_back( iter );
+    }
   }
+
+  for ( vRemove_t::value_type iter: vRemove ) { // NOTE: the lambdas above affect this
+    m_mapComboLeg.erase( iter );
+  };
 }
 
   // TODO:
@@ -405,6 +366,7 @@ double Combo::GetNet( double price ) {
   return dblNet;
 }
 
+// not used
 void Combo::PlaceOrder( LegNote::Type type, ou::tf::OrderSide::EOrderSide order_side, uint32_t nOrderQuantity ) {
 
   ComboLeg& cleg( LU( type )->second );
@@ -432,14 +394,7 @@ void Combo::PlaceOrder( LegNote::Type type, ou::tf::OrderSide::EOrderSide order_
     }
   }
 
-  // TODO: need to redo this using OrderCombo
-  switch ( m_state ) {
-    case State::Positions: // doesn't confirm both put/call are available
-    case State::Watching:
-      //cleg.m_leg.PlaceOrder( order_side, nOrderQuantity );
-      m_state = State::Executing;
-      break;
-  }
+  //cleg.m_leg.PlaceOrder( order_side, nOrderQuantity );
 }
 
 // TODO: need to redo this using OrderCombo
@@ -537,7 +492,6 @@ void Combo::CloseFarItm( double price ) {
 
 // TODO: need to redo this using OrderCombo
 void Combo::CancelOrders() { // this might be a duplicate function from above
-  m_state = State::Canceled;
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
     ComboLeg& cleg( entry.second );
     cleg.m_tracker.Quiesce();
@@ -550,7 +504,6 @@ void Combo::CancelOrders() { // this might be a duplicate function from above
 
 // TODO: need to redo this using OrderCombo
 void Combo::ClosePositions() {
-  m_state = State::Closing;
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
     ou::tf::Leg& leg( entry.second.m_leg );
     if ( leg.IsActive() ) {
