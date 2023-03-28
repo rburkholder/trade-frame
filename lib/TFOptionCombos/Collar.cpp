@@ -77,9 +77,7 @@ namespace {
 Collar::Collar()
 : Combo() {}
 
-Collar::Collar( Collar&& rhs )
-: m_mapInitTrackOption( std::move( rhs.m_mapInitTrackOption ) )
-{}
+Collar::Collar( Collar&& rhs ){}
 
 Collar::~Collar() {
 }
@@ -96,8 +94,8 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::SynthLong,
-      [this,date,pmapChains,days=specs.nDaysBack](){
-        InitTrackLongOption( LegNote::Type::SynthLong, pmapChains, date, days );
+      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){
+        InitTrackLongOption( cleg, pmapChains, date, days );
       }
     )
   );
@@ -106,8 +104,8 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::Protect,
-      [this,date,pmapChains,days=specs.nDaysBack](){
-        InitTrackLongOption( LegNote::Type::Protect, pmapChains, date, days );
+      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){
+        InitTrackLongOption( cleg, pmapChains, date, days );
       }
     )
   );
@@ -116,8 +114,8 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::SynthShort,
-      [this,date,pmapChains,days=specs.nDaysFront](){ // make money on the sold premium
-        InitTrackShortOption( LegNote::Type::SynthShort, pmapChains, date, days );
+      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){ // make money on the sold premium
+        InitTrackShortOption( cleg, pmapChains, date, days );
       }
     )
   );
@@ -126,18 +124,12 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::Cover,
-      [this,date,pmapChains,days=specs.nDaysFront](){ // make money on the sold premium
-        InitTrackShortOption( LegNote::Type::Cover, pmapChains, date, days );
+      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){ // make money on the sold premium
+        InitTrackShortOption( cleg, pmapChains, date, days );
       }
     )
   );
 
-}
-
-void Collar::Init( LegNote::Type type ) {
-  mapInitTrackOption_t::iterator iter = m_mapInitTrackOption.find( type );
-  assert( m_mapInitTrackOption.end() != iter );
-  iter->second();
 }
 
 size_t /* static */ Collar::LegCount() {

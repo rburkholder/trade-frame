@@ -66,13 +66,8 @@ public:
 protected:
 
   virtual void Init( boost::gregorian::date, const mapChains_t*, const SpreadSpecs& );
-  virtual void Init( LegNote::Type );
 
 private:
-
-  using fInitTrackOption_t = std::function<void(void)>;
-  using mapInitTrackOption_t = std::map<LegNote::Type,fInitTrackOption_t>;
-  mapInitTrackOption_t m_mapInitTrackOption;
 
 };
 

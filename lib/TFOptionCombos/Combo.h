@@ -219,25 +219,28 @@ protected:
   pOrderCombo_t m_pOrderCombo;  // one order at a time for now
   pOrderCombo_t m_pOrderCombo_Kill; // where OrderCombo goes to die inside the loop
 
-  virtual void Init( boost::gregorian::date date, const mapChains_t*, const SpreadSpecs& ) = 0;
-  virtual void Init( LegNote::Type ) = 0;
+  using fInitTrackOption_t = std::function<void(ComboLeg&)>;
+  using mapInitTrackOption_t = std::map<LegNote::Type,fInitTrackOption_t>;
+  mapInitTrackOption_t m_mapInitTrackOption;
 
-  ComboLeg& InitTracker(
-    LegNote::Type type,
+  virtual void Init( boost::gregorian::date date, const mapChains_t*, const SpreadSpecs& ) = 0;
+
+  void InitTracker(
+    ComboLeg&,
     const mapChains_t* pmapChains,
     boost::gregorian::date date,
     boost::gregorian::days days_to_expiry
   );
 
   void InitTrackLongOption(
-    LegNote::Type type,
+    ComboLeg&,
     const mapChains_t* pmapChains,
     boost::gregorian::date date,
     boost::gregorian::days days_to_expiry
     );
 
   void InitTrackShortOption(
-    LegNote::Type type,
+    ComboLeg&,
     const mapChains_t* pmapChains,
     boost::gregorian::date date,
     boost::gregorian::days days_to_expiry

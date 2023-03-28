@@ -39,6 +39,7 @@ Combo::Combo( Combo&& rhs )
   m_fConstructPosition( std::move( rhs.m_fConstructPosition ) ),
   m_fDeactivateOption( std::move( rhs.m_fDeactivateOption ) )
 {
+  assert( rhs.m_mapInitTrackOption.empty() );
 }
 
 Combo::~Combo() {
@@ -90,27 +91,18 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
 
   if ( LegNote::State::Open == legValues.m_state ) {
 
-    // this will emplace duplicates, not ready for that yet
-    //mapComboLeg_t::iterator iterLeg = m_mapComboLeg.emplace( std::move( mapComboLeg_t::value_type( legValues.m_type, std::move( leg ) ) ) );
+    mapComboLeg_t::iterator iterLeg;
 
-    // this prevents duplicates for now until proper multi-leg rolls are implemented
-    mapComboLeg_t::iterator iterLeg = m_mapComboLeg.find( legValues.m_type );
-    //if ( m_mapComboLeg.end() == iterLeg ) {
-      using result_t = std::pair<mapComboLeg_t::iterator, bool>;
-      result_t result;
-      //result = m_mapLeg.emplace( std::move( mapLeg_t::value_type( legValues.m_type, std::move( leg ) ) ) );
-      //assert( result.second );
-      //iterLeg = result.first;
-      iterLeg = m_mapComboLeg.emplace( std::move( mapComboLeg_t::value_type( legValues.m_type, std::move( leg ) ) ) );
-    //}
-    //else {
-    //  DeactivatePositionOption( iterLeg->second.m_leg.GetPosition() ); // old position
-    //  iterLeg->second.m_leg = std::move( leg ); // overwrite with new leg
-    //}
+    // this will emplace duplicate LegNote::Type
+    iterLeg = m_mapComboLeg.emplace( std::move( mapComboLeg_t::value_type( legValues.m_type, std::move( leg ) ) ) );
+    ComboLeg& cleg( iterLeg->second );
 
-    iterLeg->second.m_leg.SetChartData( pChartData, colour ); // comes after as there is no move on indicators
+    cleg.m_leg.SetChartData( pChartData, colour ); // comes after as there is no move on indicators
 
-    Init( legValues.m_type );
+    // assign Test to leg
+    mapInitTrackOption_t::iterator iter = m_mapInitTrackOption.find( legValues.m_type );
+    assert( m_mapInitTrackOption.end() != iter );
+    iter->second( cleg );
 
     pWatch_t pWatch = pPositionNew->GetWatch();
     pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
@@ -157,18 +149,12 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
   return legValues;
 }
 
-ComboLeg& Combo::InitTracker(
-  LegNote::Type type,
+void Combo::InitTracker(
+  ComboLeg& cleg,
   const mapChains_t* pmapChains,
   boost::gregorian::date date,
   boost::gregorian::days days_to_expiry
 ) {
-
-  // assumes only one of type
-
-  mapComboLeg_t::iterator iterLeg = LU( type );
-
-  ComboLeg& cleg( iterLeg->second );
 
   pPosition_t pPosition( cleg.m_leg.GetPosition() );
   assert( pPosition );
@@ -180,7 +166,7 @@ ComboLeg& Combo::InitTracker(
     [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
     },
-    [this,iterLeg]( pPosition_t pPositionOld, pOption_t pOption )->pPosition_t { // fRollLeg_t - response to Tick
+    [this]( pPosition_t pPositionOld, pOption_t pOption )->pPosition_t { // fRollLeg_t - response to Tick
       // leg will be removed in Tick
 
       const std::string sNotes( pPositionOld->Notes() );
@@ -190,14 +176,14 @@ ComboLeg& Combo::InitTracker(
       m_pOrderCombo = ou::tf::OrderCombo::Factory();
       m_pOrderCombo->CloseLeg(
         pPositionOld,
-        [this,iterLeg](){} );
+        [this](){} );
 
       pPosition_t pPosition;
       pPosition = m_fConstructPosition( this, pOption, sNotes );
       m_pOrderCombo->AddLeg(
         pPosition,
         pPositionOld->GetActiveSize(),  pPositionOld->GetActiveSide(),
-        [this,iterLeg](){});
+        [this](){});
 
       PositionNote( pPositionOld, LegNote::State::Closed );
       DeactivatePositionOption( pPositionOld );
@@ -209,7 +195,7 @@ ComboLeg& Combo::InitTracker(
 
       return pPosition;
     },
-    [this,iterLeg]( pPosition_t pPositionOld ) { // m_fCloseLeg - response to Tick
+    [this]( pPosition_t pPositionOld ) { // m_fCloseLeg - response to Tick
       // leg will be removed in Tick
 
       PositionNote( pPositionOld, LegNote::State::Closed );
@@ -220,15 +206,13 @@ ComboLeg& Combo::InitTracker(
       m_pOrderCombo = ou::tf::OrderCombo::Factory();
       m_pOrderCombo->CloseLeg(
         pPositionOld,
-        [this,iterLeg](){} );
+        [this](){} );
       m_pOrderCombo->Submit(
         [this](){
           m_pOrderCombo_Kill = std::move( m_pOrderCombo );
         } );
     }
   );
-
-  return cleg;
 
 }
 
@@ -247,26 +231,26 @@ void Combo::PositionNote( pPosition_t& pPosition, LegNote::State state ) {
 
 // NOTE: may require delayed reaction on this, as a roll will call back into this with new position
 void Combo::InitTrackLongOption(
-    LegNote::Type type,
+    ComboLeg& cleg,
     const mapChains_t* pmapChains,
     boost::gregorian::date date,
     boost::gregorian::days days_to_expiry
     ) {
 
-  ComboLeg& cleg( InitTracker( type, pmapChains, date, days_to_expiry ) );
+  InitTracker( cleg, pmapChains, date, days_to_expiry );
 
   namespace ph = std::placeholders;
   cleg.AddTest( std::bind( &ou::tf::option::Tracker::TestLong, &cleg.m_tracker, ph::_1, ph::_2, ph::_3 ) );
 }
 
 void Combo::InitTrackShortOption(
-    LegNote::Type type,
+    ComboLeg& cleg,
     const mapChains_t* pmapChains,
     boost::gregorian::date date,
     boost::gregorian::days days_to_expiry
 ) {
 
-  ComboLeg& cleg( InitTracker( type, pmapChains, date, days_to_expiry ) );
+  InitTracker( cleg, pmapChains, date, days_to_expiry );
 
   // a) buy out 0.10 (simply closing the position)
   // b) rotate if itm (somewhere else, affects long & short)
