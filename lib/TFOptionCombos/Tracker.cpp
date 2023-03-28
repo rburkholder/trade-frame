@@ -282,7 +282,7 @@ bool Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope,
               const std::string& sCandidate( m_pOptionCandidate->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
 
               if ( sCurrent == sCandidate ) {
-                // perform exit, no roll available
+                BOOST_LOG_TRIVIAL(info) << dt.time_of_day() << ",close,no-roll";
                 LegClose();
                 bRemove = true;
               }
@@ -292,12 +292,19 @@ bool Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope,
                 ou::tf::option::Option::premium_t premiumCurrent( pOptionCurrent->Premium( m_dblUnderlyingPrice ) );
                 ou::tf::option::Option::premium_t premiumCandidate( m_pOptionCandidate->Premium( m_dblUnderlyingPrice ) );
 
-                if ( 0.20 < ( premiumCandidate.extrinsic < premiumCurrent.extrinsic ) ) {
+                double diff( premiumCandidate.extrinsic < premiumCurrent.extrinsic );
+                if ( 0.20 < diff ) {
                   LegRoll(); // TODO: need to verify operation
                   bRemove = true;
                 }
                 else {
-                  // exit, roll not economical
+                  BOOST_LOG_TRIVIAL(info)
+                    << dt.time_of_day()
+                    << ",close,not-econmical"
+                    << "," << premiumCandidate.extrinsic
+                    << "," << premiumCurrent.extrinsic
+                    << "," << diff
+                    ;
                   LegClose();
                   bRemove = true;
                 }
