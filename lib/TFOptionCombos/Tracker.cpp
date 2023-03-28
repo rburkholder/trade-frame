@@ -292,7 +292,7 @@ bool Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope,
                 ou::tf::option::Option::premium_t premiumCurrent( pOptionCurrent->Premium( m_dblUnderlyingPrice ) );
                 ou::tf::option::Option::premium_t premiumCandidate( m_pOptionCandidate->Premium( m_dblUnderlyingPrice ) );
 
-                double diff( premiumCandidate.extrinsic < premiumCurrent.extrinsic );
+                double diff( premiumCandidate.extrinsic - premiumCurrent.extrinsic );
                 if ( 0.20 < diff ) {
                   LegRoll(); // TODO: need to verify operation
                   bRemove = true;
