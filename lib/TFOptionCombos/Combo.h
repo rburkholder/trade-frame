@@ -246,10 +246,10 @@ protected:
     boost::gregorian::days days_to_expiry
     );
 
-  void CalendarRoll( LegNote::Type );
-  void DiagonalRoll( LegNote::Type );
-  void LegLock( LegNote::Type );
-  void LegClose( LegNote::Type );
+  void CalendarRoll( ComboLeg& );
+  void DiagonalRoll( ComboLeg& );
+  void LegLock( ComboLeg& );
+  void LegClose( ComboLeg& );
 
   void DeactivatePositionOption( pPosition_t );
 

@@ -112,27 +112,27 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
     vMenuActivation_t ma;
     ma.emplace_back( MenuActivation(
       "Calendar Roll",
-      [this,iterLeg,&sName,type=legValues.m_type](){
-        std::cout << "Calendar Roll: " << sName << std::endl;
-        CalendarRoll( type ); // use the iterator instead
+      [this,&cleg,&sName](){
+        std::cout << "Calendar Roll: " << sName << "(todo)" << std::endl;
+        CalendarRoll( cleg );
       } ) );
     ma.emplace_back( MenuActivation(
       "Diagonal Roll",
-      [this,iterLeg,&sName,type=legValues.m_type](){
-        std::cout << "Diagonal Roll: " << sName << std::endl;
-        DiagonalRoll( type ); // use the iterator instead
+      [this,&cleg,&sName](){
+        std::cout << "Diagonal Roll: " << sName << "(todo)" << std::endl;
+        DiagonalRoll( cleg );
       } ) );
     ma.emplace_back( MenuActivation(
       "Lock Leg",
-      [this,iterLeg,&sName,type=legValues.m_type](){
-        std::cout << "Lock Leg: " << sName << " (todo)" << std::endl;
-        LegLock( type ); // use the iterator instead
+      [this,&cleg,&sName](){
+        std::cout << "Lock Leg: " << sName << "(todo)" << std::endl;
+        LegLock( cleg );
       } ) );
     ma.emplace_back( MenuActivation(
       "Close Leg",
-      [this,iterLeg,&sName,type=legValues.m_type](){
-        std::cout << "Close Leg: " << sName << " (todo)" << std::endl;
-        LegClose( type ); // use the iterator instead
+      [this,&cleg,&sName](){
+        std::cout << "Close Leg: " << sName << "(todo)" << std::endl;
+        LegClose( cleg );
       } ) );
 
     m_fActivateOption( pOption, pPositionNew, ou::tf::option::LegNote::LU( legValues.m_type ), std::move( ma ) );
@@ -361,39 +361,27 @@ bool Combo::CloseItmLeg( double price ) {
 }
 
 // TODO: need to redo this using OrderCombo
-void Combo::CalendarRoll( LegNote::Type type ) {
-  mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
-  assert( m_mapComboLeg.end() != iter );
-  ComboLeg& leg( iter->second );
-  //leg.m_tracker.CalendarRoll();
+void Combo::CalendarRoll( ComboLeg& cleg ) {
+  //cleg.m_tracker.CalendarRoll();
 }
 
 // TODO: need to redo this using OrderCombo
-void Combo::DiagonalRoll( LegNote::Type type ) {
-  mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
-  assert( m_mapComboLeg.end() != iter );
-  ComboLeg& leg( iter->second );
-  //leg.m_tracker.DiagonalRoll();
+void Combo::DiagonalRoll( ComboLeg& cleg ) {
+  //cleg.m_tracker.DiagonalRoll();
 }
 
-void Combo::LegLock( LegNote::Type type ) {
-  mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
-  assert( m_mapComboLeg.end() != iter );
-  ComboLeg& leg( iter->second );
-  leg.m_tracker.Lock( false ); // TODO: need to upate LegNote
+void Combo::LegLock( ComboLeg& cleg ) {
+  cleg.m_tracker.Lock( false ); // TODO: need to upate LegNote
+}
+
+// TODO: need to redo this using OrderCombo
+void Combo::LegClose( ComboLeg& cleg ) {
+  //cleg.m_tracker.Close();
 }
 
 // TODO: need to disable Tracker monitoring out of hours
 void Combo::AtClose() {
   // maybe remove options?
-}
-
-// TODO: need to redo this using OrderCombo
-void Combo::LegClose( LegNote::Type type ) {
-  mapComboLeg_t::iterator iter = m_mapComboLeg.find( type ); // assumes only one of type
-  assert( m_mapComboLeg.end() != iter );
-  ComboLeg& leg( iter->second );
-  //leg.m_tracker.Close();
 }
 
 // TODO: need to redo this using OrderCombo
