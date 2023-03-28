@@ -195,6 +195,7 @@ public:
   pWatch_t GetWatch() { assert( nullptr != m_pWatch.get() ); return m_pWatch; }
 
   size_t GetActiveSize() const { return m_row.nPositionActive; }
+   ou::tf::OrderSide::EOrderSide GetActiveSide() const { return m_row.eOrderSideActive; }
 
   double GetUnRealizedPL() const { return m_row.dblUnRealizedPL; };
   double GetRealizedPL() const { return m_row.dblRealizedPL; };
