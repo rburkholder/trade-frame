@@ -350,37 +350,6 @@ double Combo::GetNet( double price ) {
   return dblNet;
 }
 
-// not used
-void Combo::PlaceOrder( LegNote::Type type, ou::tf::OrderSide::EOrderSide order_side, uint32_t nOrderQuantity ) {
-
-  ComboLeg& cleg( LU( type )->second );
-
-  LegNote::Side ln_side = cleg.m_leg.GetLegNote().Values().m_side; // this is normal entry with order_side as buy
-
-  if ( ou::tf::OrderSide::Buy == order_side ) {
-    switch ( ln_side ) { // normal mapping
-      case LegNote::Side::Long:
-        order_side = ou::tf::OrderSide::Buy;
-        break;
-      case LegNote::Side::Short:
-        order_side = ou::tf::OrderSide::Sell;
-        break;
-    }
-  }
-  else { // reverse the mapping
-    switch ( ln_side ) {
-      case LegNote::Side::Long:
-        order_side = ou::tf::OrderSide::Sell;
-        break;
-      case LegNote::Side::Short:
-        order_side = ou::tf::OrderSide::Buy;
-        break;
-    }
-  }
-
-  //cleg.m_leg.PlaceOrder( order_side, nOrderQuantity );
-}
-
 // TODO: need to redo this using OrderCombo
 bool Combo::CloseItmLeg( double price ) {
   bool bClosed( false );

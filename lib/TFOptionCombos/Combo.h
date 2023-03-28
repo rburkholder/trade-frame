@@ -257,9 +257,6 @@ private:
 
   void PositionNote( pPosition_t&, LegNote::State );
 
-  // not used at present, maybe for delta neutral trading
-  void PlaceOrder( LegNote::Type, ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity );
-
 };
 
 // TODO:
