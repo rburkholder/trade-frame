@@ -152,7 +152,7 @@ public:
   enum class E20DayDirection { Unknown, Rising, Falling };
 
   Combo() = default;
-  Combo( Combo&& ); // needs experiementation on why no const works, const does not
+  Combo( Combo&& );
   Combo( const Combo& ) = delete;
   Combo& operator=( const Combo& ) = delete;
   virtual ~Combo();
