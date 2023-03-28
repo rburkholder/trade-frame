@@ -29,8 +29,8 @@
     * IB supports OPT, STK, FUT, not FOP
       * https://interactivebrokers.github.io/tws-api/basic_orders.html#combolimit
       * https://interactivebrokers.github.io/tws-api/order_submission.html#order_attach
-    * therefore submit FuturesOptions as individual orders  for now
-    * but give it a try sometime, once integration with Position is integrated
+    * therefore submit FuturesOptions as individual orders for now
+    * but give it a try sometime, once integration with Position is available
 
   For Later:
     * https://interactivebrokers.github.io/tws-api/oca.html#oca_types One Cancels All
