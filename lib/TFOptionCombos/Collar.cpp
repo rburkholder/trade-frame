@@ -97,7 +97,6 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
     std::make_pair(
       LegNote::Type::SynthLong,
       [this,date,pmapChains,days=specs.nDaysBack](){
-        // TODO: check that the leg is active
         InitTrackLongOption( LegNote::Type::SynthLong, pmapChains, date, days );
       }
     )
@@ -108,7 +107,6 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
     std::make_pair(
       LegNote::Type::Protect,
       [this,date,pmapChains,days=specs.nDaysBack](){
-        // TODO: check that the leg is active
         InitTrackLongOption( LegNote::Type::Protect, pmapChains, date, days );
       }
     )
@@ -119,7 +117,6 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
     std::make_pair(
       LegNote::Type::SynthShort,
       [this,date,pmapChains,days=specs.nDaysFront](){ // make money on the sold premium
-        // TODO: check that the leg is active
         InitTrackShortOption( LegNote::Type::SynthShort, pmapChains, date, days );
       }
     )
@@ -130,7 +127,6 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
     std::make_pair(
       LegNote::Type::Cover,
       [this,date,pmapChains,days=specs.nDaysFront](){ // make money on the sold premium
-        // TODO: check that the leg is active
         InitTrackShortOption( LegNote::Type::Cover, pmapChains, date, days );
       }
     )

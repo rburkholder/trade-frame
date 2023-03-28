@@ -64,6 +64,7 @@ public:
   virtual void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity );
 
 protected:
+
   virtual void Init( boost::gregorian::date, const mapChains_t*, const SpreadSpecs& );
   virtual void Init( LegNote::Type );
 
