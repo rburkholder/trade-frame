@@ -218,6 +218,10 @@ bool Tracker::TestLong( boost::posix_time::ptime dt, double dblUnderlyingSlope, 
       LegRoll(); // delayed a tick to call in Tick thread
       bRemove = true;
       break;
+    case ETransition::Close_start:
+      LegClose(); // delayed a tick to call in Tick thread
+      bRemove = true;
+      break;
     case ETransition::Track_Short: // mutually exclusive
       assert( false );
     default:
@@ -317,6 +321,10 @@ bool Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope,
     case ETransition::Roll_start: // used for Roll or Close
       LegRoll(); // delayed a tick to call in Tick thread
       bRemove = true;
+    case ETransition::Close_start:
+      LegClose(); // delayed a tick to call in Tick thread
+      bRemove = true;
+      break;
     case ETransition::Track_Long: // mutually exclusive
       assert( false );
     default:
@@ -418,7 +426,28 @@ void Tracker::OptionCandidate_HandleQuote( const ou::tf::Quote& quote ) {
   }
 }
 
+void Tracker::Emit() {
+
+  auto pOldWatch = m_pPosition->GetWatch();
+  BOOST_LOG_TRIVIAL(info)
+    << pOldWatch->LastQuote().DateTime().time_of_day()
+    << ",stats"
+    << ",old=" << pOldWatch->GetInstrumentName()
+    << ",b=" << pOldWatch->LastQuote().Bid()
+    << ",a=" << pOldWatch->LastQuote().Ask()
+    << ",new=" << m_pOptionCandidate->GetInstrument()->GetInstrumentName()
+    << ",b=" << m_pOptionCandidate->LastQuote().Bid()
+    << ",a=" << m_pOptionCandidate->LastQuote().Ask()
+    << ",underlying=" << m_dblUnderlyingPrice
+    << ",slope=" << m_dblUnderlyingSlope
+    ;
+}
+
 void Tracker::LegRoll() {
+
+  m_transition = ETransition::Done;
+
+  assert( m_pPosition );
 
   auto pOldWatch = m_pPosition->GetWatch();
   BOOST_LOG_TRIVIAL(info)
@@ -434,21 +463,28 @@ void Tracker::LegRoll() {
     << ",slope=" << m_dblUnderlyingSlope
     ;
 
-  assert( m_pPosition );
-  m_transition = ETransition::Done;
+  if ( m_pOptionCandidate ) {
+    OptionCandidate_StopWatch();
+    pOption_t pOption = std::move( m_pOptionCandidate );
+    m_pOptionCandidate.reset();
 
-  OptionCandidate_StopWatch();
-  pOption_t pOption = std::move( m_pOptionCandidate );
-  m_pOptionCandidate.reset();
+    pPosition_t pPosition = std::move( m_pPosition );
 
-  pPosition_t pPosition = std::move( m_pPosition );
-  m_pPosition.reset(); // might be redundant
+    m_fLegRoll( pPosition, pOption );
+  }
+  else {
+    BOOST_LOG_TRIVIAL(info) << "Tracker::LegRoll - no option canddiate";
+  }
 
-  m_fLegRoll( pPosition, pOption );
+  m_pPosition.reset();
   m_fLegRoll = nullptr;
 }
 
 void Tracker::LegClose() {
+
+  m_transition = ETransition::Done;
+
+  assert( m_pPosition );
 
   auto pOldWatch = m_pPosition->GetWatch();
   BOOST_LOG_TRIVIAL(info)
@@ -459,21 +495,42 @@ void Tracker::LegClose() {
     << ",a=" << pOldWatch->LastQuote().Ask()
     ;
 
-  m_transition = ETransition::Done;
-
-  OptionCandidate_StopWatch();
-  m_pOptionCandidate.reset();
+  if ( m_pOptionCandidate ) {
+    OptionCandidate_StopWatch();
+    m_pOptionCandidate.reset();
+  }
+  else {
+    BOOST_LOG_TRIVIAL(info) << "Tracker::LegClose - no option canddiate";
+  }
 
   pPosition_t pPosition = std::move( m_pPosition );
-  m_pPosition.reset(); // might be redundant
-
   m_fLegClose( pPosition );
+
+  m_pPosition.reset();
   m_fLegClose = nullptr;
 }
 
 void Tracker::Lock( bool bLock ) {
   //BOOST_LOG_TRIVIAL(info) << "Tracker::Lock()";
   m_bLock = bLock;
+}
+
+void Tracker::ForceRoll() {
+  if ( ( ETransition::Track_Long == m_transition ) || ( ETransition::Track_Short == m_transition ) ) {
+    m_transition = ETransition::Roll_start;
+  }
+  else {
+    std::cout << "Tracker::ForceRoll: can not start roll" << std::endl;
+  }
+}
+
+void Tracker::ForceClose() {
+  if ( ( ETransition::Track_Long == m_transition ) || ( ETransition::Track_Short == m_transition ) ) {
+    m_transition = ETransition::Close_start;
+  }
+  else {
+    std::cout << "Tracker::ForceClose: can not start close" << std::endl;
+  }
 }
 
 void Tracker::TestItmRoll( boost::gregorian::date date, boost::posix_time::time_duration time ) {

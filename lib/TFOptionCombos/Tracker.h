@@ -69,7 +69,12 @@ public:
   bool TestShort( boost::posix_time::ptime, double dblUnderlyingSlope, double dblUnderlyingPrice );
   void TestItmRoll( boost::gregorian::date, boost::posix_time::time_duration );
 
+  void Emit();
+
   void Lock( bool );
+
+  void ForceRoll();
+  void ForceClose();
 
   void Quiesce(); // called from Collar
 
@@ -103,6 +108,7 @@ private:
   , Track_Long // actively tracking price
   , Track_Short // actibvely tracking price
   , Roll_start  // needs to process the calendar roll at expiry
+  , Close_start // force a close
   , Quiesce   // stop tracking
   , Done      // prepare for destruction
     };

@@ -111,29 +111,47 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
 
     vMenuActivation_t ma;
     ma.emplace_back( MenuActivation(
-      "Calendar Roll",
+      "Statistics",
       [this,&cleg,&sName](){
-        std::cout << "Calendar Roll: " << sName << "(todo)" << std::endl;
-        CalendarRoll( cleg );
+        std::cout << "Statistics" << sName << std::endl;
+        cleg.m_tracker.Emit();
       } ) );
     ma.emplace_back( MenuActivation(
-      "Diagonal Roll",
+      "Force Roll",
       [this,&cleg,&sName](){
-        std::cout << "Diagonal Roll: " << sName << "(todo)" << std::endl;
-        DiagonalRoll( cleg );
+        std::cout << "Force Roll: " << sName << std::endl;
+        cleg.m_tracker.ForceRoll();
       } ) );
     ma.emplace_back( MenuActivation(
-      "Lock Leg",
+      "Force Close",
       [this,&cleg,&sName](){
-        std::cout << "Lock Leg: " << sName << "(todo)" << std::endl;
-        LegLock( cleg );
+        std::cout << "Force Close: " << sName << std::endl;
+        cleg.m_tracker.ForceClose();
       } ) );
-    ma.emplace_back( MenuActivation(
-      "Close Leg",
-      [this,&cleg,&sName](){
-        std::cout << "Close Leg: " << sName << "(todo)" << std::endl;
-        LegClose( cleg );
-      } ) );
+    //ma.emplace_back( MenuActivation(
+    //  "Calendar Roll",
+    //  [this,&cleg,&sName](){
+    //    std::cout << "Calendar Roll: " << sName << "(todo)" << std::endl;
+    //    CalendarRoll( cleg );
+    //  } ) );
+    //ma.emplace_back( MenuActivation(
+    //  "Diagonal Roll",
+    //  [this,&cleg,&sName](){
+    //    std::cout << "Diagonal Roll: " << sName << "(todo)" << std::endl;
+    //    DiagonalRoll( cleg );
+    //  } ) );
+    //ma.emplace_back( MenuActivation(
+    //  "Lock Leg",
+    //  [this,&cleg,&sName](){
+    //    std::cout << "Lock Leg: " << sName << "(todo)" << std::endl;
+    //    LegLock( cleg );
+    //  } ) );
+    //ma.emplace_back( MenuActivation(
+    //  "Close Leg",
+    //  [this,&cleg,&sName](){
+    //    std::cout << "Close Leg: " << sName << "(todo)" << std::endl;
+    //    LegClose( cleg );
+    //  } ) );
 
     m_fActivateOption( pOption, pPositionNew, ou::tf::option::LegNote::LU( legValues.m_type ), std::move( ma ) );
 
