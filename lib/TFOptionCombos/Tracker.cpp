@@ -411,7 +411,6 @@ void Tracker::OptionCandidate_HandleQuote( const ou::tf::Quote& quote ) {
                   << ",roll-per-share-diff=" << diff
                   ;
                 m_transition = ETransition::Roll_start;
-                //LegRoll();
               }
             }
           }
@@ -429,18 +428,33 @@ void Tracker::OptionCandidate_HandleQuote( const ou::tf::Quote& quote ) {
 void Tracker::Emit() {
 
   auto pOldWatch = m_pPosition->GetWatch();
-  BOOST_LOG_TRIVIAL(info)
-    << pOldWatch->LastQuote().DateTime().time_of_day()
-    << ",stats"
-    << ",old=" << pOldWatch->GetInstrumentName()
-    << ",b=" << pOldWatch->LastQuote().Bid()
-    << ",a=" << pOldWatch->LastQuote().Ask()
-    << ",new=" << m_pOptionCandidate->GetInstrument()->GetInstrumentName()
-    << ",b=" << m_pOptionCandidate->LastQuote().Bid()
-    << ",a=" << m_pOptionCandidate->LastQuote().Ask()
-    << ",underlying=" << m_dblUnderlyingPrice
-    << ",slope=" << m_dblUnderlyingSlope
-    ;
+
+  if ( m_pOptionCandidate ) {
+    BOOST_LOG_TRIVIAL(info)
+      << pOldWatch->LastQuote().DateTime().time_of_day()
+      << ",stats(" << (int)m_transition << ")"
+      << ",underlying=" << m_dblUnderlyingPrice
+      << ",old=" << pOldWatch->GetInstrumentName()
+      << ",b=" << pOldWatch->LastQuote().Bid()
+      << ",a=" << pOldWatch->LastQuote().Ask()
+      << ",new=" << m_pOptionCandidate->GetInstrument()->GetInstrumentName()
+      << ",b=" << m_pOptionCandidate->LastQuote().Bid()
+      << ",a=" << m_pOptionCandidate->LastQuote().Ask()
+      << ",slope=" << m_dblUnderlyingSlope
+      ;
+  }
+  else {
+    BOOST_LOG_TRIVIAL(info)
+      << pOldWatch->LastQuote().DateTime().time_of_day()
+      << ",stats(" << (int)m_transition << ")"
+      << ",underlying=" << m_dblUnderlyingPrice
+      << ",old=" << pOldWatch->GetInstrumentName()
+      << ",b=" << pOldWatch->LastQuote().Bid()
+      << ",a=" << pOldWatch->LastQuote().Ask()
+      << ",no option candidate"
+      ;
+  }
+
 }
 
 void Tracker::LegRoll() {
@@ -449,21 +463,25 @@ void Tracker::LegRoll() {
 
   assert( m_pPosition );
 
-  auto pOldWatch = m_pPosition->GetWatch();
-  BOOST_LOG_TRIVIAL(info)
-    << pOldWatch->LastQuote().DateTime().time_of_day()
-    << ",roll"
-    << ",old=" << pOldWatch->GetInstrumentName()
-    << ",b=" << pOldWatch->LastQuote().Bid()
-    << ",a=" << pOldWatch->LastQuote().Ask()
-    << ",new=" << m_pOptionCandidate->GetInstrument()->GetInstrumentName()
-    << ",b=" << m_pOptionCandidate->LastQuote().Bid()
-    << ",a=" << m_pOptionCandidate->LastQuote().Ask()
-    << ",underlying=" << m_dblUnderlyingPrice
-    << ",slope=" << m_dblUnderlyingSlope
-    ;
+  // TODO: need to perform a recovery as candidate is not always
+  //   immediately available?
 
   if ( m_pOptionCandidate ) {
+
+    auto pOldWatch = m_pPosition->GetWatch();
+    BOOST_LOG_TRIVIAL(info)
+      << pOldWatch->LastQuote().DateTime().time_of_day()
+      << ",roll"
+      << ",underlying=" << m_dblUnderlyingPrice
+      << ",old=" << pOldWatch->GetInstrumentName()
+      << ",b=" << pOldWatch->LastQuote().Bid()
+      << ",a=" << pOldWatch->LastQuote().Ask()
+      << ",new=" << m_pOptionCandidate->GetInstrument()->GetInstrumentName()
+      << ",b=" << m_pOptionCandidate->LastQuote().Bid()
+      << ",a=" << m_pOptionCandidate->LastQuote().Ask()
+      << ",slope=" << m_dblUnderlyingSlope
+      ;
+
     OptionCandidate_StopWatch();
     pOption_t pOption = std::move( m_pOptionCandidate );
     m_pOptionCandidate.reset();
@@ -517,10 +535,15 @@ void Tracker::Lock( bool bLock ) {
 
 void Tracker::ForceRoll() {
   if ( ( ETransition::Track_Long == m_transition ) || ( ETransition::Track_Short == m_transition ) ) {
-    m_transition = ETransition::Roll_start;
+    if( m_pOptionCandidate ) {
+      m_transition = ETransition::Roll_start;
+    }
+    else {
+      std::cout << "Tracker::ForceRoll: no roll, no candidate" << std::endl;
+    }
   }
   else {
-    std::cout << "Tracker::ForceRoll: can not start roll" << std::endl;
+    std::cout << "Tracker::ForceRoll: no roll, not tracking" << std::endl;
   }
 }
 
