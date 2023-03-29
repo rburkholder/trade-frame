@@ -28,7 +28,6 @@
 // TODO: remove spkes in charts
 
 OptionStatistics::OptionStatistics( pOption_t pOption )
-: m_ptiSelf( nullptr )
 {
 
   m_pOption = pOption;
@@ -93,7 +92,6 @@ OptionStatistics::~OptionStatistics() {
   m_pOption->OnQuote.Remove( MakeDelegate( this, &OptionStatistics::HandleQuote ) );
   m_pOption->OnTrade.Remove( MakeDelegate( this, &OptionStatistics::HandleTrade ) );
   m_pOption->OnGreek.Remove( MakeDelegate( this, &OptionStatistics::HandleGreek ) );
-  m_ptiSelf = nullptr; // need to be able to dynamically remove tree item?
   m_pdvChart.reset();
   m_pPosition.reset();
   m_pOption.reset();

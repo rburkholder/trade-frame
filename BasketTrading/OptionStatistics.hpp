@@ -50,7 +50,6 @@ public:
   pOption_t Option() { return m_pOption; }
   pChartDataView_t ChartDataView() { return m_pdvChart; }
 
-  void Set( ou::tf::TreeItem* pti ) { m_ptiSelf = pti; }
   void Set( pPosition_t pPosition ) { m_pPosition = pPosition; }
 
 protected:
@@ -83,12 +82,8 @@ private:
   ou::ChartEntryIndicator m_ceRho;
   ou::ChartEntryIndicator m_ceVega;
 
-  ou::tf::TreeItem* m_ptiSelf;
-
   void HandleQuote( const ou::tf::Quote& quote );
   void HandleTrade( const ou::tf::Trade& trade );
   void HandleGreek( const ou::tf::Greek& greek );
-
-  ou::tf::TreeItem* GetTreeItem() { return m_ptiSelf; } // not used at the moment
 
 };

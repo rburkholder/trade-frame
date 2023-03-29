@@ -29,7 +29,8 @@ OptionRegistry::OptionRegistry(
   , fStopCalc_t&& fStopCalc
   , fSetChartDataView_t&& fSetChartDataView
   ) :
-    m_fRegisterOption( std::move( fRegisterOption ) )
+    m_ptiSelf( nullptr )
+  , m_fRegisterOption( std::move( fRegisterOption ) )
   , m_fStartCalc( std::move( fStartCalc ) )
   , m_fStopCalc( std::move( fStopCalc ) )
   , m_fSetChartDataView( std::move( fSetChartDataView ) )
@@ -93,7 +94,7 @@ void OptionRegistry::Add( pOption_t pOption, pPosition_t pPosition, const std::s
 
   pOptionStatistics_t pOptionStatistics = OptionStatistics::Factory( pOption );
 
-  ou::tf::TreeItem* pti = m_ptiParent->AppendChild(
+  m_ptiSelf = m_ptiParent->AppendChild(
     pOption->GetInstrumentName() + " (" + sLegName + ")",
     [this,pOptionStatistics]( ou::tf::TreeItem* ){
       m_fSetChartDataView( pOptionStatistics->ChartDataView() );
@@ -110,7 +111,6 @@ void OptionRegistry::Add( pOption_t pOption, pPosition_t pPosition, const std::s
       }
     }
   );
-  pOptionStatistics->Set( pti );
   pOptionStatistics->Set( pPosition );
 
   mapOption_t::iterator iterOption = Check( pOption );
@@ -125,6 +125,13 @@ void OptionRegistry::Remove( pOption_t pOption, bool bRemoveStatistics ) {
 
   const std::string& sOptionName( pOption->GetInstrument()->GetInstrumentName() );
   std::cout << "OptionRegistry::Remove: " << sOptionName << std::endl;
+
+  if ( m_ptiSelf ) {
+    m_ptiSelf->Delete();
+    if ( m_ptiParent ) {
+      //m_ptiParent->Delete();
+    }
+  }
 
   mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
 
