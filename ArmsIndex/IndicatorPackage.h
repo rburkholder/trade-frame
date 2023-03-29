@@ -39,20 +39,20 @@ public:
      pProvider_t pDataProvider,
      pInstrument_t pInstIndex, pInstrument_t pInstTick, pInstrument_t pInstTrin
     );
-  ~IndicatorPackage(void);
+  ~IndicatorPackage();
 
-  void ToggleView( void );
+  void ToggleView();
 
   void SetChartDimensions( unsigned int x, unsigned int y );
-  void PopData( void );
-  void DrawCharts( void );
+  void PopData();
+  void DrawCharts();
 
   typedef FastDelegate1<const MemBlock&> OnDrawChart_t;
   void SetOnDrawChartIndex( OnDrawChart_t function ) { m_bdIndex.m_cb = function; }
   void SetOnDrawChartTick( OnDrawChart_t function ) { m_bdTicks.m_cb = function; }
   void SetOnDrawChartArms( OnDrawChart_t function ) { m_OnDrawChartArms = function; }
 
-  //void Start( void );
+  //void Start();
 protected:
 private:
 
@@ -99,7 +99,7 @@ private:
   struct ZZPair {
     double dblOfsIndx;
     double dblTrin;
-    ZZPair( void ): dblOfsIndx( 0.0 ), dblTrin( 0.0 ) {};
+    ZZPair(): dblOfsIndx( 0.0 ), dblTrin( 0.0 ) {};
     ZZPair( double dblOfsIndx_, double dblTrin_ ): dblOfsIndx( dblOfsIndx_ ), dblTrin( dblTrin_ ) {};
     ZZPair( const ZZPair& rhs ): dblOfsIndx( rhs.dblOfsIndx ), dblTrin( rhs.dblTrin ) {};
   };
@@ -160,12 +160,12 @@ private:
 
   OnDrawChart_t m_OnDrawChartArms;
 
-  void PushZZPair( void );
+  void PushZZPair();
 
   void DrawChart( BarDoubles& bd, const std::string& sName );
-  void DrawChartIndex( void );
-  void DrawChartTick( void );
-  void DrawChartArms( void );
+  void DrawChartIndex();
+  void DrawChartTick();
+  void DrawChartArms();
 
   void HandleOnTrin( const ou::tf::Trade& trade );
   void HandleOnTick( const ou::tf::Trade& trade );

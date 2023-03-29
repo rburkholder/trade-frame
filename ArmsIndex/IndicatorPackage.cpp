@@ -16,12 +16,17 @@
 
 #include "IndicatorPackage.h"
 
+namespace {
+ static const double c_zzTrin( 0.15 );
+ static const double c_zzIndex( 5.0 );
+}
+
 IndicatorPackage::IndicatorPackage(
      pProvider_t pDataProvider,
      pInstrument_t pInstIndex, pInstrument_t pInstTick, pInstrument_t pInstTrin
    )
    : m_bStarted( false ), m_pTrin( pInstTrin ), m_pTick( pInstTick ), m_pIndex( pInstIndex ), m_pProvider( pDataProvider ),
-     m_zzTrin( 0.15), m_zzIndex( 5.0 ),
+     m_zzTrin( c_zzTrin ), m_zzIndex( c_zzIndex ),
      m_bFirstIndexFound( false ), m_dblFirstIndex( 0.0 ),
      m_nPixelsX( 600 ), m_nPixelsY( 200 ),
      m_dblTrin( 0 ), m_dblOfsIdx( 0 ),
@@ -68,20 +73,20 @@ IndicatorPackage::IndicatorPackage(
 
 }
 
-IndicatorPackage::~IndicatorPackage(void) {
-  m_bfIndex.SetOnBarUpdated( 0 );
-  m_bfIndex.SetOnBarComplete( 0 );
-  m_zzTrin.SetOnPeakFound( 0 );
-  m_zzIndex.SetOnPeakFound( 0 );
+IndicatorPackage::~IndicatorPackage() {
+  m_bfIndex.SetOnBarUpdated( nullptr );
+  m_bfIndex.SetOnBarComplete( nullptr );
+  m_zzTrin.SetOnPeakFound( nullptr );
+  m_zzIndex.SetOnPeakFound( nullptr );
   m_pProvider->RemoveTradeHandler( m_pTrin, MakeDelegate( this, &IndicatorPackage::HandleOnTrin ) );
   m_pProvider->RemoveTradeHandler( m_pTick, MakeDelegate( this, &IndicatorPackage::HandleOnTick ) );
   m_pProvider->RemoveTradeHandler( m_pIndex, MakeDelegate( this, &IndicatorPackage::HandleOnIndex ) );
 }
 
-//void IndicatorPackage::Start( void ) {
+//void IndicatorPackage::Start() {
 //}
 
-void IndicatorPackage::ToggleView( void ) {
+void IndicatorPackage::ToggleView() {
 
   if ( m_bDayView ) {
     if ( 1 <= m_bdIndex.m_vTime.size() ) {
@@ -143,7 +148,7 @@ void IndicatorPackage::HandleOnZZIndexPeakFound( const ou::tf::ZigZag&, ptime, d
   PushZZPair();
 }
 
-void IndicatorPackage::PushZZPair( void ) {
+void IndicatorPackage::PushZZPair() {
   if ( m_bTrinOfZZPairReady && m_bIndexOfZZPairReady ) {
     ZZPair zz( m_dblZZIndex, m_dblZZTrin );
     m_lfIndexTrinPair.push( zz );
@@ -156,7 +161,7 @@ void IndicatorPackage::SetChartDimensions( unsigned int x, unsigned int y ) {
   m_nPixelsY = y;
 }
 
-void IndicatorPackage::PopData( void ) {
+void IndicatorPackage::PopData() {
 
   ou::tf::Trade trade;
 
@@ -177,7 +182,7 @@ void IndicatorPackage::PopData( void ) {
 
 }
 
-void IndicatorPackage::DrawCharts( void ) {
+void IndicatorPackage::DrawCharts() {
 
   if ( !m_bDayView ) {
     ptime t( m_bdIndex.m_barWorking.DateTime() );
@@ -213,15 +218,15 @@ void IndicatorPackage::DrawChart( BarDoubles& bd, const std::string& sName ) {
   }
 }
 
-void IndicatorPackage::DrawChartIndex( void ) {
+void IndicatorPackage::DrawChartIndex() {
   DrawChart( m_bdIndex, "Index" );
 }
 
-void IndicatorPackage::DrawChartTick( void ) {
+void IndicatorPackage::DrawChartTick() {
   DrawChart( m_bdTicks, "Ticks" );
 }
 
-void IndicatorPackage::DrawChartArms( void ) {
+void IndicatorPackage::DrawChartArms() {
 
   m_vTrin.push_back( m_dblTrin );
   m_vOfsIdx.push_back( m_dblOfsIdx );
