@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    AppAutoTrade.h
+ * File:    AppAutoTrade.hpp
  * Author:  raymond@burkholder.net
  * Project: AutoTrade
  * Created: February 14, 2022 10:06

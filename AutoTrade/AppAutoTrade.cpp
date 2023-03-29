@@ -37,9 +37,9 @@
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/WinChartView.h>
 
-#include "Config.h"
-#include "Strategy.h"
-#include "AppAutoTrade.h"
+#include "Config.hpp"
+#include "Strategy.hpp"
+#include "AppAutoTrade.hpp"
 
 namespace {
   static const std::string sAppName( "Auto Trade Example" );

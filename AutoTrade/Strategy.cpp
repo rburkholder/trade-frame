@@ -25,8 +25,8 @@
 
 #include <TFTrading/Watch.h>
 
-#include "Config.h"
-#include "Strategy.h"
+#include "Config.hpp"
+#include "Strategy.hpp"
 
 using pWatch_t = ou::tf::Watch::pWatch_t;
 
