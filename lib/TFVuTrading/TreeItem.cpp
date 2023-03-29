@@ -119,7 +119,7 @@ void TreeItem::Delete() {
   // everything should self delete
   if ( m_pTreeCtrl ) {
     m_pTreeCtrl->Delete( m_idSelf );
-    Deleted( m_idSelf );
+    //Deleted( m_idSelf );
   }
 }
 
