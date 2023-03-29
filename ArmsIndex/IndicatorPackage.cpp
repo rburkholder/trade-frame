@@ -17,8 +17,8 @@
 #include "IndicatorPackage.h"
 
 namespace {
- static const double c_zzTrin( 0.15 );
- static const double c_zzIndex( 5.0 );
+ static const double c_zzTrin( 0.15 ); // zigzag peak on trin
+ static const double c_zzIndex( 5.0 ); // zigzag peak on index delta
 }
 
 IndicatorPackage::IndicatorPackage(
