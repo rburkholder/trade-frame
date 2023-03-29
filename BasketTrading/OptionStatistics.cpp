@@ -28,13 +28,13 @@
 // TODO: remove spkes in charts
 
 OptionStatistics::OptionStatistics( pOption_t pOption )
+: m_ptiSelf( nullptr )
+, m_pOption( std::move( pOption ) )
 {
-
-  m_pOption = pOption;
 
   m_pdvChart = ou::ChartDataView::Factory();
 
-  m_pdvChart->SetNames( pOption->GetInstrumentName(), "Option" );
+  m_pdvChart->SetNames( m_pOption->GetInstrumentName(), "Option" );
 
   m_pdvChart->Add( ChartSlot::Price, &m_ceTrade );
   m_pdvChart->Add( ChartSlot::Price, &m_ceAsk );
@@ -92,9 +92,17 @@ OptionStatistics::~OptionStatistics() {
   m_pOption->OnQuote.Remove( MakeDelegate( this, &OptionStatistics::HandleQuote ) );
   m_pOption->OnTrade.Remove( MakeDelegate( this, &OptionStatistics::HandleTrade ) );
   m_pOption->OnGreek.Remove( MakeDelegate( this, &OptionStatistics::HandleGreek ) );
+  if ( m_ptiSelf ) {
+    m_ptiSelf->Delete();
+    m_ptiSelf = nullptr;
+  }
   m_pdvChart.reset();
   m_pPosition.reset();
   m_pOption.reset();
+}
+
+void OptionStatistics::Set( ou::tf::TreeItem* pti ) {
+  m_ptiSelf = pti;
 }
 
 void OptionStatistics::HandleQuote( const ou::tf::Quote& quote ) {

@@ -51,6 +51,7 @@ public:
   pChartDataView_t ChartDataView() { return m_pdvChart; }
 
   void Set( pPosition_t pPosition ) { m_pPosition = pPosition; }
+  void Set( ou::tf::TreeItem* pti );
 
 protected:
 private:
@@ -59,6 +60,8 @@ private:
 
   pOption_t m_pOption;
   pPosition_t m_pPosition;
+
+  ou::tf::TreeItem* m_ptiSelf;
 
   pChartDataView_t m_pdvChart; // the data
 
@@ -85,5 +88,7 @@ private:
   void HandleQuote( const ou::tf::Quote& quote );
   void HandleTrade( const ou::tf::Trade& trade );
   void HandleGreek( const ou::tf::Greek& greek );
+
+  ou::tf::TreeItem* GetTreeItem() { return m_ptiSelf; } // not used at the moment
 
 };

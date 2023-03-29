@@ -83,7 +83,6 @@ private:
   fSetChartDataView_t m_fSetChartDataView;
 
   ou::tf::TreeItem* m_ptiParent;
-  ou::tf::TreeItem* m_ptiSelf;
 
   using mapOptionRegistered_t = std::unordered_map<std::string, pOption_t>; // registered in option engine
   mapOptionRegistered_t m_mapOptionRegistered;
@@ -104,7 +103,5 @@ private:
   mapOption_t m_mapOption;
 
   mapOption_t::iterator Check( pOption_t pOption );
-
-  ou::tf::TreeItem* GetTreeItem() { return m_ptiSelf; } // not used at the moment
 
 };

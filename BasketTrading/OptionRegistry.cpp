@@ -19,7 +19,9 @@
  * Created: March 4, 2023 19:42:36
  */
 
- #include <TFVuTrading/TreeItem.hpp>
+#include <boost/log/trivial.hpp>
+
+#include <TFVuTrading/TreeItem.hpp>
 
 #include "OptionRegistry.hpp"
 
@@ -29,8 +31,7 @@ OptionRegistry::OptionRegistry(
   , fStopCalc_t&& fStopCalc
   , fSetChartDataView_t&& fSetChartDataView
   ) :
-    m_ptiSelf( nullptr )
-  , m_fRegisterOption( std::move( fRegisterOption ) )
+    m_fRegisterOption( std::move( fRegisterOption ) )
   , m_fStartCalc( std::move( fStartCalc ) )
   , m_fStopCalc( std::move( fStopCalc ) )
   , m_fSetChartDataView( std::move( fSetChartDataView ) )
@@ -66,7 +67,7 @@ OptionRegistry::mapOption_t::iterator OptionRegistry::Check( pOption_t pOption )
         m_fRegisterOption( pOption );
       }
       catch( std::runtime_error& e ) {
-        std::cout << "OptionRegistry::Add error: " << e.what() << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "OptionRegistry::Add error: " << e.what();
         // simply telling us we are already registered, convert from error to status?
       }
     }
@@ -79,7 +80,7 @@ OptionRegistry::mapOption_t::iterator OptionRegistry::Check( pOption_t pOption )
     iterOption->second.nReference++;
   }
 
-  std::cout << "OptionRegistry::Add " << pOption->GetInstrumentName() << std::endl;
+  BOOST_LOG_TRIVIAL(info) << "OptionRegistry::Add " << pOption->GetInstrumentName();
   return iterOption;
 }
 
@@ -93,11 +94,12 @@ void OptionRegistry::Add( pOption_t pOption, pPosition_t pPosition, const std::s
   const std::string& sOptionName( pOption->GetInstrument()->GetInstrumentName() );
 
   pOptionStatistics_t pOptionStatistics = OptionStatistics::Factory( pOption );
+  OptionStatistics& ostats( *pOptionStatistics );
 
-  m_ptiSelf = m_ptiParent->AppendChild(
+  ou::tf::TreeItem* pti = m_ptiParent->AppendChild(
     pOption->GetInstrumentName() + " (" + sLegName + ")",
-    [this,pOptionStatistics]( ou::tf::TreeItem* ){
-      m_fSetChartDataView( pOptionStatistics->ChartDataView() );
+    [this,&ostats]( ou::tf::TreeItem* ){
+      m_fSetChartDataView( ostats.ChartDataView() );
     },
     [this,&sOptionName, ma_=std::move(ma)]( ou::tf::TreeItem* pti ) {
       pti->NewMenu();
@@ -111,11 +113,12 @@ void OptionRegistry::Add( pOption_t pOption, pPosition_t pPosition, const std::s
       }
     }
   );
-  pOptionStatistics->Set( pPosition );
+  ostats.Set( pti );
+  ostats.Set( pPosition );
 
   mapOption_t::iterator iterOption = Check( pOption );
   assert( !iterOption->second.pOptionStatistics );
-  iterOption->second.pOptionStatistics = pOptionStatistics;
+  iterOption->second.pOptionStatistics = std::move ( pOptionStatistics );
 
   //std::cout << "OptionRegistry::Add(stats) " << pOption->GetInstrumentName() << std::endl;
 
@@ -124,14 +127,7 @@ void OptionRegistry::Add( pOption_t pOption, pPosition_t pPosition, const std::s
 void OptionRegistry::Remove( pOption_t pOption, bool bRemoveStatistics ) {
 
   const std::string& sOptionName( pOption->GetInstrument()->GetInstrumentName() );
-  std::cout << "OptionRegistry::Remove: " << sOptionName << std::endl;
-
-  if ( m_ptiSelf ) {
-    m_ptiSelf->Delete();
-    if ( m_ptiParent ) {
-      //m_ptiParent->Delete();
-    }
-  }
+  BOOST_LOG_TRIVIAL(info) << "OptionRegistry::Remove: " << sOptionName;
 
   mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
 
@@ -152,7 +148,7 @@ void OptionRegistry::Remove( pOption_t pOption, bool bRemoveStatistics ) {
     }
   }
   else {
-    std::cout << "OptionRegistry::Remove error, option not found: " << sOptionName << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "OptionRegistry::Remove error, option not found: " << sOptionName;
   }
 
 }
