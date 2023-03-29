@@ -67,7 +67,7 @@ bool AppAutoTrade::OnInit() {
     m_sSymbol = options.sSymbol;
   }
   else {
-    return 0;
+    return false;
   }
 
   {
@@ -90,8 +90,10 @@ bool AppAutoTrade::OnInit() {
 
   m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
-  if ( 0 < options.sGroupDirectory.size() ) {
-    m_sim->SetGroupDirectory( options.sGroupDirectory );
+  if ( options.bSimStart ) {
+    if ( 0 < options.sGroupDirectory.size() ) {
+      m_sim->SetGroupDirectory( options.sGroupDirectory );
+    }
   }
 
   m_tws->SetClientId( options.nIbInstance );
@@ -149,8 +151,8 @@ bool AppAutoTrade::OnInit() {
     }
   }
 
-  m_pFrameMain->SetAutoLayout( true );
-  m_pFrameMain->Layout();
+  //m_pFrameMain->SetAutoLayout( true );
+  //m_pFrameMain->Layout();
   m_pFrameMain->Show( true );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppAutoTrade::OnClose, this );  // start close of windows and controls
