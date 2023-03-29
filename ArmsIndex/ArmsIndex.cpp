@@ -98,13 +98,9 @@ bool AppArmsIndex::OnInit() {
 
   Bind( EVENT_PROVIDER_CONNECTED, &AppArmsIndex::HandleProviderConnected, this );
 
-  m_pFrameMain->SetAutoLayout( true );
-  m_pFrameMain->Layout();
+  //m_pFrameMain->SetAutoLayout( true );
+  //m_pFrameMain->Layout();
   m_pFrameMain->Show( true );
-
-  m_bData1Connected = false;
-  m_bExecConnected = false;
-  m_bStarted = false;
 
   CallAfter(
     [this](){
@@ -112,9 +108,13 @@ bool AppArmsIndex::OnInit() {
     }
   );
 
+  m_bData1Connected = false;
+  m_bExecConnected = false;
+  m_bStarted = false;
+
   m_iqfeed->Connect();
 
-  return 1;
+  return true;
 
 }
 
