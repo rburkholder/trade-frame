@@ -113,7 +113,7 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
     ma.emplace_back( MenuActivation(
       "Statistics",
       [this,&cleg,&sName](){
-        std::cout << "Statistics" << sName << std::endl;
+        //std::cout << "Statistics: " << sName << std::endl;
         cleg.m_tracker.Emit();
       } ) );
     ma.emplace_back( MenuActivation(
@@ -184,7 +184,7 @@ void Combo::InitTracker(
     [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
     },
-    [this]( pPosition_t pPositionOld, pOption_t pOption )->pPosition_t { // fRollLeg_t - response to Tick
+    [this]( pPosition_t pPositionOld, pOption_t pOption )->pPosition_t { // fLegRoll_t - response to Tick
       // leg will be removed in Tick
 
       const std::string sNotes( pPositionOld->Notes() );
@@ -213,7 +213,7 @@ void Combo::InitTracker(
 
       return pPosition;
     },
-    [this]( pPosition_t pPositionOld ) { // m_fCloseLeg - response to Tick
+    [this]( pPosition_t pPositionOld ) { // fLegClose_t - response to Tick
       // leg will be removed in Tick
 
       PositionNote( pPositionOld, LegNote::State::Closed );
@@ -249,11 +249,11 @@ void Combo::PositionNote( pPosition_t& pPosition, LegNote::State state ) {
 
 // NOTE: may require delayed reaction on this, as a roll will call back into this with new position
 void Combo::InitTrackLongOption(
-    ComboLeg& cleg,
-    const mapChains_t* pmapChains,
-    boost::gregorian::date date,
-    boost::gregorian::days days_to_expiry
-    ) {
+  ComboLeg& cleg,
+  const mapChains_t* pmapChains,
+  boost::gregorian::date date,
+  boost::gregorian::days days_to_expiry
+) {
 
   InitTracker( cleg, pmapChains, date, days_to_expiry );
 
@@ -262,10 +262,10 @@ void Combo::InitTrackLongOption(
 }
 
 void Combo::InitTrackShortOption(
-    ComboLeg& cleg,
-    const mapChains_t* pmapChains,
-    boost::gregorian::date date,
-    boost::gregorian::days days_to_expiry
+  ComboLeg& cleg,
+  const mapChains_t* pmapChains,
+  boost::gregorian::date date,
+  boost::gregorian::days days_to_expiry
 ) {
 
   InitTracker( cleg, pmapChains, date, days_to_expiry );
@@ -303,6 +303,7 @@ void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt
 
     bool bRemove = cleg.Test( dt, dblUnderlyingSlope, dblUnderlyingPrice );
     if ( bRemove ) {
+
       vRemove.push_back( iter );
     }
   }
