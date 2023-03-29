@@ -78,6 +78,7 @@ Tracker::Tracker( Tracker&& rhs )
 }
 
 Tracker::~Tracker() {
+  //BOOST_LOG_TRIVIAL(info) << "Tracker::~Tracker," << this;
   if ( m_pPosition ) {
     m_pPosition->GetWatch()->EnableStatsRemove();
   }
@@ -115,13 +116,17 @@ void Tracker::Initialize(
   m_fLegRoll = std::move( fLegRoll );
   m_fLegClose = std::move( fLegClose );
 
-  Initialize( pPosition );
+  Initialize( std::move( pPosition ) );
 
 }
 
 void Tracker::Initialize( pPosition_t pPosition ) {
 
-  //BOOST_LOG_TRIVIAL(info) << "Tracker::Initialize,internal";
+  //BOOST_LOG_TRIVIAL(info)
+  //  << "Tracker::Initialize,internal"
+  //  << "," << pPosition->GetInstrument()->GetInstrumentName()
+  //  << "," << this
+  //  ;
 
   assert( ETransition::Initial == m_transition );  // needs to be set prior to entry
   assert( !m_pPosition );
@@ -219,11 +224,13 @@ bool Tracker::TestLong( boost::posix_time::ptime dt, double dblUnderlyingSlope, 
       bRemove = true;
       break;
     case ETransition::Close_start:
+      //BOOST_LOG_TRIVIAL(info) << "Tracker::LegClose - step 1";
       LegClose(); // delayed a tick to call in Tick thread
       bRemove = true;
       break;
     case ETransition::Track_Short: // mutually exclusive
       assert( false );
+      break;
     default:
       break;
   }
@@ -321,7 +328,9 @@ bool Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope,
     case ETransition::Roll_start: // used for Roll or Close
       LegRoll(); // delayed a tick to call in Tick thread
       bRemove = true;
+      break;
     case ETransition::Close_start:
+      //BOOST_LOG_TRIVIAL(info) << "Tracker::LegClose - step 4";
       LegClose(); // delayed a tick to call in Tick thread
       bRemove = true;
       break;
@@ -459,6 +468,8 @@ void Tracker::Emit() {
 
 void Tracker::LegRoll() {
 
+  //BOOST_LOG_TRIVIAL(info) << "Tracker::LegRoll - step a," << this;
+
   m_transition = ETransition::Done;
 
   assert( m_pPosition );
@@ -496,9 +507,14 @@ void Tracker::LegRoll() {
 
   m_pPosition.reset();
   m_fLegRoll = nullptr;
+
+  //BOOST_LOG_TRIVIAL(info) << "Tracker::LegRoll - step b," << this;
+
 }
 
 void Tracker::LegClose() {
+
+  //BOOST_LOG_TRIVIAL(info) << "Tracker::LegClose - step 5," << this;
 
   m_transition = ETransition::Done;
 
@@ -518,7 +534,7 @@ void Tracker::LegClose() {
     m_pOptionCandidate.reset();
   }
   else {
-    BOOST_LOG_TRIVIAL(info) << "Tracker::LegClose - no option canddiate";
+    BOOST_LOG_TRIVIAL(info) << "Tracker::LegClose - no option candidate";
   }
 
   pPosition_t pPosition = std::move( m_pPosition );
