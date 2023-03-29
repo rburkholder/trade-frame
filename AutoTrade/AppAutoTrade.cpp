@@ -64,7 +64,7 @@ bool AppAutoTrade::OnInit() {
   config::Options options;
 
   if ( Load( sConfigFilename, options ) ) {
-    m_sSymbol = options.sSymbol;
+    m_sSymbol = options.sSymbol_Trade;
   }
   else {
     return false;
@@ -184,7 +184,7 @@ bool AppAutoTrade::OnInit() {
     );
   }
 
-  return 1;
+  return true;
 }
 
 void AppAutoTrade::HandleMenuActionCloseAndDone() {

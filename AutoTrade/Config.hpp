@@ -25,7 +25,12 @@ namespace config {
 
 struct Options {
 
-  std::string sSymbol;
+  // Interactive Brokers api instance
+  int nIbInstance;
+
+  std::string sSymbol_Trade;
+  std::string sSymbol_Tick;
+  std::string sSymbol_Trin;
 
   int nPeriodWidth;  // units:  seconds
 
@@ -41,14 +46,11 @@ struct Options {
   // longest EMA
   int nMA3Periods;
 
-  // group directory for simulator - obtain from Hdf5Chart
-  std::string sGroupDirectory;
-
   // force a simulation run
   bool bSimStart;
 
-  // Interactive Brokers api instance
-  int nIbInstance;
+  // group directory for simulator - obtain from Hdf5Chart
+  std::string sGroupDirectory;
 
   Options()
   : nPeriodWidth( 10 ), nMA1Periods( 8 ), nMA2Periods( 13 ), nMA3Periods( 21 )
