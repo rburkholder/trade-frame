@@ -19,6 +19,8 @@
  * Created on June 7, 2019, 5:08 PM
  */
 
+#include <boost/log/trivial.hpp>
+
 #include <TFTrading/PortfolioManager.h>
 
 #include <TFOptions/Chains.h>
@@ -157,11 +159,11 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
 
   }
   else {
-    std::cout
+    BOOST_LOG_TRIVIAL(info)
       << "Combo::SetPosition "
       << pPositionNew->GetInstrument()->GetInstrumentName()
       << " not open"
-      << std::endl;
+      ;
   }
 
   return legValues;
@@ -303,7 +305,7 @@ void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt
 
     bool bRemove = cleg.Test( dt, dblUnderlyingSlope, dblUnderlyingPrice );
     if ( bRemove ) {
-
+       //BOOST_LOG_TRIVIAL(info) << "bRemove found " << cleg.m_leg.GetPosition()->GetInstrument()->GetInstrumentName();
       vRemove.push_back( iter );
     }
   }
