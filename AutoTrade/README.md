@@ -24,17 +24,21 @@ The parameters are sourced in the configuration file (as an example):
 x64/debug/AutoTrade.cfg:
 
 ```
+ib_instance=2
 symbol=SPY
 #symbol=@ES~
-period_width=5 # seconds
+# more combos in ArmsIndex/PanelArmsIndex.cpp
+symbol_tick=JT6T.Z
+symbol_trin=RI6T.Z
+period_width=5 #seconds
 ma1_periods=5
 ma2_periods=8
 ma3_periods=12
-group_directory=/app/AutoTrade/20220218 19:23:05.489488
+group_directory=/app/AutoTrade/20220223 20:05:28.214488-1
 sim_start=off
 ```
 
-When there is no data available, set the group directory such nothing follows the '='
+When there is no data available, set the group directory such nothing follows the '=', and set sim_start to off
 
 ### x64/debug/AutoTrade.db
 
