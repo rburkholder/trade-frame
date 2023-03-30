@@ -63,8 +63,8 @@ public:
   virtual ~Strategy();
 
   void SetPosition( pPosition_t );
-  void SetTick( pWatch_t ) {}
-  void SetTrin( pWatch_t ) {}
+  void SetTick( pWatch_t );
+  void SetTrin( pWatch_t );
 
   void SaveWatch( const std::string& );
 
@@ -73,7 +73,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, PL }; // IndMA = moving averate indicator
+  enum EChartSlot { Price, Volume, Tick, Trin, PL }; // IndMA = moving averate indicator
   enum class ETradeState {
     Init,  // initiaize state in current market
     Search,  // looking for long or short enter
@@ -91,6 +91,8 @@ private:
   ETradeState m_stateTrade;
 
   pPosition_t m_pPosition;
+  pWatch_t m_pTick;
+  pWatch_t m_pTrin;
 
   int m_nPeriodWidth;
 
@@ -147,12 +149,18 @@ private:
   ou::ChartEntryShape m_ceShortFill;
   ou::ChartEntryShape m_ceShortExit;
 
+  ou::ChartEntryIndicator m_ceTick;
+  ou::ChartEntryIndicator m_ceTrin;
+
   ou::ChartEntryIndicator m_ceProfitLoss;
 
   ou::tf::BarFactory m_bfQuotes01Sec;
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
+
+  void HandleTick( const ou::tf::Trade& );
+  void HandleTrin( const ou::tf::Trade& );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
 

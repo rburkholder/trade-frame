@@ -97,7 +97,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   Clear();
 
-  m_pPosition = pPosition;
+  m_pPosition = std::move( pPosition );
   pWatch_t pWatch = m_pPosition->GetWatch();
 
   m_cdv.SetNames( "Moving Average Strategy", pWatch->GetInstrument()->GetInstrumentName() );
@@ -119,7 +119,35 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
 }
 
+void Strategy::SetTick( pWatch_t pTick ) {
+  assert( pTick );
+  m_pTick = std::move( pTick );
+
+  m_ceTick.SetName( "Tick" );
+  m_cdv.Add( EChartSlot::Tick, &m_ceTick );
+
+  m_pTick->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTick ) );
+}
+
+void Strategy::SetTrin( pWatch_t pTrin ) {
+  assert( pTrin );
+  m_pTrin = std::move( pTrin );
+
+  m_ceTrin.SetName( "Trin" );
+  m_cdv.Add( EChartSlot::Trin, &m_ceTrin );
+
+  m_pTrin->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrin ) );
+}
+
 void Strategy::Clear() {
+  if ( m_pTick ) {
+    m_pTick->OnTrade.Remove( MakeDelegate( this, &Strategy::HandleTick ) );
+    m_pTick.reset();
+  }
+  if ( m_pTrin ) {
+    m_pTrin->OnTrade.Remove( MakeDelegate( this, &Strategy::HandleTrin ) );
+    m_pTrin.reset();
+  }
   if  ( m_pPosition ) {
     pWatch_t pWatch = m_pPosition->GetWatch();
     pWatch->OnQuote.Remove( MakeDelegate( this, &Strategy::HandleQuote ) );
@@ -160,6 +188,14 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   m_ceTrade.Append( dt, trade.Price() );
   m_ceVolume.Append( dt, trade.Volume() );
 
+}
+
+void Strategy::HandleTick( const ou::tf::Trade& tick ) {
+  m_ceTick.Append( tick.DateTime(), tick.Price() );
+}
+
+void Strategy::HandleTrin( const ou::tf::Trade& trin ) {
+  m_ceTrin.Append( trin.DateTime(), trin.Price() );
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
@@ -352,6 +388,12 @@ void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_
 void Strategy::SaveWatch( const std::string& sPrefix ) {
   if ( m_pPosition ) {
     m_pPosition->GetWatch()->SaveSeries( sPrefix );
+  }
+  if ( m_pTick ) {
+    m_pTick->SaveSeries( sPrefix );
+  }
+  if ( m_pTrin ) {
+    m_pTrin->SaveSeries( sPrefix );
   }
 }
 
