@@ -42,20 +42,21 @@
 #include "AppAutoTrade.hpp"
 
 namespace {
-  static const std::string sAppName( "Auto Trade Example" );
-  static const std::string sConfigFilename( "AutoTrade.cfg" );
-  static const std::string sDbName( "AutoTrade.db" );
-  static const std::string sStateFileName( "AutoTrade.state" );
-  static const std::string sTimeZoneSpec( "../date_time_zonespec.csv" );
+  static const std::string c_sAppTitle(        "Auto Trade Example" );
+  static const std::string c_sAppNamePrefix(   "AutoTrade" );
+  static const std::string c_sChoicesFilename( c_sAppNamePrefix + ".cfg" );
+  static const std::string c_sDbName(          c_sAppNamePrefix + ".db" );
+  static const std::string c_sStateFileName(   c_sAppNamePrefix + ".state" );
+  static const std::string c_sTimeZoneSpec( "../date_time_zonespec.csv" );
 }
 
 IMPLEMENT_APP(AppAutoTrade)
 
 bool AppAutoTrade::OnInit() {
 
-  wxApp::SetAppDisplayName( sAppName );
+  wxApp::SetAppDisplayName( c_sAppTitle );
   wxApp::SetVendorName( "One Unified Net Limited" );
-  wxApp::SetVendorDisplayName( "(c)2022 One Unified Net Limited" );
+  wxApp::SetVendorDisplayName( "(c)2023 One Unified Net Limited" );
 
   wxApp::OnInit();
 
@@ -63,7 +64,7 @@ bool AppAutoTrade::OnInit() {
 
   config::Options choices;
 
-  if ( Load( sConfigFilename, choices ) ) {
+  if ( Load( c_sChoicesFilename, choices ) ) {
     m_sSymbol = choices.sSymbol_Trade;
   }
   else {
@@ -83,12 +84,12 @@ bool AppAutoTrade::OnInit() {
 
   //if ( choices.bSimStart ) {
     // just always delete it
-    if ( boost::filesystem::exists( sDbName ) ) {
-    boost::filesystem::remove( sDbName );
+    if ( boost::filesystem::exists( c_sDbName ) ) {
+    boost::filesystem::remove( c_sDbName );
     }
   //}
 
-  m_pdb = std::make_unique<ou::tf::db>( sDbName );
+  m_pdb = std::make_unique<ou::tf::db>( c_sDbName );
 
   if ( choices.bSimStart ) {
     if ( 0 < choices.sGroupDirectory.size() ) {
@@ -98,7 +99,7 @@ bool AppAutoTrade::OnInit() {
 
   m_tws->SetClientId( choices.nIbInstance );
 
-  m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
+  m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppTitle );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
 
   m_pFrameMain->SetSize( 800, 500 );
@@ -163,8 +164,8 @@ bool AppAutoTrade::OnInit() {
   vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSaveValues ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
-  if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
-    std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
+  if ( !boost::filesystem::exists( c_sTimeZoneSpec ) ) {
+    std::cout << "Required file does not exist:  " << c_sTimeZoneSpec << std::endl;
   }
 
   CallAfter(
@@ -383,7 +384,7 @@ void AppAutoTrade::ConfirmProviders() {
 
 void AppAutoTrade::SaveState() {
   std::cout << "Saving Config ..." << std::endl;
-  std::ofstream ofs( sStateFileName );
+  std::ofstream ofs( c_sStateFileName );
   boost::archive::text_oarchive oa(ofs);
   oa & *this;
   std::cout << "  done." << std::endl;
@@ -392,7 +393,7 @@ void AppAutoTrade::SaveState() {
 void AppAutoTrade::LoadState() {
   try {
     std::cout << "Loading Config ..." << std::endl;
-    std::ifstream ifs( sStateFileName );
+    std::ifstream ifs( c_sStateFileName );
     boost::archive::text_iarchive ia(ifs);
     ia & *this;
     std::cout << "  done." << std::endl;
