@@ -127,6 +127,7 @@ void Strategy::SetTick( pWatch_t pTick ) {
   m_cdv.Add( EChartSlot::Tick, &m_ceTick );
 
   m_pTick->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTick ) );
+  m_pTick->StartWatch();
 }
 
 void Strategy::SetTrin( pWatch_t pTrin ) {
@@ -137,14 +138,17 @@ void Strategy::SetTrin( pWatch_t pTrin ) {
   m_cdv.Add( EChartSlot::Trin, &m_ceTrin );
 
   m_pTrin->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrin ) );
+  m_pTrin->StartWatch();
 }
 
 void Strategy::Clear() {
   if ( m_pTick ) {
+    m_pTick->StopWatch();
     m_pTick->OnTrade.Remove( MakeDelegate( this, &Strategy::HandleTick ) );
     m_pTick.reset();
   }
   if ( m_pTrin ) {
+    m_pTrin->StopWatch();
     m_pTrin->OnTrade.Remove( MakeDelegate( this, &Strategy::HandleTrin ) );
     m_pTrin.reset();
   }
