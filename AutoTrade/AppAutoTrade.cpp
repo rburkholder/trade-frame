@@ -199,7 +199,7 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
     [this](){
       m_nTSDataStreamSequence++;
       m_pStrategy->SaveWatch(
-        "/app/AutoTrade/" +
+        "/app/" + c_sAppNamePrefix + "/" +
         m_sTSDataStreamStarted + "-" +
         boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) ); // sequence number on each save
       std::cout << "  ... Done " << std::endl;
@@ -303,9 +303,12 @@ void AppAutoTrade::HandleMenuActionSimStop() {
 }
 
 void AppAutoTrade::HandleMenuActionSimEmitStats() {
-  std::stringstream ss;
-  m_sim->EmitStats( ss );
-  std::cout << "Stats: " << ss.str() << std::endl;
+  CallAfter(
+    [this](){
+      std::stringstream ss;
+      m_sim->EmitStats( ss );
+      std::cout << "Stats: " << ss.str() << std::endl;
+    } );
 }
 
 int AppAutoTrade::OnExit() {
