@@ -102,6 +102,8 @@ public:
   const std::string GetIQFeedNameCall( double strike ) const;
   const std::string GetIQFeedNamePut(  double strike ) const;
 
+  void Erase( double strike );
+
   const chain::Strike<Option>& GetExistingStrike( double strike ) const;
   //const chain::Strike<Option>& GetStrike( double strike ) const;
   chain::Strike<Option>& GetStrike( double strike );
@@ -428,6 +430,12 @@ template<typename Option>
 const std::string Chain<Option>::GetIQFeedNamePut( double dblStrike ) const {
   typename mapChain_t::const_iterator iter = FindStrike( dblStrike );
   return iter->second.put.sIQFeedSymbolName;
+}
+
+template<typename Option>
+void Chain<Option>::Erase( double dblStrike ) {
+  typename mapChain_t::const_iterator iter = FindStrike( dblStrike );
+  m_mapChain.erase( iter );
 }
 
 template<typename Option>
