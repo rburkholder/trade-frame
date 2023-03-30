@@ -37,7 +37,6 @@
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/WinChartView.h>
 
-#include "Config.hpp"
 #include "Strategy.hpp"
 #include "AppAutoTrade.hpp"
 
@@ -63,10 +62,8 @@ bool AppAutoTrade::OnInit() {
   m_nTSDataStreamSequence = 0;
   m_bConnectedLatch = false;
 
-  config::Options choices;
-
-  if ( Load( c_sChoicesFilename, choices ) ) {
-    m_sSymbol = choices.sSymbol_Trade;
+  if ( Load( c_sChoicesFilename, m_choices ) ) {
+    m_sSymbol = m_choices.sSymbol_Trade;
   }
   else {
     return false;
@@ -92,13 +89,13 @@ bool AppAutoTrade::OnInit() {
 
   m_pdb = std::make_unique<ou::tf::db>( c_sDbName );
 
-  if ( choices.bSimStart ) {
-    if ( 0 < choices.sGroupDirectory.size() ) {
-      m_sim->SetGroupDirectory( choices.sGroupDirectory );
+  if ( m_choices.bSimStart ) {
+    if ( 0 < m_choices.sGroupDirectory.size() ) {
+      m_sim->SetGroupDirectory( m_choices.sGroupDirectory );
     }
   }
 
-  m_tws->SetClientId( choices.nIbInstance );
+  m_tws->SetClientId( m_choices.nIbInstance );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppTitle );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -141,12 +138,12 @@ bool AppAutoTrade::OnInit() {
   std::cout << "symbol: " << m_sSymbol << std::endl;
 
   m_pWinChartView->SetChartDataView( &m_ChartDataView );
-  m_pStrategy = std::make_unique<Strategy>( m_ChartDataView, choices );
+  m_pStrategy = std::make_unique<Strategy>( m_ChartDataView, m_choices );
 
-  if ( choices.bSimStart ) {
+  if ( m_choices.bSimStart ) {
     boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
     boost::smatch what;
-    if ( boost::regex_search( choices.sGroupDirectory, what, expr ) ) {
+    if ( boost::regex_search( m_choices.sGroupDirectory, what, expr ) ) {
       boost::gregorian::date date( boost::gregorian::from_undelimited_string( what[ 0 ] ) );
       std::cout << "date " << date << std::endl;
       m_pStrategy->InitForUSEquityExchanges( date );
@@ -175,7 +172,7 @@ bool AppAutoTrade::OnInit() {
     }
   );
 
-  if ( choices.bSimStart ) {
+  if ( m_choices.bSimStart ) {
     CallAfter(
       [this](){
         using Provider_t = ou::tf::PanelProviderControl::Provider_t;

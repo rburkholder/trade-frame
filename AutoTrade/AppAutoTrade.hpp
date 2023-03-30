@@ -35,6 +35,8 @@
 
 #include <TFBitsNPieces/FrameWork01.h>
 
+#include "Config.hpp"
+
 class Strategy;
 class FrameMain;
 
@@ -58,6 +60,8 @@ protected:
 private:
 
   bool m_bConnectedLatch;
+
+  config::Options m_choices;
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
