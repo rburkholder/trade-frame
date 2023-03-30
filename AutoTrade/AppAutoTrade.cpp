@@ -241,6 +241,25 @@ void AppAutoTrade::ConstructIBInstrument() {
       m_pStrategy->SetPosition( pPosition );
     } );
 
+  m_pBuildInstrumentIQFeed = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed );
+
+  if ( !m_choices.sSymbol_Tick.empty() ) {
+    m_pBuildInstrumentIQFeed->Queue(
+      m_choices.sSymbol_Tick,
+      [this]( pInstrument_t pInstrument, bool bConstructed ){
+        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+        m_pStrategy->SetTick( pWatch );
+      } );
+  }
+  if ( !m_choices.sSymbol_Trin.empty() ) {
+    m_pBuildInstrumentIQFeed->Queue(
+      m_choices.sSymbol_Trin,
+      [this]( pInstrument_t pInstrument, bool bConstructed ){
+        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+        m_pStrategy->SetTrin( pWatch );
+      } );
+  }
+
 }
 
 void AppAutoTrade::ConstructSimInstrument() {
@@ -271,6 +290,17 @@ void AppAutoTrade::ConstructSimInstrument() {
     std::cout << "Constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
   }
   m_pStrategy->SetPosition( pPosition );
+
+  if ( !m_choices.sSymbol_Tick.empty() ) {
+    ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( m_choices.sSymbol_Tick, ou::tf::InstrumentType::Index, "DTN" );
+    pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pData1Provider );
+    m_pStrategy->SetTick( pWatch );
+  }
+  if ( !m_choices.sSymbol_Trin.empty() ) {
+    ou::tf::Instrument::pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( m_choices.sSymbol_Trin, ou::tf::InstrumentType::Index, "DTN" );
+    pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pData1Provider );
+    m_pStrategy->SetTrin( pWatch );
+  }
 
   FrameMain::vpItems_t vItems;
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects

@@ -56,12 +56,15 @@ class Strategy:
 public:
 
   using pOrder_t = ou::tf::Order::pOrder_t;
+  using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   Strategy( ou::ChartDataView&, const config::Options& );
   virtual ~Strategy();
 
   void SetPosition( pPosition_t );
+  void SetTick( pWatch_t ) {}
+  void SetTrin( pWatch_t ) {}
 
   void SaveWatch( const std::string& );
 
