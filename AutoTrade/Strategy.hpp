@@ -73,7 +73,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, Tick, Trin, PL }; // IndMA = moving averate indicator
+  enum EChartSlot { Price, Volume, Tick, Trin, PL };
   enum class ETradeState {
     Init,  // initiaize state in current market
     Search,  // looking for long or short enter
