@@ -61,10 +61,10 @@ bool AppAutoTrade::OnInit() {
 
   m_nTSDataStreamSequence = 0;
 
-  config::Options options;
+  config::Options choices;
 
-  if ( Load( sConfigFilename, options ) ) {
-    m_sSymbol = options.sSymbol_Trade;
+  if ( Load( sConfigFilename, choices ) ) {
+    m_sSymbol = choices.sSymbol_Trade;
   }
   else {
     return false;
@@ -81,7 +81,7 @@ bool AppAutoTrade::OnInit() {
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
 
-  //if ( options.bSimStart ) {
+  //if ( choices.bSimStart ) {
     // just always delete it
     if ( boost::filesystem::exists( sDbName ) ) {
     boost::filesystem::remove( sDbName );
@@ -90,13 +90,13 @@ bool AppAutoTrade::OnInit() {
 
   m_pdb = std::make_unique<ou::tf::db>( sDbName );
 
-  if ( options.bSimStart ) {
-    if ( 0 < options.sGroupDirectory.size() ) {
-      m_sim->SetGroupDirectory( options.sGroupDirectory );
+  if ( choices.bSimStart ) {
+    if ( 0 < choices.sGroupDirectory.size() ) {
+      m_sim->SetGroupDirectory( choices.sGroupDirectory );
     }
   }
 
-  m_tws->SetClientId( options.nIbInstance );
+  m_tws->SetClientId( choices.nIbInstance );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -139,12 +139,12 @@ bool AppAutoTrade::OnInit() {
   std::cout << "symbol: " << m_sSymbol << std::endl;
 
   m_pWinChartView->SetChartDataView( &m_ChartDataView );
-  m_pStrategy = std::make_unique<Strategy>( m_ChartDataView, options );
+  m_pStrategy = std::make_unique<Strategy>( m_ChartDataView, choices );
 
-  if ( options.bSimStart ) {
+  if ( choices.bSimStart ) {
     boost::regex expr{ "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
     boost::smatch what;
-    if ( boost::regex_search( options.sGroupDirectory, what, expr ) ) {
+    if ( boost::regex_search( choices.sGroupDirectory, what, expr ) ) {
       boost::gregorian::date date( boost::gregorian::from_undelimited_string( what[ 0 ] ) );
       std::cout << "date " << date << std::endl;
       m_pStrategy->InitForUSEquityExchanges( date );
@@ -173,7 +173,7 @@ bool AppAutoTrade::OnInit() {
     }
   );
 
-  if ( options.bSimStart ) {
+  if ( choices.bSimStart ) {
     CallAfter(
       [this](){
         using Provider_t = ou::tf::PanelProviderControl::Provider_t;
