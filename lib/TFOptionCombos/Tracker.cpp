@@ -287,7 +287,8 @@ bool Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope,
 
           if ( bSpreadOk_current && bSpreadOk_candidate ) {
 
-            if ( 0.401 > quote.Bid() ) { // decision time
+            double bid( quote.Bid() );
+            if ( ( 0.501 > bid ) && ( 0.10 < bid ) ) { // decision time
 
               const std::string& sCurrent( pWatchCurrent->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
               const std::string& sCandidate( m_pOptionCandidate->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
@@ -305,13 +306,20 @@ bool Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope,
 
                 double diff( premiumCandidate.extrinsic - premiumCurrent.extrinsic );
                 if ( 0.20 < diff ) {
-                  LegRoll(); // TODO: need to verify operation
+                  BOOST_LOG_TRIVIAL(info)
+                  << dt.time_of_day()
+                  << ",roll,short,"
+                  << diff
+                  << "," << premiumCandidate.extrinsic << "," << premiumCandidate.intrinsic
+                  << "," << premiumCurrent.extrinsic << "," << premiumCurrent.intrinsic
+                  ;
+                  LegRoll(); // TODO: need to roll for a profit
                   bRemove = true;
                 }
                 else {
                   BOOST_LOG_TRIVIAL(info)
                     << dt.time_of_day()
-                    << ",close,not-econmical"
+                    << ",close,short,not-econmical"
                     << "," << premiumCandidate.extrinsic
                     << "," << premiumCurrent.extrinsic
                     << "," << diff
