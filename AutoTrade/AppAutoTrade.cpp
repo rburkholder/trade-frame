@@ -255,7 +255,6 @@ void AppAutoTrade::ConstructSimInstrument() {
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
   ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
   im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pData1Provider );
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   pPosition_t pPosition;
   if ( pm.PositionExists( "USD", idInstrument ) ) {
