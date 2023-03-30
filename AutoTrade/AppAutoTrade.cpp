@@ -233,7 +233,8 @@ void AppAutoTrade::ConstructIBInstrument() {
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
         pPosition = pm.ConstructPosition(
           "USD", idInstrument, "ema",
-          "ib01", "iq01", m_pExecutionProvider,
+          m_pData1Provider->GetName(), m_pExecutionProvider->GetName(),
+          m_pExecutionProvider,
           pWatch
         );
         std::cout << "position constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
@@ -265,7 +266,8 @@ void AppAutoTrade::ConstructSimInstrument() {
     pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pData1Provider );
     pPosition = pm.ConstructPosition(
       "USD", idInstrument, "ema",
-      "sim01", "sim01", m_pExecutionProvider,
+      m_pData1Provider->GetName(), m_pExecutionProvider->GetName(),
+      m_pExecutionProvider,
       pWatch
     );
     std::cout << "Constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
