@@ -214,8 +214,8 @@ void AppAutoTrade::ConstructIBInstrument() {
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  m_pBuildInstrument = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
-  m_pBuildInstrument->Queue(
+  m_pBuildInstrumentBoth = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
+  m_pBuildInstrumentBoth->Queue(
     m_sSymbol,
     [this]( pInstrument_t pInstrument, bool bConstructed ){
       if ( bConstructed ) {

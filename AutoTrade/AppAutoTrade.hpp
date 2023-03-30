@@ -67,12 +67,14 @@ private:
   std::string m_sTSDataStreamStarted;
   int m_nTSDataStreamSequence;
 
+  std::unique_ptr<ou::tf::db> m_pdb;
+
   ou::ChartDataView m_ChartDataView;
 
-  std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
-  std::unique_ptr<Strategy> m_pStrategy;
+  std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrumentBoth;
+  std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrumentIQFeed;
 
-  std::unique_ptr<ou::tf::db> m_pdb;
+  std::unique_ptr<Strategy> m_pStrategy;
 
   virtual bool OnInit();
   virtual int OnExit();
