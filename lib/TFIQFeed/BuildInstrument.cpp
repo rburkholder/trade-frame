@@ -184,9 +184,14 @@ pInstrument_t BuildInstrument( const Fundamentals& fundamentals ) {
       }
       break;
     case ESecurityType::Index:
+    case ESecurityType::MktStats:
+      pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Index, sExchange );
+      pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
+      break;
     case ESecurityType::PrecMtl:
     default:
       throw std::runtime_error( "BuildInstrument: no applicable instrument type" );
+      break;
   }
 
   pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, fundamentals.sSymbolName );

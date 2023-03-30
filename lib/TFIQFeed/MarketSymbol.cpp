@@ -108,6 +108,9 @@ const std::string MarketSymbol::BuildGenericName( const Fundamentals& fundamenta
     case ESecurityType::FOption:
       sName = ou::tf::Instrument::BuildGenericOptionName( sName, fundamentals.dateExpiration, fundamentals.eOptionSide, fundamentals.dblStrikePrice );
       break;
+    case ESecurityType::MktStats:
+      // uses base name
+      break;
     default:
       assert( false );
       break;
