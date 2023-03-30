@@ -57,6 +57,8 @@ public:
 protected:
 private:
 
+  bool m_bConnectedLatch;
+
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::WinChartView* m_pWinChartView;

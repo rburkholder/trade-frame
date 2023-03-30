@@ -61,6 +61,7 @@ bool AppAutoTrade::OnInit() {
   wxApp::OnInit();
 
   m_nTSDataStreamSequence = 0;
+  m_bConnectedLatch = false;
 
   config::Options choices;
 
@@ -362,24 +363,29 @@ void AppAutoTrade::OnExecDisconnected( int ) {
 }
 
 void AppAutoTrade::ConfirmProviders() {
-  if ( m_bData1Connected && m_bExecConnected ) {
-    bool bValidCombo( false );
-    if (
-         ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF == m_pData1Provider->ID() )
-      && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIB  == m_pExecutionProvider->ID() )
-    ) {
-      bValidCombo = true;
-      ConstructIBInstrument();
-    }
-    if (
-         ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pData1Provider->ID() )
-      && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pExecutionProvider->ID() )
-    ) {
-      bValidCombo = true;
-      ConstructSimInstrument();
-    }
-    if ( !bValidCombo ) {
-      std::cout << "invalid combo of data and execution providers" << std::endl;
+  if ( !m_bConnectedLatch ) {
+    if ( m_bData1Connected && m_bExecConnected ) {
+      bool bValidCombo( false );
+      if (
+          ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF == m_pData1Provider->ID() )
+        && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIB  == m_pExecutionProvider->ID() )
+      ) {
+        bValidCombo = true;
+        ConstructIBInstrument();
+      }
+      if (
+          ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pData1Provider->ID() )
+        && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pExecutionProvider->ID() )
+      ) {
+        bValidCombo = true;
+        ConstructSimInstrument();
+      }
+      if ( bValidCombo ) {
+        m_bConnectedLatch = true;
+      }
+      else {
+        std::cout << "invalid combo of data and execution providers" << std::endl;
+      }
     }
   }
 }
