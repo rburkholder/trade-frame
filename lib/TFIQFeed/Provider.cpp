@@ -190,22 +190,28 @@ void Provider::StopTradeWatch(pSymbol_t pSymbol) {
 
 void Provider::OnIQFeedDynamicFeedUpdateMessage( linebuffer_t* pBuffer, IQFDynamicFeedUpdateMessage *pMsg ) {
   inherited_t::mapSymbols_t::iterator mapSymbols_iter;
-  mapSymbols_iter = m_mapSymbols.find( pMsg->Field( IQFDynamicFeedUpdateMessage::DFSymbol ) );
-  pSymbol_t pSym;
+  auto field = pMsg->Field( IQFDynamicFeedSummaryMessage::DFSymbol );
+  mapSymbols_iter = m_mapSymbols.find( field );
   if ( m_mapSymbols.end() != mapSymbols_iter ) {
-    pSym = mapSymbols_iter -> second;
+    pSymbol_t pSym = mapSymbols_iter -> second;
     pSym ->HandleDynamicFeedUpdateMessage( pMsg );
+  }
+  else {
+    std::cout << "field " << field << " update not found" << std::endl;
   }
   this->DynamicFeedUpdateDone( pBuffer, pMsg );
 }
 
 void Provider::OnIQFeedDynamicFeedSummaryMessage( linebuffer_t* pBuffer, IQFDynamicFeedSummaryMessage *pMsg ) {
   inherited_t::mapSymbols_t::iterator mapSymbols_iter;
-  mapSymbols_iter = m_mapSymbols.find( pMsg->Field( IQFDynamicFeedSummaryMessage::DFSymbol ) );
-  pSymbol_t pSym;
+  auto field = pMsg->Field( IQFDynamicFeedSummaryMessage::DFSymbol );
+  mapSymbols_iter = m_mapSymbols.find( field );
   if ( m_mapSymbols.end() != mapSymbols_iter ) {
-    pSym = mapSymbols_iter -> second;
+    pSymbol_t  pSym = mapSymbols_iter -> second;
     pSym ->HandleDynamicFeedSummaryMessage( pMsg );
+  }
+  else {
+    std::cout << "field " << field << " summary not found" << std::endl;
   }
   this->DynamicFeedSummaryDone( pBuffer, pMsg );
 }
