@@ -211,7 +211,9 @@ void AppAutoTrade::ConstructIBInstrument() {
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
+  m_pBuildInstrumentIQFeed = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed );
   m_pBuildInstrumentBoth = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
+
   m_pBuildInstrumentBoth->Queue(
     m_sSymbol,
     [this]( pInstrument_t pInstrument, bool bConstructed ){
@@ -239,27 +241,26 @@ void AppAutoTrade::ConstructIBInstrument() {
         std::cout << "position constructed " << pPosition->GetInstrument()->GetInstrumentName() << std::endl;
       }
       m_pStrategy->SetPosition( pPosition );
+
+      // these need to come after the SetPostition
+      if ( !m_choices.sSymbol_Tick.empty() ) {
+        m_pBuildInstrumentIQFeed->Queue(
+          m_choices.sSymbol_Tick,
+          [this]( pInstrument_t pInstrument, bool bConstructed ){
+            pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+            m_pStrategy->SetTick( pWatch );
+          } );
+      }
+      if ( !m_choices.sSymbol_Trin.empty() ) {
+        m_pBuildInstrumentIQFeed->Queue(
+          m_choices.sSymbol_Trin,
+          [this]( pInstrument_t pInstrument, bool bConstructed ){
+            pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
+            m_pStrategy->SetTrin( pWatch );
+          } );
+      }
+
     } );
-
-  m_pBuildInstrumentIQFeed = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed );
-
-  if ( !m_choices.sSymbol_Tick.empty() ) {
-    m_pBuildInstrumentIQFeed->Queue(
-      m_choices.sSymbol_Tick,
-      [this]( pInstrument_t pInstrument, bool bConstructed ){
-        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
-        m_pStrategy->SetTick( pWatch );
-      } );
-  }
-  if ( !m_choices.sSymbol_Trin.empty() ) {
-    m_pBuildInstrumentIQFeed->Queue(
-      m_choices.sSymbol_Trin,
-      [this]( pInstrument_t pInstrument, bool bConstructed ){
-        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqfeed );
-        m_pStrategy->SetTrin( pWatch );
-      } );
-  }
-
 }
 
 void AppAutoTrade::ConstructSimInstrument() {
