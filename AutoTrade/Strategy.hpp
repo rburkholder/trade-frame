@@ -131,6 +131,8 @@ private:
   vMA_t m_vMA;
 
   double m_dblMid;
+  double m_dblLastTick;
+  double m_dblLastTrin;
 
   pOrder_t m_pOrder;
 

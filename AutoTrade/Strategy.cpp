@@ -39,6 +39,7 @@ Strategy::Strategy( ou::ChartDataView& cdv, const config::Options& options )
 , m_ceLongExit( ou::ChartEntryShape::EShape::LongStop, ou::Colour::Blue )
 , m_bfQuotes01Sec( 1 )
 , m_stateTrade( ETradeState::Init )
+, m_dblMid {}, m_dblLastTick {}, m_dblLastTrin {}
 {
 
   assert( 0 < options.nPeriodWidth );
@@ -195,12 +196,32 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 }
 
 void Strategy::HandleTick( const ou::tf::Trade& tick ) {
-  m_ceTick.Append( tick.DateTime(), tick.Price() );
+  m_dblLastTick = tick.Price();
+  m_ceTick.Append( tick.DateTime(), m_dblLastTick );
 }
 
 void Strategy::HandleTrin( const ou::tf::Trade& trin ) {
-  m_ceTrin.Append( trin.DateTime(), trin.Price() );
+  m_dblLastTrin = trin.Price();
+  m_ceTrin.Append( trin.DateTime(), m_dblLastTrin );
 }
+
+/*
+  https://www.investopedia.com/terms/a/arms.asp
+  * If AD Volume creates a higher ratio than the AD Ratio, TRIN will be below one.
+  * If AD Volume has a lower ratio than AD Ratio, TRIN will be above one.
+  * A TRIN reading below one typically accompanies a strong price advance,
+       since the strong volume in the rising stocks helps fuel the rally.
+  * A TRIN reading above one typically accompanies a strong price decline,
+       since the strong volume in the decliners helps fuel the selloff.
+  * The Arms Index moves opposite the price trajectory of the Index.
+    As discussed above, a strong price rally will see TRIN move to lower levels.
+    A falling index will see TRIN push higher.
+  * The market is said to be in a neutral state when the index equals 1.0,
+  * A value that exceeds 3.00 indicates an oversold market and that bearish sentiment is too dramatic.
+      This could mean an upward reversal in prices/index is coming.
+  * a TRIN value that dips below 0.50 may indicate an overbought market
+      and that bullish sentiment is overheating.
+*/
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 
@@ -279,48 +300,97 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   if ( ma2 < lo ) lo = ma2;
   if ( ma3 < lo ) lo = ma3;
 
-  switch ( m_stateTrade ) {
-    case ETradeState::Search:
+  if ( false ) {
+    switch ( m_stateTrade ) {
+      case ETradeState::Search:
 
-      if ( ( ma1 > ma3 ) && ( ma2 > ma3 ) && ( m_dblMid > ma1 ) ) {
-        EnterLong( bar );
-      }
-      else {
-        if ( ( ma1 < ma3 ) && ( ma2 < ma3 ) && ( m_dblMid < ma1 ) ) {
-          EnterShort( bar );
+        if ( ( ma1 > ma3 ) && ( ma2 > ma3 ) && ( m_dblMid > ma1 ) ) {
+          EnterLong( bar );
         }
-      }
-      break;
-    case ETradeState::LongSubmitted:
-      // wait for order to execute
-      break;
-    case ETradeState::LongExit:
-      if ( bar.Close() < ma2 ) {
-        ExitLong( bar );
-      }
-      break;
-    case ETradeState::ShortSubmitted:
-      // wait for order to execute
-      break;
-    case ETradeState::ShortExit:
-      if ( bar.Close() > ma2 ) {
-        ExitShort( bar );
-      }
-      break;
-    case ETradeState::LongExitSubmitted:
-    case ETradeState::ShortExitSubmitted:
-      // wait for order to execute
-      break;
-    case ETradeState::EndOfDayCancel:
-    case ETradeState::EndOfDayNeutrall:
-    case ETradeState::Done:
-      // quiescent
-      break;
-    case ETradeState::Init:
-      // market open statistics management here
-      // will need to wait for ma to load & diverge (based upon width & period)
-      m_stateTrade = ETradeState::Search;
-      break;
+        else {
+          if ( ( ma1 < ma3 ) && ( ma2 < ma3 ) && ( m_dblMid < ma1 ) ) {
+            EnterShort( bar );
+          }
+        }
+        break;
+      case ETradeState::LongSubmitted:
+        // wait for order to execute
+        break;
+      case ETradeState::LongExit:
+        if ( bar.Close() < ma2 ) {
+          ExitLong( bar );
+        }
+        break;
+      case ETradeState::ShortSubmitted:
+        // wait for order to execute
+        break;
+      case ETradeState::ShortExit:
+        if ( bar.Close() > ma2 ) {
+          ExitShort( bar );
+        }
+        break;
+      case ETradeState::LongExitSubmitted:
+      case ETradeState::ShortExitSubmitted:
+        // wait for order to execute
+        break;
+      case ETradeState::EndOfDayCancel:
+      case ETradeState::EndOfDayNeutrall:
+      case ETradeState::Done:
+        // quiescent
+        break;
+      case ETradeState::Init:
+        // market open statistics management here
+        // will need to wait for ma to load & diverge (based upon width & period)
+        m_stateTrade = ETradeState::Search;
+        break;
+    }
+  }
+
+  // TODO: need to deal with congestion, maybe bollinger bands or short duration stochastic
+
+  if ( true ) {
+    switch ( m_stateTrade ) {
+      case ETradeState::Search:
+        if ( 0.0 < m_dblLastTick ) {
+          EnterLong( bar );
+        }
+        else {
+          if ( 0.0 > m_dblLastTick ) {
+            EnterShort( bar );
+          }
+        }
+        break;
+      case ETradeState::LongSubmitted:
+        // wait for order to execute
+        break;
+      case ETradeState::LongExit:
+        if ( 0.0 >= m_dblLastTick ) {
+          ExitLong( bar );
+        }
+        break;
+      case ETradeState::ShortSubmitted:
+        // wait for order to execute
+        break;
+      case ETradeState::ShortExit:
+        if ( 0.0 <= m_dblLastTick ) {
+          ExitShort( bar );
+        }
+        break;
+      case ETradeState::LongExitSubmitted:
+      case ETradeState::ShortExitSubmitted:
+        // wait for order to execute
+        break;
+      case ETradeState::EndOfDayCancel:
+      case ETradeState::EndOfDayNeutrall:
+      case ETradeState::Done:
+        // quiescent
+        break;
+      case ETradeState::Init:
+        // market open statistics management here
+        // will need to wait for ma to load & diverge (based upon width & period)
+        m_stateTrade = ETradeState::Search;
+        break;
+    }
   }
 }
 
