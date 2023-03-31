@@ -110,7 +110,7 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   time_duration td = time_duration( 0, 0, m_nPeriodWidth );
 
-  m_vMA.emplace_back( MA( pWatch->GetQuotes(), m_vMAPeriods[0], td, ou::Colour::Gold, "ma1" ) );
+  m_vMA.emplace_back( MA( pWatch->GetQuotes(), m_vMAPeriods[0], td, ou::Colour::Gold,  "ma1" ) );
   m_vMA.emplace_back( MA( pWatch->GetQuotes(), m_vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
   m_vMA.emplace_back( MA( pWatch->GetQuotes(), m_vMAPeriods[2], td, ou::Colour::Brown, "ma3" ) );
 
