@@ -138,6 +138,9 @@ private:
 
   ou::ChartDataView& m_cdv;
 
+  ou::ChartEntryMark m_cemZero;
+  ou::ChartEntryMark m_cemOne;
+
   ou::ChartEntryIndicator m_ceQuoteAsk;
   ou::ChartEntryIndicator m_ceQuoteBid;
 

@@ -54,6 +54,9 @@ Strategy::Strategy( ou::ChartDataView& cdv, const config::Options& options )
     assert( 0 < value );
   }
 
+  m_cemZero.AddMark( 0.0, ou::Colour::Black,  "0" );
+  m_cemOne.AddMark(  1.0, ou::Colour::Black,  "1" );
+
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
@@ -124,6 +127,8 @@ void Strategy::SetTick( pWatch_t pTick ) {
   assert( pTick );
   m_pTick = std::move( pTick );
 
+  m_cdv.Add( EChartSlot::Tick, &m_cemZero );
+
   m_ceTick.SetName( "Tick" );
   m_cdv.Add( EChartSlot::Tick, &m_ceTick );
 
@@ -134,6 +139,8 @@ void Strategy::SetTick( pWatch_t pTick ) {
 void Strategy::SetTrin( pWatch_t pTrin ) {
   assert( pTrin );
   m_pTrin = std::move( pTrin );
+
+  m_cdv.Add( EChartSlot::Trin, &m_cemOne );
 
   m_ceTrin.SetName( "Trin" );
   m_cdv.Add( EChartSlot::Trin, &m_ceTrin );
@@ -347,6 +354,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   }
 
   // TODO: need to deal with congestion, maybe bollinger bands or short duration stochastic
+  //   maybe Trin will help
 
   if ( true ) {
     switch ( m_stateTrade ) {
