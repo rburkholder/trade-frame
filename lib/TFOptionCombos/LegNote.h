@@ -36,7 +36,7 @@ public:
   enum class State { Open, Expired, Closed };
   enum class Type {
     SynthLong = 0, SynthShort = 1, Cover = 2, Protect = 3,
-    DltaPlsCl = 5, DltaPlsPt = 6, DltaMnsCl = 7, DltaMnsPt = 8
+    DltaPlsGmPls = 5, DltaPlsGmMns = 6, DltaMnsGmPls = 7, DltaMnsGmMns = 8
     };
   enum class Side { Long, Short };
   enum class Option { Call, Put };
@@ -51,7 +51,8 @@ public:
     Momentum m_momentum;
     Algo m_algo;
     bool m_lock;
-    values_t(): m_lock( false ) {}
+    double m_iv;
+    values_t(): m_lock( false ), m_iv {} {}
   };
 
   LegNote();

@@ -51,6 +51,7 @@ using values_t = ou::tf::option::LegNote::values_t;
   (ou::tf::option::LegNote::Momentum, m_momentum),
   (ou::tf::option::LegNote::Algo, m_algo),
   (bool, m_lock)
+  (double,m_iv)
   )
 
 namespace ou { // One Unified
@@ -71,10 +72,10 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
       ( "synthshort", LegNote::Type::SynthShort )
       ( "cover",      LegNote::Type::Cover )
       ( "protect",    LegNote::Type::Protect )
-      ( "dltapc",     LegNote::Type::DltaPlsCl )
-      ( "dltapp",     LegNote::Type::DltaPlsPt )
-      ( "dltamc",     LegNote::Type::DltaMnsCl )
-      ( "dltamp",     LegNote::Type::DltaMnsPt )
+      ( "dpgp",       LegNote::Type::DltaPlsGmPls )
+      ( "dpgm",       LegNote::Type::DltaPlsGmMns )
+      ( "dmgp",       LegNote::Type::DltaMnsGmPls )
+      ( "dmgm",       LegNote::Type::DltaMnsGmMns )
       ;
 
     state_.add
@@ -109,6 +110,7 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
     momentum = qi::lit( "momentum=" ) >> momentum_;
     algo =     qi::lit( "algo=" ) >> algo_;
     lock =     qi::lit( "lock=" ) >> qi::bool_;
+    iv =       qi::lit( "iv=" ) >> qi::double_;
 
     // Todo: allow random order, partial list?
     start =
@@ -119,6 +121,8 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
       momentum >> qi::lit( ',' ) >>
       algo
       >> -( qi::lit( ',' ) >> lock )
+               >> qi::eps
+      >> -( qi::lit( ',' ) >> iv )
                >> qi::eps
       ;
 
@@ -138,6 +142,7 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
   qi::rule<Iterator,LegNote::Momentum> momentum;
   qi::rule<Iterator,LegNote::Algo> algo;
   qi::rule<Iterator,bool()> lock;
+  qi::rule<Iterator,double()> iv;
 
   qi::rule<Iterator, values_t()> start;
 };
@@ -194,6 +199,18 @@ const std::string LegNote::Encode() const {
     case Type::SynthShort:
       ss << "synthshort";
       break;
+    case Type::DltaPlsGmPls:
+      ss << "dpgp";
+      break;
+    case Type::DltaPlsGmMns:
+      ss << "dpgm";
+      break;
+    case Type::DltaMnsGmPls:
+      ss << "dmgp";
+      break;
+    case Type::DltaMnsGmMns:
+      ss << "dmgm";
+      break;
   }
 
   ss << ",state=";
@@ -247,6 +264,8 @@ const std::string LegNote::Encode() const {
   }
 
   ss << ",lock=" << ( m_values.m_lock ? "true" : "false" );
+
+  ss << ",iv=" << m_values.m_iv;
 
   return ss.str();
 }
