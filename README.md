@@ -6,7 +6,7 @@ This is a:
 * library of functions to sink market data, organize time series, build indicators, author algorithms, and issue orders to a broker
 * collection of projects using the libraries to carry out various manual & automated trading scenarios
 
-A primary goal of this solution is to provide a means of tracking an option combo through the birth to death life-cycle.  It is easy to enter into a option combo with Interactive Brokers with their user interface, but there does not seem to be an effective way to keep the legs grouped for tracking overall profit/loss.
+A primary goal of this solution is to provide a means of tracking an [Option Combo Order](lib/TFTrading/Order_Combo.hpp) through the birth to death life-cycle.  It is easy to enter into a option combo with Interactive Brokers with their user interface, but there does not seem to be an effective way to keep the legs grouped for tracking overall profit/loss.
 
 This library provides a means of [Tracking](lib/TFOptionCombos/Tracker.h) a [Combo](lib/TFOptionCombos/Combo.h) [Leg](lib/TFOptionCombos/Leg.h) with a [Position](lib/TFTrading/Position.h).  Positions can be grouped together to form [Portfolios](lib/TFTrading/Portfolio.h).  Portfolios representing Combos can be grouped together to represent the overall profit/loss of a trading Portfolio.
 
