@@ -6,6 +6,14 @@ This is a:
 * library of functions to sink market data, organize time series, build indicators, author algorithms, and issue orders to a broker
 * collection of projects using the libraries to carry out various manual & automated trading scenarios
 
+A primary goal of this solution is to provide a means of tracking an option combo through the birth to death life-cycle.  It is easy to enter into a option combo with Interactive Brokers with their user interface, but there does not seem to be an effective way to keep the legs grouped for tracking overall profit/loss.
+
+This library provides a means of [Tracking](lib/TFOptionCombos/Tracker.h) a [Combo](lib/TFOptionCombos/Combo.h) [Leg](lib/TFOptionCombos/Leg.h) with a [Position](lib/TFTrading/Position.h).  Positions can be grouped together to form [Portfolios](lib/TFTrading/Portfolio.h).  Portfolios representing Combos can be grouped together to represent the overall profit/loss of a trading Portfolio.
+
+Positions are composed of a [Watch](lib/TFTrading/Watch.h) class to record bid/ask/tick of [Instruments](lib/TFTrading/Instrument.h).
+
+[Options](lib/TFOptions/Option.h) inherit from the Watch class to provide [Greeks](lib/TFTimeSeries/DatedDatum.h), which are computed in real time with an [Option Engine](lib/TFOptions/Engine.h).
+
 C++ is used throughout for building high-capacity, low-latency trading applications.
 
 A C++17 compiler is used to build the libraries and code. It was built on Windows a number of years ago, 
