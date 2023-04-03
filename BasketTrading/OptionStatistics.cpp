@@ -96,6 +96,7 @@ OptionStatistics::~OptionStatistics() {
     m_ptiSelf->Delete();
     m_ptiSelf = nullptr;
   }
+  m_pdvChart->Clear();
   m_pdvChart.reset();
   m_pPosition.reset();
   m_pOption.reset();

@@ -124,6 +124,7 @@ void ChartDataView::Remove( size_t nChart, ChartEntryBase* pEntry ) {
 }
 
 void ChartDataView::Clear() {
+  std::scoped_lock<std::mutex> lock( m_mutex );
   m_mapCntChartIndexes.clear();
   m_vChartEntryCarrier.clear();
 }
