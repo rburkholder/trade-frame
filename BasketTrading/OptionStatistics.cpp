@@ -21,7 +21,6 @@
 
 #include <TFVuTrading/TreeItem.hpp>
 
-#include "OUCharting/ChartDataView.h"
 #include "OptionStatistics.hpp"
 
 // TODO: re-use the statistics in Leg?
