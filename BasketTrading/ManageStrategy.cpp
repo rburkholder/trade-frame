@@ -277,7 +277,7 @@ ManageStrategy::ManageStrategy(
         if ( 1 == ( nStrikesTotal - nStrikesMatch ) ) { // some are 2, handle those as well?
           const_cast<chain_t&>( vt.second ).Erase( dblStrkeMisMatch ); // keep most of the mis-balanced chains
           std::cout
-            << "chain " << vt.first << " added with " << dblStrkeMisMatch << " strikes"
+            << "chain " << vt.first << " added with " << nStrikesMatch << " strikes"
             << " without " << dblStrkeMisMatch
             << std::endl;
         }
