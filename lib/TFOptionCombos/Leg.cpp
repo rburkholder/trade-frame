@@ -38,19 +38,31 @@ Leg::Leg( pPosition_t pPosition ) // implies candidate will not be used
 }
 
 Leg::Leg( Leg&& rhs )
-: m_pPosition( std::move( rhs.m_pPosition ) ),
-  m_legNote( std::move( rhs.m_legNote ) ),
-  m_bOption( rhs.m_bOption ),
-  m_pChartDataView( std::move( rhs.m_pChartDataView ) )
+: m_pPosition( std::move( rhs.m_pPosition ) )
+, m_bOption( rhs.m_bOption )
+, m_legNote( std::move( rhs.m_legNote ) )
 {
+  assert( !rhs.m_pChartDataView );
+  //m_pChartDataView = rhs.m_pChartDataView;
+  //rhs.DelChartData();
+
+  //m_ceProfitLoss = std::move( rhs.m_ceProfitLoss );
+  //m_ceImpliedVolatility( std::move( rhs.m_ceImpliedVolatility ) )
+  //m_ceDelta( std::move( rhs.m_ceDelta ) )
+  //m_ceGamma( std::move( rhs.m_ceGamma ) )
+  //m_ceVega( std::move( rhs.m_ceVega ) )
+  //m_ceTheta( std::move( rhs.m_ceTheta ) )
+  //rhs.DelChartData(); // deletes rhs.m_pChartDataView
+  //m_pChartDataView = std::move( rhs.m_pChartDataView );
 }
 
 Leg& Leg::operator=( Leg&& rhs ) {
   if ( this != &rhs ) {
-    DelChartData();
     m_pPosition = std::move( rhs.m_pPosition );
     m_legNote = std::move( rhs.m_legNote );
     m_bOption = rhs.m_bOption;
+    assert( !rhs.m_pChartDataView );
+    //rhs.DelChartData();
     //m_pChartDataView = std::move( rhs.m_pChartDataView );
   }
   return *this;
