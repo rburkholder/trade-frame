@@ -98,10 +98,10 @@ void OptionRegistry::Add( pOption_t pOption, pPosition_t pPosition, const std::s
 
   ou::tf::TreeItem* pti = m_ptiParent->AppendChild(
     pOption->GetInstrumentName() + " (" + sLegName + ")",
-    [this,&ostats]( ou::tf::TreeItem* ){
+    [this,&ostats]( ou::tf::TreeItem* ){ // fOnClick_t
       m_fSetChartDataView( ostats.ChartDataView() );
     },
-    [this,&sOptionName, ma_=std::move(ma)]( ou::tf::TreeItem* pti ) {
+    [this,&sOptionName, ma_=std::move(ma)]( ou::tf::TreeItem* pti ) { // fOnBuildPopUp_t
       pti->NewMenu();
       for ( const ou::tf::option::Combo::vMenuActivation_t::value_type& vt: ma_  ) {
         pti->AppendMenuItem(
