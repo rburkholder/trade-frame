@@ -250,6 +250,11 @@ private:
   ou::ChartEntryVolume m_ceTickCount;
 
   ou::ChartEntryIndicator m_ceProfitLossStrategy;
+  ou::ChartEntryIndicator m_ceNetImpliedVolatility;
+  ou::ChartEntryIndicator m_ceNetDelta;
+  ou::ChartEntryIndicator m_ceNetGamma;
+  ou::ChartEntryIndicator m_ceNetTheta;
+  ou::ChartEntryIndicator m_ceNetVega;
 
 //  ou::ChartEntryIndicator m_ceDiffDelta;
 //  ou::ChartEntryIndicator m_ceDiffGamma;
