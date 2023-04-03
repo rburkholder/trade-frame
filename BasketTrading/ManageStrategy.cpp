@@ -415,7 +415,8 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
 
         // TODO: may need special call for colour for non-Open positions
         using LegNote = ou::tf::option::LegNote;
-        const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
+        //const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
+        const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition );
         if ( LegNote::State::Open == lnValues.m_state ) {
         }
         else {
@@ -557,7 +558,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
       combo_t* pCombo = reinterpret_cast<combo_t*>( p );
       pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, note );
       using LegNote = ou::tf::option::LegNote;
-      const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
+      const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition );
       //p->PlaceOrder( lnValues.m_type, ou::tf::OrderSide::Buy, 1 );  // TODO: perform this in the combo, rename to AddPosition?
       return pPosition;
     },
@@ -568,6 +569,8 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
       m_pOptionRegistry->Remove( pOption, true );
     }
     );
+
+  m_pCombo->SetChartData( m_pChartDataView, rColour[ m_ixColour++ ] );
 
 }
 
@@ -641,7 +644,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     ou::tf::option::LegNote ln( lnValues );
                     pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, ln.Encode() );
                     assert( pPosition );
-                    combo.SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
+                    combo.SetPosition( pPosition );
                     }
                   );
 

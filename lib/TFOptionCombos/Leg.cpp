@@ -154,7 +154,7 @@ void Leg::SaveSeries( const std::string& sPrefix ) {
   }
 }
 
-namespace {
+namespace { // where is the primary table?  is there a primary table?
   constexpr size_t ixPL = 2;
   constexpr size_t ixIV = 11;
   constexpr size_t ixDelta = 12;
@@ -163,6 +163,9 @@ namespace {
   constexpr size_t ixVega = 15;
 }
 
+// deprecate, use chart entry values as avaialble in OptionStatistics instead
+//   this serves the multi-chart at ManageStrategy level
+//   that should instead by aggregated greek values instead from pOption directly
 void Leg::SetChartData( pChartDataView_t pChartDataView, ou::Colour::EColour colour ) {
 
   DelChartData();
@@ -194,6 +197,7 @@ void Leg::SetChartData( pChartDataView_t pChartDataView, ou::Colour::EColour col
       m_ceVega.SetColour( colour );
       pChartDataView->Add( ixVega, &m_ceVega );
     }
+
     m_pChartDataView = pChartDataView;
   }
 }
@@ -319,6 +323,37 @@ void Leg::NetGreeks( double& delta, double& gamma ) const {
       }
     }
   }
+}
+
+void Leg::NetGreeks( double& pl, double& iv, double& delta, double& gamma, double& theta, double& vega, double& rho ) {
+
+  if ( m_pPosition ) {
+
+    pl += m_pPosition->GetRealizedPL() + m_pPosition->GetUnRealizedPL() - m_pPosition->GetCommissionPaid();
+
+    double quantity {};
+    switch ( m_pPosition->GetRow().eOrderSideActive ) {
+      case ou::tf::OrderSide::Buy:
+        quantity = 1.0 * m_pPosition->GetActiveSize();
+        break;
+      case ou::tf::OrderSide::Sell:
+        quantity = -1.0 * m_pPosition->GetActiveSize();
+        break;
+      case ou::tf::OrderSide::Unknown:
+        // not active
+        break;
+      default:
+        assert( false );
+    }
+
+    if ( 0.0 != quantity ) {
+      if ( m_bOption ) {
+        pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( m_pPosition->GetWatch() );
+        pOption->NetGreeks( quantity, iv, delta, gamma, theta, vega, rho );
+      }
+    }
+  }
+
 }
 
 double Leg::ConstructedValue() const {

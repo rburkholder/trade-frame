@@ -170,7 +170,9 @@ public:
   void SetPortfolio( pPortfolio_t );
   pPortfolio_t GetPortfolio() { return m_pPortfolio; }
 
-  const LegNote::values_t& SetPosition( pPosition_t, pChartDataView_t pChartData, ou::Colour::EColour );
+  const LegNote::values_t& SetPosition( pPosition_t );
+  void SetChartData( pChartDataView_t pChartData, ou::Colour::EColour );
+  void DelChartData();
 
   void Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt );
 
@@ -254,6 +256,16 @@ protected:
   void DeactivatePositionOption( pPosition_t );
 
 private:
+
+  pChartDataView_t m_pChartDataView;
+
+  ou::ChartEntryIndicator m_ceProfitLoss;
+
+  ou::ChartEntryIndicator m_ceImpliedVolatility;
+  ou::ChartEntryIndicator m_ceDelta;
+  ou::ChartEntryIndicator m_ceGamma;
+  ou::ChartEntryIndicator m_ceTheta;
+  ou::ChartEntryIndicator m_ceVega;
 
   void PositionNote( pPosition_t&, LegNote::State );
 

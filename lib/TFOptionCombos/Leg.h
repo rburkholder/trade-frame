@@ -64,6 +64,7 @@ public:
   double GetNet( double price ) const;
   double ConstructedValue() const;
   void NetGreeks( double& delta, double& gamma ) const;
+  void NetGreeks( double& pl, double& IV, double& delta, double& gamma, double& theta, double& vega, double& rho );
 
   const option::LegNote& GetLegNote() const { return m_legNote; }
 

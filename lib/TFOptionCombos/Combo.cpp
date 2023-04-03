@@ -45,6 +45,10 @@ Combo::Combo( Combo&& rhs )
 }
 
 Combo::~Combo() {
+  if ( m_pChartDataView ) {
+    DelChartData();
+  }
+
   for ( mapComboLeg_t::value_type& vt: m_mapComboLeg ) {
     DeactivatePositionOption( vt.second.m_leg.GetPosition() );
   }
@@ -82,10 +86,9 @@ Combo::mapComboLeg_t::iterator Combo::LU( LegNote::Type type ) {
   return iterLeg;
 }
 
-const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDataView_t pChartData, ou::Colour::EColour colour ) {
+const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew ) {
 
   assert( pPositionNew );
-  assert( pChartData );
   assert( m_pPortfolio->Id() == pPositionNew->GetRow().idPortfolio );
 
   ou::tf::Leg leg;
@@ -98,8 +101,6 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
     // this will emplace duplicate LegNote::Type
     iterLeg = m_mapComboLeg.emplace( std::move( mapComboLeg_t::value_type( legValues.m_type, std::move( leg ) ) ) );
     ComboLeg& cleg( iterLeg->second );
-
-    cleg.m_leg.SetChartData( pChartData, colour ); // comes after as there is no move on indicators
 
     // assign Test to leg
     mapInitTrackOption_t::iterator iter = m_mapInitTrackOption.find( legValues.m_type );
@@ -168,6 +169,73 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew, pChartDa
 
   return legValues;
 }
+
+namespace { // where is the primary table?  is there a primary table? duplicated in Leg.cpp for now
+  constexpr size_t ixPL = 2;
+  constexpr size_t ixIV = 11;
+  constexpr size_t ixDelta = 12;
+  constexpr size_t ixGamma = 13;
+  constexpr size_t ixTheta = 14;
+  constexpr size_t ixVega = 15;
+}
+
+void Combo::SetChartData( pChartDataView_t pChartDataView, ou::Colour::EColour colour ) {
+
+  assert( !m_pChartDataView );
+  m_pChartDataView = pChartDataView;
+
+  m_ceProfitLoss.SetName( "P/L Aggregate" );
+  m_ceProfitLoss.SetColour( colour );
+  m_pChartDataView->Add( ixPL, &m_ceProfitLoss );
+
+  m_ceImpliedVolatility.SetName( "IV Average" );
+  m_ceImpliedVolatility.SetColour( colour );
+  m_pChartDataView->Add( ixIV, &m_ceImpliedVolatility );
+
+  m_ceDelta.SetName( "Delta Aggregate" );
+  m_ceDelta.SetColour( colour );
+  m_pChartDataView->Add( ixDelta, &m_ceDelta );
+
+  m_ceGamma.SetName( "Gamma Aggregate" );
+  m_ceGamma.SetColour( colour );
+  m_pChartDataView->Add( ixGamma, &m_ceGamma );
+
+  m_ceTheta.SetName( "Theta Aggregate" );
+  m_ceTheta.SetColour( colour );
+  m_pChartDataView->Add( ixTheta, &m_ceTheta );
+
+  m_ceVega.SetName( "Vega Aggregate" );
+  m_ceVega.SetColour( colour );
+  m_pChartDataView->Add( ixVega, &m_ceVega );
+
+}
+
+void Combo::DelChartData() {
+
+  assert( m_pChartDataView );
+
+  m_pChartDataView->Remove( ixPL, &m_ceProfitLoss );
+  m_ceProfitLoss.Clear();
+
+  m_pChartDataView->Remove( ixIV, &m_ceImpliedVolatility );
+  m_ceImpliedVolatility.Clear();
+
+  m_pChartDataView->Remove( ixDelta, &m_ceDelta );
+  m_ceDelta.Clear();
+
+  m_pChartDataView->Remove( ixGamma, &m_ceGamma );
+  m_ceGamma.Clear();
+
+  m_pChartDataView->Remove( ixTheta, &m_ceTheta );
+  m_ceTheta.Clear();
+
+  m_pChartDataView->Remove( ixVega, &m_ceVega );
+  m_ceVega.Clear();
+
+  m_pChartDataView.reset();
+
+}
+
 
 void Combo::InitTracker(
   ComboLeg& cleg,
@@ -296,12 +364,23 @@ void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt
   using vRemove_t = std::vector<mapComboLeg_t::iterator>;
   vRemove_t vRemove;
 
+  double pl {};
+  double iv {};
+  double delta {};
+  double gamma {};
+  double theta {};
+  double vega {};
+  double rho {};
+
+  double nLegs {};
   for ( mapComboLeg_t::iterator iter = m_mapComboLeg.begin(); m_mapComboLeg.end() != iter; ++iter ) {
 
     ComboLeg& cleg( iter->second );
     Leg& leg( cleg.m_leg );
 
-    leg.Tick( dt, dblUnderlyingPrice );
+    //leg.Tick( dt, dblUnderlyingPrice );
+    leg.NetGreeks( pl, iv, delta, gamma, theta, vega, rho );
+    nLegs += 1.0;
 
     bool bRemove = cleg.Test( dt, dblUnderlyingSlope, dblUnderlyingPrice );
     if ( bRemove ) {
@@ -309,6 +388,13 @@ void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt
       vRemove.push_back( iter );
     }
   }
+
+  m_ceProfitLoss.Append( dt, pl );
+  m_ceImpliedVolatility.Append( dt, iv / nLegs ); // average
+  m_ceDelta.Append( dt, delta );
+  m_ceGamma.Append( dt, gamma );
+  m_ceTheta.Append( dt, theta );
+  m_ceVega.Append( dt, vega );
 
   for ( vRemove_t::value_type iter: vRemove ) { // NOTE: the lambdas above affect this
     m_mapComboLeg.erase( iter );
