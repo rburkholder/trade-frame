@@ -8,11 +8,11 @@ This is a:
 
 A primary goal of this solution is to provide a means of tracking an [Option Combo Order](lib/TFTrading/Order_Combo.hpp) through the birth to death life-cycle.  It is easy to enter into a option combo with Interactive Brokers with their user interface, but there does not seem to be an effective way to keep the legs grouped for tracking overall profit/loss.
 
-This library provides a means of [Tracking](lib/TFOptionCombos/Tracker.h) a [Combo](lib/TFOptionCombos/Combo.h) [Leg](lib/TFOptionCombos/Leg.h) with a [Position](lib/TFTrading/Position.h).  Positions can be grouped together to form [Portfolios](lib/TFTrading/Portfolio.h).  Portfolios representing Combos can be grouped together to represent the overall profit/loss of a trading Portfolio.
+This library provides a means of ![Tracking](lib/TFOptionCombos/Tracker.h) a ![Combo](lib/TFOptionCombos/Combo.h) ![Leg](lib/TFOptionCombos/Leg.h) with a ![Position](lib/TFTrading/Position.h).  Positions can be grouped together to form ![Portfolios](lib/TFTrading/Portfolio.h).  Portfolios representing Combos can be grouped together to represent the overall profit/loss of a trading Portfolio.
 
-Positions are composed of a [Watch](lib/TFTrading/Watch.h) class to record bid/ask/tick of [Instruments](lib/TFTrading/Instrument.h).
+Positions are composed of a ![Watch](lib/TFTrading/Watch.h) class to record bid/ask/tick of ![Instruments](lib/TFTrading/Instrument.h).
 
-[Options](lib/TFOptions/Option.h) inherit from the Watch class to provide [Greeks](lib/TFTimeSeries/DatedDatum.h), which are computed in real time with an [Option Engine](lib/TFOptions/Engine.h).
+![Options](lib/TFOptions/Option.h) inherit from the Watch class to provide ![Greeks](lib/TFTimeSeries/DatedDatum.h), which are computed in real time with an ![Option Engine](lib/TFOptions/Engine.h).
 
 C++ is used throughout for building high-capacity, low-latency trading applications.
 
@@ -161,17 +161,17 @@ to port back to Windows.  There are various Windows based artifacts in various d
 
 The lib directory has a series of libraries I use throughout the various projects/applications.  Primary libraries include:
 
-* TFTimeSeries - manage trades, quotes, greeks
-* TFSimulation - simulation engine
-* TFIQFeed - engine to talk to DTNIQ Feed for Level1 & Level2 data (ask me for a referral)
-* TFInteractiveBrokers - engine to talk to IB
-* TFIndicators - some indicators
-* TFHDF5TimeSeries - wraps the HDF5 library for storing time series
-* TFOptions - options calculations
-* TFTrading - manages orders, executions, portfolios, positions, accounts, 
-* TFVuTrading - provides a number of forms, panels, and related user-interface elements
-* OUCharting - wrapper around ChartDirector for plots and charts
-* OUSQL - which is an ORM wrapper around a sqlite database for maintaining trading records
+* ![TFTimeSeries](lib/TFTimeSeries) - manage trades, quotes, greeks
+* ![TFSimulation](lib/TFSimulation) - simulation engine
+* ![TFIQFeed](lib/TFIQFeed) - engine to talk to DTNIQ Feed for Level1 & Level2 data (ask me for a referral)
+* ![TFInteractiveBrokers](lib/TFInteractiveBrokers) - engine to talk to IB
+* ![TFIndicators](lib/TFIndicators) - some indicators
+* ![TFHDF5TimeSeries](lib/TFHDF5TimeSeries) - wraps the HDF5 library for storing time series
+* ![TFOptions](lib/TFOptions) - options calculations
+* ![TFTrading](lib/TFTrading) - manages orders, executions, portfolios, positions, accounts, 
+* ![TFVuTrading](lib/TFVuTrading) - provides a number of forms, panels, and related user-interface elements
+* ![OUCharting](lib/OUCharting) - wrapper around ChartDirector for plots and charts
+* ![OUSQL](lib/OUSQL) - which is an ORM wrapper around a sqlite database for maintaining trading records
 
 These are some of the currently supported applications:
 
