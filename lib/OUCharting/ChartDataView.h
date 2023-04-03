@@ -14,6 +14,7 @@
 #pragma once
 
 #include <map>
+#include <mutex>
 #include <vector>
 #include <string>
 #include <functional>
@@ -52,6 +53,8 @@ private:
 class ChartDataView {
 public:
 
+  std::mutex m_mutex;
+
   using pChartDataView_t = std::shared_ptr<ChartDataView>;
 
   using ViewPort_t = ChartEntryTime::range_t;
@@ -80,9 +83,9 @@ public:
   const std::string& GetName() const { return m_sName; };
   const std::string& GetDescription() const { return m_sDescription; };
 
-  ViewPort_t GetExtents() const;
-  boost::posix_time::ptime GetExtentBegin() const;
-  boost::posix_time::ptime GetExtentEnd() const;
+  ViewPort_t GetExtents();
+  boost::posix_time::ptime GetExtentBegin();
+  boost::posix_time::ptime GetExtentEnd();
 
   size_t GetChartCount() const { return m_mapCntChartIndexes.size(); };
 
@@ -122,6 +125,10 @@ private:
 
   using vChartEntryCarrier_t = std::vector<ChartEntryCarrier>;
   vChartEntryCarrier_t m_vChartEntryCarrier;
+
+  ViewPort_t GetExtents_NoLock() const;
+  boost::posix_time::ptime GetExtentBegin_NoLock() const;
+  boost::posix_time::ptime GetExtentEnd_NoLock() const;
 
   void UpdateActualChartId();
 

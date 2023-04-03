@@ -98,6 +98,8 @@ void ChartDataView::UpdateActualChartId() {
 }
 
 void ChartDataView::Add( size_t nChart, ChartEntryBase* pEntry ) {
+  std::scoped_lock<std::mutex> lock( m_mutex );
+
   m_vChartEntryCarrier.push_back( std::move( ChartEntryCarrier( nChart, pEntry ) ) );
 
   mapCntChartIndexes_t::iterator iter1 = m_mapCntChartIndexes.find( nChart );
@@ -115,6 +117,8 @@ void ChartDataView::Add( size_t nChart, ChartEntryBase* pEntry ) {
 }
 
 void ChartDataView::Remove( size_t nChart, ChartEntryBase* pEntry ) {
+  std::scoped_lock<std::mutex> lock( m_mutex );
+
   vChartEntryCarrier_t::iterator iterChartEntryCarrier = std::find_if(
     m_vChartEntryCarrier.begin(), m_vChartEntryCarrier.end(),
     [nChart,pEntry](ChartEntryCarrier& cec)->bool{
@@ -144,6 +148,8 @@ void ChartDataView::Clear() {
 //}
 
 void ChartDataView::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
+  std::scoped_lock<std::mutex> lock( m_mutex );
+
   m_dtViewPortBegin = dtBegin;
   m_dtViewPortEnd = dtEnd;
   // need to change DataArrays in each entry
@@ -163,7 +169,13 @@ ChartDataView::ViewPort_t ChartDataView::GetViewPort() const {
   return ViewPort_t( m_dtViewPortBegin, m_dtViewPortEnd );
 }
 
-ChartDataView::ViewPort_t ChartDataView::GetExtents() const {
+ChartDataView::ViewPort_t ChartDataView::GetExtents() {
+  std::scoped_lock<std::mutex> lock( m_mutex );
+  return GetExtents_NoLock();
+}
+
+ChartDataView::ViewPort_t ChartDataView::GetExtents_NoLock() const {
+
   ViewPort_t view;
   std::for_each(
     m_vChartEntryCarrier.begin(), m_vChartEntryCarrier.end(),
@@ -207,7 +219,12 @@ ChartDataView::ViewPort_t ChartDataView::GetExtents() const {
   return view;
 }
 
-boost::posix_time::ptime ChartDataView::GetExtentBegin() const {
+boost::posix_time::ptime ChartDataView::GetExtentBegin() {
+  std::scoped_lock<std::mutex> lock( m_mutex );
+  return GetExtentBegin_NoLock();
+}
+
+boost::posix_time::ptime ChartDataView::GetExtentBegin_NoLock() const {
   boost::posix_time::ptime begin { boost::posix_time::not_a_date_time };
   std::for_each(
     m_vChartEntryCarrier.begin(), m_vChartEntryCarrier.end(),
@@ -234,7 +251,11 @@ boost::posix_time::ptime ChartDataView::GetExtentBegin() const {
   return begin;
 }
 
-boost::posix_time::ptime ChartDataView::GetExtentEnd() const {
+boost::posix_time::ptime ChartDataView::GetExtentEnd() {
+  std::scoped_lock<std::mutex> lock( m_mutex );
+  return GetExtentEnd_NoLock();
+}
+boost::posix_time::ptime ChartDataView::GetExtentEnd_NoLock() const {
   boost::posix_time::ptime end { boost::posix_time::not_a_date_time };
   std::for_each(
     m_vChartEntryCarrier.begin(), m_vChartEntryCarrier.end(),
