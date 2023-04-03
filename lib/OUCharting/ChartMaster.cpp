@@ -66,10 +66,6 @@ void ChartMaster::SetChartDimensions(unsigned int width, unsigned int height) {
   //if ( nullptr != m_pCdv ) m_pCdv->SetChanged();
 }
 
-bool ChartMaster::GetChartDataViewChanged() { // flag is reset during call
-  return ( nullptr == m_pCdv ) ? false : m_pCdv->GetChanged();
-}
-
 /*
 void ChartMaster::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
   m_dblViewPortXBegin =

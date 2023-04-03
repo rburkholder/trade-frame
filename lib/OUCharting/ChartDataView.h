@@ -68,9 +68,6 @@ public:
   void Remove( size_t nChart, ChartEntryBase* pEntry );
   void Clear();  // remove stuff in order to reuse.
 
-  void SetChanged();
-  bool GetChanged(); // resets flag on read
-
   // can use not_a_date_time for one, the other, or both
   void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
   void SetViewPort( const ViewPort_t& );
@@ -113,7 +110,6 @@ private:
     };
   };
 
-  bool m_bChanged;
   std::string m_sName;
   std::string m_sDescription;
 

@@ -53,8 +53,7 @@ ChartEntryCarrier::~ChartEntryCarrier() {
 //
 
 ChartDataView::ChartDataView()
-  : m_bChanged( false ),
-    m_dtViewPortBegin( boost::posix_time::not_a_date_time ),
+  : m_dtViewPortBegin( boost::posix_time::not_a_date_time ),
     m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 {
 }
@@ -62,18 +61,6 @@ ChartDataView::ChartDataView()
 ChartDataView::~ChartDataView() {
 //  assert( m_bClosed );
   Clear();
-}
-
-void ChartDataView::SetChanged() {
-  m_bChanged = true;
-}
-
-bool ChartDataView::GetChanged() {
-  bool b = m_bChanged;
-  if ( b ) {
-    m_bChanged = false;
-  }
-  return b;
 }
 
 void ChartDataView::UpdateActualChartId() {

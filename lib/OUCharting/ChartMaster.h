@@ -41,8 +41,7 @@ public:
   virtual ~ChartMaster();
 
   void SetChartDataView( ChartDataView* pcdv );
-  ChartDataView* GetChartDataView( void ) const { return m_pCdv; };
-  bool GetChartDataViewChanged();
+  ChartDataView* GetChartDataView() const { return m_pCdv; };
 
   void SetBarWidth( boost::posix_time::time_duration tdBarWidth );
 
