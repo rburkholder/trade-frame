@@ -354,8 +354,6 @@ void Tracker::OptionCandidate_Construct( boost::posix_time::ptime dt, double str
 
   // TODO: need to enable greeks to track IV, Delta for Cobmo level aggregation
 
-  m_transition = ETransition::Acquire;
-
   assert( m_luNameAtStrike );
 
   const std::string& sNameCandidate( m_luNameAtStrike( strike ) );
@@ -366,6 +364,9 @@ void Tracker::OptionCandidate_Construct( boost::posix_time::ptime dt, double str
   const std::string& sNameCurrent( pWatchCurrent->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
 
   if ( sNameCurrent != sNameCandidate ) {
+
+    m_transition = ETransition::Acquire;
+
     BOOST_LOG_TRIVIAL(info)
       << dt.time_of_day() << " "
       << "Tracker::Construct candidate "
@@ -478,6 +479,8 @@ void Tracker::LegRoll() {
 
   //BOOST_LOG_TRIVIAL(info) << "Tracker::LegRoll - step a," << this;
 
+  // perform a push on m_transition in the caller?
+  //   this destroys state without action if the starts do not align
   m_transition = ETransition::Done;
 
   assert( m_pPosition );
