@@ -106,6 +106,9 @@ const std::string MarketSymbol::BuildGenericName( const Fundamentals& fundamenta
       sName = ou::tf::Instrument::BuildGenericOptionName( OptionBaseName( fundamentals ), fundamentals.dateExpiration, fundamentals.eOptionSide, fundamentals.dblStrikePrice );
       break;
     case ESecurityType::FOption:
+      if ( sName != fundamentals.sExchangeRoot ) {
+        std::cout << "MarketSymbol::BuildGenericName futures-option problem: " << sName << " vs " << fundamentals.sExchangeRoot << std::endl;
+      }
       sName = ou::tf::Instrument::BuildGenericOptionName( sName, fundamentals.dateExpiration, fundamentals.eOptionSide, fundamentals.dblStrikePrice );
       break;
     case ESecurityType::MktStats:
