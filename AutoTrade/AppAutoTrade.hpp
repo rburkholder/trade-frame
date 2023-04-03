@@ -75,7 +75,7 @@ private:
 
   ou::ChartDataView m_ChartDataView;
 
-  std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrumentBoth;
+  std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrumentExec;
   std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrumentIQFeed;
 
   std::unique_ptr<Strategy> m_pStrategy;
@@ -94,7 +94,7 @@ private:
   void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();
 
-  void ConstructIBInstrument();
+  void ConstructLiveInstrument();
   void ConstructSimInstrument();
 
   void ConfirmProviders();

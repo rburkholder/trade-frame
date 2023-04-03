@@ -205,16 +205,28 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
   );
 }
 
-void AppAutoTrade::ConstructIBInstrument() {
+void AppAutoTrade::ConstructLiveInstrument() {
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   m_pBuildInstrumentIQFeed = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed );
-  m_pBuildInstrumentBoth = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
 
-  m_pBuildInstrumentBoth->Queue(
+  switch ( m_pExecutionProvider->ID() ) {
+    case ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIB:
+      m_pBuildInstrumentExec = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed, m_tws );
+      break;
+    case ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF:
+      m_pBuildInstrumentExec = std::make_unique<ou::tf::BuildInstrument>( m_iqfeed );
+      m_iqfeed->EnableExecution( true );
+      break;
+    default:
+      assert( false );
+      break;
+  }
+
+  m_pBuildInstrumentExec->Queue(
     m_sSymbol,
     [this]( pInstrument_t pInstrument, bool bConstructed ){
       if ( bConstructed ) {
@@ -395,18 +407,29 @@ void AppAutoTrade::ConfirmProviders() {
     if ( m_bData1Connected && m_bExecConnected ) {
       bool bValidCombo( false );
       if (
-          ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF == m_pData1Provider->ID() )
+           ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF == m_pData1Provider->ID() )
         && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIB  == m_pExecutionProvider->ID() )
       ) {
         bValidCombo = true;
-        ConstructIBInstrument();
+        ConstructLiveInstrument();
       }
-      if (
-          ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pData1Provider->ID() )
-        && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pExecutionProvider->ID() )
-      ) {
-        bValidCombo = true;
-        ConstructSimInstrument();
+      else {
+        if (
+             ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pData1Provider->ID() )
+          && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderSimulator == m_pExecutionProvider->ID() )
+        ) {
+          bValidCombo = true;
+          ConstructSimInstrument();
+        }
+        else {
+          if (
+               ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF == m_pData1Provider->ID() )
+            && ( ou::tf::ProviderInterfaceBase::eidProvider_t::EProviderIQF == m_pExecutionProvider->ID() )
+          ) {
+            bValidCombo = true;
+            ConstructLiveInstrument();
+          }
+        }
       }
       if ( bValidCombo ) {
         m_bConnectedLatch = true;
