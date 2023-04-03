@@ -161,7 +161,7 @@ to port back to Windows.  There are various Windows based artifacts in various d
 
 The lib directory has a series of libraries I use throughout the various projects/applications.  Primary libraries include:
 
-* ![TFTimeSeries](lib/TFTimeSeries) - manage trades, quotes, greeks
+* ![TFTimeSeries](lib/TFTimeSeries) - manage trades, quotes, greeks, ![level II order book](lib/TFIQFeed/Level2)
 * ![TFSimulation](lib/TFSimulation) - simulation engine
 * ![TFIQFeed](lib/TFIQFeed) - engine to talk to DTNIQ Feed for Level1 & Level2 data (ask me for a referral)
 * ![TFInteractiveBrokers](lib/TFInteractiveBrokers) - engine to talk to IB
@@ -179,6 +179,7 @@ These are some of the currently supported applications:
 * ![ComboTrading](ComboTrading/README.md) - basics of trading multiple securities, such as various options strategies
 * ![BasketTrading](BasketTrading/README.md) - a work in progress for trading futures based options combinations
 * ![IndicatorTrading](IndicatorTrading/README.md) - view and trade with futures level II data
+* ![DepthOfMarket](DepthOfMarket/README.md) - use a level II ladder to trade futures
 * ![Dividend](Dividend/README.md) - console app to query IQFeed for possible dividend based equity investments
 * Hdf5Chart - view the contents of the hdf5 data set
 * LiveChart - view an instrument in real time
