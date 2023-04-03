@@ -258,15 +258,15 @@ ManageStrategy::ManageStrategy(
     for ( const mapChains_t::value_type& vt: m_mapChains ) { // only use chains where all calls/puts available
       size_t nStrikesTotal {};
       size_t nStrikesMatch {};
-      double dblStrkeMisMatch {};
+      double dblStrikeMisMatch {};
       vt.second.Strikes(
-        [&nStrikesTotal,&nStrikesMatch,&dblStrkeMisMatch]( double strike, const chain_t::strike_t& options ){
+        [&nStrikesTotal,&nStrikesMatch,&dblStrikeMisMatch]( double strike, const chain_t::strike_t& options ){
           nStrikesTotal++;
           if ( ( 0 != options.call.sIQFeedSymbolName.size() ) && ( 0 != options.put.sIQFeedSymbolName.size() ) ) {
             nStrikesMatch++;
           }
           else {
-            dblStrkeMisMatch = strike;
+            dblStrikeMisMatch = strike;
           }
       } );
       if ( nStrikesTotal == nStrikesMatch ) {
@@ -275,10 +275,10 @@ ManageStrategy::ManageStrategy(
       }
       else {
         if ( 1 == ( nStrikesTotal - nStrikesMatch ) ) { // some are 2, handle those as well?
-          const_cast<chain_t&>( vt.second ).Erase( dblStrkeMisMatch ); // keep most of the mis-balanced chains
+          const_cast<chain_t&>( vt.second ).Erase( dblStrikeMisMatch ); // keep most of the mis-balanced chains
           std::cout
             << "chain " << vt.first << " added with " << nStrikesMatch << " strikes"
-            << " without " << dblStrkeMisMatch
+            << " without " << dblStrikeMisMatch
             << std::endl;
         }
         else {
