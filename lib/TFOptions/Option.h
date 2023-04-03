@@ -84,6 +84,10 @@ public:
 
   virtual void EmitValues( double dblPriceUnderlying, bool bEmitName = true );
   void NetGreeks( const double quantity, double& delta, double& gamma ) const;
+  void NetGreeks(
+    const double quantity,
+    double& iv, double& delta, double& gamma, double& theta, double& vega, double& rho
+    ) const;
 
   // TODO: needs spinlock
   inline const Greek& LastGreek() const { return m_greek; };

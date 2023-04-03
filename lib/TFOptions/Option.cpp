@@ -253,6 +253,19 @@ void Option::NetGreeks( const double quantity, double& delta, double& gamma ) co
   gamma += quantity * m_greek.Gamma();
 }
 
+void Option::NetGreeks(
+    const double quantity,
+    double& iv, double& delta, double& gamma, double& theta, double& vega, double& rho
+) const {
+  //iv += quantity * m_greek.ImpliedVolatility();
+  iv += m_greek.ImpliedVolatility(); // for averaging
+  delta += quantity * m_greek.Delta();
+  gamma += quantity * m_greek.Gamma();
+  theta += quantity * m_greek.Theta();
+  vega += quantity * m_greek.Vega();
+  rho += quantity * m_greek.Rho();
+}
+
 void Option::HandleGreek( const Greek& greek ) {
   m_greek = greek;
   if ( m_bRecordSeries ) {
