@@ -109,18 +109,22 @@ private:
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
+    ar & *m_pPanelProviderControl;
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
+    if ( 2 <= version ) {
+      ar & *m_pPanelProviderControl;
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
-BOOST_CLASS_VERSION(AppAutoTrade, 1)
+BOOST_CLASS_VERSION(AppAutoTrade, 2)
 
 DECLARE_APP(AppAutoTrade)
 
