@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:   DragDropInstrument.h
  * Author: raymond@burkholder.net
  *
@@ -28,19 +28,19 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-  
+
 class DragDropInstrument: public wxDataObject {
 public:
-  
+
   typedef Instrument::pInstrument_t pInstrument_t;
   typedef pInstrument_t pOptionInstrument_t;
   typedef pInstrument_t pUnderlyingInstrument_t;
-  
+
   static const wxDataFormat DataFormatIQFeedSymbolName;
   static const wxDataFormat DataFormatClass;
   static const wxDataFormat DataFormatFunction_Instrument;
   static const wxDataFormat DataFormatFunction_OptionUnderlying;
- 
+
   typedef std::function<void(pInstrument_t)> fOnInstrumentRetrieveComplete_t;
   typedef std::function<void(fOnInstrumentRetrieveComplete_t)> fOnInstrumentRetrieveInitiate_t;
   typedef fOnInstrumentRetrieveInitiate_t* fOnInstrumentRetrieveInitiate_ptr;
@@ -49,15 +49,15 @@ public:
   typedef std::function<void(fOnOptionUnderlyingRetrieveComplete_t)> fOnOptionUnderlyingRetrieveInitiate_t;
   typedef fOnOptionUnderlyingRetrieveInitiate_t* fOnOptionUnderlyingRetrieveInitiate_ptr;
 
-  DragDropInstrument( );
+  DragDropInstrument();
   explicit DragDropInstrument( const DragDropInstrument& ) = delete;
   explicit DragDropInstrument( const DragDropInstrument&& ) = delete;
   explicit DragDropInstrument( const std::string& sIQFeedSymbolName );
   explicit DragDropInstrument( pInstrument_t );
   explicit DragDropInstrument( fOnInstrumentRetrieveInitiate_t&& );
   explicit DragDropInstrument( fOnOptionUnderlyingRetrieveInitiate_t&& );
-  virtual ~DragDropInstrument( );
-  
+  virtual ~DragDropInstrument();
+
   virtual void GetAllFormats (wxDataFormat *formats, Direction dir=Get) const;
   virtual bool GetDataHere (const wxDataFormat &format, void *buf) const;
   virtual size_t GetDataSize (const wxDataFormat &format) const;
@@ -65,19 +65,19 @@ public:
   virtual wxDataFormat GetPreferredFormat (Direction dir=Get) const;
   virtual bool SetData (const wxDataFormat &format, size_t len, const void *buf);
   bool IsSupported (const wxDataFormat &format, Direction dir=Get) const;
-  
+
   const std::string& GetIQFeedSymbolName() const; // TODO: need to validate which Format flag was in use
   pInstrument_t GetInstrument();
   fOnInstrumentRetrieveInitiate_t& GetInstrumentRetrieveInitiate();  // TODO: change to a move as the constructor  is a move
   fOnOptionUnderlyingRetrieveInitiate_t& GetOptionUnderlyingRetrieveInitiate();  // TODO: change to a move as the constructor  is a move
-  
+
 protected:
 private:
   static const char szFormatIQFeedSymbolName[];
   static const char szFormatClass[];
   static const char szFormatFunction_Instrument[];
   static const char szFormatFunction_OptionUnderlying[];
-  
+
   wxDataFormat m_DataFormat;
   std::string m_sIQFeedSymbolName;
   pInstrument_t m_pInstrument;

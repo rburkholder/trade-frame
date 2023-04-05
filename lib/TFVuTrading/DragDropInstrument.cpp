@@ -12,10 +12,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:   DragDropInstrument.cpp
  * Author: raymond@burkholder.net
- * 
+ *
  * Created on July 6, 2018, 11:25 AM
  */
 
@@ -23,7 +23,7 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-  
+
 const char DragDropInstrument::szFormatIQFeedSymbolName[]          = "TradeFrameIQFeedSymbolName";
 const char DragDropInstrument::szFormatClass[]                     = "TradeFrameClass";
 const char DragDropInstrument::szFormatFunction_Instrument[]       = "TradeFrameFunction_Instrument";
@@ -59,14 +59,17 @@ DragDropInstrument::DragDropInstrument( fOnOptionUnderlyingRetrieveInitiate_t&& 
   //std::cout << "DragDropInstrument::DragDropInstrument( fOnOptionUnderlyingRetrieveInitiate_t&& fOnOptionUnderlyingRetrieveInitiate )" << std::endl;
 }
 
-DragDropInstrument::DragDropInstrument( )
+DragDropInstrument::DragDropInstrument()
 : m_DataFormat( wxDF_PRIVATE )
 {
-  //std::cout << "DragDropInstrument::DragDropInstrument( )" << std::endl;
+  //std::cout << "DragDropInstrument construct" << std::endl;
 }
 
-DragDropInstrument::~DragDropInstrument( ) {
-  //std::cout << "DragDropInstrument::~DragDropInstrument( )" << std::endl;
+DragDropInstrument::~DragDropInstrument() {
+  m_pInstrument.reset();
+  m_fOnInstrumentRetrieveInitiate = nullptr;
+  m_fOnOptionUnderlyingRetrieveInitiate = nullptr;
+  //std::cout << "DragDropInstrument destruct" << std::endl;
 }
 
 size_t DragDropInstrument::GetFormatCount(Direction dir) const {
@@ -87,7 +90,7 @@ void DragDropInstrument::GetAllFormats(wxDataFormat *formats, Direction dir) con
 //    formats[ 2 ] = DataFormatFunction_Instrument;
     formats[ 0 ] = m_DataFormat;
   }
-  else 
+  else
     assert( 0 );
 }
 
@@ -133,9 +136,9 @@ size_t DragDropInstrument::GetDataSize(const wxDataFormat &format) const {
   return 0;
 }
 
-const std::string& DragDropInstrument::GetIQFeedSymbolName() const { 
+const std::string& DragDropInstrument::GetIQFeedSymbolName() const {
 //  if ( DataFormatInstrumentIQFeedSymbolName == m_DataFormat ) {
-    return m_sIQFeedSymbolName; 
+    return m_sIQFeedSymbolName;
 //  }
 //  else {
 //   return std::string;
@@ -208,7 +211,7 @@ bool DragDropInstrument::IsSupported(const wxDataFormat &format, Direction dir) 
   if ( format == m_DataFormat ) return true;
   return false;
   }
-  
+
 } // namespace tf
 } // namespace ou
 
