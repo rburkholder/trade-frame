@@ -53,23 +53,23 @@ struct PanelPortfolioPosition_impl {
 //public:
 
   PanelPortfolioPosition_impl( PanelPortfolioPosition& );
-  virtual ~PanelPortfolioPosition_impl( void );
+  virtual ~PanelPortfolioPosition_impl();
 
 //protected:
 //private:
-  
+
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
   typedef ou::tf::Portfolio::pPosition_t pPosition_t;
 
-  void UpdateGui( void );
+  void UpdateGui();
   void AddPosition( pPosition_t pPosition );
   void AddInstrumentToPosition( pInstrument_t pInstrument );
 
   void SaveColumnSizes( ou::tf::GridColumnSizer& ) const;
   void SetColumnSizes( ou::tf::GridColumnSizer& );
-	
+
 // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_ARRAY_PARAM_COUNT 5
 #define GRID_ARRAY_COL_COUNT 12
@@ -209,7 +209,7 @@ struct PanelPortfolioPosition_impl {
     wxMenu* m_menuGridLabelPositionPopUp;
     wxMenu* m_menuGridCellPositionPopUp;
 
-  PanelPortfolioPosition& m_ppp; // passed in on construction 
+  PanelPortfolioPosition& m_ppp; // passed in on construction
 
   pPortfolio_t m_pPortfolio;
 
@@ -225,7 +225,7 @@ struct PanelPortfolioPosition_impl {
 
   ou::tf::DialogNewPortfolio::DataExchange m_DialogNewPortfolio_DataExchange;
   ou::tf::DialogNewPortfolio* m_pdialogNewPortfolio;
-  
+
   void CreateControls();
   void SetPortfolio( pPortfolio_t pPortfolio );
 
@@ -245,7 +245,7 @@ struct PanelPortfolioPosition_impl {
   void HandleOnUnRealizedPLUpdate( const Portfolio& );
   void HandleOnExecutionUpdate( const Portfolio& );
   void HandleOnCommissionUpdate( const Portfolio& );
-  
+
   void HandleWindowDestroy( wxWindowDestroyEvent& event );
 
 };

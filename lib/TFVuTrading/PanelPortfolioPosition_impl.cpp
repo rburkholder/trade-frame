@@ -31,6 +31,8 @@ PanelPortfolioPosition_impl::PanelPortfolioPosition_impl( PanelPortfolioPosition
   m_ppp( ppp )
 {
 
+  //std::cout << "PanelPortfolioPosition_impl construct" << std::endl;
+
   m_bDialogActive = false;
 
     m_sizerMain = NULL;
@@ -55,7 +57,8 @@ PanelPortfolioPosition_impl::PanelPortfolioPosition_impl( PanelPortfolioPosition
 
 }
 
-PanelPortfolioPosition_impl::~PanelPortfolioPosition_impl( void ) {
+PanelPortfolioPosition_impl::~PanelPortfolioPosition_impl() {
+  //std::cout << "PanelPortfolioPosition_impl destruct" << std::endl;
 }
 
 void PanelPortfolioPosition_impl::CreateControls() {
