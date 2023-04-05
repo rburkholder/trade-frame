@@ -15,7 +15,7 @@
 #pragma once
 
 /* reason for existence:
- *   non-registered instruments as they come and go - actually, all will be registered 
+ *   non-registered instruments as they come and go - actually, all will be registered
  *     -> need to validate in registry prior to creating another instrument
  *   contract id is optional as data comes from IQFeed
  *   no affect on database of positions - positions are transitory
@@ -29,6 +29,7 @@
 #include <boost/serialization/split_member.hpp>
 
 #include <wx/panel.h>
+#include <wx/sizer.h>
 
 #include <TFTrading/Instrument.h>
 #include <TFTrading/PortfolioGreek.h>
@@ -62,11 +63,11 @@ public:
   typedef ou::tf::PortfolioGreek::idPosition_t idPosition_t;
   typedef ou::tf::PortfolioGreek::pPositionGreek_t pPositionGreek_t;
 
-  std::function<pInstrument_t(void)> m_fSelectInstrument;  // Dialog to select Symbol/Instrument
+  std::function<pInstrument_t()> m_fSelectInstrument;  // Dialog to select Symbol/Instrument
 
   typedef std::function<void(PanelOptionCombo&, const idPortfolio_t&, const std::string&)> fConstructPortfolioGreek_t;
   fConstructPortfolioGreek_t m_fConstructPortfolioGreek;
-  
+
   typedef std::function<void(const idPortfolio_t&, const std::string&)> fBootStrapNextPanelOptionCombo_t;
   fBootStrapNextPanelOptionCombo_t m_fBootStrapNextPanelOptionCombo;
 
@@ -82,26 +83,26 @@ public:
 
   typedef std::function<void(pOption_t, pWatch_t)> fRemoveFromEngine_t;
   fRemoveFromEngine_t m_fRemoveFromEngine;
-  
+
   typedef std::function<pInstrument_t(const idInstrument_t&,pInstrument_t&)> fLookUpInstrument_t;
   fLookUpInstrument_t m_fLookUpInstrument;
 
-  PanelOptionCombo(void);
-  PanelOptionCombo( 
-    wxWindow* parent, 
-    wxWindowID id =      PANEL_OPTIONCOMBO_IDNAME, 
-    const wxPoint& pos = PANEL_OPTIONCOMBO_POSITION, 
-    const wxSize& size = PANEL_OPTIONCOMBO_SIZE, 
+  PanelOptionCombo();
+  PanelOptionCombo(
+    wxWindow* parent,
+    wxWindowID id =      PANEL_OPTIONCOMBO_IDNAME,
+    const wxPoint& pos = PANEL_OPTIONCOMBO_POSITION,
+    const wxSize& size = PANEL_OPTIONCOMBO_SIZE,
     long style =         PANEL_OPTIONCOMBO_STYLE );
-  virtual ~PanelOptionCombo(void);
+  virtual ~PanelOptionCombo();
 
-  bool Create( 
-    wxWindow* parent, 
-    wxWindowID id =      PANEL_OPTIONCOMBO_IDNAME, 
-    const wxPoint& pos = PANEL_OPTIONCOMBO_POSITION, 
-    const wxSize& size = PANEL_OPTIONCOMBO_SIZE, 
+  bool Create(
+    wxWindow* parent,
+    wxWindowID id =      PANEL_OPTIONCOMBO_IDNAME,
+    const wxPoint& pos = PANEL_OPTIONCOMBO_POSITION,
+    const wxSize& size = PANEL_OPTIONCOMBO_SIZE,
     long style =         PANEL_OPTIONCOMBO_STYLE );
-  
+
   void AssignToSizer( wxBoxSizer* );
 
   void SetPortfolioGreek( pPortfolioGreek_t pPortfolioGreek );
@@ -111,8 +112,8 @@ public:
 
   void SaveColumnSizes( ou::tf::GridColumnSizer& ) const;
   void SetColumnSizes( ou::tf::GridColumnSizer& );
-	
-  void UpdateGui( void );
+
+  void UpdateGui();
 
 protected:
 
@@ -120,7 +121,7 @@ protected:
 
 private:
 
-  enum { ID_Null=wxID_HIGHEST, ID_PANEL_OPTIONCOMBO, 
+  enum { ID_Null=wxID_HIGHEST, ID_PANEL_OPTIONCOMBO,
     ID_LblIdPortfolio, ID_LblCurrency, ID_LblDescription, ID_LblUnrealizedPL, ID_LblCommission, ID_LblRealizedPL, ID_LblTotal,
     ID_TxtDescription,
     ID_TxtUnRealizedPL, ID_TxtCommission, ID_TxtRealizedPL, ID_TxtTotal,
@@ -129,14 +130,16 @@ private:
     ID_GridPortfolioDetails, ID_GridPositions,
     ID_PanelFiller
   };
-  
+
   bool m_bInitialized;  // needs idPortfolio and description prior to performing actions
 
   std::unique_ptr<PanelOptionCombo_impl> m_pimpl;
 
-  wxBitmap GetBitmapResource( const wxString& name );
-  wxIcon GetIconResource( const wxString& name );
+  wxBitmap GetBitmapResource( const wxString& );
+  wxIcon GetIconResource( const wxString& );
   static bool ShowToolTips() { return true; };
+
+  void HandleWindowDestroy( wxWindowDestroyEvent& );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const;
