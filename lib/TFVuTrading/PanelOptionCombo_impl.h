@@ -37,17 +37,18 @@
 #include <boost/serialization/split_member.hpp>
 
 #include <wx/stattext.h>
-#include <wx/sizer.h>
-#include <wx/grid.h>
 
-#include <TFVuTrading/DialogSimpleOneLineOrder.h>
 #include <TFVuTrading/DialogNewPortfolio.h>
+#include <TFVuTrading/DialogSimpleOneLineOrder.h>
 
 #include <TFVuTrading/ModelCell.h>
 #include <TFVuTrading/ModelCell_ops.h>
 #include <TFVuTrading/ModelCell_macros.h>
 
 #include "PanelOptionCombo.h"
+
+class wxGrid;
+class wxBoxSizer;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -56,29 +57,29 @@ struct PanelOptionCombo_impl {
 //public:
 
   PanelOptionCombo_impl( PanelOptionCombo& );
-  virtual ~PanelOptionCombo_impl( void );
+  ~PanelOptionCombo_impl();
 
 //protected:
 //private:
-  
+
   typedef ou::tf::Instrument::idInstrument_t idInstrument_t;
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
-  
+
   typedef ou::tf::option::Option::pOption_t pOption_t;
 
   typedef ou::tf::PortfolioGreek::pPortfolioGreek_t pPortfolioGreek_t;
   typedef ou::tf::PortfolioGreek::pPositionGreek_t pPositionGreek_t;
-  
+
   void AssignToSizer( wxBoxSizer* );
 
-  void UpdateGui( void );
+  void UpdateGui();
   void AddPositionGreek( pPositionGreek_t pPositionGreek );
   //void AddInstrumentToPosition( pInstrument_t pInstrument );
   void AddOptionUnderlyingPosition( pInstrument_t pOption_t, pInstrument_t pUnderlying_t );
 
   void SaveColumnSizes( ou::tf::GridColumnSizer& ) const;
   void SetColumnSizes( ou::tf::GridColumnSizer& );
-	
+
 // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
 #define GRID_ARRAY_PARAM_COUNT 6
 #define GRID_ARRAY_COL_COUNT 16
@@ -116,15 +117,12 @@ struct PanelOptionCombo_impl {
   class structPosition { // ======================================== structPosition
     friend class boost::serialization::access;
   public:
-    structPosition( pPositionGreek_t pPositionGreek, wxGrid& grid, int row )
-      : m_pPositionGreek( pPositionGreek ), m_grid( grid ), m_rowGrid( row ) {
+    structPosition( pPositionGreek_t pPositionGreek, wxGrid& grid, int nRow )
+      : m_pPositionGreek( pPositionGreek ), m_grid( grid ), m_rowGrid( nRow ) {
         Init();
     }
-    structPosition( const structPosition& rhs )
-      : m_pPositionGreek( rhs.m_pPositionGreek ), m_grid( rhs.m_grid ), m_rowGrid( rhs.m_rowGrid ) {
-      Init();
-    }
-    ~structPosition( void ) {
+    structPosition( const structPosition& ) = delete;
+    ~structPosition() {
       m_pPositionGreek->OnPositionChanged.Remove( MakeDelegate( this, &structPosition::HandleOnPositionChanged ) );
       m_pPositionGreek->OnExecutionRaw.Remove( MakeDelegate( this, &structPosition::HandleOnExecutionRaw ) );
       m_pPositionGreek->OnCommission.Remove( MakeDelegate( this, &structPosition::HandleOnCommission ) );
@@ -132,11 +130,12 @@ struct PanelOptionCombo_impl {
       m_pPositionGreek->OnQuote.Remove( MakeDelegate( this, &structPosition::HandleOnQuote ) );
       m_pPositionGreek->OnTrade.Remove( MakeDelegate( this, &structPosition::HandleOnTrade ) );
       m_pPositionGreek->OnGreek.Remove( MakeDelegate( this, &structPosition::HandleOnGreek ) );
+      m_pPositionGreek.reset();
     }
-    void UpdateGui( void ) {
+    void UpdateGui() {
       boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_rowGrid ) );
     }
-    const pPositionGreek_t GetPositionGreek( void ) const { return m_pPositionGreek; }
+    const pPositionGreek_t GetPositionGreek() const { return m_pPositionGreek; }
     void SetPrecision() {
       // https://www.boost.org/doc/libs/1_68_0/libs/fusion/doc/html/fusion/algorithm/transformation/functions/filter.html  has a const in the expression, so forced to use const_cast
       boost::fusion::for_each( boost::fusion::filter<CellInfo_t<ModelCellDouble> >( m_vModelCells ), [](const CellInfo_t<ModelCellDouble>& ci){
@@ -146,13 +145,14 @@ struct PanelOptionCombo_impl {
     }
     int GetGridRow() const { return m_rowGrid; }
     void SetGridRow( int nRow ) { m_rowGrid = nRow; }
-    
+
   private:
     int m_rowGrid;
     wxGrid& m_grid;
     pPositionGreek_t m_pPositionGreek;
     vModelCells_t m_vModelCells;  // needs to be changed to unique_ptr so doesn't change, or use move semantics? (due to background thread processing)
-    void Init( void ) {
+
+    void Init() {
       boost::fusion::fold( m_vModelCells, 0, ModelCell_ops::SetCol() );
       boost::fusion::at_c<COL_Pos>( m_vModelCells ).SetValue( m_pPositionGreek->GetRow().sName );
       m_pPositionGreek->OnPositionChanged.Add( MakeDelegate( this, &structPosition::HandleOnPositionChanged ) );
@@ -174,7 +174,7 @@ struct PanelOptionCombo_impl {
       boost::fusion::at_c<COL_URPL>( m_vModelCells ).SetValue( row.dblUnRealizedPL );
       boost::fusion::at_c<COL_RPL>( m_vModelCells ).SetValue( row.dblRealizedPL );
       boost::fusion::at_c<COL_Comm>( m_vModelCells ).SetValue( row.dblCommissionPaid );
-      
+
       SetPrecision();
     }
 
@@ -206,7 +206,7 @@ struct PanelOptionCombo_impl {
       boost::fusion::at_c<COL_Bid>( m_vModelCells ).SetValue( quote.Bid() );
       boost::fusion::at_c<COL_Ask>( m_vModelCells ).SetValue( quote.Ask() );
     }
-    
+
     void HandleOnGreek( const ou::tf::Greek& greek ) {
       boost::fusion::at_c<COL_ImpVol>( m_vModelCells ).SetValue( greek.ImpliedVolatility() );
       boost::fusion::at_c<COL_Delta>( m_vModelCells ).SetValue( greek.Delta() ); //Delta – Sensitivity to Underlying's Price
@@ -215,7 +215,7 @@ struct PanelOptionCombo_impl {
       boost::fusion::at_c<COL_Vega>( m_vModelCells ).SetValue( greek.Vega() ); //Vega – Sensitivity to Underlying's Volatility
       boost::fusion::at_c<COL_Rho>( m_vModelCells ).SetValue( greek.Rho() ); //Rho - Sensitivity to risk-free rate of interest
     }
-    
+
     template<typename Archive>
     void save( Archive& ar, const unsigned int version ) const {
       ar & *m_pPositionGreek;
@@ -228,12 +228,12 @@ struct PanelOptionCombo_impl {
 
     BOOST_SERIALIZATION_SPLIT_MEMBER()
   };  // ======================================== structPosition
-  
+
 
   typedef std::unique_ptr<structPosition> pstructPositionGreek_t;
   typedef std::vector<pstructPositionGreek_t> vPositions_t;
   vPositions_t m_vPositions;  // one to one match on rows in grid
-  
+
   bool m_bDialogActive;
   int m_nRowRightClick;  // row on which right click occurred
 
@@ -244,17 +244,17 @@ struct PanelOptionCombo_impl {
     wxTextCtrl* m_txtDescription;
     wxGrid* m_gridPositions;
     wxGrid* m_gridPortfolioStats;
-    
+
     wxSizerItem* m_siPosition;
     wxSizerItem* m_siPortfolioStats;
 
     wxMenu* m_menuGridLabelPositionPopUp;
     wxMenu* m_menuGridCellPositionPopUp;
 
-  PanelOptionCombo& m_poc; // passed in on construction 
+  PanelOptionCombo& m_poc; // passed in on construction
 
   pPortfolioGreek_t m_pPortfolioGreek;
-  
+
   typedef std::vector<double> vPortfolioCalcs_t;
   vPortfolioCalcs_t m_vPortfolioCalcs;
 
@@ -267,7 +267,7 @@ struct PanelOptionCombo_impl {
 
   ou::tf::DialogNewPortfolio::DataExchange m_DialogNewPortfolio_DataExchange;
   ou::tf::DialogNewPortfolio* m_pdialogNewPortfolio;
-  
+
   void CreateControls( wxWindow* parent );
   void SetPortfolioGreek( pPortfolioGreek_t pPortfolioGreek );
 
@@ -289,14 +289,14 @@ struct PanelOptionCombo_impl {
   void HandleOnUnRealizedPLUpdate( const Portfolio& );
   void HandleOnExecutionUpdate( const Portfolio& );
   void HandleOnCommissionUpdate( const Portfolio& );
-  
+
   void HandleWindowDestroy( wxWindowDestroyEvent& event );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
 
     ar & m_vPositions.size();
-    std::for_each( m_vPositions.begin(), m_vPositions.end(), 
+    std::for_each( m_vPositions.begin(), m_vPositions.end(),
       [&ar](const vPositions_t::value_type& vt){
         const std::string sO( vt->GetPositionGreek()->GetOption()->GetInstrument()->GetInstrumentName() );
         ar & sO;
@@ -327,12 +327,12 @@ struct PanelOptionCombo_impl {
         assert( nullptr != pUnderlyingInstrument.get() );
 
         AddOptionUnderlyingPosition( pOptionInstrument, pUnderlyingInstrument );
-        
+
         if ( 3 <= version ) {
           ar & (*m_vPositions.back());  // assumes AddPositionGreek does a push back, and is still current
         }
-        
-        
+
+
       }
       //m_poc.Layout();
       //m_sizerMain->CalcMin();

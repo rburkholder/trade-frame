@@ -17,7 +17,9 @@
 #include <set>
 #include <functional>
 
+#include <wx/grid.h>
 #include <wx/menu.h>
+#include <wx/sizer.h>
 #include <wx/textctrl.h>
 #include <wx/statline.h>
 
@@ -35,31 +37,36 @@ PanelOptionCombo_impl::PanelOptionCombo_impl( PanelOptionCombo& poc )
 
   m_bDialogActive = false;
 
-    m_sizerMain = NULL;
-    m_sizerHeader = NULL;
-    m_lblCurrency = NULL;
-    m_lblIdPortfolio = NULL;
-    m_txtDescription = NULL;
-    m_gridPositions = NULL;
-    m_gridPortfolioStats = NULL;
+    m_sizerMain = nullptr;
+    m_sizerHeader = nullptr;
+    m_lblCurrency = nullptr;
+    m_lblIdPortfolio = nullptr;
+    m_txtDescription = nullptr;
+    m_gridPositions = nullptr;
+    m_gridPortfolioStats = nullptr;
 
-    m_menuGridLabelPositionPopUp = NULL;
-    m_menuGridCellPositionPopUp = NULL;
+    m_menuGridLabelPositionPopUp = nullptr;
+    m_menuGridCellPositionPopUp = nullptr;
 
-    //m_pdialogInstrumentSelect = 0;
-    m_pdialogSimpleOneLineOrder = 0;
+    //m_pdialogInstrumentSelect = nullptr;
+    m_pdialogSimpleOneLineOrder = nullptr;
 
     m_nRowRightClick = -1;
 
 }
 
-PanelOptionCombo_impl::~PanelOptionCombo_impl( void ) {
+PanelOptionCombo_impl::~PanelOptionCombo_impl() {
+  //std::cout << "PanelOptionCombo_impl destructor begin" << std::endl;
   std::for_each( m_vPositions.begin(), m_vPositions.end(), [this]( vPositions_t::value_type& vt ){
     if ( nullptr != m_poc.m_fRemoveFromEngine ) {
       m_poc.m_fRemoveFromEngine( vt->GetPositionGreek()->GetOption(), vt->GetPositionGreek()->GetUnderlying() );
     }
   });
   m_vPositions.clear();
+  m_vPortfolioCalcs.clear();
+  m_vPortfolioModelCell.clear();
+  m_pPortfolioGreek.reset();
+  //std::cout << "PanelOptionCombo_impl destructor end" << std::endl;
 }
 
 void PanelOptionCombo_impl::CreateControls( wxWindow* parent ) {
@@ -134,26 +141,38 @@ void PanelOptionCombo_impl::CreateControls( wxWindow* parent ) {
 
   // watch out for the std::move operations?:  needed in some places?, not in others?
   // create empty DragDropInstrument with correct type in order to receive the desired initiate call when dropped
-  // GridOptionChain_impl::OnGridCellBeginDrag creates  source DragDropInstrument
-  typedef DragDropInstrument::pOptionInstrument_t pOptionInstrument_t;
-  typedef DragDropInstrument::pUnderlyingInstrument_t pUnderlyingInstrument_t;
-  DragDropInstrumentTarget* pddDataInstrumentTarget = new DragDropInstrumentTarget( new DragDropInstrument( DragDropInstrument::fOnOptionUnderlyingRetrieveInitiate_t() ) );
-  pddDataInstrumentTarget->m_fOnOptionUnderlyingRetrieveComplete = [this]( pOptionInstrument_t pOptionInstrument, pUnderlyingInstrument_t pUnderlyingInstrument ) {
-    std::cout << "pddDataInstrumentTarget symbol name: " << pOptionInstrument->GetInstrumentName() << std::endl;
-    AddOptionUnderlyingPosition( pOptionInstrument, pUnderlyingInstrument );
-  };
+  // GridOptionChain_impl::OnGridCellBeginDrag creates source DragDropInstrument
+  {
+    typedef DragDropInstrument::pOptionInstrument_t pOptionInstrument_t;
+    typedef DragDropInstrument::pUnderlyingInstrument_t pUnderlyingInstrument_t;
+    DragDropInstrumentTarget* pddDataInstrumentTarget = new DragDropInstrumentTarget( new DragDropInstrument( DragDropInstrument::fOnOptionUnderlyingRetrieveInitiate_t() ) );
+    pddDataInstrumentTarget->m_fOnOptionUnderlyingRetrieveComplete = [this]( pOptionInstrument_t pOptionInstrument, pUnderlyingInstrument_t pUnderlyingInstrument ) {
+      std::cout << "pddDataInstrumentTarget symbol name: " << pOptionInstrument->GetInstrumentName() << std::endl;
+      AddOptionUnderlyingPosition( pOptionInstrument, pUnderlyingInstrument );
+    };
+    m_gridPositions->SetDropTarget( pddDataInstrumentTarget ); // wxDropTarget takes possession
+  }
   //if ( nullptr != m_ddDataInstrumentTarget.m_fOnInstrumentRetrieveInitiate ) {
   //  m_ddDataInstrumentTarget.m_fOnInstrumentRetrieveInitiate( [](pInstrument_t pInstrument){
   //    std::cout << "symbol name: " << pInstrument->GetInstrumentName() << std::endl;
   //  });
   //}
-  m_gridPositions->SetDropTarget( pddDataInstrumentTarget ); // wxDropTarget takes possession
-  m_poc.SetDropTarget( pddDataInstrumentTarget );
+  {
+    typedef DragDropInstrument::pOptionInstrument_t pOptionInstrument_t;
+    typedef DragDropInstrument::pUnderlyingInstrument_t pUnderlyingInstrument_t;
+    DragDropInstrumentTarget* pddDataInstrumentTarget = new DragDropInstrumentTarget( new DragDropInstrument( DragDropInstrument::fOnOptionUnderlyingRetrieveInitiate_t() ) );
+    pddDataInstrumentTarget->m_fOnOptionUnderlyingRetrieveComplete = [this]( pOptionInstrument_t pOptionInstrument, pUnderlyingInstrument_t pUnderlyingInstrument ) {
+      std::cout << "pddDataInstrumentTarget symbol name: " << pOptionInstrument->GetInstrumentName() << std::endl;
+      AddOptionUnderlyingPosition( pOptionInstrument, pUnderlyingInstrument );
+    };
+    m_poc.SetDropTarget( pddDataInstrumentTarget ); // wxDropTarget takes possession
+  }
 
   m_gridPositions->Bind( wxEVT_MOUSEWHEEL,  &PanelOptionCombo_impl::OnMouseWheel, this );
   m_gridPositions->Bind( wxEVT_GRID_LABEL_RIGHT_CLICK, &PanelOptionCombo_impl::OnRightClickGridLabel, this ); // add in object for each row, column, cell?
   m_gridPositions->Bind( wxEVT_GRID_CELL_RIGHT_CLICK,  &PanelOptionCombo_impl::OnRightClickGridCell, this ); // add in object for each row, column, cell?
   m_gridPositions->Bind( wxEVT_GRID_COL_SIZE,          &PanelOptionCombo_impl::OnGridColSize, this );
+
   m_poc.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpAddPosition, this, m_poc.ID_MenuAddPosition, -1, 0 );
   m_poc.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpDeletePosition, this, m_poc.ID_MenuDeletePosition, -1, 0 );
   m_poc.Bind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpAddOrder, this, m_poc.ID_MenuAddOrder, -1, 0 );
@@ -200,6 +219,9 @@ void PanelOptionCombo_impl::SetColumnSizes( ou::tf::GridColumnSizer& gcs ) {
 
 void PanelOptionCombo_impl::HandleWindowDestroy( wxWindowDestroyEvent& event ) {
 
+  //std::cout << "PanelOptionCombo_impl::HandleWindowDestroy begin" << std::endl;
+
+  m_gridPositions->SetDropTarget( nullptr );
   m_poc.SetDropTarget( nullptr );
 
   if ( nullptr != m_menuGridLabelPositionPopUp ) {
@@ -218,7 +240,11 @@ void PanelOptionCombo_impl::HandleWindowDestroy( wxWindowDestroyEvent& event ) {
   // event.CanVeto(); // if not a
   //event.Skip();  // auto followed by Destroy();
 
-  m_gridPositions->Unbind( wxEVT_MOUSEWHEEL,  &PanelOptionCombo_impl::OnMouseWheel, this );
+  m_gridPositions->Unbind( wxEVT_MOUSEWHEEL,             &PanelOptionCombo_impl::OnMouseWheel, this );
+  m_gridPositions->Unbind( wxEVT_GRID_LABEL_RIGHT_CLICK, &PanelOptionCombo_impl::OnRightClickGridLabel, this );
+  m_gridPositions->Unbind( wxEVT_GRID_CELL_RIGHT_CLICK,  &PanelOptionCombo_impl::OnRightClickGridCell, this );
+  m_gridPositions->Unbind( wxEVT_GRID_COL_SIZE,          &PanelOptionCombo_impl::OnGridColSize, this );
+
   m_poc.Unbind( wxEVT_GRID_LABEL_RIGHT_CLICK, &PanelOptionCombo_impl::OnRightClickGridLabel, this ); // add in object for each row, column, cell?
   m_poc.Unbind( wxEVT_GRID_CELL_RIGHT_CLICK,  &PanelOptionCombo_impl::OnRightClickGridCell, this ); // add in object for each row, column, cell?
   m_poc.Unbind( wxEVT_GRID_COL_SIZE,          &PanelOptionCombo_impl::OnGridColSize, this );
@@ -231,6 +257,11 @@ void PanelOptionCombo_impl::HandleWindowDestroy( wxWindowDestroyEvent& event ) {
   m_poc.Unbind( wxEVT_COMMAND_MENU_SELECTED,  &PanelOptionCombo_impl::OnPositionPopUpClosePortfolio, this, m_poc.ID_MenuClosePortfolio, -1, 0 );
 
   m_poc.Unbind( wxEVT_DESTROY, &PanelOptionCombo_impl::HandleWindowDestroy, this );
+
+  //std::cout << "PanelOptionCombo_impl::HandleWindowDestroy end" << std::endl;
+
+  event.Skip( true );
+
 }
 
 void PanelOptionCombo_impl::SetPortfolioGreek( pPortfolioGreek_t pPortfolioGreek ) {
@@ -347,8 +378,8 @@ void PanelOptionCombo_impl::OnPositionPopUpClosePortfolio( wxCommandEvent& event
 }
 
 void PanelOptionCombo_impl::OnDialogNewPortfolioDone( ou::tf::DialogBase::DataExchange* ) {
-  m_pdialogNewPortfolio->SetOnDoneHandler( 0 );
-  m_pdialogNewPortfolio->SetDataExchange( 0 );
+  m_pdialogNewPortfolio->SetOnDoneHandler( nullptr );
+  m_pdialogNewPortfolio->SetDataExchange( nullptr );
   if ( m_DialogNewPortfolio_DataExchange.bOk ) {
     if ( nullptr != m_poc.m_fBootStrapNextPanelOptionCombo ) {
       std::string sPortfolioId( m_DialogNewPortfolio_DataExchange.sPortfolioId );
@@ -357,7 +388,7 @@ void PanelOptionCombo_impl::OnDialogNewPortfolioDone( ou::tf::DialogBase::DataEx
     }
   }
   m_pdialogNewPortfolio->Destroy();
-  m_pdialogNewPortfolio = 0;
+  m_pdialogNewPortfolio = nullptr;
   m_bDialogActive = false;
 }
 
@@ -416,7 +447,7 @@ void PanelOptionCombo_impl::OnDialogSimpleOneLineOrderDone( ou::tf::DialogBase::
   m_pdialogSimpleOneLineOrder->SetOnDoneHandler( 0 );
   m_pdialogSimpleOneLineOrder->SetDataExchange( 0 );
   m_pdialogSimpleOneLineOrder->Destroy();
-  m_pdialogSimpleOneLineOrder = 0;
+  m_pdialogSimpleOneLineOrder = nullptr;
   m_bDialogActive = false;
 }
 
@@ -508,7 +539,7 @@ void PanelOptionCombo_impl::AddPositionGreek( pPositionGreek_t pPositionGreek ) 
   int row( m_vPositions.size() );
 
   pstructPositionGreek_t pstructPositionGreek;
-  pstructPositionGreek.reset( new structPosition( pPositionGreek, *m_gridPositions, row ) );
+  pstructPositionGreek = std::make_unique<structPosition>(pPositionGreek, *m_gridPositions, row );
   m_vPositions.push_back( std::move( pstructPositionGreek ) );
   if ( nullptr != m_poc.m_fRegisterWithEngine ) {
     m_poc.m_fRegisterWithEngine( pPositionGreek->GetOption(), pPositionGreek->GetUnderlying() );
