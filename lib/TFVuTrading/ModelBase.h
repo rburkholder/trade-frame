@@ -16,7 +16,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/range.hpp>
 #include <boost/range/algorithm/for_each.hpp>
 
 #include <wx/dataview.h>
@@ -31,53 +30,53 @@ template<class T> // T inheriting class, M is map type
 class ModelBase: public wxDataViewModel {
 public:
 
-  ModelBase(void): wxDataViewModel() {};
-  ~ModelBase(void) {};
+  ModelBase(): wxDataViewModel() {};
+  virtual ~ModelBase() {};
 
-  template<class F> 
+  template<class F>
   void IterateColumnNames( F f ) {
     boost::for_each( m_vColumnNames, f );
   }
 
   // can convert from virtual to CRTP type calls.
-  virtual bool IsContainer( const wxDataViewItem& item ) const { 
-    assert( 0 );  // need to change this.  
-    return false; 
+  virtual bool IsContainer( const wxDataViewItem& item ) const {
+    assert( false );  // need to change this.
+    return false;
   };
-  virtual wxDataViewItem GetParent( const wxDataViewItem& item ) const { 
-    assert( 0 );
-    return wxDataViewItem( nullptr ); 
+  virtual wxDataViewItem GetParent( const wxDataViewItem& item ) const {
+    assert( false );
+    return wxDataViewItem( nullptr );
   };
 //  virtual unsigned int GetChildren( const wxDataViewItem& item, wxDataViewItemArray& children ) const { assert( 0 ); return 0; }; // called when clicking on plus
-  virtual unsigned int GetChildren( const wxDataViewItem& item, wxDataViewItemArray& children ) const { 
+  virtual unsigned int GetChildren( const wxDataViewItem& item, wxDataViewItemArray& children ) const {
     //assert( 0 );
     return 0;
   }; // called when clicking on plus
-  virtual unsigned int GetColumnCount( void ) const { 
-    return m_vColumnNames.size(); 
+  virtual unsigned int GetColumnCount( void ) const {
+    return m_vColumnNames.size();
   };
-  virtual wxString GetColumnType( unsigned int	col ) const { 
-    return "string"; 
+  virtual wxString GetColumnType( unsigned intcol ) const {
+    return "string";
   };
-  virtual void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col ) const { 
-    assert( 0 ); 
+  virtual void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int col ) const {
+    assert( false );
   };
-  virtual bool SetValue( const wxVariant& variant, const wxDataViewItem& item, unsigned int col	) { 
-    return false; 
+  virtual bool SetValue( const wxVariant& variant, const wxDataViewItem& item, unsigned int col ) {
+    return false;
   };
 
-  virtual void ClearItems( void ) {};
+  virtual void ClearItems() {};
 
 protected:
 
-  typedef std::vector<std::string> vString_t;
+  using vString_t = std::vector<std::string>;
 
   //static wxDataViewItem m_itemNull;
 
   vString_t m_vColumnNames;
 
 private:
-  
+
 };
 
 //template<class T>
@@ -85,3 +84,4 @@ private:
 
 } // namespace tf
 } // namespace ou
+
