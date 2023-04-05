@@ -56,25 +56,25 @@ public:
   PanelPortfolioPositionOrderExecution( MPPOE_t* pMPPOE );
   PanelPortfolioPositionOrderExecution(
    MPPOE_t* pMPPOE,
-   wxWindow* parent, 
-   wxWindowID id = SYMBOL_PANELPPOE_IDNAME, 
-   const wxPoint& pos = SYMBOL_PANELPPOE_POSITION, 
-   const wxSize& size = SYMBOL_PANELPPOE_SIZE, 
-   long style = SYMBOL_PANELPPOE_STYLE 
+   wxWindow* parent,
+   wxWindowID id = SYMBOL_PANELPPOE_IDNAME,
+   const wxPoint& pos = SYMBOL_PANELPPOE_POSITION,
+   const wxSize& size = SYMBOL_PANELPPOE_SIZE,
+   long style = SYMBOL_PANELPPOE_STYLE
    );
-  ~PanelPortfolioPositionOrderExecution(void);
+  virtual ~PanelPortfolioPositionOrderExecution();
 
   bool Create(
-   wxWindow* parent, 
-   wxWindowID id = SYMBOL_PANELPPOE_IDNAME, 
-   const wxPoint& pos = SYMBOL_PANELPPOE_POSITION, 
-   const wxSize& size = SYMBOL_PANELPPOE_SIZE, 
+   wxWindow* parent,
+   wxWindowID id = SYMBOL_PANELPPOE_IDNAME,
+   const wxPoint& pos = SYMBOL_PANELPPOE_POSITION,
+   const wxSize& size = SYMBOL_PANELPPOE_SIZE,
    long style = SYMBOL_PANELPPOE_STYLE
    );
 
   ou::Delegate<PanelPortfolioPositionOrderExecution*> NotifyClose;
 
-  VuTreePortfolioPositionOrder* GetTree( void ) { return m_pDVPPOE; };
+  VuTreePortfolioPositionOrder* GetTree() { return m_pDVPPOE; };
 
   void ClickedOnTreeContextMenu( EModelType );
 
@@ -105,7 +105,7 @@ private:
   void Init( void );
   void CreateControls( void );
   bool ShowToolTips( void ) { return true; };
-  
+
   void OnFocusChange( wxFocusEvent& event );
   void OnClose( wxCloseEvent& event );
 

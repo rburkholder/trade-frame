@@ -21,7 +21,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 // need to fix this constructor for proper use of wxPanel inherit
-PanelPortfolioPositionOrderExecution::PanelPortfolioPositionOrderExecution( MPPOE_t* pMPPOE ) 
+PanelPortfolioPositionOrderExecution::PanelPortfolioPositionOrderExecution( MPPOE_t* pMPPOE )
   : m_pMPPOE( pMPPOE )
 {
   Init();
@@ -37,7 +37,8 @@ PanelPortfolioPositionOrderExecution::PanelPortfolioPositionOrderExecution( /*wx
   Create(parent, id, pos, size, style);
 }
 
-PanelPortfolioPositionOrderExecution::~PanelPortfolioPositionOrderExecution(void) {
+PanelPortfolioPositionOrderExecution::~PanelPortfolioPositionOrderExecution() {
+  //std::cout << "~PanelPortfolioPositionOrderExecution" << std::endl;
 }
 
 bool PanelPortfolioPositionOrderExecution::Create( /*wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style*/
@@ -56,7 +57,7 @@ bool PanelPortfolioPositionOrderExecution::Create( /*wxWindow* parent, const wxS
     return true;
 }
 
-void PanelPortfolioPositionOrderExecution::Init( void ) {
+void PanelPortfolioPositionOrderExecution::Init() {
   m_vContextMenu.resize( EMTModelTypeCount );
   wxMenu* pMenu;
   pMenu = new wxMenu;
@@ -153,7 +154,7 @@ void PanelPortfolioPositionOrderExecution::CreateControls( void ) {
   // Portfolios & Positions
   m_pDVPortfolios = new VuPortfolios( m_pMPPOE->GetModelPortfolio(), pSplitPortfolioPosition, wxID_ANY, wxDefaultPosition, wxDefaultSize, commonStyle );
   m_pDVPositions = new VuPositions( m_pMPPOE->GetModelPosition(), pSplitPortfolioPosition, wxID_ANY, wxDefaultPosition, wxDefaultSize, commonStyle );
-  
+
   pSplitPortfolioPosition->Initialize( m_pDVPortfolios );
   pSplitPortfolioPosition->SplitHorizontally( m_pDVPortfolios, m_pDVPositions );
   pPanelPortfolioPosition->Show( true );
@@ -172,7 +173,7 @@ void PanelPortfolioPositionOrderExecution::CreateControls( void ) {
 
 void PanelPortfolioPositionOrderExecution::OnClose( wxCloseEvent& event ) {
   // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
+  // event.CanVeto(); // if not a
   event.Skip();  // auto followed by Destroy();
 }
 
