@@ -57,7 +57,7 @@ public:
 
   using vpItems_t = std::vector<structMenuItem*>;
 
-  FrameMain(void);
+  FrameMain();
   FrameMain(
     wxWindow* parent,
     wxWindowID id = SYMBOL_FRAMEGENERIC_IDNAME,
@@ -65,7 +65,7 @@ public:
     const wxPoint& pos = SYMBOL_FRAMEGENERIC_POSITION,
     const wxSize& size = SYMBOL_FRAMEGENERIC_SIZE,
     long style = SYMBOL_FRAMEGENERIC_STYLE );
-  ~FrameMain(void);
+  virtual ~FrameMain();
 
   bool Create(
     wxWindow* parent,

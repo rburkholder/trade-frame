@@ -31,7 +31,7 @@ FrameMain::FrameMain( wxWindow* parent, wxWindowID id, const wxString& caption, 
 }
 
 FrameMain::~FrameMain() {
-  //std::cout << "FrameMain::~FrameMain" << this->GetName() << std::endl;
+  //std::cout << "FrameMain::~FrameMain: " << this->GetName() << std::endl;
 }
 
 bool FrameMain::Create( wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style ) {
