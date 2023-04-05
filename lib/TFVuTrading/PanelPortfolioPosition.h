@@ -39,45 +39,45 @@ class PanelPortfolioPosition_impl;  // Forward declaration
 class PanelPortfolioPosition: public wxPanel {
   friend class PanelPortfolioPosition_impl;
 public:
-  
+
   typedef ou::tf::Instrument::pInstrument_t pInstrument_t;
 
   typedef ou::tf::Portfolio::idPortfolio_t idPortfolio_t;
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
-  
+
   typedef ou::tf::Portfolio::idPosition_t idPosition_t;
   typedef ou::tf::Portfolio::pPosition_t pPosition_t;
-  
+
   std::function<pInstrument_t(void)> m_fSelectInstrument;  // Dialog to select Symbol/Instrument
-  
+
   typedef std::function<void(pPosition_t)> fAddPosition_t;
   typedef std::function<void(pInstrument_t,pPortfolio_t,fAddPosition_t)> fConstructPosition_t;
   typedef std::function<void(PanelPortfolioPosition&, const std::string&, const std::string&)> fConstructPortfolio_t;
   typedef std::function<void(int,int,PanelPortfolioPosition&)> fColumnWidthChanged_t;
-  
+
   fAddPosition_t m_fAddPosition;  // does not appeared to be used
   fConstructPosition_t m_fConstructPosition;
   fConstructPortfolio_t m_fConstructPortfolio;
   fColumnWidthChanged_t m_fColumnWidthChanged;
 
-  PanelPortfolioPosition(void);
-  PanelPortfolioPosition( 
-    wxWindow* parent, 
-    wxWindowID id =      PANEL_PORTFOLIOPOSITION_IDNAME, 
-    const wxPoint& pos = PANEL_PORTFOLIOPOSITION_POSITION, 
-    const wxSize& size = PANEL_PORTFOLIOPOSITION_SIZE, 
+  PanelPortfolioPosition();
+  PanelPortfolioPosition(
+    wxWindow* parent,
+    wxWindowID id =      PANEL_PORTFOLIOPOSITION_IDNAME,
+    const wxPoint& pos = PANEL_PORTFOLIOPOSITION_POSITION,
+    const wxSize& size = PANEL_PORTFOLIOPOSITION_SIZE,
     long style =         PANEL_PORTFOLIOPOSITION_STYLE );
-  virtual ~PanelPortfolioPosition(void);
+  virtual ~PanelPortfolioPosition();
 
-  bool Create( 
-    wxWindow* parent, 
-    wxWindowID id =      PANEL_PORTFOLIOPOSITION_IDNAME, 
-    const wxPoint& pos = PANEL_PORTFOLIOPOSITION_POSITION, 
-    const wxSize& size = PANEL_PORTFOLIOPOSITION_SIZE, 
+  bool Create(
+    wxWindow* parent,
+    wxWindowID id =      PANEL_PORTFOLIOPOSITION_IDNAME,
+    const wxPoint& pos = PANEL_PORTFOLIOPOSITION_POSITION,
+    const wxSize& size = PANEL_PORTFOLIOPOSITION_SIZE,
     long style =         PANEL_PORTFOLIOPOSITION_STYLE );
 
   void SetPortfolio( pPortfolio_t pPortfolio );
-  pPortfolio_t& GetPortfolio( void );
+  pPortfolio_t& GetPortfolio();
 
   //void SetNameLookup( DelegateNameLookup_t function );
   //void SetConstructPosition( DelegateConstructPosition_t function );
@@ -87,8 +87,8 @@ public:
 
   void SaveColumnSizes( ou::tf::GridColumnSizer& ) const;
   void SetColumnSizes( ou::tf::GridColumnSizer& );
-	
-  void UpdateGui( void );
+
+  void UpdateGui();
 
 protected:
 
@@ -96,7 +96,7 @@ protected:
 
 private:
 
-  enum { ID_Null=wxID_HIGHEST, ID_PANEL_PORTFOLIOPOSITION, 
+  enum { ID_Null=wxID_HIGHEST, ID_PANEL_PORTFOLIOPOSITION,
     ID_LblIdPortfolio, ID_LblCurrency, ID_LblDescription, ID_LblUnrealizedPL, ID_LblCommission, ID_LblRealizedPL, ID_LblTotal,
     ID_TxtDescription,
     ID_TxtUnRealizedPL, ID_TxtCommission, ID_TxtRealizedPL, ID_TxtTotal,
