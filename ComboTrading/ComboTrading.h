@@ -27,11 +27,6 @@
 
 #include <OUCommon/Worker.h>
 
-#include <TFBitsNPieces/FrameWork01.h>
-#include <TFBitsNPieces/GridColumnSizer.h>
-#include <TFBitsNPieces/IQFeedSymbolListOps.h>
-
-// may need to inherit and add more functionality to the class:
 #include <TFTrading/DBOps.h>
 #include <TFTrading/PortfolioManager.h>
 
@@ -41,17 +36,24 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/PanelManualOrder.h>
+#include <TFVuTrading/PanelOptionCombo.h>
 #include <TFVuTrading/PanelPortfolioPosition.h>
 #include <TFVuTrading/GridIBPositionDetails.h>
 #include <TFVuTrading/GridIBAccountValues.h>
 
-#include "Process.h"
-#include "BundleTracking.h"
-#include "PanelCharts.h"
-
 #include <TFVuTrading/ModelPortfolioPositionOrderExecution.h>
 #include <TFVuTrading/PanelPortfolioPositionOrderExecution.h>
 #include <TFVuTrading/ControllerPortfolioPositionOrderExecution.h>
+
+#include <TFBitsNPieces/FrameWork01.h>
+#include <TFBitsNPieces/GridColumnSizer.h>
+#include <TFBitsNPieces/IQFeedSymbolListOps.h>
+#include <TFBitsNPieces/IQFeedInstrumentBuild.h>
+
+
+#include "Process.h"
+#include "PanelCharts.h"
+#include "BundleTracking.h"
 
 /// \brief Option Combo Trading, code started 2015/11/08
 ///
@@ -69,9 +71,6 @@ private:
 
   typedef ou::tf::Portfolio::pPortfolio_t pPortfolio_t;
   typedef ou::tf::Position::pPosition_t pPosition_t;
-
-  typedef ou::tf::PortfolioGreek::pPortfolioGreek_t pPortfolioGreek_t;
-  typedef ou::tf::PositionGreek::pPositionGreek_t pPositionGreek_t;
 
   typedef ou::tf::ModelPortfolioPositionOrderExecution MPPOE_t;
   typedef ou::tf::PanelPortfolioPositionOrderExecution PPPOE_t;
@@ -203,7 +202,7 @@ private:
   void ConstructEquityPosition2( pInstrument_t& pInstrument ); // step 2
 
   virtual bool OnInit();
-  virtual int OnExit();
+  //virtual int OnExit();
   virtual void OnAssertFailure( const wxChar*, int, const wxChar*, const wxChar*, const wxChar* );
   //virtual void HandleEvent( wxEvtHandler*, wxEventFunction, wxEvent& ) const;
   void OnClose( wxCloseEvent& event );

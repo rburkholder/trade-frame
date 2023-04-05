@@ -14,18 +14,16 @@
 
 // started 2015/11/08
 
+#include <memory>
 #include <algorithm>
 #include <functional>
-#include <memory>
 
 #include <boost/lexical_cast.hpp>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-// TODO:  can probably get rid of this?
-#include <boost/phoenix/core.hpp>
-#include <boost/phoenix/bind/bind_member_function.hpp>
-#include <boost/phoenix/stl/algorithm/querying.hpp>
+#include <wx/app.h>
+#include <wx/timer.h>
 
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/AccountManager.h>
@@ -34,14 +32,7 @@
 #include <TFIQFeed/BuildSymbolName.h>
 #include <TFIQFeed/BuildInstrument.h>
 
-#include <TFBitsNPieces/IQFeedInstrumentBuild.h>
-
-#include <TFVuTrading/PanelOptionCombo.h>
 #include <TFVuTrading/DragDropInstrument.h>
-
-#include <wx/app.h>
-#include <wx/timer.h>
-#include <wx/frame.h>
 
 #include "ComboTrading.h"
 
@@ -153,6 +144,8 @@ bool AppComboTrading::OnInit() {
       };
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, "Combo Trading", wxDefaultPosition, wxSize( 800, 1000 ) );
+  m_pFrameMain->SetName( "primary" );
+  //std::cout << "frame main: primary" << std::endl;
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
   //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
@@ -240,7 +233,7 @@ bool AppComboTrading::OnInit() {
   wxMenu* pMenuSymbols = m_pFrameMain->AddDynamicMenu( "Symbol List", vItemsSymbols );
 
   FrameMain::vpItems_t vItemsActions;
-  vItemsActions.push_back( new mi( "Federal Funss Yield Curve", MakeDelegate( this, &AppComboTrading::HandleMenuActionEmitYieldCurve ) ) );
+  vItemsActions.push_back( new mi( "Federal Funds Yield Curve", MakeDelegate( this, &AppComboTrading::HandleMenuActionEmitYieldCurve ) ) );
   //vItems.push_back( new mi( "load weeklies", MakeDelegate( &m_process, &Process::LoadWeeklies ) ) );
   vItemsActions.push_back( new mi( "Save Series", MakeDelegate( this, &AppComboTrading::HandleMenuActionSaveSeries ) ) );
   //vItems.push_back( new mi( "Load DataBase", MakeDelegate( this, &AppComboTrading::HandleLoadDatabase ) ) );
@@ -257,8 +250,8 @@ bool AppComboTrading::OnInit() {
 
   BuildFrameCharts();
   BuildFrameInteractiveBrokers();
-  BuildFramePortfolioPosition();
-  BuildFrameOptionCombo();
+  BuildFramePortfolioPosition(); // needed by the database loader
+  BuildFrameOptionCombo(); // this one is having problems
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   pm.OnPortfolioLoaded.Add( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
@@ -266,6 +259,8 @@ bool AppComboTrading::OnInit() {
 
   if ( true ) {
     m_pFPPOE = new FrameMain( m_pFrameMain, wxID_ANY, "Portfolio/Position/Order/Execution" );
+    m_pFPPOE->SetName( "PPOE" );
+    //std::cout << "frame main: ppoe" << std::endl;
 
     m_pMPPOE = new MPPOE_t;
 
@@ -304,26 +299,13 @@ bool AppComboTrading::OnInit() {
   return 1;
 }
 
-int AppComboTrading::OnExit() {
+//int AppComboTrading::OnExit() {
 
-  // called after destroying all application windows
+  // OnExit is called after destroying all application windows and controls,
+  // but before wxWidgets cleanup.
 
-  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
-  pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
-  pm.OnPositionLoaded.Remove( MakeDelegate( this, &AppComboTrading::HandlePositionLoad ) );
-
-//  DelinkFromPanelProviderControl();  generates stack errors
-
-  m_timerGuiRefresh.Stop();
-
-  m_db.OnRegisterTables.Remove( MakeDelegate( this, &AppComboTrading::HandleRegisterTables ) );
-  m_db.OnRegisterRows.Remove( MakeDelegate( this, &AppComboTrading::HandleRegisterRows ) );
-
-  assert( m_db.IsOpen() );
-  m_db.Close();
-
-  return wxApp::OnExit();
-}
+  //return wxApp::OnExit();
+//}
 
 void AppComboTrading::ProvideOptionList( const std::string& sSymbol, ou::tf::PanelCharts::fSymbol_t function ) {
   m_listIQFeedSymbols.SelectOptionsByUnderlying( sSymbol, function );
@@ -334,6 +316,8 @@ void AppComboTrading::BuildFrameInteractiveBrokers( void ) {
   m_pFInteractiveBrokers = new FrameMain( m_pFrameMain, wxID_ANY, "Interactive Brokers", wxDefaultPosition, wxSize( 900, 500 ),
     wxCAPTION|wxRESIZE_BORDER
     );
+  m_pFInteractiveBrokers->SetName( "IB" );
+  //std::cout << "frame main: ib" << std::endl;
 
   FrameMain* itemFrame1 = m_pFInteractiveBrokers;
 
@@ -374,6 +358,8 @@ void AppComboTrading::BuildFrameCharts( void ) {
 //    wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
         wxCAPTION|wxRESIZE_BORDER
     );
+  m_pFCharts->SetName( "charts" );
+  //std::cout << "frame main: charts" << std::endl;
 
   wxBoxSizer* psizer;
   psizer = new wxBoxSizer(wxVERTICAL);
@@ -546,6 +532,8 @@ void AppComboTrading::BuildFramePortfolioPosition( void ) {
 //    wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
         wxCAPTION|wxRESIZE_BORDER
     );
+  m_pFPP->SetName( "portfolio" );
+  //std::cout << "frame main: portfolio" << std::endl;
 
   m_pFPP->SetAutoLayout( true );
 
@@ -571,25 +559,27 @@ void AppComboTrading::BuildFramePortfolioPosition( void ) {
 
 }
 
-void AppComboTrading::BuildFrameOptionCombo( void ) {
+void AppComboTrading::BuildFrameOptionCombo() {
 
   m_pFOC = new FrameMain( m_pFrameMain, wxID_ANY, "Option Combo Sandbox", wxDefaultPosition, wxSize( 900, 500 ),
 //    wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX
         wxCAPTION|wxRESIZE_BORDER
     );
+  m_pFOC->SetName( "sandbox" );
+  //std::cout << "frame main: sandbox" << std::endl;
 
   m_pFOC->SetAutoLayout( true );
 
-  m_sizerFOC = new wxBoxSizer(wxVERTICAL);
-  m_pFOC->SetSizer(m_sizerFOC);
+  m_sizerFOC = new wxBoxSizer( wxVERTICAL );
+  m_pFOC->SetSizer( m_sizerFOC );
 
   //m_scrollOC is used for holding the pPanelOptionCombo instances
-  m_scrollFOC = new wxScrolledWindow( m_pFOC, -1, wxDefaultPosition, wxDefaultSize, wxVSCROLL );
+  m_scrollFOC = new wxScrolledWindow( m_pFOC, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL );
   m_sizerFOC->Add(m_scrollFOC, 1, wxGROW|wxALL, 4);
   //m_scrollFOC->SetScrollbars(5, 5, 10, 10);
   m_scrollFOC->SetScrollRate(4, 4);
 
-  m_sizerScrollOC = new wxBoxSizer(wxVERTICAL);
+  m_sizerScrollOC = new wxBoxSizer( wxVERTICAL );
   m_scrollFOC->SetSizer( m_sizerScrollOC );
 
   wxPoint point = m_pFOC->GetPosition();
@@ -605,6 +595,9 @@ void AppComboTrading::BuildFrameOptionCombo( void ) {
 }
 
 AppComboTrading::pPanelOptionCombo_t AppComboTrading::HandleNewPanelOptionCombo( const idPortfolio_t& idPortfolio, const std::string& sDescription ) {
+
+  typedef ou::tf::PortfolioGreek::pPortfolioGreek_t pPortfolioGreek_t;
+  typedef ou::tf::PositionGreek::pPositionGreek_t pPositionGreek_t;
 
   pPanelOptionCombo_t pPanelOptionCombo;
   pPanelOptionCombo = new ou::tf::PanelOptionCombo( m_scrollFOC );  // start with one empty portfolio
@@ -1398,11 +1391,20 @@ void AppComboTrading::HandleLoad( wxCommandEvent& event ) {
 }
 
 void AppComboTrading::OnClose( wxCloseEvent& event ) {
+
   m_timerGuiRefresh.Stop();
   DelinkFromPanelProviderControl();
-//  if ( 0 != OnPanelClosing ) OnPanelClosing();
-  // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a
+
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+  pm.OnPortfolioLoaded.Remove( MakeDelegate( this, &AppComboTrading::HandlePortfolioLoad ) );
+  pm.OnPositionLoaded.Remove( MakeDelegate( this, &AppComboTrading::HandlePositionLoad ) );
+
+  m_db.OnRegisterTables.Remove( MakeDelegate( this, &AppComboTrading::HandleRegisterTables ) );
+  m_db.OnRegisterRows.Remove( MakeDelegate( this, &AppComboTrading::HandleRegisterRows ) );
+
+  assert( m_db.IsOpen() );
+  m_db.Close();
+
   event.Skip();  // auto followed by Destroy();
 }
 
