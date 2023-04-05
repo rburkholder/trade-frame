@@ -29,14 +29,15 @@ namespace tf { // TradeFrame
 
 // need to allow DragDropInstrumentTarget delete 'data'
 DragDropInstrumentTarget::DragDropInstrumentTarget( DragDropInstrument* data ): wxDropTarget( data ) {
+  //std::cout << "DragDropInstrumentTarget construct" << std::endl;
 }
 
-DragDropInstrumentTarget::~DragDropInstrumentTarget( ) {
+DragDropInstrumentTarget::~DragDropInstrumentTarget() {
   wxDropTarget::SetDataObject( nullptr );
+  //std::cout << "DragDropInstrumentTarget destruct" << std::endl;
 }
 
 bool DragDropInstrumentTarget::GetData() {
-
   bool bResult = wxDropTarget::GetData();
   return bResult;
 }

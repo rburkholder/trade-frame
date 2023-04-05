@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:   DragDropInstrumentTarget.h
  * Author: raymond@burkholder.net
  *
@@ -31,7 +31,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-/* wxDropTarget is defined in a class desiring to be the destination of an 
+/* wxDropTarget is defined in a class desiring to be the destination of an
  *   instrument, or OptionInstrument/UnderlyingInstrument pair
  * WxDropTarget has the appropriate 'retrieve complete' function assigned
  *   in order to receive the desired objects in a callback
@@ -40,7 +40,7 @@ namespace tf { // TradeFrame
 class DragDropInstrumentTarget: public wxDropTarget {
 public:
 
-  DragDropInstrumentTarget( DragDropInstrument *data=NULL );
+  DragDropInstrumentTarget( DragDropInstrument *data = nullptr );
   virtual ~DragDropInstrumentTarget( );
 
   virtual bool GetData();
@@ -57,8 +57,8 @@ public:
   typedef DragDropInstrument::fOnInstrumentRetrieveComplete_t fOnInstrumentRetrieveComplete_t;
   fOnInstrumentRetrieveComplete_t m_fOnInstrumentRetrieveComplete;  // results of instrument drag, may or may not have contract
 
-  typedef DragDropInstrument::fOnOptionUnderlyingRetrieveComplete_t fOnOptionUnderlyingRetrieveComplete_t; 
-  fOnOptionUnderlyingRetrieveComplete_t m_fOnOptionUnderlyingRetrieveComplete; 
+  typedef DragDropInstrument::fOnOptionUnderlyingRetrieveComplete_t fOnOptionUnderlyingRetrieveComplete_t;
+  fOnOptionUnderlyingRetrieveComplete_t m_fOnOptionUnderlyingRetrieveComplete;
 
 protected:
 private:
