@@ -22,25 +22,27 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
-#include <wx/treectrl.h>
 #include <wx/panel.h>
 #include <wx/event.h>
-#include <wx/splitter.h>
 #include <wx/notebook.h>
+#include <wx/splitter.h>
+#include <wx/treectrl.h>
 
-#include <TFTrading/ProviderManager.h>
+#include <OUCharting/ChartDataView.h>
+
 #include <TFTrading/Watch.h>
+#include <TFTrading/ProviderManager.h>
+
+#include <TFIQFeed/MarketSymbol.h>
 
 #include <TFOptions/Option.h>
 #include <TFOptions/NoRiskInterestRateSeries.h>
 
+#include <TFVuTrading/ModelChartHdf5.h>
+#include <TFVuTrading/GridOptionChain.h>
+
 #include <TFBitsNPieces/TreeOps.h>
 #include <TFBitsNPieces/GridColumnSizer.h>
-
-#include <OUCharting/ChartDataView.h>
-#include <TFVuTrading/ModelChartHdf5.h>
-
-#include <TFVuTrading/GridOptionChain.h>
 
 #include "TreeItem.h"
 #include "TreeItemGroup.h"

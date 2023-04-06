@@ -17,14 +17,12 @@
 #include <vector>
 #include <algorithm>
 
-#include <boost/phoenix/bind/bind_member_function.hpp>
 #include <boost/phoenix/core/argument.hpp>
+#include <boost/phoenix/bind/bind_member_function.hpp>
 
 #include <wx/sizer.h>
 #include <wx/icon.h>
 #include <wx/menu.h>
-
-#include <TFIQFeed/MarketSymbol.h>
 
 #include <TFOptions/Option.h>
 
