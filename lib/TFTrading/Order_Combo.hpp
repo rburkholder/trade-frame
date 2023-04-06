@@ -67,12 +67,12 @@ public:
   OrderCombo();
   ~OrderCombo();
 
-  using pOrderCombo_t = std::shared_ptr<OrderCombo>;
-
   using pPosition_t = Position::pPosition_t;
 
   using fLegDone_t = OrderCombo_TrackLeg::fLegDone_t;
   using fComboDone_t = std::function<void()>;
+
+  using pOrderCombo_t = std::shared_ptr<OrderCombo>;
 
   static pOrderCombo_t Factory() { return std::make_shared<OrderCombo>(); }
 

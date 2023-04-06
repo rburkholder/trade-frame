@@ -23,6 +23,7 @@
 #define COMBO_H
 
 #include <map>
+#include <unordered_set>
 
 #include <OUCharting/ChartDataView.h>
 
@@ -218,8 +219,11 @@ protected:
   mapComboLeg_t::iterator LU( LegNote::Type );
 
   using pOrderCombo_t = ou::tf::OrderCombo::pOrderCombo_t;
-  pOrderCombo_t m_pOrderCombo;  // one order at a time for now
-  pOrderCombo_t m_pOrderCombo_Kill; // where OrderCombo goes to die inside the loop
+
+  using vpOrderCombo_t = std::unordered_set<pOrderCombo_t>;
+  vpOrderCombo_t m_vpOrderCombo;
+
+  pOrderCombo_t m_pOrderCombo_Kill; // where pOrderCombo goes to die outside the loop
 
   using fInitTrackOption_t = std::function<void(ComboLeg&)>;
   using mapInitTrackOption_t = std::map<LegNote::Type,fInitTrackOption_t>;
