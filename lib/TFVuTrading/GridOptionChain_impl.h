@@ -55,18 +55,18 @@ struct GridOptionChain_impl {
   (GRID_ARRAY_COL_COUNT,  \
     ( /* Col 0,         1,            2,         3,      4,             */ \
       (COL_CallLast , "Last",  wxALIGN_LEFT,  50, ModelCellDouble ), \
-      (COL_CallBid  , "Bid",   wxALIGN_LEFT,  50, ModelCellDouble ), \
-      (COL_CallAsk  , "Ask",   wxALIGN_LEFT,  50, ModelCellDouble ), \
       (COL_CallIV   , "IV",    wxALIGN_LEFT,  50, ModelCellDouble ), \
-      (COL_CallDelta, "Delta", wxALIGN_LEFT,  50, ModelCellDouble ), \
       (COL_CallGamma, "Gamma", wxALIGN_LEFT,  60, ModelCellDouble ), \
+      (COL_CallDelta, "Delta", wxALIGN_LEFT,  50, ModelCellDouble ), \
+      (COL_CallAsk  , "Ask",   wxALIGN_LEFT,  50, ModelCellDouble ), \
+      (COL_CallBid  , "Bid",   wxALIGN_LEFT,  50, ModelCellDouble ), \
       (COL_Strike   , "Strk",  wxALIGN_LEFT,  60, ModelCellDouble ), \
-      (COL_PutLast  , "Last",  wxALIGN_LEFT,  50, ModelCellDouble ), \
       (COL_PutBid   , "Bid",   wxALIGN_LEFT,  50, ModelCellDouble ), \
       (COL_PutAsk   , "Ask",   wxALIGN_LEFT,  50, ModelCellDouble ), \
-      (COL_PutIV    , "IV",    wxALIGN_LEFT,  50, ModelCellDouble ), \
       (COL_PutDelta , "Delta", wxALIGN_LEFT,  50, ModelCellDouble ), \
       (COL_PutGamma , "Gamma", wxALIGN_LEFT,  60, ModelCellDouble ), \
+      (COL_PutIV    , "IV",    wxALIGN_LEFT,  50, ModelCellDouble ), \
+      (COL_PutLast  , "Last",  wxALIGN_LEFT,  50, ModelCellDouble ), \
       ) \
     ) \
   /**/

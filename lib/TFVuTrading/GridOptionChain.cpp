@@ -12,15 +12,13 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-
-
 #include "GridOptionChain.h"
 #include "GridOptionChain_impl.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-GridOptionChain::GridOptionChain(void): wxGrid() {
+GridOptionChain::GridOptionChain(): wxGrid() {
   Init();
 }
 
@@ -32,10 +30,10 @@ GridOptionChain::GridOptionChain(
   Create(parent, id, pos, size, style, sTitle );
 }
 
-GridOptionChain::~GridOptionChain(void) {
+GridOptionChain::~GridOptionChain() {
 }
 
-void GridOptionChain::Init( void ) {
+void GridOptionChain::Init() {
 }
 
 bool GridOptionChain::Create(
