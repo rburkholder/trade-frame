@@ -97,16 +97,27 @@
  *
  */
 
+namespace {
+  static const std::string c_sDisplayName_App( "Combo Trading" );
+  static const std::string c_sDisplayName_Vendor( "One Unified Net Limited" );
+  static const std::string c_sFileName_Base( "ComboTrading" );
+  //static const std::string c_sDirectory_Base( "../" );
+  static const std::string c_sFileName_SymbolSubset( c_sFileName_Base + ".ser" );
+  static const std::string c_sFileName_DataBase( c_sFileName_Base + ".db" );
+  static const std::string c_sFileName_State( c_sFileName_Base + ".state" );
+  static const std::string c_sFileName_Series( "/app/" + c_sFileName_Base );
+}
+
 IMPLEMENT_APP(AppComboTrading)
 
-const std::string sFileNameMarketSymbolSubset( "../combotrading.ser" );
+const std::string sFileNameMarketSymbolSubset( c_sFileName_SymbolSubset );
 
 bool AppComboTrading::OnInit() {
 
   wxApp::OnInit();
-  wxApp::SetAppDisplayName( "Combo Trading" );
-  wxApp::SetVendorName( "OneUnified" );
-  wxApp::SetVendorDisplayName( "One Unified" );
+  wxApp::SetAppDisplayName( c_sDisplayName_App );
+  wxApp::SetVendorName( c_sDisplayName_Vendor );
+  wxApp::SetVendorDisplayName( c_sDisplayName_Vendor );
 
   //bool bExit = GetExitOnFrameDelete();
   //SetExitOnFrameDelete( true );
@@ -143,7 +154,7 @@ bool AppComboTrading::OnInit() {
         return pOption;
       };
 
-  m_pFrameMain = new FrameMain( 0, wxID_ANY, "Combo Trading", wxDefaultPosition, wxSize( 800, 1000 ) );
+  m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sDisplayName_App, wxDefaultPosition, wxSize( 800, 1000 ) );
   m_pFrameMain->SetName( "primary" );
   //std::cout << "frame main: primary" << std::endl;
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -273,9 +284,8 @@ bool AppComboTrading::OnInit() {
     m_pFPPOE->Show();
   }
 
-  m_sDbName = "../ComboTrading.db";
   try {
-    if ( boost::filesystem::exists( m_sDbName ) ) {
+    if ( boost::filesystem::exists( c_sFileName_DataBase ) ) {
   //    boost::filesystem::remove( sDbName );
     }
 
@@ -284,13 +294,10 @@ bool AppComboTrading::OnInit() {
     m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &AppComboTrading::HandlePopulateDatabase ) );
     m_db.SetOnLoadDatabaseHandler( MakeDelegate( this, &AppComboTrading::HandleLoadDatabase ) );
 
-    m_sWorkingDirectory = "..";
-    m_sfnState = "ComboTrading.state";
-
-    m_db.Open( m_sDbName );
+    m_db.Open( c_sFileName_DataBase );
   }
   catch(...) {
-    std::cout << "database fault on " << m_sDbName << std::endl;
+    std::cout << "database fault on " << c_sFileName_DataBase << std::endl;
   }
 
   m_pFrameMain->Move( 100, 500 );
@@ -1353,9 +1360,8 @@ void AppComboTrading::HandleSaveValues( void ) {
     //std::string sPrefix86400sec( "/bar/86400/AtmIV/" + iter->second.sName.substr( 0, 1 ) + "/" + iter->second.sName );
     //std::string sPrefix86400sec( "/app/ComboTrading/AtmIV/" + m_pBundle->Name() );
     //m_pBundle->SaveData( sPrefixSession, sPrefix86400sec );
-    static const std::string sPrefix( "/app/ComboTrading" );
-    const std::string sPrefixSession( sPrefix + "/" + m_sTSDataStreamStarted );
-    m_pPanelCharts->SaveSeries( sPrefixSession, sPrefix );
+    const std::string sPrefixSession( c_sFileName_Series + "/" + m_sTSDataStreamStarted );
+    m_pPanelCharts->SaveSeries( sPrefixSession, c_sFileName_Series );
     m_fedrate.SaveSeries( sPrefixSession );
   }
   catch(...) {
@@ -1368,7 +1374,7 @@ void AppComboTrading::HandleSaveValues( void ) {
 void AppComboTrading::HandleSave( wxCommandEvent& event ) {
   CallAfter( [this](){ // do after main gui action, allows debugging
     std::cout << "Saving Config ..." << std::endl;
-    std::ofstream ofs( m_sWorkingDirectory + "/" + m_sfnState );
+    std::ofstream ofs( c_sFileName_State );
     boost::archive::text_oarchive oa(ofs);
     oa & *this;
     std::cout << "  done." << std::endl;
@@ -1379,7 +1385,7 @@ void AppComboTrading::HandleLoad( wxCommandEvent& event ) {
   CallAfter( [this](){ // do after main gui action, allows debugging
     try {
       std::cout << "Loading Config ..." << std::endl;
-      std::ifstream ifs( m_sWorkingDirectory + "/" + m_sfnState );
+      std::ifstream ifs( c_sFileName_State );
       boost::archive::text_iarchive ia(ifs);
       ia & *this;
       std::cout << "  done." << std::endl;

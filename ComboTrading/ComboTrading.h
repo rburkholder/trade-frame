@@ -114,8 +114,6 @@ private:
   typedef std::map<std::string,structPortfolioTrading> mapPortfoliosTrading_t;
   typedef std::map<std::string,structPortfolioSandbox> mapPortfoliosSandbox_t;
 
-  std::string m_sDbName;
-
   ou::action::Worker m_worker;
 
   wxTimer m_timerGuiRefresh;
@@ -175,8 +173,6 @@ private:
   ou::tf::GridColumnSizer m_gcsPanelOptionCombo;
 
   ou::tf::DBOps m_db;
-  std::string m_sWorkingDirectory;
-  std::string m_sfnState;
 
   wxBoxSizer* m_sizerFOC;
   wxScrolledWindow* m_scrollFOC;
