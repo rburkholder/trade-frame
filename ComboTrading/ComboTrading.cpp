@@ -303,6 +303,11 @@ bool AppComboTrading::OnInit() {
   m_pFrameMain->Move( 100, 500 );
   m_pFrameMain->Raise();
 
+  CallAfter(
+    [this](){
+      LoadState();
+    } );
+
   return 1;
 }
 
@@ -1373,32 +1378,43 @@ void AppComboTrading::HandleSaveValues( void ) {
 
 void AppComboTrading::HandleSave( wxCommandEvent& event ) {
   CallAfter( [this](){ // do after main gui action, allows debugging
-    std::cout << "Saving Config ..." << std::endl;
-    std::ofstream ofs( c_sFileName_State );
-    boost::archive::text_oarchive oa(ofs);
-    oa & *this;
-    std::cout << "  done." << std::endl;
+    SaveState();
   });
 }
 
 void AppComboTrading::HandleLoad( wxCommandEvent& event ) {
   CallAfter( [this](){ // do after main gui action, allows debugging
-    try {
-      std::cout << "Loading Config ..." << std::endl;
-      std::ifstream ifs( c_sFileName_State );
-      boost::archive::text_iarchive ia(ifs);
-      ia & *this;
-      std::cout << "  done." << std::endl;
-    }
-    catch(...) {
-      std::cout << "load exception" << std::endl;
-    }
+    LoadState();
   });
+}
+
+void AppComboTrading::SaveState() {
+  std::cout << "Saving Config ..." << std::endl;
+  std::ofstream ofs( c_sFileName_State );
+  boost::archive::text_oarchive oa(ofs);
+  oa & *this;
+  std::cout << "  done." << std::endl;
+}
+
+void AppComboTrading::LoadState() {
+  try {
+    std::cout << "Loading Config ..." << std::endl;
+    std::ifstream ifs( c_sFileName_State );
+    boost::archive::text_iarchive ia(ifs);
+    ia & *this;
+    std::cout << "  done." << std::endl;
+  }
+  catch(...) {
+    std::cout << "load exception" << std::endl;
+  }
 }
 
 void AppComboTrading::OnClose( wxCloseEvent& event ) {
 
   m_timerGuiRefresh.Stop();
+
+  SaveState();
+
   DelinkFromPanelProviderControl();
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );

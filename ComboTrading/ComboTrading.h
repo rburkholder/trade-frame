@@ -248,9 +248,9 @@ private:
 
   void ProvideOptionList( const std::string& sSymbol, ou::tf::PanelCharts::fSymbol_t );
 
-//  void HandleMenuActionInitializeSymbolSet( void );
-  void HandleMenuActionSaveSymbolSubset( void );
-  void HandleMenuActionLoadSymbolSubset( void );
+//  void HandleMenuActionInitializeSymbolSet();
+  void HandleMenuActionSaveSymbolSubset();
+  void HandleMenuActionLoadSymbolSubset();
 
   pPanelOptionCombo_t HandleNewPanelOptionCombo( const idPortfolio_t& idPortfolio, const std::string& sDescription );
 
@@ -258,6 +258,9 @@ private:
 
   void UpdateColumns_PanelPortfolioPositions();
   void UpdateColumns_PanelOptionCombo();
+
+  void SaveState();
+  void LoadState();
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
