@@ -19,8 +19,9 @@
  * Created on May 29, 2021, 20:09
  */
 
-#include "Aggregate.h"
 #include <stdexcept>
+
+#include "Aggregate.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -40,21 +41,22 @@ void Aggregate::LoadChains( fGatherOptions_t&& fGatherOptions ) {
 
       mapChains_iterator_t iterChains;
 
+      const std::string& sInstrumentName( pOption->GetInstrumentName() );
+      const std::string& sIQFeedSymbolName( pOption->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+
       { // find existing expiry, or create new one
 
         chain_t chain;
 
         const boost::gregorian::date expiry( pOption->GetExpiry() );
 
-        const std::string& sIQFeedSymbolName( pOption->GetInstrumentName() );
-
         iterChains = m_mapChains.find( expiry ); // see if expiry date exists
         if ( m_mapChains.end() == iterChains ) { // insert new expiry set if not
           std::cout
-            << "Aggregate chain: " << sIQFeedSymbolName
-            << "," << expiry.year()
-            << "/" << expiry.month().as_number()
-            << "/" << expiry.day()
+            << "Aggregate chain: "
+            << ou::tf::Instrument::BuildDate( expiry )
+            << "," << sIQFeedSymbolName
+            << "," << sInstrumentName
             << std::endl;
           iterChains = m_mapChains.insert(
             m_mapChains.begin(),
@@ -69,8 +71,6 @@ void Aggregate::LoadChains( fGatherOptions_t&& fGatherOptions ) {
 
         chain_t& chain( iterChains->second );
         chain_t::strike_t& strike( chain.GetStrike( pOption->GetStrike() ) );
-
-        const std::string& sIQFeedSymbolName( pOption->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
 
         try {
           switch ( pOption->GetOptionSide() ) {
@@ -97,7 +97,6 @@ void Aggregate::LoadChains( fGatherOptions_t&& fGatherOptions ) {
         catch ( std::runtime_error& e ) {
           std::cout << "LoadChains::fGatherOptions error" << std::endl;
         }
-
       }
     }
   );
