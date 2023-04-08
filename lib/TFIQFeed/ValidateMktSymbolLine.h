@@ -14,10 +14,10 @@
 
 #pragma once
 
-#include <vector>
 #include <map>
-#include <string>
 #include <set>
+#include <vector>
+#include <string>
 
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
@@ -25,10 +25,10 @@ using namespace fastdelegate;
 #include <OUCommon/KeyWordMatch.h>
 
 #include "SecurityType.h"
+#include "ParseOptionSymbol.h"
 #include "ParseMktSymbolLine.h"
 #include "ParseOptionDescription.h"
 #include "ParseFOptionDescription.h"
-#include "ParseOptionSymbol.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -144,7 +144,7 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
       vSymbolTypeStats[ (size_t)trd.sc ]++;
       if ( sc_t::Unknown == trd.sc ) {
         // set marker not to save record?
-        std::cout << "Unknown symbol type for:  " << trd.sSymbol << std::endl;
+//        std::cout << "Unknown symbol type for:  " << trd.sSymbol << std::endl;
       }
 
       std::string sPattern( trd.sExchange );
@@ -216,7 +216,7 @@ void ValidateMktSymbolLine::Parse( Iterator& begin, Iterator& end ) {
 
 
       if ( 0 == trd.sDescription.length() ) {
-        std::cout << trd.sSymbol << ": missing description" << std::endl;
+//        std::cout << trd.sSymbol << ": missing description" << std::endl;
       }
 
       if ( nullptr != m_OnProcessLine ) m_OnProcessLine( trd );
