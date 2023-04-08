@@ -834,6 +834,15 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
   std::cout << "Start Underlying " << sUnderlying << std::endl;
 
   uws.pUnderlying->FilterChains();
+  uws.pUnderlying->WalkChains(
+    [pti=uws.pti]( boost::gregorian::date date ){
+      ou::tf::TreeItem* item = pti->AppendChild(
+        ou::tf::Instrument::BuildDate( date ),
+        []( ou::tf::TreeItem* pTreeItem ){
+          // expiry label does nothing
+        }
+      );
+    } );
 
   bool bConstructDefaultStrategy( true );
 

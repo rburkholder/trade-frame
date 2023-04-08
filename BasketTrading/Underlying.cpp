@@ -110,6 +110,10 @@ void Underlying::FilterChains() {
   m_GexCalc.FilterChains();
 }
 
+void Underlying::WalkChains( ou::tf::option::Aggregate::fDate_t&& fDate ) const {
+  m_GexCalc.WalkChains( std::move( fDate ) );
+}
+
 void Underlying::WalkChains( fOption_t&& fOption ) const {
   m_GexCalc.WalkChains( std::move( fOption ) );
 }

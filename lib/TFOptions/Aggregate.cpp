@@ -153,15 +153,6 @@ void Aggregate::FilterChains() {
         assert( 0 < vt.second.Size() );
       }
     }
-
-    //if ( bChainAdded ) { // wrong place for this
-    //  ou::tf::TreeItem* item = m_ptiSelf->AppendChild(
-    //    sStrikeDate,
-    //    [this]( ou::tf::TreeItem* pTreeItem ){
-    //      // expiry label does nothing
-    //    }
-    //  );
-    //}
   }
 
   assert( vChainsToBeRemoved.size() != m_mapChains.size() );
@@ -173,6 +164,12 @@ void Aggregate::FilterChains() {
   size_t nAverageStrikes = nStrikesSum / m_mapChains.size();
   std::cout << "chain size average: " << nAverageStrikes << std::endl;
 
+}
+
+void Aggregate::WalkChains( fDate_t&& fDate ) const {
+  for ( const mapChains_t::value_type& vt: m_mapChains ) {
+    fDate( vt.first );
+  }
 }
 
 void Aggregate::WalkChains( fOption_t&& fOption ) const {

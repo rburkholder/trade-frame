@@ -63,6 +63,7 @@ public:
   void PopulateChartDataView( pChartDataView_t ); // share data sets
   void PopulateChains( fGatherOptions_t&& );
   void FilterChains();
+  void WalkChains( ou::tf::option::Aggregate::fDate_t&& ) const;
   void WalkChains( fOption_t&& ) const;
   void WalkChain( boost::gregorian::date, fOption_t&& ) const;
 

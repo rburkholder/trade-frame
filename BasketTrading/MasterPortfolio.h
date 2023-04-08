@@ -210,6 +210,7 @@ private:
     UnderlyingWithStrategies( pUnderlying_t pUnderlying_ )
     : pUnderlying( std::move( pUnderlying_ ) )
     , m_nQuery {}
+    , pti( nullptr )
     {}
     //UnderlyingWithStrategies( const Statistics&& statistics_ )
     //: statistics( std::move( statistics_ ) ) {}
