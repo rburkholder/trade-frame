@@ -274,18 +274,22 @@ ManageStrategy::ManageStrategy(
           }
       } );
 
+      const std::string sStrikeDate( ou::tf::Instrument::BuildDate( vt.first ) );
+
+      bool bChainAdded( true );
       if ( nStrikesTotal == nStrikesMatch ) {
         nStrikesSum += nStrikesTotal;
-        std::cout << "chain " << vt.first << " added with " << nStrikesTotal << " strikes" << std::endl;
+        std::cout << "chain " << sStrikeDate << " added with " << nStrikesTotal << " strikes" << std::endl;
       }
       else {
         if ( 0 == nStrikesMatch ) {
-          std::cout << "chain " << vt.first << " skipped with " << nStrikesMatch << '/' << nStrikesTotal << " strikes" << std::endl;
+          std::cout << "chain " << sStrikeDate << " skipped with " << nStrikesMatch << '/' << nStrikesTotal << " strikes" << std::endl;
           vChainsToBeRemoved.push_back( vt.first );
+          bChainAdded = false;
         }
         else {
           std::cout
-            << "chain " << vt.first << " added " << nStrikesMatch << " strikes without";
+            << "chain " << sStrikeDate << " added " << nStrikesMatch << " strikes without";
           for ( double strike: vMisMatch ) {
             std::cout << " " << strike;
             const_cast<chain_t&>( vt.second ).Erase( strike );
@@ -294,6 +298,15 @@ ManageStrategy::ManageStrategy(
           assert( 0 < vt.second.Size() );
         }
       }
+
+      //if ( bChainAdded ) { // wrong place for this
+      //  ou::tf::TreeItem* item = m_ptiSelf->AppendChild(
+      //    sStrikeDate,
+      //    [this]( ou::tf::TreeItem* pTreeItem ){
+      //      // expiry label does nothing
+      //    }
+      //  );
+      //}
     }
 
     assert( vChainsToBeRemoved.size() != m_mapChains.size() );
