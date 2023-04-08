@@ -50,10 +50,10 @@ class Underlying {
 public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
-  using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
-  using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
   using fOption_t = ou::tf::option::fOption_t;
+  using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
   using fGatherOptions_t = ou::tf::option::fGatherOptions_t;
+  using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
   Underlying( pWatch_t, pPortfolio_t );
   ~Underlying();
