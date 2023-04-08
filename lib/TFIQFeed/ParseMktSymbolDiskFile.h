@@ -33,8 +33,8 @@ public:
     m_OnProcessLine = function;
   }
 
-  ParseMktSymbolDiskFile( void );
-  ~ParseMktSymbolDiskFile( void ) {};
+  ParseMktSymbolDiskFile() = default;
+  ~ParseMktSymbolDiskFile() = default;
 
   void Run( const std::string& );  // "mktsymbols_v2.txt"
 

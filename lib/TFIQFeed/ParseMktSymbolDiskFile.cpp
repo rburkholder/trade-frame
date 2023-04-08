@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-//#include "stdafx.h"
-
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -23,9 +21,6 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
-
-ParseMktSymbolDiskFile::ParseMktSymbolDiskFile( void ) {
-}
 
 // try http://stackoverflow.com/questions/2291802/is-there-a-c-iterator-that-can-iterate-over-a-file-line-by-line
 
