@@ -545,12 +545,12 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
         // TODO: run this in a thread, takes a while to process large option lists
         uws.m_nQuery = 1; // initial lock of the loop, process each option, sync or async depending if cached
         uws.pUnderlying->PopulateChains(
-          [this,&uws,multiplier](const std::string& sIQFeedUnderlying, ou::tf::option::fOption_t&& fOption ){
+          [this,&uws,multiplier](const std::string& sIQFeedUnderlying, ou::tf::option::fOption_t&& fOption ){ // fGatherOptions_t
             using query_t = ou::tf::iqfeed::OptionChainQuery;
-            m_pOptionChainQuery->QueryFuturesOptionChain( // TODO: need selection of equity vs futures
+            m_pOptionChainQuery->QueryFuturesOptionChain( //  TODO: need selection of equity vs futures
               sIQFeedUnderlying,
               "pc", "", "", "",
-              [this,&uws,multiplier,fOption_=std::move( fOption )]( const query_t::OptionList& list ){
+              [this,&uws,multiplier,fOption_=std::move( fOption )]( const query_t::OptionList& list ){ // fOptionList_t
                 std::cout
                   << "chain request " << list.sUnderlying << " has "
                   //<< chains.vCall.size() << " calls, "
@@ -588,9 +588,7 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
                 }
               });
           } );
-
         //m_mapVolatility.insert( mapVolatility_t::value_type( iip_.dblDailyHistoricalVolatility, sUnderlying ) );
-
       }
     );
   }
