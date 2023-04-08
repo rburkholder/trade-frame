@@ -57,7 +57,7 @@ boost::uint8_t rFutureMonth[] = {
   };
 
 
-ValidateMktSymbolLine::ValidateMktSymbolLine( void ) :
+ValidateMktSymbolLine::ValidateMktSymbolLine() :
   kwmExchanges( 0, 200 ), // about 300 characters?  ... fast look up of index into m_rExchanges, possibly faster than std::map
   vSymbolsPerExchange( 1 ), nUnderlyingSize( 0 ),
   cntLinesTotal( 0 ), cntLinesParsed( 0 ), cntSIC( 0 ), cntNAICS( 0 ),
@@ -72,17 +72,17 @@ ValidateMktSymbolLine::ValidateMktSymbolLine( void ) :
     m_vSuffixesToTest.push_back( "#" );
 }
 
-void ValidateMktSymbolLine::PostProcess( void ) {
+void ValidateMktSymbolLine::PostProcess() {
   for ( mapUnderlying_t::iterator iterMap = mapUnderlying.begin(); mapUnderlying.end() != iterMap; iterMap++ ) {
     // iterate through map and update bHasOptions flag in each record
       // ? check if underlying is a stock/equity/future  (sc should be set as such as well)
     bool bStatus;  // todo:  check all combinations to see if any overlap
-    if ( 0 != m_OnProcessHasOption ) {
+    if ( nullptr != m_OnProcessHasOption ) {
       for ( std::vector<std::string>::const_iterator interVec = m_vSuffixesToTest.begin(); m_vSuffixesToTest.end() != interVec; interVec++ ) {
         bStatus = m_OnProcessHasOption( iterMap->second + *interVec );
         if ( bStatus ) {
           if ( m_vSuffixesToTest.begin() != interVec ) {
-            if ( 0 != m_OnUpdateOptionUnderlying ) m_OnUpdateOptionUnderlying( iterMap->first, iterMap->second );
+            if ( nullptr != m_OnUpdateOptionUnderlying ) m_OnUpdateOptionUnderlying( iterMap->first, iterMap->second );
           }
           break;
         }
@@ -98,7 +98,7 @@ void ValidateMktSymbolLine::PostProcess( void ) {
   }
 }
 
-void ValidateMktSymbolLine::Summary( void ) {
+void ValidateMktSymbolLine::Summary() {
 
   std::cout << "== Market Symbol Type and Count ==" << std::endl;
 
