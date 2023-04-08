@@ -106,6 +106,10 @@ void Underlying::PopulateChains( fGatherOptions_t&& f ) {
   m_GexCalc.LoadChains( std::move( f ) );
 }
 
+void Underlying::FilterChains() {
+  m_GexCalc.FilterChains();
+}
+
 void Underlying::WalkChains( fOption_t&& fOption ) const {
   m_GexCalc.WalkChains( std::move( fOption ) );
 }

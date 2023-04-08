@@ -35,6 +35,7 @@ Aggregate::Aggregate(
 }
 
 void Aggregate::LoadChains( fGatherOptions_t&& fGatherOptions ) {
+  std::cout << "Aggregate::LoadChains" << std::endl;
   fGatherOptions(
     m_pWatchUnderlying->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ),
     [this]( pOption_t pOption ){
@@ -100,6 +101,78 @@ void Aggregate::LoadChains( fGatherOptions_t&& fGatherOptions ) {
       }
     }
   );
+}
+
+void Aggregate::FilterChains() {
+
+  assert( 0 < m_mapChains.size() );
+
+  std::vector<boost::gregorian::date> vChainsToBeRemoved;
+
+  size_t nStrikesSum {};
+  for ( const mapChains_t::value_type& vt: m_mapChains ) { // only use chains where all calls/puts available
+
+    size_t nStrikesTotal {};
+    size_t nStrikesMatch {};
+
+    std::vector<double> vMisMatch;
+    vMisMatch.reserve( 10 );
+
+    vt.second.Strikes(
+      [&nStrikesTotal,&nStrikesMatch,&vMisMatch]( double strike, const chain_t::strike_t& options ){
+        nStrikesTotal++;
+        if ( options.call.sIQFeedSymbolName.empty() || options.put.sIQFeedSymbolName.empty() ) {
+          vMisMatch.push_back( strike );
+        }
+        else {
+          nStrikesMatch++;
+        }
+    } );
+
+    const std::string sStrikeDate( ou::tf::Instrument::BuildDate( vt.first ) );
+
+    bool bChainAdded( true );
+    if ( nStrikesTotal == nStrikesMatch ) {
+      nStrikesSum += nStrikesTotal;
+      std::cout << "chain " << sStrikeDate << " added with " << nStrikesTotal << " strikes" << std::endl;
+    }
+    else {
+      if ( 0 == nStrikesMatch ) {
+        std::cout << "chain " << sStrikeDate << " skipped with " << nStrikesMatch << '/' << nStrikesTotal << " strikes" << std::endl;
+        vChainsToBeRemoved.push_back( vt.first );
+        bChainAdded = false;
+      }
+      else {
+        std::cout
+          << "chain " << sStrikeDate << " added " << nStrikesMatch << " strikes without";
+        for ( double strike: vMisMatch ) {
+          std::cout << " " << strike;
+          const_cast<chain_t&>( vt.second ).Erase( strike );
+        }
+        std::cout << std::endl;
+        assert( 0 < vt.second.Size() );
+      }
+    }
+
+    //if ( bChainAdded ) { // wrong place for this
+    //  ou::tf::TreeItem* item = m_ptiSelf->AppendChild(
+    //    sStrikeDate,
+    //    [this]( ou::tf::TreeItem* pTreeItem ){
+    //      // expiry label does nothing
+    //    }
+    //  );
+    //}
+  }
+
+  assert( vChainsToBeRemoved.size() != m_mapChains.size() );
+  for ( auto date: vChainsToBeRemoved ) { // remove chains with incomplete info
+    mapChains_t::iterator iter = m_mapChains.find( date );
+    m_mapChains.erase( iter );
+  }
+
+  size_t nAverageStrikes = nStrikesSum / m_mapChains.size();
+  std::cout << "chain size average: " << nAverageStrikes << std::endl;
+
 }
 
 void Aggregate::WalkChains( fOption_t&& fOption ) const {

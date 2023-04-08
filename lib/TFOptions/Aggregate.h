@@ -51,6 +51,7 @@ public:
   );
 
   void LoadChains( fGatherOptions_t&& ); // start in constructor?
+  void FilterChains();
   void WalkChains( fOption_t&& ) const;
   void WalkChain( boost::gregorian::date, fOption_t&& ) const;
 

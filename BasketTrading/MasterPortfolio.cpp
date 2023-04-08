@@ -833,6 +833,8 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
 
   std::cout << "Start Underlying " << sUnderlying << std::endl;
 
+  uws.pUnderlying->FilterChains();
+
   bool bConstructDefaultStrategy( true );
 
   // look for existing strategies, which means loading from the Strategy cache
