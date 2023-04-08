@@ -256,34 +256,42 @@ ManageStrategy::ManageStrategy(
 
     size_t nStrikesSum {};
     for ( const mapChains_t::value_type& vt: m_mapChains ) { // only use chains where all calls/puts available
+
       size_t nStrikesTotal {};
       size_t nStrikesMatch {};
-      double dblStrikeMisMatch {};
+
+      std::vector<double> vMisMatch;
+      vMisMatch.reserve( 10 );
+
       vt.second.Strikes(
-        [&nStrikesTotal,&nStrikesMatch,&dblStrikeMisMatch]( double strike, const chain_t::strike_t& options ){
+        [&nStrikesTotal,&nStrikesMatch,&vMisMatch]( double strike, const chain_t::strike_t& options ){
           nStrikesTotal++;
-          if ( ( 0 != options.call.sIQFeedSymbolName.size() ) && ( 0 != options.put.sIQFeedSymbolName.size() ) ) {
-            nStrikesMatch++;
+          if ( options.call.sIQFeedSymbolName.empty() || options.put.sIQFeedSymbolName.empty() ) {
+            vMisMatch.push_back( strike );
           }
           else {
-            dblStrikeMisMatch = strike;
+            nStrikesMatch++;
           }
       } );
+
       if ( nStrikesTotal == nStrikesMatch ) {
         nStrikesSum += nStrikesTotal;
         std::cout << "chain " << vt.first << " added with " << nStrikesTotal << " strikes" << std::endl;
       }
       else {
-        if ( 1 == ( nStrikesTotal - nStrikesMatch ) ) { // some are 2, handle those as well?
-          const_cast<chain_t&>( vt.second ).Erase( dblStrikeMisMatch ); // keep most of the mis-balanced chains
-          std::cout
-            << "chain " << vt.first << " added with " << nStrikesMatch << " strikes"
-            << " without " << dblStrikeMisMatch
-            << std::endl;
-        }
-        else {
+        if ( 0 == nStrikesMatch ) {
           std::cout << "chain " << vt.first << " skipped with " << nStrikesMatch << '/' << nStrikesTotal << " strikes" << std::endl;
           vChainsToBeRemoved.push_back( vt.first );
+        }
+        else {
+          std::cout
+            << "chain " << vt.first << " added " << nStrikesMatch << " strikes without";
+          for ( double strike: vMisMatch ) {
+            std::cout << " " << strike;
+            const_cast<chain_t&>( vt.second ).Erase( strike );
+          }
+          std::cout << std::endl;
+          assert( 0 < vt.second.Size() );
         }
       }
     }
