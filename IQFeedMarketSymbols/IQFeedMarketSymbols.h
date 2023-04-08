@@ -18,6 +18,8 @@
 
 #include <map>
 
+#include <wx/app.h>
+
 #include <OUCommon/Worker.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
@@ -53,18 +55,19 @@ private:
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );
 
-  void HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void );
-  void HandleMenuAction1ObtainNewIQFeedSymbolListLocal( void );
-  void HandleMenuAction2LoadIQFeedSymbolList( void );
-  void HandleMenuActionScanSymbolList( void );
-  void HandleMenuActionLoadSICCodes( void );
+  void HandleMenuAction0ObtainNewIQFeedSymbolListRemote();
+  void HandleMenuAction1ObtainNewIQFeedSymbolListLocal();
+  void HandleMenuAction2LoadIQFeedSymbolList();
+  void HandleMenuActionScanSymbolList();
+  void HandleMenuActionLoadSICCodes();
 
-  void HandleObtainNewIQFeedSymbolListRemote( void );
-  void HandleObtainNewIQFeedSymbolListLocal( void );
-  void HandleLoadIQFeedSymbolList( void );
+  void HandleObtainNewIQFeedSymbolListRemote();
+  void HandleObtainNewIQFeedSymbolListLocal();
+  void HandleLoadIQFeedSymbolList();
+
+  void ScanSymbolList();
 
 };
 
 // Implements MyApp& wxGetApp()
 DECLARE_APP(AppIQFeedMarketSymbols)
-

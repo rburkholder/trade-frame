@@ -12,20 +12,19 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-
-#include "stdafx.h"
-
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
+
+#include <boost/lexical_cast.hpp>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
 #include <boost/phoenix/bind/bind_member_function.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <wx/panel.h>
+#include <wx/sizer.h>
 
 #include <OUCommon/ReadSicCodeList.h>
 #include <OUCommon/ReadNaicsToSicCodeList.h>
@@ -73,11 +72,21 @@ bool AppIQFeedMarketSymbols::OnInit() {
 
 }
 
-void AppIQFeedMarketSymbols::HandleMenuActionLoadSICCodes( void ) {
-  ou::SicCodeList( "../SIC Codes List.xls" );
+void AppIQFeedMarketSymbols::HandleMenuActionLoadSICCodes() {
+  CallAfter(
+    [this](){
+      ou::SicCodeList( "../SIC Codes List.xls" );
+    } );
 }
 
-void AppIQFeedMarketSymbols::HandleMenuActionScanSymbolList( void ) {
+void AppIQFeedMarketSymbols::HandleMenuActionScanSymbolList() {
+  CallAfter(
+    [this](){
+      ScanSymbolList();
+    } );
+}
+
+void AppIQFeedMarketSymbols::ScanSymbolList() {
 
   ou::SicCodeList sic( "../SIC Codes List.xls" );
   ou::ReadNaicsToSicCodeList naics( "../NAICS_to_SIC_Cross_Reference.xls" );
@@ -132,41 +141,51 @@ void AppIQFeedMarketSymbols::HandleMenuActionScanSymbolList( void ) {
   }
 
   std::cout << "Scan done." << std::endl;
-
 }
 
-void AppIQFeedMarketSymbols::HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void ) {
+void AppIQFeedMarketSymbols::HandleMenuAction0ObtainNewIQFeedSymbolListRemote() {
   // need to lock out from running HandleLoadIQFeedSymbolList at the same time
-  m_worker.Run( MakeDelegate( this, &AppIQFeedMarketSymbols::HandleObtainNewIQFeedSymbolListRemote ) );
+  CallAfter(
+    [this](){
+      m_worker.Run( MakeDelegate( this, &AppIQFeedMarketSymbols::HandleObtainNewIQFeedSymbolListRemote ) );
+    } );
 }
 
-void AppIQFeedMarketSymbols::HandleObtainNewIQFeedSymbolListRemote( void ) {
+void AppIQFeedMarketSymbols::HandleObtainNewIQFeedSymbolListRemote() {
   std::cout << "Downloading Text File ... " << std::endl;
-  ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::Download, true ); 
+  ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::Download, true );
   std::cout << "Saving Binary File ... " << std::endl;
   m_listIQFeedSymbols.SaveToFile( ou::tf::iqfeed::detail::sFileNameMarketSymbolsBinary );
   std::cout << " ... done." << std::endl;
 }
 
-void AppIQFeedMarketSymbols::HandleMenuAction1ObtainNewIQFeedSymbolListLocal( void ) {
+void AppIQFeedMarketSymbols::HandleMenuAction1ObtainNewIQFeedSymbolListLocal() {
   // need to lock out from running HandleLoadIQFeedSymbolList at the same time
-  m_worker.Run( MakeDelegate( this, &AppIQFeedMarketSymbols::HandleObtainNewIQFeedSymbolListLocal ) );
+  CallAfter(
+    [this](){
+      m_worker.Run( MakeDelegate( this, &AppIQFeedMarketSymbols::HandleObtainNewIQFeedSymbolListLocal ) );
+    }
+  );
 }
 
-void AppIQFeedMarketSymbols::HandleObtainNewIQFeedSymbolListLocal( void ) {
+void AppIQFeedMarketSymbols::HandleObtainNewIQFeedSymbolListLocal() {
   std::cout << "Loading From Text File ... " << std::endl;
-  ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::LoadTextFromDisk, false ); 
+  ou::tf::iqfeed::LoadMktSymbols( m_listIQFeedSymbols, ou::tf::iqfeed::MktSymbolLoadType::LoadTextFromDisk, false );
   std::cout << "Saving Binary File ... " << std::endl;
   m_listIQFeedSymbols.SaveToFile( ou::tf::iqfeed::detail::sFileNameMarketSymbolsBinary );
   std::cout << " ... done." << std::endl;
 }
 
-void AppIQFeedMarketSymbols::HandleMenuAction2LoadIQFeedSymbolList( void ) {
+void AppIQFeedMarketSymbols::HandleMenuAction2LoadIQFeedSymbolList() {
   // need to lock out from running HandleObtainNewIQFeedSymbolList at the same time
-  m_worker.Run( MakeDelegate( this, &AppIQFeedMarketSymbols::HandleLoadIQFeedSymbolList ) );
+  CallAfter(
+    [this](){
+      m_worker.Run( MakeDelegate( this, &AppIQFeedMarketSymbols::HandleLoadIQFeedSymbolList ) );
+    } );
+
 }
 
-void AppIQFeedMarketSymbols::HandleLoadIQFeedSymbolList( void ) {
+void AppIQFeedMarketSymbols::HandleLoadIQFeedSymbolList() {
   std::cout << "Loading From Binary File ..." << std::endl;
   m_listIQFeedSymbols.LoadFromFile( ou::tf::iqfeed::detail::sFileNameMarketSymbolsBinary );
   std::cout << " ... completed." << std::endl;
@@ -188,8 +207,6 @@ void AppIQFeedMarketSymbols::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
   DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
-  // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a 
   event.Skip();  // auto followed by Destroy();
 }
 
