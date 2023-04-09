@@ -53,7 +53,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
   class TreeItem;
   class FrameControls;
-  class GridOptionChain;
+  class NotebookOptionChains;
   class ComposeInstrument;
   class PanelFinancialChart;
 namespace iqfeed { // IQFeed
@@ -172,7 +172,7 @@ private:
   //wxTreeItemId m_idTreeOptions;
 
   ou::tf::FrameControls* m_pFrameOptionChainsWithOrder;
-  ou::tf::GridOptionChain* m_pGridOptionChain;
+  ou::tf::NotebookOptionChains* m_pNotebookOptionChains;
 
   using pManageStrategy_t = std::shared_ptr<ManageStrategy>;
 

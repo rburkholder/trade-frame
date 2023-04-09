@@ -34,8 +34,8 @@
 
 #include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/FrameControls.h>
-#include <TFVuTrading/GridOptionChain.h>
 #include <TFVuTrading/PanelFinancialChart.h>
+#include <TFVuTrading/NotebookOptionChains.h>
 
 #include "MoneyManager.h"
 #include "MasterPortfolio.h"
@@ -58,15 +58,6 @@ namespace {
 /*
 @ES#    E-MINI S&P 500 SEPTEMBER 2021   CME     CMEMINI FUTURE
 
-@ESM22  E-MINI S&P 500 JUNE 2022        CME     CMEMINI FUTURE
-@ESU22  E-MINI S&P 500 SEPTEMBER 2022   CME     CMEMINI FUTURE
-@ESZ22  E-MINI S&P 500 DECEMBER 2022    CME     CMEMINI FUTURE
-@ESH23  E-MINI S&P 500 MARCH 2023       CME     CMEMINI FUTURE
-@ESM23  E-MINI S&P 500 JUNE 2023        CME     CMEMINI FUTURE
-@ESU23  E-MINI S&P 500 SEPTEMBER 2023   CME     CMEMINI FUTURE
-@ESZ23  E-MINI S&P 500 DECEMBER 2023    CME     CMEMINI FUTURE
-@ESZ24  E-MINI S&P 500 DECEMBER 2024    CME     CMEMINI FUTURE
-@ESZ25  E-MINI S&P 500 DECEMBER 2025    CME     CMEMINI FUTURE
 */
 
 MasterPortfolio::MasterPortfolio(
@@ -87,7 +78,7 @@ MasterPortfolio::MasterPortfolio(
 , m_pExec( std::move( pExec ) ) // IB or IQF
 , m_pData1( std::move( pData1 ) )  // IQF
 , m_pData2( std::move( pData2 ) )  // not used
-, m_pGridOptionChain( nullptr )
+, m_pNotebookOptionChains( nullptr )
 , m_pPanelFinancialChart( pPanelFinancialChart )
 , m_pFrameOptionChainsWithOrder( pFrameOptionChainsWithOrder )
     //m_eAllocate( EAllocate::Waiting )
@@ -167,6 +158,10 @@ MasterPortfolio::MasterPortfolio(
     },
     []( ou::tf::TreeItem* ){} // fOnMenu_t
     );
+
+  // TODO: build per underlying
+  m_pNotebookOptionChains = new ou::tf::NotebookOptionChains( m_pFrameOptionChainsWithOrder, wxID_ANY );
+  m_pFrameOptionChainsWithOrder->Attach( m_pNotebookOptionChains );
 
   std::stringstream ss;
   //ss.str( "" );
@@ -587,7 +582,8 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
                           im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
                         }
                         //std::cout << "  Option Name: " << pInstrument->GetInstrumentName() << std::endl;
-                        fOption_( std::make_shared<ou::tf::option::Option>( pInstrument, m_pIQ ) );
+                        pOption_t pOption = std::make_shared<ou::tf::option::Option>( pInstrument, m_pIQ );
+                        fOption_( pOption );
                       }
                       auto previous = uws.m_nQuery.fetch_sub( 1 );
                       if ( 1 == previous ) {
@@ -849,18 +845,29 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
   std::cout << "Start Underlying " << sUnderlying << std::endl;
 
   uws.pUnderlying->FilterChains();
-  uws.pUnderlying->WalkChains(
-    [this,pti=uws.pti]( boost::gregorian::date date ){
-      ou::tf::TreeItem* item = pti->AppendChild(
-        ou::tf::Instrument::BuildDate( date ),
-        [this]( ou::tf::TreeItem* pTreeItem ){ // fOnClick_t
-          if ( nullptr != m_pGridOptionChain ) {
-            m_pGridOptionChain->Destroy();
-            m_pGridOptionChain = nullptr;
-          }
+  m_pNotebookOptionChains->CallAfter(
+    [this,sUnderlying,&uws](){
+      m_pNotebookOptionChains->SetName( sUnderlying );
+      uws.pUnderlying->WalkChains(
+        [this]( pOption_t pOption ){
+          const ou::tf::option::Option& option( *pOption );
+          m_pNotebookOptionChains->Add( option.GetExpiry(), option.GetStrike(), option.GetOptionSide(), option.GetInstrumentName() );
         }
       );
     } );
+
+    //[this,pti=uws.pti]( boost::gregorian::date date ){
+      //m_pNotebookOptionChains->
+      //ou::tf::TreeItem* item = pti->AppendChild(
+      //  ou::tf::Instrument::BuildDate( date ),
+      //  [this]( ou::tf::TreeItem* pTreeItem ){ // fOnClick_t
+          //if ( nullptr != m_pGridOptionChain ) {
+          //  m_pGridOptionChain->Destroy();
+          //  m_pGridOptionChain = nullptr;
+          //}
+      //  }
+      //);
+    //} );
 
   bool bConstructDefaultStrategy( true );
 
