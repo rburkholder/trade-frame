@@ -81,7 +81,6 @@ public:
 
   using fConstructPositionUnderlying_t = ManageStrategy::fConstructPosition_t;
 
-  using fChartRoot_t = std::function<ou::tf::TreeItem*(const std::string&,pChartDataView_t)>;
   using fSetChartDataView_t = std::function<void(pChartDataView_t)>;
 
   MasterPortfolio(
@@ -323,7 +322,6 @@ private:
   //using mapVolatility_t = std::multimap<double, std::string>; // string is name of instrument
   //mapVolatility_t m_mapVolatility;
 
-  fChartRoot_t m_fChartRoot;
   fSetChartDataView_t m_fSetChartDataView;
 
   // used by Load

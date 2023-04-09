@@ -139,17 +139,12 @@ MasterPortfolio::MasterPortfolio(
 //  m_pcdvMasterPortfolioPL->Add( 2, &m_ceCommissionPaid );
   m_pcdvMasterPortfolioPL->SetNames( "Portfolio Profit / Loss", "Master P/L" );
 
-  m_fChartRoot =
-    [this]( const std::string& sName,  pChartDataView_t pChartDataView )->ou::tf::TreeItem* {
-      return m_pPanelFinancialChart->SetRoot( sName, pChartDataView );
-    };
-
   m_fSetChartDataView =
     [this]( pChartDataView_t pChartDataView ) {
       m_pPanelFinancialChart->SetChartDataView( pChartDataView );
     };
 
-  m_ptiTreeRoot = m_fChartRoot( "Master P/L", m_pcdvMasterPortfolioPL );
+  m_ptiTreeRoot = m_pPanelFinancialChart->SetRoot( "Master P/L", m_pcdvMasterPortfolioPL );
   m_ptiTreeRoot->NewMenu();
   m_ptiTreeRoot->AppendMenuItem(
     "New Underlying",
