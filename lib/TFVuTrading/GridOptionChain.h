@@ -20,6 +20,7 @@
 #include <wx/grid.h>
 
 #include <TFTrading/Instrument.h>
+
 #include <TFOptions/Option.h>
 
 #include <TFVuTrading/DragDropInstrument.h>

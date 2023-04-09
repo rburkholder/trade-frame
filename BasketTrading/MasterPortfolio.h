@@ -46,9 +46,15 @@
 #include "Underlying.h"
 #include "ManageStrategy.h"
 
+class wxMenu;
+class wxSizer;
+class wxWindow;
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
   class TreeItem;
+  class FrameControls;
+  class GridOptionChain;
   class ComposeInstrument;
 namespace iqfeed { // IQFeed
   class HistoryRequest;
@@ -59,8 +65,6 @@ namespace option {
 } // namespace option
 } // namespace tf
 } // namespace ou
-
-class wxMenu;
 
 class MasterPortfolio {
   friend class boost::serialization::access;
@@ -88,6 +92,7 @@ public:
   , pProvider_t pExec, pProvider_t pData1, pProvider_t pData2
   , fChartRoot_t&&
   , fSetChartDataView_t&&
+  , ou::tf::FrameControls* pFrameOptionChainsWithOrder
   );
   ~MasterPortfolio();
 
@@ -166,6 +171,9 @@ private:
   ou::tf::TreeItem* m_ptiTreeUnderlying;
   ou::tf::TreeItem* m_ptiTreeStrategies;
   //wxTreeItemId m_idTreeOptions;
+
+  ou::tf::FrameControls* m_pFrameOptionChainsWithOrder;
+  ou::tf::GridOptionChain* m_pGridOptionChain;
 
   using pManageStrategy_t = std::shared_ptr<ManageStrategy>;
 

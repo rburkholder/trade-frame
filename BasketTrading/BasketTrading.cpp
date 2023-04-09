@@ -32,6 +32,7 @@
 #include <TFTrading/OrderManager.h>
 
 #include <TFVuTrading/TreeItem.hpp>
+#include <TFVuTrading/FrameControls.h>
 
 #include "Config.h"
 #include "BasketTrading.h"
@@ -139,6 +140,15 @@ void AppBasketTrading::Init() {
 //  wxBoxSizer* sizerBottom = new wxBoxSizer( wxHORIZONTAL );
 //  sizerMain->Add( sizerBottom, 0, wxEXPAND | wxALL, 2 );
 
+
+  m_pFrameOptionChainsWithOrder = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Option Chain Orders" );
+  //m_pPanelTrade = new ou::tf::l2::PanelTrade( m_pFrameLadderTrade );
+  //m_pFrameLadderTrade->Attach( m_pPanelTrade );
+
+  m_pFrameOptionChainsWithOrder->SetAutoLayout( true );
+  m_pFrameOptionChainsWithOrder->Layout();
+  m_pFrameOptionChainsWithOrder->Show( true );
+
   m_bData1Connected = false;
   m_bExecConnected = false;
 
@@ -194,6 +204,8 @@ void AppBasketTrading::BuildMasterPortfolio() {
 
   //std::cout << "BuildMasterPortfolio ..." << std::endl;
 
+  assert( !m_pMasterPortfolio );
+
   using pChartDataView_t = MasterPortfolio::pChartDataView_t;
 
   m_pMasterPortfolio = std::make_unique<MasterPortfolio>(
@@ -211,7 +223,8 @@ void AppBasketTrading::BuildMasterPortfolio() {
   , [this]( pChartDataView_t pChartDataView ) {
       m_pPanelFinancialChart->SetChartDataView( pChartDataView );
     }
-    );
+  , m_pFrameOptionChainsWithOrder
+  );
   //std::cout << "  done." << std::endl;
 }
 

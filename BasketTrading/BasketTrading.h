@@ -47,8 +47,15 @@
 
 #include "MasterPortfolio.h"
 
+class wxSizer;
 class wxRadioButton;
 class PanelPortfolioStats;
+
+namespace ou {
+namespace tf {
+  class FrameControls;
+}
+}
 
 class AppBasketTrading:
   public wxApp, public ou::tf::FrameWork01<AppBasketTrading> {
@@ -76,6 +83,8 @@ private:
 //  PanelBasketTradingMain* m_pPanelBasketTradingMain;
   PanelPortfolioStats* m_pPanelPortfolioStats;
   ou::tf::PanelFinancialChart* m_pPanelFinancialChart;
+
+  ou::tf::FrameControls* m_pFrameOptionChainsWithOrder;
 
   std::string m_sDbName;
   std::string m_sStateFileName;
@@ -154,6 +163,7 @@ private:
     ar & *m_pPanelProviderControl;
     ar & m_enumBuySell;
     ar & *m_pPanelFinancialChart;
+    ar & *m_pFrameOptionChainsWithOrder;
     //ar & m_splitPanels->GetSashPosition();
   }
 
@@ -183,6 +193,10 @@ private:
     if ( 4 <= version ) {
       ar & *m_pPanelFinancialChart;
     }
+    if ( 6 <= version ) {
+      assert( m_pFrameOptionChainsWithOrder );
+      ar & *m_pFrameOptionChainsWithOrder;
+    }
     //m_splitPanels->SetSashPosition( x );
   }
 
@@ -190,6 +204,6 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(AppBasketTrading, 5)
+BOOST_CLASS_VERSION(AppBasketTrading, 6)
 DECLARE_APP(AppBasketTrading)
 

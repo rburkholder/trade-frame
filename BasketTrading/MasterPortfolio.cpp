@@ -19,6 +19,8 @@
 #include <algorithm>
 
 #include <wx/menu.h>
+#include <wx/sizer.h>
+#include <wx/window.h>
 
 #include <OUCommon/TimeSource.h>
 
@@ -31,6 +33,8 @@
 #include <TFOptions/Engine.h>
 
 #include <TFVuTrading/TreeItem.hpp>
+#include <TFVuTrading/FrameControls.h>
+#include <TFVuTrading/GridOptionChain.h>
 
 #include "MoneyManager.h"
 #include "MasterPortfolio.h"
@@ -72,6 +76,7 @@ MasterPortfolio::MasterPortfolio(
 , pProvider_t pExec, pProvider_t pData1, pProvider_t pData2
 , fChartRoot_t&& fChartRoot
 , fSetChartDataView_t&& fSetChartDataView
+, ou::tf::FrameControls* pFrameOptionChainsWithOrder
 )
 : m_bStarted( false )
 , m_nSharesTrading( 0 )
@@ -84,6 +89,8 @@ MasterPortfolio::MasterPortfolio(
 , m_pExec( std::move( pExec ) ) // IB or IQF
 , m_pData1( std::move( pData1 ) )  // IQF
 , m_pData2( std::move( pData2 ) )  // not used
+, m_pGridOptionChain( nullptr )
+, m_pFrameOptionChainsWithOrder( pFrameOptionChainsWithOrder )
     //m_eAllocate( EAllocate::Waiting )
 {
   assert( 0 < m_vSymbol.size() );
@@ -94,6 +101,8 @@ MasterPortfolio::MasterPortfolio(
   assert( pMasterPortfolio );
   assert( m_pExec );
   assert( m_pData1 );
+
+  assert( m_pFrameOptionChainsWithOrder );
 
   switch ( m_pExec->ID() ) {
     case ou::tf::keytypes::EProviderIB:
@@ -835,11 +844,14 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
 
   uws.pUnderlying->FilterChains();
   uws.pUnderlying->WalkChains(
-    [pti=uws.pti]( boost::gregorian::date date ){
+    [this,pti=uws.pti]( boost::gregorian::date date ){
       ou::tf::TreeItem* item = pti->AppendChild(
         ou::tf::Instrument::BuildDate( date ),
-        []( ou::tf::TreeItem* pTreeItem ){
-          // expiry label does nothing
+        [this]( ou::tf::TreeItem* pTreeItem ){ // fOnClick_t
+          if ( nullptr != m_pGridOptionChain ) {
+            m_pGridOptionChain->Destroy();
+            m_pGridOptionChain = nullptr;
+          }
         }
       );
     } );
