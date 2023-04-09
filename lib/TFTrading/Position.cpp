@@ -21,7 +21,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-Position::Position( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider,
+Position::Position( pInstrument_t& pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider,
   const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
   const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm )
 : m_pExecutionProvider( pExecutionProvider ), //m_pDataProvider( pDataProvider ),
@@ -59,7 +59,7 @@ Position::Position( pWatch_t pWatch, pProvider_t pExecutionProvider,
   Construction();
 }
 
-Position::Position( pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider )
+Position::Position( pInstrument_t& pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider )
 : m_pExecutionProvider( pExecutionProvider ), //m_pDataProvider( pDataProvider ),
   m_dblMultiplier( 1 )
 {
@@ -68,7 +68,7 @@ Position::Position( pInstrument_cref pInstrument, pProvider_t pExecutionProvider
 }
 
 Position::Position(
-  pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes )
+  pInstrument_t& pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes )
 : m_pExecutionProvider( pExecutionProvider ), //m_pDataProvider( pDataProvider ),
   m_dblMultiplier( 1 )
 {
@@ -78,7 +78,7 @@ Position::Position(
 }
 
 Position::Position(
-  pInstrument_cref pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const TableRowDef& row )
+  pInstrument_t& pInstrument, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const TableRowDef& row )
 : m_row( row ),
   m_pExecutionProvider( pExecutionProvider ),
   m_dblMultiplier( 1 )
@@ -98,7 +98,7 @@ Position::Position()
 {
 }
 
-void Position::ConstructWatch( pInstrument_cref pInstrument, pProvider_t pDataProvider ) {
+void Position::ConstructWatch( pInstrument_t& pInstrument, pProvider_t pDataProvider ) {
   assert( nullptr == m_pWatch.get() );
   assert( nullptr != pInstrument.get() );
   assert( nullptr != pDataProvider.get() );
@@ -124,7 +124,7 @@ void Position::Construction() {
   m_pWatch->StartWatch();
 }
 
-void Position::Set( pInstrument_cref pInstrument, pProvider_t& pExecutionProvider, pProvider_t& pDataProvider ) {
+void Position::Set( pInstrument_t& pInstrument, pProvider_t& pExecutionProvider, pProvider_t& pDataProvider ) {
 
   m_pExecutionProvider = pExecutionProvider;
 

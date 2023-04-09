@@ -29,7 +29,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-Option::Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider )
+Option::Option( pInstrument_t& pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider )
 : Watch( pInstrument, pDataProvider ),
   m_pGreekProvider( pGreekProvider ),
   m_dblStrike( pInstrument->GetStrike() )
@@ -38,7 +38,7 @@ Option::Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_
   Initialize();
 }
 
-Option::Option( pInstrument_t pInstrument, pProvider_t pDataProvider )
+Option::Option( pInstrument_t& pInstrument, pProvider_t pDataProvider )
 : Watch( pInstrument, pDataProvider ),
   m_dblStrike( pInstrument->GetStrike() )
 {

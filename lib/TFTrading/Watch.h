@@ -56,7 +56,7 @@ public:
     Summary(): nOpenInterest{}, nTotalVolume{}, dblOpen{}, dblTrade {} {}
   };
 
-  Watch( pInstrument_t pInstrument, pProvider_t pDataProvider );
+  Watch( pInstrument_t& pInstrument, pProvider_t pDataProvider );
   Watch( const Watch& rhs );
   virtual ~Watch();
 
@@ -68,7 +68,7 @@ public:
   pInstrument_t GetInstrument() { return m_pInstrument; }
   const idInstrument_t& GetInstrumentName() const { return m_pInstrument->GetInstrumentName(); }
 
-  void SetProvider( pProvider_t pDataProvider );
+  void SetProvider( pProvider_t& pDataProvider );
   pProvider_t GetProvider() { return m_pDataProvider; };
 
   bool Watching() const { return 0 != m_cntWatching; };

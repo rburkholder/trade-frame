@@ -38,8 +38,8 @@ public:
 
   using fCallbackWithGreek_t = std::function<void(const Greek&)>;
 
-  Option( pInstrument_t pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
-  Option( pInstrument_t pInstrument, pProvider_t pDataProvider );  // Greek calculations locally
+  Option( pInstrument_t& pInstrument, pProvider_t pDataProvider, pProvider_t pGreekProvider );
+  Option( pInstrument_t& pInstrument, pProvider_t pDataProvider );  // Greek calculations locally
   Option( const Option& );
   virtual ~Option();
 

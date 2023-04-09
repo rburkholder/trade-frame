@@ -52,8 +52,8 @@ public:
 
   using idAccountOwner_t = keytypes::idAccountOwner_t;
 
-  using pInstrument_cref = Instrument::pInstrument_cref;
   using pWatch_t = Position::pWatch_t;
+  using pInstrument_t = Instrument::pInstrument_t;
   using pProvider_t = Position::pProvider_t;
 
   using execution_pair_t = std::pair<const Position&, const Execution&>;
@@ -86,7 +86,7 @@ public:
     const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm,
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
     const pProvider_t& pExecutionProvider, const pProvider_t& pDataProvider,
-    pInstrument_cref pInstrument
+    pInstrument_t pInstrument
     );
 
   pPosition_t ConstructPosition( // new mechanism

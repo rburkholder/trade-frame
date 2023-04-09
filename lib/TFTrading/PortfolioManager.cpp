@@ -458,13 +458,13 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // old mechan
     const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm,
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
     const pProvider_t& pExecutionProvider, const pProvider_t& pDataProvider,
-    pInstrument_cref pInstrument )
+    pInstrument_t pInstrument )
 {
   pPosition_t pPosition;
 
   ConstructPosition(
     idPortfolio, sName,
-    [&,pInstrument,pExecutionProvider, pDataProvider]()->pPosition_t{
+    [&,pInstrument,pExecutionProvider, pDataProvider]()mutable->pPosition_t{
       pPosition = std::make_shared<ou::tf::Position>( pInstrument, pExecutionProvider, pDataProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm );
       return pPosition;
     } );

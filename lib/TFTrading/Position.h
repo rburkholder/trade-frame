@@ -60,7 +60,6 @@ public:
   using pProvider_t = ProviderInterfaceBase::pProvider_t;
 
   using pInstrument_t = Instrument::pInstrument_t;
-  using pInstrument_cref = Instrument::pInstrument_cref;
 
   using pWatch_t = Watch::pWatch_t;
 
@@ -173,16 +172,16 @@ public:
     }
   };
 
-  Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, // persisted Position (old style construction)
+  Position( pInstrument_t&, pProvider_t pExecutionProvider, pProvider_t pDataProvider, // persisted Position (old style construction)
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
     const idPortfolio_t&, const std::string& sName, const std::string& sAlgorithm );
   Position( pWatch_t, pProvider_t pExecutionProvider );  // in memory Position (new style construction)
   Position( pWatch_t, pProvider_t pExecutionProvider,   // persisted Position (new style construction)
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
     const idPortfolio_t&, const std::string& sName, const std::string& sAlgorithm );
-  Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
-  Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
-  Position( pInstrument_cref, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const TableRowDef& row );
+  Position( pInstrument_t&, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
+  Position( pInstrument_t&, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
+  Position( pInstrument_t&, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const TableRowDef& row );
   Position( const TableRowDef& row );
   Position();
   virtual ~Position();
@@ -276,7 +275,7 @@ public:
   ou::Delegate<const PositionDelta_delegate_t&> OnCommission;  // < - used by portfolio
   ou::Delegate<const PositionDelta_delegate_t&> OnUnRealizedPL;// < - use by portfolio, ( *this, dblPreviousUnRealizedPL, m_row.dblUnRealizedPL )  when unrealizedPL changes, updated by HandleQuote
 
-  void Set( pInstrument_cref, pProvider_t& pExecutionProvider, pProvider_t& pDataProvider );  // need to set verification that pointers have been set
+  void Set( pInstrument_t&, pProvider_t& pExecutionProvider, pProvider_t& pDataProvider );  // need to set verification that pointers have been set
   void Set( idPosition_t idPosition ) { m_row.idPosition = idPosition; };
   void Set( const std::string& sName ) { m_row.sName = sName; }
 
@@ -305,7 +304,7 @@ private:
 
   double m_dblMultiplier;
 
-  void ConstructWatch( pInstrument_cref, pProvider_t pDataProvider );
+  void ConstructWatch( pInstrument_t&, pProvider_t pDataProvider );
   void Construction();
 
   void Register( pOrder_t pOrder );

@@ -26,7 +26,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-Watch::Watch( pInstrument_t pInstrument, pProvider_t pDataProvider ) :
+Watch::Watch( pInstrument_t& pInstrument, pProvider_t pDataProvider ) :
   m_pInstrument( pInstrument ),
   m_pDataProvider( pDataProvider ),
   m_PriceMax( 0 ), m_PriceMin( 0 ), m_VolumeTotal( 0 ),
@@ -108,7 +108,7 @@ void Watch::RemoveEvents() {
   m_bEventsAttached = false;
 }
 
-void Watch::SetProvider( pProvider_t pDataProvider ) {
+void Watch::SetProvider( pProvider_t& pDataProvider ) {
   if ( m_pDataProvider.get() != pDataProvider.get() ) {
     DisableWatch();
     RemoveEvents();
