@@ -39,10 +39,10 @@
 #include <TFOptions/NoRiskInterestRateSeries.h>
 
 #include <TFVuTrading/ModelChartHdf5.h>
+#include <TFVuTrading/GridColumnSizer.h>
 #include <TFVuTrading/GridOptionChain.h>
 
 #include <TFBitsNPieces/TreeOps.h>
-#include <TFBitsNPieces/GridColumnSizer.h>
 
 #include "TreeItem.h"
 #include "TreeItemGroup.h"
@@ -67,7 +67,7 @@ public:
   typedef ou::tf::Watch::pWatch_t pWatch_t;
   typedef ou::tf::option::Option::pOption_t pOption_t;
 
-  PanelCharts( void );
+  PanelCharts();
   PanelCharts( wxWindow* parent, wxWindowID id = PANEL_CHARTS_IDNAME,
     const wxPoint& pos = PANEL_CHARTS_POSITION,
     const wxSize& size = PANEL_CHARTS_SIZE,
@@ -209,13 +209,13 @@ private:
   };
   // =======
 
-  typedef WatchInfo::pWatchInfo_t pWatchInfo_t;
+  using pWatchInfo_t = WatchInfo::pWatchInfo_t;
 
   // TODO: better .second to reset chain display when map is cleared
   //   chains shouldn't capture time series
-  typedef std::map<std::string,pOption_t> mapOption_t; // iqfeed updates in the option chains
+  using mapOption_t = std::map<std::string,pOption_t>; // iqfeed updates in the option chains
 
-  typedef std::map<void*,ou::tf::Instrument::idInstrument_t> mapItemToInstrument_t;
+  using mapItemToInstrument_t = std::map<void*,ou::tf::Instrument::idInstrument_t>;
   mapItemToInstrument_t m_mapItemToInstrument;  // translate menu item id to instrument [many::1]
 
   // TODO: need to check move semantics to see if things get watched/unwatched
@@ -244,8 +244,8 @@ private:
   // unique list of instrument/watches, for all listed instruments
   // instruments have been registered with instrument manager
   // used for saving series, and the underlying for option calcs
-  typedef ou::tf::Instrument::idInstrument_t idInstrument_t;
-  typedef std::map<idInstrument_t, InstrumentEntry> mapInstrumentEntry_t;
+  using idInstrument_t = ou::tf::Instrument::idInstrument_t;
+  using mapInstrumentEntry_t = std::map<idInstrument_t, InstrumentEntry>;
   mapInstrumentEntry_t m_mapInstrumentEntry;
 
   //pProvider_t m_pData1Provider;

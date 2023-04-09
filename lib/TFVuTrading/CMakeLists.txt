@@ -23,6 +23,7 @@ set(
     FrameControls.h
     FrameMain.h
     FrameOrderEntry.h
+    GridColumnSizer.h
     GridIBAccountValues.h
     GridIBAccountValues_impl.h
     GridIBPositionDetails.h
@@ -81,6 +82,7 @@ set(
     FrameControls.cpp
     FrameMain.cpp
     FrameOrderEntry.cpp
+    GridColumnSizer.cpp
     GridIBAccountValues.cpp
     GridIBAccountValues_impl.cpp
     GridIBPositionDetails.cpp

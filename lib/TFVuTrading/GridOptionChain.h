@@ -23,9 +23,8 @@
 
 #include <TFOptions/Option.h>
 
+#include <TFVuTrading/GridColumnSizer.h>
 #include <TFVuTrading/DragDropInstrument.h>
-
-#include <TFBitsNPieces/GridColumnSizer.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

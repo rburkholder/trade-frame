@@ -23,7 +23,7 @@
 #include <TFTrading/Instrument.h>
 #include <TFTrading/Portfolio.h>
 
-#include <TFBitsNPieces/GridColumnSizer.h>
+#include <TFVuTrading/GridColumnSizer.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

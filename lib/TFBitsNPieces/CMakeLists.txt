@@ -13,7 +13,6 @@ set(
     FirstOrDefaultCombiner.h
     FrameWork01.h
     FrameWork02.hpp
-    GridColumnSizer.h
     InstrumentFilter.h
     InstrumentSelection.h
     IQFeedInstrumentBuild.h
@@ -33,7 +32,6 @@ set(
 #    CalcAboveBelow.cpp
     BollingerTransitions.cpp
     FrameWork01.cpp
-    GridColumnSizer.cpp
     InstrumentSelection.cpp
     IQFeedInstrumentBuild.cpp
     IQFeedSymbolListOps.cpp

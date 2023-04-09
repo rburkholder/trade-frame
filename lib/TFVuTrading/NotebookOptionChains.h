@@ -24,16 +24,20 @@
 #include <map>
 #include <functional>
 
+#include <boost/signals2.hpp>
+
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
-#include <boost/signals2.hpp>
 
 #include <wx/wx.h>
 #include <wx/notebook.h>
 
 #include <TFTrading/TradingEnumerations.h>
+
 #include <TFOptions/Option.h>
+
 #include <TFVuTrading/GridOptionChain.h>
+
 #include <TFBitsNPieces/FirstOrDefaultCombiner.h>
 
 namespace ou { // One Unified
@@ -68,13 +72,13 @@ public:
   void SetName( const std::string& sName );  // underlying
   void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const std::string& sSymbol );
 
-  typedef std::function<void(boost::gregorian::date, double, bool bSelected, const GridOptionChain::OptionUpdateFunctions&, const GridOptionChain::OptionUpdateFunctions& )> fOnRowClicked_t;
+  using fOnRowClicked_t = std::function<void(boost::gregorian::date, double, bool bSelected, const GridOptionChain::OptionUpdateFunctions&, const GridOptionChain::OptionUpdateFunctions& )>;
   fOnRowClicked_t m_fOnRowClicked; // called when a row is control clicked
 
-  typedef std::function<void(const std::string&, boost::gregorian::date, double, GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t )> fOnOptionUnderlyingRetrieve_t;
+  using fOnOptionUnderlyingRetrieve_t = std::function<void(const std::string&, boost::gregorian::date, double, GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t )>;
   fOnOptionUnderlyingRetrieve_t m_fOnOptionUnderlyingRetrieve;
 
-  typedef std::function<void(boost::gregorian::date)> fOnPageEvent_t;
+  using fOnPageEvent_t = std::function<void(boost::gregorian::date)>;
   fOnPageEvent_t m_fOnPageChanging; // about to depart page
   fOnPageEvent_t m_fOnPageChanged;  // new page in place
 
@@ -110,7 +114,7 @@ private:
       : ixTab{}, sDate( s ), pPanel( pPanel_ ), pWinOptionChain( pGrid ) {}
   };
 
-  typedef std::map<boost::gregorian::date, Tab> mapOptionExpiry_t;
+  using mapOptionExpiry_t = std::map<boost::gregorian::date, Tab>;
 
   mapOptionExpiry_t m_mapOptionExpiry;
 

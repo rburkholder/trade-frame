@@ -38,6 +38,7 @@
 #include <TFVuTrading/PanelManualOrder.h>
 #include <TFVuTrading/PanelOptionCombo.h>
 #include <TFVuTrading/PanelPortfolioPosition.h>
+#include <TFVuTrading/GridColumnSizer.h>
 #include <TFVuTrading/GridIBPositionDetails.h>
 #include <TFVuTrading/GridIBAccountValues.h>
 
@@ -46,7 +47,6 @@
 #include <TFVuTrading/ControllerPortfolioPositionOrderExecution.h>
 
 #include <TFBitsNPieces/FrameWork01.h>
-#include <TFBitsNPieces/GridColumnSizer.h>
 #include <TFBitsNPieces/IQFeedSymbolListOps.h>
 #include <TFBitsNPieces/IQFeedInstrumentBuild.h>
 
