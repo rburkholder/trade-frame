@@ -39,8 +39,6 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE -D__WXGTK__ )
 target_include_directories(
   ${PROJECT_NAME} PRIVATE
     ".."
-    "/usr/local/lib/wx/include/gtk3-unicode-3.1"
-    "/usr/local/include/wx-3.1"
   )
 
 target_link_libraries(
