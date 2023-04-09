@@ -39,7 +39,6 @@
 
 #include <TFIQFeed/Provider.h>
 #include <TFInteractiveBrokers/IBTWS.h>
-//#include <TFSimulation/SimulationProvider.h>
 
 #include <TFOptionCombos/SpreadSpecs.h>
 
@@ -56,6 +55,7 @@ namespace tf { // TradeFrame
   class FrameControls;
   class GridOptionChain;
   class ComposeInstrument;
+  class PanelFinancialChart;
 namespace iqfeed { // IQFeed
   class HistoryRequest;
   class OptionChainQuery;
@@ -90,8 +90,7 @@ public:
   , vSymbol_t&& vSymbol // from config file? - maybe just send config file?
   , pPortfolio_t pMasterPortfolio
   , pProvider_t pExec, pProvider_t pData1, pProvider_t pData2
-  , fChartRoot_t&&
-  , fSetChartDataView_t&&
+  , ou::tf::PanelFinancialChart* pPanelFinancialChart
   , ou::tf::FrameControls* pFrameOptionChainsWithOrder
   );
   ~MasterPortfolio();
@@ -160,6 +159,7 @@ private:
   ou::tf::FedRateFromIQFeed m_fedrate;
   std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
 
+  ou::tf::PanelFinancialChart* m_pPanelFinancialChart;
   pChartDataView_t m_pChartDataView;
 
   ou::ChartEntryIndicator m_cePLCurrent;

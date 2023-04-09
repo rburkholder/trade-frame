@@ -33,6 +33,7 @@
 
 #include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/FrameControls.h>
+#include <TFVuTrading/PanelFinancialChart.h>
 
 #include "Config.h"
 #include "BasketTrading.h"
@@ -49,7 +50,7 @@ bool AppBasketTrading::OnInit() {
   wxApp::OnInit();
   wxApp::SetAppDisplayName( "Basket Trading" );
   wxApp::SetVendorName( "One Unified Net Limited" );
-  wxApp::SetVendorDisplayName( "(c) 2022 One Unified Net Limited" );
+  wxApp::SetVendorDisplayName( "(c) 2023 One Unified Net Limited" );
 
   bool code = true;
 
@@ -216,13 +217,7 @@ void AppBasketTrading::BuildMasterPortfolio() {
   , m_pPortfolioStrategyAggregate
     // providers
   , m_pExecutionProvider, m_pData1Provider, m_pData2Provider
-    // root ChartDataView to PanelFinancialChart
-  , [this]( const std::string& sName,  pChartDataView_t pChartDataView )->ou::tf::TreeItem* {
-      return m_pPanelFinancialChart->SetRoot( sName, pChartDataView );
-    }
-  , [this]( pChartDataView_t pChartDataView ) {
-      m_pPanelFinancialChart->SetChartDataView( pChartDataView );
-    }
+  , m_pPanelFinancialChart
   , m_pFrameOptionChainsWithOrder
   );
   //std::cout << "  done." << std::endl;

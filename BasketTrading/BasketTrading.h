@@ -43,7 +43,6 @@
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
-#include <TFVuTrading/PanelFinancialChart.h>
 
 #include "MasterPortfolio.h"
 
@@ -54,6 +53,7 @@ class PanelPortfolioStats;
 namespace ou {
 namespace tf {
   class FrameControls;
+  class PanelFinancialChart;
 }
 }
 

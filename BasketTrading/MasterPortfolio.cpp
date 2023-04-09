@@ -35,6 +35,7 @@
 #include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/FrameControls.h>
 #include <TFVuTrading/GridOptionChain.h>
+#include <TFVuTrading/PanelFinancialChart.h>
 
 #include "MoneyManager.h"
 #include "MasterPortfolio.h"
@@ -74,8 +75,7 @@ MasterPortfolio::MasterPortfolio(
 , vSymbol_t&& vSymbol
 , pPortfolio_t pMasterPortfolio
 , pProvider_t pExec, pProvider_t pData1, pProvider_t pData2
-, fChartRoot_t&& fChartRoot
-, fSetChartDataView_t&& fSetChartDataView
+, ou::tf::PanelFinancialChart* pPanelFinancialChart
 , ou::tf::FrameControls* pFrameOptionChainsWithOrder
 )
 : m_bStarted( false )
@@ -83,25 +83,22 @@ MasterPortfolio::MasterPortfolio(
 , m_dateTrading( dateTrading )
 , m_spread_specs( spread_specs )
 , m_vSymbol( std::move( vSymbol ) )
-, m_fChartRoot( std::move( fChartRoot ) )
-, m_fSetChartDataView( std::move( fSetChartDataView ) )
 , m_pMasterPortfolio( pMasterPortfolio )
 , m_pExec( std::move( pExec ) ) // IB or IQF
 , m_pData1( std::move( pData1 ) )  // IQF
 , m_pData2( std::move( pData2 ) )  // not used
 , m_pGridOptionChain( nullptr )
+, m_pPanelFinancialChart( pPanelFinancialChart )
 , m_pFrameOptionChainsWithOrder( pFrameOptionChainsWithOrder )
     //m_eAllocate( EAllocate::Waiting )
 {
   assert( 0 < m_vSymbol.size() );
 
-  assert( m_fChartRoot );
-  assert( m_fSetChartDataView );
-
   assert( pMasterPortfolio );
   assert( m_pExec );
   assert( m_pData1 );
 
+  assert( m_pPanelFinancialChart );
   assert( m_pFrameOptionChainsWithOrder );
 
   switch ( m_pExec->ID() ) {
@@ -141,6 +138,16 @@ MasterPortfolio::MasterPortfolio(
 //  m_pChartDataView->Add( 0, &m_cePLRealized );
 //  m_pChartDataView->Add( 2, &m_ceCommissionPaid );
   m_pChartDataView->SetNames( "Portfolio Profit / Loss", "Master P/L" );
+
+  m_fChartRoot =
+    [this]( const std::string& sName,  pChartDataView_t pChartDataView )->ou::tf::TreeItem* {
+      return m_pPanelFinancialChart->SetRoot( sName, pChartDataView );
+    };
+
+  m_fSetChartDataView =
+    [this]( pChartDataView_t pChartDataView ) {
+      m_pPanelFinancialChart->SetChartDataView( pChartDataView );
+    };
 
   m_ptiTreeRoot = m_fChartRoot( "Master P/L", m_pChartDataView );
   m_ptiTreeRoot->NewMenu();
