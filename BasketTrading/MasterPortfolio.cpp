@@ -132,12 +132,12 @@ MasterPortfolio::MasterPortfolio(
   m_cePLRealized.SetName( "P/L Realized" );
   m_ceCommissionPaid.SetName( "Commissions Paid" );
 
-  m_pChartDataView = std::make_shared<ou::ChartDataView>();
-  m_pChartDataView->Add( 0, &m_cePLCurrent );
-  m_pChartDataView->Add( 0, &m_cePLUnRealized );
-//  m_pChartDataView->Add( 0, &m_cePLRealized );
-//  m_pChartDataView->Add( 2, &m_ceCommissionPaid );
-  m_pChartDataView->SetNames( "Portfolio Profit / Loss", "Master P/L" );
+  m_pcdvMasterPortfolioPL = std::make_shared<ou::ChartDataView>();
+  m_pcdvMasterPortfolioPL->Add( 0, &m_cePLCurrent );
+  m_pcdvMasterPortfolioPL->Add( 0, &m_cePLUnRealized );
+//  m_pcdvMasterPortfolioPL->Add( 0, &m_cePLRealized );
+//  m_pcdvMasterPortfolioPL->Add( 2, &m_ceCommissionPaid );
+  m_pcdvMasterPortfolioPL->SetNames( "Portfolio Profit / Loss", "Master P/L" );
 
   m_fChartRoot =
     [this]( const std::string& sName,  pChartDataView_t pChartDataView )->ou::tf::TreeItem* {
@@ -149,7 +149,7 @@ MasterPortfolio::MasterPortfolio(
       m_pPanelFinancialChart->SetChartDataView( pChartDataView );
     };
 
-  m_ptiTreeRoot = m_fChartRoot( "Master P/L", m_pChartDataView );
+  m_ptiTreeRoot = m_fChartRoot( "Master P/L", m_pcdvMasterPortfolioPL );
   m_ptiTreeRoot->NewMenu();
   m_ptiTreeRoot->AppendMenuItem(
     "New Underlying",
@@ -160,13 +160,17 @@ MasterPortfolio::MasterPortfolio(
 
   m_ptiTreeUnderlying = m_ptiTreeRoot->AppendChild(
     "Underlying",
-    [this]( ou::tf::TreeItem* ){},
-    [this]( ou::tf::TreeItem* ){}
+    [this]( ou::tf::TreeItem* ){ // fOnClick_t
+      m_pPanelFinancialChart->SetChartDataView( nullptr );
+    },
+    [this]( ou::tf::TreeItem* ){} // fOnMenu_t
     );
   m_ptiTreeStrategies = m_ptiTreeRoot->AppendChild(
     "Strategies",
-    []( ou::tf::TreeItem* ){},
-    []( ou::tf::TreeItem* ){}
+    [this]( ou::tf::TreeItem* ){ // fOnClick_t
+      m_pPanelFinancialChart->SetChartDataView( nullptr );
+    },
+    []( ou::tf::TreeItem* ){} // fOnMenu_t
     );
 
   std::stringstream ss;

@@ -160,7 +160,7 @@ private:
   std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
 
   ou::tf::PanelFinancialChart* m_pPanelFinancialChart;
-  pChartDataView_t m_pChartDataView;
+  pChartDataView_t m_pcdvMasterPortfolioPL;
 
   ou::ChartEntryIndicator m_cePLCurrent;
   ou::ChartEntryIndicator m_cePLUnRealized;
