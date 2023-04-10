@@ -257,7 +257,8 @@ void NotebookOptionChains::OnDestroy( wxWindowDestroyEvent& event ) {
 
   UnbindEvents();
 
-  std::for_each( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(),
+  std::for_each(
+    m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(),
     [](mapOptionExpiry_t::value_type& value){
      value.second.pWinOptionChain->PreDestroy();
      value.second.pWinOptionChain->Destroy();

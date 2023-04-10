@@ -100,7 +100,7 @@ private:
   };
 
   // the strike list
-  typedef std::map<double, Row> mapStrike_t;
+  using mapStrike_t = std::map<double, Row>;
 
   struct Tab {
     size_t ixTab;
