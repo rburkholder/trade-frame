@@ -854,6 +854,19 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
           m_pNotebookOptionChains->Add( option.GetExpiry(), option.GetStrike(), option.GetOptionSide(), option.GetInstrumentName() );
         }
       );
+      m_pNotebookOptionChains->m_fOnPageChanging =
+        []( boost::gregorian::date date){
+          std::cout << "moving from " << date << std::endl;
+        };
+      m_pNotebookOptionChains->m_fOnPageChanged =
+        []( boost::gregorian::date date){
+          std::cout << "moved to " << date << std::endl;
+        };
+      using OptionUpdateFunctions = ou::tf::GridOptionChain::OptionUpdateFunctions;
+      m_pNotebookOptionChains->m_fOnRowClicked =
+        [](boost::gregorian::date date, double strike, bool bSelected, const OptionUpdateFunctions& call, const OptionUpdateFunctions& put ){
+          std::cout << "clicked " << date << "," << strike << "," << bSelected << "," << call.sSymbolName << "," << put.sSymbolName << std::endl;
+        };
     } );
 
     //[this,pti=uws.pti]( boost::gregorian::date date ){

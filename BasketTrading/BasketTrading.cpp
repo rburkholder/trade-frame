@@ -141,7 +141,6 @@ void AppBasketTrading::Init() {
 //  wxBoxSizer* sizerBottom = new wxBoxSizer( wxHORIZONTAL );
 //  sizerMain->Add( sizerBottom, 0, wxEXPAND | wxALL, 2 );
 
-
   m_pFrameOptionChainsWithOrder = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Option Chain Orders" );
   //m_pPanelTrade = new ou::tf::l2::PanelTrade( m_pFrameLadderTrade );
   //m_pFrameLadderTrade->Attach( m_pPanelTrade );
