@@ -27,12 +27,12 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-NotebookOptionChains::NotebookOptionChains(): wxNotebook() {
+NotebookOptionChains::NotebookOptionChains(): wxListbook() {
   Init();
 }
 
 NotebookOptionChains::NotebookOptionChains( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name )
-: wxNotebook()
+: wxListbook()
 {
   Init();
   Create(parent, id, pos, size, style, name );
@@ -54,7 +54,7 @@ void NotebookOptionChains::Init() {
 
 bool NotebookOptionChains::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
 
-  wxNotebook::Create(parent, id, pos, size, style, name );
+  wxListbook::Create(parent, id, pos, size, style, name );
 
   CreateControls();
 
@@ -172,7 +172,7 @@ void NotebookOptionChains::SetGridOptionChain_ColumnSaver( ou::tf::GridColumnSiz
 }
 
 void NotebookOptionChains::SetName( const std::string& sName ) {
-  wxNotebook::SetName( sName );
+  wxListbook::SetName( sName );
   m_sName = sName;
 }
 

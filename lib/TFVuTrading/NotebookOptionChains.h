@@ -30,7 +30,7 @@
 #include <boost/serialization/split_member.hpp>
 
 #include <wx/wx.h>
-#include <wx/notebook.h>
+#include <wx/listbook.h>
 
 #include <TFTrading/TradingEnumerations.h>
 
@@ -43,13 +43,13 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-#define SYMBOL_OPTIONCHAINS_STYLE wxTAB_TRAVERSAL
+#define SYMBOL_OPTIONCHAINS_STYLE wxTAB_TRAVERSAL | wxNB_LEFT
 #define SYMBOL_OPTIONCHAINS_TITLE _("Notebook Option Chains")
 #define SYMBOL_OPTIONCHAINS_IDNAME ID_NOTEBOOK_OPTIONDETAILS
 #define SYMBOL_OPTIONCHAINS_SIZE wxSize(-1, -1)
 #define SYMBOL_OPTIONCHAINS_POSITION wxDefaultPosition
 
-class NotebookOptionChains: public wxNotebook {
+class NotebookOptionChains: public wxListbook {
   friend class boost::serialization::access;
 public:
 
