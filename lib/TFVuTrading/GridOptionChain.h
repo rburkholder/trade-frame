@@ -41,7 +41,7 @@ class GridOptionChain: public wxGrid {
   friend GridOptionChain_impl;
 public:
 
-  GridOptionChain(void);
+  GridOptionChain();
   GridOptionChain(
     wxWindow* parent, wxWindowID id = GRID_OPTIONCHAIN_IDNAME,
     const wxPoint& pos = GRID_OPTIONCHAIN_POSITION,
@@ -76,13 +76,13 @@ public:
     fastdelegate::FastDelegate<void(const ou::tf::Greek&)> fGreek;
   };
 
-  typedef std::function<void(double, bool bSelected, const OptionUpdateFunctions&, const OptionUpdateFunctions& )> fOnRowClicked_t;
+  using fOnRowClicked_t = std::function<void(double, bool bSelected, const OptionUpdateFunctions&, const OptionUpdateFunctions& )>;
   fOnRowClicked_t m_fOnRowClicked; // called when a row is clicked (on/off)
 
-  typedef Instrument::pInstrument_t pInstrument_t;
+  //using pInstrument_t = Instrument::pInstrument_t;
 
-  typedef DragDropInstrument::fOnOptionUnderlyingRetrieveComplete_t fOnOptionUnderlyingRetrieveComplete_t;
-  typedef std::function<void(const std::string&, double, fOnOptionUnderlyingRetrieveComplete_t)> fOnOptionUnderlyingRetrieveInitiate_t; // IQFeed Option Symbol, strike, completion function
+  using fOnOptionUnderlyingRetrieveComplete_t = DragDropInstrument::fOnOptionUnderlyingRetrieveComplete_t;
+  using fOnOptionUnderlyingRetrieveInitiate_t = std::function<void(const std::string&, double, fOnOptionUnderlyingRetrieveComplete_t&&)>; // IQFeed Option Symbol, strike, completion function
   fOnOptionUnderlyingRetrieveInitiate_t m_fOnOptionUnderlyingRetrieveInitiate;  // called when DropTarget wants instrument
 
 protected:

@@ -308,16 +308,16 @@ void GridOptionChain_impl::OnGridCellBeginDrag( wxGridEvent& event ) {
     if ( nullptr != m_details.m_fOnOptionUnderlyingRetrieveInitiate ) {
 
       if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) ) { // call drag and drop
-        ou::tf::DragDropInstrument dndCall( [this,iterOptionValueRow]( GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t f ){
-          m_details.m_fOnOptionUnderlyingRetrieveInitiate( iterOptionValueRow->second.m_sCallName, iterOptionValueRow->first, f ); // iqfeed name and strike
+        ou::tf::DragDropInstrument dndCall( [this,iterOptionValueRow]( GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t&& f ){
+          m_details.m_fOnOptionUnderlyingRetrieveInitiate( iterOptionValueRow->second.m_sCallName, iterOptionValueRow->first, std::move( f ) ); // iqfeed name and strike
         } );
 
         bSkip = StartDragDrop( dndCall );
       }
 
       if ( ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) ) { // put drag and drop
-        ou::tf::DragDropInstrument dndPut( [this,iterOptionValueRow]( GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t f ){
-          m_details.m_fOnOptionUnderlyingRetrieveInitiate( iterOptionValueRow->second.m_sPutName, iterOptionValueRow->first, f ); // iqfeed name and strike
+        ou::tf::DragDropInstrument dndPut( [this,iterOptionValueRow]( GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t&& f ){
+          m_details.m_fOnOptionUnderlyingRetrieveInitiate( iterOptionValueRow->second.m_sPutName, iterOptionValueRow->first, std::move( f ) ); // iqfeed name and strike
         } );
 
         bSkip = StartDragDrop( dndPut );

@@ -43,7 +43,13 @@ NotebookOptionChains::~NotebookOptionChains() {
 
 void NotebookOptionChains::Init() {
   m_bBound = false;
+
   m_pgcsGridOptionChain = nullptr;
+
+  m_fOnRowClicked = nullptr;
+  m_fOnPageChanged = nullptr;
+  m_fOnPageChanging = nullptr;
+  m_fOnOptionUnderlyingRetrieve = nullptr;
 }
 
 bool NotebookOptionChains::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
@@ -191,15 +197,17 @@ void NotebookOptionChains::Add( boost::gregorian::date date, double strike, ou::
 
     // a control right click will signal through that strike should watch/unwatch
     // TODO: maybe the signal through should return a boolean of whether it turned out to be watch or unwatch
-    pGridOptionChain->m_fOnRowClicked = [this, date](double strike, bool bSelected, const GridOptionChain::OptionUpdateFunctions& funcsCall, const GridOptionChain::OptionUpdateFunctions& funcsPut  ){
-      if ( nullptr != m_fOnRowClicked) {
-        m_fOnRowClicked( date, strike, bSelected, funcsCall, funcsPut );
-      }
+    pGridOptionChain->m_fOnRowClicked =
+      [this, date](double strike, bool bSelected, const GridOptionChain::OptionUpdateFunctions& funcsCall, const GridOptionChain::OptionUpdateFunctions& funcsPut  ){
+        if ( nullptr != m_fOnRowClicked) {
+          m_fOnRowClicked( date, strike, bSelected, funcsCall, funcsPut );
+        }
     };
-    pGridOptionChain->m_fOnOptionUnderlyingRetrieveInitiate = [this, date]( const std::string& sIQFeedOptionName, double strike, GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t f ){
-      if ( nullptr != m_fOnOptionUnderlyingRetrieve ) {
-        m_fOnOptionUnderlyingRetrieve(sIQFeedOptionName, date, strike, f );
-      }
+    pGridOptionChain->m_fOnOptionUnderlyingRetrieveInitiate =
+      [this, date]( const std::string& sIQFeedOptionName, double strike, GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t&& f ){
+        if ( nullptr != m_fOnOptionUnderlyingRetrieve ) {
+          m_fOnOptionUnderlyingRetrieve(sIQFeedOptionName, date, strike, f );
+        }
     };
 
     iterExpiry = m_mapOptionExpiry.insert(
