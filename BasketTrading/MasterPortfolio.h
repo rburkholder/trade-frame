@@ -22,6 +22,7 @@
 #include <string>
 #include <functional>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -173,6 +174,9 @@ private:
 
   ou::tf::FrameControls* m_pFrameOptionChainsWithOrder;
   ou::tf::NotebookOptionChains* m_pNotebookOptionChains;
+
+  using setOptionsInEngine_t = std::unordered_set<pOption_t>;
+  setOptionsInEngine_t m_setOptionsInEngine;
 
   using pManageStrategy_t = std::shared_ptr<ManageStrategy>;
 
