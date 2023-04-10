@@ -306,16 +306,15 @@ void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuan
       assert( false );
   }
 
-  auto pair = m_vpOrderCombo.emplace( pOrderCombo );
+  auto pair = m_setpOrderCombo.insert( pOrderCombo );
   assert( pair.second );
 
-  vpOrderCombo_t::iterator iter = pair.first;
+  setpOrderCombo_t::iterator iter = pair.first;
 
   pOrderCombo->Submit(
     [this,iter](){ // fComboDone_t
       std::cout << "Collar::PlaceOrder complete" << std::endl;
-      m_pOrderCombo_Kill = *iter;
-      m_vpOrderCombo.erase( iter );
+      m_vOrderComboIter.push_back( iter );
     } );
 }
 

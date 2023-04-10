@@ -34,12 +34,13 @@ namespace option { // options
 //Combo::Combo(){}
 
 Combo::Combo( Combo&& rhs )
-: m_mapComboLeg( std::move( rhs.m_mapComboLeg ) ),
-  m_pPortfolio( std::move( rhs.m_pPortfolio ) ),
-  m_fConstructOption( std::move( rhs.m_fConstructOption ) ),
-  m_fActivateOption( std::move( rhs.m_fActivateOption ) ),
-  m_fConstructPosition( std::move( rhs.m_fConstructPosition ) ),
-  m_fDeactivateOption( std::move( rhs.m_fDeactivateOption ) )
+: m_mapComboLeg( std::move( rhs.m_mapComboLeg ) )
+, m_setpOrderCombo( std::move( rhs.m_setpOrderCombo ) )
+, m_pPortfolio( std::move( rhs.m_pPortfolio ) )
+, m_fConstructOption( std::move( rhs.m_fConstructOption ) )
+, m_fActivateOption( std::move( rhs.m_fActivateOption ) )
+, m_fConstructPosition( std::move( rhs.m_fConstructPosition ) )
+, m_fDeactivateOption( std::move( rhs.m_fDeactivateOption ) )
 {
   assert( rhs.m_mapInitTrackOption.empty() );
 }
@@ -273,15 +274,14 @@ void Combo::InitTracker(
       PositionNote( pPositionOld, LegNote::State::Closed );
       DeactivatePositionOption( pPositionOld );
 
-      auto pair = m_vpOrderCombo.emplace( pOrderCombo );
+      auto pair = m_setpOrderCombo.insert( pOrderCombo );
       assert( pair.second );
 
-      vpOrderCombo_t::iterator iter = pair.first;
+      setpOrderCombo_t::iterator iter = pair.first;
 
       pOrderCombo->Submit(
         [this,iter](){
-          m_pOrderCombo_Kill = *iter;
-          m_vpOrderCombo.erase( iter );
+          m_vOrderComboIter.push_back( iter );
         } );
 
       return pPosition;
@@ -297,15 +297,14 @@ void Combo::InitTracker(
         pPositionOld,
         [](){} );
 
-      auto pair = m_vpOrderCombo.emplace( pOrderCombo );
+      auto pair = m_setpOrderCombo.insert( pOrderCombo );
       assert( pair.second );
 
-      vpOrderCombo_t::iterator iter = pair.first;
+      setpOrderCombo_t::iterator iter = pair.first;
 
       pOrderCombo->Submit(
         [this,iter](){
-          m_pOrderCombo_Kill = *iter;
-          m_vpOrderCombo.erase( iter );
+          m_vOrderComboIter.push_back( iter );
         } );
     }
   );
@@ -366,8 +365,13 @@ void Combo::DeactivatePositionOption( pPosition_t pPosition ) {
 // TODO: make use of doubleUnderlyingSlope to trigger exit latch
 void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {
 
-  for ( vpOrderCombo_t::value_type vt: m_vpOrderCombo ) {
+  for ( setpOrderCombo_t::value_type vt: m_setpOrderCombo ) {
     vt->Tick( dt );
+  }
+
+  for ( setpOrderCombo_t::iterator iter: m_vOrderComboIter ) { // clean up
+    m_setpOrderCombo.erase( iter );
+    m_vOrderComboIter.clear();
   }
 
   using vRemove_t = std::vector<mapComboLeg_t::iterator>;

@@ -220,10 +220,12 @@ protected:
 
   using pOrderCombo_t = ou::tf::OrderCombo::pOrderCombo_t;
 
-  using vpOrderCombo_t = std::unordered_set<pOrderCombo_t>;
-  vpOrderCombo_t m_vpOrderCombo;
+  using setpOrderCombo_t = std::unordered_set<pOrderCombo_t>;
+  setpOrderCombo_t m_setpOrderCombo;
 
-  pOrderCombo_t m_pOrderCombo_Kill; // where pOrderCombo goes to die outside the loop
+  // does this require a mutex?
+  using vOrderComboIter_t = std::vector<setpOrderCombo_t::iterator>;
+  vOrderComboIter_t m_vOrderComboIter;
 
   using fInitTrackOption_t = std::function<void(ComboLeg&)>;
   using mapInitTrackOption_t = std::map<LegNote::Type,fInitTrackOption_t>;
