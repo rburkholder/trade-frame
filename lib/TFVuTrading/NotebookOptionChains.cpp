@@ -73,8 +73,8 @@ void NotebookOptionChains::CreateControls() {
 void NotebookOptionChains::BindEvents() {
   if ( !m_bBound ) {
     // Page Change events cause issues during OnDestroy
-    Bind( wxEVT_NOTEBOOK_PAGE_CHANGING, &NotebookOptionChains::OnPageChanging, this );
-    Bind( wxEVT_NOTEBOOK_PAGE_CHANGED, &NotebookOptionChains::OnPageChanged, this );
+    Bind( wxEVT_LISTBOOK_PAGE_CHANGING, &NotebookOptionChains::OnPageChanging, this );
+    Bind( wxEVT_LISTBOOK_PAGE_CHANGED, &NotebookOptionChains::OnPageChanged, this );
 
     //Bind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
     //Bind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
@@ -91,8 +91,8 @@ void NotebookOptionChains::BindEvents() {
 void NotebookOptionChains::UnbindEvents() {
   if ( m_bBound ) {
     // Page change events occur during Deletion of Pages, causing problems
-    assert( Unbind( wxEVT_NOTEBOOK_PAGE_CHANGING, &NotebookOptionChains::OnPageChanging, this ) );
-    assert( Unbind( wxEVT_NOTEBOOK_PAGE_CHANGED, &NotebookOptionChains::OnPageChanged, this ) );
+    assert( Unbind( wxEVT_LISTBOOK_PAGE_CHANGING, &NotebookOptionChains::OnPageChanging, this ) );
+    assert( Unbind( wxEVT_LISTBOOK_PAGE_CHANGED, &NotebookOptionChains::OnPageChanged, this ) );
 
     //Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
     //Unbind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
