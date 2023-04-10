@@ -43,6 +43,7 @@ set(
     Mouse.hpp
     NotebookOptionChains.h
     PanelChartHdf5.h
+    PanelComboOrder.hpp
     PanelFinancialChart.h
     PanelLogging.h
     PanelManualOrder.h
@@ -99,6 +100,7 @@ set(
     ModelPosition.cpp
     NotebookOptionChains.cpp
     PanelChartHdf5.cpp
+    PanelComboOrder.cpp
     PanelFinancialChart.cpp
     PanelLogging.cpp
     PanelManualOrder.cpp

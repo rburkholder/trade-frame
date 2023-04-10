@@ -35,7 +35,7 @@
 #include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/FrameControls.h>
 #include <TFVuTrading/PanelFinancialChart.h>
-#include <TFVuTrading/NotebookOptionChains.h>
+#include <TFVuTrading/PanelComboOrder.hpp>
 
 #include "MoneyManager.h"
 #include "MasterPortfolio.h"
@@ -78,7 +78,7 @@ MasterPortfolio::MasterPortfolio(
 , m_pExec( std::move( pExec ) ) // IB or IQF
 , m_pData1( std::move( pData1 ) )  // IQF
 , m_pData2( std::move( pData2 ) )  // not used
-, m_pNotebookOptionChains( nullptr )
+, m_pPanelComboOrder( nullptr )
 , m_pPanelFinancialChart( pPanelFinancialChart )
 , m_pFrameOptionChainsWithOrder( pFrameOptionChainsWithOrder )
     //m_eAllocate( EAllocate::Waiting )
@@ -160,8 +160,8 @@ MasterPortfolio::MasterPortfolio(
     );
 
   // TODO: build per underlying
-  m_pNotebookOptionChains = new ou::tf::NotebookOptionChains( m_pFrameOptionChainsWithOrder, wxID_ANY );
-  m_pFrameOptionChainsWithOrder->Attach( m_pNotebookOptionChains );
+  m_pPanelComboOrder = new ou::tf::PanelComboOrder( m_pFrameOptionChainsWithOrder, wxID_ANY );
+  m_pFrameOptionChainsWithOrder->Attach( m_pPanelComboOrder );
 
   std::stringstream ss;
   //ss.str( "" );
@@ -845,25 +845,25 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
   std::cout << "Start Underlying " << sUnderlying << std::endl;
 
   uws.pUnderlying->FilterChains();
-  m_pNotebookOptionChains->CallAfter(
+  m_pPanelComboOrder->CallAfter(
     [this,sUnderlying,&uws](){
-      m_pNotebookOptionChains->SetName( sUnderlying );
+      //m_pNotebookOptionChains->SetName( sUnderlying );
       uws.pUnderlying->WalkChains(
         [this]( pOption_t pOption ){
           const ou::tf::option::Option& option( *pOption );
-          m_pNotebookOptionChains->Add( option.GetExpiry(), option.GetStrike(), option.GetOptionSide(), option.GetInstrumentName() );
+          m_pPanelComboOrder->Add( option.GetExpiry(), option.GetStrike(), option.GetOptionSide(), option.GetInstrumentName() );
         }
       );
-      m_pNotebookOptionChains->m_fOnPageChanging =
+      m_pPanelComboOrder->m_fOnPageChanging =
         []( boost::gregorian::date date){
           std::cout << "moving from " << date << std::endl;
         };
-      m_pNotebookOptionChains->m_fOnPageChanged =
+      m_pPanelComboOrder->m_fOnPageChanged =
         []( boost::gregorian::date date){
           std::cout << "moved to " << date << std::endl;
         };
       using OptionUpdateFunctions = ou::tf::GridOptionChain::OptionUpdateFunctions;
-      m_pNotebookOptionChains->m_fOnRowClicked =
+      m_pPanelComboOrder->m_fOnRowClicked =
         [](boost::gregorian::date date, double strike, bool bSelected, const OptionUpdateFunctions& call, const OptionUpdateFunctions& put ){
           std::cout << "clicked " << date << "," << strike << "," << bSelected << "," << call.sSymbolName << "," << put.sSymbolName << std::endl;
         };

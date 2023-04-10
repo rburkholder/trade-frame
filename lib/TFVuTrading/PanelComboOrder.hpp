@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2017, One Unified. All rights reserved.                 *
+ * Copyright(c) 2023, One Unified. All rights reserved.                 *
  * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
@@ -11,68 +11,70 @@
  *                                                                      *
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
+
 /*
- * File:   NotebookOptionChains.h
- * Author: raymond@burkholder.net
- *
- * Created on July 2, 2017, 8:16 PM
+ * File:    PanelComboOrder.hpp
+ * Author:  raymond@burkholder.net
+ * Project: TFVuTrading
+ * Created: April 10, 2023 13:10:29
  */
 
-#ifndef WINOPTIONCHAINS_H
-#define WINOPTIONCHAINS_H
+#pragma once
 
 #include <map>
-#include <functional>
-
-#include <boost/signals2.hpp>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
-#include <wx/wx.h>
-#include <wx/listbook.h>
+#include <wx/panel.h>
 
-#include <TFTrading/TradingEnumerations.h>
+// amalgamation of NotebookOptionChains, GridOptionChain
 
-#include <TFOptions/Option.h>
+class wxGrid;
+class wxButton;
+class wxListbook;
+class wxGridEvent;
+class wxToggleButton;
+class wxListbookEvent;
 
 #include <TFVuTrading/GridOptionChain.h>
-
-#include <TFBitsNPieces/FirstOrDefaultCombiner.h>
-
-// superceded by PanelComboOrder.hpp
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-#define SYMBOL_OPTIONCHAINS_STYLE wxTAB_TRAVERSAL | wxNB_LEFT
-#define SYMBOL_OPTIONCHAINS_TITLE _("Notebook Option Chains")
-#define SYMBOL_OPTIONCHAINS_IDNAME ID_NOTEBOOK_OPTIONDETAILS
-#define SYMBOL_OPTIONCHAINS_SIZE wxSize(-1, -1)
-#define SYMBOL_OPTIONCHAINS_POSITION wxDefaultPosition
+class GridOptionChain;
 
-class NotebookOptionChains: public wxListbook {
+#define SYMBOL_PANELCOMBOORDER_STYLE wxTAB_TRAVERSAL
+#define SYMBOL_PANELCOMBOORDER_TITLE _("PanelComboOrder")
+#define SYMBOL_PANELCOMBOORDER_IDNAME ID_PANELCOMBOORDER
+#define SYMBOL_PANELCOMBOORDER_SIZE wxDefaultSize
+#define SYMBOL_PANELCOMBOORDER_POSITION wxDefaultPosition
+
+class PanelComboOrder: public wxPanel {
   friend class boost::serialization::access;
 public:
 
-  NotebookOptionChains();
-  NotebookOptionChains(
-    wxWindow* parent, wxWindowID id = SYMBOL_OPTIONCHAINS_IDNAME,
-    const wxPoint& pos = SYMBOL_OPTIONCHAINS_POSITION,
-    const wxSize& size = SYMBOL_OPTIONCHAINS_SIZE,
-    long style = SYMBOL_OPTIONCHAINS_STYLE,
-    const wxString& name = SYMBOL_OPTIONCHAINS_TITLE );
-  virtual ~NotebookOptionChains();
+  PanelComboOrder();
+  PanelComboOrder(
+    wxWindow* parent, wxWindowID id = ID_PANELCOMBOORDER,
+    const wxPoint& pos = SYMBOL_PANELCOMBOORDER_POSITION,
+    const wxSize& size = SYMBOL_PANELCOMBOORDER_SIZE,
+    long style = SYMBOL_PANELCOMBOORDER_STYLE,
+    const wxString& name = SYMBOL_PANELCOMBOORDER_TITLE );
+  virtual ~PanelComboOrder();
 
   bool Create( wxWindow* parent,
-    wxWindowID id = SYMBOL_OPTIONCHAINS_IDNAME,
-    const wxPoint& pos = SYMBOL_OPTIONCHAINS_POSITION,
-    const wxSize& size = SYMBOL_OPTIONCHAINS_SIZE,
-    long style = SYMBOL_OPTIONCHAINS_STYLE,
-    const wxString& name = SYMBOL_OPTIONCHAINS_TITLE  );
+    wxWindowID id = ID_PANELCOMBOORDER,
+    const wxPoint& pos = SYMBOL_PANELCOMBOORDER_POSITION,
+    const wxSize& size = SYMBOL_PANELCOMBOORDER_SIZE,
+    long style = SYMBOL_PANELCOMBOORDER_STYLE,
+    const wxString& name = SYMBOL_PANELCOMBOORDER_TITLE  );
 
-  void SetName( const std::string& sName );  // underlying
   void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const std::string& sSymbol );
+
+  using fOnPageEvent_t = std::function<void(boost::gregorian::date)>;
+  fOnPageEvent_t m_fOnPageChanging; // about to depart page
+  fOnPageEvent_t m_fOnPageChanged;  // new page in place
 
   using fOnRowClicked_t = std::function<void(boost::gregorian::date, double, bool bSelected, const GridOptionChain::OptionUpdateFunctions& call, const GridOptionChain::OptionUpdateFunctions& put )>;
   fOnRowClicked_t m_fOnRowClicked; // called when a row is control clicked
@@ -80,18 +82,26 @@ public:
   using fOnOptionUnderlyingRetrieve_t = std::function<void(const std::string&, boost::gregorian::date, double, GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t )>;
   fOnOptionUnderlyingRetrieve_t m_fOnOptionUnderlyingRetrieve;
 
-  using fOnPageEvent_t = std::function<void(boost::gregorian::date)>;
-  fOnPageEvent_t m_fOnPageChanging; // about to depart page
-  fOnPageEvent_t m_fOnPageChanged;  // new page in place
-
   void SetGridOptionChain_ColumnSaver( ou::tf::GridColumnSizer* );
 
 protected:
 private:
 
   enum {
-    ID_Null=wxID_HIGHEST, ID_NOTEBOOK_OPTIONDETAILS
+    ID_Null=wxID_HIGHEST, ID_PANELCOMBOORDER
+  , ID_BOOK_OptionChains
+  , ID_GRID_OptionChain
+  , ID_GRID_ComboOrder
+  , ID_BTN_UpdateGreeks
+  , ID_BTN_ClearOrder
+  , ID_BTN_PlaceOrder
   };
+
+  wxListbook* m_pBookOptionChains;
+  wxGrid* m_pGridComboOrder;
+  wxToggleButton* m_btnUpgdateGreeks;
+  wxButton* m_btnClearOrder;
+  wxButton* m_btnPlaceOrder;
 
   // put/call at strike
   struct Row {
@@ -119,18 +129,37 @@ private:
   using mapOptionExpiry_t = std::map<boost::gregorian::date, Tab>;
   mapOptionExpiry_t m_mapOptionExpiry;
 
-  bool m_bBound;
-
-  std::string m_sName;  // should be underlying so can use to lookup in PanelCharts
-
   ou::tf::GridColumnSizer* m_pgcsGridOptionChain;
-
-  void OnPageChanged( wxBookCtrlEvent& event );
-  void OnPageChanging( wxBookCtrlEvent& event );
 
   void Init();
   void CreateControls();
-  void OnDestroy( wxWindowDestroyEvent& event );
+
+    /// wxEVT_DESTROY event handler for ID_PANELCOMBOORDER
+    void OnDestroy( wxWindowDestroyEvent& event );
+
+    /// wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED event handler for ID_BOOK_OptionChains
+    void OnBOOKOptionChainsPageChanged( wxListbookEvent& event );
+
+    /// wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING event handler for ID_BOOK_OptionChains
+    void OnBOOKOptionChainsPageChanging( wxListbookEvent& event );
+
+    /// wxEVT_GRID_CELL_LEFT_CLICK event handler for ID_GRID_ComboOrder
+    void OnCellLeftClick( wxGridEvent& event );
+
+    /// wxEVT_GRID_CELL_RIGHT_CLICK event handler for ID_GRID_ComboOrder
+    void OnCellRightClick( wxGridEvent& event );
+
+    /// wxEVT_MOTION event handler for ID_GRID_ComboOrder
+    void OnMotion( wxMouseEvent& event );
+
+    /// wxEVT_COMMAND_CHECKBOX_CLICKED event handler for ID_BTN_UpdateGreeks
+    void OnBTNUpdateGreeksClick( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BTN_ClearOrder
+    void OnBTNClearOrderClick( wxCommandEvent& event );
+
+    /// wxEVT_COMMAND_BUTTON_CLICKED event handler for ID_BTN_PlaceOrder
+    void OnBTNPlaceOrderClick( wxCommandEvent& event );
 
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
@@ -155,8 +184,3 @@ private:
 
 } // namespace tf
 } // namespace ou
-
-BOOST_CLASS_VERSION(ou::tf::NotebookOptionChains, 1)
-
-#endif /* WINOPTIONCHAINS_H */
-

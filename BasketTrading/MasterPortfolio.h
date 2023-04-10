@@ -54,7 +54,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
   class TreeItem;
   class FrameControls;
-  class NotebookOptionChains;
+  class PanelComboOrder;
   class ComposeInstrument;
   class PanelFinancialChart;
 namespace iqfeed { // IQFeed
@@ -173,7 +173,7 @@ private:
   //wxTreeItemId m_idTreeOptions;
 
   ou::tf::FrameControls* m_pFrameOptionChainsWithOrder;
-  ou::tf::NotebookOptionChains* m_pNotebookOptionChains;
+  ou::tf::PanelComboOrder* m_pPanelComboOrder;
 
   using setOptionsInEngine_t = std::unordered_set<pOption_t>;
   setOptionsInEngine_t m_setOptionsInEngine;
