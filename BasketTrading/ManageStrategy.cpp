@@ -706,10 +706,18 @@ void ManageStrategy::ManageIVTracker_RH() { // once a second
     }
     else {
       if ( strike != m_dblStrikeCurrent ) {
-        double diffStrike = strike - m_dblStrikeCurrent;
-        if ( 0.0 > diffStrike ) diffStrike = -diffStrike;
-        double diffPrice = m_dblPriceCurrent - m_dblStrikeCurrent;
-        if ( 0.0 > diffPrice ) diffPrice = -diffPrice;
+
+        double diffStrike;
+        if ( strike  > m_dblStrikeCurrent )
+          diffStrike = strike - m_dblStrikeCurrent;
+        else
+          diffStrike = m_dblStrikeCurrent - strike;
+
+        double diffPrice;
+        if ( m_dblPriceCurrent > m_dblStrikeCurrent )
+          diffPrice = m_dblPriceCurrent - m_dblStrikeCurrent;
+        else
+          diffPrice = m_dblStrikeCurrent - m_dblPriceCurrent;
 
         if ( ( 0.66 * diffStrike ) < diffPrice ) { // hysterisis
           m_dblStrikeCurrent = strike;
