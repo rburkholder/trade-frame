@@ -41,7 +41,7 @@ namespace tf { // TradeFrame
 struct GridOptionChain_impl {
 //public:
   GridOptionChain_impl( GridOptionChain& );
-  ~GridOptionChain_impl( void );
+  ~GridOptionChain_impl();
 //protected:
 
 //private:
@@ -93,7 +93,7 @@ struct GridOptionChain_impl {
       Init();
       boost::fusion::at_c<COL_Strike>( m_vModelCells ).SetValue( boost::fusion::at_c<COL_Strike>( rhs.m_vModelCells ).GetValue() );
     }
-    ~OptionValueRow( void ) {}
+    ~OptionValueRow() {}
 
     void UpdateGui( void ) {
       boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_nRow ) );
@@ -114,7 +114,7 @@ struct GridOptionChain_impl {
       boost::fusion::at_c<COL_PutIV>( m_vModelCells ).SetValue( greek.ImpliedVolatility() );
       boost::fusion::at_c<COL_PutDelta>( m_vModelCells ).SetValue( greek.Delta() );
       boost::fusion::at_c<COL_PutGamma>( m_vModelCells ).SetValue( greek.Gamma() );
-}
+    }
     void UpdatePutQuote( const ou::tf::Quote& quote ) {
       boost::fusion::at_c<COL_PutBid>( m_vModelCells ).SetValue( quote.Bid() );
       boost::fusion::at_c<COL_PutAsk>( m_vModelCells ).SetValue( quote.Ask() );
@@ -140,8 +140,8 @@ struct GridOptionChain_impl {
     }
   };  // struct OptionValueRow
 
-  typedef std::map<double,OptionValueRow> mapOptionValueRow_t;
-  typedef mapOptionValueRow_t::iterator mapOptionValueRow_iter;
+  using mapOptionValueRow_t = std::map<double,OptionValueRow>;
+  using mapOptionValueRow_iter = mapOptionValueRow_t::iterator;
   mapOptionValueRow_t m_mapOptionValueRow;
 
   int m_nRow;
