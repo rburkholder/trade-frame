@@ -40,6 +40,8 @@
 
 #include <TFBitsNPieces/FirstOrDefaultCombiner.h>
 
+#include "InterfaceBookOptionChain.hpp"
+
 // superceded by PanelComboOrder.hpp
 
 namespace ou { // One Unified
@@ -51,7 +53,10 @@ namespace tf { // TradeFrame
 #define SYMBOL_OPTIONCHAINS_SIZE wxSize(-1, -1)
 #define SYMBOL_OPTIONCHAINS_POSITION wxDefaultPosition
 
-class NotebookOptionChains: public wxListbook {
+class NotebookOptionChains:
+  public wxListbook
+, public InterfaceBookOptionChain
+{
   friend class boost::serialization::access;
 public:
 
@@ -72,7 +77,7 @@ public:
     const wxString& name = SYMBOL_OPTIONCHAINS_TITLE  );
 
   void SetName( const std::string& sName );  // underlying
-  void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const std::string& sSymbol );
+  virtual void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const std::string& sSymbol );
 
   using fOnRowClicked_t = std::function<void(boost::gregorian::date, double, bool bSelected, const GridOptionChain::OptionUpdateFunctions& call, const GridOptionChain::OptionUpdateFunctions& put )>;
   fOnRowClicked_t m_fOnRowClicked; // called when a row is control clicked

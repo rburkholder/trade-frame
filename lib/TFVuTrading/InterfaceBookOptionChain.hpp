@@ -21,6 +21,12 @@
 
 #pragma once
 
+#include <string>
+
+#include <boost/date_time/gregorian/greg_date.hpp>
+
+#include <TFTrading/TradingEnumerations.h>
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -29,6 +35,7 @@ namespace tf { // TradeFrame
 struct InterfaceBookOptionChain {
 // Panel Interface
 //   add date/strike
+  virtual void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const std::string& sSymbol ) = 0;
 //   event: page dismissed (date)
 //   event: page selected (date)
 // Data Interface
