@@ -22,7 +22,6 @@
 #define WINOPTIONCHAINS_H
 
 #include <map>
-#include <functional>
 
 #include <boost/signals2.hpp>
 
@@ -85,9 +84,15 @@ public:
   using fOnOptionUnderlyingRetrieve_t = std::function<void(const std::string&, boost::gregorian::date, double, GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t )>;
   fOnOptionUnderlyingRetrieve_t m_fOnOptionUnderlyingRetrieve;
 
-  using fOnPageEvent_t = std::function<void(boost::gregorian::date)>;
-  fOnPageEvent_t m_fOnPageChanging; // about to depart page
-  fOnPageEvent_t m_fOnPageChanged;  // new page in place
+  virtual void Set(
+    fOnPageEvent_t&& fOnPageChanging // departed
+  , fOnPageEvent_t&& fOnPageChanged  // arrival
+  );
+
+  virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Quote& );
+  virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Trade& );
+  virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& );
+  virtual void Clear( boost::gregorian::date, double strike );
 
   void SetGridOptionChain_ColumnSaver( ou::tf::GridColumnSizer* );
 
@@ -97,6 +102,9 @@ private:
   enum {
     ID_Null=wxID_HIGHEST, ID_NOTEBOOK_OPTIONDETAILS
   };
+
+  fOnPageEvent_t m_fOnPageChanging; // about to depart page
+  fOnPageEvent_t m_fOnPageChanged;  // new page in place
 
   // put/call at strike
   struct Row {

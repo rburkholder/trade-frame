@@ -351,8 +351,10 @@ void PanelCharts::HandleOptionChainList( const wxTreeItemId& item ) {
           );
 
         namespace args = std::placeholders;
-        pNotebookOptionChains->m_fOnPageChanging = std::bind( &PanelCharts::OnOptionChainPageChanging, this, args::_1 );
-        pNotebookOptionChains->m_fOnPageChanged = std::bind( &PanelCharts::OnOptionChainPageChanged, this, args::_1 );
+        pNotebookOptionChains->Set(
+          std::bind( &PanelCharts::OnOptionChainPageChanging, this, args::_1 )
+        , std::bind( &PanelCharts::OnOptionChainPageChanged, this, args::_1 )
+        );
         pNotebookOptionChains->m_fOnRowClicked
           = std::bind( &PanelCharts::HandleGridClick, this, iterIdUnderlyingInstrument->first, args::_1, args::_2, args::_3, args::_4, args::_5 );
         pNotebookOptionChains->m_fOnOptionUnderlyingRetrieve

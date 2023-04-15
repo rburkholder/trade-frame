@@ -22,8 +22,11 @@
 #pragma once
 
 #include <string>
+#include <functional>
 
 #include <boost/date_time/gregorian/greg_date.hpp>
+
+#include <TFTimeSeries/DatedDatum.h>
 
 #include <TFTrading/TradingEnumerations.h>
 
@@ -33,14 +36,21 @@ namespace tf { // TradeFrame
 // acquire interface, use interface, dismiss interface
 
 struct InterfaceBookOptionChain {
-// Panel Interface
-//   add date/strike
+
+  using fOnPageEvent_t = std::function<void(boost::gregorian::date)>;
+
   virtual void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const std::string& sSymbol ) = 0;
-//   event: page dismissed (date)
-//   event: page selected (date)
-// Data Interface
-//   update (date, strike, call/put, trade/quote/greek)
-//   clear (date,strike)
+
+  virtual void Set(
+    fOnPageEvent_t&& fOnPageChanging // departed
+  , fOnPageEvent_t&& fOnPageChanged  // arrival
+  ) = 0;
+
+  virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Quote& ) = 0;
+  virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Trade& ) = 0;
+  virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& ) = 0;
+  virtual void Clear( boost::gregorian::date, double strike ) = 0;
+
 // Order Interface
 //   ComboOrder: fill order legs from leg list
 

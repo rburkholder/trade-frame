@@ -61,6 +61,11 @@ public:
 
   void SetSelected( double strike, bool bSelected );
 
+  void Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Quote& );
+  void Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Trade& );
+  void Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& );
+  void Clear(  double strike );
+
   void TimerActivate();
   void TimerDeactivate();
 

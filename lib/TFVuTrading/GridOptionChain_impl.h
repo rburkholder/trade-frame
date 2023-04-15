@@ -152,6 +152,11 @@ struct GridOptionChain_impl {
   void Add( double strike, ou::tf::OptionSide::EOptionSide side, const std::string& sSymbol );
   void SetSelected( double strike, bool bSelected );
 
+  void Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Quote& );
+  void Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Trade& );
+  void Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& );
+  void Clear(  double strike );
+
   bool m_bTimerActive;
   void TimerActivate();
   void TimerDeactivate();

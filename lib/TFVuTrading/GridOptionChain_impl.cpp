@@ -69,6 +69,14 @@ void GridOptionChain_impl::CreateControls() {
 GridOptionChain_impl::~GridOptionChain_impl( void ) {
 }
 
+void GridOptionChain_impl::Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Quote& quote ) {}
+
+void GridOptionChain_impl::Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Trade& trade ) {}
+
+void GridOptionChain_impl::Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& greek ) {}
+
+void GridOptionChain_impl::Clear(  double strike ) {}
+
 void GridOptionChain_impl::TimerActivate() {
   if ( !m_bTimerActive ) {
     m_bTimerActive = true;

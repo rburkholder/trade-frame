@@ -70,6 +70,20 @@ void GridOptionChain::CreateControls() {
 
 }
 
+void GridOptionChain::Update( double strike, ou::tf::OptionSide::EOptionSide side, const ou::tf::Quote& quote ) {
+  m_pimpl->Update( strike, side, quote );
+}
+
+void GridOptionChain::Update( double strike, ou::tf::OptionSide::EOptionSide side, const ou::tf::Trade& trade ) {
+  m_pimpl->Update( strike, side, trade );
+}
+
+void GridOptionChain::Update( double strike, ou::tf::OptionSide::EOptionSide side, const ou::tf::Greek& greek ) {
+  m_pimpl->Update( strike, side, greek );
+}
+
+void GridOptionChain::Clear(  double strike ) {}
+
 void GridOptionChain::SaveColumnSizes( ou::tf::GridColumnSizer& gcs ) const {
   gcs.SaveColumnSizes( *this );
 }
