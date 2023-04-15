@@ -66,16 +66,48 @@ void GridOptionChain_impl::CreateControls() {
 
 }
 
-GridOptionChain_impl::~GridOptionChain_impl( void ) {
+void GridOptionChain_impl::Update( double strike, ou::tf::OptionSide::EOptionSide side, const ou::tf::Quote& quote ) {
+  switch ( side ) {
+    case ou::tf::OptionSide::Call:
+      FindOptionValueRow( strike )->second.UpdateCallQuote( quote );
+      break;
+    case ou::tf::OptionSide::Put:
+      FindOptionValueRow( strike )->second.UpdatePutQuote( quote );
+      break;
+    default:
+      assert( false );
+  }
 }
 
-void GridOptionChain_impl::Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Quote& quote ) {}
+void GridOptionChain_impl::Update( double strike, ou::tf::OptionSide::EOptionSide side, const ou::tf::Trade& trade ) {
+  switch ( side ) {
+    case ou::tf::OptionSide::Call:
+      FindOptionValueRow( strike )->second.UpdateCallTrade( trade );
+      break;
+    case ou::tf::OptionSide::Put:
+      FindOptionValueRow( strike )->second.UpdatePutTrade( trade );
+      break;
+    default:
+      assert( false );
+  }
+}
 
-void GridOptionChain_impl::Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Trade& trade ) {}
+void GridOptionChain_impl::Update( double strike, ou::tf::OptionSide::EOptionSide side, const ou::tf::Greek& greek ) {
+  switch ( side ) {
+    case ou::tf::OptionSide::Call:
+      FindOptionValueRow( strike )->second.UpdateCallGreeks( greek );
+      break;
+    case ou::tf::OptionSide::Put:
+      FindOptionValueRow( strike )->second.UpdatePutGreeks( greek );
+      break;
+    default:
+      assert( false );
+  }
+}
 
-void GridOptionChain_impl::Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& greek ) {}
-
-void GridOptionChain_impl::Clear(  double strike ) {}
+void GridOptionChain_impl::Clear(  double strike ) {
+  //m_mapOptionValueRow[ strike ].Init();  ?
+}
 
 void GridOptionChain_impl::TimerActivate() {
   if ( !m_bTimerActive ) {
@@ -131,7 +163,7 @@ GridOptionChain_impl::mapOptionValueRow_iter
 GridOptionChain_impl::FindOptionValueRow( double strike ) {
   mapOptionValueRow_iter iter = m_mapOptionValueRow.find( strike );
   if ( m_mapOptionValueRow.end() == iter ) {
-    assert( 0 );
+    assert( false );
   }
   return iter;
 }
@@ -260,9 +292,7 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
 
         m_details.m_fOnRowClicked( iterOptionValueRow->first, iterOptionValueRow->second.m_bSelected, funcCall, funcPut );
       }
-
     }
-
   }
 
   event.Skip( bSkip );

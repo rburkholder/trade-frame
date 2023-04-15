@@ -41,7 +41,7 @@ namespace tf { // TradeFrame
 struct GridOptionChain_impl {
 //public:
   GridOptionChain_impl( GridOptionChain& );
-  ~GridOptionChain_impl();
+  ~GridOptionChain_impl() = default;
 //protected:
 
 //private:
@@ -93,9 +93,9 @@ struct GridOptionChain_impl {
       Init();
       boost::fusion::at_c<COL_Strike>( m_vModelCells ).SetValue( boost::fusion::at_c<COL_Strike>( rhs.m_vModelCells ).GetValue() );
     }
-    ~OptionValueRow() {}
+    ~OptionValueRow() = default;
 
-    void UpdateGui( void ) {
+    void UpdateGui() {
       boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_nRow ) );
     }
     void UpdateCallGreeks( const ou::tf::Greek& greek ) {
@@ -122,6 +122,7 @@ struct GridOptionChain_impl {
     void UpdatePutTrade( const ou::tf::Trade& trade ) {
       boost::fusion::at_c<COL_PutLast>( m_vModelCells ).SetValue( trade.Price() );
     }
+    // TODO: add open interest
   //protected:
   //private:
 
@@ -134,7 +135,7 @@ struct GridOptionChain_impl {
     int m_nRow;
     vModelCells_t m_vModelCells;
 
-    void Init( void ) {
+    void Init() {
       boost::fusion::fold( m_vModelCells, 0, ModelCell_ops::SetCol() );
       BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT,m_nRow)
     }
