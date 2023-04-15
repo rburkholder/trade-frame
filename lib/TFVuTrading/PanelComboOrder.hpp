@@ -39,6 +39,8 @@ class wxListbookEvent;
 
 #include <TFVuTrading/GridOptionChain.h>
 
+#include "InterfaceBookOptionChain.hpp"
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -50,7 +52,10 @@ class GridOptionChain;
 #define SYMBOL_PANELCOMBOORDER_SIZE wxDefaultSize
 #define SYMBOL_PANELCOMBOORDER_POSITION wxDefaultPosition
 
-class PanelComboOrder: public wxPanel {
+class PanelComboOrder:
+  public wxPanel
+, public InterfaceBookOptionChain
+{
   friend class boost::serialization::access;
 public:
 
@@ -70,11 +75,17 @@ public:
     long style = SYMBOL_PANELCOMBOORDER_STYLE,
     const wxString& name = SYMBOL_PANELCOMBOORDER_TITLE  );
 
-  void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const std::string& sSymbol );
+  virtual void Set(
+    fOnPageEvent_t&& fOnPageChanging // departed
+  , fOnPageEvent_t&& fOnPageChanged  // arrival
+  );
 
-  using fOnPageEvent_t = std::function<void(boost::gregorian::date)>;
-  fOnPageEvent_t m_fOnPageChanging; // about to depart page
-  fOnPageEvent_t m_fOnPageChanged;  // new page in place
+  virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Quote& );
+  virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Trade& );
+  virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& );
+  virtual void Clear( boost::gregorian::date, double strike );
+
+  void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const std::string& sSymbol );
 
   using fOnRowClicked_t = std::function<void(boost::gregorian::date, double, bool bSelected, const GridOptionChain::OptionUpdateFunctions& call, const GridOptionChain::OptionUpdateFunctions& put )>;
   fOnRowClicked_t m_fOnRowClicked; // called when a row is control clicked
@@ -102,6 +113,9 @@ private:
   wxToggleButton* m_btnUpgdateGreeks;
   wxButton* m_btnClearOrder;
   wxButton* m_btnPlaceOrder;
+
+  fOnPageEvent_t m_fOnPageChanging; // about to depart page
+  fOnPageEvent_t m_fOnPageChanged;  // new page in place
 
   // put/call at strike
   struct Row {

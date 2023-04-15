@@ -114,18 +114,6 @@ void NotebookOptionChains::Set(
   m_fOnPageChanged  = std::move( fOnPageChanged );
 }
 
-void NotebookOptionChains::Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Quote& ) {
-}
-
-void NotebookOptionChains::Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Trade& ) {
-}
-
-void NotebookOptionChains::Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& ) {
-}
-
-void NotebookOptionChains::Clear( boost::gregorian::date, double strike ) {
-}
-
 // start leaving old page
 void NotebookOptionChains::OnPageChanging( wxBookCtrlEvent& event ) {
   int ixTab = event.GetOldSelection();

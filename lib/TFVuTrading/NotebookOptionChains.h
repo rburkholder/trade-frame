@@ -39,8 +39,6 @@
 
 #include <TFBitsNPieces/FirstOrDefaultCombiner.h>
 
-#include "InterfaceBookOptionChain.hpp"
-
 // superceded by PanelComboOrder.hpp
 
 namespace ou { // One Unified
@@ -54,7 +52,6 @@ namespace tf { // TradeFrame
 
 class NotebookOptionChains:
   public wxListbook
-, public InterfaceBookOptionChain
 {
   friend class boost::serialization::access;
 public:
@@ -75,6 +72,13 @@ public:
     long style = SYMBOL_OPTIONCHAINS_STYLE,
     const wxString& name = SYMBOL_OPTIONCHAINS_TITLE  );
 
+  using fOnPageEvent_t = std::function<void(boost::gregorian::date)>;
+
+  void Set(
+    fOnPageEvent_t&& fOnPageChanging // departed
+  , fOnPageEvent_t&& fOnPageChanged  // arrival
+  );
+
   void SetName( const std::string& sName );  // underlying
   virtual void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const std::string& sSymbol );
 
@@ -83,16 +87,6 @@ public:
 
   using fOnOptionUnderlyingRetrieve_t = std::function<void(const std::string&, boost::gregorian::date, double, GridOptionChain::fOnOptionUnderlyingRetrieveComplete_t )>;
   fOnOptionUnderlyingRetrieve_t m_fOnOptionUnderlyingRetrieve;
-
-  virtual void Set(
-    fOnPageEvent_t&& fOnPageChanging // departed
-  , fOnPageEvent_t&& fOnPageChanged  // arrival
-  );
-
-  virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Quote& );
-  virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Trade& );
-  virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& );
-  virtual void Clear( boost::gregorian::date, double strike );
 
   void SetGridOptionChain_ColumnSaver( ou::tf::GridColumnSizer* );
 

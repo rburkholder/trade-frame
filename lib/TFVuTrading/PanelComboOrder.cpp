@@ -122,6 +122,30 @@ void PanelComboOrder::UnbindEvents() {
   assert( Unbind( wxEVT_LISTBOOK_PAGE_CHANGED, &PanelComboOrder::OnBOOKOptionChainsPageChanged, this ) );
 }
 
+void PanelComboOrder::Set(
+  fOnPageEvent_t&& fOnPageChanging // departed
+, fOnPageEvent_t&& fOnPageChanged  // arrival
+) {
+  m_fOnPageChanging = std::move( fOnPageChanging );
+  m_fOnPageChanged  = std::move( fOnPageChanged );
+}
+
+void PanelComboOrder::Update( boost::gregorian::date date, double strike, ou::tf::OptionSide::EOptionSide side, const ou::tf::Quote& quote ) {
+  m_mapOptionExpiry[ date ].pWinOptionChain->Update( strike, side, quote );
+}
+
+void PanelComboOrder::Update( boost::gregorian::date date, double strike, ou::tf::OptionSide::EOptionSide side, const ou::tf::Trade& trade ) {
+  m_mapOptionExpiry[ date ].pWinOptionChain->Update( strike, side, trade );
+}
+
+void PanelComboOrder::Update( boost::gregorian::date date, double strike, ou::tf::OptionSide::EOptionSide side, const ou::tf::Greek& greek ) {
+  m_mapOptionExpiry[ date ].pWinOptionChain->Update( strike, side, greek );
+}
+
+void PanelComboOrder::Clear( boost::gregorian::date date, double strike ) {
+  m_mapOptionExpiry[ date ].pWinOptionChain->Clear( strike );
+}
+
 // add specific put/call-at-strike pair to Notebook of OptionChaines
 void PanelComboOrder::Add( boost::gregorian::date date, double strike, ou::tf::OptionSide::EOptionSide side, const std::string& sSymbol ) {
 

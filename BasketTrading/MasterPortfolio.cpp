@@ -854,14 +854,20 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
           m_pPanelComboOrder->Add( option.GetExpiry(), option.GetStrike(), option.GetOptionSide(), option.GetInstrumentName() );
         }
       );
-      m_pPanelComboOrder->m_fOnPageChanging =
-        []( boost::gregorian::date date){
+
+      m_pPanelComboOrder->Set(
+        [&uws]( boost::gregorian::date date){ // fOnPageEvent_t - departing
           std::cout << "moving from " << date << std::endl;
-        };
-      m_pPanelComboOrder->m_fOnPageChanged =
-        []( boost::gregorian::date date){
+        },
+        [&uws]( boost::gregorian::date date){ // fOnPageEvent_t - arriving
           std::cout << "moved to " << date << std::endl;
-        };
+          double price = uws.pUnderlying->GetWatch()->LastTrade().Price();
+          if ( 0.0 < price ) {
+
+          }
+        }
+      );
+
       using OptionUpdateFunctions = ou::tf::GridOptionChain::OptionUpdateFunctions;
       m_pPanelComboOrder->m_fOnRowClicked =
         [](boost::gregorian::date date, double strike, bool bSelected, const OptionUpdateFunctions& call, const OptionUpdateFunctions& put ){
