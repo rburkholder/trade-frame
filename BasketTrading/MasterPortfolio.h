@@ -91,7 +91,7 @@ public:
   , pPortfolio_t pMasterPortfolio
   , pProvider_t pExec, pProvider_t pData1, pProvider_t pData2
   , ou::tf::PanelFinancialChart* pPanelFinancialChart
-  , ou::tf::FrameControls* pFrameOptionChainsWithOrder
+  , wxWindow* pWindowParent
   );
   ~MasterPortfolio();
 
@@ -172,8 +172,7 @@ private:
   ou::tf::TreeItem* m_ptiTreeStrategies;
   //wxTreeItemId m_idTreeOptions;
 
-  ou::tf::FrameControls* m_pFrameOptionChainsWithOrder;
-  ou::tf::PanelComboOrder* m_pPanelComboOrder;
+  wxWindow* m_pWindowParent;
 
   using setOptionsInEngine_t = std::unordered_set<pOption_t>;
   setOptionsInEngine_t m_setOptionsInEngine;
@@ -213,15 +212,18 @@ private:
     pStrategy_t pStrategyInWaiting;
     mapStrategy_t mapStrategyActive;
     mapStrategy_t mapStrategyClosed;
-    ou::tf::TreeItem* pti;
     Statistics statistics;
     ou::tf::Bars m_barsHistory;
     std::atomic_uint32_t m_nQuery;
+    ou::tf::TreeItem* pti;
+    ou::tf::FrameControls* pFrameOptionChainsWithOrder;
+    ou::tf::PanelComboOrder* pPanelComboOrder;
 
     UnderlyingWithStrategies( pUnderlying_t pUnderlying_ )
     : pUnderlying( std::move( pUnderlying_ ) )
     , m_nQuery {}
     , pti( nullptr )
+    , pPanelComboOrder( nullptr )
     {}
     //UnderlyingWithStrategies( const Statistics&& statistics_ )
     //: statistics( std::move( statistics_ ) ) {}
@@ -232,12 +234,14 @@ private:
     {
       assert( rhs.mapStrategyActive.empty() );
       assert( rhs.mapStrategyClosed.empty() );
+      assert( nullptr == pPanelComboOrder );
     }
 
     ~UnderlyingWithStrategies() {
       pStrategyInWaiting.reset();
       mapStrategyClosed.clear();
       mapStrategyActive.clear();
+      pPanelComboOrder = nullptr; // destroyed elsewhere
     }
 
     void ClosePositions() {
@@ -280,7 +284,7 @@ private:
         pStrategy->pManageStrategy->TakeProfits();
       }
     }
-  };
+  }; // UnderlyingWithStrategies
 
   using mapUnderlyingWithStrategies_t = std::map<std::string /* sUGenericUnderlying */, UnderlyingWithStrategies>;
   using iterUnderlyingWithStrategies_t = mapUnderlyingWithStrategies_t::iterator;

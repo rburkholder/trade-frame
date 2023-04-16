@@ -141,14 +141,6 @@ void AppBasketTrading::Init() {
 //  wxBoxSizer* sizerBottom = new wxBoxSizer( wxHORIZONTAL );
 //  sizerMain->Add( sizerBottom, 0, wxEXPAND | wxALL, 2 );
 
-  m_pFrameOptionChainsWithOrder = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Option Chain Orders" );
-  //m_pPanelTrade = new ou::tf::l2::PanelTrade( m_pFrameLadderTrade );
-  //m_pFrameLadderTrade->Attach( m_pPanelTrade );
-
-  m_pFrameOptionChainsWithOrder->SetAutoLayout( true );
-  m_pFrameOptionChainsWithOrder->Layout();
-  m_pFrameOptionChainsWithOrder->Show( true );
-
   m_bData1Connected = false;
   m_bExecConnected = false;
 
@@ -217,7 +209,7 @@ void AppBasketTrading::BuildMasterPortfolio() {
     // providers
   , m_pExecutionProvider, m_pData1Provider, m_pData2Provider
   , m_pPanelFinancialChart
-  , m_pFrameOptionChainsWithOrder
+  , m_pFrameMain
   );
   //std::cout << "  done." << std::endl;
 }

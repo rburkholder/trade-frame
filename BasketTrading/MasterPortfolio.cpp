@@ -67,7 +67,7 @@ MasterPortfolio::MasterPortfolio(
 , pPortfolio_t pMasterPortfolio
 , pProvider_t pExec, pProvider_t pData1, pProvider_t pData2
 , ou::tf::PanelFinancialChart* pPanelFinancialChart
-, ou::tf::FrameControls* pFrameOptionChainsWithOrder
+, wxWindow* pWindowParent
 )
 : m_bStarted( false )
 , m_nSharesTrading( 0 )
@@ -78,10 +78,8 @@ MasterPortfolio::MasterPortfolio(
 , m_pExec( std::move( pExec ) ) // IB or IQF
 , m_pData1( std::move( pData1 ) )  // IQF
 , m_pData2( std::move( pData2 ) )  // not used
-, m_pPanelComboOrder( nullptr )
 , m_pPanelFinancialChart( pPanelFinancialChart )
-, m_pFrameOptionChainsWithOrder( pFrameOptionChainsWithOrder )
-    //m_eAllocate( EAllocate::Waiting )
+, m_pWindowParent( pWindowParent )
 {
   assert( 0 < m_vSymbol.size() );
 
@@ -90,7 +88,7 @@ MasterPortfolio::MasterPortfolio(
   assert( m_pData1 );
 
   assert( m_pPanelFinancialChart );
-  assert( m_pFrameOptionChainsWithOrder );
+  assert( m_pWindowParent );
 
   switch ( m_pExec->ID() ) {
     case ou::tf::keytypes::EProviderIB:
@@ -158,10 +156,6 @@ MasterPortfolio::MasterPortfolio(
     },
     []( ou::tf::TreeItem* ){} // fOnMenu_t
     );
-
-  // TODO: build per underlying
-  m_pPanelComboOrder = new ou::tf::PanelComboOrder( m_pFrameOptionChainsWithOrder, wxID_ANY );
-  m_pFrameOptionChainsWithOrder->Attach( m_pPanelComboOrder );
 
   std::stringstream ss;
   //ss.str( "" );
@@ -844,18 +838,30 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
 
   std::cout << "Start Underlying " << sUnderlying << std::endl;
 
+  uws.pFrameOptionChainsWithOrder = new ou::tf::FrameControls( m_pWindowParent, wxID_ANY, "Option Chain Orders" );
+  //m_pPanelTrade = new ou::tf::l2::PanelTrade( m_pFrameLadderTrade );
+  //m_pFrameLadderTrade->Attach( m_pPanelTrade );
+
+  uws.pFrameOptionChainsWithOrder->SetAutoLayout( true );
+  uws.pFrameOptionChainsWithOrder->Layout();
+  uws.pFrameOptionChainsWithOrder->Show( true );
+
+  // TODO: build per underlying
+  uws.pPanelComboOrder = new ou::tf::PanelComboOrder( uws.pFrameOptionChainsWithOrder, wxID_ANY );
+  uws.pFrameOptionChainsWithOrder->Attach( uws.pPanelComboOrder );
+
   uws.pUnderlying->FilterChains();
-  m_pPanelComboOrder->CallAfter(
+  uws.pPanelComboOrder->CallAfter(
     [this,sUnderlying,&uws](){
       //m_pNotebookOptionChains->SetName( sUnderlying );
       uws.pUnderlying->WalkChains(
-        [this]( pOption_t pOption ){
+        [this,&uws]( pOption_t pOption ){
           const ou::tf::option::Option& option( *pOption );
-          m_pPanelComboOrder->Add( option.GetExpiry(), option.GetStrike(), option.GetOptionSide(), option.GetInstrumentName() );
+          uws.pPanelComboOrder->Add( option.GetExpiry(), option.GetStrike(), option.GetOptionSide(), option.GetInstrumentName() );
         }
       );
 
-      m_pPanelComboOrder->Set(
+      uws.pPanelComboOrder->Set(
         [&uws]( boost::gregorian::date date){ // fOnPageEvent_t - departing
           std::cout << "moving from " << date << std::endl;
         },
@@ -869,7 +875,7 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
       );
 
       using OptionUpdateFunctions = ou::tf::GridOptionChain::OptionUpdateFunctions;
-      m_pPanelComboOrder->m_fOnRowClicked =
+      uws.pPanelComboOrder->m_fOnRowClicked =
         [](boost::gregorian::date date, double strike, bool bSelected, const OptionUpdateFunctions& call, const OptionUpdateFunctions& put ){
           std::cout << "clicked " << date << "," << strike << "," << bSelected << "," << call.sSymbolName << "," << put.sSymbolName << std::endl;
         };
