@@ -111,16 +111,18 @@ void PanelComboOrder::CreateControls() {
 }
 
 void PanelComboOrder::BindEvents() {
+  m_pBookOptionChains->Bind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy_Book, this, ID_BOOK_OptionChains );
+
   // Page Change events cause issues during OnDestroy
   Bind( wxEVT_LISTBOOK_PAGE_CHANGING, &PanelComboOrder::OnBOOKOptionChainsPageChanging, this );
   Bind( wxEVT_LISTBOOK_PAGE_CHANGED, &PanelComboOrder::OnBOOKOptionChainsPageChanged, this );
-  // Bind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy_Book, m_pBookOptionChains, ID_BOOK_OptionChains ); // compile error on the class
   Bind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy_Panel, this );
 }
 
 void PanelComboOrder::UnbindEvents() {
+  assert( m_pBookOptionChains->Unbind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy_Book, this, ID_BOOK_OptionChains ) );
+
   // Page change events occur during Deletion of Pages, causing problems
-  //assert( Unbind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy_Book, m_pBookOptionChains, ID_BOOK_OptionChains ) ); // compile error on the class
   assert( Unbind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy_Panel, this ) );
   assert( Unbind( wxEVT_LISTBOOK_PAGE_CHANGING, &PanelComboOrder::OnBOOKOptionChainsPageChanging, this ) );
   assert( Unbind( wxEVT_LISTBOOK_PAGE_CHANGED, &PanelComboOrder::OnBOOKOptionChainsPageChanged, this ) );
@@ -232,12 +234,6 @@ void PanelComboOrder::Add( boost::gregorian::date date, double strike, ou::tf::O
 }
 
 void PanelComboOrder::OnDestroy_Book( wxWindowDestroyEvent& event ) {
-  event.Skip();
-}
-
-void PanelComboOrder::OnDestroy_Panel( wxWindowDestroyEvent& event ) {
-
-  UnbindEvents();
 
   std::for_each(
     m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(),
@@ -248,10 +244,17 @@ void PanelComboOrder::OnDestroy_Panel( wxWindowDestroyEvent& event ) {
    });
 
   //DeleteAllPages();
-  //while ( 0 != m_pBookOptionChains->GetPageCount() ) { // pages and book are already gone
+  while ( 0 != m_pBookOptionChains->GetPageCount() ) { // pages and book are already gone
    //DeletePage( 0 );
-   //m_pBookOptionChains->RemovePage( 0 );
-  //}
+   m_pBookOptionChains->RemovePage( 0 );
+  }
+
+  event.Skip();
+}
+
+void PanelComboOrder::OnDestroy_Panel( wxWindowDestroyEvent& event ) {
+
+  UnbindEvents();
 
   m_pGridComboOrder = nullptr;
   m_pBookOptionChains = nullptr;
