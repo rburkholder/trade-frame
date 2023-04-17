@@ -185,6 +185,7 @@ void PanelComboOrder::Add( boost::gregorian::date date, double strike, ou::tf::O
 
     auto pair = m_mapOptionExpiry.emplace( mapOptionExpiry_t::value_type( date, Tab( sDate, pPanel, pGridOptionChain ) ) );
     assert( pair.second );
+    iterExpiry = pair.first;
 
     struct Reindex {
       size_t ix;
