@@ -80,6 +80,8 @@ public:
   , fOnPageEvent_t&& fOnPageChanged  // arrival
   );
 
+  virtual void MakeRowVisible( boost::gregorian::date, double strike );
+
   virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Quote& );
   virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Trade& );
   virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& );

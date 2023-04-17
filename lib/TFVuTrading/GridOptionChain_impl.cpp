@@ -159,6 +159,11 @@ void GridOptionChain_impl::Add( double strike, ou::tf::OptionSide::EOptionSide s
   }
 }
 
+void GridOptionChain_impl::MakeRowVisible( double strike ) {
+  mapOptionValueRow_iter iter = m_mapOptionValueRow.find( strike );
+  m_details.MakeCellVisible( iter->second.m_nRow, 0 );
+}
+
 GridOptionChain_impl::mapOptionValueRow_iter
 GridOptionChain_impl::FindOptionValueRow( double strike ) {
   mapOptionValueRow_iter iter = m_mapOptionValueRow.find( strike );

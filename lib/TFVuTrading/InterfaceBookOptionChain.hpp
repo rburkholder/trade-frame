@@ -46,10 +46,12 @@ struct InterfaceBookOptionChain {
   , fOnPageEvent_t&& fOnPageChanged  // arrival
   ) = 0;
 
+  virtual void MakeRowVisible( boost::gregorian::date, double strike ) = 0;
+
   virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Quote& ) = 0;
   virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Trade& ) = 0;
   virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& ) = 0;
-  virtual void Clear( boost::gregorian::date, double strike ) = 0;
+  virtual void Clear(  boost::gregorian::date, double strike ) = 0;
 
 // Order Interface
 //   ComboOrder: fill order legs from leg list

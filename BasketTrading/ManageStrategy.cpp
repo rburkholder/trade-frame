@@ -304,19 +304,25 @@ void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
         std::cout << "chain selector instance exists" << std::endl;
       }
       else {
-        auto [ m_pFrameBookOptionChains, m_pInterfaceBookOptionChains ] = m_fInterfaceBookOptionChain();
+        //auto& [ m_pFrameBookOptionChains, m_pInterfaceBookOptionChains ] = m_fInterfaceBookOptionChain();
+        auto pair = m_fInterfaceBookOptionChain();
+        m_pFrameBookOptionChains = pair.first;
+        m_pInterfaceBookOptionChains = pair.second;
+
         m_pFrameBookOptionChains->Bind( wxEVT_DESTROY, &ManageStrategy::OnDestroy_FrameBookOptionChains, this );
 
         m_pInterfaceBookOptionChains->Set(
-          []( boost::gregorian::date date){ // fOnPageEvent_t - departing
+          []( boost::gregorian::date date ){ // fOnPageEvent_t - departing
             std::cout << "moving from " << date << std::endl;
           },
-          []( boost::gregorian::date date){ // fOnPageEvent_t - arriving
+          [this]( boost::gregorian::date date ){ // fOnPageEvent_t - arriving
             std::cout << "moved to " << date << std::endl;
-            //double price = uws.pUnderlying->GetWatch()->LastTrade().Price();
-            //if ( 0.0 < price ) {
-
-            //}
+            double price = m_pWatchUnderlying->LastTrade().Price();
+            if ( 0.0 < price ) {
+              chain_t& chain( m_mapChains[ date ] );
+              double strike( chain.Atm( price ) );
+              m_pInterfaceBookOptionChains->MakeRowVisible( date, strike );
+            }
           }
         );
 

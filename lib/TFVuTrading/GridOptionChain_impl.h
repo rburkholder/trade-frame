@@ -151,6 +151,9 @@ struct GridOptionChain_impl {
   mapOptionValueRow_iter FindOptionValueRow( double );
 
   void Add( double strike, ou::tf::OptionSide::EOptionSide side, const std::string& sSymbol );
+
+  void MakeRowVisible( double strike );
+
   void SetSelected( double strike, bool bSelected );
 
   void Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Quote& );

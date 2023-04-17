@@ -99,6 +99,10 @@ void GridOptionChain::Add( double strike, ou::tf::OptionSide::EOptionSide side, 
   m_pimpl->Add( strike, side, sSymbol );
 }
 
+void GridOptionChain::MakeRowVisible( double strike ) {
+  m_pimpl->MakeRowVisible( strike );
+}
+
 void GridOptionChain::SetSelected( double strike, bool bSelected) {
   m_pimpl->SetSelected( strike, bSelected );
 }
