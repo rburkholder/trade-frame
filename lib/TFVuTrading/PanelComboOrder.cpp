@@ -149,6 +149,9 @@ void PanelComboOrder::Clear( boost::gregorian::date date, double strike ) {
 // add specific put/call-at-strike pair to Notebook of OptionChaines
 void PanelComboOrder::Add( boost::gregorian::date date, double strike, ou::tf::OptionSide::EOptionSide side, const std::string& sSymbol ) {
 
+  //[this,pti=uws.pti]( boost::gregorian::date date ){
+    //  ou::tf::Instrument::BuildDate( date ),
+
   mapOptionExpiry_t::iterator iterExpiry = m_mapOptionExpiry.find( date );
 
   if ( m_mapOptionExpiry.end() == iterExpiry ) {
