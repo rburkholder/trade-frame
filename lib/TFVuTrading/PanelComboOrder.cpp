@@ -243,9 +243,7 @@ void PanelComboOrder::OnDestroy_Book( wxWindowDestroyEvent& event ) {
      value.second.pPanel->Destroy();
    });
 
-  //DeleteAllPages();
-  while ( 0 != m_pBookOptionChains->GetPageCount() ) { // pages and book are already gone
-   //DeletePage( 0 );
+  while ( 0 != m_pBookOptionChains->GetPageCount() ) {
    m_pBookOptionChains->RemovePage( 0 );
   }
 
