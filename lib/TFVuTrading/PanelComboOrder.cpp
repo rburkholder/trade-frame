@@ -46,6 +46,8 @@ PanelComboOrder::~PanelComboOrder() {
 
 void PanelComboOrder::Init() {
 
+  m_pgcsGridOptionChain = nullptr;
+
   m_pBookOptionChains = nullptr;
   m_pGridComboOrder = nullptr;
   m_btnUpgdateGreeks = nullptr;
