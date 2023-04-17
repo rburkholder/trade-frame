@@ -216,14 +216,11 @@ private:
     ou::tf::Bars m_barsHistory;
     std::atomic_uint32_t m_nQuery;
     ou::tf::TreeItem* pti;
-    ou::tf::FrameControls* pFrameOptionChainsWithOrder;
-    ou::tf::PanelComboOrder* pPanelComboOrder;
 
     UnderlyingWithStrategies( pUnderlying_t pUnderlying_ )
     : pUnderlying( std::move( pUnderlying_ ) )
     , m_nQuery {}
     , pti( nullptr )
-    , pPanelComboOrder( nullptr )
     {}
     //UnderlyingWithStrategies( const Statistics&& statistics_ )
     //: statistics( std::move( statistics_ ) ) {}
@@ -234,14 +231,12 @@ private:
     {
       assert( rhs.mapStrategyActive.empty() );
       assert( rhs.mapStrategyClosed.empty() );
-      assert( nullptr == pPanelComboOrder );
     }
 
     ~UnderlyingWithStrategies() {
       pStrategyInWaiting.reset();
       mapStrategyClosed.clear();
       mapStrategyActive.clear();
-      pPanelComboOrder = nullptr; // destroyed elsewhere
     }
 
     void ClosePositions() {

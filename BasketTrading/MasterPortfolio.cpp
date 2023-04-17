@@ -726,6 +726,33 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
           [this]( pChartDataView_t p ){
             m_fSetChartDataView( p );
           },
+    // ManageStrategy::m_fInterfaceBookOptionChain
+          [this,&uws]()->std::pair<wxWindow*,ou::tf::InterfaceBookOptionChain*>{
+
+            ou::tf::FrameControls* pFrame = new ou::tf::FrameControls( m_pWindowParent, wxID_ANY, "Option Chain Orders" );
+            pFrame->SetAutoLayout( true );
+            pFrame->Layout();
+            pFrame->Show( true );
+            // TODO: center above main
+
+            // TODO: build per underlying
+            ou::tf::PanelComboOrder* pPanel = new ou::tf::PanelComboOrder( pFrame, wxID_ANY );
+            pFrame->Attach( pPanel );
+
+            pPanel->CallAfter(
+              [this,&uws,pPanel](){
+                //m_pNotebookOptionChains->SetName( sUnderlying );
+                uws.pUnderlying->WalkChains(
+                  [this,pPanel]( pOption_t pOption ){
+                    const ou::tf::option::Option& option( *pOption );
+                    pPanel->Add( option.GetExpiry(), option.GetStrike(), option.GetOptionSide(), option.GetInstrumentName() );
+                  }
+                );
+              });
+
+            return std::pair( pFrame, pPanel );
+
+          },
     // ManageStrategy::m_fFirstTrade
           [this](ManageStrategy& ms, const ou::tf::Trade& trade){  // assumes same thread entry
             // calculate the starting parameters
@@ -838,61 +865,7 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
 
   std::cout << "Start Underlying " << sUnderlying << std::endl;
 
-  uws.pFrameOptionChainsWithOrder = new ou::tf::FrameControls( m_pWindowParent, wxID_ANY, "Option Chain Orders" );
-  //m_pPanelTrade = new ou::tf::l2::PanelTrade( m_pFrameLadderTrade );
-  //m_pFrameLadderTrade->Attach( m_pPanelTrade );
-
-  uws.pFrameOptionChainsWithOrder->SetAutoLayout( true );
-  uws.pFrameOptionChainsWithOrder->Layout();
-  uws.pFrameOptionChainsWithOrder->Show( true );
-
-  // TODO: build per underlying
-  uws.pPanelComboOrder = new ou::tf::PanelComboOrder( uws.pFrameOptionChainsWithOrder, wxID_ANY );
-  uws.pFrameOptionChainsWithOrder->Attach( uws.pPanelComboOrder );
-
   uws.pUnderlying->FilterChains();
-  uws.pPanelComboOrder->CallAfter(
-    [this,sUnderlying,&uws](){
-      //m_pNotebookOptionChains->SetName( sUnderlying );
-      uws.pUnderlying->WalkChains(
-        [this,&uws]( pOption_t pOption ){
-          const ou::tf::option::Option& option( *pOption );
-          uws.pPanelComboOrder->Add( option.GetExpiry(), option.GetStrike(), option.GetOptionSide(), option.GetInstrumentName() );
-        }
-      );
-
-      uws.pPanelComboOrder->Set(
-        [&uws]( boost::gregorian::date date){ // fOnPageEvent_t - departing
-          std::cout << "moving from " << date << std::endl;
-        },
-        [&uws]( boost::gregorian::date date){ // fOnPageEvent_t - arriving
-          std::cout << "moved to " << date << std::endl;
-          double price = uws.pUnderlying->GetWatch()->LastTrade().Price();
-          if ( 0.0 < price ) {
-
-          }
-        }
-      );
-
-      using OptionUpdateFunctions = ou::tf::GridOptionChain::OptionUpdateFunctions;
-      uws.pPanelComboOrder->m_fOnRowClicked =
-        [](boost::gregorian::date date, double strike, bool bSelected, const OptionUpdateFunctions& call, const OptionUpdateFunctions& put ){
-          std::cout << "clicked " << date << "," << strike << "," << bSelected << "," << call.sSymbolName << "," << put.sSymbolName << std::endl;
-        };
-    } );
-
-    //[this,pti=uws.pti]( boost::gregorian::date date ){
-      //m_pNotebookOptionChains->
-      //ou::tf::TreeItem* item = pti->AppendChild(
-      //  ou::tf::Instrument::BuildDate( date ),
-      //  [this]( ou::tf::TreeItem* pTreeItem ){ // fOnClick_t
-          //if ( nullptr != m_pGridOptionChain ) {
-          //  m_pGridOptionChain->Destroy();
-          //  m_pGridOptionChain = nullptr;
-          //}
-      //  }
-      //);
-    //} );
 
   bool bConstructDefaultStrategy( true );
 
@@ -974,15 +947,6 @@ void MasterPortfolio::Add_ManageStrategy_ToTree( const idPortfolio_t& idPortfoli
       m_fSetChartDataView( pManageStrategy->GetChartDataView() );
     },
     [this,pManageStrategy]( ou::tf::TreeItem* pti ){ // OnMenu
-      // todo
-      pti->NewMenu();
-      pti->AppendMenuItem(
-        "Close",
-        [this,pManageStrategy]( ou::tf::TreeItem* pti){
-          const std::string& idPortfolio( pManageStrategy->GetPortfolio()->GetRow().idPortfolio );
-          std::cout << "Closing: " << idPortfolio << std::endl;
-          pManageStrategy->ClosePositions();
-        });
     } );
   pManageStrategy->SetTreeItem( ptiManageStrategy );
 }

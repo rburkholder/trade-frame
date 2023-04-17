@@ -52,9 +52,13 @@
 
 #include "ValidateOptions.h"
 
+class wxWindow;
+class wxWindowDestroyEvent;
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
   class TreeItem;
+  struct InterfaceBookOptionChain;
 } // namespace tf
 } // namespace ou
 
@@ -98,6 +102,8 @@ public:
   using fStartCalc_t = std::function<void(pOption_t,pWatch_t)>; // option, underlying
   using fStopCalc_t =  std::function<void(pOption_t,pWatch_t)>; // option, underlying
 
+  using fInterfaceBookOptionChain_t = std::function<std::pair<wxWindow*,ou::tf::InterfaceBookOptionChain*>()>;
+
   using fFirstTrade_t = std::function<void(ManageStrategy&,const ou::tf::Trade&)>;
   using fBar_t        = std::function<void(ManageStrategy&,const ou::tf::Bar&)>;
 
@@ -119,6 +125,7 @@ public:
   , fStartCalc_t&&
   , fStopCalc_t&&
   , fSetChartDataView_t&&
+  , fInterfaceBookOptionChain_t&&
   , fFirstTrade_t
   , fAuthorizeUnderlying_t
   , fAuthorizeOption_t
@@ -193,6 +200,10 @@ private:
 
   ou::tf::Trade m_TradeUnderlyingLatest;
   ou::tf::Quote m_QuoteUnderlyingLatest;
+
+  fInterfaceBookOptionChain_t m_fInterfaceBookOptionChain;
+  wxWindow* m_pFrameBookOptionChains;
+  ou::tf::InterfaceBookOptionChain* m_pInterfaceBookOptionChains;
 
 //  double m_cntUpReturn;
 //  double m_cntDnReturn;
@@ -387,6 +398,8 @@ private:
   void ManageIVTracker_RH();
   void ManageIVTracker_Emit();
   void ManageIVTracker_End();
+
+  void OnDestroy_FrameBookOptionChains( wxWindowDestroyEvent& );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

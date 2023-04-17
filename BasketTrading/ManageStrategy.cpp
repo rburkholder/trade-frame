@@ -80,11 +80,14 @@
 
 #include <algorithm>
 
+#include <wx/window.h>
+
 #include <TFOptionCombos/Collar.h>
 using combo_t = ou::tf::option::Collar;
 #include <TFOptionCombos/LegNote.h>
 
 #include <TFVuTrading/TreeItem.hpp>
+#include <TFVuTrading/InterfaceBookOptionChain.hpp>
 
 #include "ManageStrategy.h"
 #include "OptionRegistry.hpp"
@@ -122,6 +125,7 @@ ManageStrategy::ManageStrategy(
 , fStartCalc_t&& fStartCalc // => m_fStartCalc
 , fStopCalc_t&& fStopCalc // => m_fStopCalc
 , fSetChartDataView_t&& fSetChartDataView // => m_fSetChartDataView
+, fInterfaceBookOptionChain_t&& fInterfaceBookOptionChain // => m_fInterfaceBookOptionChain
 , fFirstTrade_t fFirstTrade // => m_fFirstTrade
 , fAuthorizeUnderlying_t fAuthorizeUnderlying // => m_fAuthorizeUnderlying
 , fAuthorizeOption_t fAuthorizeOption // => m_fAuthorizeOption
@@ -138,6 +142,10 @@ ManageStrategy::ManageStrategy(
   m_specsSpread( specSpread ),
 
   m_ptiSelf( nullptr ),
+
+  m_pFrameBookOptionChains( nullptr ),
+  m_pInterfaceBookOptionChains( nullptr ),
+  m_fInterfaceBookOptionChain( std::move( fInterfaceBookOptionChain ) ),
 
   m_fConstructOption( std::move( fConstructOption ) ),
   m_fConstructPosition( std::move( fConstructPosition ) ),
@@ -176,6 +184,8 @@ ManageStrategy::ManageStrategy(
   assert( m_pWatchUnderlying );
   assert( m_pPortfolioOwning );
 
+  assert( m_fInterfaceBookOptionChain );
+
   assert( fGatherOptions );
   //assert( nullptr != m_fConstructWatch );
   assert( m_fConstructOption );
@@ -189,7 +199,6 @@ ManageStrategy::ManageStrategy(
   //m_rBarDirection[ 2 ] = EBarDirection::None;
 
   m_pChartDataView = std::make_shared<ou::ChartDataView>();
-
   m_pChartDataView->SetNames( "Unknown Strategy", m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
 
   //m_ceUpReturn.SetName( "Up Return" );
@@ -282,9 +291,60 @@ ManageStrategy::~ManageStrategy( ) {
 }
 
 void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
+
   m_ptiSelf = ptiSelf;
   m_pOptionRegistry->SetTreeItem( ptiSelf );
+
+  m_ptiSelf->NewMenu();
+  m_ptiSelf->AppendMenuItem(
+    "Chains",
+    [this]( ou::tf::TreeItem* pti ){
+      std::cout << "request chains" << std::endl;
+      if ( m_pFrameBookOptionChains ) {
+        std::cout << "chain selector instance exists" << std::endl;
+      }
+      else {
+        auto [ m_pFrameBookOptionChains, m_pInterfaceBookOptionChains ] = m_fInterfaceBookOptionChain();
+        m_pFrameBookOptionChains->Bind( wxEVT_DESTROY, &ManageStrategy::OnDestroy_FrameBookOptionChains, this );
+
+        m_pInterfaceBookOptionChains->Set(
+          []( boost::gregorian::date date){ // fOnPageEvent_t - departing
+            std::cout << "moving from " << date << std::endl;
+          },
+          []( boost::gregorian::date date){ // fOnPageEvent_t - arriving
+            std::cout << "moved to " << date << std::endl;
+            //double price = uws.pUnderlying->GetWatch()->LastTrade().Price();
+            //if ( 0.0 < price ) {
+
+            //}
+          }
+        );
+
+        //using OptionUpdateFunctions = ou::tf::GridOptionChain::OptionUpdateFunctions;
+        //m_pInterfaceBookOptionChains->m_fOnRowClicked =
+        //  [](boost::gregorian::date date, double strike, bool bSelected, const OptionUpdateFunctions& call, const OptionUpdateFunctions& put ){
+        //    std::cout << "clicked " << date << "," << strike << "," << bSelected << "," << call.sSymbolName << "," << put.sSymbolName << std::endl;
+        //  };
+      }
+    } );
+  m_ptiSelf->AppendMenuItem(
+    "Close",
+    [this]( ou::tf::TreeItem* pti ){
+      const std::string& idPortfolio( GetPortfolio()->GetRow().idPortfolio );
+      std::cout << "Closing: " << idPortfolio << std::endl;
+      ClosePositions();
+    });
   }
+
+void ManageStrategy::OnDestroy_FrameBookOptionChains( wxWindowDestroyEvent& event ) {
+  //std::cout << "ManageStrategy::OnDestroy_FrameBookOptionChains" << std::endl;
+  if ( m_pFrameBookOptionChains ) {
+    assert( m_pFrameBookOptionChains->Unbind( wxEVT_DESTROY, &ManageStrategy::OnDestroy_FrameBookOptionChains, this ) );
+    m_pFrameBookOptionChains = nullptr;
+    m_pInterfaceBookOptionChains = nullptr;
+  }
+  event.Skip();
+}
 
 void ManageStrategy::Run() {
   assert( m_pWatchUnderlying );
