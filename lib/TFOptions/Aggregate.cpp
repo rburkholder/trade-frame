@@ -115,14 +115,25 @@ void Aggregate::FilterChains() {
     size_t nStrikesTotal {};
     size_t nStrikesMatch {};
 
-    std::vector<double> vMisMatch;
+    struct MisMatched {
+      double strike;
+      std::string side;
+      MisMatched( double strike_, const std::string& side_ ): strike( strike_ ), side( std::move( side_ ) ) {}
+    };
+
+    std::vector<MisMatched> vMisMatch;
     vMisMatch.reserve( 10 );
 
     vt.second.Strikes(
       [&nStrikesTotal,&nStrikesMatch,&vMisMatch]( double strike, const chain_t::strike_t& options ){
         nStrikesTotal++;
         if ( options.call.sIQFeedSymbolName.empty() || options.put.sIQFeedSymbolName.empty() ) {
-          vMisMatch.push_back( strike );
+          if ( options.call.sIQFeedSymbolName.empty() ) {
+            vMisMatch.emplace_back( MisMatched( strike, "C" ) );
+          }
+          if ( options.put.sIQFeedSymbolName.empty() ) {
+            vMisMatch.emplace_back( MisMatched( strike, "P" ) );
+          }
         }
         else {
           nStrikesMatch++;
@@ -145,9 +156,9 @@ void Aggregate::FilterChains() {
       else {
         std::cout
           << "chain " << sStrikeDate << " added " << nStrikesMatch << " strikes without";
-        for ( double strike: vMisMatch ) {
-          std::cout << " " << strike;
-          const_cast<chain_t&>( vt.second ).Erase( strike );
+        for ( const MisMatched& entry: vMisMatch ) {
+          std::cout << " " << entry.side << entry.strike;
+          const_cast<chain_t&>( vt.second ).Erase( entry.strike );
         }
         std::cout << std::endl;
         assert( 0 < vt.second.Size() );
