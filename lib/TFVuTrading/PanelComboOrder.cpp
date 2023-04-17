@@ -114,12 +114,14 @@ void PanelComboOrder::BindEvents() {
   // Page Change events cause issues during OnDestroy
   Bind( wxEVT_LISTBOOK_PAGE_CHANGING, &PanelComboOrder::OnBOOKOptionChainsPageChanging, this );
   Bind( wxEVT_LISTBOOK_PAGE_CHANGED, &PanelComboOrder::OnBOOKOptionChainsPageChanged, this );
-  Bind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy, this );
+  // Bind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy_Book, m_pBookOptionChains, ID_BOOK_OptionChains ); // compile error on the class
+  Bind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy_Panel, this );
 }
 
 void PanelComboOrder::UnbindEvents() {
   // Page change events occur during Deletion of Pages, causing problems
-  assert( Unbind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy, this ) );
+  //assert( Unbind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy_Book, m_pBookOptionChains, ID_BOOK_OptionChains ) ); // compile error on the class
+  assert( Unbind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy_Panel, this ) );
   assert( Unbind( wxEVT_LISTBOOK_PAGE_CHANGING, &PanelComboOrder::OnBOOKOptionChainsPageChanging, this ) );
   assert( Unbind( wxEVT_LISTBOOK_PAGE_CHANGED, &PanelComboOrder::OnBOOKOptionChainsPageChanged, this ) );
 }
@@ -229,7 +231,11 @@ void PanelComboOrder::Add( boost::gregorian::date date, double strike, ou::tf::O
 
 }
 
-void PanelComboOrder::OnDestroy( wxWindowDestroyEvent& event ) {
+void PanelComboOrder::OnDestroy_Book( wxWindowDestroyEvent& event ) {
+  event.Skip();
+}
+
+void PanelComboOrder::OnDestroy_Panel( wxWindowDestroyEvent& event ) {
 
   UnbindEvents();
 
@@ -242,10 +248,13 @@ void PanelComboOrder::OnDestroy( wxWindowDestroyEvent& event ) {
    });
 
   //DeleteAllPages();
-  while ( 0 != m_pBookOptionChains->GetPageCount() ) {
+  //while ( 0 != m_pBookOptionChains->GetPageCount() ) { // pages and book are already gone
    //DeletePage( 0 );
-   m_pBookOptionChains->RemovePage( 0 );
-  }
+   //m_pBookOptionChains->RemovePage( 0 );
+  //}
+
+  m_pGridComboOrder = nullptr;
+  m_pBookOptionChains = nullptr;
 
   event.Skip();
 }

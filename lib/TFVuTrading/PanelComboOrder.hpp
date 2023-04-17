@@ -148,8 +148,8 @@ private:
   void Init();
   void CreateControls();
 
-    /// wxEVT_DESTROY event handler for ID_PANELCOMBOORDER
-    void OnDestroy( wxWindowDestroyEvent& event );
+    void OnDestroy_Book( wxWindowDestroyEvent& event );
+    void OnDestroy_Panel( wxWindowDestroyEvent& event );
 
     /// wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED event handler for ID_BOOK_OptionChains
     void OnBOOKOptionChainsPageChanged( wxListbookEvent& event );
