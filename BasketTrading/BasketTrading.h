@@ -84,8 +84,6 @@ private:
   PanelPortfolioStats* m_pPanelPortfolioStats;
   ou::tf::PanelFinancialChart* m_pPanelFinancialChart;
 
-  ou::tf::FrameControls* m_pFrameOptionChainsWithOrder;
-
   std::string m_sDbName;
   std::string m_sStateFileName;
   ou::tf::DBOps m_db;
@@ -163,7 +161,6 @@ private:
     ar & *m_pPanelProviderControl;
     ar & m_enumBuySell;
     ar & *m_pPanelFinancialChart;
-    ar & *m_pFrameOptionChainsWithOrder;
     //ar & m_splitPanels->GetSashPosition();
   }
 
@@ -194,8 +191,7 @@ private:
       ar & *m_pPanelFinancialChart;
     }
     if ( 6 <= version ) {
-      assert( m_pFrameOptionChainsWithOrder );
-      ar & *m_pFrameOptionChainsWithOrder;
+      // deprecated
     }
     //m_splitPanels->SetSashPosition( x );
   }
