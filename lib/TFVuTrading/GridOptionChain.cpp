@@ -13,7 +13,7 @@
  ************************************************************************/
 
 #include "GridOptionChain.h"
-#include "GridOptionChain_impl.h"
+#include "GridOptionChain_impl.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

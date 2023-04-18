@@ -18,7 +18,7 @@
 #include <wx/dnd.h>
 #include <wx/cursor.h>
 
-#include "GridOptionChain_impl.h"
+#include "GridOptionChain_impl.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
