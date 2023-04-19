@@ -68,8 +68,8 @@ public:
   void Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& );
   void Clear(  double strike );
 
-  void TimerActivate();
-  void TimerDeactivate();
+  void Start();
+  void Stop();
 
   void SaveColumnSizes( ou::tf::GridColumnSizer& ) const;
   void SetColumnSizes( ou::tf::GridColumnSizer& );

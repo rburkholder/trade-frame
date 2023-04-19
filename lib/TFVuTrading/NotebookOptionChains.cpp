@@ -127,7 +127,7 @@ void NotebookOptionChains::OnPageChanging( wxBookCtrlEvent& event ) {
       std::cout << "NotebookOptionChains::OnPageChanging: couldn't find tab index: " << ixTab << std::endl;
     }
     else {
-      iter->second.pWinOptionChain->TimerDeactivate();
+      iter->second.pWinOptionChain->Stop();
       if ( nullptr != m_pgcsGridOptionChain ) {
         iter->second.pWinOptionChain->SaveColumnSizes( *m_pgcsGridOptionChain );
       }
@@ -154,7 +154,7 @@ void NotebookOptionChains::OnPageChanged( wxBookCtrlEvent& event ) {
     if ( nullptr != m_pgcsGridOptionChain ) {
       iter->second.pWinOptionChain->SetColumnSizes( *m_pgcsGridOptionChain );
     }
-    iter->second.pWinOptionChain->TimerActivate();
+    iter->second.pWinOptionChain->Start();
     if ( nullptr != m_fOnPageChanged ) {
       m_fOnPageChanged( iter->first );
     }

@@ -277,7 +277,7 @@ void PanelComboOrder::OnBOOKOptionChainsPageChanging( wxListbookEvent& event ) {
       std::cout << "PanelComboOrder::OnPageChanging: couldn't find tab index: " << ixTab << std::endl;
     }
     else {
-      iter->second.pGridOptionChain->TimerDeactivate();
+      iter->second.pGridOptionChain->Stop();
       if ( nullptr != m_pgcsGridOptionChain ) {
         iter->second.pGridOptionChain->SaveColumnSizes( *m_pgcsGridOptionChain );
       }
@@ -303,7 +303,7 @@ void PanelComboOrder::OnBOOKOptionChainsPageChanged( wxListbookEvent& event ) {
     if ( nullptr != m_pgcsGridOptionChain ) {
       iter->second.pGridOptionChain->SetColumnSizes( *m_pgcsGridOptionChain );
     }
-    iter->second.pGridOptionChain->TimerActivate();
+    iter->second.pGridOptionChain->Start();
     if ( nullptr != m_fOnPageChanged ) {
       m_fOnPageChanged( iter->first );
     }

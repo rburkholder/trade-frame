@@ -92,8 +92,8 @@ void GridOptionChain::SetColumnSizes( ou::tf::GridColumnSizer& gcs ) {
  gcs.SetColumnSizes( *this );
 }
 
-void GridOptionChain::TimerActivate() { m_pimpl->TimerActivate(); }
-void GridOptionChain::TimerDeactivate() { m_pimpl->TimerDeactivate(); }
+void GridOptionChain::Start() { m_pimpl->TimerActivate(); }
+void GridOptionChain::Stop() { m_pimpl->TimerDeactivate(); }
 
 void GridOptionChain::Add( double strike, ou::tf::OptionSide::EOptionSide side, const std::string& sSymbol ) {
   m_pimpl->Add( strike, side, sSymbol );
