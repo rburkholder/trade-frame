@@ -24,26 +24,33 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 GridOptionChain_impl::GridOptionChain_impl( GridOptionChain& details )
-: m_details( details ), m_bTimerActive( false ) {
+: wxGridTableBase()
+, m_details( details ), m_bTimerActive( false ) {
+}
+
+GridOptionChain_impl::~GridOptionChain_impl() {
+  m_details.SetTable( nullptr, false, wxGrid::wxGridSelectNone );
+  m_vRowIX.clear();
+  m_mapOptionValueRow.clear();
 }
 
 void GridOptionChain_impl::CreateControls() {
 
-    m_details.SetDefaultColSize(50);
-    m_details.SetDefaultRowSize(22);
-    m_details.SetColLabelSize(22);
-    m_details.SetRowLabelSize(50);
+  m_details.SetDefaultColSize(50);
+  m_details.SetDefaultRowSize(22);
+  m_details.SetColLabelSize(22);
+  m_details.SetRowLabelSize(50);
 
-  m_details.CreateGrid(0, GRID_ARRAY_COL_COUNT, wxGrid::wxGridSelectCells);
+  m_details.SetTable( this, false, wxGrid::wxGridSelectCells );
 
-// found in ModelCell_macros.h
-#ifdef GRID_EMIT_SetColSettings
-#undef GRID_EMIT_SetColSettings
-#endif
+  // found in ModelCell_macros.h
+  #ifdef GRID_EMIT_SetColSettings
+  #undef GRID_EMIT_SetColSettings
+  #endif
 
-#define GRID_EMIT_SetColSettings( z, n, VAR ) \
-  m_details.SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); \
-  m_details.SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
+  #define GRID_EMIT_SetColSettings( z, n, VAR ) \
+    /* m_details.SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); */ \
+    m_details.SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
 
   int ix( 0 );
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
@@ -129,11 +136,13 @@ void GridOptionChain_impl::TimerDeactivate() {
 }
 
 void GridOptionChain_impl::Add( double strike, ou::tf::OptionSide::EOptionSide side, const std::string& sSymbol ) {
+
   mapOptionValueRow_iter iter = m_mapOptionValueRow.find( strike );
   if ( m_mapOptionValueRow.end() == iter ) {
-    iter = m_mapOptionValueRow.insert(
-      m_mapOptionValueRow.begin(),
+    auto pair = m_mapOptionValueRow.emplace(
       mapOptionValueRow_t::value_type( strike, OptionValueRow( m_details, strike ) ) );
+    assert( pair.second );
+    iter = pair.first;
 
     struct Reindex {
       size_t ix;
@@ -142,9 +151,12 @@ void GridOptionChain_impl::Add( double strike, ou::tf::OptionSide::EOptionSide s
     };
 
     Reindex reindex;
-    std::for_each(
-      m_mapOptionValueRow.rbegin(), m_mapOptionValueRow.rend(),
-        [&reindex](mapOptionValueRow_t::value_type& v){ reindex( v.second ); } );
+    m_vRowIX.clear();
+
+    for ( auto iter = m_mapOptionValueRow.rbegin(); iter != m_mapOptionValueRow.rend(); iter++ ) {
+      reindex( iter->second );
+      m_vRowIX.push_back( iter );
+    }
 
     assert( m_details.InsertRows( iter->second.m_nRow ) );
   }
@@ -182,14 +194,15 @@ void GridOptionChain_impl::SetSelected(double strike, bool bSelected) {
 
 // replace my the 'option engine'?
 void GridOptionChain_impl::HandleGuiRefresh( wxTimerEvent& event ) {
+  // TODO: redo this section by using the wxGridTableMessage to trigger a refresh of the visible grid
   // need extra validation here, crash when redrawing with active options
-  std::for_each( m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
-    [this](mapOptionValueRow_t::value_type& value) {
-      if ( m_details.IsVisible( value.second.m_nRow, COL_Strike ) ) {
-        value.second.UpdateGui();
-      }
-    }
-  );
+//  std::for_each( m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
+//    [this](mapOptionValueRow_t::value_type& value) {
+//      if ( m_details.IsVisible( value.second.m_nRow, COL_Strike ) ) {
+//        value.second.UpdateGui();
+//      }
+//    }
+//  );
 }
 
 void GridOptionChain_impl::OnMouseMotion( wxMouseEvent& event ) {
@@ -198,11 +211,9 @@ void GridOptionChain_impl::OnMouseMotion( wxMouseEvent& event ) {
     // 2018/08/02 obsolete?  replaced by LeftClick operations?
     if ( ( 0 < m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
 
-      mapOptionValueRow_t::iterator iter;
-      iter = std::find_if(
-        m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
-        [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
-      assert( m_mapOptionValueRow.end() != iter );
+      assert( m_nRow < m_vRowIX.size() );
+      mapOptionValueRow_t::reverse_iterator iter = m_vRowIX[ m_nRow ];
+      assert( m_mapOptionValueRow.rend() != iter );
 
 //      std::cout << "column: " << m_nColumn << std::endl;
 
@@ -235,11 +246,9 @@ void GridOptionChain_impl::OnGridRightClick( wxGridEvent& event ) {
 
     if ( ( 0 < m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
 
-      mapOptionValueRow_t::iterator iter;
-      iter = std::find_if(
-        m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
-        [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
-      assert( m_mapOptionValueRow.end() != iter );
+      assert( m_nRow < m_vRowIX.size() );
+      mapOptionValueRow_t::reverse_iterator iter = m_vRowIX[ m_nRow ];
+      assert( m_mapOptionValueRow.rend() != iter );
 
       // 2018/08/02 obsolete?  replaced by LeftClick operations?
 //      if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) ) {
@@ -272,11 +281,9 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
 
   if ( ( 0 < m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
 
-    mapOptionValueRow_t::iterator iterOptionValueRow;
-    iterOptionValueRow = std::find_if(
-      m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
-      [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
-    assert( m_mapOptionValueRow.end() != iterOptionValueRow );
+    assert( m_nRow < m_vRowIX.size() );
+    mapOptionValueRow_t::reverse_iterator iterOptionValueRow = m_vRowIX[ m_nRow ];
+    assert( m_mapOptionValueRow.rend() != iterOptionValueRow );
 
     if ( nullptr != m_details.m_fOnRowClicked ) {
 
@@ -342,11 +349,9 @@ void GridOptionChain_impl::OnGridCellBeginDrag( wxGridEvent& event ) {
 
   if ( ( 0 < m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
 
-    mapOptionValueRow_t::iterator iterOptionValueRow;
-    iterOptionValueRow = std::find_if(
-      m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
-      [this]( mapOptionValueRow_t::value_type& vt ){ return m_nRow == vt.second.m_nRow; } );
-    assert( m_mapOptionValueRow.end() != iterOptionValueRow );
+    assert( m_nRow < m_vRowIX.size() );
+    mapOptionValueRow_t::reverse_iterator iterOptionValueRow = m_vRowIX[ m_nRow ];
+    assert( m_mapOptionValueRow.rend() != iterOptionValueRow );
 
     if ( nullptr != m_details.m_fOnOptionUnderlyingRetrieveInitiate ) {
 
@@ -370,6 +375,114 @@ void GridOptionChain_impl::OnGridCellBeginDrag( wxGridEvent& event ) {
   }
 
   event.Skip( bSkip );
+}
+
+void GridOptionChain_impl::SetView( wxGrid *grid ) {
+  wxGridTableBase::SetView( grid );
+}
+
+wxGrid* GridOptionChain_impl::GetView() const {
+  return wxGridTableBase::GetView();
+}
+
+int GridOptionChain_impl::GetNumberRows() {
+  return m_mapOptionValueRow.size();
+}
+
+int GridOptionChain_impl::GetNumberCols() {
+  return GRID_ARRAY_COL_COUNT;
+}
+
+bool GridOptionChain_impl::IsEmptyCell(int row, int col ) {
+  return false;
+}
+
+// https://github.com/wxWidgets/wxWidgets/blob/master/src/generic/grid.cpp
+// wxGridStringTable::InsertRows
+bool GridOptionChain_impl::InsertRows( size_t pos, size_t numRows ) {
+  //return wxGridTableBase::InsertRows( pos, numRows ); // don't do this
+    if ( GetView() ) {
+      wxGridTableMessage msg(
+        this,
+        wxGRIDTABLE_NOTIFY_ROWS_INSERTED,
+        pos,
+        numRows
+      );
+      GetView()->ProcessTableMessage( msg );
+    }
+  return true;
+}
+
+wxString GridOptionChain_impl::GetValue( int row, int col ) {
+
+  wxString s;
+
+  #define GRID_EMIT_SwitchGetValue( z, n, data ) \
+    case GRID_EXTRACT_COL_DETAILS(z, n, 0):  \
+      s = boost::fusion::at_c<GRID_EXTRACT_COL_DETAILS(z, n, 0)>( m_vRowIX[row]->second.m_vModelCells ).GetText(); \
+      break;
+
+  switch ( col ) {
+    BOOST_PP_REPEAT(BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SwitchGetValue, 0 )
+  }
+
+  return s;
+
+}
+
+void GridOptionChain_impl::SetValue(int row, int col, const wxString &value ) {
+}
+
+//void GridOptionChain_impl::SetValueAsDouble(int row, int col, double value ) {
+//}
+
+//double GridOptionChain_impl::GetValueAsDouble(int row, int col ) {
+//  return 0.0;
+//}
+
+wxString GridOptionChain_impl::GetColLabelValue( int col ) {
+
+  wxString s;
+
+  #define GRID_EMIT_SwitchGetColLabel( z, n, data ) \
+    case GRID_EXTRACT_COL_DETAILS(z, n, 0):  \
+      s = wxString( GRID_EXTRACT_COL_DETAILS(z, n, 1 ) ); \
+      break;
+
+  switch ( col ) {
+    BOOST_PP_REPEAT(BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SwitchGetColLabel, 0 )
+  }
+
+  return s;
+}
+
+wxGridCellAttr* GridOptionChain_impl::GetAttr (int row, int col, wxGridCellAttr::wxAttrKind kind ) {
+
+  #define GRID_EMIT_SwitchGetColAlign( z, n, data ) \
+    case GRID_EXTRACT_COL_DETAILS(z, n, 0):  \
+      align = GRID_EXTRACT_COL_DETAILS(z, n, 2 ); \
+      break;
+
+  wxGridCellAttr* pAttr = new wxGridCellAttr();
+
+  int align = wxALIGN_CENTER;
+  switch ( col ) {
+    BOOST_PP_REPEAT(BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SwitchGetColAlign, 0 )
+  }
+  pAttr->SetAlignment( align, wxALIGN_CENTER_VERTICAL );
+
+  switch ( kind ) {
+    case wxGridCellAttr::wxAttrKind::Cell:
+    case wxGridCellAttr::wxAttrKind::Col:
+      break;
+    case wxGridCellAttr::wxAttrKind::Row:
+      break;
+    case wxGridCellAttr::wxAttrKind::Default:
+      break;
+  }
+
+  return pAttr;
+
 }
 
 void GridOptionChain_impl::StopWatch() {

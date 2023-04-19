@@ -26,6 +26,7 @@
 #include <boost/fusion/algorithm/transformation/filter.hpp>
 #include <boost/fusion/include/filter.hpp>
 
+#include <wx/grid.h>
 #include <wx/timer.h>
 #include <wx/stattext.h>
 
@@ -38,10 +39,10 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-struct GridOptionChain_impl {
+struct GridOptionChain_impl: public wxGridTableBase {
 //public:
   GridOptionChain_impl( GridOptionChain& );
-  ~GridOptionChain_impl() = default;
+  virtual ~GridOptionChain_impl();
 //protected:
 
 //private:
@@ -75,9 +76,9 @@ struct GridOptionChain_impl {
     BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,GRID_EXTRACT_ENUM_LIST,0)
   };
 
-  typedef boost::fusion::VECTOR_DEF<
+  using vModelCells_t = boost::fusion::VECTOR_DEF<
     BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COMPOSE_MODEL_CELL,4)
-  > vModelCells_t;
+  >;
 
   struct OptionValueRow {
   //public:
@@ -87,7 +88,8 @@ struct GridOptionChain_impl {
 	      Init();
         boost::fusion::at_c<COL_Strike>( m_vModelCells ).SetValue( strike );
       }
-    OptionValueRow( const OptionValueRow& rhs )
+    OptionValueRow( const OptionValueRow& rhs ) = delete;
+    OptionValueRow( OptionValueRow&& rhs )
       : m_grid( rhs.m_grid ), m_nRow( rhs.m_nRow ), m_bSelected( rhs.m_bSelected )
     {
       Init();
@@ -145,6 +147,9 @@ struct GridOptionChain_impl {
   using mapOptionValueRow_iter = mapOptionValueRow_t::iterator;
   mapOptionValueRow_t m_mapOptionValueRow;
 
+  using vRowIX_t = std::vector<mapOptionValueRow_t::reverse_iterator>;
+  vRowIX_t m_vRowIX;
+
   int m_nRow;
   int m_nColumn;
 
@@ -167,6 +172,25 @@ struct GridOptionChain_impl {
 
   void CreateControls();
   //void OnDestroy( wxWindowDestroyEvent& event );  // can't use this
+
+  virtual void SetView ( wxGrid *grid );
+  virtual wxGrid* GetView() const;
+
+  virtual int GetNumberRows();
+  virtual int GetNumberCols();
+  virtual bool IsEmptyCell(int row, int col);
+
+  virtual bool InsertRows(size_t pos=0, size_t numRows=1);
+
+  virtual wxString GetValue(int row, int col);
+  virtual void SetValue(int row, int col, const wxString &value);
+
+  virtual wxGridCellAttr* GetAttr (int row, int col, wxGridCellAttr::wxAttrKind kind );
+
+  //virtual void SetValueAsDouble(int row, int col, double value);
+  //virtual double GetValueAsDouble(int row, int col);
+
+  virtual wxString GetColLabelValue(int col);
 
   void StopWatch();
   void DestroyControls();
