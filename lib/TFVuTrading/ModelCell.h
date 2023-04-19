@@ -21,6 +21,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <wx/string.h>
+
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
@@ -48,14 +50,14 @@ public:
   typedef typename ModelCell_traits<CRTP>::value_type value_type;
   typedef FastDelegate1<const wxString&> FunctionSetText_t;
 
-  ModelCell( void );
+  ModelCell();
   ModelCell( const ModelCell& rhs );
   ModelCell( FunctionSetText_t );
 
   virtual ~ModelCell(void);
 
   void SetValue( const value_type& val );
-  const value_type GetValue( void ) const { return m_val; };
+  const value_type GetValue() const { return m_val; };
 
   void SetFunctionSetText( FunctionSetText_t function ) {
     m_functionSetText = function;
@@ -69,9 +71,9 @@ public:
     return m_sCellText;
   }
 
-  void UpdateGui( void );
+  void UpdateGui();
 
-  bool Changed( void ) const { return m_bChanged; }
+  bool Changed() const { return m_bChanged; }
 
   template<typename F>
   void UpdateGui( F f ) {
@@ -105,11 +107,11 @@ struct ModelCell_traits<ModelCellInt> {
 class ModelCellInt: public ModelCell<ModelCellInt> {
 public:
 
-  ModelCellInt( void ) {};
+  ModelCellInt() {};
   ModelCellInt(FunctionSetText_t function): ModelCell<ModelCellInt>( function ) {};
   //~ModelCellInt( void );
 
-  void InitializeValue( void ) { m_val = 0; }
+  void InitializeValue() { m_val = 0; }
 protected:
 private:
 };
@@ -127,7 +129,7 @@ class ModelCellDouble: public ModelCell<ModelCellDouble> {
   friend class ModelCell<ModelCellDouble>;
 public:
 
-  ModelCellDouble( void ): m_nPrecision( 2 ) {
+  ModelCellDouble(): m_nPrecision( 2 ) {
     Initialize();
   }
   ModelCellDouble( const ModelCellDouble& rhs )
@@ -140,7 +142,7 @@ public:
 
   virtual ~ModelCellDouble( void ) {}
 
-  void InitializeValue( void ) { m_val = {}; }
+  void InitializeValue() { m_val = {}; }
 
   void SetPrecision( unsigned int n ) {
     m_nPrecision = n;
@@ -154,7 +156,7 @@ private:
     //ss.precision( m_nPrecision );
     //ss.setf( std::ios::fixed, std:: ios::floatfield );
   }
-  void Val2String( void ) {
+  void Val2String() {
     std::stringstream().swap(ss);
     // ss.setf( std::ios::fixed, std:: ios::floatfield );
     //ss.precision( m_nPrecision );
@@ -176,11 +178,11 @@ struct ModelCell_traits<ModelCellString> {
 class ModelCellString: public ModelCell<ModelCellString> {
 public:
 
-  ModelCellString( void ) {};
+  ModelCellString() {};
   ModelCellString(FunctionSetText_t function): ModelCell<ModelCellString>( function ) {};
   //~ModelCellInt( void );
 
-  void Val2String( void ) { m_sCellText = m_val.c_str(); };
+  void Val2String() { m_sCellText = m_val.c_str(); };
 protected:
 private:
 };
@@ -188,8 +190,8 @@ private:
 // ======================
 
 template<typename CRTP>
-ModelCell<CRTP>::ModelCell( void )
-: m_bChanged( true ), m_functionSetText( 0 )
+ModelCell<CRTP>::ModelCell()
+: m_bChanged( true ), m_functionSetText( nullptr )
 { // gets initial value into gui
   InitializeValue();
 }
@@ -211,7 +213,7 @@ ModelCell<CRTP>::ModelCell( FunctionSetText_t function )
 }
 
 template<typename CRTP>
-ModelCell<CRTP>::~ModelCell(void) {
+ModelCell<CRTP>::~ModelCell() {
 }
 
 template<typename CRTP>
@@ -224,7 +226,7 @@ void ModelCell<CRTP>::SetValue( const value_type& val ) {
 
 template<typename CRTP>
 void ModelCell<CRTP>::UpdateGui() {
-  if ( m_bChanged && ( 0 != m_functionSetText ) ) {
+  if ( m_bChanged && ( nullptr != m_functionSetText ) ) {
     Val2String();
     m_functionSetText( m_sCellText );
     m_bChanged = false;
@@ -238,6 +240,7 @@ void ModelCell<CRTP>::Val2String() {
   }
   else {
     std::string s( boost::lexical_cast<std::string>( m_val ) );
+    //wxString s( boost::lexical_cast<wxString>( m_val ) );
     m_sCellText = s.c_str();
   }
 }
