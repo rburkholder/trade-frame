@@ -138,23 +138,23 @@ void PanelComboOrder::Set(
 
 void PanelComboOrder::MakeRowVisible( boost::gregorian::date date, double strike ) {
   // what happens if grid is not visible, different date is showing?
-  m_mapOptionExpiry[ date ].pWinOptionChain->MakeRowVisible( strike );
+  m_mapOptionExpiry[ date ].pGridOptionChain->MakeRowVisible( strike );
 }
 
 void PanelComboOrder::Update( boost::gregorian::date date, double strike, ou::tf::OptionSide::EOptionSide side, const ou::tf::Quote& quote ) {
-  m_mapOptionExpiry[ date ].pWinOptionChain->Update( strike, side, quote );
+  m_mapOptionExpiry[ date ].pGridOptionChain->Update( strike, side, quote );
 }
 
 void PanelComboOrder::Update( boost::gregorian::date date, double strike, ou::tf::OptionSide::EOptionSide side, const ou::tf::Trade& trade ) {
-  m_mapOptionExpiry[ date ].pWinOptionChain->Update( strike, side, trade );
+  m_mapOptionExpiry[ date ].pGridOptionChain->Update( strike, side, trade );
 }
 
 void PanelComboOrder::Update( boost::gregorian::date date, double strike, ou::tf::OptionSide::EOptionSide side, const ou::tf::Greek& greek ) {
-  m_mapOptionExpiry[ date ].pWinOptionChain->Update( strike, side, greek );
+  m_mapOptionExpiry[ date ].pGridOptionChain->Update( strike, side, greek );
 }
 
 void PanelComboOrder::Clear( boost::gregorian::date date, double strike ) {
-  m_mapOptionExpiry[ date ].pWinOptionChain->Clear( strike );
+  m_mapOptionExpiry[ date ].pGridOptionChain->Clear( strike );
 }
 
 // add specific put/call-at-strike pair to Notebook of OptionChaines
@@ -234,7 +234,7 @@ void PanelComboOrder::Add( boost::gregorian::date date, double strike, ou::tf::O
   }
 
   // add option set to the expiry panel
-  iterExpiry->second.pWinOptionChain->Add( strike, side, sSymbol );
+  iterExpiry->second.pGridOptionChain->Add( strike, side, sSymbol );
 
 }
 
@@ -243,8 +243,8 @@ void PanelComboOrder::OnDestroy_Book( wxWindowDestroyEvent& event ) {
   std::for_each(
     m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(),
     [](mapOptionExpiry_t::value_type& value){
-     value.second.pWinOptionChain->PreDestroy();
-     value.second.pWinOptionChain->Destroy();
+     value.second.pGridOptionChain->PreDestroy();
+     value.second.pGridOptionChain->Destroy();
      value.second.pPanel->Destroy();
    });
 
@@ -277,9 +277,9 @@ void PanelComboOrder::OnBOOKOptionChainsPageChanging( wxListbookEvent& event ) {
       std::cout << "PanelComboOrder::OnPageChanging: couldn't find tab index: " << ixTab << std::endl;
     }
     else {
-      iter->second.pWinOptionChain->TimerDeactivate();
+      iter->second.pGridOptionChain->TimerDeactivate();
       if ( nullptr != m_pgcsGridOptionChain ) {
-        iter->second.pWinOptionChain->SaveColumnSizes( *m_pgcsGridOptionChain );
+        iter->second.pGridOptionChain->SaveColumnSizes( *m_pgcsGridOptionChain );
       }
       if ( nullptr != m_fOnPageChanging ) {
         m_fOnPageChanging( iter->first );
@@ -301,9 +301,9 @@ void PanelComboOrder::OnBOOKOptionChainsPageChanged( wxListbookEvent& event ) {
   }
   else {
     if ( nullptr != m_pgcsGridOptionChain ) {
-      iter->second.pWinOptionChain->SetColumnSizes( *m_pgcsGridOptionChain );
+      iter->second.pGridOptionChain->SetColumnSizes( *m_pgcsGridOptionChain );
     }
-    iter->second.pWinOptionChain->TimerActivate();
+    iter->second.pGridOptionChain->TimerActivate();
     if ( nullptr != m_fOnPageChanged ) {
       m_fOnPageChanged( iter->first );
     }
@@ -335,7 +335,7 @@ void PanelComboOrder::SetGridOptionChain_ColumnSaver( ou::tf::GridColumnSizer* p
   }
   else {
     if ( nullptr != m_pgcsGridOptionChain ) {
-      iter->second.pWinOptionChain->SetColumnSizes( *m_pgcsGridOptionChain );
+      iter->second.pGridOptionChain->SetColumnSizes( *m_pgcsGridOptionChain );
     }
   }
 }

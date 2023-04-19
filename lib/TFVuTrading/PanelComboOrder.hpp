@@ -135,11 +135,11 @@ private:
     std::string sDate;
     mapStrike_t mapStrike;
     wxPanel* pPanel;
-    GridOptionChain* pWinOptionChain;
+    GridOptionChain* pGridOptionChain;
     Tab( int ix = 0, const std::string& s = "", wxPanel* pPanel_ = nullptr, ou::tf::GridOptionChain* pGrid = nullptr )
-      : ixTab( ix ), sDate( s ), pPanel( pPanel_ ), pWinOptionChain( pGrid ) {}
+      : ixTab( ix ), sDate( s ), pPanel( pPanel_ ), pGridOptionChain( pGrid ) {}
     Tab( const std::string& s, wxPanel* pPanel_ = nullptr, ou::tf::GridOptionChain* pGrid = nullptr )
-      : ixTab{}, sDate( s ), pPanel( pPanel_ ), pWinOptionChain( pGrid ) {}
+      : ixTab{}, sDate( s ), pPanel( pPanel_ ), pGridOptionChain( pGrid ) {}
   };
 
   using mapOptionExpiry_t = std::map<boost::gregorian::date, Tab>;
