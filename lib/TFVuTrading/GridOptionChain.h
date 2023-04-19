@@ -48,7 +48,7 @@ public:
     const wxSize& size = GRID_OPTIONCHAIN_SIZE,
     long style = GRID_OPTIONCHAIN_STYLE,
     const wxString& = GRID_OPTIONCHAIN_TITLE );
-  virtual ~GridOptionChain(void);
+  virtual ~GridOptionChain();
 
   bool Create( wxWindow* parent,
     wxWindowID id = GRID_OPTIONCHAIN_IDNAME,
