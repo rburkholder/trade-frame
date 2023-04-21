@@ -116,17 +116,17 @@ void GridOptionChain_impl::Clear(  double strike ) {
   //m_mapOptionValueRow[ strike ].Init();  ?
 }
 
-void GridOptionChain_impl::TimerActivate() {
+void GridOptionChain_impl::Start() {
   if ( !m_bTimerActive ) {
     m_bTimerActive = true;
     // this GuiRefresh initialization should come after all else
     m_timerGuiRefresh.SetOwner( &m_details );
     m_details.Bind( wxEVT_TIMER, &GridOptionChain_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-    m_timerGuiRefresh.Start( 250 );
+    m_timerGuiRefresh.Start( 300 );
   }
 }
 
-void GridOptionChain_impl::TimerDeactivate() {
+void GridOptionChain_impl::Stop() {
   if ( m_bTimerActive ) {
     m_bTimerActive = false;
     m_timerGuiRefresh.Stop();
@@ -217,7 +217,7 @@ void GridOptionChain_impl::OnMouseMotion( wxMouseEvent& event ) {
 
 //      std::cout << "column: " << m_nColumn << std::endl;
 
-//      if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) ) {
+//      if ( ( COL_CallLast <= m_nColumn ) && ( COL_CallBid >= m_nColumn ) ) {
 //        // call drag and drop
 //        ou::tf::DragDropDataInstrument dndCall( iter->second.m_sCallName );
 //        wxDropSource dragSource( &m_details );
@@ -225,7 +225,7 @@ void GridOptionChain_impl::OnMouseMotion( wxMouseEvent& event ) {
 //        wxDragResult result = dragSource.DoDragDrop( true );
 //      }
 
-//      if ( ( 7 <= m_nColumn ) && ( 12 >= m_nColumn ) ) {
+//      if ( ( COL_PutBid <= m_nColumn ) && ( COL_PutLast >= m_nColumn ) ) {
 //        // put drag and drop
 //        ou::tf::DragDropDataInstrument dndPut( iter->second.m_sPutName );
 //        wxDropSource dragSource( &m_details );
@@ -506,7 +506,7 @@ void GridOptionChain_impl::StopWatch() {
 
 void GridOptionChain_impl::DestroyControls() {
 
-  TimerDeactivate();
+  Stop();
 
   m_details.Unbind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionChain_impl::OnGridCellBeginDrag, this );
 

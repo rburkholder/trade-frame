@@ -14,6 +14,9 @@
 
 #pragma once
 
+#include <map>
+//#include <unordered_set>
+
 #include <boost/fusion/container/vector/vector20.hpp>
 #include <boost/fusion/include/vector20.hpp>
 
@@ -54,7 +57,7 @@ struct GridOptionChain_impl: public wxGridTableBase {
 #define GRID_ARRAY_COL_COUNT 13
 #define GRID_ARRAY \
   (GRID_ARRAY_COL_COUNT,  \
-    ( /* Col 0,         1,            2,       3,      4,             */ \
+    ( /* Col 0,         1,            2,       3,      4,          */ \
       (COL_CallLast , "Last",  wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_CallIV   , "IV",    wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_CallGamma, "Gamma", wxALIGN_RIGHT,  60, ModelCellDouble ), \
@@ -69,8 +72,7 @@ struct GridOptionChain_impl: public wxGridTableBase {
       (COL_PutIV    , "IV",    wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_PutLast  , "Last",  wxALIGN_RIGHT,  50, ModelCellDouble ), \
       ) \
-    ) \
-  /**/
+    )
 
   enum {
     BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,GRID_EXTRACT_ENUM_LIST,0)
@@ -143,6 +145,9 @@ struct GridOptionChain_impl: public wxGridTableBase {
     }
   };  // struct OptionValueRow
 
+  int m_nRow;
+  int m_nColumn;
+
   using mapOptionValueRow_t = std::map<double,OptionValueRow>;
   using mapOptionValueRow_iter = mapOptionValueRow_t::iterator;
   mapOptionValueRow_t m_mapOptionValueRow;
@@ -150,8 +155,8 @@ struct GridOptionChain_impl: public wxGridTableBase {
   using vRowIX_t = std::vector<mapOptionValueRow_t::reverse_iterator>;
   vRowIX_t m_vRowIX;
 
-  int m_nRow;
-  int m_nColumn;
+  //using setSubscriptions_t = std::unordered_set<mapOptionValueRow_t::reverse_iterator>;
+  //setSubscriptions_t m_setSubscriptions;
 
   mapOptionValueRow_iter FindOptionValueRow( double );
 
@@ -167,8 +172,8 @@ struct GridOptionChain_impl: public wxGridTableBase {
   void Clear(  double strike );
 
   bool m_bTimerActive;
-  void TimerActivate();
-  void TimerDeactivate();
+  void Start();
+  void Stop();
 
   void CreateControls();
   //void OnDestroy( wxWindowDestroyEvent& event );  // can't use this
