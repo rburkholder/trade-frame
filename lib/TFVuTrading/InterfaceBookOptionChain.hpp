@@ -48,9 +48,11 @@ struct InterfaceBookOptionChain {
 
   virtual void MakeRowVisible( boost::gregorian::date, double strike ) = 0;
 
+  // TODO: these updates are time intensive, can they be improved?
   virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Quote& ) = 0;
   virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Trade& ) = 0;
   virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& ) = 0;
+
   virtual void Clear(  boost::gregorian::date, double strike ) = 0;
 
 // Order Interface
