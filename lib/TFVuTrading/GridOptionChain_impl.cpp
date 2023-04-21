@@ -426,6 +426,44 @@ wxString GridOptionChain_impl::GetValue( int row, int col ) {
     BOOST_PP_REPEAT(BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SwitchGetValue, 0 )
   }
 
+  if ( COL_Strike == col ) {
+
+    std::set<int> setRowsToDelete;
+
+    // check edges of row set and disable updates
+    for (setRows_t::iterator iter = m_setRowUpdating.begin(); iter != m_setRowUpdating.end(); ++iter ) {
+      if ( m_details.IsVisible( *iter, col, false ) ) {
+        break;
+      }
+      else {
+        setRowsToDelete.emplace( *iter );
+      }
+    }
+
+    for (setRows_t::reverse_iterator iter = m_setRowUpdating.rbegin(); iter != m_setRowUpdating.rend(); ++iter ) {
+      if ( m_details.IsVisible( *iter, col, false ) ) {
+        break;
+      }
+      else {
+        setRowsToDelete.emplace( *iter );
+      }
+    }
+
+    for ( int row: setRowsToDelete ) {
+      std::cout << "stop strike " << m_vRowIX[row]->first << std::endl;
+      m_setRowUpdating.erase( row );
+    }
+
+    // enable trade/quote/greek
+    setRows_t::iterator iter = m_setRowUpdating.find( row );
+    if ( m_setRowUpdating.end() == iter ) {
+      auto pair = m_setRowUpdating.emplace( row );
+      assert( pair.second );
+      std::cout << "start strike " << m_vRowIX[row]->first << std::endl;
+    }
+
+  }
+
   return s;
 
 }

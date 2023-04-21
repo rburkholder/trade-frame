@@ -15,7 +15,7 @@
 #pragma once
 
 #include <map>
-//#include <unordered_set>
+#include <set>
 
 #include <boost/fusion/container/vector/vector20.hpp>
 #include <boost/fusion/include/vector20.hpp>
@@ -99,7 +99,7 @@ struct GridOptionChain_impl: public wxGridTableBase {
     }
     ~OptionValueRow() = default;
 
-    void UpdateGui() {
+    void UpdateGui() { // now updated by update events
       boost::fusion::for_each( m_vModelCells, ModelCell_ops::UpdateGui( m_grid, m_nRow ) );
     }
     void UpdateCallGreeks( const ou::tf::Greek& greek ) {
@@ -152,11 +152,12 @@ struct GridOptionChain_impl: public wxGridTableBase {
   using mapOptionValueRow_iter = mapOptionValueRow_t::iterator;
   mapOptionValueRow_t m_mapOptionValueRow;
 
+  // fast access into m_mapOptionValueRow by row index
   using vRowIX_t = std::vector<mapOptionValueRow_t::reverse_iterator>;
   vRowIX_t m_vRowIX;
 
-  //using setSubscriptions_t = std::unordered_set<mapOptionValueRow_t::reverse_iterator>;
-  //setSubscriptions_t m_setSubscriptions;
+  using setRows_t = std::set<int>;
+  setRows_t m_setRowUpdating; // rows with trade/quote/greeks
 
   mapOptionValueRow_iter FindOptionValueRow( double );
 
@@ -195,7 +196,7 @@ struct GridOptionChain_impl: public wxGridTableBase {
   //virtual void SetValueAsDouble(int row, int col, double value);
   //virtual double GetValueAsDouble(int row, int col);
 
-  virtual wxString GetColLabelValue(int col);
+  virtual wxString GetColLabelValue( int col );
 
   void StopWatch();
   void DestroyControls();
