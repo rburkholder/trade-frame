@@ -37,7 +37,7 @@ class wxGridEvent;
 class wxToggleButton;
 class wxListbookEvent;
 
-#include <TFVuTrading/GridOptionChain.h>
+#include <TFVuTrading/GridOptionChain.hpp>
 
 #include "InterfaceBookOptionChain.hpp"
 

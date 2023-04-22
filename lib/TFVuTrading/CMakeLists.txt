@@ -28,7 +28,7 @@ set(
     GridIBAccountValues_impl.h
     GridIBPositionDetails.h
     GridIBPositionDetails_impl.h
-    GridOptionChain.h
+    GridOptionChain.hpp
     GridOptionChain_impl.hpp
     InterfaceBookOptionChain.hpp
     ModelBase.h

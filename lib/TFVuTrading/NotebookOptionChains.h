@@ -35,7 +35,7 @@
 
 #include <TFOptions/Option.h>
 
-#include <TFVuTrading/GridOptionChain.h>
+#include <TFVuTrading/GridOptionChain.hpp>
 
 #include <TFBitsNPieces/FirstOrDefaultCombiner.h>
 

@@ -40,7 +40,7 @@
 
 #include <TFVuTrading/ModelChartHdf5.h>
 #include <TFVuTrading/GridColumnSizer.h>
-#include <TFVuTrading/GridOptionChain.h>
+#include <TFVuTrading/GridOptionChain.hpp>
 
 #include <TFBitsNPieces/TreeOps.h>
 

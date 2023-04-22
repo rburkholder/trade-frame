@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "GridOptionChain.h"
+#include "GridOptionChain.hpp"
 #include "GridOptionChain_impl.hpp"
 
 namespace ou { // One Unified

@@ -36,7 +36,7 @@
 #include <TFVuTrading/ModelCell_ops.h>
 #include <TFVuTrading/ModelCell_macros.h>
 
-#include "GridOptionChain.h"
+#include "GridOptionChain.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
