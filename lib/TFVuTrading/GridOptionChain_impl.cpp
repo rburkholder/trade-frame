@@ -451,6 +451,14 @@ wxString GridOptionChain_impl::GetValue( int row, int col ) {
 
     for ( int row: setRowsToDelete ) {
       std::cout << "stop strike " << m_vRowIX[row]->first << std::endl;
+
+      if ( m_details.m_fOptionDelegates_Detach ) {
+        ou::tf::option::Delegates call;
+        ou::tf::option::Delegates put;
+        FillDelegates( row, call, put );
+        m_details.m_fOptionDelegates_Detach( call, put );
+      }
+
       m_setRowUpdating.erase( row );
     }
 
@@ -461,11 +469,33 @@ wxString GridOptionChain_impl::GetValue( int row, int col ) {
       auto pair = m_setRowUpdating.emplace( row );
       assert( pair.second );
       std::cout << "start strike " << m_vRowIX[row]->first << std::endl;
+
+      if ( m_details.m_fOptionDelegates_Attach ) {
+        ou::tf::option::Delegates call;
+        ou::tf::option::Delegates put;
+        FillDelegates( row, call, put );
+        m_details.m_fOptionDelegates_Attach( call, put );
+      }
     }
 
   }
 
   return s;
+}
+
+void GridOptionChain_impl::FillDelegates( int row, ou::tf::option::Delegates& call, ou::tf::option::Delegates& put ) {
+
+  OptionValueRow& ovr( m_vRowIX[row]->second );
+
+  call.sSymbolName = ovr.m_sCallName;
+  call.fQuote = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdateCallQuote );
+  call.fTrade = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdateCallTrade );
+  call.fGreek = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdateCallGreeks );
+
+  put.sSymbolName = ovr.m_sPutName;
+  put.fQuote = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdatePutQuote );
+  put.fTrade = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdatePutTrade );
+  put.fGreek = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdatePutGreeks );
 }
 
 void GridOptionChain_impl::SetValue(int row, int col, const wxString &value ) {

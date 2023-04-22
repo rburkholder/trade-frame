@@ -197,6 +197,8 @@ struct GridOptionChain_impl: public wxGridTableBase {
 
   virtual wxString GetColLabelValue( int col );
 
+  void FillDelegates( int row, ou::tf::option::Delegates& call, ou::tf::option::Delegates& put );
+
   void StopWatch();
   void DestroyControls();
 
