@@ -290,15 +290,15 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
       if ( ( 0 <= m_nRow ) && event.ControlDown() ) {
         ou::tf::option::Delegates call;
         call.sSymbolName = iterOptionValueRow->second.m_sCallName;
-        call.fQuote = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallQuote );
-        call.fTrade = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallTrade );
-        call.fGreek = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallGreeks );
+        call.fdQuote = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallQuote );
+        call.fdTrade = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallTrade );
+        call.fdGreek = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallGreeks );
 
         ou::tf::option::Delegates put;
         put.sSymbolName = iterOptionValueRow->second.m_sPutName;
-        put.fQuote = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutQuote );
-        put.fTrade = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutTrade );
-        put.fGreek = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutGreeks );
+        put.fdQuote = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutQuote );
+        put.fdTrade = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutTrade );
+        put.fdGreek = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutGreeks );
 
         iterOptionValueRow->second.m_bSelected = !iterOptionValueRow->second.m_bSelected;
 
@@ -488,14 +488,14 @@ void GridOptionChain_impl::FillDelegates( int row, ou::tf::option::Delegates& ca
   OptionValueRow& ovr( m_vRowIX[row]->second );
 
   call.sSymbolName = ovr.m_sCallName;
-  call.fQuote = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdateCallQuote );
-  call.fTrade = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdateCallTrade );
-  call.fGreek = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdateCallGreeks );
+  call.fdQuote = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdateCallQuote );
+  call.fdTrade = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdateCallTrade );
+  call.fdGreek = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdateCallGreeks );
 
   put.sSymbolName = ovr.m_sPutName;
-  put.fQuote = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdatePutQuote );
-  put.fTrade = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdatePutTrade );
-  put.fGreek = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdatePutGreeks );
+  put.fdQuote = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdatePutQuote );
+  put.fdTrade = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdatePutTrade );
+  put.fdGreek = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdatePutGreeks );
 }
 
 void GridOptionChain_impl::SetValue(int row, int col, const wxString &value ) {

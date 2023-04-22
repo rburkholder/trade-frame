@@ -417,9 +417,9 @@ void PanelCharts::HandleGridClick(
           if ( bSelected != pOption->Watching() ) {
             if ( bSelected ) {
               assert( !pOption->Watching() );
-              pOption->OnQuote.Add( delegates->fQuote );
-              pOption->OnTrade.Add( delegates->fTrade );
-              pOption->OnGreek.Add( delegates->fGreek );
+              pOption->OnQuote.Add( delegates->fdQuote );
+              pOption->OnTrade.Add( delegates->fdTrade );
+              pOption->OnGreek.Add( delegates->fdGreek );
               pOption->StartWatch(); // verify if start watch happens in the engine
               m_fCalcOptionGreek_Add( iterOption->second, entryUnderlying.m_pWatch );
             }
@@ -427,9 +427,9 @@ void PanelCharts::HandleGridClick(
               assert( pOption->Watching() );
               m_fCalcOptionGreek_Remove( iterOption->second, entryUnderlying.m_pWatch );
               pOption->StopWatch(); // verify if stop watch happens in the engine
-              pOption->OnQuote.Remove( delegates->fQuote );
-              pOption->OnTrade.Remove( delegates->fTrade );
-              pOption->OnGreek.Remove( delegates->fGreek );
+              pOption->OnQuote.Remove( delegates->fdQuote );
+              pOption->OnTrade.Remove( delegates->fdTrade );
+              pOption->OnGreek.Remove( delegates->fdGreek );
             }
           }
         });

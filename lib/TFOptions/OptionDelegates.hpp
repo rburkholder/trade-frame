@@ -27,13 +27,13 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-namespace option { // options
+namespace option { // Options
 
 struct Delegates {
   std::string sSymbolName;
-  fastdelegate::FastDelegate<void(const ou::tf::Quote&)> fQuote;
-  fastdelegate::FastDelegate<void(const ou::tf::Trade&)> fTrade;
-  fastdelegate::FastDelegate<void(const ou::tf::Greek&)> fGreek;
+  fastdelegate::FastDelegate<void(const ou::tf::Quote&)> fdQuote;
+  fastdelegate::FastDelegate<void(const ou::tf::Trade&)> fdTrade;
+  fastdelegate::FastDelegate<void(const ou::tf::Greek&)> fdGreek;
 };
 
 } // namespace option
