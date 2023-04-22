@@ -17,17 +17,19 @@
 #include <map>
 #include <set>
 
+#include <boost/fusion/algorithm/iteration/fold.hpp>
+#include <boost/fusion/algorithm/iteration/for_each.hpp>
+#include <boost/fusion/algorithm/transformation/filter.hpp>
+
 #include <boost/fusion/container/vector/vector20.hpp>
+
+#include <boost/fusion/include/at_c.hpp>
+#include <boost/fusion/include/fold.hpp>
+#include <boost/fusion/include/filter.hpp>
+#include <boost/fusion/include/for_each.hpp>
 #include <boost/fusion/include/vector20.hpp>
 
-#include <boost/fusion/algorithm/iteration/for_each.hpp>
-#include <boost/fusion/include/for_each.hpp>
-#include <boost/fusion/algorithm/iteration/fold.hpp>
-#include <boost/fusion/include/fold.hpp>
 #include <boost/fusion/sequence/intrinsic/at_c.hpp>
-#include <boost/fusion/include/at_c.hpp>
-#include <boost/fusion/algorithm/transformation/filter.hpp>
-#include <boost/fusion/include/filter.hpp>
 
 #include <wx/timer.h>
 #include <wx/stattext.h>

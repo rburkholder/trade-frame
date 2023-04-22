@@ -40,6 +40,8 @@ namespace tf { // TradeFrame
 struct InterfaceBookOptionChain {
 
   using fOnPageEvent_t = std::function<void(boost::gregorian::date)>;
+  using fOptionDelegates_t = std::function<void( ou::tf::option::Delegates& call, ou::tf::option::Delegates& put )>;
+  //using fOptionDelegateAttachments_t = std::function<void( fOptionDelegates_t&& fAttach, fOptionDelegates_t&& fDetach)>; // copied across grids
 
   virtual void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const std::string& sSymbol ) = 0;
 
@@ -48,9 +50,14 @@ struct InterfaceBookOptionChain {
   , fOnPageEvent_t&& fOnPageChanged  // arrival
   ) = 0;
 
+  virtual void Set( // use this for fast updates, instead of Update() below
+    fOptionDelegates_t&& fOptionDelegates_Attach
+  , fOptionDelegates_t&& fOptionDelegates_Detach
+  ) = 0;
+
   virtual void MakeRowVisible( boost::gregorian::date, double strike ) = 0;
 
-  // TODO: these updates are time intensive, can they be improved?
+  // slow version of updates due to multiple lookups
   virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Quote& ) = 0;
   virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Trade& ) = 0;
   virtual void Update( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& ) = 0;

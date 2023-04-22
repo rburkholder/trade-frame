@@ -136,6 +136,16 @@ void PanelComboOrder::Set(
   m_fOnPageChanged  = std::move( fOnPageChanged );
 }
 
+void PanelComboOrder::Set(
+  fOptionDelegates_t&& fOptionDelegates_Attach
+, fOptionDelegates_t&& fOptionDelegates_Detach
+) {
+  for ( mapOptionExpiry_t::value_type& expiry: m_mapOptionExpiry ) {
+    Tab& tab( expiry.second );
+    tab.pGridOptionChain->Set( fOptionDelegates_Attach, fOptionDelegates_Detach ); // make copies of the lambdas
+  }
+}
+
 void PanelComboOrder::MakeRowVisible( boost::gregorian::date date, double strike ) {
   // what happens if grid is not visible, different date is showing?
   m_mapOptionExpiry[ date ].pGridOptionChain->MakeRowVisible( strike );

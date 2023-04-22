@@ -452,7 +452,7 @@ wxString GridOptionChain_impl::GetValue( int row, int col ) {
     for ( int row: setRowsToDelete ) {
       std::cout << "stop strike " << m_vRowIX[row]->first << std::endl;
 
-      if ( m_details.m_fOptionDelegates_Detach ) {
+      if ( m_details.m_fOptionDelegates_Detach ) { // TODO: are these called when panel grid is changed or grid destroyed?
         ou::tf::option::Delegates call;
         ou::tf::option::Delegates put;
         FillDelegates( row, call, put );
@@ -468,13 +468,20 @@ wxString GridOptionChain_impl::GetValue( int row, int col ) {
 
       auto pair = m_setRowUpdating.emplace( row );
       assert( pair.second );
-      std::cout << "start strike " << m_vRowIX[row]->first << std::endl;
 
       if ( m_details.m_fOptionDelegates_Attach ) {
         ou::tf::option::Delegates call;
         ou::tf::option::Delegates put;
         FillDelegates( row, call, put );
         m_details.m_fOptionDelegates_Attach( call, put );
+        std::cout
+          << "start strike " << m_vRowIX[row]->first
+          << "," << call.sSymbolName
+          << "," << put.sSymbolName
+          << std::endl;
+      }
+      else {
+        std::cout << "start strike " << m_vRowIX[row]->first << std::endl;
       }
     }
 

@@ -71,7 +71,14 @@ void GridOptionChain::CreateControls() {
   //m_timerGuiRefresh.Start( 250 );
 
   m_pimpl->CreateControls();
+}
 
+void GridOptionChain::Set(
+  fOptionDelegates_t fOptionDelegates_Attach
+, fOptionDelegates_t fOptionDelegates_Detach
+) {
+  m_fOptionDelegates_Attach = std::move( fOptionDelegates_Attach );
+  m_fOptionDelegates_Detach = std::move( fOptionDelegates_Detach );
 }
 
 void GridOptionChain::Update( double strike, ou::tf::OptionSide::EOptionSide side, const ou::tf::Quote& quote ) {

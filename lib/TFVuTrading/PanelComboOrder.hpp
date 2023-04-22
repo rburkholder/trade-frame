@@ -80,6 +80,11 @@ public:
   , fOnPageEvent_t&& fOnPageChanged  // arrival
   );
 
+  virtual void Set( // NOTE: needs to be set prior to use of Add()
+    fOptionDelegates_t&& fOptionDelegates_Attach
+  , fOptionDelegates_t&& fOptionDelegates_Detach
+  );
+
   virtual void MakeRowVisible( boost::gregorian::date, double strike );
 
   // slow mechanism of updating grid entries

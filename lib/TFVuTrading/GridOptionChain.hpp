@@ -77,8 +77,11 @@ public:
   void PreDestroy();
 
   using fOptionDelegates_t = std::function<void( ou::tf::option::Delegates& call, ou::tf::option::Delegates& put)>;
-  fOptionDelegates_t m_fOptionDelegates_Attach;
-  fOptionDelegates_t m_fOptionDelegates_Detach;
+
+  void Set( // makes a copy of the lambda
+    fOptionDelegates_t fOptionDelegates_Attach
+  , fOptionDelegates_t fOptionDelegates_Detach
+  );
 
   using fOnRowClicked_t = std::function<void(double, bool bSelected, const ou::tf::option::Delegates& call, const ou::tf::option::Delegates& put )>;
   fOnRowClicked_t m_fOnRowClicked; // called when a row is clicked (on/off)
@@ -98,6 +101,9 @@ private:
   };
 
   std::unique_ptr<GridOptionChain_impl> m_pimpl;
+
+  fOptionDelegates_t m_fOptionDelegates_Attach;
+  fOptionDelegates_t m_fOptionDelegates_Detach;
 
   template<class Archive>
   void serialize(Archive & ar, const unsigned int file_version);
