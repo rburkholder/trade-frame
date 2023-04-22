@@ -182,7 +182,7 @@ void PanelComboOrder::Add( boost::gregorian::date date, double strike, ou::tf::O
     // a control right click will signal through that strike should watch/unwatch
     // TODO: maybe the signal through should return a boolean of whether it turned out to be watch or unwatch
     pGridOptionChain->m_fOnRowClicked =
-      [this, date](double strike, bool bSelected, const GridOptionChain::OptionDelegates& call, const GridOptionChain::OptionDelegates& put  ){
+      [this, date](double strike, bool bSelected, const ou::tf::option::Delegates& call, const ou::tf::option::Delegates& put  ){
         if ( nullptr != m_fOnRowClicked) {
           m_fOnRowClicked( date, strike, bSelected, call, put );
         }

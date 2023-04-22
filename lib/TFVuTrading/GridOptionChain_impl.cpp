@@ -288,13 +288,13 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
     if ( nullptr != m_details.m_fOnRowClicked ) {
 
       if ( ( 0 <= m_nRow ) && event.ControlDown() ) {
-        GridOptionChain::OptionDelegates call;
+        ou::tf::option::Delegates call;
         call.sSymbolName = iterOptionValueRow->second.m_sCallName;
         call.fQuote = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallQuote );
         call.fTrade = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallTrade );
         call.fGreek = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallGreeks );
 
-        GridOptionChain::OptionDelegates put;
+        ou::tf::option::Delegates put;
         put.sSymbolName = iterOptionValueRow->second.m_sPutName;
         put.fQuote = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutQuote );
         put.fTrade = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutTrade );
@@ -461,7 +461,6 @@ wxString GridOptionChain_impl::GetValue( int row, int col ) {
       auto pair = m_setRowUpdating.emplace( row );
       assert( pair.second );
       std::cout << "start strike " << m_vRowIX[row]->first << std::endl;
-
     }
 
   }
@@ -533,10 +532,10 @@ void GridOptionChain_impl::StopWatch() {
 
       if ( nullptr != m_details.m_fOnRowClicked ) {
 
-        GridOptionChain::OptionDelegates call;
+        ou::tf::option::Delegates call;
         call.sSymbolName = value.second.m_sCallName;
 
-        GridOptionChain::OptionDelegates put;
+        ou::tf::option::Delegates put;
         put.sSymbolName = value.second.m_sPutName;
 
         m_details.m_fOnRowClicked( value.first, value.second.m_bSelected, call, put );

@@ -28,6 +28,8 @@
 
 #include <TFTimeSeries/DatedDatum.h>
 
+#include <TFOptions/OptionDelegates.hpp>
+
 #include <TFTrading/TradingEnumerations.h>
 
 namespace ou { // One Unified

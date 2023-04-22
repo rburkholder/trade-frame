@@ -19,9 +19,8 @@
 
 #include <wx/grid.h>
 
-#include <TFTrading/Instrument.h>
-
 #include <TFOptions/Option.h>
+#include <TFOptions/OptionDelegates.hpp>
 
 #include <TFVuTrading/GridColumnSizer.h>
 #include <TFVuTrading/DragDropInstrument.h>
@@ -66,6 +65,7 @@ public:
   void Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Quote& );
   void Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Trade& );
   void Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& );
+
   void Clear(  double strike );
 
   void Start();
@@ -76,18 +76,11 @@ public:
 
   void PreDestroy();
 
-  struct OptionDelegates {
-    std::string sSymbolName;
-    fastdelegate::FastDelegate<void(const ou::tf::Quote&)> fQuote;
-    fastdelegate::FastDelegate<void(const ou::tf::Trade&)> fTrade;
-    fastdelegate::FastDelegate<void(const ou::tf::Greek&)> fGreek;
-  };
-
-  using fOptionDelegates_t = std::function<void(OptionDelegates& call, OptionDelegates& put)>;
+  using fOptionDelegates_t = std::function<void( ou::tf::option::Delegates& call, ou::tf::option::Delegates& put)>;
   fOptionDelegates_t m_fOptionDelegates_Attach;
   fOptionDelegates_t m_fOptionDelegates_Detach;
 
-  using fOnRowClicked_t = std::function<void(double, bool bSelected, const OptionDelegates& call, const OptionDelegates& put )>;
+  using fOnRowClicked_t = std::function<void(double, bool bSelected, const ou::tf::option::Delegates& call, const ou::tf::option::Delegates& put )>;
   fOnRowClicked_t m_fOnRowClicked; // called when a row is clicked (on/off)
 
   using fOnOptionUnderlyingRetrieveComplete_t = DragDropInstrument::fOnOptionUnderlyingRetrieveComplete_t;

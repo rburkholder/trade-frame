@@ -29,7 +29,7 @@ set(
     GridIBPositionDetails.h
     GridIBPositionDetails_impl.h
     GridOptionChain.h
-    GridOptionChain_impl.h
+    GridOptionChain_impl.hpp
     InterfaceBookOptionChain.hpp
     ModelBase.h
     ModelCell.h

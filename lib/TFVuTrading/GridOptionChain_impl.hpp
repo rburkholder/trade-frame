@@ -29,7 +29,6 @@
 #include <boost/fusion/algorithm/transformation/filter.hpp>
 #include <boost/fusion/include/filter.hpp>
 
-#include <wx/grid.h>
 #include <wx/timer.h>
 #include <wx/stattext.h>
 

@@ -381,8 +381,8 @@ void PanelCharts::OnOptionChainPageChanged( boost::gregorian::date date ) {
 void PanelCharts::HandleGridClick(
   idInstrument_t idInstrumentUnderlying,
   boost::gregorian::date date, double strike, bool bSelected,
-  const ou::tf::GridOptionChain::OptionDelegates& call,
-  const ou::tf::GridOptionChain::OptionDelegates& put )
+  const ou::tf::option::Delegates& call,
+  const ou::tf::option::Delegates& put )
 {
   std::cout << "GridClick: " << date << "," << strike << "," << call.sSymbolName << "," << put.sSymbolName << std::endl;
 //  if ( ou::tf::keytypes::EProviderIQF != m_pData1Provider->ID() ) {
@@ -395,9 +395,9 @@ void PanelCharts::HandleGridClick(
     }
     else {
       InstrumentEntry& entryUnderlying( iterInstrumentUnderlying->second );
-      std::vector<const ou::tf::GridOptionChain::OptionDelegates*> vFuncs = { &call, &put };
+      std::vector<const ou::tf::option::Delegates*> vFuncs = { &call, &put };
       std::for_each( vFuncs.begin(), vFuncs.end(),
-        [this, &entryUnderlying, bSelected](const ou::tf::GridOptionChain::OptionDelegates* delegates) {
+        [this, &entryUnderlying, bSelected](const ou::tf::option::Delegates* delegates) {
 
           mapOption_t::iterator iterOption = entryUnderlying.m_mapSelectedChainOptions.find( delegates->sSymbolName );
           if ( entryUnderlying.m_mapSelectedChainOptions.end() == iterOption ) {

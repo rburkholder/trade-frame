@@ -21,6 +21,7 @@ set(
     Margin.h
     NoRiskInterestRateSeries.h
     Option.h
+    OptionDelegates.hpp
     PopulateWithIBOptions.h
     Strike.h
   )
