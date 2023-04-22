@@ -381,10 +381,10 @@ void PanelCharts::OnOptionChainPageChanged( boost::gregorian::date date ) {
 void PanelCharts::HandleGridClick(
   idInstrument_t idInstrumentUnderlying,
   boost::gregorian::date date, double strike, bool bSelected,
-  const ou::tf::GridOptionChain::OptionUpdateFunctions& funcCall,
-  const ou::tf::GridOptionChain::OptionUpdateFunctions& funcPut )
+  const ou::tf::GridOptionChain::OptionDelegates& call,
+  const ou::tf::GridOptionChain::OptionDelegates& put )
 {
-  std::cout << "GridClick: " << date << "," << strike << "," << funcCall.sSymbolName << "," << funcPut.sSymbolName << std::endl;
+  std::cout << "GridClick: " << date << "," << strike << "," << call.sSymbolName << "," << put.sSymbolName << std::endl;
 //  if ( ou::tf::keytypes::EProviderIQF != m_pData1Provider->ID() ) {
 //    std::cout << funcCall.sSymbolName << "," << funcPut.sSymbolName << ": IQFeed provider not available" << std::endl;
 //  }
@@ -395,9 +395,9 @@ void PanelCharts::HandleGridClick(
     }
     else {
       InstrumentEntry& entryUnderlying( iterInstrumentUnderlying->second );
-      std::vector<const ou::tf::GridOptionChain::OptionUpdateFunctions*> vFuncs = { &funcCall, &funcPut };
+      std::vector<const ou::tf::GridOptionChain::OptionDelegates*> vFuncs = { &call, &put };
       std::for_each( vFuncs.begin(), vFuncs.end(),
-        [this, &entryUnderlying, bSelected](const ou::tf::GridOptionChain::OptionUpdateFunctions* delegates) {
+        [this, &entryUnderlying, bSelected](const ou::tf::GridOptionChain::OptionDelegates* delegates) {
 
           mapOption_t::iterator iterOption = entryUnderlying.m_mapSelectedChainOptions.find( delegates->sSymbolName );
           if ( entryUnderlying.m_mapSelectedChainOptions.end() == iterOption ) {

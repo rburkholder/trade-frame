@@ -296,8 +296,8 @@ private:
   void HandleGridClick(
     idInstrument_t,
     boost::gregorian::date date, double strike, bool bSelected,
-    const ou::tf::GridOptionChain::OptionUpdateFunctions& funcCall,
-    const ou::tf::GridOptionChain::OptionUpdateFunctions& funcPut );
+    const ou::tf::GridOptionChain::OptionDelegates& call,
+    const ou::tf::GridOptionChain::OptionDelegates& put );
 
   void OnOptionChainPageChanging( boost::gregorian::date );
   void OnOptionChainPageChanged( boost::gregorian::date );

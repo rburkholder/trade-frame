@@ -76,17 +76,19 @@ public:
 
   void PreDestroy();
 
-  struct OptionUpdateFunctions {
+  struct OptionDelegates {
     std::string sSymbolName;
     fastdelegate::FastDelegate<void(const ou::tf::Quote&)> fQuote;
     fastdelegate::FastDelegate<void(const ou::tf::Trade&)> fTrade;
     fastdelegate::FastDelegate<void(const ou::tf::Greek&)> fGreek;
   };
 
-  using fOnRowClicked_t = std::function<void(double, bool bSelected, const OptionUpdateFunctions&, const OptionUpdateFunctions& )>;
-  fOnRowClicked_t m_fOnRowClicked; // called when a row is clicked (on/off)
+  using fOptionDelegates_t = std::function<void(OptionDelegates& call, OptionDelegates& put)>;
+  fOptionDelegates_t m_fOptionDelegates_Attach;
+  fOptionDelegates_t m_fOptionDelegates_Detach;
 
-  //using pInstrument_t = Instrument::pInstrument_t;
+  using fOnRowClicked_t = std::function<void(double, bool bSelected, const OptionDelegates& call, const OptionDelegates& put )>;
+  fOnRowClicked_t m_fOnRowClicked; // called when a row is clicked (on/off)
 
   using fOnOptionUnderlyingRetrieveComplete_t = DragDropInstrument::fOnOptionUnderlyingRetrieveComplete_t;
   using fOnOptionUnderlyingRetrieveInitiate_t = std::function<void(const std::string&, double, fOnOptionUnderlyingRetrieveComplete_t&&)>; // IQFeed Option Symbol, strike, completion function

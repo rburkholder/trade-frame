@@ -288,21 +288,21 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
     if ( nullptr != m_details.m_fOnRowClicked ) {
 
       if ( ( 0 <= m_nRow ) && event.ControlDown() ) {
-        GridOptionChain::OptionUpdateFunctions funcCall;
-        funcCall.sSymbolName = iterOptionValueRow->second.m_sCallName;
-        funcCall.fQuote = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallQuote );
-        funcCall.fTrade = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallTrade );
-        funcCall.fGreek = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallGreeks );
+        GridOptionChain::OptionDelegates call;
+        call.sSymbolName = iterOptionValueRow->second.m_sCallName;
+        call.fQuote = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallQuote );
+        call.fTrade = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallTrade );
+        call.fGreek = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdateCallGreeks );
 
-        GridOptionChain::OptionUpdateFunctions funcPut;
-        funcPut.sSymbolName = iterOptionValueRow->second.m_sPutName;
-        funcPut.fQuote = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutQuote );
-        funcPut.fTrade = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutTrade );
-        funcPut.fGreek = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutGreeks );
+        GridOptionChain::OptionDelegates put;
+        put.sSymbolName = iterOptionValueRow->second.m_sPutName;
+        put.fQuote = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutQuote );
+        put.fTrade = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutTrade );
+        put.fGreek = fastdelegate::MakeDelegate( &iterOptionValueRow->second, &OptionValueRow::UpdatePutGreeks );
 
         iterOptionValueRow->second.m_bSelected = !iterOptionValueRow->second.m_bSelected;
 
-        m_details.m_fOnRowClicked( iterOptionValueRow->first, iterOptionValueRow->second.m_bSelected, funcCall, funcPut );
+        m_details.m_fOnRowClicked( iterOptionValueRow->first, iterOptionValueRow->second.m_bSelected, call, put );
       }
     }
   }
@@ -431,7 +431,7 @@ wxString GridOptionChain_impl::GetValue( int row, int col ) {
     std::set<int> setRowsToDelete;
 
     // check edges of row set and disable updates
-    for (setRows_t::iterator iter = m_setRowUpdating.begin(); iter != m_setRowUpdating.end(); ++iter ) {
+    for ( setRows_t::iterator iter = m_setRowUpdating.begin(); iter != m_setRowUpdating.end(); ++iter ) {
       if ( m_details.IsVisible( *iter, col, false ) ) {
         break;
       }
@@ -440,7 +440,7 @@ wxString GridOptionChain_impl::GetValue( int row, int col ) {
       }
     }
 
-    for (setRows_t::reverse_iterator iter = m_setRowUpdating.rbegin(); iter != m_setRowUpdating.rend(); ++iter ) {
+    for ( setRows_t::reverse_iterator iter = m_setRowUpdating.rbegin(); iter != m_setRowUpdating.rend(); ++iter ) {
       if ( m_details.IsVisible( *iter, col, false ) ) {
         break;
       }
@@ -457,18 +457,20 @@ wxString GridOptionChain_impl::GetValue( int row, int col ) {
     // enable trade/quote/greek
     setRows_t::iterator iter = m_setRowUpdating.find( row );
     if ( m_setRowUpdating.end() == iter ) {
+
       auto pair = m_setRowUpdating.emplace( row );
       assert( pair.second );
       std::cout << "start strike " << m_vRowIX[row]->first << std::endl;
+
     }
 
   }
 
   return s;
-
 }
 
 void GridOptionChain_impl::SetValue(int row, int col, const wxString &value ) {
+  assert( false );  // not sure if this is used
 }
 
 //void GridOptionChain_impl::SetValueAsDouble(int row, int col, double value ) {
@@ -526,17 +528,18 @@ wxGridCellAttr* GridOptionChain_impl::GetAttr (int row, int col, wxGridCellAttr:
 void GridOptionChain_impl::StopWatch() {
   std::for_each( m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(), [this](mapOptionValueRow_t::value_type& value){
     if ( value.second.m_bSelected ) {
+
       value.second.m_bSelected = false;
 
       if ( nullptr != m_details.m_fOnRowClicked ) {
 
-        GridOptionChain::OptionUpdateFunctions funcCall;
-        funcCall.sSymbolName = value.second.m_sCallName;
+        GridOptionChain::OptionDelegates call;
+        call.sSymbolName = value.second.m_sCallName;
 
-        GridOptionChain::OptionUpdateFunctions funcPut;
-        funcPut.sSymbolName = value.second.m_sPutName;
+        GridOptionChain::OptionDelegates put;
+        put.sSymbolName = value.second.m_sPutName;
 
-        m_details.m_fOnRowClicked( value.first, value.second.m_bSelected, funcCall, funcPut );
+        m_details.m_fOnRowClicked( value.first, value.second.m_bSelected, call, put );
       }
     }
   });

@@ -34,6 +34,10 @@ GridOptionChain::~GridOptionChain() {
 }
 
 void GridOptionChain::Init() {
+  m_fOptionDelegates_Attach = nullptr;
+  m_fOptionDelegates_Detach = nullptr;
+  m_fOnRowClicked = nullptr;
+  m_fOnOptionUnderlyingRetrieveInitiate = nullptr;
 }
 
 bool GridOptionChain::Create(
@@ -82,7 +86,7 @@ void GridOptionChain::Update( double strike, ou::tf::OptionSide::EOptionSide sid
   m_pimpl->Update( strike, side, greek );
 }
 
-void GridOptionChain::Clear(  double strike ) {}
+void GridOptionChain::Clear( double strike ) {}
 
 void GridOptionChain::SaveColumnSizes( ou::tf::GridColumnSizer& gcs ) const {
   gcs.SaveColumnSizes( *this );
@@ -118,6 +122,7 @@ template void GridOptionChain::serialize<boost::archive::text_oarchive>(
 );
 
 void GridOptionChain::HandleSize( wxSizeEvent& event ) {
+  event.Skip( true );
 }
 
 void GridOptionChain::PreDestroy() {
