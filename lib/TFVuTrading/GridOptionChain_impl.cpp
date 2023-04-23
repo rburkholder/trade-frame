@@ -450,15 +450,7 @@ wxString GridOptionChain_impl::GetValue( int row, int col ) {
     }
 
     for ( int row: setRowsToDelete ) {
-      std::cout << "stop strike " << m_vRowIX[row]->first << std::endl;
-
-      if ( m_details.m_fOptionDelegates_Detach ) { // TODO: are these called when panel grid is changed or grid destroyed?
-        ou::tf::option::Delegates call;
-        ou::tf::option::Delegates put;
-        FillDelegates( row, call, put );
-        m_details.m_fOptionDelegates_Detach( call, put );
-      }
-
+      StopStrike( row );
       m_setRowUpdating.erase( row );
     }
 
@@ -503,6 +495,17 @@ void GridOptionChain_impl::FillDelegates( int row, ou::tf::option::Delegates& ca
   put.fdQuote = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdatePutQuote );
   put.fdTrade = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdatePutTrade );
   put.fdGreek = fastdelegate::MakeDelegate( &ovr, &OptionValueRow::UpdatePutGreeks );
+}
+
+void GridOptionChain_impl::StopStrike( int row ) {
+  std::cout << "stop strike " << m_vRowIX[row]->first << std::endl;
+
+  if ( m_details.m_fOptionDelegates_Detach ) { // TODO: are these called when panel grid is changed or grid destroyed?
+    ou::tf::option::Delegates call;
+    ou::tf::option::Delegates put;
+    FillDelegates( row, call, put );
+    m_details.m_fOptionDelegates_Detach( call, put );
+  }
 }
 
 void GridOptionChain_impl::SetValue(int row, int col, const wxString &value ) {
@@ -594,6 +597,13 @@ void GridOptionChain_impl::DestroyControls() {
   m_details.Unbind( wxEVT_GRID_CELL_RIGHT_CLICK , &GridOptionChain_impl::OnGridRightClick, this );
 
   m_details.Unbind( wxEVT_MOTION, &GridOptionChain_impl::OnMouseMotion, this );  //m_details.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
+
+  for ( setRows_t::iterator iter = m_setRowUpdating.begin(); iter != m_setRowUpdating.end(); ++iter ) {
+    StopStrike( *iter );
+  }
+
+  m_setRowUpdating.clear();
+
 }
 
 } // namespace tf
