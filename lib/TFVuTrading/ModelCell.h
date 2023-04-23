@@ -89,8 +89,8 @@ protected:
   bool m_bChanged;  // may need a spinlock for this variable to handle background thread updates
   value_type m_val;
   wxString m_sCellText;
-  void Val2String( void );
-  void InitializeValue( void );
+  void Val2String();
+  void InitializeValue();
 private:
   FunctionSetText_t m_functionSetText;
 };
