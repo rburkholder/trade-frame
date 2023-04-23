@@ -67,6 +67,7 @@ public:
 
   pInstrument_t GetInstrument() { return m_pInstrument; }
   const idInstrument_t& GetInstrumentName() const { return m_pInstrument->GetInstrumentName(); }
+  const idInstrument_t& GetInstrumentName( keytypes::eidProvider_t id ) const { return m_pInstrument->GetInstrumentName( id ); }
 
   void SetProvider( pProvider_t& pDataProvider );
   pProvider_t GetProvider() { return m_pDataProvider; };

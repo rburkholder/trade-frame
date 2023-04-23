@@ -171,7 +171,7 @@ void PanelComboOrder::Clear( boost::gregorian::date date, double strike ) {
 }
 
 // add specific put/call-at-strike pair to Notebook of OptionChaines
-void PanelComboOrder::Add( boost::gregorian::date date, double strike, ou::tf::OptionSide::EOptionSide side, const std::string& sSymbol ) {
+void PanelComboOrder::Add( boost::gregorian::date date, double strike, ou::tf::OptionSide::EOptionSide side, const std::string& sIQFeedSymbolName ) {
 
   //[this,pti=uws.pti]( boost::gregorian::date date ){
     //  ou::tf::Instrument::BuildDate( date ),
@@ -189,7 +189,7 @@ void PanelComboOrder::Add( boost::gregorian::date date, double strike, ou::tf::O
     auto* pPanel = new wxPanel( this, wxID_ANY );
     auto* pSizer = new wxBoxSizer(wxVERTICAL);
     pPanel->SetSizer( pSizer );
-    auto* pGridOptionChain = new GridOptionChain( pPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, sSymbol );
+    auto* pGridOptionChain = new GridOptionChain( pPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, sIQFeedSymbolName );
     pSizer->Add( pGridOptionChain, 1, wxALL|wxEXPAND, 1 );
 
     // a control right click will signal through that strike should watch/unwatch
@@ -240,16 +240,16 @@ void PanelComboOrder::Add( boost::gregorian::date date, double strike, ou::tf::O
   switch ( side ) {
     case ou::tf::OptionSide::Call:
       assert( "" == iterStrike->second.sCall );
-      iterStrike->second.sCall = sSymbol;
+      iterStrike->second.sCall = sIQFeedSymbolName;
       break;
     case ou::tf::OptionSide::Put:
       assert( "" == iterStrike->second.sPut );
-      iterStrike->second.sPut = sSymbol;
+      iterStrike->second.sPut = sIQFeedSymbolName;
       break;
   }
 
   // add option set to the expiry panel
-  iterExpiry->second.pGridOptionChain->Add( strike, side, sSymbol );
+  iterExpiry->second.pGridOptionChain->Add( strike, side, sIQFeedSymbolName );
 
 }
 

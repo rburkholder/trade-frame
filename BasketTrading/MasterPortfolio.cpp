@@ -735,7 +735,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
 
             ou::tf::FrameControls* pFrame = new ou::tf::FrameControls( m_pWindowParent, wxID_ANY, "Option Chain Orders" );
             pFrame->SetAutoLayout( true );
-            pFrame->Layout();
+            //pFrame->Layout();
 
             // TODO: build per underlying
             ou::tf::PanelComboOrder* pPanel = new ou::tf::PanelComboOrder( pFrame, wxID_ANY );
@@ -762,7 +762,12 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
                 uws.pUnderlying->WalkChains(
                   [this,pPanel]( pOption_t pOption ){
                     const ou::tf::option::Option& option( *pOption );
-                    pPanel->Add( option.GetExpiry(), option.GetStrike(), option.GetOptionSide(), option.GetInstrumentName() );
+                    pPanel->Add(
+                      option.GetExpiry()
+                    , option.GetStrike()
+                    , option.GetOptionSide()
+                    , option.GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF )
+                    );
                   }
                 );
               });
