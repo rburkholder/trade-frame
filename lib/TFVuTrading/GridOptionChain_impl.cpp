@@ -203,6 +203,7 @@ void GridOptionChain_impl::HandleGuiRefresh( wxTimerEvent& event ) {
 //      }
 //    }
 //  );
+  m_details.ForceRefresh();
 }
 
 void GridOptionChain_impl::OnMouseMotion( wxMouseEvent& event ) {
@@ -302,7 +303,9 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
 
         iterOptionValueRow->second.m_bSelected = !iterOptionValueRow->second.m_bSelected;
 
-        m_details.m_fOnRowClicked( iterOptionValueRow->first, iterOptionValueRow->second.m_bSelected, call, put );
+        if ( m_details.m_fOnRowClicked ) {
+          m_details.m_fOnRowClicked( iterOptionValueRow->first, iterOptionValueRow->second.m_bSelected, call, put );
+        }
       }
     }
   }
