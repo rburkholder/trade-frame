@@ -250,6 +250,34 @@ void GridOptionChain_impl::OnGridRightClick( wxGridEvent& event ) {
       assert( m_nRow < m_vRowIX.size() );
       mapOptionValueRow_t::reverse_iterator iter = m_vRowIX[ m_nRow ];
       assert( m_mapOptionValueRow.rend() != iter );
+      OptionValueRow& values( iter->second );
+
+      switch ( m_nColumn ) {
+        case COL_CallAsk: // perform buy
+          std::cout << "buy 1 "
+          << values.m_sCallName
+          << "@" << boost::fusion::at_c<COL_CallAsk>( values.m_vModelCells ).GetText()
+          << std::endl;
+          break;
+        case COL_CallBid: // perform sell
+          std::cout << "sell 1 "
+          << values.m_sCallName
+          << "@" << boost::fusion::at_c<COL_CallBid>( values.m_vModelCells ).GetText()
+          << std::endl;
+          break;
+        case COL_PutBid: // perform sell
+          std::cout << "sell 1 "
+          << values.m_sPutName
+          << "@" << boost::fusion::at_c<COL_PutBid>( values.m_vModelCells ).GetText()
+          << std::endl;
+          break;
+        case COL_PutAsk: // perform buy
+          std::cout << "buy 1 "
+          << values.m_sPutName
+          << "@" << boost::fusion::at_c<COL_PutAsk>( values.m_vModelCells ).GetText()
+          << std::endl;
+          break;
+      }
 
       // 2018/08/02 obsolete?  replaced by LeftClick operations?
 //      if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) ) {
