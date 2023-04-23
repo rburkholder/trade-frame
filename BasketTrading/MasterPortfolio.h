@@ -27,6 +27,7 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
+#include <wx/gdicmn.h>
 #include <wx/treebase.h>
 
 #include <OUCharting/ChartDataView.h>
@@ -94,6 +95,10 @@ public:
   , wxWindow* pWindowParent
   );
   ~MasterPortfolio();
+
+  static bool m_bFramePanelComboOrder;
+  static wxPoint m_pointFramePanelComboOrder;
+  static wxSize  m_sizeFramePanelComboOrder;
 
   void Add( pPortfolio_t ); // from database load
   void Add( pPosition_t );  // from database load
@@ -349,6 +354,9 @@ private:
   void StartUnderlying( UnderlyingWithStrategies& );
   void Add_ManageStrategy_ToTree( const idPortfolio_t&, pManageStrategy_t );
   void AddAsActiveStrategy( UnderlyingWithStrategies&, pStrategy_t&&, const idPortfolio_t& idPortfolioStrategy );
+
+  void HandleFramePanelComboOrder_Move( wxMoveEvent& );
+  void HandleFramePanelComboOrder_Size( wxSizeEvent& );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

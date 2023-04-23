@@ -182,8 +182,6 @@ void AppBasketTrading::Init() {
   vItems.push_back( new mi( "a7 Add combo - forced", MakeDelegate( this, &AppBasketTrading::HandleAddComboForced ) ) );
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
 
-  //m_pFrameMain->Layout();
-
   CallAfter(
     [this](){
       LoadState();

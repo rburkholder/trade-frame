@@ -60,6 +60,10 @@ namespace {
 
 */
 
+bool MasterPortfolio::m_bFramePanelComboOrder( false );
+wxPoint MasterPortfolio::m_pointFramePanelComboOrder;
+wxSize  MasterPortfolio::m_sizeFramePanelComboOrder;
+
 MasterPortfolio::MasterPortfolio(
   boost::gregorian::date dateTrading
 , ou::tf::option::SpreadSpecs spread_specs // from config file
@@ -732,12 +736,25 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
             ou::tf::FrameControls* pFrame = new ou::tf::FrameControls( m_pWindowParent, wxID_ANY, "Option Chain Orders" );
             pFrame->SetAutoLayout( true );
             pFrame->Layout();
-            pFrame->Show( true );
-            // TODO: center above main
 
             // TODO: build per underlying
             ou::tf::PanelComboOrder* pPanel = new ou::tf::PanelComboOrder( pFrame, wxID_ANY );
             pFrame->Attach( pPanel );
+
+            if ( m_bFramePanelComboOrder ) {
+              pFrame->SetSize( m_sizeFramePanelComboOrder );
+              pFrame->Move( m_pointFramePanelComboOrder );
+            }
+            else {
+              m_pointFramePanelComboOrder = pFrame->GetPosition();
+              m_sizeFramePanelComboOrder = pFrame->GetSize();
+              m_bFramePanelComboOrder = true;
+            }
+
+            pFrame->Bind( wxEVT_MOVE, &MasterPortfolio::HandleFramePanelComboOrder_Move, this );
+            pFrame->Bind( wxEVT_SIZE, &MasterPortfolio::HandleFramePanelComboOrder_Size, this );
+
+            pFrame->Show( true ); // TODO: center above main
 
             pPanel->CallAfter(
               [this,&uws,pPanel](){
@@ -1053,4 +1070,14 @@ void MasterPortfolio::TakeProfits() {
     [](mapUnderlyingWithStrategies_t::value_type& uws){
       uws.second.TakeProfits();
     } );
+}
+
+void MasterPortfolio::HandleFramePanelComboOrder_Move( wxMoveEvent& event ) {
+  m_pointFramePanelComboOrder = event.GetPosition();
+  event.Skip();
+}
+
+void MasterPortfolio::HandleFramePanelComboOrder_Size( wxSizeEvent& event ) {
+  m_sizeFramePanelComboOrder = event.GetSize();
+  event.Skip();
 }

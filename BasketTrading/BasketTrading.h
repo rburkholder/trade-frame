@@ -161,6 +161,13 @@ private:
     ar & *m_pPanelProviderControl;
     ar & m_enumBuySell;
     ar & *m_pPanelFinancialChart;
+    //ar & *m_pMasterPortfolio;
+    {
+      ar & MasterPortfolio::m_pointFramePanelComboOrder.x;
+      ar & MasterPortfolio::m_pointFramePanelComboOrder.y;
+      ar & MasterPortfolio::m_sizeFramePanelComboOrder.GetWidth();
+      ar & MasterPortfolio::m_sizeFramePanelComboOrder.GetHeight();
+    }
     //ar & m_splitPanels->GetSashPosition();
   }
 
@@ -190,6 +197,19 @@ private:
     if ( 4 <= version ) {
       ar & *m_pPanelFinancialChart;
     }
+    if ( 7 <= version ) {
+      //ar & *m_pMasterPortfolio;
+      int x,y,h,w;
+      ar & x;
+      ar & y;
+      ar & w;
+      ar & h;
+
+      MasterPortfolio::m_pointFramePanelComboOrder = wxPoint( x, y );
+      MasterPortfolio::m_sizeFramePanelComboOrder = wxSize( w, h );
+
+      MasterPortfolio::m_bFramePanelComboOrder = true;
+    }
     if ( 6 <= version ) {
       // deprecated
     }
@@ -200,6 +220,6 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(AppBasketTrading, 6)
+BOOST_CLASS_VERSION(AppBasketTrading, 7)
 DECLARE_APP(AppBasketTrading)
 
