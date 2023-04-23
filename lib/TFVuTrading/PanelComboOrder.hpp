@@ -126,6 +126,9 @@ private:
   fOnPageEvent_t m_fOnPageChanging; // about to depart page
   fOnPageEvent_t m_fOnPageChanged;  // new page in place
 
+  fOptionDelegates_t m_fOptionDelegates_Attach;
+  fOptionDelegates_t m_fOptionDelegates_Detach;
+
   // put/call at strike
   struct Row {
     int ixRow;

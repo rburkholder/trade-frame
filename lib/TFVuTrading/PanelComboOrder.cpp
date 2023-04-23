@@ -140,6 +140,9 @@ void PanelComboOrder::Set(
   fOptionDelegates_t&& fOptionDelegates_Attach
 , fOptionDelegates_t&& fOptionDelegates_Detach
 ) {
+  m_fOptionDelegates_Attach = std::move( fOptionDelegates_Attach );
+  m_fOptionDelegates_Detach = std::move( fOptionDelegates_Detach );
+
   for ( mapOptionExpiry_t::value_type& expiry: m_mapOptionExpiry ) {
     Tab& tab( expiry.second );
     tab.pGridOptionChain->Set( fOptionDelegates_Attach, fOptionDelegates_Detach ); // make copies of the lambdas
@@ -207,6 +210,8 @@ void PanelComboOrder::Add( boost::gregorian::date date, double strike, ou::tf::O
     auto pair = m_mapOptionExpiry.emplace( mapOptionExpiry_t::value_type( date, Tab( sDate, pPanel, pGridOptionChain ) ) );
     assert( pair.second );
     iterExpiry = pair.first;
+
+    iterExpiry->second.pGridOptionChain->Set( m_fOptionDelegates_Attach, m_fOptionDelegates_Detach ); // make copies of the lambdas
 
     struct Reindex {
       size_t ix;
