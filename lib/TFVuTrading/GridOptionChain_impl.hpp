@@ -60,17 +60,17 @@ struct GridOptionChain_impl: public wxGridTableBase {
   (GRID_ARRAY_COL_COUNT,  \
     ( /* Col 0,         1,            2,       3,      4,          */ \
       (COL_CallLast , "Last",  wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COL_CallIV   , "IV",    wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COL_CallIV   , "C IV",  wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_CallGamma, "Gamma", wxALIGN_RIGHT,  60, ModelCellDouble ), \
       (COL_CallDelta, "Delta", wxALIGN_RIGHT,  50, ModelCellDouble ), \
-      (COL_CallAsk  , "Ask",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_CallBid  , "Bid",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COL_CallAsk  , "Ask",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_Strike   , "Strk",  wxALIGN_RIGHT,  60, ModelCellDouble ), \
       (COL_PutBid   , "Bid",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_PutAsk   , "Ask",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_PutDelta , "Delta", wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_PutGamma , "Gamma", wxALIGN_RIGHT,  60, ModelCellDouble ), \
-      (COL_PutIV    , "IV",    wxALIGN_RIGHT,  50, ModelCellDouble ), \
+      (COL_PutIV    , "P IV",  wxALIGN_RIGHT,  50, ModelCellDouble ), \
       (COL_PutLast  , "Last",  wxALIGN_RIGHT,  50, ModelCellDouble ), \
       ) \
     )
@@ -143,6 +143,12 @@ struct GridOptionChain_impl: public wxGridTableBase {
     void Init() {
       boost::fusion::fold( m_vModelCells, 0, ModelCell_ops::SetCol() );
       BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT,m_nRow)
+      boost::fusion::at_c<COL_CallIV>( m_vModelCells ).SetPrecision( 3 );
+      boost::fusion::at_c<COL_CallDelta>( m_vModelCells ).SetPrecision( 3 );
+      boost::fusion::at_c<COL_CallGamma>( m_vModelCells ).SetPrecision( 4 );
+      boost::fusion::at_c<COL_PutIV>( m_vModelCells ).SetPrecision( 3 );
+      boost::fusion::at_c<COL_PutDelta>( m_vModelCells ).SetPrecision( 3 );
+      boost::fusion::at_c<COL_PutGamma>( m_vModelCells ).SetPrecision( 4 );
     }
   };  // struct OptionValueRow
 
