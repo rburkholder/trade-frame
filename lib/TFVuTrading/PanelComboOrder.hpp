@@ -38,6 +38,7 @@ class wxToggleButton;
 class wxListbookEvent;
 
 #include <TFVuTrading/GridOptionChain.hpp>
+#include <TFVuTrading/GridOptionOrder.hpp>
 
 #include "InterfaceBookOptionChain.hpp"
 
@@ -118,7 +119,7 @@ private:
   };
 
   wxListbook* m_pBookOptionChains;
-  wxGrid* m_pGridComboOrder;
+  GridOptionOrder* m_pGridComboOrder;
   wxToggleButton* m_btnUpgdateGreeks;
   wxButton* m_btnClearOrder;
   wxButton* m_btnPlaceOrder;

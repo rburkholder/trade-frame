@@ -35,6 +35,8 @@
 
 #include <boost/fusion/sequence/intrinsic/at_c.hpp>
 
+#include <wx/timer.h>
+
 #include <TFVuTrading/ModelCell.h>
 #include <TFVuTrading/ModelCell_ops.h>
 #include <TFVuTrading/ModelCell_macros.h>
@@ -59,14 +61,14 @@ struct GridOptionOrder_impl: public wxGridTableBase {
   #define GRID_ARRAY_COL_COUNT 7
   #define GRID_ARRAY \
     (GRID_ARRAY_COL_COUNT,  \
-      ( /* Col 0,         1,            2,       3,      4,          */  \
+      ( /* Col 0,         1,            2,       3,      4,          */ \
         (COL_OrderSide, "OSide", wxALIGN_RIGHT,  50, ModelCellString ), \
-        (COL_Quan,      "Quan",  wxALIGN_RIGHT,  50, ModelCellInt ),    \
+        (COL_Quan,      "Quan",  wxALIGN_RIGHT,  50, ModelCellInt    ), \
         (COL_Price,     "Price", wxALIGN_RIGHT,  50, ModelCellDouble ), \
-        (COL_Name,      "Name",  wxALIGN_LEFT ,  60, ModelCellString ), \
+        (COL_Name,      "Name",  wxALIGN_LEFT ,  70, ModelCellString ), \
         (COL_IV,        "IV",    wxALIGN_RIGHT,  50, ModelCellDouble ), \
         (COL_Delta,     "Delta", wxALIGN_RIGHT,  50, ModelCellDouble ), \
-        (COL_Gamma,     "Gamma", wxALIGN_RIGHT,  50, ModelCellDouble ), \
+        (COL_Gamma,     "Gamma", wxALIGN_RIGHT,  60, ModelCellDouble ), \
         ) \
       )
 
@@ -79,9 +81,14 @@ struct GridOptionOrder_impl: public wxGridTableBase {
   >;
 
   bool m_bTimerActive;
+  wxTimer m_timerGuiRefresh;
+  void HandleGuiRefresh( wxTimerEvent& event );
 
   void CreateControls();
   void DestroyControls();
+
+  void Start();
+  void Stop();
 
   virtual void SetView ( wxGrid *grid );
   virtual wxGrid* GetView() const;

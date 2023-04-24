@@ -82,15 +82,9 @@ void PanelComboOrder::CreateControls() {
     itemPanel1->SetSizer(itemBoxSizer2);
 
     m_pBookOptionChains = new wxListbook( itemPanel1, ID_BOOK_OptionChains, wxDefaultPosition, wxDefaultSize, wxBK_LEFT|wxNO_BORDER );
-
     itemBoxSizer2->Add(m_pBookOptionChains, 1, wxGROW|wxALL, 1);
 
-    m_pGridComboOrder = new wxGrid( itemPanel1, ID_GRID_ComboOrder, wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxVSCROLL );
-    m_pGridComboOrder->SetDefaultColSize(50);
-    m_pGridComboOrder->SetDefaultRowSize(25);
-    m_pGridComboOrder->SetColLabelSize(25);
-    m_pGridComboOrder->SetRowLabelSize(50);
-    m_pGridComboOrder->CreateGrid(5, 6, wxGrid::wxGridSelectRows);
+    m_pGridComboOrder = new GridOptionOrder( itemPanel1, ID_GRID_ComboOrder, wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxVSCROLL );
     itemBoxSizer2->Add(m_pGridComboOrder, 0, wxGROW|wxALL, 0);
 
     wxBoxSizer* itemBoxSizer4 = new wxBoxSizer(wxHORIZONTAL);
