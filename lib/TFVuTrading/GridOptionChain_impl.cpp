@@ -192,17 +192,7 @@ void GridOptionChain_impl::SetSelected(double strike, bool bSelected) {
   // TODO: actually enable/disable watch?
 }
 
-// replace my the 'option engine'?
 void GridOptionChain_impl::HandleGuiRefresh( wxTimerEvent& event ) {
-  // TODO: redo this section by using the wxGridTableMessage to trigger a refresh of the visible grid
-  // need extra validation here, crash when redrawing with active options
-//  std::for_each( m_mapOptionValueRow.begin(), m_mapOptionValueRow.end(),
-//    [this](mapOptionValueRow_t::value_type& value) {
-//      if ( m_details.IsVisible( value.second.m_nRow, COL_Strike ) ) {
-//        value.second.UpdateGui();
-//      }
-//    }
-//  );
   m_details.ForceRefresh();
 }
 
@@ -238,9 +228,6 @@ void GridOptionChain_impl::OnMouseMotion( wxMouseEvent& event ) {
 }
 
 void GridOptionChain_impl::OnGridRightClick( wxGridEvent& event ) {
-  //std::cout << "Notebook Left Click: " << event.GetRow() << std::endl;
-  // column header is -1, first row is 0
-  // use to toggle monitoring
 
   m_nRow = event.GetRow();
   m_nColumn = event.GetCol();
