@@ -96,6 +96,7 @@ protected:
   void CreateControls();
 
 private:
+
   enum {
     ID_Null=wxID_HIGHEST, ID_GRID_OPTIONCHAIN
   };

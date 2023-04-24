@@ -43,8 +43,8 @@ void GridOptionChain::Init() {
 bool GridOptionChain::Create(
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
 
-  wxGrid::Create(parent, id, pos, size, style, name );
-  m_pimpl = std::make_unique<GridOptionChain_impl>( *this);
+  wxGrid::Create( parent, id, pos, size, style, name );
+  m_pimpl = std::make_unique<GridOptionChain_impl>( *this );
 
   CreateControls();
 
