@@ -32,7 +32,6 @@
 #include <boost/fusion/sequence/intrinsic/at_c.hpp>
 
 #include <wx/timer.h>
-#include <wx/stattext.h>
 
 #include <TFVuTrading/ModelCell.h>
 #include <TFVuTrading/ModelCell_ops.h>
@@ -168,6 +167,9 @@ struct GridOptionChain_impl: public wxGridTableBase {
 
   mapOptionValueRow_iter FindOptionValueRow( double );
 
+  void CreateControls();
+  //void OnDestroy( wxWindowDestroyEvent& event );  // can't use this
+
   void Add( double strike, ou::tf::OptionSide::EOptionSide side, const std::string& sSymbol );
 
   void MakeRowVisible( double strike );
@@ -179,12 +181,8 @@ struct GridOptionChain_impl: public wxGridTableBase {
   void Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& );
   void Clear(  double strike );
 
-  bool m_bTimerActive;
   void Start();
   void Stop();
-
-  void CreateControls();
-  //void OnDestroy( wxWindowDestroyEvent& event );  // can't use this
 
   virtual void SetView ( wxGrid *grid );
   virtual wxGrid* GetView() const;
@@ -218,6 +216,7 @@ struct GridOptionChain_impl: public wxGridTableBase {
 
   bool StartDragDrop( DragDropInstrument& );
 
+  bool m_bTimerActive;
   wxTimer m_timerGuiRefresh;
   void HandleGuiRefresh( wxTimerEvent& event );
 
