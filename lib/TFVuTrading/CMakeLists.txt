@@ -30,6 +30,8 @@ set(
     GridIBPositionDetails_impl.h
     GridOptionChain.hpp
     GridOptionChain_impl.hpp
+    GridOptionOrder.hpp
+    GridOptionOrder_impl.hpp
     InterfaceBookOptionChain.hpp
     ModelBase.h
     ModelCell.h
@@ -91,6 +93,8 @@ set(
     GridIBPositionDetails_impl.cpp
     GridOptionChain.cpp
     GridOptionChain_impl.cpp
+    GridOptionOrder.cpp
+    GridOptionOrder_impl.cpp
     ModelBase.cpp
     ModelCell.cpp
     ModelChartHdf5.cpp
