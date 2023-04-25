@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    GridOptionOrder_impl.hpp
+ * File:    GridOptionComboOrder_impl.hpp
  * Author:  raymond@burkholder.net
  * Project: TFVuTrading
  * Created: 2023/04/23 17:28:15
@@ -41,7 +41,7 @@
 #include <TFVuTrading/ModelCell_ops.h>
 #include <TFVuTrading/ModelCell_macros.h>
 
-#include "GridOptionOrder.hpp"
+#include "GridOptionComboOrder.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

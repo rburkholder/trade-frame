@@ -13,14 +13,14 @@
  ************************************************************************/
 
 /*
- * File:    GridOptionOrder.cpp
+ * File:    GridOptionComboOrder.cpp
  * Author:  raymond@burkholder.net
  * Project: TFVuTrading
  * Created: 2023/04/23 17:28:15
  */
 
-#include "GridOptionOrder.hpp"
-#include "GridOptionOrder_impl.hpp"
+#include "GridOptionComboOrder.hpp"
+#include "GridOptionComboOrder_impl.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
