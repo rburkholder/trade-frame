@@ -63,6 +63,8 @@ void GridOptionOrder_impl::CreateControls() {
 
   m_details.EnableEditing( false );
 
+  m_details.AppendRows( 5 ); // cells labelled empty when no order or summary is present ( fifth row is summary stats)
+
 }
 
 void GridOptionOrder_impl::Start() {
@@ -105,8 +107,8 @@ int GridOptionOrder_impl::GetNumberCols() {
   return GRID_ARRAY_COL_COUNT;
 }
 
-bool GridOptionOrder_impl::IsEmptyCell(int row, int col ) {
-  return false;
+bool GridOptionOrder_impl::IsEmptyCell( int row, int col ) {
+  return true;
 }
 
 // https://github.com/wxWidgets/wxWidgets/blob/master/src/generic/grid.cpp
@@ -125,7 +127,19 @@ bool GridOptionOrder_impl::InsertRows( size_t pos, size_t numRows ) {
   return true;
 }
 
-void GridOptionOrder_impl::SetValue(int row, int col, const wxString &value ) {
+bool GridOptionOrder_impl::AppendRows( size_t numRows ) {
+  if ( GetView() ) {
+    wxGridTableMessage msg(
+      this,
+      wxGRIDTABLE_NOTIFY_ROWS_APPENDED,
+      numRows
+    );
+    GetView()->ProcessTableMessage( msg );
+  }
+return true;
+}
+
+void GridOptionOrder_impl::SetValue( int row, int col, const wxString &value ) {
   assert( false );  // not sure if this is used
 }
 

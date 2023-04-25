@@ -58,7 +58,7 @@ struct GridOptionOrder_impl: public wxGridTableBase {
 
   // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
   #define GRID_ARRAY_PARAM_COUNT 5
-  #define GRID_ARRAY_COL_COUNT 7
+  #define GRID_ARRAY_COL_COUNT 9
   #define GRID_ARRAY \
     (GRID_ARRAY_COL_COUNT,  \
       ( /* Col 0,         1,            2,       3,      4,          */ \
@@ -66,6 +66,8 @@ struct GridOptionOrder_impl: public wxGridTableBase {
         (COL_Quan,      "Quan",  wxALIGN_RIGHT,  50, ModelCellInt    ), \
         (COL_Price,     "Price", wxALIGN_RIGHT,  50, ModelCellDouble ), \
         (COL_Name,      "Name",  wxALIGN_LEFT ,  70, ModelCellString ), \
+        (COL_Bid,       "Bid",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
+        (COL_Ask,       "Ask",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
         (COL_IV,        "IV",    wxALIGN_RIGHT,  50, ModelCellDouble ), \
         (COL_Delta,     "Delta", wxALIGN_RIGHT,  50, ModelCellDouble ), \
         (COL_Gamma,     "Gamma", wxALIGN_RIGHT,  60, ModelCellDouble ), \
@@ -95,14 +97,15 @@ struct GridOptionOrder_impl: public wxGridTableBase {
 
   virtual int GetNumberRows();
   virtual int GetNumberCols();
-  virtual bool IsEmptyCell(int row, int col);
+  virtual bool IsEmptyCell( int row, int col );
 
-  virtual bool InsertRows(size_t pos=0, size_t numRows=1);
+  virtual bool InsertRows( size_t pos = 0, size_t numRows = 1 );
+  virtual bool AppendRows( size_t numRows = 1 );
 
-  virtual wxString GetValue(int row, int col);
-  virtual void SetValue(int row, int col, const wxString &value);
+  virtual wxString GetValue( int row, int col );
+  virtual void SetValue( int row, int col, const wxString &value );
 
-  virtual wxGridCellAttr* GetAttr (int row, int col, wxGridCellAttr::wxAttrKind kind );
+  virtual wxGridCellAttr* GetAttr ( int row, int col, wxGridCellAttr::wxAttrKind kind );
 
   //virtual void SetValueAsDouble(int row, int col, double value);
   //virtual double GetValueAsDouble(int row, int col);
