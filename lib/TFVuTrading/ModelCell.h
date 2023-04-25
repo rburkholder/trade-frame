@@ -24,7 +24,6 @@
 #include <wx/string.h>
 
 #include <OUCommon/FastDelegate.h>
-using namespace fastdelegate;
 
 // this may cause problems or may result from problems if some other include hierarchy uses the file differently
 #define WINRGB
@@ -47,14 +46,14 @@ template<typename CRTP> // CRTP, with conversion specifics, defines value_type.
 class ModelCell {
 public:
 
-  typedef typename ModelCell_traits<CRTP>::value_type value_type;
-  typedef FastDelegate1<const wxString&> FunctionSetText_t;
+  using value_type = typename ModelCell_traits<CRTP>::value_type;
+  using FunctionSetText_t = fastdelegate::FastDelegate1<const wxString&>;
 
   ModelCell();
   ModelCell( const ModelCell& rhs );
   ModelCell( FunctionSetText_t );
 
-  virtual ~ModelCell(void);
+  virtual ~ModelCell();
 
   void SetValue( const value_type& val );
   const value_type GetValue() const { return m_val; };
@@ -77,7 +76,7 @@ public:
 
   template<typename F>
   void UpdateGui( F f ) {
-    typedef void type;
+    using type = void;
     if ( m_bChanged ) {
       Val2String();
       f( m_sCellText );
@@ -109,7 +108,7 @@ public:
 
   ModelCellInt() {};
   ModelCellInt(FunctionSetText_t function): ModelCell<ModelCellInt>( function ) {};
-  //~ModelCellInt( void );
+  //~ModelCellInt();
 
   void InitializeValue() { m_val = 0; }
 protected:
@@ -140,7 +139,7 @@ public:
     Initialize();
   }
 
-  virtual ~ModelCellDouble( void ) {}
+  virtual ~ModelCellDouble() {}
 
   void InitializeValue() { m_val = {}; }
 
@@ -180,7 +179,7 @@ public:
 
   ModelCellString() {};
   ModelCellString(FunctionSetText_t function): ModelCell<ModelCellString>( function ) {};
-  //~ModelCellInt( void );
+  //~ModelCellInt();
 
   void Val2String() { m_sCellText = m_val.c_str(); };
 protected:
