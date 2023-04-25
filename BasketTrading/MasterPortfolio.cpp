@@ -734,12 +734,10 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
           [this,&uws]()->std::pair<wxWindow*,ou::tf::InterfaceBookOptionChain*>{
 
             ou::tf::FrameControls* pFrame = new ou::tf::FrameControls( m_pWindowParent, wxID_ANY, "Option Chain Orders" );
-            pFrame->SetAutoLayout( true );
-            //pFrame->Layout();
+            //pFrame->SetAutoLayout( true );
 
-            // TODO: build per underlying
-            ou::tf::PanelComboOrder* pPanel = new ou::tf::PanelComboOrder( pFrame, wxID_ANY );
-            pFrame->Attach( pPanel );
+            pFrame->Bind( wxEVT_MOVE, &MasterPortfolio::HandleFramePanelComboOrder_Move, this );
+            pFrame->Bind( wxEVT_SIZE, &MasterPortfolio::HandleFramePanelComboOrder_Size, this );
 
             if ( m_bFramePanelComboOrder ) {
               pFrame->SetSize( m_sizeFramePanelComboOrder );
@@ -751,23 +749,28 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
               m_bFramePanelComboOrder = true;
             }
 
-            pFrame->Bind( wxEVT_MOVE, &MasterPortfolio::HandleFramePanelComboOrder_Move, this );
-            pFrame->Bind( wxEVT_SIZE, &MasterPortfolio::HandleFramePanelComboOrder_Size, this );
+            ou::tf::PanelComboOrder* pPanel = new ou::tf::PanelComboOrder( pFrame, wxID_ANY );
+            pFrame->Attach( pPanel );
 
+            //pFrame->Layout();
             pFrame->Show( true ); // TODO: center above main
 
+            auto dt = ou::TimeSource::GlobalInstance().Internal();
+
             pPanel->CallAfter(
-              [this,&uws,pPanel](){
+              [this,&uws,dt,pPanel](){
                 //m_pNotebookOptionChains->SetName( sUnderlying );
                 uws.pUnderlying->WalkChains(
-                  [this,pPanel]( pOption_t pOption ){
-                    const ou::tf::option::Option& option( *pOption );
-                    pPanel->Add(
-                      option.GetExpiry()
-                    , option.GetStrike()
-                    , option.GetOptionSide()
-                    , option.GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF )
-                    );
+                  [this,dt,pPanel]( pOption_t pOption ){
+                    if ( dt < pOption->GetInstrument()->GetExpiryUtc() ) {
+                      const ou::tf::option::Option& option( *pOption );
+                      pPanel->Add(
+                        option.GetExpiry()
+                      , option.GetStrike()
+                      , option.GetOptionSide()
+                      , option.GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF )
+                      );
+                    }
                   }
                 );
               });
