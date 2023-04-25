@@ -119,7 +119,7 @@ private:
   };
 
   wxListbook* m_pBookOptionChains;
-  GridOptionOrder* m_pGridComboOrder;
+  GridOptionComboOrder* m_pGridOptionComboOrder;
   wxToggleButton* m_btnUpgdateGreeks;
   wxButton* m_btnClearOrder;
   wxButton* m_btnPlaceOrder;

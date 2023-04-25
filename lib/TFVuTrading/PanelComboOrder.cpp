@@ -49,7 +49,7 @@ void PanelComboOrder::Init() {
   m_pgcsGridOptionChain = nullptr;
 
   m_pBookOptionChains = nullptr;
-  m_pGridComboOrder = nullptr;
+  m_pGridOptionComboOrder = nullptr;
   m_btnUpgdateGreeks = nullptr;
   m_btnClearOrder = nullptr;
   m_btnPlaceOrder = nullptr;
@@ -84,8 +84,8 @@ void PanelComboOrder::CreateControls() {
     m_pBookOptionChains = new wxListbook( itemPanel1, ID_BOOK_OptionChains, wxDefaultPosition, wxDefaultSize, wxBK_LEFT|wxNO_BORDER );
     itemBoxSizer2->Add(m_pBookOptionChains, 1, wxGROW|wxALL, 1);
 
-    m_pGridComboOrder = new GridOptionOrder( itemPanel1, ID_GRID_ComboOrder, wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxVSCROLL );
-    itemBoxSizer2->Add(m_pGridComboOrder, 0, wxGROW|wxALL, 0);
+    m_pGridOptionComboOrder = new GridOptionComboOrder( itemPanel1, ID_GRID_ComboOrder, wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxVSCROLL );
+    itemBoxSizer2->Add(m_pGridOptionComboOrder, 0, wxGROW|wxALL, 0);
 
     wxBoxSizer* itemBoxSizer4 = new wxBoxSizer(wxHORIZONTAL);
     itemBoxSizer2->Add(itemBoxSizer4, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 0);
@@ -268,7 +268,7 @@ void PanelComboOrder::OnDestroy_Panel( wxWindowDestroyEvent& event ) {
 
   UnbindEvents();
 
-  m_pGridComboOrder = nullptr;
+  m_pGridOptionComboOrder = nullptr;
   m_pBookOptionChains = nullptr;
 
   event.Skip();

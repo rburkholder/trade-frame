@@ -46,15 +46,15 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-struct GridOptionOrder_impl: public wxGridTableBase {
+struct GridOptionComboOrder_impl: public wxGridTableBase {
 //public:
-  GridOptionOrder_impl( GridOptionOrder& );
-  virtual ~GridOptionOrder_impl();
+  GridOptionComboOrder_impl( GridOptionComboOrder& );
+  virtual ~GridOptionComboOrder_impl();
 //protected:
 
 //private:
 
-  GridOptionOrder& m_details;
+  GridOptionComboOrder& m_details;
 
   // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
   #define GRID_ARRAY_PARAM_COUNT 5

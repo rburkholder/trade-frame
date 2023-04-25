@@ -36,20 +36,20 @@ namespace tf { // TradeFrame
 #define GRID_OPTIONORDER_SIZE wxSize(-1, -1)
 #define GRID_OPTIONORDER_POSITION wxDefaultPosition
 
-class GridOptionOrder_impl;  // Forward Declaration
+class GridOptionComboOrder_impl;  // Forward Declaration
 
-class GridOptionOrder: public wxGrid {
-  friend GridOptionOrder_impl;
+class GridOptionComboOrder: public wxGrid {
+  friend GridOptionComboOrder_impl;
 public:
 
-  GridOptionOrder();
-  GridOptionOrder(
+  GridOptionComboOrder();
+  GridOptionComboOrder(
     wxWindow* parent, wxWindowID id = GRID_OPTIONORDER_IDNAME,
     const wxPoint& pos = GRID_OPTIONORDER_POSITION,
     const wxSize& size = GRID_OPTIONORDER_SIZE,
     long style = GRID_OPTIONORDER_STYLE,
     const wxString& = GRID_OPTIONORDER_TITLE );
-  virtual ~GridOptionOrder();
+  virtual ~GridOptionComboOrder();
 
   bool Create( wxWindow* parent,
     wxWindowID id = GRID_OPTIONORDER_IDNAME,
@@ -69,7 +69,7 @@ private:
     ID_Null=wxID_HIGHEST, ID_GRID_OPTIONORDER
   };
 
-  std::unique_ptr<GridOptionOrder_impl> m_pimpl;
+  std::unique_ptr<GridOptionComboOrder_impl> m_pimpl;
 
   void OnDestroy( wxWindowDestroyEvent& event );
 

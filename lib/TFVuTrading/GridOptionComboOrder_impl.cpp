@@ -24,16 +24,16 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-GridOptionOrder_impl::GridOptionOrder_impl( GridOptionOrder& details )
+GridOptionComboOrder_impl::GridOptionComboOrder_impl( GridOptionComboOrder& details )
 : wxGridTableBase()
 , m_details( details ), m_bTimerActive( false ) {
 }
 
-GridOptionOrder_impl::~GridOptionOrder_impl() {
+GridOptionComboOrder_impl::~GridOptionComboOrder_impl() {
   m_details.SetTable( nullptr, false, wxGrid::wxGridSelectNone );
 }
 
-void GridOptionOrder_impl::CreateControls() {
+void GridOptionComboOrder_impl::CreateControls() {
 
   m_details.SetDefaultColSize(50);
   m_details.SetDefaultRowSize(22);
@@ -67,53 +67,53 @@ void GridOptionOrder_impl::CreateControls() {
 
 }
 
-void GridOptionOrder_impl::Start() {
+void GridOptionComboOrder_impl::Start() {
   if ( !m_bTimerActive ) {
     m_bTimerActive = true;
     // this GuiRefresh initialization should come after all else
     m_timerGuiRefresh.SetOwner( &m_details );
-    m_details.Bind( wxEVT_TIMER, &GridOptionOrder_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+    m_details.Bind( wxEVT_TIMER, &GridOptionComboOrder_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
     m_timerGuiRefresh.Start( 300 );
   }
 }
 
-void GridOptionOrder_impl::Stop() {
+void GridOptionComboOrder_impl::Stop() {
   if ( m_bTimerActive ) {
     m_bTimerActive = false;
     m_timerGuiRefresh.Stop();
     m_timerGuiRefresh.DeletePendingEvents();
-    m_details.Unbind( wxEVT_TIMER, &GridOptionOrder_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+    m_details.Unbind( wxEVT_TIMER, &GridOptionComboOrder_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
   }
 }
 
-void GridOptionOrder_impl::HandleGuiRefresh( wxTimerEvent& event ) {
+void GridOptionComboOrder_impl::HandleGuiRefresh( wxTimerEvent& event ) {
   m_details.ForceRefresh();
 }
 
-void GridOptionOrder_impl::SetView( wxGrid *grid ) {
+void GridOptionComboOrder_impl::SetView( wxGrid *grid ) {
   wxGridTableBase::SetView( grid );
 }
 
-wxGrid* GridOptionOrder_impl::GetView() const {
+wxGrid* GridOptionComboOrder_impl::GetView() const {
   return wxGridTableBase::GetView();
 }
 
-int GridOptionOrder_impl::GetNumberRows() {
+int GridOptionComboOrder_impl::GetNumberRows() {
   //return m_mapOptionValueRow.size();
   return 0;
 }
 
-int GridOptionOrder_impl::GetNumberCols() {
+int GridOptionComboOrder_impl::GetNumberCols() {
   return GRID_ARRAY_COL_COUNT;
 }
 
-bool GridOptionOrder_impl::IsEmptyCell( int row, int col ) {
+bool GridOptionComboOrder_impl::IsEmptyCell( int row, int col ) {
   return true;
 }
 
 // https://github.com/wxWidgets/wxWidgets/blob/master/src/generic/grid.cpp
 // wxGridStringTable::InsertRows
-bool GridOptionOrder_impl::InsertRows( size_t pos, size_t numRows ) {
+bool GridOptionComboOrder_impl::InsertRows( size_t pos, size_t numRows ) {
   //return wxGridTableBase::InsertRows( pos, numRows ); // don't do this
     if ( GetView() ) {
       wxGridTableMessage msg(
@@ -127,7 +127,7 @@ bool GridOptionOrder_impl::InsertRows( size_t pos, size_t numRows ) {
   return true;
 }
 
-bool GridOptionOrder_impl::AppendRows( size_t numRows ) {
+bool GridOptionComboOrder_impl::AppendRows( size_t numRows ) {
   if ( GetView() ) {
     wxGridTableMessage msg(
       this,
@@ -139,16 +139,16 @@ bool GridOptionOrder_impl::AppendRows( size_t numRows ) {
 return true;
 }
 
-void GridOptionOrder_impl::SetValue( int row, int col, const wxString &value ) {
+void GridOptionComboOrder_impl::SetValue( int row, int col, const wxString &value ) {
   assert( false );  // not sure if this is used
 }
 
-wxString GridOptionOrder_impl::GetValue( int row, int col ) {
+wxString GridOptionComboOrder_impl::GetValue( int row, int col ) {
   wxString s;
   return s;
 }
 
-wxString GridOptionOrder_impl::GetColLabelValue( int col ) {
+wxString GridOptionComboOrder_impl::GetColLabelValue( int col ) {
 
   wxString s;
 
@@ -164,7 +164,7 @@ wxString GridOptionOrder_impl::GetColLabelValue( int col ) {
   return s;
 }
 
-wxGridCellAttr* GridOptionOrder_impl::GetAttr (int row, int col, wxGridCellAttr::wxAttrKind kind ) {
+wxGridCellAttr* GridOptionComboOrder_impl::GetAttr (int row, int col, wxGridCellAttr::wxAttrKind kind ) {
 
   #define GRID_EMIT_SwitchGetColAlign( z, n, data ) \
     case GRID_EXTRACT_COL_DETAILS(z, n, 0):  \
@@ -193,7 +193,7 @@ wxGridCellAttr* GridOptionOrder_impl::GetAttr (int row, int col, wxGridCellAttr:
 
 }
 
-void GridOptionOrder_impl::DestroyControls() {
+void GridOptionComboOrder_impl::DestroyControls() {
 //  m_details.Unbind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionOrder_impl::OnGridCellBeginDrag, this );
 //  m_details.Unbind( wxEVT_MOTION, &GridOptionOrder_impl::OnMouseMotion, this );  //m_details.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
 }

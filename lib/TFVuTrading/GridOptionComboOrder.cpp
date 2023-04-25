@@ -25,11 +25,11 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-GridOptionOrder::GridOptionOrder(): wxGrid() {
+GridOptionComboOrder::GridOptionComboOrder(): wxGrid() {
   Init();
 }
 
-GridOptionOrder::GridOptionOrder(
+GridOptionComboOrder::GridOptionComboOrder(
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& sTitle )
 : wxGrid(  )
 {
@@ -37,27 +37,27 @@ GridOptionOrder::GridOptionOrder(
   Create(parent, id, pos, size, style, sTitle );
 }
 
-GridOptionOrder::~GridOptionOrder() {
+GridOptionComboOrder::~GridOptionComboOrder() {
 }
 
-void GridOptionOrder::Init() {
+void GridOptionComboOrder::Init() {
 }
 
-bool GridOptionOrder::Create(
+bool GridOptionComboOrder::Create(
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
 
   wxGrid::Create( parent, id, pos, size, style, name );
-  m_pimpl = std::make_unique<GridOptionOrder_impl>( *this );
+  m_pimpl = std::make_unique<GridOptionComboOrder_impl>( *this );
 
   CreateControls();
 
   return true;
 }
 
-void GridOptionOrder::CreateControls() {
+void GridOptionComboOrder::CreateControls() {
 
   //Bind( wxEVT_CLOSE_WINDOW, &GridOptionDetails::OnClose, this );  // not called for child windows
-  Bind( wxEVT_DESTROY, &GridOptionOrder::OnDestroy, this );
+  Bind( wxEVT_DESTROY, &GridOptionComboOrder::OnDestroy, this );
 
   //Bind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
   //Bind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
@@ -76,7 +76,7 @@ void GridOptionOrder::CreateControls() {
   m_pimpl->CreateControls();
 }
 
-void GridOptionOrder::OnDestroy( wxWindowDestroyEvent& event ) {
+void GridOptionComboOrder::OnDestroy( wxWindowDestroyEvent& event ) {
 
   //m_timerGuiRefresh.Stop();
   //Unbind( wxEVT_TIMER, &WinChartView::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
@@ -85,7 +85,7 @@ void GridOptionOrder::OnDestroy( wxWindowDestroyEvent& event ) {
   m_pimpl->DestroyControls();
   m_pimpl.reset();
 
-  Unbind( wxEVT_DESTROY, &GridOptionOrder::OnDestroy, this );
+  Unbind( wxEVT_DESTROY, &GridOptionComboOrder::OnDestroy, this );
 
   //Unbind( wxEVT_PAINT, &WinChartView::HandlePaint, this );
   //Unbind( wxEVT_SIZE, &GridOptionDetails::HandleSize, this );
