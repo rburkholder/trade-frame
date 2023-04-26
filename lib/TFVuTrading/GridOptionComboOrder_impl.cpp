@@ -63,6 +63,7 @@ void GridOptionComboOrder_impl::CreateControls() {
 
   m_details.EnableEditing( false );
 
+  m_vOptionComboOrderRow.resize( 5 );
   m_details.AppendRows( 5 ); // cells labelled empty when no order or summary is present ( fifth row is summary stats)
 
 }
@@ -108,7 +109,7 @@ int GridOptionComboOrder_impl::GetNumberCols() {
 }
 
 bool GridOptionComboOrder_impl::IsEmptyCell( int row, int col ) {
-  return true;
+  return ( m_vOptionComboOrderRow[ row ].m_bActive );
 }
 
 // https://github.com/wxWidgets/wxWidgets/blob/master/src/generic/grid.cpp
@@ -166,6 +167,8 @@ wxString GridOptionComboOrder_impl::GetColLabelValue( int col ) {
 
 wxGridCellAttr* GridOptionComboOrder_impl::GetAttr (int row, int col, wxGridCellAttr::wxAttrKind kind ) {
 
+  int align = wxALIGN_CENTER;
+
   #define GRID_EMIT_SwitchGetColAlign( z, n, data ) \
     case GRID_EXTRACT_COL_DETAILS(z, n, 0):  \
       align = GRID_EXTRACT_COL_DETAILS(z, n, 2 ); \
@@ -173,21 +176,29 @@ wxGridCellAttr* GridOptionComboOrder_impl::GetAttr (int row, int col, wxGridCell
 
   wxGridCellAttr* pAttr = new wxGridCellAttr();
 
-  int align = wxALIGN_CENTER;
-  switch ( col ) {
-    BOOST_PP_REPEAT(BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SwitchGetColAlign, 0 )
-  }
-  pAttr->SetAlignment( align, wxALIGN_CENTER_VERTICAL );
-
   switch ( kind ) {
     case wxGridCellAttr::wxAttrKind::Cell:
     case wxGridCellAttr::wxAttrKind::Col:
+      switch ( col ) {
+        case COL_Quan:
+        case COL_Price:
+          switch ( col ) {
+            BOOST_PP_REPEAT(BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SwitchGetColAlign, 0 )
+          }
+          pAttr->SetReadOnly( false );
+          break;
+        default:
+          pAttr->SetReadOnly();
+          break;
+      }
       break;
     case wxGridCellAttr::wxAttrKind::Row:
       break;
     case wxGridCellAttr::wxAttrKind::Default:
       break;
   }
+
+  pAttr->SetAlignment( align, wxALIGN_CENTER_VERTICAL );
 
   return pAttr;
 

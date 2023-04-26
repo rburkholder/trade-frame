@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include <boost/fusion/algorithm/iteration/fold.hpp>
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/fusion/algorithm/transformation/filter.hpp>
@@ -36,6 +38,8 @@
 #include <boost/fusion/sequence/intrinsic/at_c.hpp>
 
 #include <wx/timer.h>
+
+#include <TFTimeSeries/DatedDatum.h>
 
 #include <TFVuTrading/ModelCell.h>
 #include <TFVuTrading/ModelCell_ops.h>
@@ -65,7 +69,7 @@ struct GridOptionComboOrder_impl: public wxGridTableBase {
         (COL_OrderSide, "OSide", wxALIGN_RIGHT,  50, ModelCellString ), \
         (COL_Quan,      "Quan",  wxALIGN_RIGHT,  50, ModelCellInt    ), \
         (COL_Price,     "Price", wxALIGN_RIGHT,  50, ModelCellDouble ), \
-        (COL_Name,      "Name",  wxALIGN_LEFT ,  70, ModelCellString ), \
+        (COL_Name,      "Name",  wxALIGN_LEFT , 120, ModelCellString ), \
         (COL_Bid,       "Bid",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
         (COL_Ask,       "Ask",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
         (COL_IV,        "IV",    wxALIGN_RIGHT,  50, ModelCellDouble ), \
@@ -82,7 +86,63 @@ struct GridOptionComboOrder_impl: public wxGridTableBase {
     BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COMPOSE_MODEL_CELL,4)
   >;
 
-  bool m_bTimerActive;
+  struct OptionComboOrderRow {
+
+    OptionComboOrderRow()
+      : m_bActive( false ), m_nRow {}
+      {
+	      Init();
+      }
+    OptionComboOrderRow( const std::string& sOrderSide, int quan, double price, const std::string& sName )
+      : m_bActive( true ), m_nRow {}
+      {
+	      Init();
+        boost::fusion::at_c<COL_OrderSide>( m_vModelCells ).SetValue( sOrderSide );
+        boost::fusion::at_c<COL_Quan>( m_vModelCells ).SetValue( quan );
+        boost::fusion::at_c<COL_Price>( m_vModelCells ).SetValue( price );
+        boost::fusion::at_c<COL_Name>( m_vModelCells ).SetValue( sName );
+      }
+    OptionComboOrderRow( const OptionComboOrderRow& rhs ) = delete;
+    OptionComboOrderRow( OptionComboOrderRow&& rhs )
+      : m_bActive( rhs.m_bActive ), m_nRow( rhs.m_nRow )
+    {
+      Init();
+      boost::fusion::at_c<COL_OrderSide>( m_vModelCells ).SetValue( boost::fusion::at_c<COL_OrderSide>( rhs.m_vModelCells ).GetValue() );
+      boost::fusion::at_c<COL_Quan>( m_vModelCells ).SetValue( boost::fusion::at_c<COL_Quan>( rhs.m_vModelCells ).GetValue() );
+      boost::fusion::at_c<COL_Price>( m_vModelCells ).SetValue( boost::fusion::at_c<COL_Price>( rhs.m_vModelCells ).GetValue() );
+      boost::fusion::at_c<COL_Name>( m_vModelCells ).SetValue( boost::fusion::at_c<COL_Name>( rhs.m_vModelCells ).GetValue() );
+    }
+    ~OptionComboOrderRow() = default;
+
+    bool m_bActive;
+
+    int m_nRow;
+    vModelCells_t m_vModelCells;
+
+    void Init() {
+      boost::fusion::fold( m_vModelCells, 0, ModelCell_ops::SetCol() );
+      //BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT,m_nRow) // performed elsewhere
+      boost::fusion::at_c<COL_IV>( m_vModelCells ).SetPrecision( 3 );
+      boost::fusion::at_c<COL_Delta>( m_vModelCells ).SetPrecision( 3 );
+      boost::fusion::at_c<COL_Gamma>( m_vModelCells ).SetPrecision( 4 );
+    }
+
+    void UpdateGreeks( const ou::tf::Greek& greek ) {
+      boost::fusion::at_c<COL_IV>( m_vModelCells ).SetValue( greek.ImpliedVolatility() );
+      boost::fusion::at_c<COL_Delta>( m_vModelCells ).SetValue( greek.Delta() );
+      boost::fusion::at_c<COL_Gamma>( m_vModelCells ).SetValue( greek.Gamma() );
+    }
+
+    void UpdateQuote( const ou::tf::Quote& quote ) {
+      boost::fusion::at_c<COL_Bid>( m_vModelCells ).SetValue( quote.Bid() );
+      boost::fusion::at_c<COL_Ask>( m_vModelCells ).SetValue( quote.Ask() );
+    }
+  };
+
+  using vOptionComboOrderRow_t = std::vector<OptionComboOrderRow>;
+  vOptionComboOrderRow_t m_vOptionComboOrderRow;
+
+  bool m_bTimerActive; // migrate to the panel for control of universal timer
   wxTimer m_timerGuiRefresh;
   void HandleGuiRefresh( wxTimerEvent& event );
 
