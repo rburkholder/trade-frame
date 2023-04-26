@@ -24,23 +24,23 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-GridOptionComboOrder_impl::GridOptionComboOrder_impl( GridOptionComboOrder& details )
+GridOptionComboOrder_impl::GridOptionComboOrder_impl( GridOptionComboOrder& grid )
 : wxGridTableBase()
-, m_details( details ), m_bTimerActive( false ) {
+, m_grid( grid ), m_bTimerActive( false ) {
 }
 
 GridOptionComboOrder_impl::~GridOptionComboOrder_impl() {
-  m_details.SetTable( nullptr, false, wxGrid::wxGridSelectNone );
+  m_grid.SetTable( nullptr, false, wxGrid::wxGridSelectNone );
 }
 
 void GridOptionComboOrder_impl::CreateControls() {
 
-  m_details.SetDefaultColSize(50);
-  m_details.SetDefaultRowSize(22);
-  m_details.SetColLabelSize(22);
-  m_details.SetRowLabelSize(50);
+  m_grid.SetDefaultColSize(50);
+  m_grid.SetDefaultRowSize(22);
+  m_grid.SetColLabelSize(22);
+  m_grid.SetRowLabelSize(50);
 
-  m_details.SetTable( this, false, wxGrid::wxGridSelectCells );
+  m_grid.SetTable( this, false, wxGrid::wxGridSelectCells );
 
   // found in ModelCell_macros.h
   #ifdef GRID_EMIT_SetColSettings
@@ -48,23 +48,23 @@ void GridOptionComboOrder_impl::CreateControls() {
   #endif
 
   #define GRID_EMIT_SetColSettings( z, n, VAR ) \
-    /* m_details.SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); */ \
-    m_details.SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
+    /* m_grid.SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); */ \
+    m_grid.SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
 
   int ix( 0 );
   BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
 
-  //m_details.Bind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
+  //m_grid.Bind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
 
-  m_details.EnableDragCell( true );
+  m_grid.EnableDragCell( true );
 
-//  m_details.Bind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionChain_impl::OnGridCellBeginDrag, this );  // this is the event we really want
-//  m_details.Bind( wxEVT_MOTION, &GridOptionChain_impl::OnMouseMotion, this );  // already consumed by grid itself
+//  m_grid.Bind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionChain_impl::OnGridCellBeginDrag, this );  // this is the event we really want
+//  m_grid.Bind( wxEVT_MOTION, &GridOptionChain_impl::OnMouseMotion, this );  // already consumed by grid itself
 
-  m_details.EnableEditing( false );
+  m_grid.EnableEditing( false );
 
   m_vOptionComboOrderRow.resize( 5 );
-  m_details.AppendRows( 5 ); // cells labelled empty when no order or summary is present ( fifth row is summary stats)
+  m_grid.AppendRows( 5 ); // cells labelled empty when no order or summary is present ( fifth row is summary stats)
 
 }
 
@@ -72,8 +72,8 @@ void GridOptionComboOrder_impl::Start() {
   if ( !m_bTimerActive ) {
     m_bTimerActive = true;
     // this GuiRefresh initialization should come after all else
-    m_timerGuiRefresh.SetOwner( &m_details );
-    m_details.Bind( wxEVT_TIMER, &GridOptionComboOrder_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+    m_timerGuiRefresh.SetOwner( &m_grid );
+    m_grid.Bind( wxEVT_TIMER, &GridOptionComboOrder_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
     m_timerGuiRefresh.Start( 300 );
   }
 }
@@ -83,12 +83,12 @@ void GridOptionComboOrder_impl::Stop() {
     m_bTimerActive = false;
     m_timerGuiRefresh.Stop();
     m_timerGuiRefresh.DeletePendingEvents();
-    m_details.Unbind( wxEVT_TIMER, &GridOptionComboOrder_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+    m_grid.Unbind( wxEVT_TIMER, &GridOptionComboOrder_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
   }
 }
 
 void GridOptionComboOrder_impl::HandleGuiRefresh( wxTimerEvent& event ) {
-  m_details.ForceRefresh();
+  m_grid.ForceRefresh();
 }
 
 void GridOptionComboOrder_impl::SetView( wxGrid *grid ) {
@@ -205,8 +205,9 @@ wxGridCellAttr* GridOptionComboOrder_impl::GetAttr (int row, int col, wxGridCell
 }
 
 void GridOptionComboOrder_impl::DestroyControls() {
-//  m_details.Unbind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionOrder_impl::OnGridCellBeginDrag, this );
-//  m_details.Unbind( wxEVT_MOTION, &GridOptionOrder_impl::OnMouseMotion, this );  //m_details.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
+// m_grid.Unbind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionOrder_impl::OnGridCellBeginDrag, this );
+// m_grid.Unbind( wxEVT_MOTION, &GridOptionOrder_impl::OnMouseMotion, this );
+// m_grid.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
 }
 
 } // namespace tf

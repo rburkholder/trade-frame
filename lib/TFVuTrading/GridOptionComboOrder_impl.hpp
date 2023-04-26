@@ -58,7 +58,7 @@ struct GridOptionComboOrder_impl: public wxGridTableBase {
 
 //private:
 
-  GridOptionComboOrder& m_details;
+  GridOptionComboOrder& m_grid;
 
   // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
   #define GRID_ARRAY_PARAM_COUNT 5
