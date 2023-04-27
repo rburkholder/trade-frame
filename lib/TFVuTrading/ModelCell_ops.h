@@ -34,8 +34,8 @@ struct UpdateGui {
 };
 
 struct SetCol {
-  typedef int result_type;
-  SetCol( void ) {};
+  using result_type = int;
+  SetCol() {};
   template<typename F, typename T>
   int operator()( F& f, T& t ) const {
     return 1 + t.SetCol( f );
