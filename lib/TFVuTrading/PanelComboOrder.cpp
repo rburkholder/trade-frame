@@ -113,6 +113,8 @@ void PanelComboOrder::BindEvents() {
   m_pBookOptionChains->Bind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy_Book, this, ID_BOOK_OptionChains );
 
   // Page Change events cause issues during OnDestroy
+  Bind( wxEVT_BUTTON, &PanelComboOrder::OnBTNClearOrderClick, this, ID_BTN_ClearOrder );
+  Bind( wxEVT_BUTTON, &PanelComboOrder::OnBTNPlaceOrderClick, this, ID_BTN_PlaceOrder );
   Bind( wxEVT_LISTBOOK_PAGE_CHANGING, &PanelComboOrder::OnBOOKOptionChainsPageChanging, this );
   Bind( wxEVT_LISTBOOK_PAGE_CHANGED, &PanelComboOrder::OnBOOKOptionChainsPageChanged, this );
   Bind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy_Panel, this );
@@ -130,6 +132,8 @@ void PanelComboOrder::UnbindEvents() {
   assert( Unbind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy_Panel, this ) );
   assert( Unbind( wxEVT_LISTBOOK_PAGE_CHANGING, &PanelComboOrder::OnBOOKOptionChainsPageChanging, this ) );
   assert( Unbind( wxEVT_LISTBOOK_PAGE_CHANGED, &PanelComboOrder::OnBOOKOptionChainsPageChanged, this ) );
+  assert( Unbind( wxEVT_BUTTON, &PanelComboOrder::OnBTNClearOrderClick, this, ID_BTN_ClearOrder ) );
+  assert( Unbind( wxEVT_BUTTON, &PanelComboOrder::OnBTNPlaceOrderClick, this, ID_BTN_PlaceOrder ) );
 }
 
 void PanelComboOrder::Set(
@@ -149,10 +153,10 @@ void PanelComboOrder::Set(
 
   for ( mapOptionExpiry_t::value_type& expiry: m_mapOptionExpiry ) {
     Tab& tab( expiry.second );
-    tab.pGridOptionChain->Set( fOptionDelegates_Attach, fOptionDelegates_Detach ); // make copies of the lambdas
+    tab.pGridOptionChain->Set( m_fOptionDelegates_Attach, m_fOptionDelegates_Detach ); // make copies of the lambdas
   }
 
-  m_pGridOptionComboOrder->Set( fOptionDelegates_Attach, fOptionDelegates_Detach ); // make copies of the lambdas
+  m_pGridOptionComboOrder->Set( m_fOptionDelegates_Attach, m_fOptionDelegates_Detach ); // make copies of the lambdas
 }
 
 void PanelComboOrder::StartRefresh() {
@@ -360,10 +364,12 @@ void PanelComboOrder::OnBTNUpdateGreeksClick( wxCommandEvent& event ) {
 }
 
 void PanelComboOrder::OnBTNClearOrderClick( wxCommandEvent& event ) {
+  m_pGridOptionComboOrder->ClearOrders();
   event.Skip();
 }
 
 void PanelComboOrder::OnBTNPlaceOrderClick( wxCommandEvent& event ) {
+  m_pGridOptionComboOrder->PlaceComboOrder();
   event.Skip();
 }
 

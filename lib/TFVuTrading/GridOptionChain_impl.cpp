@@ -475,7 +475,8 @@ wxString GridOptionChain_impl::GetValue( int row, int col ) {
         ou::tf::option::Delegates call;
         ou::tf::option::Delegates put;
         FillDelegates( row, call, put );
-        m_details.m_fOptionDelegates_Attach( call, put );
+        m_details.m_fOptionDelegates_Attach( call );
+        m_details.m_fOptionDelegates_Attach( put );
         std::cout
           << "start strike " << m_vRowIX[row]->first
           << "," << call.sSymbolName
@@ -514,7 +515,8 @@ void GridOptionChain_impl::StopStrike( int row ) {
     ou::tf::option::Delegates call;
     ou::tf::option::Delegates put;
     FillDelegates( row, call, put );
-    m_details.m_fOptionDelegates_Detach( call, put );
+    m_details.m_fOptionDelegates_Detach( call );
+    m_details.m_fOptionDelegates_Detach( put );
   }
 }
 

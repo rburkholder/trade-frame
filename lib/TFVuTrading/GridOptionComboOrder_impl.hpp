@@ -73,9 +73,9 @@ struct GridOptionComboOrder_impl: public wxGridTableBase {
         (COL_Name,      "Name",  wxALIGN_LEFT , 120, ModelCellString ), \
         (COL_Bid,       "Bid",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
         (COL_Ask,       "Ask",   wxALIGN_RIGHT,  50, ModelCellDouble ), \
-        (COL_IV,        "IV",    wxALIGN_RIGHT,  50, ModelCellDouble ), \
         (COL_Delta,     "Delta", wxALIGN_RIGHT,  50, ModelCellDouble ), \
         (COL_Gamma,     "Gamma", wxALIGN_RIGHT,  60, ModelCellDouble ), \
+        (COL_IV,        "IV",    wxALIGN_RIGHT,  50, ModelCellDouble ), \
         ) \
       )
 
@@ -138,6 +138,8 @@ struct GridOptionComboOrder_impl: public wxGridTableBase {
       boost::fusion::at_c<COL_Bid>( m_vModelCells ).SetValue( quote.Bid() );
       boost::fusion::at_c<COL_Ask>( m_vModelCells ).SetValue( quote.Ask() );
     }
+
+    void UpdateTrade( const ou::tf::Trade& trade ) {}
   };
 
   using vOptionComboOrderRow_t = std::vector<OptionComboOrderRow>;
@@ -146,7 +148,10 @@ struct GridOptionComboOrder_impl: public wxGridTableBase {
   void CreateControls();
   void DestroyControls();
 
-  void Refresh();
+  //void Refresh();
+
+  void ClearRows();
+  void PlaceComboOrder();
 
   virtual void SetView ( wxGrid *grid );
   virtual wxGrid* GetView() const;

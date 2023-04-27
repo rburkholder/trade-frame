@@ -87,7 +87,8 @@ void GridOptionComboOrder::Set(
 }
 
 void GridOptionComboOrder::Refresh() {
-  m_pimpl->Refresh();
+  ForceRefresh();
+  //m_pimpl->Refresh();
 }
 
 GridOptionComboOrder::fAddComboOrder_t GridOptionComboOrder::FunctionAddComboOrder() {
@@ -95,6 +96,14 @@ GridOptionComboOrder::fAddComboOrder_t GridOptionComboOrder::FunctionAddComboOrd
     m_pimpl->Add( side, quan, price, sName );
   };
   return std::move( f );
+}
+
+void GridOptionComboOrder::ClearOrders() {
+  m_pimpl->ClearRows();
+}
+
+void GridOptionComboOrder::PlaceComboOrder() {
+
 }
 
 void GridOptionComboOrder::OnDestroy( wxWindowDestroyEvent& event ) {

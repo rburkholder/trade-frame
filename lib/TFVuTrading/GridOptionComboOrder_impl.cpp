@@ -36,7 +36,7 @@ GridOptionComboOrder_impl::~GridOptionComboOrder_impl() {
 void GridOptionComboOrder_impl::CreateControls() {
 
   m_grid.SetDefaultColSize(50);
-  m_grid.SetDefaultRowSize(22);
+  m_grid.SetDefaultRowSize(20);
   m_grid.SetColLabelSize(22);
   m_grid.SetRowLabelSize(50);
 
@@ -68,17 +68,17 @@ void GridOptionComboOrder_impl::CreateControls() {
 
 }
 
-void GridOptionComboOrder_impl::Add( ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sName ) {
+void GridOptionComboOrder_impl::Add( ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sIQFeedName ) {
 
   bool bSymbolFound( false );
   for (vOptionComboOrderRow_t::value_type& row: m_vOptionComboOrderRow ) {
     if ( OptionComboOrderRow::EType::item == row.m_type ) {
-      if ( boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetValue() == sName ) {
+      if ( boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetValue() == sIQFeedName ) {
         boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).SetValue( side );
         boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).SetValue( quan );
         boost::fusion::at_c<COL_Price>( row.m_vModelCells ).SetValue( price );
         bSymbolFound = true;
-        break;
+        break; // exit for
       }
     }
   }
@@ -94,7 +94,17 @@ void GridOptionComboOrder_impl::Add( ou::tf::OrderSide::EOrderSide side, int qua
         boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).SetValue( side );
         boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).SetValue( quan );
         boost::fusion::at_c<COL_Price>( row.m_vModelCells ).SetValue( price );
-        boost::fusion::at_c<COL_Name>( row.m_vModelCells ).SetValue( sName );
+        boost::fusion::at_c<COL_Name>( row.m_vModelCells ).SetValue( sIQFeedName );
+
+        if ( m_grid.m_fOptionDelegates_Attach ) {
+          ou::tf::option::Delegates delegates;
+          delegates.sSymbolName = sIQFeedName;
+          delegates.fdQuote = fastdelegate::MakeDelegate( &row, &OptionComboOrderRow::UpdateQuote );
+          delegates.fdGreek = fastdelegate::MakeDelegate( &row, &OptionComboOrderRow::UpdateGreeks );
+          delegates.fdTrade = fastdelegate::MakeDelegate( &row, &OptionComboOrderRow::UpdateTrade );
+          m_grid.m_fOptionDelegates_Attach( delegates );
+        }
+
         bEmptyFilled = true;
         break; // exit for
       }
@@ -104,15 +114,15 @@ void GridOptionComboOrder_impl::Add( ou::tf::OrderSide::EOrderSide side, int qua
       m_grid.ForceRefresh();
     }
     else {
-      std::cout << "no empty slot found for " << sName << std::endl;
+      std::cout << "no empty slot found for " << sIQFeedName << std::endl;
     }
   }
 
 }
 
-void GridOptionComboOrder_impl::Refresh() {
-  m_grid.ForceRefresh();
-}
+//void GridOptionComboOrder_impl::Refresh() {
+//  m_grid.ForceRefresh();
+//}
 
 void GridOptionComboOrder_impl::SetView( wxGrid *grid ) {
   wxGridTableBase::SetView( grid );
@@ -172,9 +182,7 @@ wxString GridOptionComboOrder_impl::GetValue( int ixRow, int ixCol ) {
   assert( 0 <= ixRow );
   assert( m_vOptionComboOrderRow.size() > ixRow );
   OptionComboOrderRow& row( m_vOptionComboOrderRow[ ixRow ] );
-  if ( OptionComboOrderRow::EType::empty == row.m_type ) {
-    s = "";
-  }
+  if ( OptionComboOrderRow::EType::empty == row.m_type ) {}
   else {
     switch ( ixCol ) {
       case COL_OrderSide:
@@ -199,8 +207,23 @@ wxString GridOptionComboOrder_impl::GetValue( int ixRow, int ixCol ) {
       case COL_Name:
         s = boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetText();
         break;
+      case COL_Bid:
+        s = boost::fusion::at_c<COL_Bid>( row.m_vModelCells ).GetText();
+        break;
+      case COL_Ask:
+        s = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetText();
+        break;
+      case COL_Delta:
+        s = boost::fusion::at_c<COL_Delta>( row.m_vModelCells ).GetText();
+        break;
+      case COL_Gamma:
+        s = boost::fusion::at_c<COL_Gamma>( row.m_vModelCells ).GetText();
+        break;
+      case COL_IV:
+        s = boost::fusion::at_c<COL_IV>( row.m_vModelCells ).GetText();
+        break;
       default:
-        s = "";
+        s = "n/a";
         break;
     }
   }
@@ -235,6 +258,7 @@ wxGridCellAttr* GridOptionComboOrder_impl::GetAttr (int row, int col, wxGridCell
   wxGridCellAttr* pAttr = new wxGridCellAttr();
 
   switch ( kind ) {
+    case wxGridCellAttr::wxAttrKind::Any:
     case wxGridCellAttr::wxAttrKind::Cell:
     case wxGridCellAttr::wxAttrKind::Col:
       switch ( col ) {
@@ -262,7 +286,33 @@ wxGridCellAttr* GridOptionComboOrder_impl::GetAttr (int row, int col, wxGridCell
 
 }
 
+void GridOptionComboOrder_impl::PlaceComboOrder() {
+  std::cout << "place combo order not implemented" << std::endl;
+}
+
+void GridOptionComboOrder_impl::ClearRows() {
+  for (vOptionComboOrderRow_t::value_type& row: m_vOptionComboOrderRow ) {
+    if ( OptionComboOrderRow::EType::item == row.m_type ) {
+      if ( m_grid.m_fOptionDelegates_Detach ) {
+        ou::tf::option::Delegates delegates;
+        delegates.sSymbolName =  boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetValue();
+        delegates.fdQuote = fastdelegate::MakeDelegate( &row, &OptionComboOrderRow::UpdateQuote );
+        delegates.fdGreek = fastdelegate::MakeDelegate( &row, &OptionComboOrderRow::UpdateGreeks );
+        delegates.fdTrade = fastdelegate::MakeDelegate( &row, &OptionComboOrderRow::UpdateTrade );
+        m_grid.m_fOptionDelegates_Detach( delegates );
+      }
+    }
+
+    row.m_type = OptionComboOrderRow::EType::empty;
+  }
+
+  m_grid.ForceRefresh();
+}
+
 void GridOptionComboOrder_impl::DestroyControls() {
+
+  ClearRows();
+
 // m_grid.Unbind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionOrder_impl::OnGridCellBeginDrag, this );
 // m_grid.Unbind( wxEVT_MOTION, &GridOptionOrder_impl::OnMouseMotion, this );
 // m_grid.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );

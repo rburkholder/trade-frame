@@ -75,7 +75,7 @@ public:
 
   void PreDestroy();
 
-  using fOptionDelegates_t = std::function<void( ou::tf::option::Delegates& call, ou::tf::option::Delegates& put)>;
+  using fOptionDelegates_t = std::function<void( ou::tf::option::Delegates& )>;
 
   void Set( // makes a copy of the lambda
     fOptionDelegates_t fOptionDelegates_Attach

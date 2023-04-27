@@ -40,7 +40,8 @@ namespace tf { // TradeFrame
 struct InterfaceBookOptionChain {
 
   using fOnPageEvent_t = std::function<void(boost::gregorian::date)>;
-  using fOptionDelegates_t = std::function<void( ou::tf::option::Delegates& call, ou::tf::option::Delegates& put )>;
+  using fOptionDelegates_t = std::function<void( ou::tf::option::Delegates& )>;
+  //using fOptionDelegates_t = std::function<void( ou::tf::option::Delegates& call, ou::tf::option::Delegates& put )>;
   //using fOptionDelegateAttachments_t = std::function<void( fOptionDelegates_t&& fAttach, fOptionDelegates_t&& fDetach)>; // copied across grids
 
   virtual void Add( boost::gregorian::date, double strike, ou::tf::OptionSide::EOptionSide, const std::string& sSymbol ) = 0;
