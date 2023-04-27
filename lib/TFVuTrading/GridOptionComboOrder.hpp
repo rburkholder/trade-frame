@@ -26,6 +26,9 @@
 
 #include <wx/grid.h>
 
+#include <TFOptions/Option.h>
+#include <TFOptions/OptionDelegates.hpp>
+
 #include <TFVuTrading/DragDropInstrument.h>
 
 namespace ou { // One Unified
@@ -62,6 +65,13 @@ public:
   using fAddComboOrder_t = std::function<void(ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sName)>;
   fAddComboOrder_t FunctionAddComboOrder();
 
+  using fOptionDelegates_t = std::function<void( ou::tf::option::Delegates& call, ou::tf::option::Delegates& put)>;
+
+  void Set( // makes a copy of the lambda
+    fOptionDelegates_t fOptionDelegates_Attach
+  , fOptionDelegates_t fOptionDelegates_Detach
+  );
+
   void Refresh();
 
 protected:
@@ -76,6 +86,9 @@ private:
   };
 
   std::unique_ptr<GridOptionComboOrder_impl> m_pimpl;
+
+  fOptionDelegates_t m_fOptionDelegates_Attach;
+  fOptionDelegates_t m_fOptionDelegates_Detach;
 
   void OnDestroy( wxWindowDestroyEvent& event );
 

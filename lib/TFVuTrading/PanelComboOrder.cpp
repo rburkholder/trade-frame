@@ -151,6 +151,8 @@ void PanelComboOrder::Set(
     Tab& tab( expiry.second );
     tab.pGridOptionChain->Set( fOptionDelegates_Attach, fOptionDelegates_Detach ); // make copies of the lambdas
   }
+
+  m_pGridOptionComboOrder->Set( fOptionDelegates_Attach, fOptionDelegates_Detach ); // make copies of the lambdas
 }
 
 void PanelComboOrder::StartRefresh() {
