@@ -50,12 +50,17 @@ void PanelComboOrder::Init() {
 
   m_pBookOptionChains = nullptr;
   m_pGridOptionComboOrder = nullptr;
+  m_pGridOptionChain_Current = nullptr;
+
   m_btnUpgdateGreeks = nullptr;
   m_btnClearOrder = nullptr;
   m_btnPlaceOrder = nullptr;
 
   m_fOnPageChanged = nullptr;
   m_fOnPageChanging = nullptr;
+
+  m_fOptionDelegates_Attach = nullptr;
+  m_fOptionDelegates_Detach = nullptr;
 }
 
 bool PanelComboOrder::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
@@ -111,9 +116,14 @@ void PanelComboOrder::BindEvents() {
   Bind( wxEVT_LISTBOOK_PAGE_CHANGING, &PanelComboOrder::OnBOOKOptionChainsPageChanging, this );
   Bind( wxEVT_LISTBOOK_PAGE_CHANGED, &PanelComboOrder::OnBOOKOptionChainsPageChanged, this );
   Bind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy_Panel, this );
+
+  StartRefresh();
 }
 
 void PanelComboOrder::UnbindEvents() {
+
+  StopRefresh();
+
   assert( m_pBookOptionChains->Unbind( wxEVT_DESTROY, &PanelComboOrder::OnDestroy_Book, this, ID_BOOK_OptionChains ) );
 
   // Page change events occur during Deletion of Pages, causing problems
@@ -141,6 +151,24 @@ void PanelComboOrder::Set(
     Tab& tab( expiry.second );
     tab.pGridOptionChain->Set( fOptionDelegates_Attach, fOptionDelegates_Detach ); // make copies of the lambdas
   }
+}
+
+void PanelComboOrder::StartRefresh() {
+  // this GuiRefresh initialization should come after all else
+  m_timerGuiRefresh.SetOwner( this );
+  Bind( wxEVT_TIMER, &PanelComboOrder::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+  m_timerGuiRefresh.Start( 300 );
+}
+
+void PanelComboOrder::StopRefresh() {
+  m_timerGuiRefresh.Stop();
+  m_timerGuiRefresh.DeletePendingEvents();
+  Unbind( wxEVT_TIMER, &PanelComboOrder::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
+}
+
+void PanelComboOrder::HandleGuiRefresh( wxTimerEvent& event ) {
+  if ( m_pGridOptionChain_Current ) m_pGridOptionChain_Current->Refresh();
+  if ( m_pGridOptionComboOrder ) m_pGridOptionComboOrder->Refresh();
 }
 
 void PanelComboOrder::MakeRowVisible( boost::gregorian::date date, double strike ) {
@@ -224,6 +252,7 @@ void PanelComboOrder::Add( boost::gregorian::date date, double strike, ou::tf::O
     m_pBookOptionChains->InsertPage( iterExpiry->second.ixTab, pPanel, sDate );
 
     m_pBookOptionChains->SetSelection( 0 );
+    m_pGridOptionChain_Current = m_mapOptionExpiry.begin()->second.pGridOptionChain;
   } // end add panel
 
   mapStrike_t& mapStrike( iterExpiry->second.mapStrike ); // assumes single thread
@@ -281,14 +310,15 @@ void PanelComboOrder::OnBOOKOptionChainsPageChanging( wxListbookEvent& event ) {
   if ( -1 != ixTab ) {
     //std::cout << "page changing: " << ixTab << std::endl;
     mapOptionExpiry_t::iterator iter
-     = std::find_if( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), [ixTab,this](mapOptionExpiry_t::value_type& vt) {
-       return ixTab == vt.second.ixTab;
+      = std::find_if( m_mapOptionExpiry.begin(), m_mapOptionExpiry.end(), [ixTab,this](mapOptionExpiry_t::value_type& vt) {
+        return ixTab == vt.second.ixTab;
     });
     if ( m_mapOptionExpiry.end() == iter ) {
       std::cout << "PanelComboOrder::OnPageChanging: couldn't find tab index: " << ixTab << std::endl;
     }
     else {
-      iter->second.pGridOptionChain->Stop();
+      //iter->second.pGridOptionChain->Stop();
+      m_pGridOptionChain_Current = nullptr;
       if ( nullptr != m_pgcsGridOptionChain ) {
         iter->second.pGridOptionChain->SaveColumnSizes( *m_pgcsGridOptionChain );
       }
@@ -314,7 +344,8 @@ void PanelComboOrder::OnBOOKOptionChainsPageChanged( wxListbookEvent& event ) {
     if ( nullptr != m_pgcsGridOptionChain ) {
       iter->second.pGridOptionChain->SetColumnSizes( *m_pgcsGridOptionChain );
     }
-    iter->second.pGridOptionChain->Start();
+    //iter->second.pGridOptionChain->Start();
+    m_pGridOptionChain_Current = iter->second.pGridOptionChain;
     if ( nullptr != m_fOnPageChanged ) {
       m_fOnPageChanged( iter->first );
     }

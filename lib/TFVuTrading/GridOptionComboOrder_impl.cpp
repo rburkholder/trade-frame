@@ -26,7 +26,7 @@ namespace tf { // TradeFrame
 
 GridOptionComboOrder_impl::GridOptionComboOrder_impl( GridOptionComboOrder& grid )
 : wxGridTableBase()
-, m_grid( grid ), m_bTimerActive( false ) {
+, m_grid( grid ) {
 }
 
 GridOptionComboOrder_impl::~GridOptionComboOrder_impl() {
@@ -110,26 +110,7 @@ void GridOptionComboOrder_impl::Add( ou::tf::OrderSide::EOrderSide side, int qua
 
 }
 
-void GridOptionComboOrder_impl::Start() {
-  if ( !m_bTimerActive ) {
-    m_bTimerActive = true;
-    // this GuiRefresh initialization should come after all else
-    m_timerGuiRefresh.SetOwner( &m_grid );
-    m_grid.Bind( wxEVT_TIMER, &GridOptionComboOrder_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-    m_timerGuiRefresh.Start( 300 );
-  }
-}
-
-void GridOptionComboOrder_impl::Stop() {
-  if ( m_bTimerActive ) {
-    m_bTimerActive = false;
-    m_timerGuiRefresh.Stop();
-    m_timerGuiRefresh.DeletePendingEvents();
-    m_grid.Unbind( wxEVT_TIMER, &GridOptionComboOrder_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  }
-}
-
-void GridOptionComboOrder_impl::HandleGuiRefresh( wxTimerEvent& event ) {
+void GridOptionComboOrder_impl::Refresh() {
   m_grid.ForceRefresh();
 }
 

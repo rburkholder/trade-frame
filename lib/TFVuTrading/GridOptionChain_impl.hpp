@@ -31,8 +31,6 @@
 
 #include <boost/fusion/sequence/intrinsic/at_c.hpp>
 
-#include <wx/timer.h>
-
 #include <TFVuTrading/ModelCell.h>
 #include <TFVuTrading/ModelCell_ops.h>
 #include <TFVuTrading/ModelCell_macros.h>
@@ -170,6 +168,8 @@ struct GridOptionChain_impl: public wxGridTableBase {
   void CreateControls();
   //void OnDestroy( wxWindowDestroyEvent& event );  // can't use this
 
+  void Refresh();
+
   void Add( double strike, ou::tf::OptionSide::EOptionSide side, const std::string& sSymbol );
 
   void MakeRowVisible( double strike );
@@ -180,9 +180,6 @@ struct GridOptionChain_impl: public wxGridTableBase {
   void Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Trade& );
   void Update( double strike, ou::tf::OptionSide::EOptionSide, const ou::tf::Greek& );
   void Clear(  double strike );
-
-  void Start();
-  void Stop();
 
   virtual void SetView ( wxGrid *grid );
   virtual wxGrid* GetView() const;
@@ -215,10 +212,6 @@ struct GridOptionChain_impl: public wxGridTableBase {
   void OnGridCellBeginDrag( wxGridEvent& event );
 
   bool StartDragDrop( DragDropInstrument& );
-
-  bool m_bTimerActive;
-  wxTimer m_timerGuiRefresh;
-  void HandleGuiRefresh( wxTimerEvent& event );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

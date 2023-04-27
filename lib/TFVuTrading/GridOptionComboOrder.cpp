@@ -76,6 +76,10 @@ void GridOptionComboOrder::CreateControls() {
   m_pimpl->CreateControls();
 }
 
+void GridOptionComboOrder::Refresh() {
+  m_pimpl->Refresh();
+}
+
 GridOptionComboOrder::fAddComboOrder_t GridOptionComboOrder::FunctionAddComboOrder() {
   fAddComboOrder_t f = [this](ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sName ){
     m_pimpl->Add( side, quan, price, sName );

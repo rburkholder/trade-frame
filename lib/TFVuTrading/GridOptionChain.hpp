@@ -68,8 +68,7 @@ public:
 
   void Clear(  double strike );
 
-  void Start();
-  void Stop();
+  void Refresh();
 
   void SaveColumnSizes( ou::tf::GridColumnSizer& ) const;
   void SetColumnSizes( ou::tf::GridColumnSizer& );

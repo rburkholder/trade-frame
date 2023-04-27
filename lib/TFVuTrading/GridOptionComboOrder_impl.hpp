@@ -37,8 +37,6 @@
 
 #include <boost/fusion/sequence/intrinsic/at_c.hpp>
 
-#include <wx/timer.h>
-
 #include <TFTimeSeries/DatedDatum.h>
 
 #include <TFVuTrading/ModelCell.h>
@@ -145,15 +143,10 @@ struct GridOptionComboOrder_impl: public wxGridTableBase {
   using vOptionComboOrderRow_t = std::vector<OptionComboOrderRow>;
   vOptionComboOrderRow_t m_vOptionComboOrderRow;
 
-  bool m_bTimerActive; // migrate to the panel for control of universal timer
-  wxTimer m_timerGuiRefresh;
-  void HandleGuiRefresh( wxTimerEvent& event );
-
   void CreateControls();
   void DestroyControls();
 
-  void Start();
-  void Stop();
+  void Refresh();
 
   virtual void SetView ( wxGrid *grid );
   virtual wxGrid* GetView() const;

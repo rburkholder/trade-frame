@@ -27,6 +27,7 @@
 #include <boost/serialization/split_member.hpp>
 
 #include <wx/panel.h>
+#include <wx/timer.h>
 
 // amalgamation of NotebookOptionChains, GridOptionChain
 
@@ -119,10 +120,16 @@ private:
   };
 
   wxListbook* m_pBookOptionChains;
-  GridOptionComboOrder* m_pGridOptionComboOrder;
+
   wxToggleButton* m_btnUpgdateGreeks;
   wxButton* m_btnClearOrder;
   wxButton* m_btnPlaceOrder;
+
+  wxTimer m_timerGuiRefresh;
+  void HandleGuiRefresh( wxTimerEvent& event );
+
+  void StartRefresh();
+  void StopRefresh();
 
   fOnPageEvent_t m_fOnPageChanging; // about to depart page
   fOnPageEvent_t m_fOnPageChanged;  // new page in place
@@ -156,6 +163,8 @@ private:
   using mapOptionExpiry_t = std::map<boost::gregorian::date, Tab>;
   mapOptionExpiry_t m_mapOptionExpiry;
 
+  GridOptionChain* m_pGridOptionChain_Current;
+  GridOptionComboOrder* m_pGridOptionComboOrder;
   ou::tf::GridColumnSizer* m_pgcsGridOptionChain;
 
   void Init();

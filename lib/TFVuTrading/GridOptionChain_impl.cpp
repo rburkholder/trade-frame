@@ -25,7 +25,7 @@ namespace tf { // TradeFrame
 
 GridOptionChain_impl::GridOptionChain_impl( GridOptionChain& details )
 : wxGridTableBase()
-, m_details( details ), m_bTimerActive( false ) {
+, m_details( details ) {
 }
 
 GridOptionChain_impl::~GridOptionChain_impl() {
@@ -116,25 +116,6 @@ void GridOptionChain_impl::Clear(  double strike ) {
   //m_mapOptionValueRow[ strike ].Init();  ?
 }
 
-void GridOptionChain_impl::Start() {
-  if ( !m_bTimerActive ) {
-    m_bTimerActive = true;
-    // this GuiRefresh initialization should come after all else
-    m_timerGuiRefresh.SetOwner( &m_details );
-    m_details.Bind( wxEVT_TIMER, &GridOptionChain_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-    m_timerGuiRefresh.Start( 300 );
-  }
-}
-
-void GridOptionChain_impl::Stop() {
-  if ( m_bTimerActive ) {
-    m_bTimerActive = false;
-    m_timerGuiRefresh.Stop();
-    m_timerGuiRefresh.DeletePendingEvents();
-    m_details.Unbind( wxEVT_TIMER, &GridOptionChain_impl::HandleGuiRefresh, this, m_timerGuiRefresh.GetId() );
-  }
-}
-
 void GridOptionChain_impl::Add( double strike, ou::tf::OptionSide::EOptionSide side, const std::string& sSymbol ) {
 
   mapOptionValueRow_iter iter = m_mapOptionValueRow.find( strike );
@@ -192,7 +173,7 @@ void GridOptionChain_impl::SetSelected(double strike, bool bSelected) {
   // TODO: actually enable/disable watch?
 }
 
-void GridOptionChain_impl::HandleGuiRefresh( wxTimerEvent& event ) {
+void GridOptionChain_impl::Refresh() {
   m_details.ForceRefresh();
 }
 
@@ -614,8 +595,6 @@ void GridOptionChain_impl::StopWatch() {
 }
 
 void GridOptionChain_impl::DestroyControls() {
-
-  Stop();
 
   m_details.Unbind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionChain_impl::OnGridCellBeginDrag, this );
 

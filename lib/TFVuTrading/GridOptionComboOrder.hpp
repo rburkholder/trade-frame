@@ -62,6 +62,8 @@ public:
   using fAddComboOrder_t = std::function<void(ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sName)>;
   fAddComboOrder_t FunctionAddComboOrder();
 
+  void Refresh();
+
 protected:
 
   void Init();
