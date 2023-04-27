@@ -19,6 +19,8 @@
  * Created: May 7, 2022 15:39
  */
 
+#include <string>
+
 #include "FeatureSet_Level.hpp"
 
 namespace ou { // One Unified
@@ -305,36 +307,50 @@ void FeatureSet_Level::Bid_IncCancel( const ou::tf::Depth& depth ) {
   bid.v8.relativeCancel = ( 0.0 < bid.v8.intensityCancel ) ? bid.v7.intensityCancel / bid.v8.intensityCancel : 0.0;
 }
 
-const std::string FeatureSet_Level::Header() {
-  return std::string(
-    "level,ask.v1.vol,ask.v1.price,ask.v1.aggvol,ask.v1.aggprice"
-         ",ask.v3.diff2top,ask.v3.diff2adj"
-         ",ask.v4.mean.price,ask.v4.mean.vol"
-         ",ask.v6.dprice,ask.v6.dvol"
-         ",ask.v7.limit.int,ask.v7.mrkt.int,ask.v7.cncl.int"
-         ",ask.v8.limit.int,ask.v8.mrkt.int,ask.v8.cncl.int"
-         ",ask.v8.limit.rel,ask.v8.mrkt.rel,ask.v8.cncl.rel"
-         ",ask.v9.limit,ask.v9.mrkt,ask.v9.cncl"
+const std::string FeatureSet_Level::Header( const size_t level ) {
+  static const std::vector<std::string> vColumnName = {
+      "ask.v1.vol", "ask.v1.price"
+    , "ask.v1.aggvol", "ask.v1.aggprice"
+    , "ask.v3.diff2top", "ask.v3.diff2adj"
+    , "ask.v4.mean.price", "ask.v4.mean.vol"
+    , "ask.v6.dprice", "ask.v6.dvol"
+    , "ask.v7.limit.int" ,"ask.v7.mrkt.int", "ask.v7.cncl.int"
+    , "ask.v8.limit.int", "ask.v8.mrkt.int", "ask.v8.cncl.int"
+    , "ask.v8.limit.rel", "ask.v8.mrkt.rel", "ask.v8.cncl.rel"
+    , "ask.v9.limit", "ask.v9.mrkt", "ask.v9.cncl"
 
-         ",bid.v1.volume,bid.v1.price,bid.v1.aggvol,bid.v1.aggprice"
-         ",bid.v3.diff2top,bid.v3.diff2adj"
-         ",bid.v4.mean.price,ask.v4.mean.vol"
-         ",bid.v6.dprice,bid.v6.dvol"
-         ",bid.v7.limit.int,bid.v7.mrkt.int,bid.v7.cncl.int"
-         ",bid.v8.limit.int,bid.v8.mrkt.int,bid.v8.cncl.int"
-         ",bid.v8.limit.rel,bid.v8.mrkt.rel,bid.v8.cncl.rel"
-         ",bid.v9.limit,bid.v9.mrkt,bid.v9.cncl"
+    , "bid.v1.vol", "bid.v1.price"
+    , "bid.v1.aggvol", "bid.v1.aggprice"
+    , "bid.v3.diff2top", "bid.v3.diff2adj"
+    , "bid.v4.mean.price", "ask.v4.mean.vol"
+    , "bid.v6.dprice", "bid.v6.dvol"
+    , "bid.v7.limit.int", "bid.v7.mrkt.int", "bid.v7.cncl.int"
+    , "bid.v8.limit.int", "bid.v8.mrkt.int", "bid.v8.cncl.int"
+    , "bid.v8.limit.rel", "bid.v8.mrkt.rel", "bid.v8.cncl.rel"
+    , "bid.v9.limit", "bid.v9.mrkt", "bid.v9.cncl"
 
-         ",cross.v2.spread,cross.v2.mid"
-         ",cross.v2.imbal.lvl,cross.v2.imbal.agg"
-         ",cross.v5.sum.price.spread,cross.v5.sum.vol.spread"
-  );
+    , "cross.v2.spread", "cross.v2.mid"
+    , "cross.v2.imbal.lvl", "cross.v2.imbal.agg"
+    , "cross.v5.sum.price.spread", "cross.v5.sum.vol.spread"
+  };
+
+  bool bComma( false );
+  std::string sHeader;
+  const std::string sLevel( std::to_string( level ) );
+  for ( const std::string& sColumnName: vColumnName ) {
+    if ( bComma ) {
+      sHeader += ",";
+    }
+    else bComma = true;
+    sHeader += sColumnName + ".l" + sLevel;
+  }
+
+  return sHeader;
 }
 
 std::ostream& FeatureSet_Level::operator<<( std::ostream& stream ) const {
   stream
-           << m_ix
-    << ',' << ask.v1.volume
+           << ask.v1.volume
     << ',' << ask.v1.price
     << ',' << ask.v1.aggregateVolume
     << ',' << ask.v1.aggregatePrice

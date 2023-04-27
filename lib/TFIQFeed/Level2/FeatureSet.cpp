@@ -151,12 +151,14 @@ const std::string FeatureSet::Header() {
   bool bSeparator( false );
   bool bSkipLevel0( true );
   std::string header;
+  size_t level = 1;
   for ( const vLevels_t::value_type& vt: m_vLevels ) {
     if ( bSkipLevel0 ) bSkipLevel0 = false;
     else {
       if ( bSeparator ) header += ',';
       else bSeparator = true;
-      header += vt.Header();
+      header += vt.Header( level );
+      level++;
     }
   }
   return header;

@@ -206,8 +206,7 @@ public:
   void Bid_IncMarket( const ou::tf::Depth& );
   void Bid_IncCancel( const ou::tf::Depth& );
 
-  static const std::string Header();
-
+  static const std::string Header( const size_t level );
   std::ostream& operator<<( std::ostream& s ) const;
 
 protected:
