@@ -328,40 +328,48 @@ void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
 
         m_pInterfaceBookOptionChains->Set(
           [this]( ou::tf::option::Delegates& call, ou::tf::option::Delegates& put ){ // fOptionDelegates_t&& fOptionDelegates_Attach
-            m_fConstructOption(
-              call.sSymbolName,
-              [this,call]( pOption_t pOption ){
-                pOption->OnTrade.Add( call.fdTrade );
-                pOption->OnQuote.Add( call.fdQuote );
-                pOption->OnGreek.Add( call.fdGreek );
-                m_pOptionRegistry->Add( pOption );
-              } );
-            m_fConstructOption(
-              put.sSymbolName,
-              [this,put]( pOption_t pOption ){
-                pOption->OnTrade.Add( put.fdTrade );
-                pOption->OnQuote.Add( put.fdQuote );
-                pOption->OnGreek.Add( put.fdGreek );
-                m_pOptionRegistry->Add( pOption );
-              } );
+            if ( !call.sSymbolName.empty() ) {
+              m_fConstructOption(
+                call.sSymbolName,
+                [this,call]( pOption_t pOption ){
+                  pOption->OnTrade.Add( call.fdTrade );
+                  pOption->OnQuote.Add( call.fdQuote );
+                  pOption->OnGreek.Add( call.fdGreek );
+                  m_pOptionRegistry->Add( pOption );
+                } );
+            }
+            if ( !put.sSymbolName.empty() ) {
+              m_fConstructOption(
+                put.sSymbolName,
+                [this,put]( pOption_t pOption ){
+                  pOption->OnTrade.Add( put.fdTrade );
+                  pOption->OnQuote.Add( put.fdQuote );
+                  pOption->OnGreek.Add( put.fdGreek );
+                  m_pOptionRegistry->Add( pOption );
+                } );
+            }
           },
           [this]( ou::tf::option::Delegates& call, ou::tf::option::Delegates& put ){ // fOptionDelegates_t&& fOptionDelegates_Detach
-            m_fConstructOption(
-              call.sSymbolName,
-              [this,call]( pOption_t pOption ){
-                m_pOptionRegistry->Remove( pOption, false );
-                pOption->OnTrade.Remove( call.fdTrade );
-                pOption->OnQuote.Remove( call.fdQuote );
-                pOption->OnGreek.Remove( call.fdGreek );
-              } );
-            m_fConstructOption(
-              put.sSymbolName,
-              [this,put]( pOption_t pOption ){
-                m_pOptionRegistry->Remove( pOption, false );
-                pOption->OnTrade.Remove( put.fdTrade );
-                pOption->OnQuote.Remove( put.fdQuote );
-                pOption->OnGreek.Remove( put.fdGreek );
-              } );
+            if ( !call.sSymbolName.empty() ) {
+              m_fConstructOption(
+                call.sSymbolName,
+                [this,call]( pOption_t pOption ){
+                  m_pOptionRegistry->Remove( pOption, false );
+                  pOption->OnTrade.Remove( call.fdTrade );
+                  pOption->OnQuote.Remove( call.fdQuote );
+                  pOption->OnGreek.Remove( call.fdGreek );
+                } );
+            }
+            if ( !put.sSymbolName.empty() ) {
+              m_fConstructOption(
+                put.sSymbolName,
+                [this,put]( pOption_t pOption ){
+                  m_pOptionRegistry->Remove( pOption, false );
+                  pOption->OnTrade.Remove( put.fdTrade );
+                  pOption->OnQuote.Remove( put.fdQuote );
+                  pOption->OnGreek.Remove( put.fdGreek );
+                } );
+            }
           }
         );
 
