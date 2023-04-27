@@ -76,6 +76,13 @@ void GridOptionComboOrder::CreateControls() {
   m_pimpl->CreateControls();
 }
 
+GridOptionComboOrder::fAddComboOrder_t GridOptionComboOrder::FunctionAddComboOrder() {
+  fAddComboOrder_t f = [this](ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sName ){
+    m_pimpl->Add( side, quan, price, sName );
+  };
+  return std::move( f );
+}
+
 void GridOptionComboOrder::OnDestroy( wxWindowDestroyEvent& event ) {
 
   //m_timerGuiRefresh.Stop();

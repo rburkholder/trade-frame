@@ -83,6 +83,9 @@ public:
   , fOptionDelegates_t fOptionDelegates_Detach
   );
 
+  using fAddToComboOrder_t = std::function<void(ou::tf::OrderSide::EOrderSide,int quan,double price, const std::string& name)>;
+  void Set( fAddToComboOrder_t&& );
+
   using fOnRowClicked_t = std::function<void(double, bool bSelected, const ou::tf::option::Delegates& call, const ou::tf::option::Delegates& put )>;
   fOnRowClicked_t m_fOnRowClicked; // called when a row is clicked (on/off)
 
@@ -105,6 +108,8 @@ private:
 
   fOptionDelegates_t m_fOptionDelegates_Attach;
   fOptionDelegates_t m_fOptionDelegates_Detach;
+
+  fAddToComboOrder_t m_fAddToComboOrder;
 
   template<class Archive>
   void serialize(Archive & ar, const unsigned int file_version);

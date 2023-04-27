@@ -228,45 +228,59 @@ void GridOptionChain_impl::OnMouseMotion( wxMouseEvent& event ) {
 }
 
 void GridOptionChain_impl::OnGridRightClick( wxGridEvent& event ) {
+  // column header is -1, first row is 0
+  //std::cout << "Right Click," << event.GetRow() << "," << event.GetCol() << std::endl;
 
   m_nRow = event.GetRow();
   m_nColumn = event.GetCol();
 
-    if ( ( 0 < m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
+  if ( ( 0 <= m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
 
-      assert( m_nRow < m_vRowIX.size() );
-      mapOptionValueRow_t::reverse_iterator iter = m_vRowIX[ m_nRow ];
-      assert( m_mapOptionValueRow.rend() != iter );
-      OptionValueRow& values( iter->second );
+    assert( m_nRow < m_vRowIX.size() );
+    mapOptionValueRow_t::reverse_iterator iter = m_vRowIX[ m_nRow ];
+    assert( m_mapOptionValueRow.rend() != iter );
+    OptionValueRow& values( iter->second );
 
-      switch ( m_nColumn ) {
-        case COL_CallAsk: // perform buy
-          std::cout << "buy 1 "
-          << values.m_sCallName
-          << "@" << boost::fusion::at_c<COL_CallAsk>( values.m_vModelCells ).GetText()
-          << std::endl;
-          break;
-        case COL_CallBid: // perform sell
-          std::cout << "sell 1 "
-          << values.m_sCallName
-          << "@" << boost::fusion::at_c<COL_CallBid>( values.m_vModelCells ).GetText()
-          << std::endl;
-          break;
-        case COL_PutBid: // perform sell
-          std::cout << "sell 1 "
-          << values.m_sPutName
-          << "@" << boost::fusion::at_c<COL_PutBid>( values.m_vModelCells ).GetText()
-          << std::endl;
-          break;
-        case COL_PutAsk: // perform buy
-          std::cout << "buy 1 "
-          << values.m_sPutName
-          << "@" << boost::fusion::at_c<COL_PutAsk>( values.m_vModelCells ).GetText()
-          << std::endl;
-          break;
-      }
+    switch ( m_nColumn ) {
+      case COL_CallAsk: // perform buy
+        std::cout << "buy 1 "
+        << values.m_sCallName
+        << "@" << boost::fusion::at_c<COL_CallAsk>( values.m_vModelCells ).GetText()
+        << std::endl;
+        if ( m_details.m_fAddToComboOrder ) {
+          m_details.m_fAddToComboOrder( ou::tf::OrderSide::Buy, 1, boost::fusion::at_c<COL_CallAsk>( values.m_vModelCells ).GetValue(), values.m_sCallName );
+        }
+        break;
+      case COL_CallBid: // perform sell
+        std::cout << "sell 1 "
+        << values.m_sCallName
+        << "@" << boost::fusion::at_c<COL_CallBid>( values.m_vModelCells ).GetText()
+        << std::endl;
+        if ( m_details.m_fAddToComboOrder ) {
+          m_details.m_fAddToComboOrder( ou::tf::OrderSide::Sell, 1, boost::fusion::at_c<COL_CallBid>( values.m_vModelCells ).GetValue(), values.m_sCallName );
+        }
+        break;
+      case COL_PutBid: // perform sell
+        std::cout << "sell 1 "
+        << values.m_sPutName
+        << "@" << boost::fusion::at_c<COL_PutBid>( values.m_vModelCells ).GetText()
+        << std::endl;
+        if ( m_details.m_fAddToComboOrder ) {
+          m_details.m_fAddToComboOrder( ou::tf::OrderSide::Sell, 1, boost::fusion::at_c<COL_PutBid>( values.m_vModelCells ).GetValue(), values.m_sPutName );
+        }
+        break;
+      case COL_PutAsk: // perform buy
+        std::cout << "buy 1 "
+        << values.m_sPutName
+        << "@" << boost::fusion::at_c<COL_PutAsk>( values.m_vModelCells ).GetText()
+        << std::endl;
+        if ( m_details.m_fAddToComboOrder ) {
+          m_details.m_fAddToComboOrder( ou::tf::OrderSide::Buy, 1, boost::fusion::at_c<COL_PutAsk>( values.m_vModelCells ).GetValue(), values.m_sPutName );
+        }
+        break;
+    }
 
-      // 2018/08/02 obsolete?  replaced by LeftClick operations?
+    // 2018/08/02 obsolete?  replaced by LeftClick operations?
 //      if ( ( 0 <= m_nColumn ) && ( 5 >= m_nColumn ) ) {
 //        // call drag and drop
 //        ou::tf::DragDropDataInstrument dndCall( iter->second.m_sCallName );
@@ -282,20 +296,17 @@ void GridOptionChain_impl::OnGridRightClick( wxGridEvent& event ) {
 //        dragSource.SetData( dndPut );
 //        wxDragResult result = dragSource.DoDragDrop( true );
 //      }
-    }
+  }
 }
 
 void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
   //std::cout << "Notebook Left Click: " << event.GetRow() << std::endl;
   // column header is -1, first row is 0
-  // use to toggle monitoring
-
-  bool bSkip( true );
 
   m_nRow = event.GetRow();
   m_nColumn = event.GetCol();
 
-  if ( ( 0 < m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
+  if ( ( 0 <= m_nRow ) && ( m_nRow < m_mapOptionValueRow.size() ) ) {
 
     assert( m_nRow < m_vRowIX.size() );
     mapOptionValueRow_t::reverse_iterator iterOptionValueRow = m_vRowIX[ m_nRow ];
@@ -325,7 +336,7 @@ void GridOptionChain_impl::OnGridLeftClick( wxGridEvent& event ) {
     }
   }
 
-  event.Skip( bSkip );
+  event.Skip( true );
 }
 
 bool GridOptionChain_impl::StartDragDrop( ou::tf::DragDropInstrument& dddi ) {

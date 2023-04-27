@@ -68,6 +68,48 @@ void GridOptionComboOrder_impl::CreateControls() {
 
 }
 
+void GridOptionComboOrder_impl::Add( ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sName ) {
+
+  bool bSymbolFound( false );
+  for (vOptionComboOrderRow_t::value_type& row: m_vOptionComboOrderRow ) {
+    if ( OptionComboOrderRow::EType::item == row.m_type ) {
+      if ( boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetValue() == sName ) {
+        boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).SetValue( side );
+        boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).SetValue( quan );
+        boost::fusion::at_c<COL_Price>( row.m_vModelCells ).SetValue( price );
+        bSymbolFound = true;
+        break;
+      }
+    }
+  }
+
+  if ( bSymbolFound ) {
+    m_grid.ForceRefresh();
+  }
+  else {
+    bool bEmptyFilled( false );
+    for (vOptionComboOrderRow_t::value_type& row: m_vOptionComboOrderRow ) {
+      if ( OptionComboOrderRow::EType::empty == row.m_type ) {
+        row.m_type = OptionComboOrderRow::EType::item;
+        boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).SetValue( side );
+        boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).SetValue( quan );
+        boost::fusion::at_c<COL_Price>( row.m_vModelCells ).SetValue( price );
+        boost::fusion::at_c<COL_Name>( row.m_vModelCells ).SetValue( sName );
+        bEmptyFilled = true;
+        break; // exit for
+      }
+    }
+
+    if ( bEmptyFilled ) {
+      m_grid.ForceRefresh();
+    }
+    else {
+      std::cout << "no empty slot found for " << sName << std::endl;
+    }
+  }
+
+}
+
 void GridOptionComboOrder_impl::Start() {
   if ( !m_bTimerActive ) {
     m_bTimerActive = true;
@@ -109,7 +151,7 @@ int GridOptionComboOrder_impl::GetNumberCols() {
 }
 
 bool GridOptionComboOrder_impl::IsEmptyCell( int row, int col ) {
-  return ( m_vOptionComboOrderRow[ row ].m_bActive );
+  return ( OptionComboOrderRow::EType::empty == m_vOptionComboOrderRow[ row ].m_type );
 }
 
 // https://github.com/wxWidgets/wxWidgets/blob/master/src/generic/grid.cpp
@@ -144,8 +186,43 @@ void GridOptionComboOrder_impl::SetValue( int row, int col, const wxString &valu
   assert( false );  // not sure if this is used
 }
 
-wxString GridOptionComboOrder_impl::GetValue( int row, int col ) {
+wxString GridOptionComboOrder_impl::GetValue( int ixRow, int ixCol ) {
   wxString s;
+  assert( 0 <= ixRow );
+  assert( m_vOptionComboOrderRow.size() > ixRow );
+  OptionComboOrderRow& row( m_vOptionComboOrderRow[ ixRow ] );
+  if ( OptionComboOrderRow::EType::empty == row.m_type ) {
+    s = "";
+  }
+  else {
+    switch ( ixCol ) {
+      case COL_OrderSide:
+        switch ( boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).GetValue() ) {
+          case ou::tf::OrderSide::Buy:
+            s = "Buy";
+            break;
+          case ou::tf::OrderSide::Sell:
+            s = "Sell";
+            break;
+          default:
+            assert( false );
+            break;
+        }
+        break;
+      case COL_Quan:
+        s = boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).GetText();
+        break;
+      case COL_Price:
+        s = boost::fusion::at_c<COL_Price>( row.m_vModelCells ).GetText();
+        break;
+      case COL_Name:
+        s = boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetText();
+        break;
+      default:
+        s = "";
+        break;
+    }
+  }
   return s;
 }
 

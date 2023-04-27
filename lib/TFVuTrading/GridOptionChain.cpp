@@ -36,6 +36,7 @@ GridOptionChain::~GridOptionChain() {
 void GridOptionChain::Init() {
   m_fOptionDelegates_Attach = nullptr;
   m_fOptionDelegates_Detach = nullptr;
+  m_fAddToComboOrder = nullptr;
   m_fOnRowClicked = nullptr;
   m_fOnOptionUnderlyingRetrieveInitiate = nullptr;
 }
@@ -79,6 +80,10 @@ void GridOptionChain::Set(
 ) {
   m_fOptionDelegates_Attach = std::move( fOptionDelegates_Attach );
   m_fOptionDelegates_Detach = std::move( fOptionDelegates_Detach );
+}
+
+void GridOptionChain::Set( fAddToComboOrder_t&& f ) {
+  m_fAddToComboOrder = std::move( f );
 }
 
 void GridOptionChain::Update( double strike, ou::tf::OptionSide::EOptionSide side, const ou::tf::Quote& quote ) {

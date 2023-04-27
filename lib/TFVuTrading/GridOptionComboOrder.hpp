@@ -22,6 +22,7 @@
 #pragma once
 
 #include <memory>
+#include <functional>
 
 #include <wx/grid.h>
 
@@ -57,6 +58,9 @@ public:
     const wxSize& size = GRID_OPTIONORDER_SIZE,
     long style = GRID_OPTIONORDER_STYLE,
     const wxString& = GRID_OPTIONORDER_TITLE );
+
+  using fAddComboOrder_t = std::function<void(ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sName)>;
+  fAddComboOrder_t FunctionAddComboOrder();
 
 protected:
 

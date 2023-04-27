@@ -201,6 +201,8 @@ void PanelComboOrder::Add( boost::gregorian::date date, double strike, ou::tf::O
         }
     };
 
+    pGridOptionChain->Set( std::move( m_pGridOptionComboOrder->FunctionAddComboOrder() ) );
+
     auto pair = m_mapOptionExpiry.emplace( mapOptionExpiry_t::value_type( date, Tab( sDate, pPanel, pGridOptionChain ) ) );
     assert( pair.second );
     iterExpiry = pair.first;

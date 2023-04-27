@@ -54,6 +54,9 @@ struct GridOptionComboOrder_impl: public wxGridTableBase {
 //public:
   GridOptionComboOrder_impl( GridOptionComboOrder& );
   virtual ~GridOptionComboOrder_impl();
+
+  void Add( ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sName );
+
 //protected:
 
 //private:
@@ -66,7 +69,7 @@ struct GridOptionComboOrder_impl: public wxGridTableBase {
   #define GRID_ARRAY \
     (GRID_ARRAY_COL_COUNT,  \
       ( /* Col 0,         1,            2,       3,      4,          */ \
-        (COL_OrderSide, "OSide", wxALIGN_RIGHT,  50, ModelCellString ), \
+        (COL_OrderSide, "OSide", wxALIGN_RIGHT,  50, ModelCellInt    ), \
         (COL_Quan,      "Quan",  wxALIGN_RIGHT,  50, ModelCellInt    ), \
         (COL_Price,     "Price", wxALIGN_RIGHT,  50, ModelCellDouble ), \
         (COL_Name,      "Name",  wxALIGN_LEFT , 120, ModelCellString ), \
@@ -88,23 +91,28 @@ struct GridOptionComboOrder_impl: public wxGridTableBase {
 
   struct OptionComboOrderRow {
 
+    enum EType { empty, summary, item } m_type;
+
+    int m_nRow;
+    vModelCells_t m_vModelCells;
+
     OptionComboOrderRow()
-      : m_bActive( false ), m_nRow {}
-      {
-	      Init();
-      }
-    OptionComboOrderRow( const std::string& sOrderSide, int quan, double price, const std::string& sName )
-      : m_bActive( true ), m_nRow {}
-      {
-	      Init();
-        boost::fusion::at_c<COL_OrderSide>( m_vModelCells ).SetValue( sOrderSide );
-        boost::fusion::at_c<COL_Quan>( m_vModelCells ).SetValue( quan );
-        boost::fusion::at_c<COL_Price>( m_vModelCells ).SetValue( price );
-        boost::fusion::at_c<COL_Name>( m_vModelCells ).SetValue( sName );
-      }
+    : m_type( EType::empty ), m_nRow {}
+    {
+      Init();
+    }
+    OptionComboOrderRow( ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sName )
+    : m_type( EType::item ), m_nRow {}
+    {
+      Init();
+      boost::fusion::at_c<COL_OrderSide>( m_vModelCells ).SetValue( side );
+      boost::fusion::at_c<COL_Quan>( m_vModelCells ).SetValue( quan );
+      boost::fusion::at_c<COL_Price>( m_vModelCells ).SetValue( price );
+      boost::fusion::at_c<COL_Name>( m_vModelCells ).SetValue( sName );
+    }
     OptionComboOrderRow( const OptionComboOrderRow& rhs ) = delete;
     OptionComboOrderRow( OptionComboOrderRow&& rhs )
-      : m_bActive( rhs.m_bActive ), m_nRow( rhs.m_nRow )
+    : m_type( rhs.m_type ), m_nRow( rhs.m_nRow )
     {
       Init();
       boost::fusion::at_c<COL_OrderSide>( m_vModelCells ).SetValue( boost::fusion::at_c<COL_OrderSide>( rhs.m_vModelCells ).GetValue() );
@@ -113,11 +121,6 @@ struct GridOptionComboOrder_impl: public wxGridTableBase {
       boost::fusion::at_c<COL_Name>( m_vModelCells ).SetValue( boost::fusion::at_c<COL_Name>( rhs.m_vModelCells ).GetValue() );
     }
     ~OptionComboOrderRow() = default;
-
-    bool m_bActive;
-
-    int m_nRow;
-    vModelCells_t m_vModelCells;
 
     void Init() {
       boost::fusion::fold( m_vModelCells, 0, ModelCell_ops::SetCol() );
