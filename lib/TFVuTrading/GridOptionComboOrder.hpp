@@ -62,8 +62,8 @@ public:
     long style = GRID_OPTIONORDER_STYLE,
     const wxString& = GRID_OPTIONORDER_TITLE );
 
-  using fAddComboOrder_t = std::function<void(ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sName)>;
-  fAddComboOrder_t FunctionAddComboOrder();
+  using fOrderLeg_t = std::function<void(ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sIQFeedName)>;
+  fOrderLeg_t FunctionAddComboOrderLeg();
 
   using fOptionDelegates_t = std::function<void( ou::tf::option::Delegates& )>;
 
@@ -71,6 +71,10 @@ public:
     fOptionDelegates_t fOptionDelegates_Attach
   , fOptionDelegates_t fOptionDelegates_Detach
   );
+
+  using fIterateLegs_t = std::function<void( fOrderLeg_t&& )>;
+  using fGatherOrderLegs_t = std::function<void( fIterateLegs_t&& )>;
+  void Set( fGatherOrderLegs_t&& );
 
   void Refresh();
 
@@ -92,6 +96,8 @@ private:
 
   fOptionDelegates_t m_fOptionDelegates_Attach;
   fOptionDelegates_t m_fOptionDelegates_Detach;
+
+  fGatherOrderLegs_t m_fGatherOrderLegs;
 
   void OnDestroy( wxWindowDestroyEvent& event );
 

@@ -83,7 +83,14 @@ void GridOptionComboOrder::Set(
 , fOptionDelegates_t fOptionDelegates_Detach
 ) {
   m_fOptionDelegates_Attach = std::move( fOptionDelegates_Attach );
+  assert( m_fOptionDelegates_Attach );
   m_fOptionDelegates_Detach = std::move( fOptionDelegates_Detach );
+  assert( m_fOptionDelegates_Detach );
+}
+
+void GridOptionComboOrder::Set( fGatherOrderLegs_t&& fGatherOrderLegs ) {
+  m_fGatherOrderLegs = std::move( fGatherOrderLegs );
+  assert( m_fGatherOrderLegs );
 }
 
 void GridOptionComboOrder::Refresh() {
@@ -91,8 +98,8 @@ void GridOptionComboOrder::Refresh() {
   ForceRefresh();
 }
 
-GridOptionComboOrder::fAddComboOrder_t GridOptionComboOrder::FunctionAddComboOrder() {
-  fAddComboOrder_t f = [this](ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sName ){
+GridOptionComboOrder::fOrderLeg_t GridOptionComboOrder::FunctionAddComboOrderLeg() {
+  fOrderLeg_t f = [this](ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sName ){
     m_pimpl->Add( side, quan, price, sName );
   };
   return std::move( f );

@@ -351,6 +351,20 @@ void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
           }
         );
 
+        m_pInterfaceBookOptionChains->Set(
+          []( ou::tf::InterfaceBookOptionChain::fIterateLegs_t&& fIterateLegs ){
+
+            // initialize stuff here
+
+            fIterateLegs(
+              []( ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sIQFeedName ){
+              }
+             );
+
+            // finish up here
+          }
+        );
+
       }
     } );
   m_ptiSelf->AppendMenuItem(

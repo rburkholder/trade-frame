@@ -87,6 +87,10 @@ public:
   , fOptionDelegates_t&& fOptionDelegates_Detach
   );
 
+  virtual void Set(
+    fGatherOrderLegs_t&&
+  );
+
   virtual void MakeRowVisible( boost::gregorian::date, double strike );
 
   // slow mechanism of updating grid entries
@@ -105,6 +109,8 @@ public:
   fOnOptionUnderlyingRetrieve_t m_fOnOptionUnderlyingRetrieve;
 
   void SetGridOptionChain_ColumnSaver( ou::tf::GridColumnSizer* );
+
+  void PlaceComboOrder();
 
 protected:
 private:
@@ -136,6 +142,8 @@ private:
 
   fOptionDelegates_t m_fOptionDelegates_Attach;
   fOptionDelegates_t m_fOptionDelegates_Detach;
+
+  fGatherOrderLegs_t m_fGatherOrderLegs;
 
   // put/call at strike
   struct Row {

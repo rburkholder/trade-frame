@@ -411,7 +411,40 @@ wxGridCellAttr* GridOptionComboOrder_impl::GetAttr (int row, int col, wxGridCell
 }
 
 void GridOptionComboOrder_impl::PlaceComboOrder() {
-  std::cout << "place combo order not implemented" << std::endl;
+  m_grid.m_fGatherOrderLegs(
+    [this]( GridOptionComboOrder::fOrderLeg_t&& fOrderLeg ){
+      for ( vOptionComboOrderRow_t::value_type& row: m_vOptionComboOrderRow ) {
+        switch (row.m_type ) {
+          case OptionComboOrderRow::EType::item:
+            {
+              int side = boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).GetValue();
+              double price {};
+              switch ( side ) {
+                case ou::tf::OrderSide::Buy:
+                  price = boost::fusion::at_c<COL_Bid>( row.m_vModelCells ).GetValue(); // start on low side
+                  break;
+                case ou::tf::OrderSide::Sell:
+                  price = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetValue(); // start on high side
+                  break;
+                default:
+                  assert( false );
+                  break;
+              }
+              fOrderLeg(
+                (ou::tf::OrderSide::EOrderSide) side,
+                boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).GetValue(),
+                price, //boost::fusion::at_c<COL_Price>( row.m_vModelCells ).GetValue(),
+                boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetValue()
+              );
+            }
+            break;
+          default:
+            break;
+        }
+      }
+    }
+  );
+  ClearRows();
 }
 
 void GridOptionComboOrder_impl::ClearRows() {

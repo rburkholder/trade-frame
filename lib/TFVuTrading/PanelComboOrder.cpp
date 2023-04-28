@@ -159,6 +159,10 @@ void PanelComboOrder::Set(
   m_pGridOptionComboOrder->Set( m_fOptionDelegates_Attach, m_fOptionDelegates_Detach ); // make copies of the lambdas
 }
 
+void PanelComboOrder::Set( fGatherOrderLegs_t&& fGatherOrderLegs ) {
+  m_pGridOptionComboOrder->Set( std::move( fGatherOrderLegs ) );
+}
+
 void PanelComboOrder::StartRefresh() {
   // this GuiRefresh initialization should come after all else
   m_timerGuiRefresh.SetOwner( this );
@@ -235,7 +239,7 @@ void PanelComboOrder::Add( boost::gregorian::date date, double strike, ou::tf::O
         }
     };
 
-    pGridOptionChain->Set( std::move( m_pGridOptionComboOrder->FunctionAddComboOrder() ) );
+    pGridOptionChain->Set( std::move( m_pGridOptionComboOrder->FunctionAddComboOrderLeg() ) );
 
     auto pair = m_mapOptionExpiry.emplace( mapOptionExpiry_t::value_type( date, Tab( sDate, pPanel, pGridOptionChain ) ) );
     assert( pair.second );

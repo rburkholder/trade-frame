@@ -65,11 +65,11 @@ struct InterfaceBookOptionChain {
 
   virtual void Clear(  boost::gregorian::date, double strike ) = 0;
 
-// Order Interface
-//   ComboOrder: fill order legs from leg list
-
-// internal:
-//   buy/sell call/put leg into leg list
+  // obtain list of legs for the combo order
+  using fOrderLeg_t = std::function<void( ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sIQFeedName )>;
+  using fIterateLegs_t = std::function<void( fOrderLeg_t&& )>;
+  using fGatherOrderLegs_t = std::function<void( fIterateLegs_t&& )>;
+  virtual void Set( fGatherOrderLegs_t&& ) = 0;
 };
 
 } // namespace tf
