@@ -87,8 +87,8 @@ void GridOptionComboOrder::Set(
 }
 
 void GridOptionComboOrder::Refresh() {
+  m_pimpl->Refresh();
   ForceRefresh();
-  //m_pimpl->Refresh();
 }
 
 GridOptionComboOrder::fAddComboOrder_t GridOptionComboOrder::FunctionAddComboOrder() {

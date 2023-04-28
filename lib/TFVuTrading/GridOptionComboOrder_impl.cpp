@@ -21,6 +21,10 @@
 
 #include "GridOptionComboOrder_impl.hpp"
 
+namespace {
+  static const int c_nDefaultRows( 5 );
+}
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -63,8 +67,11 @@ void GridOptionComboOrder_impl::CreateControls() {
 
   m_grid.EnableEditing( false );
 
-  m_vOptionComboOrderRow.resize( 5 );
-  m_grid.AppendRows( 5 ); // cells labelled empty when no order or summary is present ( fifth row is summary stats)
+  assert( 2 < c_nDefaultRows );
+  m_vOptionComboOrderRow.resize( c_nDefaultRows );
+  m_grid.AppendRows( c_nDefaultRows ); // cells labelled empty when no order or summary is present ( fifth row is summary stats)
+
+  m_vOptionComboOrderRow[ c_nDefaultRows - 1 ].m_type = OptionComboOrderRow::EType::summary;
 
 }
 
@@ -120,9 +127,84 @@ void GridOptionComboOrder_impl::Add( ou::tf::OrderSide::EOrderSide side, int qua
 
 }
 
-//void GridOptionComboOrder_impl::Refresh() {
-//  m_grid.ForceRefresh();
-//}
+void GridOptionComboOrder_impl::Refresh() {
+
+  OptionComboOrderRow& summary( m_vOptionComboOrderRow[ c_nDefaultRows - 1] );
+
+  boost::fusion::at_c<COL_Quan>(  summary.m_vModelCells ).SetValue(   0 );
+  boost::fusion::at_c<COL_Price>( summary.m_vModelCells ).SetValue( 0.0 );
+  boost::fusion::at_c<COL_Bid>(   summary.m_vModelCells ).SetValue( 0.0 ); // best - no spread - lower amount
+  boost::fusion::at_c<COL_Ask>(   summary.m_vModelCells ).SetValue( 0.0 ); // full - full spread - higher amount
+  boost::fusion::at_c<COL_Delta>( summary.m_vModelCells ).SetValue( 0.0 );
+  boost::fusion::at_c<COL_Gamma>( summary.m_vModelCells ).SetValue( 0.0 );
+  boost::fusion::at_c<COL_IV>(    summary.m_vModelCells ).SetValue( 0.0 );
+
+  int sumQuan_int {};
+  double sumQuan_dbl {};
+  double sumPrice {};
+  double sumBid {};
+  double sumAsk {};
+  double sumDelta {};
+  double sumGamma {};
+  double sumIV {};
+
+  for ( vOptionComboOrderRow_t::value_type& item: m_vOptionComboOrderRow ) {
+    if ( OptionComboOrderRow::EType::item == item.m_type ) {
+
+      double spread_none {};
+      double spread_full {};
+
+      int quan_int = boost::fusion::at_c<COL_Quan>( item.m_vModelCells ).GetValue();
+      double quan_dbl = quan_int;
+      sumQuan_int += quan_int;
+      sumQuan_dbl += quan_dbl;
+      boost::fusion::at_c<COL_Quan>( summary.m_vModelCells ).SetValue( sumQuan_int );
+
+      double multiplier {};
+      switch ( boost::fusion::at_c<COL_OrderSide>( item.m_vModelCells ).GetValue() ) {
+        case ou::tf::OrderSide::Buy:
+          multiplier = 1.0 * quan_dbl;
+          spread_full = boost::fusion::at_c<COL_Ask>( item.m_vModelCells ).GetValue();
+          spread_none = boost::fusion::at_c<COL_Bid>( item.m_vModelCells ).GetValue();
+          break;
+        case ou::tf::OrderSide::Sell:
+          multiplier = -1.0 * quan_dbl;
+          spread_full = boost::fusion::at_c<COL_Bid>( item.m_vModelCells ).GetValue();
+          spread_none = boost::fusion::at_c<COL_Ask>( item.m_vModelCells ).GetValue();
+          break;
+        default:
+          assert( false );
+          break;
+      }
+
+      double price = boost::fusion::at_c<COL_Price>( item.m_vModelCells ).GetValue();
+      sumPrice += multiplier * price;
+      boost::fusion::at_c<COL_Price>( summary.m_vModelCells ).SetValue( sumPrice );
+
+      sumBid += multiplier * spread_none;
+      //sumBid += quan_dbl * spread_none;
+      boost::fusion::at_c<COL_Bid>( summary.m_vModelCells ).SetValue( sumBid );
+
+      sumAsk += multiplier * spread_full;
+      //sumAsk += quan_dbl * spread_full;
+      boost::fusion::at_c<COL_Ask>( summary.m_vModelCells ).SetValue( sumAsk );
+
+      double delta = boost::fusion::at_c<COL_Delta>( item.m_vModelCells ).GetValue();
+      sumDelta += multiplier * delta;
+      boost::fusion::at_c<COL_Delta>( summary.m_vModelCells ).SetValue( sumDelta );
+
+      double gamma = boost::fusion::at_c<COL_Gamma>( item.m_vModelCells ).GetValue();
+      sumGamma += multiplier * gamma;
+      boost::fusion::at_c<COL_Gamma>( summary.m_vModelCells ).SetValue( sumGamma );
+
+      double iv = boost::fusion::at_c<COL_IV>( item.m_vModelCells ).GetValue();
+      sumIV += quan_dbl * iv;
+      boost::fusion::at_c<COL_IV>( summary.m_vModelCells ).SetValue( sumIV / sumQuan_dbl );
+
+    }
+  }
+
+}
 
 void GridOptionComboOrder_impl::SetView( wxGrid *grid ) {
   wxGridTableBase::SetView( grid );
@@ -178,55 +260,97 @@ void GridOptionComboOrder_impl::SetValue( int row, int col, const wxString &valu
 }
 
 wxString GridOptionComboOrder_impl::GetValue( int ixRow, int ixCol ) {
-  wxString s;
+
   assert( 0 <= ixRow );
   assert( m_vOptionComboOrderRow.size() > ixRow );
+
+  wxString s;
   OptionComboOrderRow& row( m_vOptionComboOrderRow[ ixRow ] );
-  if ( OptionComboOrderRow::EType::empty == row.m_type ) {}
-  else {
-    switch ( ixCol ) {
-      case COL_OrderSide:
-        switch ( boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).GetValue() ) {
-          case ou::tf::OrderSide::Buy:
-            s = "Buy";
-            break;
-          case ou::tf::OrderSide::Sell:
-            s = "Sell";
-            break;
-          default:
-            assert( false );
-            break;
-        }
-        break;
-      case COL_Quan:
-        s = boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).GetText();
-        break;
-      case COL_Price:
-        s = boost::fusion::at_c<COL_Price>( row.m_vModelCells ).GetText();
-        break;
-      case COL_Name:
-        s = boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetText();
-        break;
-      case COL_Bid:
-        s = boost::fusion::at_c<COL_Bid>( row.m_vModelCells ).GetText();
-        break;
-      case COL_Ask:
-        s = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetText();
-        break;
-      case COL_Delta:
-        s = boost::fusion::at_c<COL_Delta>( row.m_vModelCells ).GetText();
-        break;
-      case COL_Gamma:
-        s = boost::fusion::at_c<COL_Gamma>( row.m_vModelCells ).GetText();
-        break;
-      case COL_IV:
-        s = boost::fusion::at_c<COL_IV>( row.m_vModelCells ).GetText();
-        break;
-      default:
-        s = "n/a";
-        break;
-    }
+
+  switch ( row.m_type ) {
+    case OptionComboOrderRow::EType::empty:
+      break;
+    case OptionComboOrderRow::EType::item:
+      switch ( ixCol ) {
+        case COL_OrderSide:
+          switch ( boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).GetValue() ) {
+            case ou::tf::OrderSide::Buy:
+              s = "Buy";
+              break;
+            case ou::tf::OrderSide::Sell:
+              s = "Sell";
+              break;
+            default:
+              assert( false );
+              break;
+          }
+          break;
+        case COL_Quan:
+          s = boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).GetText();
+          break;
+        case COL_Price:
+          s = boost::fusion::at_c<COL_Price>( row.m_vModelCells ).GetText();
+          break;
+        case COL_Name:
+          s = boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetText();
+          break;
+        case COL_Bid:
+          s = boost::fusion::at_c<COL_Bid>( row.m_vModelCells ).GetText();
+          break;
+        case COL_Ask:
+          s = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetText();
+          break;
+        case COL_Delta:
+          s = boost::fusion::at_c<COL_Delta>( row.m_vModelCells ).GetText();
+          break;
+        case COL_Gamma:
+          s = boost::fusion::at_c<COL_Gamma>( row.m_vModelCells ).GetText();
+          break;
+        case COL_IV:
+          s = boost::fusion::at_c<COL_IV>( row.m_vModelCells ).GetText();
+          break;
+        default:
+          s = "n/a";
+          break;
+      }
+      break;
+    case OptionComboOrderRow::EType::summary:
+      assert( ( c_nDefaultRows - 1 ) == ixRow );
+      switch ( ixCol ) {
+        case COL_OrderSide:
+          // empty
+          break;
+        case COL_Quan:
+          s = boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).GetText();
+          break;
+        case COL_Price:
+          s = boost::fusion::at_c<COL_Price>( row.m_vModelCells ).GetText();
+          break;
+        case COL_Name:
+          // empty
+          break;
+        case COL_Bid:
+          s = boost::fusion::at_c<COL_Bid>( row.m_vModelCells ).GetText();
+          break;
+        case COL_Ask:
+          s = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetText();
+          break;
+        case COL_Delta:
+          s = boost::fusion::at_c<COL_Delta>( row.m_vModelCells ).GetText();
+          break;
+        case COL_Gamma:
+          s = boost::fusion::at_c<COL_Gamma>( row.m_vModelCells ).GetText();
+          break;
+        case COL_IV:
+          s = boost::fusion::at_c<COL_IV>( row.m_vModelCells ).GetText();
+          break;
+        default:
+          s = "n/a";
+          break;
+      }
+      break;
   }
+
   return s;
 }
 
@@ -291,19 +415,24 @@ void GridOptionComboOrder_impl::PlaceComboOrder() {
 }
 
 void GridOptionComboOrder_impl::ClearRows() {
-  for (vOptionComboOrderRow_t::value_type& row: m_vOptionComboOrderRow ) {
-    if ( OptionComboOrderRow::EType::item == row.m_type ) {
-      if ( m_grid.m_fOptionDelegates_Detach ) {
-        ou::tf::option::Delegates delegates;
-        delegates.sSymbolName =  boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetValue();
-        delegates.fdQuote = fastdelegate::MakeDelegate( &row, &OptionComboOrderRow::UpdateQuote );
-        delegates.fdGreek = fastdelegate::MakeDelegate( &row, &OptionComboOrderRow::UpdateGreeks );
-        delegates.fdTrade = fastdelegate::MakeDelegate( &row, &OptionComboOrderRow::UpdateTrade );
-        m_grid.m_fOptionDelegates_Detach( delegates );
-      }
+  for ( vOptionComboOrderRow_t::value_type& row: m_vOptionComboOrderRow ) {
+    switch ( row.m_type ) {
+      case OptionComboOrderRow::EType::item:
+        if ( m_grid.m_fOptionDelegates_Detach ) {
+          ou::tf::option::Delegates delegates;
+          delegates.sSymbolName =  boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetValue();
+          delegates.fdQuote = fastdelegate::MakeDelegate( &row, &OptionComboOrderRow::UpdateQuote );
+          delegates.fdGreek = fastdelegate::MakeDelegate( &row, &OptionComboOrderRow::UpdateGreeks );
+          delegates.fdTrade = fastdelegate::MakeDelegate( &row, &OptionComboOrderRow::UpdateTrade );
+          m_grid.m_fOptionDelegates_Detach( delegates );
+        }
+        row.m_type = OptionComboOrderRow::EType::empty;
+        break;
+      case OptionComboOrderRow::EType::empty:
+        break;
+      case OptionComboOrderRow::EType::summary:
+        break;
     }
-
-    row.m_type = OptionComboOrderRow::EType::empty;
   }
 
   m_grid.ForceRefresh();

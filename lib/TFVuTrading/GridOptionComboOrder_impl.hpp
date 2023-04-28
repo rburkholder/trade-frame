@@ -148,7 +148,7 @@ struct GridOptionComboOrder_impl: public wxGridTableBase {
   void CreateControls();
   void DestroyControls();
 
-  //void Refresh();
+  void Refresh();
 
   void ClearRows();
   void PlaceComboOrder();
