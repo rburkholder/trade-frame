@@ -76,6 +76,8 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
       ( "dpgm",       LegNote::Type::DltaPlsGmMns )
       ( "dmgp",       LegNote::Type::DltaMnsGmPls )
       ( "dmgm",       LegNote::Type::DltaMnsGmMns )
+      ( "long",       LegNote::Type::Long )
+      ( "short",      LegNote::Type::Short )
       ;
 
     state_.add
@@ -97,6 +99,7 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
     momentum_.add
       ( "rise", LegNote::Momentum::Rise )
       ( "fall", LegNote::Momentum::Fall )
+      ( "unknown", LegNote::Momentum::Unknown )
       ;
 
     algo_.add
@@ -211,6 +214,12 @@ const std::string LegNote::Encode() const {
     case Type::DltaMnsGmMns:
       ss << "dmgm";
       break;
+    case Type::Long:
+      ss << "long";
+      break;
+    case Type::Short:
+      ss << "short";
+      break;
   }
 
   ss << ",state=";
@@ -253,6 +262,9 @@ const std::string LegNote::Encode() const {
       break;
     case Momentum::Fall:
       ss << "fall";
+      break;
+    case Momentum::Unknown:
+      ss << "unknown";
       break;
   }
 

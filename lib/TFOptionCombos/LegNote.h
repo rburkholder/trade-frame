@@ -36,11 +36,12 @@ public:
   enum class State { Open, Expired, Closed };
   enum class Type {
     SynthLong = 0, SynthShort = 1, Cover = 2, Protect = 3,
-    DltaPlsGmPls = 5, DltaPlsGmMns = 6, DltaMnsGmPls = 7, DltaMnsGmMns = 8
+    DltaPlsGmPls = 5, DltaPlsGmMns = 6, DltaMnsGmPls = 7, DltaMnsGmMns = 8,
+    Long = 11, Short = 12
     };
   enum class Side { Long, Short };
   enum class Option { Call, Put };
-  enum class Momentum { Rise, Fall };
+  enum class Momentum { Rise, Fall, Unknown };
   enum class Algo { Collar };
 
   struct values_t {
