@@ -130,6 +130,8 @@ public:
   using fConstructWatch_t  = std::function<void(const std::string&, fConstructedWatch_t&&)>;
   using fConstructOption_t = std::function<void(const std::string&, fConstructedOption_t&&)>;  // source from IQFeed Symbol Name
 
+  using pOrderCombo_t = ou::tf::OrderCombo::pOrderCombo_t;
+
   // TODO: ActivateOption to return lambda to update menu
   using fMenuActivation_t = std::function<void()>;
   struct MenuActivation {
@@ -197,6 +199,8 @@ public:
   bool AreOrdersActive() const;
   void SaveSeries( const std::string& sPrefix );
 
+  void Submit( pOrderCombo_t, const std::string& sComment );
+
 protected:
 
   static const double m_dblMaxStrikeDelta;
@@ -218,12 +222,10 @@ protected:
   //ComboLeg& LU( LegNote::Type );
   mapComboLeg_t::iterator LU( LegNote::Type );
 
-  using pOrderCombo_t = ou::tf::OrderCombo::pOrderCombo_t;
-
   using setpOrderCombo_t = std::unordered_set<pOrderCombo_t>;
   setpOrderCombo_t m_setpOrderCombo;
 
-  // does this require a mutex?
+  // does this require a mutex? used for removing completed orders?
   using vOrderComboIter_t = std::vector<setpOrderCombo_t::iterator>;
   vOrderComboIter_t m_vOrderComboIter;
 

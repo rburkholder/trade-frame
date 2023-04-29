@@ -274,15 +274,7 @@ void Combo::InitTracker(
       PositionNote( pPositionOld, LegNote::State::Closed );
       DeactivatePositionOption( pPositionOld );
 
-      auto pair = m_setpOrderCombo.insert( pOrderCombo );
-      assert( pair.second );
-
-      setpOrderCombo_t::iterator iter = pair.first;
-
-      pOrderCombo->Submit(
-        [this,iter](){
-          m_vOrderComboIter.push_back( iter );
-        } );
+      Submit( pOrderCombo, "Combo::InitTracker old position closed" );
 
       return pPosition;
     },
@@ -297,15 +289,8 @@ void Combo::InitTracker(
         pPositionOld,
         [](){} );
 
-      auto pair = m_setpOrderCombo.insert( pOrderCombo );
-      assert( pair.second );
+      Submit( pOrderCombo, "Combo::InitTracker old position rolled" );
 
-      setpOrderCombo_t::iterator iter = pair.first;
-
-      pOrderCombo->Submit(
-        [this,iter](){
-          m_vOrderComboIter.push_back( iter );
-        } );
     }
   );
 
@@ -362,6 +347,20 @@ void Combo::DeactivatePositionOption( pPosition_t pPosition ) {
   m_fDeactivateOption( pOption );
 }
 
+void Combo::Submit( pOrderCombo_t pOrderCombo, const std::string& sComment ) {
+
+  auto pair = m_setpOrderCombo.insert( pOrderCombo );
+  assert( pair.second );
+
+  setpOrderCombo_t::iterator iter = pair.first;
+
+  pOrderCombo->Submit(
+    [this,iter,sComment](){ // fComboDone_t
+      std::cout << sComment << std::endl;
+      m_vOrderComboIter.push_back( iter );
+    } );
+}
+
 // TODO: make use of doubleUnderlyingSlope to trigger exit latch
 void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {
 
@@ -369,10 +368,11 @@ void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt
     vt->Tick( dt );
   }
 
+  // clear the set of completed orders
   for ( setpOrderCombo_t::iterator iter: m_vOrderComboIter ) { // clean up
     m_setpOrderCombo.erase( iter );
-    m_vOrderComboIter.clear();
   }
+  m_vOrderComboIter.clear();
 
   using vRemove_t = std::vector<mapComboLeg_t::iterator>;
   vRemove_t vRemove;
