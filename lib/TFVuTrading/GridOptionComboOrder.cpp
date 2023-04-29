@@ -110,7 +110,7 @@ void GridOptionComboOrder::ClearOrders() {
 }
 
 void GridOptionComboOrder::PlaceComboOrder() {
-
+  m_pimpl->PlaceComboOrder();
 }
 
 void GridOptionComboOrder::OnDestroy( wxWindowDestroyEvent& event ) {

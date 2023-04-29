@@ -335,6 +335,7 @@ void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
                 pOption->OnTrade.Add( delegates.fdTrade );
                 pOption->OnQuote.Add( delegates.fdQuote );
                 pOption->OnGreek.Add( delegates.fdGreek );
+                pOption->StartWatch();
                 m_pOptionRegistry->Add( pOption );
               } );
           },
@@ -344,6 +345,7 @@ void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
               delegates.sSymbolName,
               [this,delegates]( pOption_t pOption ){
                 m_pOptionRegistry->Remove( pOption, false );
+                pOption->StopWatch();
                 pOption->OnTrade.Remove( delegates.fdTrade );
                 pOption->OnQuote.Remove( delegates.fdQuote );
                 pOption->OnGreek.Remove( delegates.fdGreek );
@@ -352,16 +354,77 @@ void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
         );
 
         m_pInterfaceBookOptionChains->Set(
-          []( ou::tf::InterfaceBookOptionChain::fIterateLegs_t&& fIterateLegs ){
+          [this]( ou::tf::InterfaceBookOptionChain::fIterateLegs_t&& fIterateLegs ){
 
-            // initialize stuff here
+            using pOrderCombo_t = ou::tf::OrderCombo::pOrderCombo_t;
+            pOrderCombo_t pOrderCombo = ou::tf::OrderCombo::Factory();
 
             fIterateLegs(
-              []( ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sIQFeedName ){
+              [this,pOrderCombo]( ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sIQFeedName ){
+                m_fConstructOption(
+                  sIQFeedName,
+                  [this, pOrderCombo, side, quan, price]( pOption_t pOption ){
+
+                    ou::tf::option::Option& option( *pOption );
+
+                    ou::tf::option::LegNote::values_t lnValues;
+                    //combo_t::FillLegNote( ix, direction, lnValues );
+                    switch ( side ) {
+                      case ou::tf::OrderSide::Buy:
+                        lnValues.m_side = ou::tf::option::LegNote::Side::Long;
+                        lnValues.m_type = ou::tf::option::LegNote::Type::Long; // default, changed in next step
+                        break;
+                      case ou::tf::OrderSide::Sell:
+                        lnValues.m_side = ou::tf::option::LegNote::Side::Short;
+                        lnValues.m_type = ou::tf::option::LegNote::Type::Short; // default, changed in next step
+                        break;
+                      default:
+                        assert( false );
+                        break;
+                    }
+                    switch ( option.GetInstrument()->GetRow().eOptionSide ) {
+                      case ou::tf::OptionSide::Call:
+                        lnValues.m_option = ou::tf::option::LegNote::Option::Call;
+                        switch ( side ) {
+                          case ou::tf::OrderSide::Buy:
+                            lnValues.m_type = ou::tf::option::LegNote::Type::DltaPlsGmPls;
+                            break;
+                          case ou::tf::OrderSide::Sell:
+                            lnValues.m_type = ou::tf::option::LegNote::Type::DltaMnsGmMns;
+                            break;
+                        }
+                        break;
+                      case ou::tf::OptionSide::Put:
+                        lnValues.m_option = ou::tf::option::LegNote::Option::Put;
+                        switch ( side ) {
+                          case ou::tf::OrderSide::Buy:
+                            lnValues.m_type = ou::tf::option::LegNote::Type::DltaMnsGmPls;
+                            break;
+                          case ou::tf::OrderSide::Sell:
+                            lnValues.m_type = ou::tf::option::LegNote::Type::DltaPlsGmMns;
+                            break;
+                        }
+                        break;
+                      default:
+                        assert( false );
+                        break;
+                    }
+                    lnValues.m_state = ou::tf::option::LegNote::State::Open;
+                    lnValues.m_algo = ou::tf::option::LegNote::Algo::Collar;
+                    lnValues.m_momentum = ou::tf::option::LegNote::Momentum::Unknown;
+                    ou::tf::option::LegNote ln( lnValues );
+
+                    const idPortfolio_t idPortfolio = m_pCombo->GetPortfolio()->GetRow().idPortfolio;
+
+                    pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, ln.Encode() );
+                    assert( pPosition );
+                    m_pCombo->SetPosition( pPosition );
+
+                    pOrderCombo->AddLeg( pPosition, quan, side, [](){} /* fLegDone_t&& */ );
+                  });
               }
              );
-
-            // finish up here
+            m_pCombo->Submit( pOrderCombo, "ManageStrategy combo positions added" );
           }
         );
 
