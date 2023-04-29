@@ -130,6 +130,66 @@ void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, c
     )
   );
 
+  // === vertical/diagonal roll for profitable long synthetic when trend is in wrong direction
+  m_mapInitTrackOption.emplace(
+    std::make_pair(
+      LegNote::Type::DltaPlsGmPls, // long call
+      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){
+        InitTrackLongOption( cleg, pmapChains, date, days );
+      }
+    )
+  );
+
+  // === close out at minimum value, calendar roll to continue (auto or manual?)
+  m_mapInitTrackOption.emplace(
+    std::make_pair(
+      LegNote::Type::DltaPlsGmMns, // short put
+      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){
+        InitTrackLongOption( cleg, pmapChains, date, days );
+      }
+    )
+  );
+
+  // === vertical/diagonal roll for profitable long synthetic when trend is in wrong direction
+  m_mapInitTrackOption.emplace(
+    std::make_pair(
+      LegNote::Type::DltaMnsGmPls, // long put
+      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){ // make money on the sold premium
+        InitTrackShortOption( cleg, pmapChains, date, days );
+      }
+    )
+  );
+
+  // === close out at minimum value, calendar roll to continue (auto or manual?)
+  m_mapInitTrackOption.emplace(
+    std::make_pair(
+      LegNote::Type::DltaMnsGmMns, // short call
+      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){ // make money on the sold premium
+        InitTrackShortOption( cleg, pmapChains, date, days );
+      }
+    )
+  );
+
+  // === vertical/diagonal roll for profitable long synthetic when trend is in wrong direction
+  m_mapInitTrackOption.emplace(
+    std::make_pair(
+      LegNote::Type::Long,
+      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){ // make money on the sold premium
+        InitTrackLongOption( cleg, pmapChains, date, days );
+      }
+    )
+  );
+
+  // === close out at minimum value, calendar roll to continue (auto or manual?)
+  m_mapInitTrackOption.emplace(
+    std::make_pair(
+      LegNote::Type::Short,
+      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){ // make money on the sold premium
+        InitTrackShortOption( cleg, pmapChains, date, days );
+      }
+    )
+  );
+
 }
 
 size_t /* static */ Collar::LegCount() {
@@ -213,8 +273,6 @@ size_t /* static */ Collar::LegCount() {
   values.m_state = LegNote::State::Open;
 
   switch ( direction ) {
-    case E20DayDirection::Unknown:
-      break;
     case E20DayDirection::Rising:
       values.m_momentum = LegNote::Momentum::Rise;
       values.m_type     = c_rLegDefRise[ix].type;
@@ -226,6 +284,9 @@ size_t /* static */ Collar::LegCount() {
       values.m_type     = c_rLegDefFall[ix].type;
       values.m_side     = c_rLegDefFall[ix].side;
       values.m_option   = c_rLegDefFall[ix].option;
+      break;
+    case E20DayDirection::Unknown:
+      assert( false );
       break;
   }
 
@@ -306,16 +367,8 @@ void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuan
       assert( false );
   }
 
-  auto pair = m_setpOrderCombo.insert( pOrderCombo );
-  assert( pair.second );
+  Submit( pOrderCombo, "Collar::PlaceOrder complete" );
 
-  setpOrderCombo_t::iterator iter = pair.first;
-
-  pOrderCombo->Submit(
-    [this,iter](){ // fComboDone_t
-      std::cout << "Collar::PlaceOrder complete" << std::endl;
-      m_vOrderComboIter.push_back( iter );
-    } );
 }
 
 } // namespace option
