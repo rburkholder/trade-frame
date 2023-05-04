@@ -739,20 +739,22 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
             pFrame->Bind( wxEVT_MOVE, &MasterPortfolio::HandleFramePanelComboOrder_Move, this );
             pFrame->Bind( wxEVT_SIZE, &MasterPortfolio::HandleFramePanelComboOrder_Size, this );
 
+            ou::tf::PanelComboOrder* pPanel = new ou::tf::PanelComboOrder( pFrame, wxID_ANY );
+            pFrame->Attach( pPanel );
+
             if ( m_bFramePanelComboOrder ) {
-              pFrame->SetSize( m_sizeFramePanelComboOrder );
-              pFrame->Move( m_pointFramePanelComboOrder );
+              //pFrame->SetSize( m_sizeFramePanelComboOrder );
+              //pFrame->Move( m_pointFramePanelComboOrder );
+              pFrame->SetSize( m_pointFramePanelComboOrder.x, m_pointFramePanelComboOrder.y, m_sizeFramePanelComboOrder.GetWidth(), m_sizeFramePanelComboOrder.GetHeight() );
             }
             else {
+              //pFrame->CentreOnParent();
               m_pointFramePanelComboOrder = pFrame->GetPosition();
               m_sizeFramePanelComboOrder = pFrame->GetSize();
               m_bFramePanelComboOrder = true;
             }
 
-            ou::tf::PanelComboOrder* pPanel = new ou::tf::PanelComboOrder( pFrame, wxID_ANY );
-            pFrame->Attach( pPanel );
-
-            //pFrame->Layout();
+            pFrame->Layout();
             pFrame->Show( true ); // TODO: center above main
 
             auto dt = ou::TimeSource::GlobalInstance().Internal();
