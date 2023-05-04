@@ -1,3 +1,11 @@
+## 2023/04/29
+
+https://0-dte.com/10-things-to-consider-with-trading-0dte-options/
+10 Things to Consider with Trading 0DTE Options
+Understanding Price Differences Between the ES and SPX in 0DTE Options Trading
+Comparing ES and SPX Options in 0DTE Trading
+The Best ES Options Strategies for 0DTE Trading
+
 ## 2021/05/20
 
 https://www.investopedia.com/trading/options-trading-volume-and-open-interest/
