@@ -358,6 +358,8 @@ private:
   void HandleFramePanelComboOrder_Move( wxMoveEvent& );
   void HandleFramePanelComboOrder_Size( wxSizeEvent& );
 
+  void OnDestroy_PanelFinancialChart( wxWindowDestroyEvent& );
+
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
   }

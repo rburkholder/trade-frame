@@ -398,6 +398,7 @@ void AppBasketTrading::LoadState() {
 }
 
 void AppBasketTrading::OnClose( wxCloseEvent& event ) {
+  // prior to OnExit
 
   if ( m_worker.joinable() ) m_worker.join();
   m_timerGuiRefresh.Stop();
@@ -408,6 +409,11 @@ void AppBasketTrading::OnClose( wxCloseEvent& event ) {
 
   SaveState();
 
+  if ( m_pPanelFinancialChart ) { // prior to destruction of m_pMasterPortfolio
+    m_pPanelFinancialChart->Destroy();
+    m_pPanelFinancialChart = nullptr;
+  }
+
   m_pMasterPortfolio.reset();
 
   if ( m_db.IsOpen() ) m_db.Close();
@@ -416,6 +422,7 @@ void AppBasketTrading::OnClose( wxCloseEvent& event ) {
 }
 
 int AppBasketTrading::OnExit() {
+  // after OnClose
 
   return 0;
 }

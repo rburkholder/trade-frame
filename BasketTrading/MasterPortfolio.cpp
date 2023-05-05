@@ -137,6 +137,8 @@ MasterPortfolio::MasterPortfolio(
       m_pPanelFinancialChart->SetChartDataView( pChartDataView );
     };
 
+  m_pPanelFinancialChart->Bind( wxEVT_DESTROY, &MasterPortfolio::OnDestroy_PanelFinancialChart, this );
+
   m_ptiTreeRoot = m_pPanelFinancialChart->SetRoot( "Master P/L", m_pcdvMasterPortfolioPL );
   m_ptiTreeRoot->NewMenu();
   m_ptiTreeRoot->AppendMenuItem(
@@ -187,14 +189,14 @@ MasterPortfolio::MasterPortfolio(
 }
 
 MasterPortfolio::~MasterPortfolio() {
+
   if ( m_worker.joinable() ) {
     m_worker.join();
   }
 
-  // captured pManageStrategy needs to be cleared
-  m_ptiTreeStrategies->Delete();
-  m_ptiTreeUnderlying->Delete();
-  m_ptiTreeRoot->Delete();
+  assert( nullptr == m_ptiTreeRoot );
+  assert( nullptr == m_ptiTreeUnderlying );
+  assert( nullptr == m_ptiTreeStrategies );
 
   //TODO: need to wait for m_pOptionEngine to finish
   //m_mapVolatility.clear();
@@ -1090,4 +1092,27 @@ void MasterPortfolio::HandleFramePanelComboOrder_Move( wxMoveEvent& event ) {
 void MasterPortfolio::HandleFramePanelComboOrder_Size( wxSizeEvent& event ) {
   m_sizeFramePanelComboOrder = event.GetSize();
   event.Skip();
+}
+
+void MasterPortfolio::OnDestroy_PanelFinancialChart( wxWindowDestroyEvent& event ) {
+
+  m_pPanelFinancialChart->Unbind( wxEVT_DESTROY, &MasterPortfolio::OnDestroy_PanelFinancialChart, this );
+
+  // captured pManageStrategy needs to be cleared
+  if ( m_ptiTreeStrategies ) {
+    m_ptiTreeStrategies->Delete();
+    m_ptiTreeStrategies = nullptr;
+  }
+
+  if ( m_ptiTreeUnderlying ) {
+    m_ptiTreeUnderlying->Delete();
+    m_ptiTreeUnderlying = nullptr;
+  }
+
+  if ( m_ptiTreeRoot ) {
+    m_ptiTreeRoot->Delete();
+    m_ptiTreeRoot = nullptr;
+  }
+
+  event.Skip( true );
 }
