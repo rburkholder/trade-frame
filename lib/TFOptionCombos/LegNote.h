@@ -34,10 +34,11 @@ class LegNote {
 public:
 
   enum class State { Open, Expired, Closed };
-  enum class Type {
-    SynthLong = 0, SynthShort = 1, Cover = 2, Protect = 3,
-    DltaPlsGmPls = 5, DltaPlsGmMns = 6, DltaMnsGmPls = 7, DltaMnsGmMns = 8,
-    Long = 11, Short = 12
+  enum class Type { // Name_Type relies on this order
+    SynthLong = 0, SynthShort, Cover, Protect,
+    DltaPlsGmPls, DltaPlsGmMns, DltaMnsGmPls, DltaMnsGmMns,
+    Long, Short,
+    _size
     };
   enum class Side { Long, Short };
   enum class Option { Call, Put };

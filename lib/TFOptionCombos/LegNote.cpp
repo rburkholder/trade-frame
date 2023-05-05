@@ -19,6 +19,7 @@
  * Created: January 1, 2021, 15:50
  */
 
+#include <array>
 #include <sstream>
 #include <stdexcept>
 
@@ -30,15 +31,6 @@
 #include <boost/phoenix/core.hpp>
 
 #include "LegNote.h"
-
-namespace {
-  static const char* Name_Type[] = {
-      "SynthLong"
-    , "SynthShort"
-    , "Cover"
-    , "Protect"
-  };
-}
 
 using values_t = ou::tf::option::LegNote::values_t;
 
@@ -58,26 +50,43 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
+namespace {
+  using rName_Type_t = std::array<std::string,(size_t)LegNote::Type::_size>;
+  static const rName_Type_t rName_Type = {
+      "SynthLong"
+    , "SynthShort"
+    , "Cover"
+    , "Protect"
+    , "DltaPlsGmPls"
+    , "DltaPlsGmMns"
+    , "DltaMnsGmPls"
+    , "DltaMnsGmMns"
+    , "Long"
+    , "Short"
+  };
+}
+
 namespace qi = boost::spirit::qi;
 
 template<typename Iterator>
 struct LegNoteParser: qi::grammar<Iterator, values_t()> {
 
-  LegNoteParser( void): LegNoteParser::base_type( start ) {
+
+  LegNoteParser(): LegNoteParser::base_type( start ) {
 
     // Todo, case insensitive: https://www.boost.org/doc/libs/1_75_0/libs/spirit/doc/html/spirit/qi/reference/string/symbols.html
-
+    #define TYPE_ADD( val ) ( rName_Type[ (size_t)val ], val )
     type_.add
-      ( "synthlong",  LegNote::Type::SynthLong )
-      ( "synthshort", LegNote::Type::SynthShort )
-      ( "cover",      LegNote::Type::Cover )
-      ( "protect",    LegNote::Type::Protect )
-      ( "dpgp",       LegNote::Type::DltaPlsGmPls )
-      ( "dpgm",       LegNote::Type::DltaPlsGmMns )
-      ( "dmgp",       LegNote::Type::DltaMnsGmPls )
-      ( "dmgm",       LegNote::Type::DltaMnsGmMns )
-      ( "long",       LegNote::Type::Long )
-      ( "short",      LegNote::Type::Short )
+      TYPE_ADD( LegNote::Type::SynthLong )
+      TYPE_ADD( LegNote::Type::SynthShort )
+      TYPE_ADD( LegNote::Type::Cover )
+      TYPE_ADD( LegNote::Type::Protect )
+      TYPE_ADD( LegNote::Type::DltaPlsGmPls )
+      TYPE_ADD( LegNote::Type::DltaPlsGmMns )
+      TYPE_ADD( LegNote::Type::DltaMnsGmPls )
+      TYPE_ADD( LegNote::Type::DltaMnsGmMns )
+      TYPE_ADD( LegNote::Type::Long )
+      TYPE_ADD( LegNote::Type::Short )
       ;
 
     state_.add
@@ -188,39 +197,7 @@ const std::string LegNote::Encode() const {
 
   std::stringstream ss;
 
-  ss << "type=";
-  switch ( m_values.m_type ) {
-    case Type::Cover:
-      ss << "cover";
-      break;
-    case Type::Protect:
-      ss << "protect";
-      break;
-    case Type::SynthLong:
-      ss << "synthlong";
-      break;
-    case Type::SynthShort:
-      ss << "synthshort";
-      break;
-    case Type::DltaPlsGmPls:
-      ss << "dpgp";
-      break;
-    case Type::DltaPlsGmMns:
-      ss << "dpgm";
-      break;
-    case Type::DltaMnsGmPls:
-      ss << "dmgp";
-      break;
-    case Type::DltaMnsGmMns:
-      ss << "dmgm";
-      break;
-    case Type::Long:
-      ss << "long";
-      break;
-    case Type::Short:
-      ss << "short";
-      break;
-  }
+  ss << "type=" << rName_Type[ (size_t)m_values.m_type];
 
   ss << ",state=";
   switch ( m_values.m_state ) {
@@ -322,7 +299,8 @@ void LegNote::Parse( const std::string& s ) {
 }
 
 std::string LegNote::LU( Type type ) {
-  return std::string( Name_Type[ (int)type ] );
+  assert( (size_t)Type::_size > (size_t)type );
+  return ( rName_Type[ (size_t)type ] );
 }
 
 } // namespace option
