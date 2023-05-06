@@ -11,6 +11,7 @@ set(
     Dispatcher.h
     FeatureSet.hpp
     FeatureSet_Level.hpp
+    FeatureSet_Level_impl.hpp
     MsgOrderArrival.h
     MsgOrderDelete.h
     MsgPriceLevelArrival.h
@@ -23,6 +24,7 @@ set(
     Dispatcher.cpp
     FeatureSet.cpp
     FeatureSet_Level.cpp
+    FeatureSet_Level_impl.cpp
     MsgOrderArrival.cpp
     MsgOrderDelete.cpp
     MsgPriceLevelArrival.cpp

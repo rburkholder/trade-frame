@@ -22,6 +22,7 @@
 #include <string>
 
 #include "FeatureSet_Level.hpp"
+#include "FeatureSet_Level_impl.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -308,30 +309,15 @@ void FeatureSet_Level::Bid_IncCancel( const ou::tf::Depth& depth ) {
 }
 
 const std::string FeatureSet_Level::Header( const size_t level ) {
+
+  #define QUOTED( VALUE ) #VALUE
+
+  #define VECTOR_VALUE(z,n,data) \
+    BOOST_PP_COMMA_IF(n) \
+    QUOTED(BOOST_PP_ARRAY_ELEM(n,ARRAY_NAMES))
+
   static const std::vector<std::string> vColumnName = {
-      "ask.v1.vol", "ask.v1.price"
-    , "ask.v1.aggvol", "ask.v1.aggprice"
-    , "ask.v3.diff2top", "ask.v3.diff2adj"
-    , "ask.v4.mean.price", "ask.v4.mean.vol"
-    , "ask.v6.dprice", "ask.v6.dvol"
-    , "ask.v7.limit.int" ,"ask.v7.mrkt.int", "ask.v7.cncl.int"
-    , "ask.v8.limit.int", "ask.v8.mrkt.int", "ask.v8.cncl.int"
-    , "ask.v8.limit.rel", "ask.v8.mrkt.rel", "ask.v8.cncl.rel"
-    , "ask.v9.limit", "ask.v9.mrkt", "ask.v9.cncl"
-
-    , "bid.v1.vol", "bid.v1.price"
-    , "bid.v1.aggvol", "bid.v1.aggprice"
-    , "bid.v3.diff2top", "bid.v3.diff2adj"
-    , "bid.v4.mean.price", "ask.v4.mean.vol"
-    , "bid.v6.dprice", "bid.v6.dvol"
-    , "bid.v7.limit.int", "bid.v7.mrkt.int", "bid.v7.cncl.int"
-    , "bid.v8.limit.int", "bid.v8.mrkt.int", "bid.v8.cncl.int"
-    , "bid.v8.limit.rel", "bid.v8.mrkt.rel", "bid.v8.cncl.rel"
-    , "bid.v9.limit", "bid.v9.mrkt", "bid.v9.cncl"
-
-    , "cross.v2.spread", "cross.v2.mid"
-    , "cross.v2.imbal.lvl", "cross.v2.imbal.agg"
-    , "cross.v5.sum.price.spread", "cross.v5.sum.vol.spread"
+    BOOST_PP_REPEAT( ARRAY_NAMES_SIZE, VECTOR_VALUE, 0 )
   };
 
   bool bComma( false );
@@ -349,76 +335,14 @@ const std::string FeatureSet_Level::Header( const size_t level ) {
 }
 
 std::ostream& FeatureSet_Level::operator<<( std::ostream& stream ) const {
+
+  #define COMMA << ','
+  #define EMIT_VALUE(z,n,data) \
+    BOOST_PP_IF(1, COMMA, BOOST_PP_EMPTY) \
+    << BOOST_PP_ARRAY_ELEM(n,ARRAY_NAMES )
+
   stream
-           << ask.v1.volume
-    << ',' << ask.v1.price
-    << ',' << ask.v1.aggregateVolume
-    << ',' << ask.v1.aggregatePrice
-
-    << ',' << ask.v3.diffToTop
-    << ',' << ask.v3.diffToAdjacent
-
-    << ',' << ask.v4.meanPrice
-    << ',' << ask.v4.meanVolume
-
-    << ',' << ask.v6.dPrice_dt
-    << ',' << ask.v6.dVolume_dt
-
-    << ',' << ask.v7.intensityLimit
-    << ',' << ask.v7.intensityMarket
-    << ',' << ask.v7.intensityCancel
-
-    << ',' << ask.v8.intensityLimit
-    << ',' << ask.v8.intensityMarket
-    << ',' << ask.v8.intensityCancel
-
-    << ',' << ask.v8.relativeLimit
-    << ',' << ask.v8.relativeMarket
-    << ',' << ask.v8.relativeCancel
-
-    << ',' << ask.v9.accelLimit
-    << ',' << ask.v9.accelMarket
-    << ',' << ask.v9.accelCancel
-
-    << ',' << bid.v1.volume
-    << ',' << bid.v1.price
-    << ',' << bid.v1.aggregateVolume
-    << ',' << bid.v1.aggregatePrice
-
-    << ',' << bid.v3.diffToTop
-    << ',' << bid.v3.diffToAdjacent
-
-    << ',' << bid.v4.meanPrice
-    << ',' << bid.v4.meanVolume
-
-    << ',' << bid.v6.dPrice_dt
-    << ',' << bid.v6.dVolume_dt
-
-    << ',' << bid.v7.intensityLimit
-    << ',' << bid.v7.intensityMarket
-    << ',' << bid.v7.intensityCancel
-
-    << ',' << bid.v8.intensityLimit
-    << ',' << bid.v8.intensityMarket
-    << ',' << bid.v8.intensityCancel
-
-    << ',' << bid.v8.relativeLimit
-    << ',' << bid.v8.relativeMarket
-    << ',' << bid.v8.relativeCancel
-
-    << ',' << bid.v9.accelLimit
-    << ',' << bid.v9.accelMarket
-    << ',' << bid.v9.accelCancel
-
-    << ',' << cross.v2.spread
-    << ',' << cross.v2.mid
-
-    << ',' << cross.v2.imbalanceLvl
-    << ',' << cross.v2.imbalanceAgg
-
-    << ',' << cross.v5.sumPriceSpreads
-    << ',' << cross.v5.sumVolumeSpreads
-
+    BOOST_PP_REPEAT( ARRAY_NAMES_SIZE, EMIT_VALUE, 0 )
     ;
   return stream;
 }
