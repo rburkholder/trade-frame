@@ -41,6 +41,8 @@ namespace l2 { // level 2 data
 class FeatureSet_Level {
 public:
 
+   // == -> variables requiring emission flag
+
   // if a level changes, change those plus deeper
   // if a level is added / removed, recalc all levels
 
@@ -49,12 +51,11 @@ public:
 
   struct V1 { // absolute
 
-    price_t price;
-    volume_t volume;
+    price_t price; // ==
+    price_t aggregatePrice; // ==
 
-    double aggregateVolume;
-
-    price_t aggregatePrice;
+    volume_t volume; // ==
+    double aggregateVolume; // ==
 
     bool bNew; // can't tell a removal, but an addition might be significant
 
@@ -67,15 +68,15 @@ public:
   };
 
   struct V3 { // diff
-    price_t diffToTop;
-    price_t diffToAdjacent;
+    price_t diffToTop; // ==
+    price_t diffToAdjacent; // ==
     V3(): diffToTop {}, diffToAdjacent {}
     {}
   };
 
   struct V4 { // absolute
-    price_t meanPrice;
-    volume_t meanVolume;
+    price_t meanPrice; // ==
+    volume_t meanVolume; // ==
     V4(): meanPrice {}, meanVolume {}
     {}
   };
@@ -85,9 +86,9 @@ public:
     ptime dtLast;
     double deltaArrival;
 
-    price_t dPrice_dt;
+    price_t dPrice_dt; // ==
 
-    volume_t dVolume_dt;
+    volume_t dVolume_dt; // ==
 
     V6()
     : dtLast( boost::posix_time::not_a_date_time )
@@ -99,13 +100,13 @@ public:
   struct V7 { // intensity over per unit time (1 sec)
 
     ptime dtLastLimit;
-    double intensityLimit; // short term intensity
+    double intensityLimit; // short term intensity // ==
 
     ptime dtLastMarket;
-    double intensityMarket; // short term intensity
+    double intensityMarket; // short term intensity // ==
 
     ptime dtLastCancel;
-    double intensityCancel; // short term intensity
+    double intensityCancel; // short term intensity // ==
 
     V7()
     : dtLastLimit(  boost::posix_time::not_a_date_time ), intensityLimit  {}
@@ -116,14 +117,14 @@ public:
 
   struct V8 { // relative intensity of short period vs long period (10s vs 900s)
 
-    double intensityLimit; // long term intensity
-    double relativeLimit; // ratio of short term intensity vs long term intensity
+    double intensityLimit; // == // long term intensity
+    double relativeLimit; // == // ratio of short term intensity vs long term intensity
 
-    double intensityMarket; // long term intensity
-    double relativeMarket; // ratio of short term intensity vs long term intensity
+    double intensityMarket; // == // long term intensity
+    double relativeMarket; // == // ratio of short term intensity vs long term intensity
 
-    double intensityCancel; // long term intensity
-    double relativeCancel; // ratio of short term intensity vs long term intensity
+    double intensityCancel; // == // long term intensity
+    double relativeCancel; // == // ratio of short term intensity vs long term intensity
 
     V8()
     : intensityLimit  {}, relativeLimit  {}
@@ -133,9 +134,9 @@ public:
   };
 
   struct V9 { // accelleration of trading type per unit time (vs previous 1 sec) - accel( v7 )
-    double accelLimit;
-    double accelMarket;
-    double accelCancel;
+    double accelLimit; // ==
+    double accelMarket; // ==
+    double accelCancel; // ==
     V9()
     : accelLimit {}
     , accelMarket {}
@@ -163,16 +164,16 @@ public:
   BookLevel bid;
 
   struct V2 {
-    price_t spread; // diff
-    price_t mid;    // absolute
-    double imbalanceLvl;  // (volBid - volAsk ) / ( volBid + volAsk ) -- not in the paper
-    double imbalanceAgg;  // (volBid - volAsk ) / ( volBid + volAsk ) -- not in the paper
+    price_t spread; // == // diff
+    price_t mid;    // == // absolute
+    double imbalanceLvl;  // == // (volBid - volAsk ) / ( volBid + volAsk ) -- not in the paper
+    double imbalanceAgg;  // == // (volBid - volAsk ) / ( volBid + volAsk ) -- not in the paper
     V2(): spread {}, mid {}, imbalanceLvl {}, imbalanceAgg {} {}
   };
 
   struct V5 { // sum(diff)
-    price_t sumPriceSpreads;
-    double sumVolumeSpreads;
+    price_t sumPriceSpreads; // ==
+    double sumVolumeSpreads; // ==
     V5(): sumPriceSpreads {}, sumVolumeSpreads {} {}
   };
 
