@@ -22,10 +22,7 @@
 #pragma once
 
 #include <map>
-//#include <vector>
 #include <string_view>
-
-#include <boost/describe/enum.hpp>
 
 #include <boost/preprocessor/tuple/enum.hpp>
 #include <boost/preprocessor/tuple/to_array.hpp>
@@ -38,17 +35,6 @@
 #include <boost/fusion/container/vector.hpp>
 
 #include "FeatureSet_Level.hpp"
-
-using vName_t = std::vector<std::string_view>;
-static const vName_t vName {
-  "ask.v1.aggregatePrice"
-, "ask.v4.meanVolume"
-};
-
-BOOST_DEFINE_ENUM(
-  EColumn
-, ask_v1_volume
-)
 
 #define TUPLE_NAMES ( \
     ask.v1.volume \
@@ -131,6 +117,7 @@ namespace l2 { // level 2 data
 
 class FeatureSet_Column {
 public:
+
   using price_t = FeatureSet_Level::price_t;
   using volume_t = FeatureSet_Level::volume_t;
 

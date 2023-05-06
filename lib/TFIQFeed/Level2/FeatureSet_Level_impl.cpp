@@ -45,12 +45,6 @@ FeatureSet_Column::FeatureSet_Column( FeatureSet_Level& level )
     BOOST_PP_REPEAT( ARRAY_NAMES_SIZE, FUSION_VECTOR_REFERENCES, 0 )
 )
 {
-  using test_t = boost::fusion::vector<
-    decltype( level.ask.v1.aggregatePrice )&
-  , decltype( level.ask.v4.meanVolume )&
-  >;
-
-  test_t test( level.ask.v1.aggregatePrice, level.ask.v4.meanVolume );
 }
 
 } // namespace l2
