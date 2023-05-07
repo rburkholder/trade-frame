@@ -23,6 +23,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -55,6 +56,9 @@ struct symbol_t {
 
   bool bTradable;
   bool bEmitFVS;
+
+  using vSentinel_t = std::vector<std::string>; // convert to struct with string/level later
+  vSentinel_t vSentinel;
 
   double dblCommission;
 

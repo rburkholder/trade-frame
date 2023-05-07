@@ -45,6 +45,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   (double, dblCommission)
   (bool, bTradable)
   (bool, bEmitFVS)
+  (ou::tf::config::symbol_t::vSentinel_t, vSentinel)
   (ou::tf::config::symbol_t::EAlgorithm, eAlgorithm)
   (std::string, sSignalFrom)
   (boost::gregorian::days, dte)
@@ -216,6 +217,14 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> luBool
       >> *qi::lit(' ') >> qi::eol;
 
+    ruleSentinel
+      %= qi::lit("sentinel")
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> *( qi::char_("A-Za-z0-9." ) )
+      >> *qi::lit(' ') >> qi::eol;
+
+    ruleSentinelVector %= +ruleSentinel;
+
     ruleAlgorithm
       %= qi::lit("algorithm")
       >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
@@ -311,6 +320,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> -ruleCommission
       >> -ruleTradable
       >> -ruleEmitFVS
+      >> -ruleSentinelVector
       >> -ruleAlgorithm
       >> -ruleSignalFrom
       >> -ruleDaysToExpiry
@@ -393,6 +403,8 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   qi::rule<Iterator, ou::tf::config::symbol_t::EFeed()> ruleFeed;
   qi::rule<Iterator, bool()> ruleTradable;
   qi::rule<Iterator, bool()> ruleEmitFVS;
+  qi::rule<Iterator, std::string()> ruleSentinel;
+  qi::rule<Iterator, ou::tf::config::symbol_t::vSentinel_t()> ruleSentinelVector;
   qi::rule<Iterator, size_t()> rulePriceBins;
   qi::rule<Iterator, double()> rulePriceUpper;
   qi::rule<Iterator, double()> rulePriceLower;
