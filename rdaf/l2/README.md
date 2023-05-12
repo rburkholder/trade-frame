@@ -38,6 +38,8 @@ feed=<l1|l2m|l2o>
 sym_symbol=ES-20230317
 trade=yes
 emit_fvs=yes
+sentinel=ask.v1.price
+sentinel=bid.v1.price
 algorithm=<future|equity_option>
 period_width=3
 ma1_periods=5
@@ -72,6 +74,8 @@ volume_upper=500000
 volume_lower=0
 ```
 * group_directory is optional if sim_start is off.
+* sentinel column names are listed in lib/TFIQFeed/Level2/FeatureSet_Level_impl.hpp
+* sentinel columns are the ones which must change to trigger an emit_fvs
 
 ### x64/debug/rdaf/l2/app.db
 
