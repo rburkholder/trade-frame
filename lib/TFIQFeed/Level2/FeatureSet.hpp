@@ -45,6 +45,7 @@ public:
 
   using price_t = ou::tf::Trade::price_t;
   using volume_t = ou::tf::Trade::volume_t;
+  using vSentinel_t = std::vector<std::string>;
 
   FeatureSet();
   ~FeatureSet();
@@ -52,6 +53,7 @@ public:
   // Initialization
 
   void Set( size_t nLevels );
+  void Set( const vSentinel_t& );
 
   // Queries
 
@@ -77,6 +79,7 @@ public:
 
   bool IntegrityCheck() const;
   const std::string Header();
+  void Changed( bool& );
   std::ostream& operator<<( std::ostream& s ) const;
 
 protected:

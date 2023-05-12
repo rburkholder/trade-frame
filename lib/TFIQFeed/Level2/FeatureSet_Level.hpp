@@ -38,6 +38,8 @@ namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 namespace l2 { // level 2 data
 
+class FeatureSet_Column;
+
 class FeatureSet_Level {
 public:
 
@@ -185,8 +187,13 @@ public:
   CrossLevel cross;
 
   FeatureSet_Level();
+  FeatureSet_Level( FeatureSet_Level&& );
+  ~FeatureSet_Level();
+
+  using vSentinel_t = std::vector<std::string>;
 
   void Set( int ix, FeatureSet_Level* pTop, FeatureSet_Level* pNext );
+  void Set( const vSentinel_t& );
 
   void Ask_Activate( bool bActive ) { ask.bActive = bActive; }
   void Bid_Activate( bool bActive ) { bid.bActive = bActive; }
@@ -208,6 +215,7 @@ public:
   void Bid_IncCancel( const ou::tf::Depth& );
 
   static const std::string Header( const size_t level );
+  void Changed( bool& ) const;
   std::ostream& operator<<( std::ostream& s ) const;
 
 protected:
@@ -219,6 +227,8 @@ private:
   FeatureSet_Level* m_pNext; // pointer only, no memory
 
   FeatureSet_Level& operator=( const FeatureSet_Level& ) = delete;
+
+  std::unique_ptr<FeatureSet_Column> m_pFeatureSet_Column;
 
   void QuotePriceUpdates();
   void QuoteVolumeUpdates();

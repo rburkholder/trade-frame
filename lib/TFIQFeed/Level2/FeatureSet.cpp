@@ -32,8 +32,7 @@ FeatureSet::FeatureSet()
 : m_nLevels {}
 {}
 
-FeatureSet::~FeatureSet()
-{}
+FeatureSet::~FeatureSet() {}
 
 void FeatureSet::Set( size_t nLevels ) {
 
@@ -50,6 +49,13 @@ void FeatureSet::Set( size_t nLevels ) {
   }
   m_vLevels[ m_nLevels ].Set( m_nLevels, &m_vLevels[ 1 ], nullptr );
 
+}
+
+void FeatureSet::Set( const vSentinel_t& vSentinel ) { // comes after Set( levels )
+  assert( 0 < m_nLevels );
+  for ( vLevels_t::value_type& level: m_vLevels ) {
+    level.Set( vSentinel );
+  }
 }
 
 void FeatureSet::HandleBookChangesAsk( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ) {
@@ -164,9 +170,17 @@ const std::string FeatureSet::Header() {
   return header;
 }
 
+void FeatureSet::Changed( bool& bChanged ) {
+  for ( const vLevels_t::value_type& vt: m_vLevels ) {
+    vt.Changed( bChanged );
+  }
+}
+
 std::ostream& FeatureSet::operator<<( std::ostream& stream ) const {
+
   bool bSeparator( false );
   bool bSkipLevel0( true );
+
   for ( const vLevels_t::value_type& vt: m_vLevels ) {
     if ( bSkipLevel0 ) bSkipLevel0 = false;
     else {
@@ -175,6 +189,7 @@ std::ostream& FeatureSet::operator<<( std::ostream& stream ) const {
       stream << vt;
     }
   }
+
   return stream;
 }
 

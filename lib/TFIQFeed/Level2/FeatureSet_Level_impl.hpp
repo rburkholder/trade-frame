@@ -22,6 +22,7 @@
 #pragma once
 
 #include <map>
+#include <array>
 #include <string_view>
 
 #include <boost/preprocessor/tuple/enum.hpp>
@@ -118,10 +119,17 @@ namespace l2 { // level 2 data
 class FeatureSet_Column {
 public:
 
-  using price_t = FeatureSet_Level::price_t;
-  using volume_t = FeatureSet_Level::volume_t;
+  using vName_t = std::vector<std::string>;
+  using rSentinelFlag_t = std::array<bool,ARRAY_NAMES_SIZE>;
 
-  FeatureSet_Column( FeatureSet_Level& level );
+  FeatureSet_Column( FeatureSet_Level& );
+  ~FeatureSet_Column();
+
+  static void MapColumnNames( const vName_t&, rSentinelFlag_t& );
+
+  void SetSentinel( const rSentinelFlag_t& );
+
+  void Changed( bool& );
 
 protected:
 private:
@@ -129,15 +137,25 @@ private:
   using mapLuColumn_t = std::map<std::string_view,size_t>;
   static const mapLuColumn_t m_mapLuColumn;
 
-  #define FUSION_VECTOR_TYPE(z,n,data ) \
-    BOOST_PP_COMMA_IF(n) \
-    decltype(FeatureSet_Level::BOOST_PP_ARRAY_ELEM(n,ARRAY_NAMES ))&
+  template<typename Element>
+  struct Sentinel {
+    bool bSentinel;
+    const Element& original;
+    Element copy;
+    Sentinel( const Element& original_ ): original( original_ ), copy {} {}
+  };
 
-  using vColumns_t = boost::fusion::vector<
-    BOOST_PP_REPEAT( ARRAY_NAMES_SIZE, FUSION_VECTOR_TYPE, 0 )
+  #define FUSION_VECTOR_Element(z,n,data ) \
+    BOOST_PP_COMMA_IF(n) \
+    Sentinel<decltype(FeatureSet_Level::BOOST_PP_ARRAY_ELEM(n,ARRAY_NAMES ))>
+
+  using fvSentinel_t = boost::fusion::vector<
+    BOOST_PP_REPEAT( ARRAY_NAMES_SIZE, FUSION_VECTOR_Element, 0 )
   >;
 
-  vColumns_t m_vColumns;
+  fvSentinel_t m_fvSentinel;
+
+  bool m_bSentinelSet;
 
 };
 

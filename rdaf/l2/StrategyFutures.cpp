@@ -80,6 +80,8 @@ Futures::Futures(
 , m_dblStopDeltaProposed {}
 , m_dblStopActiveDelta {}, m_dblStopActiveActual {}
 , m_bfQuotes01Sec( 1 )
+, m_nEmitted {}
+, m_nEmitSuppressed {}
 {
 //  assert( m_pFile );
 //  assert( m_pFileUtility );
@@ -314,6 +316,7 @@ void Futures::FVSStreamStart( const std::string& sPath ) {
     if ( bOpen ) {
       m_streamFVS.open( m_sFVSPath, std::ios_base::trunc );
       assert( m_streamFVS.is_open() );
+      m_FeatureSet.Set( m_config.vSentinel );
       m_streamFVS << "datetime," << m_FeatureSet.Header() << std::endl;
     }
   }
@@ -321,6 +324,12 @@ void Futures::FVSStreamStart( const std::string& sPath ) {
 
 void Futures::FVSStreamStop( int ) {
   m_streamFVS.close();
+
+  BOOST_LOG_TRIVIAL(info)
+    << "Emission stats: "
+    << m_nEmitted << " emitted, "
+    << m_nEmitSuppressed << " suppressed"
+    ;
 }
 
 // from IndicatorTrading/FeedModel.cpp
@@ -402,10 +411,18 @@ void Futures::StartDepthByOrder() {
 
       if ( m_config.bEmitFVS ) {
         if ( m_streamFVS.is_open() ) {
-          m_streamFVS
-            << boost::posix_time::to_iso_string( depth.DateTime() )
-            << ',' << m_FeatureSet
-            << std::endl;
+          bool bChanged( false );
+          m_FeatureSet.Changed( bChanged );
+          if ( bChanged ) {
+            m_streamFVS
+              << boost::posix_time::to_iso_string( depth.DateTime() )
+              << ',' << m_FeatureSet
+              << std::endl;
+            m_nEmitted++;
+          }
+          else {
+            m_nEmitSuppressed++;
+          }
         }
       }
 
@@ -476,10 +493,18 @@ void Futures::StartDepthByOrder() {
 
       if ( m_config.bEmitFVS ) {
         if ( m_streamFVS.is_open() ) {
-          m_streamFVS
-            << boost::posix_time::to_iso_string( depth.DateTime() )
-            << ',' << m_FeatureSet
-            << std::endl;
+          bool bChanged( false );
+          m_FeatureSet.Changed( bChanged );
+          if ( bChanged ) {
+            m_streamFVS
+              << boost::posix_time::to_iso_string( depth.DateTime() )
+              << ',' << m_FeatureSet
+              << std::endl;
+            m_nEmitted++;
+          }
+          else {
+            m_nEmitSuppressed++;
+          }
         }
       }
 

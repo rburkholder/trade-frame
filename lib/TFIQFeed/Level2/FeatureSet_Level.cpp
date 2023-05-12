@@ -21,6 +21,8 @@
 
 #include <string>
 
+#include <boost/preprocessor/stringize.hpp>
+
 #include "FeatureSet_Level.hpp"
 #include "FeatureSet_Level_impl.hpp"
 
@@ -33,12 +35,31 @@ FeatureSet_Level::FeatureSet_Level()
 : m_ix {}
 , m_pTop( nullptr )
 , m_pNext( nullptr )
+{
+  m_pFeatureSet_Column = std::make_unique<FeatureSet_Column>( *this );
+}
+
+FeatureSet_Level::FeatureSet_Level( FeatureSet_Level&& rhs )
+: m_ix( rhs.m_ix )
+, m_pTop( rhs.m_pTop )
+, m_pNext( rhs.m_pNext )
+, m_pFeatureSet_Column( std::move( rhs.m_pFeatureSet_Column ) )
 {}
+
+FeatureSet_Level::~FeatureSet_Level() {
+  m_pFeatureSet_Column.reset();
+}
 
 void FeatureSet_Level::Set( int ix, FeatureSet_Level* pTop, FeatureSet_Level* pNext ) {
   m_ix = ix;
   m_pTop = pTop;
   m_pNext = pNext;
+}
+
+void FeatureSet_Level::Set( const vSentinel_t& vSentinel ) {
+  FeatureSet_Column::rSentinelFlag_t rSentinelFlag;
+  FeatureSet_Column::MapColumnNames( vSentinel, rSentinelFlag );
+  m_pFeatureSet_Column->SetSentinel( rSentinelFlag );
 }
 
 void FeatureSet_Level::Ask_Quote( const ou::tf::Depth& depth ) {
@@ -310,11 +331,9 @@ void FeatureSet_Level::Bid_IncCancel( const ou::tf::Depth& depth ) {
 
 const std::string FeatureSet_Level::Header( const size_t level ) {
 
-  #define QUOTED( VALUE ) #VALUE
-
   #define VECTOR_VALUE(z,n,data) \
     BOOST_PP_COMMA_IF(n) \
-    QUOTED(BOOST_PP_ARRAY_ELEM(n,ARRAY_NAMES))
+    BOOST_PP_STRINGIZE(BOOST_PP_ARRAY_ELEM(n,ARRAY_NAMES))
 
   static const std::vector<std::string> vColumnName = {
     BOOST_PP_REPEAT( ARRAY_NAMES_SIZE, VECTOR_VALUE, 0 )
@@ -334,12 +353,16 @@ const std::string FeatureSet_Level::Header( const size_t level ) {
   return sHeader;
 }
 
+void FeatureSet_Level::Changed( bool& bChanged ) const {
+  m_pFeatureSet_Column->Changed( bChanged );
+}
+
 std::ostream& FeatureSet_Level::operator<<( std::ostream& stream ) const {
 
   #define COMMA << ','
   #define EMIT_VALUE(z,n,data) \
-    BOOST_PP_IF(1, COMMA, BOOST_PP_EMPTY) \
-    << BOOST_PP_ARRAY_ELEM(n,ARRAY_NAMES )
+    BOOST_PP_IF( 1, COMMA, BOOST_PP_EMPTY ) \
+    << BOOST_PP_ARRAY_ELEM( n,ARRAY_NAMES )
 
   stream
     BOOST_PP_REPEAT( ARRAY_NAMES_SIZE, EMIT_VALUE, 0 )

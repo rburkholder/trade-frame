@@ -266,6 +266,9 @@ private:
   std::string m_sFVSPath;
   std::ofstream m_streamFVS;
 
+  size_t m_nEmitted;
+  size_t m_nEmitSuppressed;
+
   void InitRdaf();
 
   void StartDepthByOrder();
