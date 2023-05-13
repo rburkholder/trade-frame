@@ -13,12 +13,12 @@
  ************************************************************************/
 // Started 2014/09/21
 
-#include <boost/preprocessor/tuple/elem.hpp>
+#include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/array/elem.hpp>
 #include <boost/preprocessor/array/size.hpp>
-#include <boost/preprocessor/punctuation/comma_if.hpp>
+#include <boost/preprocessor/tuple/elem.hpp>
 #include <boost/preprocessor/repetition/repeat.hpp>
-#include <boost/preprocessor/cat.hpp>
+#include <boost/preprocessor/punctuation/comma_if.hpp>
 
 #define GRID_EXTRACT_COL_DETAILS(z, row, col) \
   BOOST_PP_TUPLE_ELEM( \
@@ -46,11 +46,11 @@ namespace tf { // TradeFrame
   template<typename ModelCell>
   class CellInfo_t: public ModelCell {
   public:
-    CellInfo_t( void ): m_col( 0 ) {};
+    CellInfo_t(): m_col( 0 ) {};
     CellInfo_t( int col ): m_col( col ) {};
-    virtual ~CellInfo_t( void ) {  }
+    virtual ~CellInfo_t() = default;
     int SetCol( int col ) { m_col = col; return m_col; }
-    int GetCol( void ) const { return m_col; }
+    int GetCol() const { return m_col; }
   private:
     int m_col;
   };
