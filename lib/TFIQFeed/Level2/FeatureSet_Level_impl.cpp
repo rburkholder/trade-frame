@@ -82,6 +82,7 @@ void FeatureSet_Column::SetSentinel( const rSentinelFlag_t& r ) {
 }
 
 void FeatureSet_Column::Changed( bool& bChanged ) {
+  assert( m_bSentinelSet );
   boost::fusion::for_each(
     m_fvSentinel,
     [&bChanged]( auto& element ){
