@@ -295,6 +295,7 @@ protected:
 
   // called by Network via CRTP
   void OnNetworkConnected() {
+    //this->Send( "S,SET PROTOCOL,6.2\n" );
     if ( &HistoryQuery<T>::OnHistoryConnected != &T::OnHistoryConnected ) {
       static_cast<T*>( this )->OnHistoryConnected();
     }
@@ -330,7 +331,14 @@ private:
 
   using const_iterator_t = typename inherited_t::linebuffer_t::const_iterator;
 
-  static const size_t m_nMillisecondsToSleep;
+  static const char c_chCmdError;
+  static const char c_chCmdSystem;
+
+  static const char c_chRidTick;
+  static const char c_chRidInterval;
+  static const char c_chRidEndOfDay;
+
+  static const size_t c_nMillisecondsToSleep;
 
   // used for containing parsed data and passing it on
   ou::BufferRepository<TickDataPoint> m_reposTickDataPoint;
@@ -351,8 +359,8 @@ private:
 
 template <typename T>
 HistoryQuery<T>::HistoryQuery()
-: Network<HistoryQuery<T> >( "127.0.0.1", 9100 ),
-  m_stateRetrieval( RetrievalState::Idle )
+: Network<HistoryQuery<T> >( "127.0.0.1", 9100 )
+, m_stateRetrieval( RetrievalState::Idle )
 {
   m_ruleEndMsg = qi::lit( "!ENDMSG!" );
   m_ruleErrorInvalidSymbol = qi::lit( "E,Invalid symbol" );
@@ -397,7 +405,7 @@ void HistoryQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
       break;
   }
 
-  this->GiveBackBuffer( buf );
+  this->GiveBackBuffer( buf ); // 'this' is required for vtable access
 }
 
 template <typename T>
@@ -408,8 +416,8 @@ void HistoryQuery<T>::RetrieveNDataPoints( const std::string& sSymbol, unsigned 
   else {
     m_stateRetrieval = RetrievalState::RetrieveDataPoints;
     std::stringstream ss;
-    boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
-    ss << "HTX," << sSymbol << "," << n << ",1,D\n";
+    boost::this_thread::sleep( boost::posix_time::milliseconds( c_nMillisecondsToSleep ) );
+    ss << "HTX," << sSymbol << "," << n << ",1," << c_chRidTick << "\n";
     this->Send( ss.str().c_str() );
   }
 }
@@ -422,8 +430,8 @@ void HistoryQuery<T>::RetrieveNDaysOfDataPoints( const std::string& sSymbol, uns
   else {
     m_stateRetrieval = RetrievalState::RetrieveDataPoints;
     std::stringstream ss;
-    boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
-    ss << "HTD," << sSymbol << "," << n << ",,,,1,D\n";
+    boost::this_thread::sleep( boost::posix_time::milliseconds( c_nMillisecondsToSleep ) );
+    ss << "HTD," << sSymbol << "," << n << ",,,,1," << c_chRidTick << "\n";
     this->Send( ss.str().c_str() );
   }
 }
@@ -446,9 +454,9 @@ void HistoryQuery<T>::RetrieveDatedRangeOfDataPoints( const std::string& sSymbol
     ss.imbue( special_locale );
     (*facet).format( "%Y%m%d %H%M%S" );
 
-    boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
+    boost::this_thread::sleep( boost::posix_time::milliseconds( c_nMillisecondsToSleep ) );
 
-    ss << "HTT," << sSymbol << "," << dtStart << "," << dtEnd << ",,,,1,D\n";
+    ss << "HTT," << sSymbol << "," << dtStart << "," << dtEnd << ",,,,1," << c_chRidTick << "\n";
     this->Send( ss.str().c_str() );
   }
 }
@@ -461,8 +469,8 @@ void HistoryQuery<T>::RetrieveNIntervals( const std::string& sSymbol, unsigned i
   else {
     m_stateRetrieval = RetrievalState::RetrieveIntervals;
     std::stringstream ss;
-    boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
-    ss << "HIX," << sSymbol << "," << i << "," << n << ",1,I\n";
+    boost::this_thread::sleep( boost::posix_time::milliseconds( c_nMillisecondsToSleep ) );
+    ss << "HIX," << sSymbol << "," << i << "," << n << ",1," << c_chRidInterval << "\n";
     this->Send( ss.str().c_str() );
   }
 }
@@ -475,8 +483,8 @@ void HistoryQuery<T>::RetrieveNDaysOfIntervals( const std::string& sSymbol, unsi
   else {
     m_stateRetrieval = RetrievalState::RetrieveIntervals;
     std::stringstream ss;
-    boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
-    ss << "HID," << sSymbol << "," << i << "," << n << ",,,,1,I\n";
+    boost::this_thread::sleep( boost::posix_time::milliseconds( c_nMillisecondsToSleep ) );
+    ss << "HID," << sSymbol << "," << i << "," << n << ",,,,1," << c_chRidInterval << "\n";
     this->Send( ss.str().c_str() );
   }
 }
@@ -489,8 +497,8 @@ void HistoryQuery<T>::RetrieveNEndOfDays( const std::string& sSymbol, unsigned i
   else {
     m_stateRetrieval = RetrievalState::RetrieveEndOfDays;
     std::stringstream ss;
-    boost::this_thread::sleep( boost::posix_time::milliseconds( m_nMillisecondsToSleep ) );
-    ss << "HDX," << sSymbol << "," << n << ",1,E\n";
+    boost::this_thread::sleep( boost::posix_time::milliseconds( c_nMillisecondsToSleep ) );
+    ss << "HDX," << sSymbol << "," << n << ",1," << c_chRidEndOfDay << "\n";
     this->Send( ss.str().c_str() );
   }
 }
@@ -501,7 +509,12 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
   typename linebuffer_t::const_iterator bgn = (*buf).begin();
   typename linebuffer_t::const_iterator end = (*buf).end();
 
+  //std::string s( bgn, end );  // enable for debug
+
   assert( ( end - bgn ) > 2 );
+
+  typename linebuffer_t::const_iterator bgn3 = bgn;  // used for status
+
   char chRequestID = *bgn;
   bgn++;
   bgn++;
@@ -509,7 +522,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
 
   bool b = false;
   switch ( chRequestID ) {
-    case 'D': {
+    case c_chRidTick: {
         assert ( RetrievalState::RetrieveDataPoints == m_stateRetrieval );
         TickDataPoint* pDP = m_reposTickDataPoint.CheckOutL();
         b = parse( bgn, end, m_grammarDataPoint, *pDP );
@@ -526,7 +539,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         }
       }
       break;
-    case 'I': {
+    case c_chRidInterval: {
         assert ( RetrievalState::RetrieveIntervals == m_stateRetrieval );
         Interval* pDP = m_reposInterval.CheckOutL();
         b = parse( bgn, end, m_grammarInterval, *pDP );
@@ -543,7 +556,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         }
       }
       break;
-    case 'E': {
+    case c_chRidEndOfDay: {
         assert ( RetrievalState::RetrieveEndOfDays == m_stateRetrieval );
         EndOfDay* pDP = m_reposEndOfDay.CheckOutL();
         b = parse( bgn, end, m_grammarEndOfDay, *pDP );
@@ -560,8 +573,20 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         }
       }
       break;
+    case c_chCmdError:
+      {
+        std::string s( bgn3, end );
+        throw std::logic_error( "HistoryQuery<T>::ProcessHistoryRetrieval unknown error: " + s );
+      }
+      break;
+    case c_chCmdSystem:
+      std::cout << std::string( bgn3, end ) << std::endl;
+      break;
     default:
-      throw std::logic_error( "HistoryQuery<T>::ProcessHistoryRetrieval unknown record");
+      {
+        std::string s( bgn3, end );
+        throw std::logic_error( "HistoryQuery<T>::ProcessHistoryRetrieval unknown record: " + s );
+      }
   }
 
   if ( !b ) {
@@ -593,7 +618,14 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
   }
 }
 
-template <typename T> const size_t HistoryQuery<T>::m_nMillisecondsToSleep = 75;
+template <typename T> const char   HistoryQuery<T>::c_chCmdError( 'E' );
+template <typename T> const char   HistoryQuery<T>::c_chCmdSystem( 'S' );
+
+template <typename T> const char   HistoryQuery<T>::c_chRidTick( 'T' );
+template <typename T> const char   HistoryQuery<T>::c_chRidInterval( 'I' );
+template <typename T> const char   HistoryQuery<T>::c_chRidEndOfDay( 'O' );
+
+template <typename T> const size_t HistoryQuery<T>::c_nMillisecondsToSleep( 75 );
 
 } // namespace iqfeed
 } // namespace tf
