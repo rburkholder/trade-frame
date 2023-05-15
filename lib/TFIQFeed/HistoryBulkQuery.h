@@ -369,7 +369,7 @@ void HistoryBulkQuery<T>::OnHistorySendDone( structQueryState* pqs ) {
 template <typename T>
 void HistoryBulkQuery<T>::OnHistoryTickDataPoint( structQueryState* pqs, ou::tf::iqfeed::HistoryStructs::TickDataPoint* pDP ) {
 
-  Quote quote( pDP->DateTime, pDP->Bid, pDP->BidSize, pDP->Ask, pDP->AskSize );
+  Quote quote( pDP->DateTime, pDP->Bid, 0, pDP->Ask, 0 );
   pqs->ticks->quotes.Append( quote );
   Trade trade( pDP->DateTime, pDP->Last, pDP->LastSize );
   pqs->ticks->trades.Append( trade );

@@ -85,54 +85,42 @@ namespace iqfeed { // IQFeed
 namespace HistoryStructs {
 
   struct TickDataPoint {
-    unsigned short Year;
-    unsigned short Month;
-    unsigned short Day;
-    unsigned short Hour;
-    unsigned short Minute;
-    unsigned short Second;
+    std::string sDateTime;
     posix_time::ptime DateTime;
     double Last;
-    unsigned long LastSize;
-    unsigned long TotalVolume;
+    uint32_t LastSize;
+    uint32_t TotalVolume;
     double Bid;
     double Ask;
-    unsigned long TickID;
-    unsigned long BidSize;
-    unsigned long AskSize;
+    uint64_t TickID;
     char BasisForLast;  // 'C' normal, 'E' extended
+    uint16_t MarketCenter;
+    std::string sTradeConditions;
+    uint16_t TradeAggressor;
+    uint16_t DayCode;
   };
 
   struct Interval {
-    unsigned short Year;
-    unsigned short Month;
-    unsigned short Day;
-    unsigned short Hour;
-    unsigned short Minute;
-    unsigned short Second;
+    std::string sDateTime;
     posix_time::ptime DateTime;
     double High;
     double Low;
     double Open;
     double Close;
-    unsigned long TotalVolume;
-    unsigned long PeriodVolume;
+    uint32_t TotalVolume;
+    uint32_t PeriodVolume;
+    uint32_t NumberOfTrades;
   };
 
   struct EndOfDay {
-    unsigned short Year;
-    unsigned short Month;
-    unsigned short Day;
-    unsigned short Hour;
-    unsigned short Minute;
-    unsigned short Second;
+    std::string sDateTime;
     posix_time::ptime DateTime;
     double High;
     double Low;
     double Open;
     double Close;
-    unsigned long PeriodVolume;
-    unsigned long OpenInterest;
+    uint32_t PeriodVolume;
+    uint32_t OpenInterest;
   };
 
 } // namespace HistoryStructs
@@ -143,53 +131,41 @@ namespace HistoryStructs {
 
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::HistoryStructs::TickDataPoint,
-  (unsigned short, Year)
-  (unsigned short, Month)
-  (unsigned short, Day)
-  (unsigned short, Hour)
-  (unsigned short, Minute)
-  (unsigned short, Second)
+  (std::string, sDateTime)
   (double, Last)
-  (unsigned long, LastSize)
-  (unsigned long, TotalVolume)
+  (uint32_t, LastSize)
+  (uint32_t, TotalVolume)
   (double, Bid)
   (double, Ask)
-  (unsigned long, TickID)
-  (unsigned long, BidSize)
-  (unsigned long, AskSize)
+  (uint64_t, TickID)
   (char, BasisForLast)
+  (uint16_t, MarketCenter)
+  (std::string, sTradeConditions)
+  (uint16_t, TradeAggressor)
+  (uint16_t, DayCode)
   )
 
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::HistoryStructs::Interval,
-  (unsigned short, Year)
-  (unsigned short, Month)
-  (unsigned short, Day)
-  (unsigned short, Hour)
-  (unsigned short, Minute)
-  (unsigned short, Second)
+  (std::string, sDateTime)
   (double, High)
   (double, Low)
   (double, Open)
   (double, Close)
-  (unsigned long, TotalVolume)
-  (unsigned long, PeriodVolume)
+  (uint32_t, TotalVolume)
+  (uint32_t, PeriodVolume)
+  (uint32_t, NumberOfTrades)
   )
 
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::HistoryStructs::EndOfDay,
-  (unsigned short, Year)
-  (unsigned short, Month)
-  (unsigned short, Day)
-  (unsigned short, Hour)
-  (unsigned short, Minute)
-  (unsigned short, Second)
+  (std::string, sDateTime)
   (double, High)
   (double, Low)
   (double, Open)
   (double, Close)
-  (unsigned long, PeriodVolume)
-  (unsigned long, OpenInterest)
+  (uint32_t, PeriodVolume)
+  (uint32_t, OpenInterest)
   )
 
 namespace ou { // One Unified
@@ -202,11 +178,19 @@ namespace HistoryStructs {
   struct DataPointParser: qi::grammar<Iterator, TickDataPoint()> {
     DataPointParser(): DataPointParser::base_type(start) {
       start %=
-                  qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_
-        >> ' ' >> qi::ushort_ >> ':' >> qi::ushort_ >> ':' >> qi::ushort_
-        >> ',' >> qi::double_ >> ',' >> qi::ulong_  >> ',' >> qi::ulong_
-        >> ',' >> qi::double_ >> ',' >> qi::double_ >> ',' >> qi::ulong_
-        >> ',' >> qi::ulong_  >> ',' >> qi::ulong_  >> ',' >> ascii::char_
+                  qi::lit( 'L' ) >> qi::lit( 'H' )
+        >> ',' >> +( qi::char_( "0-9" ) | qi::char_( '.' ) | qi::char_( ' ' ) | qi::char_( ':') | qi::char_( '-') )
+        >> ',' >> qi::double_ // last
+        >> ',' >> qi::ulong_  // last size
+        >> ',' >> qi::ulong_  // total volume
+        >> ',' >> qi::double_ // bid
+        >> ',' >> qi::double_ // ask
+        >> ',' >> qi::ulong_long  // tick id
+        >> ',' >> qi::char_   // basis for last
+        >> ',' >> qi::short_  // market center
+        >> ',' >> +qi::char_( "0-9A-F" )  // trade conditions
+        >> ',' >> qi::ushort_  // trade aggressor
+        >> ',' >> qi::ushort_  // day code
         >> ','
         ;
     }
@@ -217,11 +201,15 @@ namespace HistoryStructs {
   struct IntervalParser: qi::grammar<Iterator, Interval()> {
     IntervalParser(): IntervalParser::base_type(start) {
       start %=
-                  qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_
-        >> ' ' >> qi::ushort_ >> ':' >> qi::ushort_ >> ':' >> qi::ushort_
-        >> ',' >> qi::double_ >> ',' >> qi::double_
-        >> ',' >> qi::double_ >> ',' >> qi::double_
-        >> ',' >> qi::ulong_  >> ',' >> qi::ulong_
+                  qi::lit( 'L' ) >> qi::lit( 'H' )
+        >> ',' >> +( qi::char_( "0-9" ) | qi::char_( '.' ) | qi::char_( ' ' ) | qi::char_( ':') | qi::char_( '-') )
+        >> ',' >> qi::double_ // high
+        >> ',' >> qi::double_ // low
+        >> ',' >> qi::double_ // open
+        >> ',' >> qi::double_ // close
+        >> ',' >> qi::ulong_  // total volume
+        >> ',' >> qi::ulong_  // period volume
+        >> ',' >> qi::ulong_  // number of trades
         >> ','
         ;
     }
@@ -232,11 +220,14 @@ namespace HistoryStructs {
   struct EndOfDayParser: qi::grammar<Iterator, EndOfDay()> {
     EndOfDayParser(): EndOfDayParser::base_type(start) {
       start %=
-                  qi::ushort_ >> '-' >> qi::ushort_ >> '-' >> qi::ushort_
-        >> ' ' >> qi::ushort_ >> ':' >> qi::ushort_ >> ':' >> qi::ushort_
-        >> ',' >> qi::double_ >> ',' >> qi::double_
-        >> ',' >> qi::double_ >> ',' >> qi::double_
-        >> ',' >> qi::ulong_  >> ',' >> qi::ulong_
+                  qi::lit( 'L' ) >> qi::lit( 'H' )
+        >> ',' >> +( qi::char_( "0-9" ) | qi::char_( '.' ) | qi::char_( ' ' ) | qi::char_( ':') | qi::char_( '-') )
+        >> ',' >> qi::double_ // high
+        >> ',' >> qi::double_ // low
+        >> ',' >> qi::double_ // open
+        >> ',' >> qi::double_ // close
+        >> ',' >> qi::ulong_  // period volume
+        >> ',' >> qi::ulong_  // open interest
         >> ','
         ;
     }
@@ -295,7 +286,7 @@ protected:
 
   // called by Network via CRTP
   void OnNetworkConnected() {
-    //this->Send( "S,SET PROTOCOL,6.2\n" );
+    this->Send( "S,SET PROTOCOL,6.2\n" );
     if ( &HistoryQuery<T>::OnHistoryConnected != &T::OnHistoryConnected ) {
       static_cast<T*>( this )->OnHistoryConnected();
     }
@@ -398,10 +389,16 @@ void HistoryQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
       //ReturnLineBuffer( wParam );
       break;
     case RetrievalState::Idle:
-      // it is an error to land here
-      std::cout << "Unknown HistoryQuery<T>::OnNetworkLineBuffer RetrievalState::Idle"  << std::endl;
-      //throw std::logic_error( "RetrievalState::Idle");
-      //ReturnLineBuffer( wParam );
+      switch ( *(*buf).begin() ) {
+        case c_chCmdSystem: // captures the 'S,CURRENT PROTOCOL,6.2'
+          break;
+        default:
+          // it is an error to land here
+          std::cout << "Unknown HistoryQuery<T>::OnNetworkLineBuffer RetrievalState::Idle"  << std::endl;
+          //throw std::logic_error( "RetrievalState::Idle");
+          //ReturnLineBuffer( wParam );
+          break;
+      }
       break;
   }
 
@@ -510,14 +507,18 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
   typename linebuffer_t::const_iterator end = (*buf).end();
 
   //std::string s( bgn, end );  // enable for debug
+  //std::cout << s << std::endl;
+  // end message is like: 'T,!ENDMSG!'
 
   assert( ( end - bgn ) > 2 );
 
   typename linebuffer_t::const_iterator bgn3 = bgn;  // used for status
 
   char chRequestID = *bgn;
-  bgn++;
-  bgn++;
+  bgn++; // skip id
+  assert( ',' == *bgn );
+  bgn++; // skip comma
+
   typename linebuffer_t::const_iterator bgn2 = bgn;  // used for error handling
 
   bool b = false;
@@ -527,9 +528,10 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         TickDataPoint* pDP = m_reposTickDataPoint.CheckOutL();
         b = parse( bgn, end, m_grammarDataPoint, *pDP );
         if ( b && ( bgn == end ) ) {
+          //pDP->DateTime = boost::posix_time::time_from_string( pDP->sDateTime );
           pDP->DateTime = posix_time::ptime(
-            boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
-            boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
+            boost::gregorian::date( 2023, 5, 14 ),
+            boost::posix_time::time_duration( 13, 14, 15 ) );
           //if ( &HistoryQuery<T>::OnHistoryTickDataPoint != &T::OnHistoryTickDataPoint ) {
             static_cast<T*>( this )->OnHistoryTickDataPoint( pDP );
           //}
@@ -544,9 +546,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         Interval* pDP = m_reposInterval.CheckOutL();
         b = parse( bgn, end, m_grammarInterval, *pDP );
         if ( b && ( bgn == end ) ) {
-          pDP->DateTime = posix_time::ptime(
-            boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
-            boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
+          pDP->DateTime = boost::posix_time::time_from_string( pDP->sDateTime );
           //if ( &HistoryQuery<T>::OnHistoryIntervalData != &T::OnHistoryIntervalData ) {
             static_cast<T*>( this )->OnHistoryIntervalData( pDP );
           //}
@@ -561,9 +561,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         EndOfDay* pDP = m_reposEndOfDay.CheckOutL();
         b = parse( bgn, end, m_grammarEndOfDay, *pDP );
         if ( b && ( bgn == end ) ) {
-          pDP->DateTime = posix_time::ptime(
-            boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
-            boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
+          pDP->DateTime = boost::posix_time::time_from_string( pDP->sDateTime );
           //if ( &HistoryQuery<T>::OnHistorySummaryData != &T::OnHistorySummaryData ) {
             static_cast<T*>( this )->OnHistoryEndOfDayData( pDP );
           //}
@@ -579,7 +577,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         throw std::logic_error( "HistoryQuery<T>::ProcessHistoryRetrieval unknown error: " + s );
       }
       break;
-    case c_chCmdSystem:
+    case c_chCmdSystem: // needs to be processed in idle state
       std::cout << std::string( bgn3, end ) << std::endl;
       break;
     default:

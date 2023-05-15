@@ -618,9 +618,9 @@ private:
 
             qfb.time = (double)nTime / 1000.0;
             qfb.ask = tdp.Ask;
-            qfb.askvol = tdp.AskSize;
+            qfb.askvol = 0;
             qfb.bid = tdp.Bid;
-            qfb.bidvol = tdp.BidSize;
+            qfb.bidvol = 0;
 
             const double mid = ( tdp.Ask + tdp.Bid ) / 2.0;
 
