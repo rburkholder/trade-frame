@@ -17,12 +17,10 @@
 // processes historical data requests against the IQFeed API
 
 // todo:  put parsers in separate compilation units to cut down on compile time
-
-#define FUSION_MAX_VECTOR_SIZE 18
+//    may not be possible based upon templating of the character type from the network buffer
 
 #include <string>
 #include <sstream>
-#include <vector>
 
 #include <boost/thread/thread.hpp>
 
@@ -34,49 +32,11 @@ namespace posix_time = boost::posix_time;
 #include <boost/spirit/include/qi.hpp>
 
 #include <boost/phoenix/core.hpp>
-#include <boost/phoenix/bind.hpp>
-#include <boost/phoenix/object.hpp>
-#include <boost/phoenix/operator.hpp>
-
-namespace qi = boost::spirit::qi;
-namespace ascii = boost::spirit::ascii;
 
 #include <OUCommon/ReusableBuffers.h>
 #include <OUCommon/Network.h>
 
-// custom on
-// http://msdn.microsoft.com/en-us/library/e5ewb1h3.aspx
-//#define _CRTDBG_MAP_ALLOC
-//#include <stdlib.h>
-//#include <crtdbg.h>
-// custom off
-
-/* If necessary to read values from a file, here is some old code to load stream formatted data from a file:
-#include <fstream>
-#include <stdexcept>
-
-    string s;
-    s.assign( szPrefix );
-    s.append( "-" );
-    s.append( szSymbol );
-    s.append( ".txt" );
-
-    char buf[ 512 ];
-    ifstream file;
-    file.open( s.c_str() );
-
-    m_stateHistory = EHandleResponse;
-    file.getline( buf, 511 );
-    while ( 0 != *buf ) {
-      OnPortMessage( buf );
-      file.getline( buf, 511 );
-    }
-    m_stateHistory = EResponseDone;
-    OnPortMessage( buf );
-    file.close();
-
-    */
-
+namespace qi = boost::spirit::qi;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -85,7 +45,13 @@ namespace iqfeed { // IQFeed
 namespace HistoryStructs {
 
   struct TickDataPoint {
-    std::string sDateTime;
+    unsigned short Year;
+    unsigned short Month;
+    unsigned short Day;
+    unsigned short Hour;
+    unsigned short Minute;
+    unsigned short Second;
+    unsigned long Micro;
     posix_time::ptime DateTime;
     double Last;
     uint32_t LastSize;
@@ -101,7 +67,13 @@ namespace HistoryStructs {
   };
 
   struct Interval {
-    std::string sDateTime;
+    unsigned short Year;
+    unsigned short Month;
+    unsigned short Day;
+    unsigned short Hour;
+    unsigned short Minute;
+    unsigned short Second;
+    unsigned long Micro;
     posix_time::ptime DateTime;
     double High;
     double Low;
@@ -113,7 +85,13 @@ namespace HistoryStructs {
   };
 
   struct EndOfDay {
-    std::string sDateTime;
+    unsigned short Year;
+    unsigned short Month;
+    unsigned short Day;
+    unsigned short Hour;
+    unsigned short Minute;
+    unsigned short Second;
+    unsigned long Micro;
     posix_time::ptime DateTime;
     double High;
     double Low;
@@ -131,7 +109,13 @@ namespace HistoryStructs {
 
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::HistoryStructs::TickDataPoint,
-  (std::string, sDateTime)
+  (unsigned short, Year)
+  (unsigned short, Month)
+  (unsigned short, Day)
+  (unsigned short, Hour)
+  (unsigned short, Minute)
+  (unsigned short, Second)
+  (unsigned long, Micro)
   (double, Last)
   (uint32_t, LastSize)
   (uint32_t, TotalVolume)
@@ -147,7 +131,13 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::HistoryStructs::Interval,
-  (std::string, sDateTime)
+  (unsigned short, Year)
+  (unsigned short, Month)
+  (unsigned short, Day)
+  (unsigned short, Hour)
+  (unsigned short, Minute)
+  (unsigned short, Second)
+  (unsigned long, Micro)
   (double, High)
   (double, Low)
   (double, Open)
@@ -159,7 +149,13 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
   ou::tf::iqfeed::HistoryStructs::EndOfDay,
-  (std::string, sDateTime)
+  (unsigned short, Year)
+  (unsigned short, Month)
+  (unsigned short, Day)
+  (unsigned short, Hour)
+  (unsigned short, Minute)
+  (unsigned short, Second)
+  (unsigned long, Micro)
   (double, High)
   (double, Low)
   (double, Open)
@@ -179,7 +175,13 @@ namespace HistoryStructs {
     DataPointParser(): DataPointParser::base_type(start) {
       start %=
                   qi::lit( 'L' ) >> qi::lit( 'H' )
-        >> ',' >> +( qi::char_( "0-9" ) | qi::char_( '.' ) | qi::char_( ' ' ) | qi::char_( ':') | qi::char_( '-') )
+        >> ',' >> qi::ushort_ // year
+        >> '-' >> qi::ushort_ // month
+        >> '-' >> qi::ushort_ // day
+        >> ' ' >> qi::ushort_ // hour
+        >> ':' >> qi::ushort_ // minute
+        >> ':' >> qi::ushort_ // second
+        >> '.' >> qi::ulong_ // micro
         >> ',' >> qi::double_ // last
         >> ',' >> qi::ulong_  // last size
         >> ',' >> qi::ulong_  // total volume
@@ -202,7 +204,13 @@ namespace HistoryStructs {
     IntervalParser(): IntervalParser::base_type(start) {
       start %=
                   qi::lit( 'L' ) >> qi::lit( 'H' )
-        >> ',' >> +( qi::char_( "0-9" ) | qi::char_( '.' ) | qi::char_( ' ' ) | qi::char_( ':') | qi::char_( '-') )
+        >> ',' >> qi::ushort_ // year
+        >> '-' >> qi::ushort_ // month
+        >> '-' >> qi::ushort_ // day
+        >> ' ' >> qi::ushort_ // hour
+        >> ':' >> qi::ushort_ // minute
+        >> ':' >> qi::ushort_ // second
+        >> '.' >> qi::ulong_ // micro
         >> ',' >> qi::double_ // high
         >> ',' >> qi::double_ // low
         >> ',' >> qi::double_ // open
@@ -221,7 +229,13 @@ namespace HistoryStructs {
     EndOfDayParser(): EndOfDayParser::base_type(start) {
       start %=
                   qi::lit( 'L' ) >> qi::lit( 'H' )
-        >> ',' >> +( qi::char_( "0-9" ) | qi::char_( '.' ) | qi::char_( ' ' ) | qi::char_( ':') | qi::char_( '-') )
+        >> ',' >> qi::ushort_ // year
+        >> '-' >> qi::ushort_ // month
+        >> '-' >> qi::ushort_ // day
+        >> ' ' >> qi::ushort_ // hour
+        >> ':' >> qi::ushort_ // minute
+        >> ':' >> qi::ushort_ // second
+        >> '.' >> qi::ulong_ // micro
         >> ',' >> qi::double_ // high
         >> ',' >> qi::double_ // low
         >> ',' >> qi::double_ // open
@@ -506,7 +520,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
   typename linebuffer_t::const_iterator bgn = (*buf).begin();
   typename linebuffer_t::const_iterator end = (*buf).end();
 
-  //std::string s( bgn, end );  // enable for debug
+  std::string s( bgn, end );  // enable for debug
   //std::cout << s << std::endl;
   // end message is like: 'T,!ENDMSG!'
 
@@ -528,10 +542,10 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         TickDataPoint* pDP = m_reposTickDataPoint.CheckOutL();
         b = parse( bgn, end, m_grammarDataPoint, *pDP );
         if ( b && ( bgn == end ) ) {
-          //pDP->DateTime = boost::posix_time::time_from_string( pDP->sDateTime );
+          //pDP->DateTime = boost::posix_time::time_from_string( pDP->sDateTime );  // very very slow
           pDP->DateTime = posix_time::ptime(
-            boost::gregorian::date( 2023, 5, 14 ),
-            boost::posix_time::time_duration( 13, 14, 15 ) );
+            boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
+            boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second, pDP->Micro ) );
           //if ( &HistoryQuery<T>::OnHistoryTickDataPoint != &T::OnHistoryTickDataPoint ) {
             static_cast<T*>( this )->OnHistoryTickDataPoint( pDP );
           //}
@@ -546,7 +560,10 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         Interval* pDP = m_reposInterval.CheckOutL();
         b = parse( bgn, end, m_grammarInterval, *pDP );
         if ( b && ( bgn == end ) ) {
-          pDP->DateTime = boost::posix_time::time_from_string( pDP->sDateTime );
+          //pDP->DateTime = boost::posix_time::time_from_string( pDP->sDateTime );  // very very slow
+          pDP->DateTime = posix_time::ptime(
+            boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
+            boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second, pDP->Micro ) );
           //if ( &HistoryQuery<T>::OnHistoryIntervalData != &T::OnHistoryIntervalData ) {
             static_cast<T*>( this )->OnHistoryIntervalData( pDP );
           //}
@@ -561,7 +578,10 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
         EndOfDay* pDP = m_reposEndOfDay.CheckOutL();
         b = parse( bgn, end, m_grammarEndOfDay, *pDP );
         if ( b && ( bgn == end ) ) {
-          pDP->DateTime = boost::posix_time::time_from_string( pDP->sDateTime );
+          //pDP->DateTime = boost::posix_time::time_from_string( pDP->sDateTime );  // very very slow
+          pDP->DateTime = posix_time::ptime(
+            boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
+            boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second, pDP->Micro ) );
           //if ( &HistoryQuery<T>::OnHistorySummaryData != &T::OnHistorySummaryData ) {
             static_cast<T*>( this )->OnHistoryEndOfDayData( pDP );
           //}
@@ -628,3 +648,30 @@ template <typename T> const size_t HistoryQuery<T>::c_nMillisecondsToSleep( 75 )
 } // namespace iqfeed
 } // namespace tf
 } // namespace ou
+
+/* If necessary to read values from a file, here is some old code to load stream formatted data from a file:
+#include <fstream>
+#include <stdexcept>
+
+    string s;
+    s.assign( szPrefix );
+    s.append( "-" );
+    s.append( szSymbol );
+    s.append( ".txt" );
+
+    char buf[ 512 ];
+    ifstream file;
+    file.open( s.c_str() );
+
+    m_stateHistory = EHandleResponse;
+    file.getline( buf, 511 );
+    while ( 0 != *buf ) {
+      OnPortMessage( buf );
+      file.getline( buf, 511 );
+    }
+    m_stateHistory = EResponseDone;
+    OnPortMessage( buf );
+    file.close();
+
+    */
+
