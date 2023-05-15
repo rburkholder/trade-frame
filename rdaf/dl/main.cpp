@@ -612,11 +612,13 @@ private:
 
             pSecurity->nTicks++;
 
-            std::time_t nTime = boost::posix_time::to_time_t( tdp.DateTime );
+            auto mu = (tdp.DateTime - ptime(boost::gregorian::date(1970,1,1))).total_microseconds();
+            double dbl_mu = (double)mu;
+            double shifted_mu = dbl_mu / ( 1000.0 * 1000 * 1000.0 );
 
             Security::QuoteForBranch& qfb( pSecurity->m_branchQuote );
 
-            qfb.time = (double)nTime / 1000.0;
+            qfb.time = shifted_mu;
             qfb.ask = tdp.Ask;
             qfb.askvol = 0;
             qfb.bid = tdp.Bid;
@@ -631,7 +633,7 @@ private:
             const double price = tdp.Last;
             const int64_t volume = tdp.LastSize;
 
-            tfb.time = (double)nTime / 1000.0;
+            tfb.time = shifted_mu;
             tfb.price = price;
             tfb.vol = volume;
 
