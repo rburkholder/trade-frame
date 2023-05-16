@@ -84,14 +84,11 @@ namespace HistoryStructs {
     uint32_t NumberOfTrades;
   };
 
+  // "O,LH,2022-08-02,4167.25,4160.00,4167.25,4160.00,3,1103,"
   struct EndOfDay {
     unsigned short Year;
     unsigned short Month;
     unsigned short Day;
-    unsigned short Hour;
-    unsigned short Minute;
-    unsigned short Second;
-    unsigned long Micro;
     posix_time::ptime DateTime;
     double High;
     double Low;
@@ -152,10 +149,6 @@ BOOST_FUSION_ADAPT_STRUCT(
   (unsigned short, Year)
   (unsigned short, Month)
   (unsigned short, Day)
-  (unsigned short, Hour)
-  (unsigned short, Minute)
-  (unsigned short, Second)
-  (unsigned long, Micro)
   (double, High)
   (double, Low)
   (double, Open)
@@ -181,7 +174,7 @@ namespace HistoryStructs {
         >> ' ' >> qi::ushort_ // hour
         >> ':' >> qi::ushort_ // minute
         >> ':' >> qi::ushort_ // second
-        >> '.' >> qi::ulong_ // micro
+        >> '.' >> qi::ulong_  // micro
         >> ',' >> qi::double_ // last
         >> ',' >> qi::ulong_  // last size
         >> ',' >> qi::ulong_  // total volume
@@ -210,7 +203,7 @@ namespace HistoryStructs {
         >> ' ' >> qi::ushort_ // hour
         >> ':' >> qi::ushort_ // minute
         >> ':' >> qi::ushort_ // second
-        >> '.' >> qi::ulong_ // micro
+        >> '.' >> qi::ulong_  // micro
         >> ',' >> qi::double_ // high
         >> ',' >> qi::double_ // low
         >> ',' >> qi::double_ // open
@@ -232,10 +225,6 @@ namespace HistoryStructs {
         >> ',' >> qi::ushort_ // year
         >> '-' >> qi::ushort_ // month
         >> '-' >> qi::ushort_ // day
-        >> ' ' >> qi::ushort_ // hour
-        >> ':' >> qi::ushort_ // minute
-        >> ':' >> qi::ushort_ // second
-        >> '.' >> qi::ulong_ // micro
         >> ',' >> qi::double_ // high
         >> ',' >> qi::double_ // low
         >> ',' >> qi::double_ // open
@@ -581,7 +570,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
           //pDP->DateTime = boost::posix_time::time_from_string( pDP->sDateTime );  // very very slow
           pDP->DateTime = posix_time::ptime(
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
-            boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second, pDP->Micro ) );
+            boost::posix_time::time_duration( 23, 59, 59 ) );
           //if ( &HistoryQuery<T>::OnHistorySummaryData != &T::OnHistorySummaryData ) {
             static_cast<T*>( this )->OnHistoryEndOfDayData( pDP );
           //}
