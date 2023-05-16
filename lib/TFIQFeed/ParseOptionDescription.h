@@ -63,8 +63,6 @@ namespace tf { // TradeFrame
 namespace iqfeed { // IQFeed
 
 namespace qi = boost::spirit::qi;
-namespace phoenix = boost::phoenix;
-namespace ascii = boost::spirit::ascii;
 
 template<typename Iterator>
 struct OptionDescriptionParser: qi::grammar<Iterator, adapted_option_t()> {
