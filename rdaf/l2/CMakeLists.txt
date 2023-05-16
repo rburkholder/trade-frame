@@ -32,7 +32,7 @@ set(
     StrategyBase.hpp
     StrategyEquityOption.hpp
     StrategyFutures.hpp
-    StrategyFutures_Torch.hpp
+    Torch.hpp
   )
 
 set(
@@ -44,7 +44,7 @@ set(
     StrategyBase.cpp
     StrategyEquityOption.cpp
     StrategyFutures.cpp
-    StrategyFutures_Torch.cpp
+    Torch.cpp
   )
 
 add_executable(

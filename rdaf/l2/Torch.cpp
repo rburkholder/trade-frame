@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    StrategyFutures_Torch.cpp
+ * File:    Torch.cpp
  * Author:  raymond@burkholder.net
  * Project: rdaf/l2
  * Created: 2023/05/15 21:18:40
@@ -29,7 +29,7 @@
 
 #include <TFIQFeed/Level2/FeatureSet.hpp>
 
-#include "StrategyFutures_Torch.hpp"
+#include "Torch.hpp"
 
 #define TUPLE_NAMES ( \
     ask.v3.diffToTop \
