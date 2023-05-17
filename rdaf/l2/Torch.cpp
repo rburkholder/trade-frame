@@ -89,13 +89,13 @@
 
 namespace Strategy {
 
-Futures_Torch::Futures_Torch() {
+Torch::Torch() {
 }
 
-Futures_Torch::~Futures_Torch() {
+Torch::~Torch() {
 }
 
-void Futures_Torch::Accumulate( const ou::tf::iqfeed::l2::FeatureSet& fs ) {
+void Torch::Accumulate( const ou::tf::iqfeed::l2::FeatureSet& fs ) {
   // 3 levels
   // accumulate values with count
 
@@ -105,7 +105,7 @@ void Futures_Torch::Accumulate( const ou::tf::iqfeed::l2::FeatureSet& fs ) {
   }
 }
 
-Futures_Torch::Op Futures_Torch::StepModel() {
+Torch::Op Torch::StepModel() {
   Op op( Op::Neutral );
 
   // calc average from accumulate/count

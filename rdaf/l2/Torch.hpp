@@ -33,11 +33,11 @@ namespace l2 {
 
 namespace Strategy {
 
-class Futures_Torch {
+class Torch {
 public:
 
-  Futures_Torch();
-  ~Futures_Torch();
+  Torch();
+  ~Torch();
 
   enum Op { Long, Neutral, Hold, Short };
 
