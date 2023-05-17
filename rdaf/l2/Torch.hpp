@@ -19,7 +19,9 @@
  * Created: 2023/05/15 21:18:40
  */
 
-#include <vector>
+#pragma once
+
+#include <memory>
 
 namespace ou {
 namespace tf {
@@ -32,6 +34,8 @@ namespace l2 {
 }
 
 namespace Strategy {
+
+class Torch_impl;
 
 class Torch {
 public:
@@ -46,14 +50,10 @@ public:
 
 protected:
 private:
-  struct Accumulator {
-    double accumulate;
-    double count;
-  };
 
-  using vAccumulator_t = std::vector<Accumulator>;
-  vAccumulator_t mvAccumulator;
-  // array 3xn (n to be determined from tuple in impl class)
+  using pTorch_impl_t = std::unique_ptr<Torch_impl>;
+  pTorch_impl_t m_pTorch_impl;
+
 };
 
-}
+} // namespace Strategy

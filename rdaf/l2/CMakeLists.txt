@@ -33,6 +33,7 @@ set(
     StrategyEquityOption.hpp
     StrategyFutures.hpp
     Torch.hpp
+    Torch_impl.hpp
   )
 
 set(
@@ -45,6 +46,7 @@ set(
     StrategyEquityOption.cpp
     StrategyFutures.cpp
     Torch.cpp
+    Torch_impl.cpp
   )
 
 add_executable(

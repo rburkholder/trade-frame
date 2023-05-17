@@ -13,33 +13,52 @@
  ************************************************************************/
 
 /*
- * File:    Torch.cpp
+ * File:    Torch_impl.cpp
  * Author:  raymond@burkholder.net
  * Project: rdaf/l2
- * Created: 2023/05/15 21:18:40
+ * Created: 2023/05/16 18:00:31
  */
 
-#include <TFIQFeed/Level2/FeatureSet.hpp>
-
-#include "Torch.hpp"
 #include "Torch_impl.hpp"
 
 namespace Strategy {
 
-Torch::Torch() {
-  m_pTorch_impl = std::make_unique<Torch_impl>();
+Torch_impl::Torch_impl()
+: m_bTimeStepAccumulation_filled( false )
+, m_ixTimeStepAccumulation {}
+{}
+
+Torch_impl::~Torch_impl() {}
+
+void Torch_impl::Accumulate( const ou::tf::iqfeed::l2::FeatureSet& fs ) {
+
+  rLevelAccumulation_t::size_type ix {};
+  for ( const ou::tf::iqfeed::l2::FeatureSet::vLevels_t::value_type& vt: fs.FVS() ) {
+    switch ( ix ) {
+      case 0:
+        // skip
+        break;
+      case 1:
+      case 2:
+      case 3:
+
+        break;
+      default:
+        break;
+    }
+    ix++;
+  }
 }
 
-Torch::~Torch() {
-  m_pTorch_impl.reset();
+Torch::Op Torch_impl::StepModel() {
+  Torch::Op op( Torch::Op::Neutral );
+
+  // calc average from accumulate/count
+  // 3 levels
+  // maintain 10 minutes x 60 seconds
+
+  return op; // placeholder
 }
 
-void Torch::Accumulate( const ou::tf::iqfeed::l2::FeatureSet& fs ) {
-  m_pTorch_impl->Accumulate( fs );
-}
 
-Torch::Op Torch::StepModel() {
-  return m_pTorch_impl->StepModel();
-}
-
-}
+} // namespace Strategy
