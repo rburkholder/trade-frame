@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <boost/date_time/posix_time/ptime.hpp>
+
 #include <memory>
 
 namespace ou {
@@ -28,10 +30,10 @@ namespace tf {
 namespace iqfeed {
 namespace l2 {
   class FeatureSet;
-}
-}
-}
-}
+} // namespace l2
+} // namespace iqfeed
+} // namespace tf
+} // namespace ou
 
 namespace Strategy {
 
@@ -40,13 +42,13 @@ class Torch_impl;
 class Torch {
 public:
 
-  Torch();
+  Torch( const ou::tf::iqfeed::l2::FeatureSet& );
   ~Torch();
 
   enum Op { Long, Neutral, Hold, Short };
 
-  void Accumulate( const ou::tf::iqfeed::l2::FeatureSet& );
-  Op StepModel();
+  void Accumulate();
+  Op StepModel( boost::posix_time::ptime );
 
 protected:
 private:

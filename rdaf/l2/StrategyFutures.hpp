@@ -52,6 +52,7 @@
 #include <TFBitsNPieces/MovingAverage.hpp>
 
 #include "State.hpp"
+#include "Torch.hpp"
 #include "StrategyBase.hpp"
 
 #if RDAF
@@ -265,6 +266,9 @@ private:
   ou::tf::iqfeed::l2::FeatureSet m_FeatureSet;
   std::string m_sFVSPath;
   std::ofstream m_streamFVS;
+
+  using pTorch_t = std::unique_ptr<Torch>;
+  pTorch_t m_pTorch;
 
   size_t m_nEmitted;
   size_t m_nEmitSuppressed;

@@ -338,6 +338,7 @@ void Futures::StartDepthByOrder() {
   using EState = ou::tf::iqfeed::l2::OrderBased::EState;
 
   m_FeatureSet.Set( 10 );
+  m_pTorch = std::make_unique<Torch>( m_FeatureSet );
 
   m_pOrderBased = ou::tf::iqfeed::l2::OrderBased::Factory();
 
@@ -409,21 +410,24 @@ void Futures::StartDepthByOrder() {
         }
       }
 
-      if ( m_config.bEmitFVS ) {
-        if ( m_streamFVS.is_open() ) {
-          bool bChanged( false );
-          m_FeatureSet.Changed( bChanged );
-          if ( bChanged ) {
-            m_streamFVS
-              << boost::posix_time::to_iso_string( depth.DateTime() )
-              << ',' << m_FeatureSet
-              << std::endl;
-            m_nEmitted++;
-          }
-          else {
-            m_nEmitSuppressed++;
+      bool bChanged( false );
+      m_FeatureSet.Changed( bChanged );
+
+      if ( bChanged ) {
+        m_nEmitted++;
+        m_pTorch->Accumulate();
+
+        if ( m_config.bEmitFVS ) {
+          if ( m_streamFVS.is_open() ) {
+              m_streamFVS
+                << boost::posix_time::to_iso_string( depth.DateTime() )
+                << ',' << m_FeatureSet
+                << std::endl;
           }
         }
+      }
+      else {
+        m_nEmitSuppressed++;
       }
 
     },
@@ -491,21 +495,24 @@ void Futures::StartDepthByOrder() {
         }
       }
 
-      if ( m_config.bEmitFVS ) {
-        if ( m_streamFVS.is_open() ) {
-          bool bChanged( false );
-          m_FeatureSet.Changed( bChanged );
-          if ( bChanged ) {
-            m_streamFVS
-              << boost::posix_time::to_iso_string( depth.DateTime() )
-              << ',' << m_FeatureSet
-              << std::endl;
-            m_nEmitted++;
-          }
-          else {
-            m_nEmitSuppressed++;
+      bool bChanged( false );
+      m_FeatureSet.Changed( bChanged );
+
+      if ( bChanged ) {
+        m_nEmitted++;
+        m_pTorch->Accumulate();
+
+        if ( m_config.bEmitFVS ) {
+          if ( m_streamFVS.is_open() ) {
+              m_streamFVS
+                << boost::posix_time::to_iso_string( depth.DateTime() )
+                << ',' << m_FeatureSet
+                << std::endl;
           }
         }
+      }
+      else {
+        m_nEmitSuppressed++;
       }
 
     }
@@ -756,7 +763,7 @@ void Futures::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   if ( m_dblUnRealized > m_dblProfitMax ) m_dblProfitMax = m_dblUnRealized;
   if ( m_dblUnRealized < m_dblProfitMin ) m_dblProfitMin = m_dblUnRealized;
 
-  //TimeTick( bar );
+  TimeTick( bar );
 }
 
 /*
@@ -1241,6 +1248,19 @@ void Futures::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
    //auto delta = std::chrono::duration_cast<std::chrono::microseconds>( end - begin).count();
    //auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end - begin).count();
    //m_ceExecutionTime.Append( bar.DateTime(), delta );
+
+   Torch::Op op = m_pTorch->StepModel( bar.DateTime() );
+
+   switch ( op ) {
+    case Torch::Op::Long:
+      break;
+    case Torch::Op::Hold:
+      break;
+    case Torch::Op::Short:
+      break;
+    case Torch::Op::Neutral:
+      break;
+   }
 
 }
 

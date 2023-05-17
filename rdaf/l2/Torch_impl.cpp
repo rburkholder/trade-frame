@@ -23,42 +23,111 @@
 
 namespace Strategy {
 
-Torch_impl::Torch_impl()
-: m_bTimeStepAccumulation_filled( false )
-, m_ixTimeStepAccumulation {}
+#define FUSION_VECTOR_REFERENCES(z,n,level ) \
+  BOOST_PP_COMMA_IF(n) \
+  Accumulator( level.BOOST_PP_ARRAY_ELEM(n,ARRAY_NAMES ) )
+
+Torch_impl::Torch_impl( const ou::tf::iqfeed::l2::FeatureSet& fs )
+: m_bTimeStepsFilled( false )
+, m_ixTimeStep {}
+, m_fvAccumulator_l1(
+    BOOST_PP_REPEAT( ARRAY_NAMES_SIZE, FUSION_VECTOR_REFERENCES, fs.FVS()[ 1 ] )
+  )
+, m_fvAccumulator_l2(
+    BOOST_PP_REPEAT( ARRAY_NAMES_SIZE, FUSION_VECTOR_REFERENCES, fs.FVS()[ 2 ] )
+  )
+, m_fvAccumulator_l3(
+    BOOST_PP_REPEAT( ARRAY_NAMES_SIZE, FUSION_VECTOR_REFERENCES, fs.FVS()[ 3 ] )
+  )
 {}
 
 Torch_impl::~Torch_impl() {}
 
-void Torch_impl::Accumulate( const ou::tf::iqfeed::l2::FeatureSet& fs ) {
-
-  rLevelAccumulation_t::size_type ix {};
-  for ( const ou::tf::iqfeed::l2::FeatureSet::vLevels_t::value_type& vt: fs.FVS() ) {
-    switch ( ix ) {
-      case 0:
-        // skip
-        break;
-      case 1:
-      case 2:
-      case 3:
-
-        break;
-      default:
-        break;
+void Torch_impl::Accumulate() {
+  boost::fusion::for_each(
+    m_fvAccumulator_l1,
+    []( auto& accumulator ){
+      accumulator.accumulate += accumulator.feature;
+      accumulator.count++;
     }
-    ix++;
-  }
+  );
+  boost::fusion::for_each(
+    m_fvAccumulator_l2,
+    []( auto& accumulator ){
+      accumulator.accumulate += accumulator.feature;
+      accumulator.count++;
+    }
+  );
+  boost::fusion::for_each(
+    m_fvAccumulator_l3,
+    []( auto& accumulator ){
+      accumulator.accumulate += accumulator.feature;
+      accumulator.count++;
+    }
+  );
 }
 
-Torch::Op Torch_impl::StepModel() {
+Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt ) {
+  // todo: incorporate dt, or seconds from midnight
   Torch::Op op( Torch::Op::Neutral );
 
-  // calc average from accumulate/count
-  // 3 levels
-  // maintain 10 minutes x 60 seconds
+  rTimeStep_Averages_t& step( m_rTimeSteps[ m_ixTimeStep ] );
+  rTimeStep_Averages_t::iterator iterTimeStep( step.begin() );
+
+  boost::fusion::for_each(
+    m_fvAccumulator_l1,
+    [&iterTimeStep]( auto& accumulator ){
+      if ( 0 == accumulator.count ) {
+        *iterTimeStep = 0.0;
+      }
+      else {
+        *iterTimeStep = accumulator.accumulate / accumulator.count;
+        accumulator.Clear();
+      }
+      iterTimeStep++;
+    }
+  );
+
+  boost::fusion::for_each(
+    m_fvAccumulator_l2,
+    [&iterTimeStep]( auto& accumulator ){
+      if ( 0 == accumulator.count ) {
+        *iterTimeStep = 0.0;
+      }
+      else {
+        *iterTimeStep = accumulator.accumulate / accumulator.count;
+        accumulator.Clear();
+      }
+      iterTimeStep++;
+    }
+  );
+
+  boost::fusion::for_each(
+    m_fvAccumulator_l3,
+    [&iterTimeStep]( auto& accumulator ){
+      if ( 0 == accumulator.count ) {
+        *iterTimeStep = 0.0;
+      }
+      else {
+        *iterTimeStep = accumulator.accumulate / accumulator.count;
+        accumulator.Clear();
+      }
+      iterTimeStep++;
+    }
+  );
+
+  if ( m_bTimeStepsFilled ) {
+    // submit to torch
+    //   m_ixTimeStep has latest step
+  }
+
+  m_ixTimeStep++;
+  if ( c_nTimeSteps == m_ixTimeStep ) {
+    m_ixTimeStep = 0;
+    m_bTimeStepsFilled = true;
+  }
 
   return op; // placeholder
 }
-
 
 } // namespace Strategy

@@ -98,31 +98,54 @@ namespace Strategy {
 class Torch_impl {
 public:
 
-  Torch_impl();
+  Torch_impl( const ou::tf::iqfeed::l2::FeatureSet& );
   ~Torch_impl();
 
-  void Accumulate( const ou::tf::iqfeed::l2::FeatureSet& );
-  Torch::Op StepModel();
+  void Accumulate();
+  Torch::Op StepModel( boost::posix_time::ptime );
 
 protected:
 private:
 
+  template <typename type>
   struct Accumulator {
+    const type& feature;
     double accumulate;
     double count;
+    // TODO: convert to exponential moving average?
+    //   ema lags less than ma
+    Accumulator( const type& feature_ )
+    : feature( feature_ )
+    , accumulate {}, count {}
+    {}
+    void Clear() {
+      accumulate = 0.0;
+      count = 0;
+    }
   };
+
+  #define FUSION_VECTOR_Accumulator(z,n,data ) \
+    BOOST_PP_COMMA_IF(n) \
+    Accumulator<decltype(ou::tf::iqfeed::l2::FeatureSet_Level::BOOST_PP_ARRAY_ELEM(n,ARRAY_NAMES ))>
+
+  using fvAccumulator_t = boost::fusion::vector<
+    BOOST_PP_REPEAT( ARRAY_NAMES_SIZE, FUSION_VECTOR_Accumulator, 0 )
+  >;
+
+  fvAccumulator_t m_fvAccumulator_l1;
+  fvAccumulator_t m_fvAccumulator_l2;
+  fvAccumulator_t m_fvAccumulator_l3;
 
   static const size_t c_nLevels = 3;
   static const size_t c_nTimeSteps = 10 * 60; // seconds
 
-  using rAccumulator_t = std::array<Accumulator, ARRAY_NAMES_SIZE>;
-  using rLevelAccumulation_t = std::array<rAccumulator_t,c_nLevels>;
-  using rTimeStepAccumulation_t = std::array<rLevelAccumulation_t, c_nTimeSteps>;
+  using rTimeStep_Averages_t = std::array<double, c_nLevels * ARRAY_NAMES_SIZE>;
+  using rTimeSteps_t = std::array<rTimeStep_Averages_t, c_nTimeSteps>;
 
-  rTimeStepAccumulation_t m_rTimeStepAccumulation;
+  rTimeSteps_t m_rTimeSteps;
 
-  rTimeStepAccumulation_t::size_type m_ixTimeStepAccumulation; // entry to be filled
-  bool m_bTimeStepAccumulation_filled;  // ie wrapped
+  rTimeSteps_t::size_type m_ixTimeStep; // entry to be filled
+  bool m_bTimeStepsFilled;  // ie wrapped
 
 };
 

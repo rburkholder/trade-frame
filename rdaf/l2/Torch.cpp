@@ -19,27 +19,25 @@
  * Created: 2023/05/15 21:18:40
  */
 
-#include <TFIQFeed/Level2/FeatureSet.hpp>
-
 #include "Torch.hpp"
 #include "Torch_impl.hpp"
 
 namespace Strategy {
 
-Torch::Torch() {
-  m_pTorch_impl = std::make_unique<Torch_impl>();
+Torch::Torch( const ou::tf::iqfeed::l2::FeatureSet& fs ) {
+  m_pTorch_impl = std::make_unique<Torch_impl>( fs );
 }
 
 Torch::~Torch() {
   m_pTorch_impl.reset();
 }
 
-void Torch::Accumulate( const ou::tf::iqfeed::l2::FeatureSet& fs ) {
-  m_pTorch_impl->Accumulate( fs );
+void Torch::Accumulate() {
+  m_pTorch_impl->Accumulate();
 }
 
-Torch::Op Torch::StepModel() {
-  return m_pTorch_impl->StepModel();
+Torch::Op Torch::StepModel( boost::posix_time::ptime dt ) {
+  return m_pTorch_impl->StepModel( dt );
 }
 
 }
