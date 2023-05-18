@@ -35,11 +35,18 @@ public:
 
   enum class State { Open, Expired, Closed };
   enum class Type { // Name_Type relies on this order
-    SynthLong = 0, SynthShort, Cover, Protect,
-    DltaPlsGmPls, DltaPlsGmMns, DltaMnsGmPls, DltaMnsGmMns,
-    Long, Short,
-    _size
-    };
+    SynthLong = 0
+  , SynthShort
+  , Cover        // short call or put
+  , Protect      // long  put or call
+  , DltaPlsGmPls // long call
+  , DltaPlsGmMns // short put
+  , DltaMnsGmPls // long put
+  , DltaMnsGmMns // short call
+  , Long
+  , Short
+  , _size
+  };
   enum class Side { Long, Short };
   enum class Option { Call, Put };
   enum class Momentum { Rise, Fall, Unknown };
