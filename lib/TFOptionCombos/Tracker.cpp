@@ -570,16 +570,20 @@ void Tracker::ForceRoll() {
     }
   }
   else {
-    std::cout << "Tracker::ForceRoll: no roll, not tracking" << std::endl;
+    std::cout << "Tracker::ForceRoll: no roll, not tracking (" << (int)m_transition << ")" << std::endl;
   }
 }
 
 void Tracker::ForceClose() {
-  if ( ( ETransition::Track_Long == m_transition ) || ( ETransition::Track_Short == m_transition ) ) {
-    m_transition = ETransition::Close_start;
-  }
-  else {
-    std::cout << "Tracker::ForceClose: can not start close" << std::endl;
+  switch ( m_transition ) {
+    case ETransition::Track_Long:
+    case ETransition::Track_Short:
+    case ETransition::Vacant:
+      m_transition = ETransition::Close_start;
+      break;
+    default:
+      std::cout << "Tracker::ForceClose: can not start close (" << (int)m_transition << ")" << std::endl;
+      break;
   }
 }
 
