@@ -42,7 +42,7 @@ class Torch_impl;
 class Torch {
 public:
 
-  Torch( const ou::tf::iqfeed::l2::FeatureSet& );
+  Torch( const std::string& sTorchModel, const ou::tf::iqfeed::l2::FeatureSet& );
   ~Torch();
 
   enum Op { Long, Neutral, Hold, Short };

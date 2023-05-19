@@ -87,6 +87,10 @@ struct symbol_t {
   size_t nVolumeUpper;
   size_t nVolumeLower;
 
+  // torch related
+
+  std::string sTorchModelPath;
+
   // post parse - naming
 
   std::string sSymbol_IQFeed;

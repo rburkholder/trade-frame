@@ -24,8 +24,8 @@
 
 namespace Strategy {
 
-Torch::Torch( const ou::tf::iqfeed::l2::FeatureSet& fs ) {
-  m_pTorch_impl = std::make_unique<Torch_impl>( fs );
+Torch::Torch( const std::string& sTorchModel, const ou::tf::iqfeed::l2::FeatureSet& fs ) {
+  m_pTorch_impl = std::make_unique<Torch_impl>( sTorchModel, fs );
 }
 
 Torch::~Torch() {

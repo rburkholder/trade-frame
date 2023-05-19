@@ -56,6 +56,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   (int, nStochastic1Periods)
   (int, nStochastic2Periods)
   (int, nStochastic3Periods)
+  (std::string, sTorchModelPath)
   (size_t, nPriceBins)
   (double, dblPriceUpper)
   (double, dblPriceLower)
@@ -281,6 +282,12 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >> boost::spirit::int_
       >> *qi::lit(' ') >> qi::eol;
 
+    ruleTorchModel
+      %= qi::lit("torch_model")
+      >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
+      >> +( qi::char_( "0-9a-zA-Z/.") | qi::char_( '-') | qi::char_( '_' ) )
+      >> *qi::lit(' ') >> qi::eol;
+
     rulePriceBins
       %= qi::lit( "price_bins" )
       >> *qi::lit(' ') >> qi::lit('=') >> *qi::lit(' ')
@@ -331,6 +338,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
       >>  ruleStochastic1Periods
       >>  ruleStochastic2Periods
       >>  ruleStochastic3Periods
+      >> -ruleTorchModel
       >>  rulePriceBins
       >>  rulePriceUpper
       >>  rulePriceLower
@@ -393,6 +401,7 @@ struct ChoicesParser: qi::grammar<Iterator, ou::tf::config::choices_t()> {
   qi::rule<Iterator, int()> ruleStochastic1Periods;
   qi::rule<Iterator, int()> ruleStochastic2Periods;
   qi::rule<Iterator, int()> ruleStochastic3Periods;
+  qi::rule<Iterator, std::string()> ruleTorchModel;
   qi::rule<Iterator, std::string()> ruleDateTime;
   qi::rule<Iterator, std::string()> ruleTimeUpper;
   qi::rule<Iterator, std::string()> ruleTimeLower;

@@ -338,7 +338,7 @@ void Futures::StartDepthByOrder() {
   using EState = ou::tf::iqfeed::l2::OrderBased::EState;
 
   m_FeatureSet.Set( 10 );
-  m_pTorch = std::make_unique<Torch>( m_FeatureSet );
+  m_pTorch = std::make_unique<Torch>( m_config.sTorchModelPath, m_FeatureSet );
 
   m_pOrderBased = ou::tf::iqfeed::l2::OrderBased::Factory();
 

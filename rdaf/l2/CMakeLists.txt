@@ -18,8 +18,8 @@ set(BOOST_USE_STATIC_RUNTIME OFF)
 #set(BOOST_INCLUDEDIR "/usr/local/include/boost")
 
 find_package(Boost ${TF_BOOST_VERSION} REQUIRED COMPONENTS system date_time program_options thread filesystem serialization regex log log_setup json)
-
 find_package(Td 1.8.11 REQUIRED)
+find_package(Torch REQUIRED)
 
 #message("boost lib: ${Boost_LIBRARIES}")
 
@@ -69,6 +69,7 @@ target_include_directories(
     "../lib"
     "/usr/local/lib/wx/include/gtk3-unicode-${WX_VERSION_MAJOR}"
     "/usr/local/include/wx-${WX_VERSION_MAJOR}"
+    "/usr/include/torch/csrc/api/include"
 #    "/usr/local/include/rdaf"
   )
 
@@ -98,6 +99,7 @@ target_link_libraries(
       TFIndicators
       TFTimeSeries
       Telegram
+      "${TORCH_LIBRARIES}"
       dl
       z
       curl
