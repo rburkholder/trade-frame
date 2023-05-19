@@ -160,7 +160,8 @@ MasterPortfolio::MasterPortfolio(
     [this]( ou::tf::TreeItem* ){ // fOnClick_t
       m_pPanelFinancialChart->SetChartDataView( nullptr );
     },
-    []( ou::tf::TreeItem* ){} // fOnMenu_t
+    []( ou::tf::TreeItem* pti ){ // fOnMenu_t
+    }
     );
 
   std::stringstream ss;
@@ -344,6 +345,11 @@ void MasterPortfolio::Test() {
 
 // look for potential underlying symbols to support strategy implementation
 void MasterPortfolio::Load( ptime dtLatestEod ) {
+
+  if ( !m_pMasterPortfolio ) {
+    std::cout << "no master portfolio loaded" << std::endl;
+    return;
+  }
 
   m_dtLatestEod = dtLatestEod;
 
