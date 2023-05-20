@@ -19,8 +19,12 @@
  * Created: 2023/05/16 18:00:31
  */
 
-#include <torch/torch.h>
+//#include <torch/torch.h>
 
+#include <ATen/core/ATen_fwd.h>
+#include <ATen/ops/from_blob.h>
+
+#include <c10/core/DeviceType.h>
 #include <c10/util/Exception.h>
 
 #include "Torch_impl.hpp"
@@ -35,8 +39,7 @@ namespace Strategy {
   Accumulator( level.BOOST_PP_ARRAY_ELEM(n,ARRAY_NAMES ) )
 
 Torch_impl::Torch_impl( const std::string& sTorchModel, const ou::tf::iqfeed::l2::FeatureSet& fs )
-: m_bTimeStepsFilled( false )
-, m_ixTimeStep {}
+: m_ixTimeStep {}
 , m_fvAccumulator_l1(
     BOOST_PP_REPEAT( ARRAY_NAMES_SIZE, FUSION_VECTOR_REFERENCES, fs.FVS()[ 1 ] )
   )
@@ -47,6 +50,8 @@ Torch_impl::Torch_impl( const std::string& sTorchModel, const ou::tf::iqfeed::l2
     BOOST_PP_REPEAT( ARRAY_NAMES_SIZE, FUSION_VECTOR_REFERENCES, fs.FVS()[ 3 ] )
   )
 {
+  m_vTensor.reserve( c_nTimeSteps );
+
   try {
     torch::manual_seed(0);
     m_module = torch::jit::load( sTorchModel );
@@ -147,10 +152,28 @@ Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt ) {
 
   *iterTimeStep = seconds;
 
+  // https://pytorch.org/cppdocs/api/structc10_1_1_i_value.html
+  // IValues contain their values as an IValue::Payload,
+  //    which holds primitive types (int64_t, bool, double, Device) and Tensor as values,
+  //    and all other types as a c10::intrusive_ptr.
+  // https://pytorch.org/cppdocs/notes/tensor_creation.html
+
+  if ( c_nTimeSteps == m_vTensor.size() ) {
+    m_vTensor.erase( m_vTensor.begin() );
+  }
+
+  auto options = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCPU, 1);
+  m_vTensor.push_back( torch::from_blob( &step, {ARRAY_NAMES_SIZE + 1}, options ) );
+  torch::TensorList list = torch::TensorList( m_vTensor );
+  torch::Tensor steps = torch::stack( list, 1 );
+
   std::vector<torch::jit::IValue> inputs;
+  inputs.push_back( list );  // choose this one
+  inputs.push_back( steps ); // or this one
+
   assert( false );  // requires tensor construction from above
 
-  if ( m_bTimeStepsFilled ) {
+  if ( c_nTimeSteps == m_vTensor.size() ) {
     // submit to torch
     //   m_ixTimeStep has latest step
     m_module.eval();
@@ -161,7 +184,6 @@ Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt ) {
   assert( m_ixTimeStep <= c_nTimeSteps );
   if ( c_nTimeSteps == m_ixTimeStep ) {
     m_ixTimeStep = 0;
-    m_bTimeStepsFilled = true;
   }
 
   return op; // placeholder

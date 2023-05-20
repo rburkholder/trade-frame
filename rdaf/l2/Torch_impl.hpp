@@ -135,13 +135,14 @@ private:
   static const size_t c_nLevels = 3;
   static const size_t c_nTimeSteps = 10 * 60; // seconds
 
-  using rTimeStep_Averages_t = std::array<double, c_nLevels * ARRAY_NAMES_SIZE + 1>; // last is seconds since midnight
+  using rTimeStep_Averages_t = std::array<float, c_nLevels * ARRAY_NAMES_SIZE + 1>; // last is seconds since midnight
   using rTimeSteps_t = std::array<rTimeStep_Averages_t, c_nTimeSteps>;
+  using vTensor_t = std::vector<torch::Tensor>;
 
   rTimeSteps_t m_rTimeSteps;
+  vTensor_t m_vTensor;
 
   rTimeSteps_t::size_type m_ixTimeStep; // entry to be filled
-  bool m_bTimeStepsFilled;  // ie wrapped
 
   torch::jit::script::Module m_module;
 
