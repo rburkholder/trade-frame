@@ -36,8 +36,8 @@ void Torch::Accumulate() {
   m_pTorch_impl->Accumulate();
 }
 
-Torch::Op Torch::StepModel( boost::posix_time::ptime dt ) {
-  return m_pTorch_impl->StepModel( dt );
+Torch::Op Torch::StepModel( boost::posix_time::ptime dt, Torch::Op op, double unrealized, float result[3]) {
+  return m_pTorch_impl->StepModel( dt, op, unrealized, result );
 }
 
 }

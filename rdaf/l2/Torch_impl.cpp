@@ -21,6 +21,8 @@
 
 //#include <torch/torch.h>
 
+#include <tuple>
+
 #include <ATen/core/ATen_fwd.h>
 #include <ATen/ops/from_blob.h>
 
@@ -53,18 +55,23 @@ Torch_impl::Torch_impl( const std::string& sTorchModel, const ou::tf::iqfeed::l2
   m_vTensor.reserve( c_nTimeSteps );
 
   try {
+
     torch::manual_seed(0);
+
+    m_tensorCell = torch::zeros( { 1, 1, 64 } );
+    m_tensorHidden = torch::zeros( { 1, 1, 64 } );
+
     m_module = torch::jit::load( sTorchModel );
     m_module.to(torch::kCPU);
     //torch::NoGradGuard no_grad_;  // ?
 
-    for ( const auto& attr: m_module.named_attributes() ) {
-      std::cout << "attr: " << attr.name << std::endl;
-    }
+    //for ( const auto& attr: m_module.named_attributes() ) {
+    //  std::cout << "attr: " << attr.name << std::endl;
+    //}
 
-    for (const auto& method: m_module.get_methods() ) {
-      std::cout << "method: " << method.name() << std::endl;
-    }
+    //for (const auto& method: m_module.get_methods() ) {
+    //  std::cout << "method: " << method.name() << std::endl;
+    //}
   }
   catch ( const c10::Error& e ) {
     std::string s( "torch error: " + e.msg() );
@@ -99,9 +106,7 @@ void Torch_impl::Accumulate() {
   );
 }
 
-Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt ) {
-  // todo: incorporate dt, or seconds from midnight
-  Torch::Op op( Torch::Op::Neutral );
+Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt, Torch::Op old_op, double unrealized, float result[3] ) {
 
   auto seconds = dt.time_of_day().seconds();
 
@@ -162,22 +167,65 @@ Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt ) {
     m_vTensor.erase( m_vTensor.begin() );
   }
 
-  auto options = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCPU, 1);
-  m_vTensor.push_back( torch::from_blob( &step, {ARRAY_NAMES_SIZE + 1}, options ) );
-  torch::TensorList list = torch::TensorList( m_vTensor );
-  torch::Tensor steps = torch::stack( list, 1 );
-
   std::vector<torch::jit::IValue> inputs;
-  inputs.push_back( list );  // choose this one
+
+  static const auto options = torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCPU, -1 );
+
+  m_vTensor.push_back( torch::from_blob( &step, { c_nLevels * ARRAY_NAMES_SIZE + 1 }, options ) );
+  torch::TensorList listSteps = torch::TensorList( m_vTensor );
+  torch::Tensor steps = torch::stack( listSteps, 1 );
+
+  //inputs.push_back( listSteps );  // choose this one
   inputs.push_back( steps ); // or this one
 
-  assert( false );  // requires tensor construction from above
+  double currentOp {};
+  switch ( old_op ) {
+    case Torch::Op::Hold:
+      break;
+    case Torch::Op::Long:
+      currentOp = +1.0;
+      break;
+    case Torch::Op::Neutral:
+      currentOp = 0.0;
+      break;
+    case Torch::Op::Short:
+      currentOp = -1.0;
+      break;
+  }
+
+  float state[ 2 ];
+  state[ 0 ] = currentOp;
+  state[ 1 ] = unrealized;
+  //torch::Tensor state_tensor = torch::from_blob( &state, { 2 } );
+  //inputs.push_back( state_tensor );
+  inputs.push_back( torch::from_blob( &state, { 2 } ) );
+
+  std::tuple<torch::Tensor, torch::Tensor> tuple( m_tensorHidden, m_tensorCell );
+  //std::vector<torch::jit::IValue> tuple;
+  //tuple.push_back( m_tensorHidden );
+  //tuple.push_back( m_tensorCell );
+  inputs.push_back( tuple );
+
+  Torch::Op op { Torch::Op::Neutral };
 
   if ( c_nTimeSteps == m_vTensor.size() ) {
     // submit to torch
-    //   m_ixTimeStep has latest step
-    m_module.eval();
-    auto output = m_module.forward(inputs).toTuple()->elements()[0].toTensor();
+    //m_module.eval();
+    //auto output = m_module.forward(inputs).toTuple()->elements()[0].toTensor();
+    auto output = m_module.forward( inputs );
+
+    auto hidden_cell = output.toTuple()->elements()[ 1 ];
+    m_tensorHidden = hidden_cell.toTuple()->elements()[0].toTensor();
+    m_tensorCell = hidden_cell.toTuple()->elements()[1].toTensor();
+
+    torch::Tensor trade = output.toTuple()->elements()[ 0 ].toTensor();
+    auto trade_a = trade.accessor<float,1>();
+    assert( 3 == trade_a.size( 0 ) );
+
+    result[ 0 ] = trade_a[ 0 ];
+    result[ 1 ] = trade_a[ 1 ];
+    result[ 2 ] = trade_a[ 2 ];
+
   }
 
   m_ixTimeStep++;

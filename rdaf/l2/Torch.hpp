@@ -48,7 +48,7 @@ public:
   enum Op { Long, Neutral, Hold, Short };
 
   void Accumulate();
-  Op StepModel( boost::posix_time::ptime );
+  Op StepModel( boost::posix_time::ptime, Torch::Op, double unrealized, float[3] );
 
 protected:
 private:

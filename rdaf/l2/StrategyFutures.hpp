@@ -269,6 +269,7 @@ private:
 
   using pTorch_t = std::unique_ptr<Torch>;
   pTorch_t m_pTorch;
+  Torch::Op m_opPosition;
 
   size_t m_nEmitted;
   size_t m_nEmitSuppressed;
@@ -285,6 +286,7 @@ private:
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& );
 
+  void HandleRHTrading_Traditional( const ou::tf::Quote& );
   void HandleRHTrading( const ou::tf::Quote& );
 
   void HandleRHTrading( const ou::tf::Bar& );

@@ -339,6 +339,7 @@ void Futures::StartDepthByOrder() {
 
   m_FeatureSet.Set( 10 );
   m_pTorch = std::make_unique<Torch>( m_config.sTorchModelPath, m_FeatureSet );
+  m_opPosition = Torch::Op::Neutral;
 
   m_pOrderBased = ou::tf::iqfeed::l2::OrderBased::Factory();
 
@@ -903,6 +904,11 @@ void Futures::ShowOrder( pOrder_t pOrder ) {
 }
 
 void Futures::HandleRHTrading( const ou::tf::Quote& quote ) {
+  // placeholder while testing Torch
+  ptime dt( quote.DateTime() );
+}
+
+void Futures::HandleRHTrading_Traditional( const ou::tf::Quote& quote ) {
 
   ptime dt( quote.DateTime() );
 
@@ -1249,9 +1255,13 @@ void Futures::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
    //auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end - begin).count();
    //m_ceExecutionTime.Append( bar.DateTime(), delta );
 
-   Torch::Op op = m_pTorch->StepModel( bar.DateTime() );
+  float result[ 3 ];
 
-   switch ( op ) {
+  Torch::Op op = m_pTorch->StepModel( bar.DateTime(), m_opPosition, m_dblUnRealized, result );
+
+  if ( m_opPosition != op ) {
+
+    switch ( op ) {
     case Torch::Op::Long:
       break;
     case Torch::Op::Hold:
@@ -1260,7 +1270,10 @@ void Futures::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       break;
     case Torch::Op::Neutral:
       break;
-   }
+    }
+
+    m_opPosition = op;
+  }
 
 }
 

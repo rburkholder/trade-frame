@@ -98,7 +98,7 @@ public:
   ~Torch_impl();
 
   void Accumulate();
-  Torch::Op StepModel( boost::posix_time::ptime );
+  Torch::Op StepModel( boost::posix_time::ptime, Torch::Op, double unrealized, float[3] );
 
 protected:
 private:
@@ -145,6 +145,9 @@ private:
   rTimeSteps_t::size_type m_ixTimeStep; // entry to be filled
 
   torch::jit::script::Module m_module;
+
+  torch::Tensor m_tensorCell;
+  torch::Tensor m_tensorHidden;
 
 };
 
