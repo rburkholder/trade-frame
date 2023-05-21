@@ -60,10 +60,8 @@ public:
   , const std::string& sUnderlying
   );
 
-  // long by default for entry, short doesn't make much sense due to combo combinations
-  virtual void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity );
-
 protected:
+  virtual void BuildOrder( pOrderCombo_t, ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity );
 private:
 };
 

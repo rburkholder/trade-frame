@@ -241,12 +241,8 @@ size_t /* static */ Collar::LegCount() {
   return sName;
 }
 
-void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuantity ) {
-
-  assert( 0 < nOrderQuantity );
-
-  pOrderCombo_t pOrderCombo = ou::tf::OrderCombo::Factory();
-  // legs are already in place, so create order for new portfolio
+// long by default for entry, short doesn't make much sense due to combo combinations
+void Collar::BuildOrder( pOrderCombo_t pOrderCombo, ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuantity ) {
 
   switch ( side ) {
     case ou::tf::OrderSide::Buy: // typical entry
@@ -264,8 +260,6 @@ void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuan
     default:
       assert( false );
   }
-
-  Submit( pOrderCombo, "Collar::PlaceOrder complete" );
 
 }
 

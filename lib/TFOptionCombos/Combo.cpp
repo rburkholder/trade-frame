@@ -457,6 +457,19 @@ void Combo::DeactivatePositionOption( pPosition_t pPosition ) {
   m_fDeactivateOption( pOption );
 }
 
+void Combo::PlaceOrder( ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuantity ) {
+
+  assert( 0 < nOrderQuantity );
+
+  // legs are already in place, so create order for new portfolio
+  pOrderCombo_t pOrderCombo = ou::tf::OrderCombo::Factory();
+
+  BuildOrder( pOrderCombo, side, nOrderQuantity ); // call the specific combo builder
+
+  Submit( pOrderCombo, "Combo::PlaceOrder complete" );
+
+}
+
 void Combo::Submit( pOrderCombo_t pOrderCombo, const std::string& sComment ) {
 
   auto pair = m_setpOrderCombo.insert( pOrderCombo );

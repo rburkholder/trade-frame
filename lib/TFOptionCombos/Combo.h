@@ -179,7 +179,7 @@ public:
 
   void Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt );
 
-  virtual void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity ) = 0; // called by ManageStrategy to start Combo
+  void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity ); // called by ManageStrategy to start Combo
 
   virtual double GetNet( double price );
 
@@ -258,6 +258,8 @@ protected:
   void DiagonalRoll( ComboLeg& );
   void LegLock( ComboLeg& );
   void LegClose( ComboLeg& );
+
+  virtual void BuildOrder( pOrderCombo_t, ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity ) = 0;
 
   void DeactivatePositionOption( pPosition_t );
 
