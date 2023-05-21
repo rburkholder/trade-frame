@@ -58,17 +58,13 @@ public:
   , const SpreadSpecs&
   , double price
   , const std::string& sUnderlying
-    );
+  );
 
   // long by default for entry, short doesn't make much sense due to combo combinations
   virtual void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity );
 
 protected:
-
-  virtual void Init( boost::gregorian::date, const mapChains_t*, const SpreadSpecs& );
-
 private:
-
 };
 
 } // namespace option

@@ -233,8 +233,6 @@ protected:
   using mapInitTrackOption_t = std::map<LegNote::Type,fInitTrackOption_t>;
   mapInitTrackOption_t m_mapInitTrackOption;
 
-  virtual void Init( boost::gregorian::date date, const mapChains_t*, const SpreadSpecs& ) = 0;
-
   void InitTracker(
     ComboLeg&,
     const mapChains_t* pmapChains,
@@ -274,6 +272,8 @@ private:
   ou::ChartEntryIndicator m_ceGamma;
   ou::ChartEntryIndicator m_ceTheta;
   ou::ChartEntryIndicator m_ceVega;
+
+  void Init( boost::gregorian::date, const mapChains_t*, const SpreadSpecs& );
 
   void PositionNote( pPosition_t&, LegNote::State );
 

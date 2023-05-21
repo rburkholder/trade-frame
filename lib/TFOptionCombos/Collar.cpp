@@ -38,6 +38,12 @@ call sold. They should only therefore be used when the likelihood of a strong, l
 rally (or significant bounce) is perceived to be relatively small.
 */
 
+/*
+  Having said all that, this is not a underlying + two option strategy, this is a four option strategy, so
+  different rules probably apply.  Skew is balanace, I think, and this is designed to capture mean reversion scenarios
+  along with 0dte and 1dte premium capture
+*/
+
 #include <array>
 
 #include <TFOptions/Chains.h>
@@ -80,116 +86,6 @@ Collar::Collar()
 Collar::Collar( Collar&& rhs ){}
 
 Collar::~Collar() {
-}
-
-// needs to happen before all Legs have been created
-// called from Combo::Prepare
-void Collar::Init( boost::gregorian::date date, const mapChains_t* pmapChains, const SpreadSpecs& specs ) {
-
-  // TODO: check if position is active prior to Initialize
-  // TODO: so much happening, almost ready to start firing events on state change
-  // TODO: refactor date, pmapChains
-
-  // === vertical/diagonal roll for profitable long synthetic when trend is in wrong direction
-  m_mapInitTrackOption.emplace(
-    std::make_pair(
-      LegNote::Type::SynthLong,
-      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){
-        InitTrackLongOption( cleg, pmapChains, date, days );
-      }
-    )
-  );
-
-  // === vertical/diagonal roll for profitable long protective when trend is in wrong direction
-  m_mapInitTrackOption.emplace(
-    std::make_pair(
-      LegNote::Type::Protect,
-      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){
-        InitTrackLongOption( cleg, pmapChains, date, days );
-      }
-    )
-  );
-
-  // === close out at minium value, calendar roll to continue (auto or manual?)
-  m_mapInitTrackOption.emplace(
-    std::make_pair(
-      LegNote::Type::SynthShort,
-      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){ // make money on the sold premium
-        InitTrackShortOption( cleg, pmapChains, date, days );
-      }
-    )
-  );
-
-  // === close out at minimum value, calendar roll to continue (auto or manual?)
-  m_mapInitTrackOption.emplace(
-    std::make_pair(
-      LegNote::Type::Cover,
-      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){ // make money on the sold premium
-        InitTrackShortOption( cleg, pmapChains, date, days );
-      }
-    )
-  );
-
-  // === vertical/diagonal roll for profitable long synthetic when trend is in wrong direction
-  m_mapInitTrackOption.emplace(
-    std::make_pair(
-      LegNote::Type::DltaPlsGmPls, // long call
-      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){
-        InitTrackLongOption( cleg, pmapChains, date, days );
-      }
-    )
-  );
-
-  // === close out at minimum value, calendar roll to continue (auto or manual?)
-  m_mapInitTrackOption.emplace(
-    std::make_pair(
-      LegNote::Type::DltaPlsGmMns, // short put
-      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){
-        InitTrackLongOption( cleg, pmapChains, date, days );
-      }
-    )
-  );
-
-  // === vertical/diagonal roll for profitable long synthetic when trend is in wrong direction
-  m_mapInitTrackOption.emplace(
-    std::make_pair(
-      LegNote::Type::DltaMnsGmPls, // long put
-      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){ // make money on the sold premium
-        InitTrackShortOption( cleg, pmapChains, date, days );
-      }
-    )
-  );
-
-  // === close out at minimum value, calendar roll to continue (auto or manual?)
-  m_mapInitTrackOption.emplace(
-    std::make_pair(
-      LegNote::Type::DltaMnsGmMns, // short call
-      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){ // make money on the sold premium
-        InitTrackShortOption( cleg, pmapChains, date, days );
-      }
-    )
-  );
-
-  // === vertical/diagonal roll for profitable long synthetic when trend is in wrong direction
-  m_mapInitTrackOption.emplace(
-    std::make_pair(
-      LegNote::Type::Long,
-      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){ // make money on the sold premium
-        InitTrackLongOption( cleg, pmapChains, date, days );
-      }
-    )
-  );
-
-  // === close out at minimum value, calendar roll to continue (auto or manual?)
-  m_mapInitTrackOption.emplace(
-    std::make_pair(
-      LegNote::Type::Short,
-      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){ // make money on the sold premium
-        InitTrackShortOption( cleg, pmapChains, date, days );
-      }
-    )
-  );
-
 }
 
 size_t /* static */ Collar::LegCount() {
@@ -346,6 +242,8 @@ size_t /* static */ Collar::LegCount() {
 }
 
 void Collar::PlaceOrder( ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuantity ) {
+
+  assert( 0 < nOrderQuantity );
 
   pOrderCombo_t pOrderCombo = ou::tf::OrderCombo::Factory();
   // legs are already in place, so create order for new portfolio
