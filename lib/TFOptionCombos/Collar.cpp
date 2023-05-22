@@ -63,6 +63,8 @@ namespace {
   using LegDef = ou::tf::option::LegDef;
   using rLegDef_t = std::array<LegDef,c_nLegs>;
 
+  // NOTE/Caveat: AddLegOrder requires that c_rLegDefRise & c_rLegDefFall have identical LegNote::Side for each entry
+
   //long collar: synthetic long, covered call, long put
   static const rLegDef_t c_rLegDefRise = { // rising momentum
     LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Call ), // synthetic long
@@ -79,26 +81,14 @@ namespace {
     LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Call )  // protective
   };
 
-  using mapLegDev_t = std::map<LegNote::Type, LegDef>;
+  using mapLegDev_t = std::map<LegNote::Type, size_t>; // lookup into array
 
-  //long collar: synthetic long, covered call, long put
-  static const mapLegDev_t mapLegDef_Rise = {
-    { LegNote::Type::SynthLong,  LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Call ) } // synthetic long
-  , { LegNote::Type::SynthShort, LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Put ) }  // synthetic long
-  , { LegNote::Type::Cover,      LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Call ) } // covered
-  , { LegNote::Type::Protect,    LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Put ) }  // protective
+  static const mapLegDev_t mapLegDef = {
+    { LegNote::Type::SynthLong,  0 }
+  , { LegNote::Type::SynthShort, 1 }
+  , { LegNote::Type::Cover,      2 }
+  , { LegNote::Type::Protect,    3 }
   };
-
-  //short collar: synthetic short, covered put, long call
-  static const mapLegDev_t mapLegDef_Fall = {
-    { LegNote::Type::SynthLong,  LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Put ) }  // synthetic long
-  , { LegNote::Type::SynthShort, LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Call ) } // synthetic long
-  , { LegNote::Type::Cover,      LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Put ) }  // covered
-  , { LegNote::Type::Protect,    LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Call ) } // protective
-  };
-
-// rLegDef_t and mapLegDev_t are redundant... this is an interim step to migrate usage to the map
-// maybe convert the map to type/index to act as lookup into the array
 
 } // namespace anon
 
@@ -268,11 +258,12 @@ size_t /* static */ Collar::LegCount() {
 , pPosition_t pPosition
 ) {
   switch ( side ) {
-    case ou::tf::OrderSide::Buy: // typical entry
+    case ou::tf::OrderSide::Buy: // usual entry
       {
-        mapLegDev_t::const_iterator iter = mapLegDef_Rise.find( type );
-        assert( mapLegDef_Rise.end() != iter );
-        switch ( iter->second.side ) {
+        mapLegDev_t::const_iterator iter = mapLegDef.find( type );
+        assert( mapLegDef.end() != iter );
+        const LegDef& leg( c_rLegDefRise[ iter->second ] ); // note the Caveat at top of file
+        switch ( leg.side ) {
           case LegNote::Side::Long:
             pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Buy, [](){} );
             break;
@@ -282,16 +273,17 @@ size_t /* static */ Collar::LegCount() {
         }
       }
       break;
-    case ou::tf::OrderSide::Sell: // unusual
+    case ou::tf::OrderSide::Sell: // unusual entry
       {
-        mapLegDev_t::const_iterator iter = mapLegDef_Fall.find( type );
-        assert( mapLegDef_Fall.end() != iter );
-        switch ( iter->second.side ) {
+        mapLegDev_t::const_iterator iter = mapLegDef.find( type );
+        assert( mapLegDef.end() != iter );
+        const LegDef& leg( c_rLegDefFall[ iter->second ] ); // note the Caveat at top of file
+        switch ( leg.side ) {
           case LegNote::Side::Long:
-            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Buy, [](){} );
+            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Sell, [](){} );
             break;
           case LegNote::Side::Short:
-            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Sell, [](){} );
+            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Buy, [](){} );
             break;
         }
       }
