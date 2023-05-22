@@ -275,6 +275,7 @@ void Collar::AddLegOrder(
     case ou::tf::OrderSide::Buy: // typical entry
       {
         mapLegDev_t::const_iterator iter = mapLegDef_Rise.find( type );
+        assert( mapLegDef_Rise.end() != iter );
         switch ( iter->second.side ) {
           case LegNote::Side::Long:
             pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Buy, [](){} );
@@ -288,6 +289,7 @@ void Collar::AddLegOrder(
     case ou::tf::OrderSide::Sell: // unusual
       {
         mapLegDev_t::const_iterator iter = mapLegDef_Fall.find( type );
+        assert( mapLegDef_Fall.end() != iter );
         switch ( iter->second.side ) {
           case LegNote::Side::Long:
             pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Buy, [](){} );
@@ -302,7 +304,6 @@ void Collar::AddLegOrder(
       assert( false );
   }
 }
-
 
 } // namespace option
 } // namespace tf

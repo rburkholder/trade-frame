@@ -60,7 +60,6 @@ public:
   , const std::string& sUnderlying
   );
 
-protected:
   virtual void AddLegOrder(
     const LegNote::Type
   , pOrderCombo_t
@@ -68,6 +67,8 @@ protected:
   , uint32_t nOrderQuantity
   , pPosition_t
   );
+
+protected:
 private:
 };
 
