@@ -55,7 +55,9 @@ public:
 
   ComboLeg() = delete;
   ComboLeg( const ComboLeg& ) = delete;
-  ComboLeg( ou::tf::Leg&& leg ): m_state( State::loaded ), m_leg( std::move( leg ) ) {}
+  ComboLeg( ou::tf::Leg&& leg )
+  : m_state( State::loaded )
+  , m_leg( std::move( leg ) ) {}
   ComboLeg( ComboLeg&& rhs )
   : m_state( rhs.m_state)
   , m_leg( std::move( rhs.m_leg ) )

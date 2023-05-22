@@ -374,7 +374,7 @@ void Combo::InitTracker(
       PositionNote( pPositionOld, LegNote::State::Closed );
       DeactivatePositionOption( pPositionOld );
 
-      Submit( pOrderCombo, "Combo::InitTracker old position closed" );
+      Submit( pOrderCombo, "Combo::InitTracker position rolled" );
 
       return pPosition;
     },
@@ -389,7 +389,7 @@ void Combo::InitTracker(
         pPositionOld,
         [](){} );
 
-      Submit( pOrderCombo, "Combo::InitTracker old position rolled" );
+      Submit( pOrderCombo, "Combo::InitTracker old position closed" );
 
     }
   );
@@ -667,9 +667,11 @@ void Combo::CancelOrders() { // this might be a duplicate function from above
 // TODO: need to redo this using OrderCombo
 void Combo::ClosePositions() {
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
-    ou::tf::Leg& leg( entry.second.m_leg );
+    ComboLeg& cleg( entry.second );
+    cleg.m_tracker.Quiesce();
+    ou::tf::Leg& leg( cleg.m_leg );
     if ( leg.IsActive() ) {
-      //pPosition_t pPosition = leg.ClosePosition();
+      pPosition_t pPosition = leg.GetPosition();
       auto& instance( ou::tf::PortfolioManager::GlobalInstance() ); // NOTE this direct call!!
       //instance.PositionUpdateNotes( pPosition );
     }
