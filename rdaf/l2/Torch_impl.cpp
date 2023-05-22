@@ -186,7 +186,7 @@ Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt, Torch::Op old_op, 
       currentOp = +1.0;
       break;
     case Torch::Op::Neutral:
-      currentOp = 0.0;
+      currentOp =  0.0;
       break;
     case Torch::Op::Short:
       currentOp = -1.0;
@@ -214,9 +214,9 @@ Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt, Torch::Op old_op, 
     //auto output = m_module.forward(inputs).toTuple()->elements()[0].toTensor();
     auto output = m_module.forward( inputs );
 
-    auto hidden_cell = output.toTuple()->elements()[ 1 ];
-    m_tensorHidden = hidden_cell.toTuple()->elements()[0].toTensor();
-    m_tensorCell = hidden_cell.toTuple()->elements()[1].toTensor();
+    auto recycle = output.toTuple()->elements()[ 1 ];
+    m_tensorHidden = recycle.toTuple()->elements()[0].toTensor();
+    m_tensorCell = recycle.toTuple()->elements()[1].toTensor();
 
     torch::Tensor trade = output.toTuple()->elements()[ 0 ].toTensor();
     auto trade_a = trade.accessor<float,1>();
