@@ -98,12 +98,9 @@ namespace {
   };
 
 // rLegDef_t and mapLegDev_t are redundant... this is an interim step to migrate usage to the map
+// maybe convert the map to type/index to act as lookup into the array
 
 } // namespace anon
-
-Collar::Collar() {}
-
-Collar::~Collar() {}
 
 size_t /* static */ Collar::LegCount() {
   return c_nLegs;

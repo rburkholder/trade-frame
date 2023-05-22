@@ -40,12 +40,6 @@ public:
   using pPosition_t = ou::tf::Position::pPosition_t;
   using pOrderCombo_t = ou::tf::OrderCombo::pOrderCombo_t;
 
-  Collar();
-  Collar( Collar&& ) = delete;
-  Collar( const Collar& ) = delete;
-  Collar& operator=( const Collar& rhs ) = delete;
-  virtual ~Collar();
-
   static size_t LegCount();
 
   static void ChooseLegs( // throw Chain exceptions
