@@ -35,7 +35,7 @@ namespace option { // options
 
 Combo::Combo( Combo&& rhs )
 : m_mapComboLeg( std::move( rhs.m_mapComboLeg ) )
-, m_setpOrderCombo( std::move( rhs.m_setpOrderCombo ) )
+, m_setpOrderCombo_Active( std::move( rhs.m_setpOrderCombo_Active ) )
 , m_pPortfolio( std::move( rhs.m_pPortfolio ) )
 , m_fConstructOption( std::move( rhs.m_fConstructOption ) )
 , m_fActivateOption( std::move( rhs.m_fActivateOption ) )
@@ -451,30 +451,30 @@ void Combo::Submit( pOrderCombo_t pOrderCombo, const std::string& sComment ) {
 
   // TODO: need to confirm legs exist
 
-  auto pair = m_setpOrderCombo.insert( pOrderCombo );
-  assert( pair.second );
+  auto pair = m_setpOrderCombo_Active.insert( pOrderCombo );
 
+  assert( pair.second );
   setpOrderCombo_t::iterator iter = pair.first;
 
   pOrderCombo->Submit(
     [this,iter,sComment](){ // fComboDone_t
       std::cout << sComment << std::endl;
-      m_vOrderComboIter.push_back( iter );
+      m_vOrderComboIter_CleanUp.push_back( iter );
     } );
 }
 
 // TODO: make use of doubleUnderlyingSlope to trigger exit latch
 void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt ) {
 
-  for ( setpOrderCombo_t::value_type vt: m_setpOrderCombo ) {
+  for ( setpOrderCombo_t::value_type vt: m_setpOrderCombo_Active ) {
     vt->Tick( dt );
   }
 
   // clear the set of completed orders
-  for ( setpOrderCombo_t::iterator iter: m_vOrderComboIter ) { // clean up
-    m_setpOrderCombo.erase( iter );
+  for ( setpOrderCombo_t::iterator iter: m_vOrderComboIter_CleanUp ) { // clean up
+    m_setpOrderCombo_Active.erase( iter );
   }
-  m_vOrderComboIter.clear();
+  m_vOrderComboIter_CleanUp.clear();
 
   using vRemove_t = std::vector<mapComboLeg_t::iterator>;
   vRemove_t vRemove;
@@ -659,7 +659,6 @@ void Combo::CancelOrders() { // this might be a duplicate function from above
     ComboLeg& cleg( entry.second );
     cleg.m_tracker.Quiesce();
     //cleg.m_monitor.CancelOrder(); // or wait for completion?
-
     Leg& leg( cleg.m_leg );
     //leg.CancelOrder();
   }

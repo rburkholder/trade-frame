@@ -219,12 +219,14 @@ protected:
   using mapComboLeg_t = std::multimap<LegNote::Type,ComboLeg>;
   mapComboLeg_t m_mapComboLeg;
 
+  // contains active ComboOrders
   using setpOrderCombo_t = std::unordered_set<pOrderCombo_t>;
-  setpOrderCombo_t m_setpOrderCombo;
+  setpOrderCombo_t m_setpOrderCombo_Active;
 
+  // contains completed ComboOrders for cleanup
   // does this require a mutex? used for removing completed orders?
   using vOrderComboIter_t = std::vector<setpOrderCombo_t::iterator>;
-  vOrderComboIter_t m_vOrderComboIter;
+  vOrderComboIter_t m_vOrderComboIter_CleanUp;
 
   using fInitTrackOption_t = std::function<void(ComboLeg&)>;
   using mapInitTrackOption_t = std::map<LegNote::Type,fInitTrackOption_t>;
