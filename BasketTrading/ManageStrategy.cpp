@@ -83,7 +83,11 @@
 #include <wx/window.h>
 
 #include <TFOptionCombos/Collar.h>
-using combo_t = ou::tf::option::Collar;
+using Collar = ou::tf::option::Collar;
+
+#include "TFOptionCombos/Combo.h"
+using Combo = ou::tf::option::Combo;
+
 #include <TFOptionCombos/LegNote.h>
 
 #include <TFVuTrading/TreeItem.hpp>
@@ -267,7 +271,7 @@ ManageStrategy::ManageStrategy(
         m_mapChains,
         m_fConstructOption
       );
-    m_pValidateOptions->SetSize( combo_t::LegCount() ); // will need to make this generic
+    m_pValidateOptions->SetSize( Collar::LegCount() ); // will need to make this generic
 
   }
   catch (...) {
@@ -368,7 +372,6 @@ void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
                     ou::tf::option::Option& option( *pOption );
 
                     ou::tf::option::LegNote::values_t lnValues;
-                    //combo_t::FillLegNote( ix, direction, lnValues );
                     switch ( side ) {
                       case ou::tf::OrderSide::Buy:
                         lnValues.m_side = ou::tf::option::LegNote::Side::Long;
@@ -497,20 +500,20 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
 
         const idPortfolio_t idPortfolio = pPosition->GetRow().idPortfolio;
 
-        combo_t* pCombo;
+        Combo* pCombo;
         if ( m_pCombo ) {
           // use existing combo
-          pCombo = &dynamic_cast<combo_t&>( *m_pCombo );
+          pCombo = m_pCombo.get();
           assert( pCombo );
         }
         else {
            // need to construct empty combo when first leg presented
 
-          m_pCombo = std::make_unique<combo_t>();
+          m_pCombo = std::make_unique<Combo>();
 
           ComboPrepare( GetNoon().date() );
 
-          pCombo = &dynamic_cast<combo_t&>( *m_pCombo );
+          pCombo = m_pCombo.get();
           assert( pCombo );
 
           // NOTE: as portfolios are created only on validation, are all portfolios on the tree, but marked as authorized or not?
@@ -550,7 +553,7 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
 void ManageStrategy::ClosePositions( void ) {
   std::cout << m_pWatchUnderlying->GetInstrument()->GetInstrumentName() << " close positions" << std::endl;
   if ( m_pCombo ) {
-    combo_t& combo( dynamic_cast<combo_t&>( *m_pCombo ) );
+    Combo& combo( *m_pCombo );
     combo.CancelOrders(); // TODO: generify via Common or Base
     combo.ClosePositions(); // TODO: generify via Common or Base
   }
@@ -659,7 +662,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
 
   m_pCombo->Prepare(
     date, &m_mapChains, m_specsSpread,
-    [this]( const std::string& sOptionName, combo_t::fConstructedOption_t&& fConstructedOption ){ // fConstructOption_t
+    [this]( const std::string& sOptionName, Combo::fConstructedOption_t&& fConstructedOption ){ // fConstructOption_t
       // TODO: maintain a local map for quick reference
       m_fConstructOption(
         sOptionName,
@@ -672,8 +675,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
       //std::cout << "Option repository: adding option " << pOption->GetInstrumentName() << std::endl;
       m_pOptionRegistry->Add( pOption, pPosition, sLegType, std::move( ma ) );
     },
-    [this]( ou::tf::option::Combo* p, pOption_t pOption, const std::string& note )->pPosition_t { // fConstructPosition_t
-      combo_t* pCombo = reinterpret_cast<combo_t*>( p );
+    [this]( ou::tf::option::Combo* pCombo, pOption_t pOption, const std::string& note )->pPosition_t { // fConstructPosition_t
       pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, note );
       using LegNote = ou::tf::option::LegNote;
       const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition );
@@ -727,24 +729,25 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             const boost::gregorian::date dateBar( bar.DateTime().date() );
             if ( m_pValidateOptions->ValidateBidAsk(
               dateBar, mid, 11,
-              [this,mid,direction]( const mapChains_t& chains, boost::gregorian::date date, double price, combo_t::fLegSelected_t&& fLegSelected ){
-                combo_t::ChooseLegs( direction, chains, date, m_specsSpread, mid, fLegSelected );
+              [this,mid,direction]( const mapChains_t& chains, boost::gregorian::date date, double price, Combo::fLegSelected_t&& fLegSelected ){
+                Collar::ChooseLegs( direction, chains, date, m_specsSpread, mid, fLegSelected );
               }
             ) ) {
 
               const idPortfolio_t idPortfolio
-                = combo_t::Name( direction, m_mapChains, dateBar, m_specsSpread, mid ,sUnderlying );
+                = Collar::Name( direction, m_mapChains, dateBar, m_specsSpread, mid ,sUnderlying );
 
               if ( m_fAuthorizeSimple( idPortfolio, sUnderlying, false ) ) {
 
                 std::cout << sUnderlying << ": bid/ask spread ok, opening positions (pivot=" << m_dblPivot << "/" << mid << ")" << std::endl;
 
-                m_pCombo = std::make_unique<combo_t>();
+                m_pCombo = std::make_unique<Combo>();
                 assert( m_pCombo );
 
                 ComboPrepare( GetNoon().date() );
 
-                combo_t& combo = dynamic_cast<combo_t&>( *m_pCombo );
+                assert( m_pCombo );
+                Combo& combo = *m_pCombo;
 
                 if ( m_ixColour >= ( sizeof( rColour ) - 2 ) ) {
                   std::cout << "WARNING: strategy running out of colours." << std::endl;
@@ -765,12 +768,12 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   [this,&idPortfolio,&combo,direction,pOrderCombo]( size_t ix, pOption_t pOption ){ // fValidatedOption_t -- need Strategy specific naming
                     // called for each of the legs
                     ou::tf::option::LegNote::values_t lnValues;
-                    combo_t::FillLegNote( ix, direction, lnValues ); // TODO: need to have the leg type provided by ValidateOptions
+                    Collar::FillLegNote( ix, direction, lnValues ); // TODO: need to have the leg type provided by ValidateOptions
                     ou::tf::option::LegNote ln( lnValues );
                     pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, ln.Encode() );
                     assert( pPosition );
                     combo.SetPosition( pPosition );
-                    combo.AddLegOrder( lnValues.m_type, pOrderCombo,  ou::tf::OrderSide::Buy, 1, pPosition );
+                    Collar::AddLegOrder( lnValues.m_type, pOrderCombo,  ou::tf::OrderSide::Buy, 1, pPosition );
                     }
                   );
 
@@ -1008,7 +1011,8 @@ void ManageStrategy::HandleCancel( boost::gregorian::date, boost::posix_time::ti
         std::cout << m_pWatchUnderlying->GetInstrument()->GetInstrumentName() << " cancel" << std::endl;
         if ( m_pCombo ) {
           //if ( m_pPositionUnderlying ) m_pPositionUnderlying->CancelOrders();
-          combo_t& combo = dynamic_cast<combo_t&>( *m_pCombo );
+          assert( m_pCombo );
+          Combo& combo = *m_pCombo;
           //entry.second.ClosePositions();
           combo.CancelOrders(); // TODO: generify via Common or Base
         }
@@ -1071,7 +1075,7 @@ void ManageStrategy::HandleAfterRH( const ou::tf::Bar& bar ) {
 void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
   // TODO: pWatchUnderlying should be saved in caller hierarchy
   if ( m_pCombo ) {
-    combo_t& combo( dynamic_cast<combo_t&>( *m_pCombo ) );
+    Combo& combo( *m_pCombo );
     //entry.second.ClosePositions();
     combo.SaveSeries( sPrefix ); // TODO: generify via Common or Base
   }
@@ -1175,7 +1179,7 @@ double ManageStrategy::EmitInfo() {
   double dblNet {};
   if ( m_pCombo ) {
     double price( m_pWatchUnderlying->LastTrade().Price() );
-    combo_t& combo( dynamic_cast<combo_t&>( *m_pCombo ) );
+    Combo& combo( *m_pCombo );
     std::cout
       << "Info "
       << m_pWatchUnderlying->GetInstrument()->GetInstrumentName()
@@ -1197,7 +1201,7 @@ void ManageStrategy::CloseExpiryItm( boost::gregorian::date date ) {
   double price( m_TradeUnderlyingLatest.Price() );
   if ( 0.0 != price ) {
     if ( m_pCombo ) {
-      combo_t& combo( dynamic_cast<combo_t&>( *m_pCombo ) );
+      Combo& combo( *m_pCombo );
       combo.CloseExpiryItm( price, date );
     }
   }
@@ -1207,7 +1211,7 @@ void ManageStrategy::CloseFarItm() {
   double price( m_TradeUnderlyingLatest.Price() );
   if ( 0.0 != price ) {
     if ( m_pCombo ) {
-      combo_t& combo( dynamic_cast<combo_t&>( *m_pCombo ) );
+      Combo& combo( *m_pCombo );
       combo.CloseFarItm( price );
     }
   }
@@ -1217,7 +1221,7 @@ void ManageStrategy::CloseItmLeg() {
   double price( m_TradeUnderlyingLatest.Price() );
   if ( 0.0 != price ) {
     if ( m_pCombo ) {
-      combo_t& combo( dynamic_cast<combo_t&>( *m_pCombo ) );
+      Combo& combo( *m_pCombo );
       combo.CloseItmLeg( price );
     }
   }
@@ -1227,7 +1231,7 @@ void ManageStrategy::CloseForProfits() {
   double price( m_TradeUnderlyingLatest.Price() );
   if ( 0.0 != price ) {
     if ( m_pCombo ) {
-      combo_t& combo( dynamic_cast<combo_t&>( *m_pCombo ) );
+      Combo& combo( *m_pCombo );
       combo.CloseForProfits( price );
     }
   }
@@ -1237,7 +1241,7 @@ void ManageStrategy::TakeProfits() {
   double price( m_TradeUnderlyingLatest.Price() );
   if ( 0.0 != price ) {
     if ( m_pCombo ) {
-      combo_t& combo( dynamic_cast<combo_t&>( *m_pCombo ) );
+      Combo& combo( *m_pCombo );
       combo.TakeProfits( price );
     }
   }

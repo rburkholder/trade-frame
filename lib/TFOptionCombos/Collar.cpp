@@ -101,13 +101,9 @@ namespace {
 
 } // namespace anon
 
-Collar::Collar()
-: Combo() {}
+Collar::Collar() {}
 
-Collar::Collar( Collar&& rhs ){}
-
-Collar::~Collar() {
-}
+Collar::~Collar() {}
 
 size_t /* static */ Collar::LegCount() {
   return c_nLegs;
@@ -123,6 +119,9 @@ size_t /* static */ Collar::LegCount() {
 )
 {
 
+  using citerChain_t = mapChains_t::const_iterator;
+  using chain_t = ou::tf::option::Chain<ou::tf::option::chain::OptionName>;
+
   citerChain_t citerChainBack = SelectChain( chains, date, specs.nDaysBack );
   const chain_t& chainBack( citerChainBack->second );
 
@@ -132,10 +131,10 @@ size_t /* static */ Collar::LegCount() {
   bool bOk( true );
 
   switch ( direction ) {
-    case E20DayDirection::Unknown:
+    case Combo::E20DayDirection::Unknown:
       assert( false );
       break;
-    case E20DayDirection::Rising:
+    case Combo::E20DayDirection::Rising:
       {
         const double strikeSyntheticBack(  chainBack.Call_Itm( priceUnderlying ) ); // long call
         const double strikeSyntheticFront( chainFront.Put_Atm( strikeSyntheticBack ) ); // short put
@@ -151,7 +150,7 @@ size_t /* static */ Collar::LegCount() {
         fLegSelected( strikeProtective,     citerChainBack->first,  chainBack.GetIQFeedNamePut(   strikeProtective ) );
       }
       break;
-    case E20DayDirection::Falling:
+    case Combo::E20DayDirection::Falling:
       {
         const double strikeSyntheticBack(  chainBack.Put_Itm( priceUnderlying ) ); // long put
         const double strikeSyntheticFront( chainFront.Call_Atm( strikeSyntheticBack ) ); // short call
@@ -191,19 +190,19 @@ size_t /* static */ Collar::LegCount() {
   values.m_state = LegNote::State::Open;
 
   switch ( direction ) {
-    case E20DayDirection::Rising:
+    case Combo::E20DayDirection::Rising:
       values.m_momentum = LegNote::Momentum::Rise;
       values.m_type     = c_rLegDefRise[ix].type;
       values.m_side     = c_rLegDefRise[ix].side;
       values.m_option   = c_rLegDefRise[ix].option;
       break;
-    case E20DayDirection::Falling:
+    case Combo::E20DayDirection::Falling:
       values.m_momentum = LegNote::Momentum::Fall;
       values.m_type     = c_rLegDefFall[ix].type;
       values.m_side     = c_rLegDefFall[ix].side;
       values.m_option   = c_rLegDefFall[ix].option;
       break;
-    case E20DayDirection::Unknown:
+    case Combo::E20DayDirection::Unknown:
       assert( false );
       break;
   }

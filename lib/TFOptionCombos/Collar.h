@@ -22,6 +22,9 @@
 #ifndef COLLAR_H
 #define COLLAR_H
 
+#include <TFTrading/Position.h>
+#include <TFTrading/Order_Combo.hpp>
+
 #include "Combo.h"
 #include "SpreadSpecs.h"
 
@@ -29,11 +32,16 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-class Collar: public Combo {
+class Collar {
 public:
 
+  using mapChains_t = Combo::mapChains_t;
+  using fLegSelected_t = Combo::fLegSelected_t;
+  using pPosition_t = ou::tf::Position::pPosition_t;
+  using pOrderCombo_t = ou::tf::OrderCombo::pOrderCombo_t;
+
   Collar();
-  Collar( Collar&& );
+  Collar( Collar&& ) = delete;
   Collar( const Collar& ) = delete;
   Collar& operator=( const Collar& rhs ) = delete;
   virtual ~Collar();
