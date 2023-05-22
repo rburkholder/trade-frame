@@ -382,6 +382,7 @@ void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
                         assert( false );
                         break;
                     }
+
                     switch ( option.GetInstrument()->GetRow().eOptionSide ) {
                       case ou::tf::OptionSide::Call:
                         lnValues.m_option = ou::tf::option::LegNote::Option::Call;
@@ -409,6 +410,7 @@ void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
                         assert( false );
                         break;
                     }
+
                     lnValues.m_state = ou::tf::option::LegNote::State::Open;
                     lnValues.m_algo = ou::tf::option::LegNote::Algo::Collar;
                     lnValues.m_momentum = ou::tf::option::LegNote::Momentum::Unknown;
@@ -752,21 +754,29 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 m_ptiSelf->UpdateText( idPortfolio );
                 m_pChartDataView->SetNames( idPortfolio, m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
 
+                // TODO: consider migrating ValidateOption usage to separate class to create the combo
+                //   then can capture the specifics of the specific combo type without inheriting from Combo
+                // * maybe track the options in the Collar class, or make use of the combo list in Combo
+                //     but that is position oriented, only after the list of options has been validated
+
+                ou::tf::OrderCombo::pOrderCombo_t pOrderCombo = ou::tf::OrderCombo::Factory();
+
                 m_pValidateOptions->Get( // process each option of set
-                  [this,&idPortfolio,&combo,direction]( size_t ix, pOption_t pOption ){ // fValidatedOption_t -- need Strategy specific naming
+                  [this,&idPortfolio,&combo,direction,pOrderCombo]( size_t ix, pOption_t pOption ){ // fValidatedOption_t -- need Strategy specific naming
                     // called for each of the legs
                     ou::tf::option::LegNote::values_t lnValues;
-                    combo_t::FillLegNote( ix, direction, lnValues );
+                    combo_t::FillLegNote( ix, direction, lnValues ); // TODO: need to have the leg type provided by ValidateOptions
                     ou::tf::option::LegNote ln( lnValues );
                     pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, ln.Encode() );
                     assert( pPosition );
                     combo.SetPosition( pPosition );
+                    combo.AddLegOrder( lnValues.m_type, pOrderCombo,  ou::tf::OrderSide::Buy, 1, pPosition );
                     }
                   );
 
                 m_pValidateOptions->ClearValidation(); // after positions created to keep watch in options from a quick stop/start
 
-                combo.PlaceOrder( ou::tf::OrderSide::Buy, 1 );
+                combo.Submit( pOrderCombo, "ManageStrategy Initial OrderCombo Executed" );
                 m_stateTrading = ETradingState::TSComboMonitor;
 
               } // m_fAuthorizeSimple

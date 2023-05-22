@@ -179,8 +179,6 @@ public:
 
   void Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt );
 
-  void PlaceOrder( ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity ); // called by ManageStrategy to start Combo
-
   virtual double GetNet( double price );
 
   void GoNeutral( boost::gregorian::date date, boost::posix_time::time_duration time );
