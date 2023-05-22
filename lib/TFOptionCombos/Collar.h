@@ -61,7 +61,13 @@ public:
   );
 
 protected:
-  virtual void BuildOrder( pOrderCombo_t, ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity );
+  virtual void AddLegOrder(
+    const LegNote::Type
+  , pOrderCombo_t
+  , const ou::tf::OrderSide::EOrderSide
+  , uint32_t nOrderQuantity
+  , pPosition_t
+  );
 private:
 };
 

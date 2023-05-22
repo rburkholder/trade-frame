@@ -219,9 +219,6 @@ protected:
   using mapComboLeg_t = std::multimap<LegNote::Type,ComboLeg>;
   mapComboLeg_t m_mapComboLeg;
 
-  //ComboLeg& LU( LegNote::Type );
-  mapComboLeg_t::iterator LU( LegNote::Type );
-
   using setpOrderCombo_t = std::unordered_set<pOrderCombo_t>;
   setpOrderCombo_t m_setpOrderCombo;
 
@@ -259,7 +256,13 @@ protected:
   void LegLock( ComboLeg& );
   void LegClose( ComboLeg& );
 
-  virtual void BuildOrder( pOrderCombo_t, ou::tf::OrderSide::EOrderSide, uint32_t nOrderQuantity ) = 0;
+  virtual void AddLegOrder(
+    const LegNote::Type
+  , pOrderCombo_t
+  , const ou::tf::OrderSide::EOrderSide
+  , uint32_t nOrderQuantity
+  , pPosition_t
+  ) = 0;
 
   void DeactivatePositionOption( pPosition_t );
 

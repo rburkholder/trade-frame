@@ -44,6 +44,7 @@ rally (or significant bounce) is perceived to be relatively small.
   along with 0dte and 1dte premium capture
 */
 
+#include <map>
 #include <array>
 
 #include <TFOptions/Chains.h>
@@ -77,6 +78,26 @@ namespace {
     LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Put  ), // covered
     LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Call )  // protective
   };
+
+  using mapLegDev_t = std::map<LegNote::Type, LegDef>;
+
+  //long collar: synthetic long, covered call, long put
+  static const mapLegDev_t mapLegDef_Rise = {
+    { LegNote::Type::SynthLong,  LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Call ) } // synthetic long
+  , { LegNote::Type::SynthShort, LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Put ) }  // synthetic long
+  , { LegNote::Type::Cover,      LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Call ) } // covered
+  , { LegNote::Type::Protect,    LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Put ) }  // protective
+  };
+
+  //short collar: synthetic short, covered put, long call
+  static const mapLegDev_t mapLegDef_Fall = {
+    { LegNote::Type::SynthLong,  LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Put ) }  // synthetic long
+  , { LegNote::Type::SynthShort, LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Call ) } // synthetic long
+  , { LegNote::Type::Cover,      LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Put ) }  // covered
+  , { LegNote::Type::Protect,    LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Call ) } // protective
+  };
+
+// rLegDef_t and mapLegDev_t are redundant... this is an interim step to migrate usage to the map
 
 } // namespace anon
 
@@ -112,6 +133,7 @@ size_t /* static */ Collar::LegCount() {
 
   switch ( direction ) {
     case E20DayDirection::Unknown:
+      assert( false );
       break;
     case E20DayDirection::Rising:
       {
@@ -189,13 +211,13 @@ size_t /* static */ Collar::LegCount() {
 }
 
 /* static */ std::string Collar::Name(
-    Combo::E20DayDirection direction
-  , const mapChains_t& chains
-  , boost::gregorian::date date
-  , const SpreadSpecs& specs
-  , double price
-  , const std::string& sUnderlying
-  ) {
+  Combo::E20DayDirection direction
+, const mapChains_t& chains
+, boost::gregorian::date date
+, const SpreadSpecs& specs
+, double price
+, const std::string& sUnderlying
+) {
 
   std::string sName( "collar-" + sUnderlying );
   size_t ix {};
@@ -242,26 +264,45 @@ size_t /* static */ Collar::LegCount() {
 }
 
 // long by default for entry, short doesn't make much sense due to combo combinations
-void Collar::BuildOrder( pOrderCombo_t pOrderCombo, ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuantity ) {
-
+void Collar::AddLegOrder(
+  const LegNote::Type type
+, pOrderCombo_t pOrderCombo
+, const ou::tf::OrderSide::EOrderSide side
+, uint32_t nOrderQuantity
+, pPosition_t pPosition
+) {
   switch ( side ) {
     case ou::tf::OrderSide::Buy: // typical entry
-      pOrderCombo->AddLeg( LU( LegNote::Type::SynthLong )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Buy, [](){} ); // fLegDone_t
-      pOrderCombo->AddLeg( LU( LegNote::Type::SynthShort )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Sell, [](){} ); // fLegDone_t
-      pOrderCombo->AddLeg( LU( LegNote::Type::Cover )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Sell, [](){} ); // fLegDone_t
-      pOrderCombo->AddLeg( LU( LegNote::Type::Protect )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Buy, [](){} ); // fLegDone_t
+      {
+        mapLegDev_t::const_iterator iter = mapLegDef_Rise.find( type );
+        switch ( iter->second.side ) {
+          case LegNote::Side::Long:
+            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Buy, [](){} );
+            break;
+          case LegNote::Side::Short:
+            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Sell, [](){} );
+            break;
+        }
+      }
       break;
     case ou::tf::OrderSide::Sell: // unusual
-      pOrderCombo->AddLeg( LU( LegNote::Type::SynthLong )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Sell, [](){} ); // fLegDone_t
-      pOrderCombo->AddLeg( LU( LegNote::Type::SynthShort )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Buy, [](){} ); // fLegDone_t
-      pOrderCombo->AddLeg( LU( LegNote::Type::Cover )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Buy, [](){} ); // fLegDone_t
-      pOrderCombo->AddLeg( LU( LegNote::Type::Protect )->second.m_leg.GetPosition(), nOrderQuantity, ou::tf::OrderSide::Sell, [](){} ); // fLegDone_t
+      {
+        mapLegDev_t::const_iterator iter = mapLegDef_Fall.find( type );
+        switch ( iter->second.side ) {
+          case LegNote::Side::Long:
+            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Buy, [](){} );
+            break;
+          case LegNote::Side::Short:
+            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Sell, [](){} );
+            break;
+        }
+      }
       break;
     default:
       assert( false );
   }
-
 }
+
 
 } // namespace option
 } // namespace tf

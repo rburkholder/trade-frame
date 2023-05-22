@@ -187,16 +187,6 @@ void Combo::SetPortfolio( pPortfolio_t pPortfolio ) {
   m_pPortfolio = pPortfolio;
 }
 
-Combo::mapComboLeg_t::iterator Combo::LU( LegNote::Type type ) {
-  //auto pair = m_mapComboLeg.equal_range( type );
-  //assert( m_mapComboLeg.end() != pair.first );
-  //assert( pair.first != pair.second ); // at least one, check for only one?
-  mapComboLeg_t::iterator iterLeg = m_mapComboLeg.lower_bound( type ); // look for first
-  assert( m_mapComboLeg.end() != iterLeg );
-  //return iterLeg->second;
-  return iterLeg;
-}
-
 const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew ) {
 
   assert( pPositionNew );
@@ -458,19 +448,24 @@ void Combo::DeactivatePositionOption( pPosition_t pPosition ) {
 }
 
 void Combo::PlaceOrder( ou::tf::OrderSide::EOrderSide side, uint32_t nOrderQuantity ) {
+  // TODO: possibly migate order composition to the caller, as they have the combo type
 
   assert( 0 < nOrderQuantity );
 
   // legs are already in place, so create order for new portfolio
   pOrderCombo_t pOrderCombo = ou::tf::OrderCombo::Factory();
 
-  BuildOrder( pOrderCombo, side, nOrderQuantity ); // call the specific combo builder
+  for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
+    AddLegOrder( entry.first, pOrderCombo, side, nOrderQuantity, entry.second.m_leg.GetPosition() );
+  }
 
   Submit( pOrderCombo, "Combo::PlaceOrder complete" );
 
 }
 
 void Combo::Submit( pOrderCombo_t pOrderCombo, const std::string& sComment ) {
+
+  // TODO: need to confirm legs exist
 
   auto pair = m_setpOrderCombo.insert( pOrderCombo );
   assert( pair.second );
