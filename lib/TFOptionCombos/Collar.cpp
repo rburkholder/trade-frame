@@ -264,7 +264,7 @@ size_t /* static */ Collar::LegCount() {
 }
 
 // long by default for entry, short doesn't make much sense due to combo combinations
-void Collar::AddLegOrder(
+/* static */ void Collar::AddLegOrder(
   const LegNote::Type type
 , pOrderCombo_t pOrderCombo
 , const ou::tf::OrderSide::EOrderSide side

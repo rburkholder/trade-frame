@@ -60,7 +60,7 @@ public:
   , const std::string& sUnderlying
   );
 
-  virtual void AddLegOrder(
+  static void AddLegOrder(
     const LegNote::Type
   , pOrderCombo_t
   , const ou::tf::OrderSide::EOrderSide

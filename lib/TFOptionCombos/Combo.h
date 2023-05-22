@@ -254,14 +254,6 @@ protected:
   void LegLock( ComboLeg& );
   void LegClose( ComboLeg& );
 
-  virtual void AddLegOrder(
-    const LegNote::Type
-  , pOrderCombo_t
-  , const ou::tf::OrderSide::EOrderSide
-  , uint32_t nOrderQuantity
-  , pPosition_t
-  ) = 0;
-
   void DeactivatePositionOption( pPosition_t );
 
 private:
