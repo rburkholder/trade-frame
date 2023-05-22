@@ -26,20 +26,21 @@
 #include "OptionRegistry.hpp"
 
 OptionRegistry::OptionRegistry(
-    fRegisterOption_t&& fRegisterOption
-  , fStartCalc_t&& fStartCalc
-  , fStopCalc_t&& fStopCalc
-  , fSetChartDataView_t&& fSetChartDataView
-  ) :
-    m_fRegisterOption( std::move( fRegisterOption ) )
-  , m_fStartCalc( std::move( fStartCalc ) )
-  , m_fStopCalc( std::move( fStopCalc ) )
-  , m_fSetChartDataView( std::move( fSetChartDataView ) )
-  {
-    assert( nullptr != m_fStartCalc );
-    assert( nullptr != m_fStopCalc );
-    assert( nullptr != m_fRegisterOption );
-  }
+  fRegisterOption_t&& fRegisterOption
+, fStartCalc_t&& fStartCalc
+, fStopCalc_t&& fStopCalc
+, fSetChartDataView_t&& fSetChartDataView
+)
+: m_fRegisterOption( std::move( fRegisterOption ) )
+, m_fStartCalc( std::move( fStartCalc ) )
+, m_fStopCalc( std::move( fStopCalc ) )
+, m_fSetChartDataView( std::move( fSetChartDataView ) )
+, m_ptiParent( nullptr )
+{
+  assert( nullptr != m_fStartCalc );
+  assert( nullptr != m_fStopCalc );
+  assert( nullptr != m_fRegisterOption );
+}
 
 OptionRegistry::~OptionRegistry() {
   for ( mapOption_t::value_type& vt: m_mapOption ) { // TODO: fix, isn't the best place?
@@ -56,10 +57,6 @@ OptionRegistry::mapOption_t::iterator OptionRegistry::Check( pOption_t pOption )
   mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
   if ( m_mapOption.end() == iterOption ) {
 
-    auto pair = m_mapOption.emplace( sOptionName, RegistryEntry( pOption ) );
-    assert( pair.second );
-    iterOption = std::move( pair.first );
-
     mapOptionRegistered_t::iterator iterRegistry = m_mapOptionRegistered.find( sOptionName );
     if ( m_mapOptionRegistered.end() == iterRegistry ) {
       m_mapOptionRegistered.emplace( mapOptionRegistered_t::value_type( sOptionName, pOption ) );
@@ -71,6 +68,10 @@ OptionRegistry::mapOption_t::iterator OptionRegistry::Check( pOption_t pOption )
         // simply telling us we are already registered, convert from error to status?
       }
     }
+
+    auto pair = m_mapOption.emplace( sOptionName, RegistryEntry( pOption ) );
+    assert( pair.second );
+    iterOption = std::move( pair.first );
 
     assert( m_pWatchUnderlying );
     m_fStartCalc( pOption, m_pWatchUnderlying );
@@ -91,36 +92,41 @@ void OptionRegistry::Add( pOption_t pOption ) {
 
 void OptionRegistry::Add( pOption_t pOption, pPosition_t pPosition, const std::string& sLegName, ou::tf::option::Combo::vMenuActivation_t&& ma ) {
 
-  const std::string& sOptionName( pOption->GetInstrument()->GetInstrumentName() );
+  mapOption_t::iterator iterOption = Check( pOption );
 
-  pOptionStatistics_t pOptionStatistics = OptionStatistics::Factory( pOption );
-  OptionStatistics& ostats( *pOptionStatistics );
+  pOptionStatistics_t pOptionStatistics;
+  if ( iterOption->second.pOptionStatistics ) {
+    pOptionStatistics = iterOption->second.pOptionStatistics;
+    // TODO: test position is correct?
+    std::cout << "OptionRegistry::Add, named leg " << sLegName << " exists with " << pOption->GetInstrumentName() << std::endl;
+    // Note: for future fix, the issue here was that a DltaPlsGmPls leg was in place, and the algo wanted to re-use with a SynthLong
+    //   ie the two strikes matched as the SynthLong got rolled up
+  }
+  else {
+    pOptionStatistics = OptionStatistics::Factory( pOption );
+    pOptionStatistics->Set( pPosition );
+  }
+
+  OptionStatistics& option_stats( *pOptionStatistics );
 
   ou::tf::TreeItem* pti = m_ptiParent->AppendChild(
     pOption->GetInstrumentName() + " (" + sLegName + ")",
-    [this,&ostats]( ou::tf::TreeItem* ){ // fOnClick_t
-      m_fSetChartDataView( ostats.ChartDataView() );
+    [this,&option_stats]( ou::tf::TreeItem* ){ // fOnClick_t
+      m_fSetChartDataView( option_stats.ChartDataView() );
     },
-    [this,&sOptionName, ma_=std::move(ma)]( ou::tf::TreeItem* pti ) { // fOnBuildPopUp_t
+    [this, ma_=std::move(ma)]( ou::tf::TreeItem* pti ) { // fOnBuildPopUp_t
       pti->NewMenu();
       for ( const ou::tf::option::Combo::vMenuActivation_t::value_type& vt: ma_  ) {
         pti->AppendMenuItem(
           vt.sLabel,
-          //[this,&sOptionName,ma_f=std::move( vt.fMenuActivation )]( ou::tf::TreeItem* pti ){
-          [this,&sOptionName,ma_f=&vt.fMenuActivation]( ou::tf::TreeItem* pti ){
+          [this,ma_f=&vt.fMenuActivation]( ou::tf::TreeItem* pti ){
             (*ma_f)();
           });
       }
     }
   );
-  ostats.Set( pti );
-  ostats.Set( pPosition );
 
-  mapOption_t::iterator iterOption = Check( pOption );
-  assert( !iterOption->second.pOptionStatistics );
-  iterOption->second.pOptionStatistics = std::move ( pOptionStatistics );
-
-  //std::cout << "OptionRegistry::Add(stats) " << pOption->GetInstrumentName() << std::endl;
+  option_stats.Set( pti );
 
 }
 
@@ -143,7 +149,7 @@ void OptionRegistry::Remove( pOption_t pOption, bool bRemoveStatistics ) {
       entry.pOptionStatistics.reset();
     }
     if ( 0 == entry.nReference ) {
-      assert( !entry.pOptionStatistics );
+      //assert( !entry.pOptionStatistics );
       m_mapOption.erase( iterOption );
     }
   }

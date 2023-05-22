@@ -61,10 +61,12 @@ public:
   ~OptionRegistry();
 
   void AssignWatchUnderlying( pWatch_t pWatchUnderlying ) {
+    assert( !m_pWatchUnderlying );
     m_pWatchUnderlying = pWatchUnderlying;
   }
 
   void SetTreeItem( ou::tf::TreeItem* ptiParent ) {
+    assert( !m_ptiParent );
     m_ptiParent = ptiParent;
   }
 
@@ -84,23 +86,25 @@ private:
 
   ou::tf::TreeItem* m_ptiParent;
 
-  using mapOptionRegistered_t = std::unordered_map<std::string, pOption_t>; // registered in option engine
-  mapOptionRegistered_t m_mapOptionRegistered;
-
   using pOptionStatistics_t = OptionStatistics::pOptionStatistics_t;
 
   struct RegistryEntry {
+
     size_t nReference;
     pOption_t pOption;
     pOptionStatistics_t pOptionStatistics;
+
     RegistryEntry( pOption_t pOption_ )
     : nReference( 1 ), pOption( std::move( pOption_ ) ) {}
-    RegistryEntry( pOption_t pOption_, pOptionStatistics_t pOptionStatistics_ )
-    : nReference( 1 ), pOption( std::move( pOption_ ) ), pOptionStatistics( std::move( pOptionStatistics_ ) ) {}
+    //RegistryEntry( pOption_t pOption_, pOptionStatistics_t pOptionStatistics_ )
+    //: nReference( 1 ), pOption( std::move( pOption_ ) ), pOptionStatistics( std::move( pOptionStatistics_ ) ) {}
   };
 
   using mapOption_t = std::unordered_map<std::string,RegistryEntry>; // for m_fStartCalc, m_fStopCalc
   mapOption_t m_mapOption;
+
+  using mapOptionRegistered_t = std::unordered_map<std::string, pOption_t>; // registered in option engine
+  mapOptionRegistered_t m_mapOptionRegistered;
 
   mapOption_t::iterator Check( pOption_t pOption );
 
