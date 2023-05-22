@@ -173,6 +173,8 @@ public:
   void SetPortfolio( pPortfolio_t );
   pPortfolio_t GetPortfolio() { return m_pPortfolio; }
 
+  // TODO: ensure options/positions are not duplicated
+  //   ie possible SynthLong overlapping a DltaPlsGmPls
   const LegNote::values_t& SetPosition( pPosition_t );
   void SetChartData( pChartDataView_t pChartData, ou::Colour::EColour );
   void DelChartData();
