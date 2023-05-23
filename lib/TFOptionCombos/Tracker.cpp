@@ -231,6 +231,9 @@ bool Tracker::TestLong( boost::posix_time::ptime dt, double dblUnderlyingSlope, 
     case ETransition::Track_Short: // mutually exclusive
       assert( false );
       break;
+    //case ETransition::Done:
+    //  bRemove = true;
+    //  break;
     default:
       break;
   }
@@ -622,7 +625,7 @@ void Tracker::OptionCandidate_StopWatch() {
   m_pOptionCandidate->EnableStatsRemove();
 }
 
-void Tracker::Quiesce() { // called from destructor, Collar
+void Tracker::Quiesce() { // called from destructor, Combo
   m_transition = ETransition::Quiesce;
   if ( m_pOptionCandidate ) {
     OptionCandidate_StopWatch();
