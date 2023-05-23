@@ -19,8 +19,8 @@
  * Created on May 25, 2019, 4:46 PM
  */
 
-#ifndef LEG_H
-#define LEG_H
+#ifndef OU_TF_LEG_H
+#define OU_TF_LEG_H
 
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryIndicator.h>
@@ -90,5 +90,5 @@ private:
 } // namespace ou
 } // namespace tf
 
-#endif /* LEG_H */
+#endif /* OU_TF_LEG_H */
 
