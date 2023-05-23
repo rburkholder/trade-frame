@@ -217,19 +217,18 @@ const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew ) {
     ma.emplace_back( MenuActivation(
       "Statistics",
       [this,&cleg,&sName](){
-        //std::cout << "Statistics: " << sName << std::endl;
         cleg.m_tracker.Emit();
       } ) );
     ma.emplace_back( MenuActivation(
       "Force Roll",
       [this,&cleg,&sName](){
-        std::cout << "Force Roll: " << sName << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "Force Roll: " << sName;
         cleg.m_tracker.ForceRoll();
       } ) );
     ma.emplace_back( MenuActivation(
       "Force Close",
       [this,&cleg,&sName](){
-        std::cout << "Force Close: " << sName << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "Force Close: " << sName;
         cleg.m_tracker.ForceClose();
       } ) );
     //ma.emplace_back( MenuActivation(
@@ -458,7 +457,7 @@ void Combo::Submit( pOrderCombo_t pOrderCombo, const std::string& sComment ) {
 
   pOrderCombo->Submit(
     [this,iter,sComment](){ // fComboDone_t
-      std::cout << sComment << std::endl;
+      BOOST_LOG_TRIVIAL(info) << "Combo::Submit: " << sComment;
       m_vOrderComboIter_CleanUp.push_back( iter );
     } );
 }
@@ -657,24 +656,19 @@ void Combo::CloseFarItm( double price ) {
 void Combo::CancelOrders() { // this might be a duplicate function from above
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
     ComboLeg& cleg( entry.second );
-    cleg.m_tracker.Quiesce();
+    //cleg.m_tracker.Quiesce();
     //cleg.m_monitor.CancelOrder(); // or wait for completion?
     Leg& leg( cleg.m_leg );
     //leg.CancelOrder();
   }
 }
 
-// TODO: need to redo this using OrderCombo
 void Combo::ClosePositions() {
   for ( mapComboLeg_t::value_type& entry: m_mapComboLeg ) {
     ComboLeg& cleg( entry.second );
-    cleg.m_tracker.Quiesce();
-    ou::tf::Leg& leg( cleg.m_leg );
-    if ( leg.IsActive() ) {
-      pPosition_t pPosition = leg.GetPosition();
-      auto& instance( ou::tf::PortfolioManager::GlobalInstance() ); // NOTE this direct call!!
-      //instance.PositionUpdateNotes( pPosition );
-    }
+    //ou::tf::Leg& leg( cleg.m_leg );
+    //cleg.m_tracker.Quiesce();
+    cleg.m_tracker.ForceClose();
   }
 }
 
