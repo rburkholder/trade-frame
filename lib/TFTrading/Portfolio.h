@@ -12,8 +12,8 @@
  ************************************************************************/
 #pragma once
 
-#include <string>
 #include <map>
+#include <string>
 
 #include <OUCommon/Delegate.h>
 
@@ -38,9 +38,8 @@ namespace tf { // TradeFrame
 // monitor delta at each portfolio/sub-portfolio level.  Each level may have different master hedging positions.
 
 class Portfolio {
-public:
-
   friend std::ostream& operator<<( std::ostream& os, const Portfolio& );
+public:
 
   using pPosition_t = Position::pPosition_t;
 
@@ -56,8 +55,8 @@ public:
   using currency_t = Currency::type;
 
   enum EPortfolioType { Master=1, CurrencySummary=2, Standard=10, MultiLeggedPosition, Basket, Aggregate };
-  // only one Master, can only have AlternateCurrency at next level below
-  // AlternateCurrency only at level below Master, can have any combination of lower three Portfolio types
+  // only one Master, can only have CurrencySummary at next level below
+  // CurrencySummary only at level below Master, can have any combination of lower Portfolio types
   // Standard can have variety of position types (including multiple sub-portfolios?)
   // MultiLeggedPosition, typically all positions have same underlying
   // Basket, multiple symbol types, typically traded in batch
@@ -75,7 +74,7 @@ public:
       ou::db::Field( a, "description", sDescription );
       ou::db::Field( a, "realizedpl", dblRealizedPL );
       ou::db::Field( a, "commission", dblCommissionsPaid );
-      // unrealized is not here as it is a dynamic value, realized is non-dynamic, updated as position changes
+      // unrealized is not here as it is a dynamic value, realized is non-dynamic, updated as position/portfolio changes
     }
 
     idPortfolio_t idPortfolio;
@@ -88,11 +87,11 @@ public:
     double dblRealizedPL; // does not include commissions paid
     double dblCommissionsPaid;
 
-    TableRowDef( void )
+    TableRowDef()
       : dblRealizedPL( 0.0 ), dblCommissionsPaid( 0.0 ), bActive( false ), ePortfolioType( Standard ), sCurrency( Currency::Name[ Currency::USD ] ) {};
     TableRowDef ( const TableRowDef& row )
       : idPortfolio( row.idPortfolio ), idAccountOwner( row.idAccountOwner ), idOwner( row.idOwner ), ePortfolioType( row.ePortfolioType ),
-      bActive( true ), sCurrency( row.sCurrency ), sDescription( row.sDescription ),
+      bActive( row.bActive ), sCurrency( row.sCurrency ), sDescription( row.sDescription ),
       dblRealizedPL( row.dblRealizedPL ), dblCommissionsPaid( row.dblCommissionsPaid ) {};
 //    TableRowDef(  // initializaton of top level portfolio record (portfolio currency master record)
 //      const idPortfolio_t& idPortfolio_, const idAccountOwner_t& idAccountOwner_, currency_t sCurrency_,
