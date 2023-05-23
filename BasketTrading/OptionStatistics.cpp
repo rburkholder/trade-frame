@@ -91,10 +91,12 @@ OptionStatistics::~OptionStatistics() {
   m_pOption->OnQuote.Remove( MakeDelegate( this, &OptionStatistics::HandleQuote ) );
   m_pOption->OnTrade.Remove( MakeDelegate( this, &OptionStatistics::HandleTrade ) );
   m_pOption->OnGreek.Remove( MakeDelegate( this, &OptionStatistics::HandleGreek ) );
-  //if ( m_ptiSelf ) { // already deleted, don't do this
-  //  m_ptiSelf->Delete();
-  //  m_ptiSelf = nullptr;
-  //}
+
+  if ( m_ptiSelf ) { // more debugging needed here to obtain proper deletion
+    m_ptiSelf->Delete();
+    m_ptiSelf = nullptr;
+  }
+
   m_pdvChart->Clear();
   m_pdvChart.reset();
   m_pPosition.reset();
@@ -102,6 +104,7 @@ OptionStatistics::~OptionStatistics() {
 }
 
 void OptionStatistics::Set( ou::tf::TreeItem* pti ) {
+  assert( !m_ptiSelf );
   m_ptiSelf = pti;
 }
 
