@@ -684,9 +684,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
     },
     [this]( pOption_t pOption ){ // fDeactivateOption_t
       //std::cout << "Option repository: removing option " << pOption->GetInstrumentName() << std::endl;
-      //assert( pWatch->GetInstrument()->IsOption() );
-      //pOption_t pOption = std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch );
-      m_pOptionRegistry->Remove( pOption, true );
+      m_pOptionRegistry->Remove( pOption, false );
     }
     );
 
@@ -773,7 +771,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, ln.Encode() );
                     assert( pPosition );
                     combo.SetPosition( pPosition );
-                    Collar::AddLegOrder( lnValues.m_type, pOrderCombo,  ou::tf::OrderSide::Buy, 1, pPosition );
+                    Collar::AddLegOrder( lnValues.m_type, pOrderCombo, ou::tf::OrderSide::Buy, 1, pPosition );
                     }
                   );
 
