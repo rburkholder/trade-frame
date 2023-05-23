@@ -273,6 +273,7 @@ bool MonitorOrder::IsDone() const { return ( ( State::Filled == m_state ) || ( S
 // To think about: use GTD Limit order to automate the count dow?
 //  means cancellation, and resubmission, which creates 'dead zones'
 //  with currnet order update mechanism, the order is in continuous deployment
+// NOTE: need a way out if !bSpreakOk due to option past expiry time
 void MonitorOrder::UpdateOrder( ptime dt ) {
 
   if ( 0 == m_pOrder->GetQuanRemaining() ) { // not sure if a cancel adjusts remaining
@@ -295,8 +296,9 @@ void MonitorOrder::UpdateOrder( ptime dt ) {
 
       if ( !bSpreadOk ) {
         BOOST_LOG_TRIVIAL(info)
-          << "MonitorOrder PlaceOrder without best spread: "
-          << "count=" << best_count
+          << "MonitorOrder UpdateOrder without best spread: "
+          << pWatch->GetInstrumentName()
+          << ",count=" << best_count
           << ",spread=" << best_spread
           << ",bid=" << quote.Bid()
           << ",ask=" << quote.Ask()
