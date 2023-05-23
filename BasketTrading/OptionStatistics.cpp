@@ -104,8 +104,14 @@ OptionStatistics::~OptionStatistics() {
 }
 
 void OptionStatistics::Set( ou::tf::TreeItem* pti ) {
-  assert( !m_ptiSelf );
-  m_ptiSelf = pti;
+  if ( m_ptiSelf ) {
+    assert( nullptr == pti );
+    m_ptiSelf = pti;
+  }
+  else {
+    assert( pti );
+    m_ptiSelf = pti;
+  }
 }
 
 void OptionStatistics::HandleQuote( const ou::tf::Quote& quote ) {
