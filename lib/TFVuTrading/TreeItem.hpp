@@ -51,7 +51,6 @@ public:
   void SortChildren();
 
   void Delete();
-  void Deleted( const wxTreeItemId& );
   void UpdateText( const std::string& );
 
   void NewMenu();
@@ -76,6 +75,7 @@ private:
   void HandleTreeEventItemChanged();
   void HandleTreeEventItemMenu();
 
+  void Deleted( const wxTreeItemId& );
 };
 
 } // namespace tf
