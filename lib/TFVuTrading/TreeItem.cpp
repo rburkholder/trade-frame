@@ -73,6 +73,7 @@ TreeItem::~TreeItem() {
     delete m_pMenuPopup;
     m_pMenuPopup = nullptr;
   }
+  m_pTreeCtrl = nullptr;
   //std::cout << m_idSelf << std::endl;
 }
 
@@ -99,18 +100,21 @@ void TreeItem::SortChildren() {
 }
 
 void TreeItem::HandleTreeEventItemChanged() {
+  assert( m_pTreeCtrl );
   if ( m_fOnClick ) {
     m_fOnClick( this );
   }
 }
 
 void TreeItem::HandleTreeEventItemMenu() {
+  assert( m_pTreeCtrl );
   if ( m_fOnBuildPopUp ) {
     m_fOnBuildPopUp( this );
   }
 }
 
 void TreeItem::UpdateText( const std::string& sText ) {
+  assert( m_pTreeCtrl );
   m_pTreeCtrl->SetItemText( m_idSelf, sText );
 }
 
@@ -119,10 +123,12 @@ void TreeItem::Delete() {
   // everything should self delete
   if ( m_pTreeCtrl ) {
     m_pTreeCtrl->Delete( m_idSelf );
-    //Deleted( m_idSelf );
+    // A Deleted event should occur
+    //  will need to verify sequence of events
   }
 }
 
+// when the associated menu item has been deleted
 void TreeItem::Deleted( const wxTreeItemId& id ) {
   if ( id == m_idSelf ) {
     m_pTreeCtrl = nullptr;
@@ -181,7 +187,7 @@ void TreeItem::AppendMenuItem( const std::string& sText, fOnClick_t&& fOnClick )
     );
 
   pTree->Bind(
-    wxEVT_TREE_DELETE_ITEM,
+    wxEVT_TREE_DELETE_ITEM, // seems to come during the deletion request, prior to destructor, so looks safe
     [pTree]( wxTreeEvent& event ){
       wxTreeItemData* pData = pTree->GetItemData( event.GetItem() );
       assert( nullptr != pData );
