@@ -205,9 +205,6 @@ public:
 
 protected:
 
-  static const double m_dblMaxStrikeDelta;
-  static const double m_dblMaxStrangleDelta;
-
   fConstructOption_t m_fConstructOption;
   fActivateOption_t m_fActivateOption;
   fConstructPosition_t m_fConstructPosition;
