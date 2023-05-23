@@ -62,6 +62,9 @@ public:
   //   constructor needs engine add/remove
   //   will require registration to P message for current quote
 
+  // NOTE: a start watch in Watch activates both quote & trade
+  //    need to change that, or issue watch directly to the iqfeed provider
+
 protected:
 private:
 
