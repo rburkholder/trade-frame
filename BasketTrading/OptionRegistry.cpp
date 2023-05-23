@@ -98,13 +98,15 @@ void OptionRegistry::Add( pOption_t pOption, pPosition_t pPosition, const std::s
   if ( iterOption->second.pOptionStatistics ) {
     pOptionStatistics = iterOption->second.pOptionStatistics;
     // TODO: test position is correct?
-    std::cout << "OptionRegistry::Add, named leg " << sLegName << " exists with " << pOption->GetInstrumentName() << std::endl;
+    BOOST_LOG_TRIVIAL(info)
+      << "OptionRegistry::Add, named leg " << sLegName << " exists with " << pOption->GetInstrumentName() << std::endl;
     // Note: for future fix, the issue here was that a DltaPlsGmPls leg was in place, and the algo wanted to re-use with a SynthLong
     //   ie the two strikes matched as the SynthLong got rolled up
   }
   else {
     pOptionStatistics = OptionStatistics::Factory( pOption );
     pOptionStatistics->Set( pPosition );
+    iterOption->second.pOptionStatistics = pOptionStatistics;
   }
 
   OptionStatistics& option_stats( *pOptionStatistics );
@@ -145,8 +147,14 @@ void OptionRegistry::Remove( pOption_t pOption, bool bRemoveStatistics ) {
       m_fStopCalc( pOption, m_pWatchUnderlying );
     }
     if ( bRemoveStatistics ) {
-      assert( entry.pOptionStatistics );
-      entry.pOptionStatistics.reset();
+      //assert( entry.pOptionStatistics );
+      if ( !entry.pOptionStatistics ) {
+        BOOST_LOG_TRIVIAL(warning)
+          << "OptionRegistry: " << sOptionName << " has no OptionStatistics to remove";
+      }
+      else {
+        entry.pOptionStatistics.reset();
+      }
     }
     if ( 0 == entry.nReference ) {
       //assert( !entry.pOptionStatistics );
