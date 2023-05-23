@@ -440,6 +440,8 @@ void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
     [this]( ou::tf::TreeItem* pti ){
       const std::string& idPortfolio( GetPortfolio()->GetRow().idPortfolio );
       std::cout << "Closing: " << idPortfolio << std::endl;
+      GetPortfolio()->SetActive( false ); // flag is updated to database as positions are updated
+      // may require PortfolioManager::PortfolioUpdateActive
       ClosePositions();
     });
   }
@@ -550,7 +552,7 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
   }
 }
 
-void ManageStrategy::ClosePositions( void ) {
+void ManageStrategy::ClosePositions() {
   std::cout << m_pWatchUnderlying->GetInstrument()->GetInstrumentName() << " close positions" << std::endl;
   if ( m_pCombo ) {
     Combo& combo( *m_pCombo );
