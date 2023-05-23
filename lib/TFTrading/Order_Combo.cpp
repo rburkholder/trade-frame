@@ -41,6 +41,8 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+// mo is MonitorOrder
+
 OrderCombo_TrackLeg::OrderCombo_TrackLeg( pPosition_t pPosition_, uint32_t nQuantity_, ou::tf::OrderSide::EOrderSide side_, fLegDone_t&& fLegDone_ )
 : state( State::leg_add )
 , pPosition( pPosition_ ), nQuantity( nQuantity_ ), side( side_ ), fLegDone( std::move( fLegDone_ ) )
@@ -125,6 +127,9 @@ void OrderCombo::AddLeg( pPosition_t pPosition, uint32_t nOrderQuantity, ou::tf:
     case EState::done:
       assert( false );
       break;
+    default:
+      assert( false );
+      break;
   }
 }
 
@@ -141,6 +146,9 @@ void OrderCombo::CloseLeg( pPosition_t pPosition, fLegDone_t&& fLegDone ) {
     case EState::placing:
     case EState::monitoring:
     case EState::done:
+      assert( false );
+      break;
+    default:
       assert( false );
       break;
   }
