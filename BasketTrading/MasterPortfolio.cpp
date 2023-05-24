@@ -541,12 +541,13 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
           [this,&uws,sUnderlying]( ou::tf::TreeItem* pti ){
             m_fSetChartDataView( uws.pUnderlying->GetChartDataView() );
           },
-          [this,sUnderlying,sIqfSymbol]( ou::tf::TreeItem* pti ){
+          [this,sUnderlying,sIqfSymbol,&uws]( ou::tf::TreeItem* pti ){
             pti->NewMenu();
             pti->AppendMenuItem(
               "Add Strategy",
-              [this,sUnderlying]( ou::tf::TreeItem* pti ){
-                std::cout << "Add Strategy for: " << sUnderlying << " (todo)" << std::endl;
+              [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
+                std::cout << "Add Strategy for: " << sUnderlying << std::endl;
+                ConstructDefaultStrategy( uws );
               });
             pti->AppendMenuItem(
               "IQFeed Name",
@@ -963,9 +964,19 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
   }
 
   if ( bConstructDefaultStrategy) { // create a new strategy by default
+    ConstructDefaultStrategy( uws );
+  }
+}
 
-    assert( !uws.pStrategyInWaiting );  // need empty location
-
+void MasterPortfolio::ConstructDefaultStrategy( UnderlyingWithStrategies& uws ) {
+  const std::string& sUnderlying( uws.pUnderlying->GetWatch()->GetInstrumentName() );
+  if ( uws.pStrategyInWaiting ) {
+    std::cout
+      << "MasterPortfolio::ConstructDefaultStrategy has strategy-in-waiting: "
+      << sUnderlying
+      << std::endl;
+  }
+  else {
     pManageStrategy_t pManageStrategy( ConstructStrategy( uws ) );
     Add_ManageStrategy_ToTree( sUnderlying + "-construction" , pManageStrategy );
     uws.pStrategyInWaiting = std::make_unique<Strategy>( std::move( pManageStrategy ) );
