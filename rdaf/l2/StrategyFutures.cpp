@@ -43,6 +43,7 @@
 #define ENABLE_MA 0
 #define ENABLE_STOCH 0
 #define ENABLE_IMBAL 0
+#define ENABLE_SENTINEL 0
 
 #include <OUCharting/ChartDataView.h>
 
@@ -427,6 +428,7 @@ void Futures::StartDepthByOrder() {
         }
       }
 
+#if ENABLE_SENTINEL
       bool bChanged( false );
       m_FeatureSet.Changed( bChanged );
 
@@ -446,7 +448,9 @@ void Futures::StartDepthByOrder() {
       else {
         m_nEmitSuppressed++;
       }
-
+#else
+      m_pTorch->Accumulate();
+#endif
     },
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
 
