@@ -238,9 +238,10 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
 
         BOOST_LOG_TRIVIAL(info)
           << "simulate,"
-          << idOrder
           << ",lmt_ask"
-          << "," << id
+          << ",size_map=" << m_mapAsks.size()
+          << ",order_id=" << idOrder
+          << ",exec_id=" << id
           << "," << nOrderQuanRemaining << "-" << quanApplied << "," << bid
           << "," << order.GetInstrument()->GetInstrumentName()
           ;
@@ -286,9 +287,10 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
 
         BOOST_LOG_TRIVIAL(info)
           << "simulate,"
-          << idOrder
           << ",lmt_bid"
-          << "," << id
+          << ",size_map=" << m_mapBids.size()
+          << ",order_id=" << idOrder
+          << ",exec_id=" << id
           << "," << nOrderQuanRemaining << "-" << quanApplied << "," << ask
           << "," << order.GetInstrument()->GetInstrumentName()
           ;
