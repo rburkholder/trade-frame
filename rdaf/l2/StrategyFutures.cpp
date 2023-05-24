@@ -40,6 +40,8 @@
 #include <rdaf/TFile.h>
 #endif
 
+#define INCLUDE_MA 0
+
 #include <OUCharting/ChartDataView.h>
 
 #include <TFVuTrading/TreeItem.hpp>
@@ -152,11 +154,13 @@ void Futures::SetupChart() {
 
   //m_cdv.Add( EChartSlot::Price, &m_ceEhlersLoPassFilter );
 
+#if INCLUDE_MA
   m_cdv.Add( EChartSlot::MASlope, &m_cemZero );
 
   for ( vMovingAverageSlope_t::value_type& mas: m_vMovingAverageSlope ) {
     mas.AddToView( m_cdv, EChartSlot::Price, EChartSlot::SD, EChartSlot::MASlope );
   }
+#endif
 
   m_cdv.Add( EChartSlot::Stoch, &m_cemStochastic );
 
@@ -164,10 +168,12 @@ void Futures::SetupChart() {
     vt->AddToView( m_cdv, EChartSlot::Price, EChartSlot::Stoch );
   }
 
+#if INCLUDE_MA
   m_cdv.Add( EChartSlot::MA, &m_cemZero );
   m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA1 );
   m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA2 );
   m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA3 );
+#endif
 
   m_cdv.Add( EChartSlot::ImbalanceMean, &m_cemZero );
 
@@ -239,6 +245,7 @@ void Futures::SetPosition( pPosition_t pPosition ) {
     assert( 0 < value );
   }
 
+#if INCLUDE_MA
   m_vMovingAverageSlope.emplace_back( ou::tf::MovingAverageSlope( m_quotes,            1,  td, ou::Colour::Green, "ma0" ) ); // for ehlers
   m_vMovingAverageSlope.emplace_back( ou::tf::MovingAverageSlope( m_quotes, vMAPeriods[0], td, ou::Colour::Brown, "ma1" ) );
   m_vMovingAverageSlope.emplace_back( ou::tf::MovingAverageSlope( m_quotes, vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
@@ -247,6 +254,7 @@ void Futures::SetPosition( pPosition_t pPosition ) {
   m_ceRelativeMA1.SetColour( ou::Colour::Green );
   m_ceRelativeMA2.SetColour( ou::Colour::Brown );
   m_ceRelativeMA3.SetColour( ou::Colour::Coral );
+#endif
 
   SetupChart(); // comes after stochastic initialization
 
@@ -784,8 +792,8 @@ void Futures::EnterLong( const ou::tf::Quote& quote ) { // limit orders, in real
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
   assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Futures::HandleOrderCancelled ) );
@@ -801,8 +809,8 @@ void Futures::EnterShort( const ou::tf::Quote& quote ) { // limit orders, in rea
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
   assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Futures::HandleOrderCancelled ) );
@@ -936,6 +944,7 @@ void Futures::HandleRHTrading_Traditional( const ou::tf::Quote& quote ) {
 
   // Moving Average
 
+#if INCLUDE_MA
   const double ma0( m_vMovingAverageSlope[0].EMA() ); // shortest
   const double ma1( m_vMovingAverageSlope[1].EMA() );
   const double ma2( m_vMovingAverageSlope[2].EMA() );
@@ -949,16 +958,19 @@ void Futures::HandleRHTrading_Traditional( const ou::tf::Quote& quote ) {
   double slope1 = m_vMovingAverageSlope[1].Slope();
   double slope2 = m_vMovingAverageSlope[2].Slope();
   double slope3 = m_vMovingAverageSlope[3].Slope();
+#endif
 
   // use a series of State objects to track changes,
   //   and forecast with a probability model
   //   for appropriate returns
 
+#if INCLUDE_MA
   State state(
     quote.Bid(), quote.Ask()
   , ma0, ma1, ma2, ma3
   , slope0, slope1, slope2, slope3
   );
+#endif
 
   EStateDesired stateDesired( EStateDesired::Continue );
 
@@ -968,7 +980,7 @@ void Futures::HandleRHTrading_Traditional( const ou::tf::Quote& quote ) {
 
   // TODO: trail and decrement stop as price moves
   static const double stop_delta_min( 0.50 );
-
+#if INCLUDE_MA
   if ( state.EnterLong() ) {
     double diff = state.Stop();
     assert( 0.0 < diff );
@@ -990,6 +1002,7 @@ void Futures::HandleRHTrading_Traditional( const ou::tf::Quote& quote ) {
       // TODO: suggestion, four seconds perform a cancel, or from some other event
     }
   }
+#endif
 
   // 1a) filter on moving average to reduce churn
   // 1b) lock it in by trailing a stop, based upon one of the ma
@@ -1000,6 +1013,7 @@ void Futures::HandleRHTrading_Traditional( const ou::tf::Quote& quote ) {
 
   static const boost::posix_time::seconds wait( 2 );
 
+#if INCLUDE_MA
   switch ( m_stateTrade ) {
     case EStateTrade::Search:
       switch ( stateDesired ) {
@@ -1173,12 +1187,12 @@ void Futures::HandleRHTrading_Traditional( const ou::tf::Quote& quote ) {
       }
       break;
   }
+#endif
 
   //m_stateMovingAverage = currentMovingAverage; // not stateMovingAverage
 
 }
 
-// not called at the moment
 void Futures::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   //const std::chrono::time_point<std::chrono::system_clock> begin
@@ -1261,15 +1275,53 @@ void Futures::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   if ( m_opPosition != op ) {
 
-    switch ( op ) {
-    case Torch::Op::Long:
-      break;
-    case Torch::Op::Hold:
-      break;
-    case Torch::Op::Short:
-      break;
-    case Torch::Op::Neutral:
-      break;
+    switch ( m_stateTrade ) {
+      case EStateTrade::Search:
+        switch ( op ) {
+        case Torch::Op::Long:
+          EnterLong( m_quote );
+          break;
+        case Torch::Op::Hold:
+          break;
+        case Torch::Op::Short:
+          EnterShort( m_quote );
+          break;
+        case Torch::Op::Neutral:
+          break;
+        }
+        break;
+      case EStateTrade::LongExitSignal:
+        switch ( op ) {
+        case Torch::Op::Long:
+          break;
+        case Torch::Op::Hold:
+          break;
+        case Torch::Op::Short:
+          ExitPosition( m_quote );
+          //EnterShort( m_quote );
+          break;
+        case Torch::Op::Neutral:
+          ExitPosition( m_quote );
+          break;
+        }
+        break;
+      case EStateTrade::ShortExitSignal:
+        switch ( op ) {
+        case Torch::Op::Long:
+          ExitPosition( m_quote );
+          //EnterLong( m_quote );
+          break;
+        case Torch::Op::Hold:
+          break;
+        case Torch::Op::Short:
+          break;
+        case Torch::Op::Neutral:
+          ExitPosition( m_quote );
+          break;
+        }
+        break;
+      default:
+        break;
     }
 
     m_opPosition = op;
