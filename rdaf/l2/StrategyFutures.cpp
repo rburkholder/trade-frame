@@ -1320,6 +1320,8 @@ void Futures::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
           break;
         }
         break;
+    case EStateTrade::Init:
+      m_stateTrade = EStateTrade::Search;
       default:
         break;
     }
