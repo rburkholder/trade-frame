@@ -56,7 +56,7 @@ Torch_impl::Torch_impl( const std::string& sTorchModel, const ou::tf::iqfeed::l2
     m_tensorHidden = torch::zeros( { 1, 1, 64 } );
 
     m_module = torch::jit::load( sTorchModel );
-    m_module.to(torch::kCPU);
+    m_module.to( torch::kCPU );
     m_module.train( false );
 
     //for ( const auto& attr: m_module.named_attributes() ) {
@@ -233,8 +233,24 @@ Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt, Torch::Op op_old_t
 
     //assert( 0.98 < sum );
 
-    if ( neutral_ < short_ ) op = Torch::Op::Short;
-    if ( short_ < long_ ) op = Torch::Op::Long;
+    if ( neutral_ < short_ ) {
+      if ( short_ < long_ ) {
+        op = Torch::Op::Long;
+      }
+      else {
+        op = Torch::Op::Short;
+      }
+    }
+    else {
+      if ( neutral_ < long_ ) {
+        if ( long_ < short_ ) {
+          op = Torch::Op::Short;
+        }
+        else {
+          op = Torch::Op::Long;
+        }
+      }
+    }
 
   }
 
