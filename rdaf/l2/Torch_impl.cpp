@@ -51,7 +51,7 @@ Torch_impl::Torch_impl( const std::string& sTorchModel, const ou::tf::iqfeed::l2
   try {
 
     torch::manual_seed( 0 );
-    torch::NoGradGuard no_grad_;
+    //torch::NoGradGuard no_grad_;
 
     m_tensorCell = torch::zeros( { 1, 1, 64 } );
     m_tensorHidden = torch::zeros( { 1, 1, 64 } );
@@ -166,7 +166,7 @@ Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt, Torch::Op op_old_t
 
   static const auto options = torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCPU, -1 );
 
-  m_vTensor.push_back( torch::from_blob( &step, { 1, c_nLevels * ARRAY_NAMES_SIZE + 1 }, options ) );
+  m_vTensor.push_back( torch::from_blob( &step, { 1, c_nLevels * ARRAY_NAMES_SIZE + 1 }, options ).requires_grad_( false ) );
   torch::Tensor steps = torch::stack( m_vTensor, 1 );
 
   assert( c_nTimeSteps >= m_vTensor.size() );
@@ -191,12 +191,14 @@ Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt, Torch::Op op_old_t
   float state[ 1 ][ 2 ];
   state[ 0 ][ 0 ] = dblOpOld;
   state[ 0 ][ 1 ] = unrealized;
-  torch::Tensor state_tensor = torch::from_blob( &state, { 1, 2 } );
+  torch::Tensor state_tensor = torch::from_blob( &state, { 1, 2 } ).requires_grad_( false );
   inputs.push_back( state_tensor );
 
   std::vector<torch::jit::IValue> tuple;
   tuple.push_back( m_tensorHidden );
+  //tuple.push_back( m_tensorHidden.requires_grad_( false ) ); // what():  you can only change requires_grad flags of leaf variables. If you want to use a computed variable in a subgraph that doesn't require differentiation use var_no_grad = var.detach().
   tuple.push_back( m_tensorCell );
+  //tuple.push_back( m_tensorCell.requires_grad_( false ) ); // what():  you can only change requires_grad flags of leaf variables. If you want to use a computed variable in a subgraph that doesn't require differentiation use var_no_grad = var.detach().
   inputs.push_back(torch::ivalue::Tuple::create( tuple ) );
 
   Torch::Op op { Torch::Op::Neutral };
