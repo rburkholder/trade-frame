@@ -19,14 +19,6 @@
  * Created: 2023/05/16 18:00:31
  */
 
-//#include <torch/torch.h>
-
-//#include <ATen/core/ATen_fwd.h>
-//#include <ATen/ops/from_blob.h>
-
-#include <c10/core/DeviceType.h>
-#include <c10/util/Exception.h>
-
 #include "Torch_impl.hpp"
 
 // https://pytorch.org/cppdocs/
@@ -54,14 +46,15 @@ Torch_impl::Torch_impl( const std::string& sTorchModel, const ou::tf::iqfeed::l2
 
   try {
 
-    torch::manual_seed(0);
+    torch::manual_seed( 0 );
+    torch::NoGradGuard no_grad_;
 
     m_tensorCell = torch::zeros( { 1, 1, 64 } );
     m_tensorHidden = torch::zeros( { 1, 1, 64 } );
 
     m_module = torch::jit::load( sTorchModel );
     m_module.to(torch::kCPU);
-    //torch::NoGradGuard no_grad_;  // ?
+    m_module.train( false );
 
     //for ( const auto& attr: m_module.named_attributes() ) {
     //  std::cout << "attr: " << attr.name << std::endl;
@@ -172,6 +165,8 @@ Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt, Torch::Op op_old_t
   m_vTensor.push_back( torch::from_blob( &step, { 1, c_nLevels * ARRAY_NAMES_SIZE + 1 }, options ) );
   torch::Tensor steps = torch::stack( m_vTensor, 1 );
 
+  assert( c_nTimeSteps >= m_vTensor.size() );
+
   inputs.push_back( steps ); // or this one
 
   double dblOpOld {};
@@ -211,6 +206,12 @@ Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt, Torch::Op op_old_t
     m_tensorHidden = recycle.toTuple()->elements()[0].toTensor();
     m_tensorCell = recycle.toTuple()->elements()[1].toTensor();
 
+    //auto sizesHidden = m_tensorHidden.sizes();
+    //auto sizesCell = m_tensorCell.sizes();
+
+    //size_t sizeHidden = sizesHidden.size();
+    //size_t sizeCell = sizesCell.size();
+
     torch::Tensor trade = output.toTuple()->elements()[ 0 ].toTensor();
 
     result[ 0 ] = trade[ 0 ][ 0 ].item<float>(); // short
@@ -221,15 +222,16 @@ Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt, Torch::Op op_old_t
     float& neutral_( result[ 1 ] );
     float& long_( result[ 2 ] );
 
-    assert( 0 <= short_ );
-    assert( 0 <= neutral_ );
-    assert( 0 <= long_ );
+    // not normalized
+    //assert( 0 <= short_ );
+    //assert( 0 <= neutral_ );
+    //assert( 0 <= long_ );
 
-    float sum( short_ );
-    sum += neutral_;
-    sum += long_;
+    //float sum( short_ );
+    //sum += neutral_;
+    //sum += long_;
 
-    assert( 0.98 < sum );
+    //assert( 0.98 < sum );
 
     if ( neutral_ < short_ ) op = Torch::Op::Short;
     if ( short_ < long_ ) op = Torch::Op::Long;
