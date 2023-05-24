@@ -22,7 +22,11 @@
 #include "Torch_impl.hpp"
 
 // https://pytorch.org/cppdocs/
+// https://g-airborne.com/bringing-your-deep-learning-model-to-production-with-libtorch-part-1-why-libtorch/
 // https://g-airborne.com/bringing-your-deep-learning-model-to-production-with-libtorch-part-2-tracing-your-pytorch-model/
+// https://g-airborne.com/bringing-your-deep-learning-model-to-production-with-libtorch-part-3-advanced-libtorch/
+
+// https://medium.com/crim/from-pytorch-to-libtorch-tips-and-tricks-dc45b6c1b1ac
 
 namespace Strategy {
 
@@ -200,6 +204,9 @@ Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt, Torch::Op op_old_t
   if ( c_nTimeSteps == m_vTensor.size() ) {
     // submit to torch
     // m_module.eval();
+
+    torch::NoGradGuard no_grad_;
+
     auto output = m_module.forward( inputs );
 
     auto recycle = output.toTuple()->elements()[ 1 ];
