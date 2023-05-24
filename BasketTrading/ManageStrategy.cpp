@@ -1074,10 +1074,15 @@ void ManageStrategy::HandleAfterRH( const ou::tf::Bar& bar ) {
 
 void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
   // TODO: pWatchUnderlying should be saved in caller hierarchy
-  if ( m_pCombo ) {
-    Combo& combo( *m_pCombo );
-    //entry.second.ClosePositions();
-    combo.SaveSeries( sPrefix ); // TODO: generify via Common or Base
+  if ( m_pOptionRegistry ) {
+    m_pOptionRegistry->SaveSeries( sPrefix );
+  }
+  else {
+    if ( m_pCombo ) {
+      Combo& combo( *m_pCombo );
+      //entry.second.ClosePositions();
+      combo.SaveSeries( sPrefix ); // TODO: generify via Common or Base
+    }
   }
 }
 
