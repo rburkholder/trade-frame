@@ -51,7 +51,6 @@ Torch_impl::Torch_impl( const std::string& sTorchModel, const ou::tf::iqfeed::l2
   try {
 
     torch::manual_seed( 0 );
-    //torch::NoGradGuard no_grad_;
 
     m_tensorCell = torch::zeros( { 1, 1, 64 } );
     m_tensorHidden = torch::zeros( { 1, 1, 64 } );
@@ -196,9 +195,7 @@ Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt, Torch::Op op_old_t
 
   std::vector<torch::jit::IValue> tuple;
   tuple.push_back( m_tensorHidden );
-  //tuple.push_back( m_tensorHidden.requires_grad_( false ) ); // what():  you can only change requires_grad flags of leaf variables. If you want to use a computed variable in a subgraph that doesn't require differentiation use var_no_grad = var.detach().
   tuple.push_back( m_tensorCell );
-  //tuple.push_back( m_tensorCell.requires_grad_( false ) ); // what():  you can only change requires_grad flags of leaf variables. If you want to use a computed variable in a subgraph that doesn't require differentiation use var_no_grad = var.detach().
   inputs.push_back(torch::ivalue::Tuple::create( tuple ) );
 
   Torch::Op op { Torch::Op::Neutral };
@@ -214,12 +211,6 @@ Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt, Torch::Op op_old_t
     auto recycle = output.toTuple()->elements()[ 1 ];
     m_tensorHidden = recycle.toTuple()->elements()[0].toTensor();
     m_tensorCell = recycle.toTuple()->elements()[1].toTensor();
-
-    //auto sizesHidden = m_tensorHidden.sizes();
-    //auto sizesCell = m_tensorCell.sizes();
-
-    //size_t sizeHidden = sizesHidden.size();
-    //size_t sizeCell = sizesCell.size();
 
     torch::Tensor trade = output.toTuple()->elements()[ 0 ].toTensor();
 
