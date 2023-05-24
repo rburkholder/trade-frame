@@ -37,12 +37,14 @@ public:
 
   using fOnClick_t = std::function<void(TreeItem*)>;       // left click
   using fOnBuildPopUp_t = std::function<void(TreeItem*)>;  // right click
+  using fOnDeleted_t = std::function<void()>;
 
   TreeItem( wxTreeCtrl*, const std::string& ); // only used to attach root item
   ~TreeItem();
 
   void SetOnClick( fOnClick_t&& fOnClick ) { m_fOnClick = std::move( fOnClick ); }
   void SetOnBuildPopUp( fOnBuildPopUp_t&& fOnBuildPopUp ) { m_fOnBuildPopUp = std::move( fOnBuildPopUp ); }
+  void SetOnDeleted( fOnDeleted_t&& fOnDeleted ) { m_fOnDeleted = std::move( fOnDeleted ); }
 
   TreeItem* AppendChild( const std::string& );  // all tree build operations
   TreeItem* AppendChild( const std::string&, fOnClick_t&& );  // all tree build operations
@@ -69,6 +71,7 @@ private:
 
   fOnClick_t m_fOnClick;
   fOnBuildPopUp_t m_fOnBuildPopUp;
+  fOnDeleted_t m_fOnDeleted;
 
   TreeItem( wxTreeCtrl*, wxTreeItemId idParent, const std::string& ); // used in AppendChild
 

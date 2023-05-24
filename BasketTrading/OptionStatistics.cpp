@@ -107,9 +107,14 @@ void OptionStatistics::Set( ou::tf::TreeItem* pti ) {
   if ( m_ptiSelf ) {
     assert( nullptr == pti );
     m_ptiSelf = pti;
+    m_ptiSelf->SetOnDeleted(
+      [this](){
+        m_ptiSelf = nullptr;
+      } );
   }
   else {
     assert( pti );
+    // remove SetOnDeleted?
     m_ptiSelf = pti;
   }
 }

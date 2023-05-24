@@ -54,6 +54,7 @@ private:
 
 TreeItem::TreeItem( wxTreeCtrl* tree, const std::string& sText )
 : m_pTreeCtrl( tree )
+, m_fOnClick( nullptr ), m_fOnBuildPopUp( nullptr ), m_fOnDeleted( nullptr )
 {
   assert( nullptr != tree );
   m_pMenuPopup = new wxMenu();
@@ -62,6 +63,7 @@ TreeItem::TreeItem( wxTreeCtrl* tree, const std::string& sText )
 
 TreeItem::TreeItem( wxTreeCtrl* tree, wxTreeItemId idParent, const std::string& sText ) // private constructor
 : m_pTreeCtrl( tree ), m_idParent( idParent )
+, m_fOnClick( nullptr ), m_fOnBuildPopUp( nullptr ), m_fOnDeleted( nullptr )
 {
   assert( nullptr != tree );
   m_pMenuPopup = new wxMenu();
@@ -130,6 +132,9 @@ void TreeItem::Delete() {
 
 // when the associated menu item has been deleted
 void TreeItem::Deleted( const wxTreeItemId& id ) {
+  if ( m_fOnDeleted ) {
+    m_fOnDeleted();
+  }
   if ( id == m_idSelf ) {
     m_pTreeCtrl = nullptr;
   }
