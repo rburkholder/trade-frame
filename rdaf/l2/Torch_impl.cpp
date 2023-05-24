@@ -21,10 +21,8 @@
 
 //#include <torch/torch.h>
 
-#include <tuple>
-
-#include <ATen/core/ATen_fwd.h>
-#include <ATen/ops/from_blob.h>
+//#include <ATen/core/ATen_fwd.h>
+//#include <ATen/ops/from_blob.h>
 
 #include <c10/core/DeviceType.h>
 #include <c10/util/Exception.h>
@@ -106,9 +104,9 @@ void Torch_impl::Accumulate() {
   );
 }
 
-Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt, Torch::Op old_op, double unrealized, float result[3] ) {
+Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt, Torch::Op op_old_t, double unrealized, float result[3] ) {
 
-  auto seconds = dt.time_of_day().seconds();
+  auto seconds = dt.time_of_day().total_seconds();
 
   rTimeStep_Averages_t& step( m_rTimeSteps[ m_ixTimeStep ] );
   rTimeStep_Averages_t::iterator iterTimeStep( step.begin() );
@@ -171,47 +169,42 @@ Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt, Torch::Op old_op, 
 
   static const auto options = torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCPU, -1 );
 
-  m_vTensor.push_back( torch::from_blob( &step, { c_nLevels * ARRAY_NAMES_SIZE + 1 }, options ) );
-  torch::TensorList listSteps = torch::TensorList( m_vTensor );
-  torch::Tensor steps = torch::stack( listSteps, 1 );
+  m_vTensor.push_back( torch::from_blob( &step, { 1, c_nLevels * ARRAY_NAMES_SIZE + 1 }, options ) );
+  torch::Tensor steps = torch::stack( m_vTensor, 1 );
 
-  //inputs.push_back( listSteps );  // choose this one
   inputs.push_back( steps ); // or this one
 
-  double currentOp {};
-  switch ( old_op ) {
+  double dblOpOld {};
+  switch ( op_old_t ) {
     case Torch::Op::Hold:
       break;
     case Torch::Op::Long:
-      currentOp = +1.0;
+      dblOpOld = +1.0;
       break;
     case Torch::Op::Neutral:
-      currentOp =  0.0;
+      dblOpOld =  0.0;
       break;
     case Torch::Op::Short:
-      currentOp = -1.0;
+      dblOpOld = -1.0;
       break;
   }
 
-  float state[ 2 ];
-  state[ 0 ] = currentOp;
-  state[ 1 ] = unrealized;
-  //torch::Tensor state_tensor = torch::from_blob( &state, { 2 } );
-  //inputs.push_back( state_tensor );
-  inputs.push_back( torch::from_blob( &state, { 2 } ) );
+  float state[ 1 ][ 2 ];
+  state[ 0 ][ 0 ] = dblOpOld;
+  state[ 0 ][ 1 ] = unrealized;
+  torch::Tensor state_tensor = torch::from_blob( &state, { 1, 2 } );
+  inputs.push_back( state_tensor );
 
-  std::tuple<torch::Tensor, torch::Tensor> tuple( m_tensorHidden, m_tensorCell );
-  //std::vector<torch::jit::IValue> tuple;
-  //tuple.push_back( m_tensorHidden );
-  //tuple.push_back( m_tensorCell );
-  inputs.push_back( tuple );
+  std::vector<torch::jit::IValue> tuple;
+  tuple.push_back( m_tensorHidden );
+  tuple.push_back( m_tensorCell );
+  inputs.push_back(torch::ivalue::Tuple::create( tuple ) );
 
   Torch::Op op { Torch::Op::Neutral };
 
   if ( c_nTimeSteps == m_vTensor.size() ) {
     // submit to torch
-    //m_module.eval();
-    //auto output = m_module.forward(inputs).toTuple()->elements()[0].toTensor();
+    // m_module.eval();
     auto output = m_module.forward( inputs );
 
     auto recycle = output.toTuple()->elements()[ 1 ];
@@ -219,12 +212,27 @@ Torch::Op Torch_impl::StepModel( boost::posix_time::ptime dt, Torch::Op old_op, 
     m_tensorCell = recycle.toTuple()->elements()[1].toTensor();
 
     torch::Tensor trade = output.toTuple()->elements()[ 0 ].toTensor();
-    auto trade_a = trade.accessor<float,1>();
-    assert( 3 == trade_a.size( 0 ) );
 
-    result[ 0 ] = trade_a[ 0 ];
-    result[ 1 ] = trade_a[ 1 ];
-    result[ 2 ] = trade_a[ 2 ];
+    result[ 0 ] = trade[ 0 ][ 0 ].item<float>(); // short
+    result[ 1 ] = trade[ 0 ][ 1 ].item<float>(); // neutral
+    result[ 2 ] = trade[ 0 ][ 2 ].item<float>(); // long
+
+    float& short_( result[ 0 ] );
+    float& neutral_( result[ 1 ] );
+    float& long_( result[ 2 ] );
+
+    assert( 0 <= short_ );
+    assert( 0 <= neutral_ );
+    assert( 0 <= long_ );
+
+    float sum( short_ );
+    sum += neutral_;
+    sum += long_;
+
+    assert( 0.98 < sum );
+
+    if ( neutral_ < short_ ) op = Torch::Op::Short;
+    if ( short_ < long_ ) op = Torch::Op::Long;
 
   }
 
