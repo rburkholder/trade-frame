@@ -518,6 +518,7 @@ void Futures::StartDepthByOrder() {
         }
       }
 
+#if ENABLE_SENTINEL
       bool bChanged( false );
       m_FeatureSet.Changed( bChanged );
 
@@ -537,6 +538,9 @@ void Futures::StartDepthByOrder() {
       else {
         m_nEmitSuppressed++;
       }
+#else
+      m_pTorch->Accumulate();
+#endif
 
     }
   );
