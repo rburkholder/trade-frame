@@ -40,7 +40,9 @@
 #include <rdaf/TFile.h>
 #endif
 
-#define INCLUDE_MA 0
+#define ENABLE_MA 0
+#define ENABLE_STOCH 0
+#define ENABLE_IMBAL 0
 
 #include <OUCharting/ChartDataView.h>
 
@@ -154,7 +156,7 @@ void Futures::SetupChart() {
 
   //m_cdv.Add( EChartSlot::Price, &m_ceEhlersLoPassFilter );
 
-#if INCLUDE_MA
+#if ENABLE_MA
   m_cdv.Add( EChartSlot::MASlope, &m_cemZero );
 
   for ( vMovingAverageSlope_t::value_type& mas: m_vMovingAverageSlope ) {
@@ -162,19 +164,22 @@ void Futures::SetupChart() {
   }
 #endif
 
+#if ENABLE_STOCH
   m_cdv.Add( EChartSlot::Stoch, &m_cemStochastic );
 
   for ( vStochastic_t::value_type& vt: m_vStochastic ) {
     vt->AddToView( m_cdv, EChartSlot::Price, EChartSlot::Stoch );
   }
+#endif
 
-#if INCLUDE_MA
+#if ENABLE_MA
   m_cdv.Add( EChartSlot::MA, &m_cemZero );
   m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA1 );
   m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA2 );
   m_cdv.Add( EChartSlot::MA, &m_ceRelativeMA3 );
 #endif
 
+#if ENABLE_IMBAL
   m_cdv.Add( EChartSlot::ImbalanceMean, &m_cemZero );
 
   m_ceImbalanceRawMean.SetName( "imbalance mean" );
@@ -183,6 +188,7 @@ void Futures::SetupChart() {
 
   m_ceImbalanceSmoothMean.SetColour( ou::Colour::DarkGreen );
   m_cdv.Add( EChartSlot::ImbalanceMean, &m_ceImbalanceSmoothMean );
+#endif
 
   m_cdv.Add( EChartSlot::PL1, &m_cemZero );
 
@@ -226,11 +232,11 @@ void Futures::SetPosition( pPosition_t pPosition ) {
   //m_rHiPass[3].Init( m_config.nMA1Periods, ou::Colour::Green, "HP4" );
 
   // stochastic
-
+#if ENABLE_STOCH
   m_vStochastic.emplace_back( std::make_unique<Stochastic>( "1", m_quotes, m_config.nStochastic1Periods, td, ou::Colour::DeepSkyBlue ) );
   m_vStochastic.emplace_back( std::make_unique<Stochastic>( "2", m_quotes, m_config.nStochastic2Periods, td, ou::Colour::DodgerBlue ) );  // is dark: MediumSlateBlue; MediumAquamarine is greenish; MediumPurple is dark; Purple is dark
   m_vStochastic.emplace_back( std::make_unique<Stochastic>( "3", m_quotes, m_config.nStochastic3Periods, td, ou::Colour::MediumSlateBlue ) ); // no MediumTurquoise, maybe Indigo
-
+#endif
   // moving average
 
   using vMAPeriods_t = std::vector<int>;
@@ -245,7 +251,7 @@ void Futures::SetPosition( pPosition_t pPosition ) {
     assert( 0 < value );
   }
 
-#if INCLUDE_MA
+#if ENABLE_MA
   m_vMovingAverageSlope.emplace_back( ou::tf::MovingAverageSlope( m_quotes,            1,  td, ou::Colour::Green, "ma0" ) ); // for ehlers
   m_vMovingAverageSlope.emplace_back( ou::tf::MovingAverageSlope( m_quotes, vMAPeriods[0], td, ou::Colour::Brown, "ma1" ) );
   m_vMovingAverageSlope.emplace_back( ou::tf::MovingAverageSlope( m_quotes, vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
@@ -409,7 +415,9 @@ void Futures::StartDepthByOrder() {
       }
 
       if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
+#if ENABLE_IMBAL
         Imbalance( depth );
+#endif
         if ( 1 == ix ) {
 #if FVS
           m_ceFVS_Bid_Lvl1RelLmt.Append( dt, -m_FeatureSet.FVS()[ 1 ].bid.v8.relativeLimit );
@@ -494,7 +502,9 @@ void Futures::StartDepthByOrder() {
       }
 
       if ( ( 1 == ix ) || ( 2 == ix ) ) { // may need to recalculate at any level change instead
+#if ENABLE_IMBAL
         Imbalance( depth );
+#endif
         if ( 1 == ix ) {
 #if FVS
           m_ceFVS_Ask_Lvl1RelLmt.Append( dt, +m_FeatureSet.FVS()[ 1 ].ask.v8.relativeLimit );
@@ -944,7 +954,7 @@ void Futures::HandleRHTrading_Traditional( const ou::tf::Quote& quote ) {
 
   // Moving Average
 
-#if INCLUDE_MA
+#if ENABLE_MA
   const double ma0( m_vMovingAverageSlope[0].EMA() ); // shortest
   const double ma1( m_vMovingAverageSlope[1].EMA() );
   const double ma2( m_vMovingAverageSlope[2].EMA() );
@@ -964,7 +974,7 @@ void Futures::HandleRHTrading_Traditional( const ou::tf::Quote& quote ) {
   //   and forecast with a probability model
   //   for appropriate returns
 
-#if INCLUDE_MA
+#if ENABLE_MA
   State state(
     quote.Bid(), quote.Ask()
   , ma0, ma1, ma2, ma3
@@ -980,7 +990,7 @@ void Futures::HandleRHTrading_Traditional( const ou::tf::Quote& quote ) {
 
   // TODO: trail and decrement stop as price moves
   static const double stop_delta_min( 0.50 );
-#if INCLUDE_MA
+#if ENABLE_MA
   if ( state.EnterLong() ) {
     double diff = state.Stop();
     assert( 0.0 < diff );
@@ -1013,7 +1023,7 @@ void Futures::HandleRHTrading_Traditional( const ou::tf::Quote& quote ) {
 
   static const boost::posix_time::seconds wait( 2 );
 
-#if INCLUDE_MA
+#if ENABLE_MA
   switch ( m_stateTrade ) {
     case EStateTrade::Search:
       switch ( stateDesired ) {
