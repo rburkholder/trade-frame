@@ -24,6 +24,7 @@
 #include <OUCharting/ChartEntryIndicator.h>
 
 #include <TFOptions/Option.h>
+
 #include <TFTrading/Position.h>
 
 namespace ou {
