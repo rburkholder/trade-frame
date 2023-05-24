@@ -74,6 +74,8 @@ public:
   void Add( pOption_t pOption, pPosition_t pPosition, const std::string& sLegName, ou::tf::option::Combo::vMenuActivation_t&& ma );
   void Remove( pOption_t pOption, bool bRemoveStatistics );
 
+  void SaveSeries( const std::string& sPrefix );
+
 protected:
 private:
 

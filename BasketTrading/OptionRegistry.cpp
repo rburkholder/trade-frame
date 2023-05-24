@@ -166,3 +166,9 @@ void OptionRegistry::Remove( pOption_t pOption, bool bRemoveStatistics ) {
   }
 
 }
+
+void OptionRegistry::SaveSeries( const std::string& sPrefix ) {
+  for ( mapOptionRegistered_t::value_type& vt: m_mapOptionRegistered ) {
+    vt.second->SaveSeries( sPrefix );
+  }
+}
