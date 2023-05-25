@@ -43,7 +43,6 @@
 #define ENABLE_MA 0
 #define ENABLE_STOCH 0
 #define ENABLE_IMBAL 0
-#define ENABLE_SENTINEL 0
 
 #include <OUCharting/ChartDataView.h>
 
@@ -331,7 +330,6 @@ void Futures::FVSStreamStart( const std::string& sPath ) {
     if ( bOpen ) {
       m_streamFVS.open( m_sFVSPath, std::ios_base::trunc );
       assert( m_streamFVS.is_open() );
-      m_FeatureSet.Set( m_config.vSentinel );
       m_streamFVS << "datetime," << m_FeatureSet.Header() << std::endl;
     }
   }
@@ -353,6 +351,10 @@ void Futures::StartDepthByOrder() {
   using EState = ou::tf::iqfeed::l2::OrderBased::EState;
 
   m_FeatureSet.Set( 10 );
+  if ( 0 < m_config.vSentinel.size() ) {
+    m_FeatureSet.Set( m_config.vSentinel );
+  }
+
   m_pTorch = std::make_unique<Torch>( m_config.sTorchModelPath, m_FeatureSet );
   m_opPosition = Torch::Op::Neutral;
 
@@ -428,7 +430,6 @@ void Futures::StartDepthByOrder() {
         }
       }
 
-#if ENABLE_SENTINEL
       bool bChanged( false );
       m_FeatureSet.Changed( bChanged );
 
@@ -448,9 +449,7 @@ void Futures::StartDepthByOrder() {
       else {
         m_nEmitSuppressed++;
       }
-#else
-      m_pTorch->Accumulate();
-#endif
+
     },
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
 
@@ -518,7 +517,6 @@ void Futures::StartDepthByOrder() {
         }
       }
 
-#if ENABLE_SENTINEL
       bool bChanged( false );
       m_FeatureSet.Changed( bChanged );
 
@@ -538,9 +536,6 @@ void Futures::StartDepthByOrder() {
       else {
         m_nEmitSuppressed++;
       }
-#else
-      m_pTorch->Accumulate();
-#endif
 
     }
   );
