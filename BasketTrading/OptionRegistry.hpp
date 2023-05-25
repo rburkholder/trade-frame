@@ -108,6 +108,6 @@ private:
   using mapOptionRegistered_t = std::unordered_map<std::string, pOption_t>; // registered in option engine
   mapOptionRegistered_t m_mapOptionRegistered;
 
-  mapOption_t::iterator Check( pOption_t pOption );
+  mapOption_t::iterator LookUp( pOption_t pOption );
 
 };
