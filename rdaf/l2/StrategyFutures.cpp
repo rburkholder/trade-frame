@@ -350,7 +350,7 @@ void Futures::StartDepthByOrder() {
 
   using EState = ou::tf::iqfeed::l2::OrderBased::EState;
 
-  m_FeatureSet.Set( 10 );
+  m_FeatureSet.Set( m_config.nFVSLevels );
   if ( 0 < m_config.vSentinel.size() ) {
     m_FeatureSet.Set( m_config.vSentinel );
   }
@@ -362,6 +362,8 @@ void Futures::StartDepthByOrder() {
 
   m_pOrderBased->Set(
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fBid_
+
+      if ( m_config.nFVSLevels < ix ) return;
 
       ptime dt( depth.DateTime() );
 
@@ -452,6 +454,8 @@ void Futures::StartDepthByOrder() {
 
     },
     [this]( ou::tf::iqfeed::l2::EOp op, unsigned int ix, const ou::tf::Depth& depth ){ // fBookChanges_t&& fAsk_
+
+      if ( m_config.nFVSLevels < ix ) return;
 
       ptime dt( depth.DateTime() );
 

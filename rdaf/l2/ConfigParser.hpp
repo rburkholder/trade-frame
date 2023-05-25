@@ -57,6 +57,8 @@ struct symbol_t {
   bool bTradable;
   bool bEmitFVS;
 
+  size_t nFVSLevels;
+
   using vSentinel_t = std::vector<std::string>; // convert to struct with string/level later
   vSentinel_t vSentinel;
 
@@ -110,6 +112,7 @@ struct symbol_t {
   , dblCommission( 0.01 )
   , bTradable( true )
   , bEmitFVS( false )
+  , nFVSLevels( 10 )
   , dte( 7 )
   , nTimeBins {}
   , dblTimeUpper {}

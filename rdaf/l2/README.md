@@ -37,6 +37,7 @@ time_lower=20221219T220000
 feed=<l1|l2m|l2o>
 sym_symbol=ES-20230317
 trade=yes
+fvs_levels=3
 emit_fvs=yes
 sentinel=ask.v1.price
 sentinel=bid.v1.price
