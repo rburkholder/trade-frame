@@ -27,6 +27,11 @@
 
 #include "Combo.h"
 
+// TODO:
+//   need a mechansism to prevent over-write/duplication of options
+//     ie, when a manual option rolls into an existing one, or an existing rolls into a manual one
+//     all the legs are there, should be able to flag or gate the transition
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
