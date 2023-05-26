@@ -104,7 +104,7 @@ void ChooseLegs( // throw Chain exceptions
 , boost::gregorian::date date
 , const SpreadSpecs& specs
 , double priceUnderlying
-, const fLegSelected_t& fLegSelected
+, const fLegSelected_t&& fLegSelected
 )
 {
 

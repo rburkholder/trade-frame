@@ -47,7 +47,7 @@ void ChooseLegs( // throw Chain exceptions
 , boost::gregorian::date
 , const SpreadSpecs&
 , double priceUnderlying
-, const fLegSelected_t&
+, const fLegSelected_t&&
 );
 
 void FillLegNote( size_t ix, Combo::E20DayDirection, LegNote::values_t& );
