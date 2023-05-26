@@ -83,7 +83,7 @@
 #include <wx/window.h>
 
 #include <TFOptionCombos/Collar.h>
-using Collar = ou::tf::option::Collar;
+namespace collar = ou::tf::option::collar;
 
 #include "TFOptionCombos/Combo.h"
 using Combo = ou::tf::option::Combo;
@@ -271,7 +271,7 @@ ManageStrategy::ManageStrategy(
         m_mapChains,
         m_fConstructOption
       );
-    m_pValidateOptions->SetSize( Collar::LegCount() ); // will need to make this generic
+    m_pValidateOptions->SetSize( collar::flex::LegCount() ); // will need to make this generic
 
   }
   catch (...) {
@@ -730,12 +730,12 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             if ( m_pValidateOptions->ValidateBidAsk(
               dateBar, mid, 11,
               [this,mid,direction]( const mapChains_t& chains, boost::gregorian::date date, double price, Combo::fLegSelected_t&& fLegSelected ){
-                Collar::ChooseLegs( direction, chains, date, m_specsSpread, mid, fLegSelected );
+                collar::flex::ChooseLegs( direction, chains, date, m_specsSpread, mid, fLegSelected );
               }
             ) ) {
 
               const idPortfolio_t idPortfolio
-                = Collar::Name( direction, m_mapChains, dateBar, m_specsSpread, mid ,sUnderlying );
+                = collar::flex::Name( direction, m_mapChains, dateBar, m_specsSpread, mid ,sUnderlying );
 
               if ( m_fAuthorizeSimple( idPortfolio, sUnderlying, false ) ) {
 
@@ -768,12 +768,12 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   [this,&idPortfolio,&combo,direction,pOrderCombo]( size_t ix, pOption_t pOption ){ // fValidatedOption_t -- need Strategy specific naming
                     // called for each of the legs
                     ou::tf::option::LegNote::values_t lnValues;
-                    Collar::FillLegNote( ix, direction, lnValues ); // TODO: need to have the leg type provided by ValidateOptions
+                    collar::flex::FillLegNote( ix, direction, lnValues ); // TODO: need to have the leg type provided by ValidateOptions
                     ou::tf::option::LegNote ln( lnValues );
                     pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, ln.Encode() );
                     assert( pPosition );
                     combo.SetPosition( pPosition );
-                    Collar::AddLegOrder( lnValues.m_type, pOrderCombo, ou::tf::OrderSide::Buy, 1, pPosition );
+                    collar::flex::AddLegOrder( lnValues.m_type, pOrderCombo, ou::tf::OrderSide::Buy, 1, pPosition );
                     }
                   );
 

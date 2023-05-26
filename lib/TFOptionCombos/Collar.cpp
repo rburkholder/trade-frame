@@ -55,6 +55,8 @@ rally (or significant bounce) is perceived to be relatively small.
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
+namespace collar { // collar
+namespace flex { // flex
 
 namespace {
 
@@ -92,11 +94,11 @@ namespace {
 
 } // namespace anon
 
-size_t /* static */ Collar::LegCount() {
+size_t LegCount() {
   return c_nLegs;
 }
 
-/* static */ void Collar::ChooseLegs( // throw Chain exceptions
+void ChooseLegs( // throw Chain exceptions
   Combo::E20DayDirection direction
 , const mapChains_t& chains
 , boost::gregorian::date date
@@ -169,7 +171,7 @@ size_t /* static */ Collar::LegCount() {
   }
 }
 
-/* static */ void Collar::FillLegNote( size_t ix, Combo::E20DayDirection direction, LegNote::values_t& values ) {
+void FillLegNote( size_t ix, Combo::E20DayDirection direction, LegNote::values_t& values ) {
 
   assert( ix < c_nLegs );
 
@@ -196,7 +198,7 @@ size_t /* static */ Collar::LegCount() {
 
 }
 
-/* static */ std::string Collar::Name(
+std::string Name(
   Combo::E20DayDirection direction
 , const mapChains_t& chains
 , boost::gregorian::date date
@@ -250,7 +252,7 @@ size_t /* static */ Collar::LegCount() {
 }
 
 // long by default for entry, short doesn't make much sense due to combo combinations
-/* static */ void Collar::AddLegOrder(
+void AddLegOrder(
   const LegNote::Type type
 , pOrderCombo_t pOrderCombo
 , const ou::tf::OrderSide::EOrderSide side
@@ -293,6 +295,8 @@ size_t /* static */ Collar::LegCount() {
   }
 }
 
+} // namespace flex
+} // namespace collar
 } // namespace option
 } // namespace tf
 } // namespace ou
