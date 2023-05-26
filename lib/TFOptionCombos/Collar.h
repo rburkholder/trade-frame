@@ -24,6 +24,7 @@
 
 #include <TFTrading/Position.h>
 #include <TFTrading/Order_Combo.hpp>
+#include <functional>
 
 #include "Combo.h"
 #include "SpreadSpecs.h"
@@ -31,12 +32,50 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
-namespace collar { // collar
 
 using mapChains_t = Combo::mapChains_t;
 using fLegSelected_t = Combo::fLegSelected_t;
 using pPosition_t = ou::tf::Position::pPosition_t;
 using pOrderCombo_t = ou::tf::OrderCombo::pOrderCombo_t;
+
+struct ComboTraits {
+
+  using fLegCount_t = std::function<size_t()>;
+  using fChooseLegs_t = std::function<void(
+    Combo::E20DayDirection
+  , const mapChains_t& chains
+  , boost::gregorian::date
+  , const SpreadSpecs&
+  , double priceUnderlying
+  , const fLegSelected_t&&
+  )>;
+  using fFillLegNote_t = std::function<void(
+    size_t ix, Combo::E20DayDirection, LegNote::values_t&
+  )>;
+  using fName_t = std::function<std::string(
+    Combo::E20DayDirection
+  , const mapChains_t& chains
+  , boost::gregorian::date
+  , const SpreadSpecs&
+  , double price
+  , const std::string& sUnderlying
+  )>;
+  using fAddLegOrder_t = std::function<void(
+    const LegNote::Type
+  , pOrderCombo_t
+  , const ou::tf::OrderSide::EOrderSide
+  , uint32_t nOrderQuantity
+  , pPosition_t
+  )>;
+
+  fLegCount_t fLegCount;
+  fChooseLegs_t fChooseLegs;
+  fFillLegNote_t fFillLegNote;
+  fName_t fName;
+  fAddLegOrder_t fAddLegOrder;
+};
+
+namespace collar { // collar
 
 namespace flex { // flex
 
@@ -69,6 +108,8 @@ void AddLegOrder(
 , uint32_t nOrderQuantity
 , pPosition_t
 );
+
+void Bind( ComboTraits& traits );
 
 } // namespace flex
 
@@ -103,6 +144,8 @@ void AddLegOrder(
 , uint32_t nOrderQuantity
 , pPosition_t
 );
+
+void Bind( ComboTraits& traits );
 
 } // namespace locked
 } // namespace collar

@@ -140,7 +140,6 @@ ManageStrategy::ManageStrategy(
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>()
 , m_dblOpen {}
 , m_dblPivot( dblPivot )
-, m_eCombo( eCombo )
   //m_barPriorDaily( barPriorDaily )
 , m_pWatchUnderlying( pWatchUnderlying )
 , m_pPortfolioOwning( pPortfolioOwning )
@@ -199,6 +198,15 @@ ManageStrategy::ManageStrategy(
   assert( m_fConstructPortfolio );
   assert( m_fFirstTrade );
   assert( m_fBar );
+
+  switch ( eCombo ) {
+    case ECombo::flex:
+      ou::tf::option::collar::flex::Bind( m_ct );
+      break;
+    case ECombo::locked:
+      ou::tf::option::collar::locked::Bind( m_ct );
+      break;
+  }
 
   //m_rBarDirection[ 0 ] = EBarDirection::None;
   //m_rBarDirection[ 1 ] = EBarDirection::None;
@@ -273,15 +281,7 @@ ManageStrategy::ManageStrategy(
         m_mapChains,
         m_fConstructOption
       );
-    switch ( m_eCombo ) {
-      case ECombo::flex:
-        m_pValidateOptions->SetSize( collar::flex::LegCount() ); // will need to make this generic
-        break;
-      case ECombo::locked:
-        m_pValidateOptions->SetSize( collar::locked::LegCount() ); // will need to make this generic
-        break;
-    }
-
+    m_pValidateOptions->SetSize( m_ct.fLegCount() ); // will need to make this generic
 
   }
   catch (...) {
@@ -740,27 +740,11 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             if ( m_pValidateOptions->ValidateBidAsk(
               dateBar, mid, 11,
               [this,mid,direction]( const mapChains_t& chains, boost::gregorian::date date, double price, Combo::fLegSelected_t&& fLegSelected ){
-                switch ( m_eCombo ) {
-                  case ECombo::flex:
-                    collar::flex::ChooseLegs( direction, chains, date, m_specsSpread, mid, std::move( fLegSelected ) );
-                    break;
-                  case ECombo::locked:
-                    collar::locked::ChooseLegs( direction, chains, date, m_specsSpread, mid, std::move( fLegSelected ) );
-                    break;
-                }
-
+                m_ct.fChooseLegs( direction, chains, date, m_specsSpread, mid, std::move( fLegSelected ) );
               }
             ) ) {
 
-              idPortfolio_t idPortfolio;
-              switch ( m_eCombo ) {
-                case ECombo::flex:
-                  idPortfolio = collar::flex::Name( direction, m_mapChains, dateBar, m_specsSpread, mid ,sUnderlying );
-                  break;
-                case ECombo::locked:
-                  idPortfolio = collar::locked::Name( direction, m_mapChains, dateBar, m_specsSpread, mid ,sUnderlying );
-                  break;
-              }
+              idPortfolio_t idPortfolio = m_ct.fName( direction, m_mapChains, dateBar, m_specsSpread, mid ,sUnderlying );
 
               if ( m_fAuthorizeSimple( idPortfolio, sUnderlying, false ) ) {
 
@@ -793,30 +777,12 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   [this,&idPortfolio,&combo,direction,pOrderCombo]( size_t ix, pOption_t pOption ){ // fValidatedOption_t -- need Strategy specific naming
                     // called for each of the legs
                     ou::tf::option::LegNote::values_t lnValues;
-
-                    switch ( m_eCombo ) {
-                      case ECombo::flex:
-                        collar::flex::FillLegNote( ix, direction, lnValues ); // TODO: need to have the leg type provided by ValidateOptions
-                        break;
-                      case ECombo::locked:
-                        collar::locked::FillLegNote( ix, direction, lnValues ); // TODO: need to have the leg type provided by ValidateOptions
-                        break;
-                    }
-
+                    m_ct.fFillLegNote( ix, direction, lnValues ); // TODO: need to have the leg type provided by ValidateOptions
                     ou::tf::option::LegNote ln( lnValues );
                     pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, ln.Encode() );
                     assert( pPosition );
                     combo.SetPosition( pPosition );
-
-                    switch ( m_eCombo ) {
-                      case ECombo::flex:
-                        collar::flex::AddLegOrder( lnValues.m_type, pOrderCombo, ou::tf::OrderSide::Buy, 1, pPosition );
-                        break;
-                      case ECombo::locked:
-                        collar::locked::AddLegOrder( lnValues.m_type, pOrderCombo, ou::tf::OrderSide::Buy, 1, pPosition );
-                        break;
-                    }
-
+                    m_ct.fAddLegOrder( lnValues.m_type, pOrderCombo, ou::tf::OrderSide::Buy, 1, pPosition );
                   }
                   );
 

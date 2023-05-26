@@ -186,7 +186,7 @@ private:
   enum class EmaState { EmaUnstable, EmaUp, EmaDown };
   EmaState m_stateEma;
 
-  ECombo m_eCombo;
+  ou::tf::option::ComboTraits m_ct;
 
   size_t m_nConfirmationIntervals;
 

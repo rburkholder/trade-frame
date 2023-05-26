@@ -295,6 +295,15 @@ void AddLegOrder(
   }
 }
 
+namespace ph = std::placeholders;
+void Bind( ComboTraits& traits ) {
+  traits.fLegCount = std::bind( &LegCount );
+  traits.fChooseLegs = std::bind( &ChooseLegs, ph::_1, ph::_2, ph::_3, ph::_4, ph::_5, ph::_6 );
+  traits.fFillLegNote = std::bind( &FillLegNote, ph::_1, ph::_2, ph::_3 );
+  traits.fName = std::bind( &Name, ph::_1, ph::_2, ph::_3, ph::_4, ph::_5, ph::_6 );
+  traits.fAddLegOrder = std::bind( &AddLegOrder, ph::_1, ph::_2, ph::_3, ph::_4, ph::_5 );
+}
+
 } // namespace flex
 
 namespace locked { // locked
@@ -534,6 +543,15 @@ void AddLegOrder(
     default:
       assert( false );
   }
+}
+
+namespace ph = std::placeholders;
+void Bind( ComboTraits& traits ) {
+  traits.fLegCount = std::bind( &LegCount );
+  traits.fChooseLegs = std::bind( &ChooseLegs, ph::_1, ph::_2, ph::_3, ph::_4, ph::_5, ph::_6 );
+  traits.fFillLegNote = std::bind( &FillLegNote, ph::_1, ph::_2, ph::_3 );
+  traits.fName = std::bind( &Name, ph::_1, ph::_2, ph::_3, ph::_4, ph::_5, ph::_6 );
+  traits.fAddLegOrder = std::bind( &AddLegOrder, ph::_1, ph::_2, ph::_3, ph::_4, ph::_5 );
 }
 
 } // namespace locked
