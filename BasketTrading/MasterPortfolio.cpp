@@ -632,6 +632,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
         //1.0, // TODO: defaults to rising for now, use BollingerTransitions::ReadDailyBars for directional selection
         //uws.pUnderlying->SetPivots(double dblR2, double dblR1, double dblPV, double dblS1, double dblS2)
         dblPivot, // gt is long, lt is short
+        ManageStrategy::ECombo::flex,
         uws.pUnderlying->GetWatch(),
         uws.pUnderlying->GetPortfolio(),
         m_spread_specs,

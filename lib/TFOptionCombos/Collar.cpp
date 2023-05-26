@@ -296,6 +296,248 @@ void AddLegOrder(
 }
 
 } // namespace flex
+
+namespace locked { // locked
+
+namespace {
+
+  static const size_t c_nLegs( 4 );
+
+  using LegDef = ou::tf::option::LegDef;
+  using rLegDef_t = std::array<LegDef,c_nLegs>;
+
+  // NOTE/Caveat: AddLegOrder requires that c_rLegDefRise & c_rLegDefFall have identical LegNote::Side for each entry
+
+  //long collar: synthetic long, covered call, long put
+  static const rLegDef_t c_rLegDefRise = { // rising momentum
+    LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Call ), // synthetic long
+    LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Put  ), // synthetic long
+    LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Call ), // covered
+    LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Put  )  // protective
+  };
+
+  //short collar: synthetic short, covered put, long call
+  static const rLegDef_t c_rLegDefFall = { // falling momentum
+    LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Put  ), // synthetic short
+    LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Call ), // synthetic short
+    LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Put  ), // covered
+    LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Call )  // protective
+  };
+
+  using mapLegDev_t = std::map<LegNote::Type, size_t>; // lookup into array
+
+  static const mapLegDev_t mapLegDef = {
+    { LegNote::Type::SynthLong,  0 }
+  , { LegNote::Type::SynthShort, 1 }
+  , { LegNote::Type::Cover,      2 }
+  , { LegNote::Type::Protect,    3 }
+  };
+
+} // namespace anon
+
+size_t LegCount() {
+  return c_nLegs;
+}
+
+void ChooseLegs( // throw Chain exceptions
+  Combo::E20DayDirection direction
+, const mapChains_t& chains
+, boost::gregorian::date date
+, const SpreadSpecs& specs
+, double priceUnderlying
+, const fLegSelected_t&& fLegSelected
+)
+{
+
+  using citerChain_t = mapChains_t::const_iterator;
+  using chain_t = ou::tf::option::Chain<ou::tf::option::chain::OptionName>;
+
+  citerChain_t citerChainBack = SelectChain( chains, date, specs.nDaysBack );
+  const chain_t& chainBack( citerChainBack->second );
+
+  citerChain_t citerChainFront = SelectChain( chains, date, specs.nDaysFront );
+  const chain_t& chainFront( citerChainFront->second );
+
+  bool bOk( true );
+
+  switch ( direction ) {
+    case Combo::E20DayDirection::Unknown:
+      assert( false );
+      break;
+    case Combo::E20DayDirection::Rising:
+      {
+        const double strikeSyntheticBack(  chainBack.Call_Itm( priceUnderlying ) ); // long call
+        const double strikeSyntheticFront( chainFront.Put_Atm( strikeSyntheticBack ) ); // short put
+
+        double strikeCovered( chainFront.Call_Otm( strikeSyntheticBack ) );
+        //strikeCovered = chainFront.Call_Otm( strikeCovered ); // two strikes up
+
+        const double strikeProtective( chainBack.Put_Atm( strikeSyntheticBack ) ); // rounding problem across chains
+
+        fLegSelected( strikeSyntheticBack,  citerChainBack->first,  chainBack.GetIQFeedNameCall(  strikeSyntheticBack ) );
+        fLegSelected( strikeSyntheticFront, citerChainFront->first, chainFront.GetIQFeedNamePut(  strikeSyntheticFront ) );
+        fLegSelected( strikeCovered,        citerChainFront->first, chainFront.GetIQFeedNameCall( strikeCovered ) );
+        fLegSelected( strikeProtective,     citerChainBack->first,  chainBack.GetIQFeedNamePut(   strikeProtective ) );
+      }
+      break;
+    case Combo::E20DayDirection::Falling:
+      {
+        const double strikeSyntheticBack(  chainBack.Put_Itm( priceUnderlying ) ); // long put
+        const double strikeSyntheticFront( chainFront.Call_Atm( strikeSyntheticBack ) ); // short call
+
+        double strikeCovered( chainFront.Put_Otm( strikeSyntheticBack ) );
+        //strikeCovered = chainFront.Put_Otm( strikeCovered ); // two strikes down
+
+        const double strikeProtective( chainBack.Call_Atm( strikeSyntheticBack ) ); // rounding problem across chains
+
+        fLegSelected( strikeSyntheticBack,  citerChainBack->first,  chainBack.GetIQFeedNamePut(   strikeSyntheticBack ) );
+        fLegSelected( strikeSyntheticFront, citerChainFront->first, chainFront.GetIQFeedNameCall( strikeSyntheticFront ) );
+        fLegSelected( strikeCovered,        citerChainFront->first, chainFront.GetIQFeedNamePut(  strikeCovered ) );
+        fLegSelected( strikeProtective,     citerChainBack->first,  chainBack.GetIQFeedNameCall(  strikeProtective ) );
+      }
+      break;
+  }
+
+  if ( !bOk ) {
+    size_t sum {};
+    for ( const mapChains_t::value_type& vt: chains ) {
+      sum += vt.second.Size();
+      std::cout
+        << "chain: "
+        << vt.first << " "
+        << vt.second.Size()
+        << std::endl;
+    }
+    std::cout << "  sum: " << sum << std::endl;
+  }
+}
+
+void FillLegNote( size_t ix, Combo::E20DayDirection direction, LegNote::values_t& values ) {
+
+  assert( ix < c_nLegs );
+
+  values.m_algo = LegNote::Algo::Collar;
+  values.m_state = LegNote::State::Open;
+
+  switch ( direction ) {
+    case Combo::E20DayDirection::Rising:
+      values.m_momentum = LegNote::Momentum::Rise;
+      values.m_type     = c_rLegDefRise[ix].type;
+      values.m_side     = c_rLegDefRise[ix].side;
+      values.m_option   = c_rLegDefRise[ix].option;
+      break;
+    case Combo::E20DayDirection::Falling:
+      values.m_momentum = LegNote::Momentum::Fall;
+      values.m_type     = c_rLegDefFall[ix].type;
+      values.m_side     = c_rLegDefFall[ix].side;
+      values.m_option   = c_rLegDefFall[ix].option;
+      break;
+    case Combo::E20DayDirection::Unknown:
+      assert( false );
+      break;
+  }
+
+}
+
+std::string Name(
+  Combo::E20DayDirection direction
+, const mapChains_t& chains
+, boost::gregorian::date date
+, const SpreadSpecs& specs
+, double price
+, const std::string& sUnderlying
+) {
+
+  std::string sName( "collar-" + sUnderlying );
+  size_t ix {};
+
+  switch ( direction ) {
+    case Combo::E20DayDirection::Rising:
+      sName += "-rise";
+      break;
+    case Combo::E20DayDirection::Falling:
+      sName += "-fall";
+      break;
+  }
+
+  ChooseLegs(
+    direction, chains, date, specs, price,
+    [&sName,&ix]( double strike, boost::gregorian::date date, const std::string& sIQFeedName ){
+      switch ( ix ) {
+        case 0:
+          sName
+            += "-"
+            +  ou::tf::Instrument::BuildDate( date.year(), date.month(), date.day() )
+            +  "-"
+            +  boost::lexical_cast<std::string>( strike );
+          break;
+        case 1:
+          break;
+        case 2:
+          sName
+            += "-"
+            +  ou::tf::Instrument::BuildDate( date.year(), date.month(), date.day() )
+            +  "-"
+            +  boost::lexical_cast<std::string>( strike );
+          break;
+        case 3:
+          sName
+            += "-"
+            +  boost::lexical_cast<std::string>( strike );
+          break;
+      }
+      ix++;
+    }
+    );
+  return sName;
+}
+
+// long by default for entry, short doesn't make much sense due to combo combinations
+void AddLegOrder(
+  const LegNote::Type type
+, pOrderCombo_t pOrderCombo
+, const ou::tf::OrderSide::EOrderSide side
+, uint32_t nOrderQuantity
+, pPosition_t pPosition
+) {
+  switch ( side ) {
+    case ou::tf::OrderSide::Buy: // usual entry
+      {
+        mapLegDev_t::const_iterator iter = mapLegDef.find( type );
+        assert( mapLegDef.end() != iter );
+        const LegDef& leg( c_rLegDefRise[ iter->second ] ); // note the Caveat at top of file
+        switch ( leg.side ) {
+          case LegNote::Side::Long:
+            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Buy, [](){} );
+            break;
+          case LegNote::Side::Short:
+            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Sell, [](){} );
+            break;
+        }
+      }
+      break;
+    case ou::tf::OrderSide::Sell: // unusual entry
+      {
+        mapLegDev_t::const_iterator iter = mapLegDef.find( type );
+        assert( mapLegDef.end() != iter );
+        const LegDef& leg( c_rLegDefFall[ iter->second ] ); // note the Caveat at top of file
+        switch ( leg.side ) {
+          case LegNote::Side::Long:
+            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Sell, [](){} );
+            break;
+          case LegNote::Side::Short:
+            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Buy, [](){} );
+            break;
+        }
+      }
+      break;
+    default:
+      assert( false );
+  }
+}
+
+} // namespace locked
+
 } // namespace collar
 } // namespace option
 } // namespace tf

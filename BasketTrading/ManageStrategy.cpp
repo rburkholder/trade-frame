@@ -117,6 +117,7 @@ namespace {
 ManageStrategy::ManageStrategy(
   //const ou::tf::Bar& barPriorDaily,
   double dblPivot
+, ECombo eCombo
 , pWatch_t pWatchUnderlying
 , pPortfolio_t pPortfolioOwning // => owning portfolio
 , const ou::tf::option::SpreadSpecs& specSpread
@@ -135,55 +136,56 @@ ManageStrategy::ManageStrategy(
 , fAuthorizeOption_t fAuthorizeOption // => m_fAuthorizeOption
 , fAuthorizeSimple_t fAuthorizeSimple // => m_fAuthorizeSimple
 , fBar_t fBar
-  )
-: ou::tf::DailyTradeTimeFrame<ManageStrategy>(),
-  m_dblOpen {},
-  m_dblPivot( dblPivot ),
-  //m_barPriorDaily( barPriorDaily ),
-  m_pWatchUnderlying( pWatchUnderlying ),
-  m_pPortfolioOwning( pPortfolioOwning ),
+)
+: ou::tf::DailyTradeTimeFrame<ManageStrategy>()
+, m_dblOpen {}
+, m_dblPivot( dblPivot )
+, m_eCombo( eCombo )
+  //m_barPriorDaily( barPriorDaily )
+, m_pWatchUnderlying( pWatchUnderlying )
+, m_pPortfolioOwning( pPortfolioOwning )
 
-  m_specsSpread( specSpread ),
+, m_specsSpread( specSpread )
 
-  m_ptiSelf( nullptr ),
+, m_ptiSelf( nullptr )
 
-  m_pFrameBookOptionChains( nullptr ),
-  m_pInterfaceBookOptionChains( nullptr ),
-  m_fInterfaceBookOptionChain( std::move( fInterfaceBookOptionChain ) ),
+, m_pFrameBookOptionChains( nullptr )
+, m_pInterfaceBookOptionChains( nullptr )
+, m_fInterfaceBookOptionChain( std::move( fInterfaceBookOptionChain ) )
 
-  m_fConstructOption( std::move( fConstructOption ) ),
-  m_fConstructPosition( std::move( fConstructPosition ) ),
-  m_fConstructPortfolio( std::move( fConstructPortfolio ) ),
-  m_stateTrading( ETradingState::TSInitializing ),
-  m_fFirstTrade( fFirstTrade ),
-  m_fAuthorizeUnderlying( fAuthorizeUnderlying ),
-  m_fAuthorizeOption( fAuthorizeOption ),
-  m_fAuthorizeSimple( fAuthorizeSimple ),
-  m_fBar( fBar ),
+, m_fConstructOption( std::move( fConstructOption ) )
+, m_fConstructPosition( std::move( fConstructPosition ) )
+, m_fConstructPortfolio( std::move( fConstructPortfolio ) )
+, m_stateTrading( ETradingState::TSInitializing )
+, m_fFirstTrade( fFirstTrade )
+, m_fAuthorizeUnderlying( fAuthorizeUnderlying )
+, m_fAuthorizeOption( fAuthorizeOption )
+, m_fAuthorizeSimple( fAuthorizeSimple )
+, m_fBar( fBar )
 
-  m_dblStrikeCurrent {},
-  m_dblPriceCurrent {},
+, m_dblStrikeCurrent {}
+, m_dblPriceCurrent {}
 
-  m_fSetChartDataView( std::move( fSetChartDataView ) ),
+, m_fSetChartDataView( std::move( fSetChartDataView ) )
 
-  m_eTradeDirection( ETradeDirection::None ),
-  m_bfQuotes01Sec( 1 ),
-  m_bfTrades01Sec( 1 ),
-  m_bfTrades06Sec( 6 ),
+, m_eTradeDirection( ETradeDirection::None )
+, m_bfQuotes01Sec( 1 )
+, m_bfTrades01Sec( 1 )
+, m_bfTrades06Sec( 6 )
 //  m_bfTicks06sec( 6 ),
 //  m_bfTrades60Sec( 60 ),
 //  m_cntUpReturn {}, m_cntDnReturn {},
 
-  m_stateEma( EmaState::EmaUnstable ),
+, m_stateEma( EmaState::EmaUnstable )
   //m_eOptionState( EOptionState::Initial1 ),
 
-  m_ixColour {},
-  m_ceShortEntries( ou::ChartEntryShape::EShape::Short, ou::Colour::Red ),
-  m_ceLongEntries( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue ),
-  m_ceShortFills( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red ),
-  m_ceLongFills( ou::ChartEntryShape::EShape::FillLong, ou::Colour::Blue ),
-  m_ceShortExits( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red ),
-  m_ceLongExits( ou::ChartEntryShape::EShape::LongStop, ou::Colour::Blue )
+, m_ixColour {}
+, m_ceShortEntries( ou::ChartEntryShape::EShape::Short, ou::Colour::Red )
+, m_ceLongEntries( ou::ChartEntryShape::EShape::Long, ou::Colour::Blue )
+, m_ceShortFills( ou::ChartEntryShape::EShape::FillShort, ou::Colour::Red )
+, m_ceLongFills( ou::ChartEntryShape::EShape::FillLong, ou::Colour::Blue )
+, m_ceShortExits( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
+, m_ceLongExits( ou::ChartEntryShape::EShape::LongStop, ou::Colour::Blue )
 {
   assert( m_pWatchUnderlying );
   assert( m_pPortfolioOwning );
@@ -271,7 +273,15 @@ ManageStrategy::ManageStrategy(
         m_mapChains,
         m_fConstructOption
       );
-    m_pValidateOptions->SetSize( collar::flex::LegCount() ); // will need to make this generic
+    switch ( m_eCombo ) {
+      case ECombo::flex:
+        m_pValidateOptions->SetSize( collar::flex::LegCount() ); // will need to make this generic
+        break;
+      case ECombo::locked:
+        m_pValidateOptions->SetSize( collar::locked::LegCount() ); // will need to make this generic
+        break;
+    }
+
 
   }
   catch (...) {
@@ -730,12 +740,27 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             if ( m_pValidateOptions->ValidateBidAsk(
               dateBar, mid, 11,
               [this,mid,direction]( const mapChains_t& chains, boost::gregorian::date date, double price, Combo::fLegSelected_t&& fLegSelected ){
-                collar::flex::ChooseLegs( direction, chains, date, m_specsSpread, mid, std::move( fLegSelected ) );
+                switch ( m_eCombo ) {
+                  case ECombo::flex:
+                    collar::flex::ChooseLegs( direction, chains, date, m_specsSpread, mid, std::move( fLegSelected ) );
+                    break;
+                  case ECombo::locked:
+                    collar::locked::ChooseLegs( direction, chains, date, m_specsSpread, mid, std::move( fLegSelected ) );
+                    break;
+                }
+
               }
             ) ) {
 
-              const idPortfolio_t idPortfolio
-                = collar::flex::Name( direction, m_mapChains, dateBar, m_specsSpread, mid ,sUnderlying );
+              idPortfolio_t idPortfolio;
+              switch ( m_eCombo ) {
+                case ECombo::flex:
+                  idPortfolio = collar::flex::Name( direction, m_mapChains, dateBar, m_specsSpread, mid ,sUnderlying );
+                  break;
+                case ECombo::locked:
+                  idPortfolio = collar::locked::Name( direction, m_mapChains, dateBar, m_specsSpread, mid ,sUnderlying );
+                  break;
+              }
 
               if ( m_fAuthorizeSimple( idPortfolio, sUnderlying, false ) ) {
 
@@ -768,13 +793,31 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                   [this,&idPortfolio,&combo,direction,pOrderCombo]( size_t ix, pOption_t pOption ){ // fValidatedOption_t -- need Strategy specific naming
                     // called for each of the legs
                     ou::tf::option::LegNote::values_t lnValues;
-                    collar::flex::FillLegNote( ix, direction, lnValues ); // TODO: need to have the leg type provided by ValidateOptions
+
+                    switch ( m_eCombo ) {
+                      case ECombo::flex:
+                        collar::flex::FillLegNote( ix, direction, lnValues ); // TODO: need to have the leg type provided by ValidateOptions
+                        break;
+                      case ECombo::locked:
+                        collar::locked::FillLegNote( ix, direction, lnValues ); // TODO: need to have the leg type provided by ValidateOptions
+                        break;
+                    }
+
                     ou::tf::option::LegNote ln( lnValues );
                     pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, ln.Encode() );
                     assert( pPosition );
                     combo.SetPosition( pPosition );
-                    collar::flex::AddLegOrder( lnValues.m_type, pOrderCombo, ou::tf::OrderSide::Buy, 1, pPosition );
+
+                    switch ( m_eCombo ) {
+                      case ECombo::flex:
+                        collar::flex::AddLegOrder( lnValues.m_type, pOrderCombo, ou::tf::OrderSide::Buy, 1, pPosition );
+                        break;
+                      case ECombo::locked:
+                        collar::locked::AddLegOrder( lnValues.m_type, pOrderCombo, ou::tf::OrderSide::Buy, 1, pPosition );
+                        break;
                     }
+
+                  }
                   );
 
                 m_pValidateOptions->ClearValidation(); // after positions created to keep watch in options from a quick stop/start

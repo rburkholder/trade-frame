@@ -110,9 +110,12 @@ public:
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
   using fSetChartDataView_t = std::function<void(pChartDataView_t)>;
 
+  enum class ECombo { flex, locked };
+
   ManageStrategy(
     //const ou::tf::Bar& barPriorDaily,
     double dblPivot
+  , ECombo
   , pWatch_t // underlying
   , pPortfolio_t // owning portfolio
   , const ou::tf::option::SpreadSpecs&
@@ -182,6 +185,8 @@ private:
 
   enum class EmaState { EmaUnstable, EmaUp, EmaDown };
   EmaState m_stateEma;
+
+  ECombo m_eCombo;
 
   size_t m_nConfirmationIntervals;
 
