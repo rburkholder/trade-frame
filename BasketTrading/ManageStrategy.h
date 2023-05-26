@@ -15,7 +15,7 @@
  * File:   ManageStrategy.h
  * Author: raymond@burkholder.net
  *
- * Created on August 26, 2018, 6:46 PM
+ * Created: August 26, 2018, 6:46 PM
  */
 
 #ifndef MANAGESTRATEGY_H
@@ -124,6 +124,7 @@ public:
   , fRegisterOption_t&&
   , fStartCalc_t&&
   , fStopCalc_t&&
+  //, fDeRegisterOption_t&&
   , fSetChartDataView_t&&
   , fInterfaceBookOptionChain_t&&
   , fFirstTrade_t
@@ -140,7 +141,7 @@ public:
 
   ou::tf::DatedDatum::volume_t CalcShareCount( double dblAmount ) const;
   //void SetFundsToTrade( double dblFundsToTrade ) { m_dblFundsToTrade = dblFundsToTrade; };
-  void ClosePositions( void );
+  void ClosePositions();
   void SaveSeries( const std::string& sPrefix );
 
   void AddPosition( pPosition_t ); // add pre-existing position
@@ -148,7 +149,7 @@ public:
 
   pChartDataView_t GetChartDataView() { return m_pChartDataView; } // some attributes populated externally
 
-  void Test( void );
+  void Test();
 
   void TakeProfits();  // close any profitable leg
   void CloseExpiryItm( boost::gregorian::date );
@@ -182,9 +183,6 @@ private:
   enum class EmaState { EmaUnstable, EmaUp, EmaDown };
   EmaState m_stateEma;
 
-  //enum class EBarDirection { None, Up, Down };
-  //EBarDirection m_rBarDirection[ 3 ];
-
   size_t m_nConfirmationIntervals;
 
   const ou::tf::option::SpreadSpecs& m_specsSpread;
@@ -204,9 +202,6 @@ private:
   fInterfaceBookOptionChain_t m_fInterfaceBookOptionChain;
   wxWindow* m_pFrameBookOptionChains;
   ou::tf::InterfaceBookOptionChain* m_pInterfaceBookOptionChains;
-
-//  double m_cntUpReturn;
-//  double m_cntDnReturn;
 
   using chain_t = ou::tf::option::Chain<ou::tf::option::chain::OptionName>;
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
@@ -232,13 +227,9 @@ private:
   fFirstTrade_t m_fFirstTrade;
   fBar_t m_fBar;
 
-  //const ou::tf::Bar& m_barPriorDaily;
-
   pPortfolio_t m_pPortfolioOwning; // owning portfolio
   ou::tf::TreeItem* m_ptiSelf; // should be strategy list
   fSetChartDataView_t m_fSetChartDataView;
-
-  //PivotCrossing m_pivotCrossing;
 
   pChartDataView_t m_pChartDataView;
 
@@ -266,14 +257,6 @@ private:
   ou::ChartEntryIndicator m_ceNetGamma;
   ou::ChartEntryIndicator m_ceNetTheta;
   ou::ChartEntryIndicator m_ceNetVega;
-
-//  ou::ChartEntryIndicator m_ceDiffDelta;
-//  ou::ChartEntryIndicator m_ceDiffGamma;
-//  ou::ChartEntryIndicator m_ceDiffVega;
-//  ou::ChartEntryIndicator m_ceDiffTheta;
-
-  //ou::ChartEntryIndicator m_ceUpReturn;
-  //ou::ChartEntryIndicator m_ceDnReturn;
 
   ou::ChartEntryShape m_ceShortEntries;
   ou::ChartEntryShape m_ceLongEntries;
