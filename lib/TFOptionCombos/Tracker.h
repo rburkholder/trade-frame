@@ -62,6 +62,7 @@ public:
 
   void Initialize(
     pPosition_t pPosition
+  , bool bLock
   , const chain_t* pChain
   , fConstructOption_t&&
   , fLegRoll_t&&
@@ -73,8 +74,6 @@ public:
   void TestItmRoll( boost::gregorian::date, boost::posix_time::time_duration );
 
   void Emit();
-
-  void Lock( bool );
 
   void ForceRoll();
   void ForceClose();

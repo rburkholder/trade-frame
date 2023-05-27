@@ -95,6 +95,7 @@ Tracker::~Tracker() {
 
 void Tracker::Initialize(
   pPosition_t pPosition
+, bool bLock
 , const chain_t* pChain
 , fConstructOption_t&& fConstructOption
 , fLegRoll_t&& fLegRoll
@@ -109,6 +110,8 @@ void Tracker::Initialize(
   assert( fLegClose );
 
   assert( ETransition::Initial == m_transition );
+
+  m_bLock = bLock;
 
   m_pChain = pChain;
 
@@ -557,11 +560,6 @@ void Tracker::LegClose() {
 
   m_pPosition.reset();
   m_fLegClose = nullptr;
-}
-
-void Tracker::Lock( bool bLock ) {
-  //BOOST_LOG_TRIVIAL(info) << "Tracker::Lock()";
-  m_bLock = bLock;
 }
 
 void Tracker::ForceRoll() {

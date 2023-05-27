@@ -353,8 +353,12 @@ void Combo::InitTracker(
   citerChain_t citerChain = SelectChain( *pmapChains, date, days_to_expiry );
   const chain_t& chain( citerChain->second );
 
+  const std::string sNotes( pPosition->Notes() );
+  LegNote ln( sNotes );
+  LegNote::values_t notes( ln.Values() );
+
   cleg.m_tracker.Initialize(
-    pPosition, &chain,
+    pPosition, notes.m_lock, &chain,
     [this]( const std::string& sName, fConstructedOption_t&& f ){ // m_fConstructOption
       m_fConstructOption( sName, std::move( f ) );
     },
@@ -593,10 +597,6 @@ void Combo::CalendarRoll( ComboLeg& cleg ) {
 // TODO: need to redo this using OrderCombo
 void Combo::DiagonalRoll( ComboLeg& cleg ) {
   //cleg.m_tracker.DiagonalRoll();
-}
-
-void Combo::LegLock( ComboLeg& cleg ) {
-  cleg.m_tracker.Lock( false ); // TODO: need to upate LegNote
 }
 
 // TODO: need to redo this using OrderCombo

@@ -163,6 +163,7 @@ void FillLegNote( size_t ix, Combo::E20DayDirection direction, LegNote::values_t
 
   values.m_algo = LegNote::Algo::Collar;
   values.m_state = LegNote::State::Open;
+  values.m_lock = false;
 
   switch ( direction ) {
     case Combo::E20DayDirection::Rising:
@@ -401,6 +402,7 @@ void FillLegNote( size_t ix, Combo::E20DayDirection direction, LegNote::values_t
 
   values.m_algo = LegNote::Algo::Collar;
   values.m_state = LegNote::State::Open;
+  values.m_lock = true;
 
   switch ( direction ) {
     case Combo::E20DayDirection::Rising:
