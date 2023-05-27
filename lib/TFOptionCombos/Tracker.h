@@ -27,6 +27,9 @@
     if can make some more on the recovery
  */
 
+// TODO: pass in a function to test if roll target already exists
+//   acts as a gate to transition
+
 #pragma once
 
 #include <TFTrading/Position.h>

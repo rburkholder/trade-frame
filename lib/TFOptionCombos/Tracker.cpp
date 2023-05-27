@@ -120,7 +120,7 @@ void Tracker::Initialize(
 
 }
 
-void Tracker::Initialize( pPosition_t pPosition ) {
+void Tracker::Initialize( pPosition_t pPosition ) {  // private
 
   //BOOST_LOG_TRIVIAL(info)
   //  << "Tracker::Initialize,internal"
@@ -293,8 +293,8 @@ bool Tracker::TestShort( boost::posix_time::ptime dt, double dblUnderlyingSlope,
             double bid( quote.Bid() );
             if ( ( 0.501 > bid ) && ( 0.10 < bid ) ) { // decision time
 
-              const std::string& sCurrent( pWatchCurrent->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
-              const std::string& sCandidate( m_pOptionCandidate->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
+              const std::string& sCurrent( pWatchCurrent->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
+              const std::string& sCandidate( m_pOptionCandidate->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
 
               if ( sCurrent == sCandidate ) {
                 BOOST_LOG_TRIVIAL(info) << dt.time_of_day() << ",close,no-roll";
@@ -473,6 +473,7 @@ void Tracker::Emit() {
       << ",b=" << pOldWatch->LastQuote().Bid()
       << ",a=" << pOldWatch->LastQuote().Ask()
       << ",no option candidate"
+      << ",slope=" << m_dblUnderlyingSlope
       ;
   }
 
