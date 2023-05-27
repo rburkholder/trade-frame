@@ -191,6 +191,7 @@ public:
   void Submit( pOrderCombo_t, const std::string& sComment );
 
 protected:
+private:
 
   fConstructOption_t m_fConstructOption;
   fActivateOption_t m_fActivateOption;
@@ -245,8 +246,6 @@ protected:
   void LegClose( ComboLeg& );
 
   void DeactivatePositionOption( pPosition_t );
-
-private:
 
   pChartDataView_t m_pChartDataView;
 
