@@ -117,8 +117,6 @@ void ChooseLegs( // throw Chain exceptions
   citerChain_t citerChainFront = SelectChain( chains, date, specs.nDaysFront );
   const chain_t& chainFront( citerChainFront->second );
 
-  bool bOk( true );
-
   switch ( direction ) {
     case Combo::E20DayDirection::Unknown:
       assert( false );
@@ -157,18 +155,6 @@ void ChooseLegs( // throw Chain exceptions
       break;
   }
 
-  if ( !bOk ) {
-    size_t sum {};
-    for ( const mapChains_t::value_type& vt: chains ) {
-      sum += vt.second.Size();
-      std::cout
-        << "chain: "
-        << vt.first << " "
-        << vt.second.Size()
-        << std::endl;
-    }
-    std::cout << "  sum: " << sum << std::endl;
-  }
 }
 
 void FillLegNote( size_t ix, Combo::E20DayDirection direction, LegNote::values_t& values ) {
@@ -367,8 +353,6 @@ void ChooseLegs( // throw Chain exceptions
   citerChain_t citerChainFront = SelectChain( chains, date, specs.nDaysFront );
   const chain_t& chainFront( citerChainFront->second );
 
-  bool bOk( true );
-
   switch ( direction ) {
     case Combo::E20DayDirection::Unknown:
       assert( false );
@@ -378,10 +362,11 @@ void ChooseLegs( // throw Chain exceptions
         const double strikeSyntheticBack(  chainBack.Call_Itm( priceUnderlying ) ); // long call
         const double strikeSyntheticFront( chainFront.Put_Atm( strikeSyntheticBack ) ); // short put
 
-        double strikeCovered( chainFront.Call_Otm( strikeSyntheticBack ) );
+        //double strikeCovered( chainFront.Call_Otm( strikeSyntheticBack ) );
         //strikeCovered = chainFront.Call_Otm( strikeCovered ); // two strikes up
+        const double strikeCovered( chainFront.Call_Atm( strikeSyntheticBack ) );
 
-        const double strikeProtective( chainBack.Put_Atm( strikeSyntheticBack ) ); // rounding problem across chains
+        const double strikeProtective( chainBack.Put_Atm( strikeSyntheticBack ) );
 
         fLegSelected( strikeSyntheticBack,  citerChainBack->first,  chainBack.GetIQFeedNameCall(  strikeSyntheticBack ) );
         fLegSelected( strikeSyntheticFront, citerChainFront->first, chainFront.GetIQFeedNamePut(  strikeSyntheticFront ) );
@@ -394,10 +379,11 @@ void ChooseLegs( // throw Chain exceptions
         const double strikeSyntheticBack(  chainBack.Put_Itm( priceUnderlying ) ); // long put
         const double strikeSyntheticFront( chainFront.Call_Atm( strikeSyntheticBack ) ); // short call
 
-        double strikeCovered( chainFront.Put_Otm( strikeSyntheticBack ) );
+        //double strikeCovered( chainFront.Put_Otm( strikeSyntheticBack ) );
         //strikeCovered = chainFront.Put_Otm( strikeCovered ); // two strikes down
+        const double strikeCovered( chainFront.Put_Atm( strikeSyntheticBack ) );
 
-        const double strikeProtective( chainBack.Call_Atm( strikeSyntheticBack ) ); // rounding problem across chains
+        const double strikeProtective( chainBack.Call_Atm( strikeSyntheticBack ) );
 
         fLegSelected( strikeSyntheticBack,  citerChainBack->first,  chainBack.GetIQFeedNamePut(   strikeSyntheticBack ) );
         fLegSelected( strikeSyntheticFront, citerChainFront->first, chainFront.GetIQFeedNameCall( strikeSyntheticFront ) );
@@ -407,18 +393,6 @@ void ChooseLegs( // throw Chain exceptions
       break;
   }
 
-  if ( !bOk ) {
-    size_t sum {};
-    for ( const mapChains_t::value_type& vt: chains ) {
-      sum += vt.second.Size();
-      std::cout
-        << "chain: "
-        << vt.first << " "
-        << vt.second.Size()
-        << std::endl;
-    }
-    std::cout << "  sum: " << sum << std::endl;
-  }
 }
 
 void FillLegNote( size_t ix, Combo::E20DayDirection direction, LegNote::values_t& values ) {
@@ -445,7 +419,6 @@ void FillLegNote( size_t ix, Combo::E20DayDirection direction, LegNote::values_t
       assert( false );
       break;
   }
-
 }
 
 std::string Name(

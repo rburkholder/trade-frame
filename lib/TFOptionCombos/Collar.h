@@ -22,9 +22,10 @@
 #ifndef COLLAR_FLEX_H
 #define COLLAR_FLEX_H
 
+#include <functional>
+
 #include <TFTrading/Position.h>
 #include <TFTrading/Order_Combo.hpp>
-#include <functional>
 
 #include "Combo.h"
 #include "SpreadSpecs.h"
