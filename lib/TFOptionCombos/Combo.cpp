@@ -413,7 +413,6 @@ void Combo::PositionNote( pPosition_t& pPosition, LegNote::State state ) {
   instance.PositionUpdateNotes( pPosition );
 }
 
-// NOTE: may require delayed reaction on this, as a roll will call back into this with new position
 void Combo::InitTrackLongOption(
   ComboLeg& cleg,
   const mapChains_t* pmapChains,

@@ -56,15 +56,13 @@ public:
   ComboLeg() = delete;
   ComboLeg( const ComboLeg& ) = delete;
   ComboLeg( ou::tf::Leg&& leg )
-  : m_state( State::loaded )
-  , m_leg( std::move( leg ) ) {}
+  : m_leg( std::move( leg ) ) {}
   ComboLeg( ComboLeg&& rhs )
-  : m_state( rhs.m_state)
-  , m_leg( std::move( rhs.m_leg ) )
+  : m_leg( std::move( rhs.m_leg ) )
   {
     assert( rhs.m_vfTest.empty() );
   }
-  ~ComboLeg() { m_state = State::done; m_vfTest.clear(); }
+  ~ComboLeg() { m_vfTest.clear(); }
 
   void AddTest( fTest_t&& fTest ) {
     m_vfTest.emplace_back( std::move( fTest ) );
@@ -81,20 +79,9 @@ public:
 protected:
 private:
 
-  enum class State {
-    empty
-  , opening
-  , loaded
-  , locked // does this mean an empty m_vfTest? would be useful to pause trading while awaiting a significant manual event
-  , tracking // evaluating vfTest, position is active (non-zero position)
-  , rolling_in // when rolling from one leg to another (need to link legs?, or just by iterators?) maintain legs during calendar/diagonals, remove old when done, provides transactional view for paired entry/exit for margin maintenance
-  , rolling_out // second of pair when rolling
-  , closing // some cross over with 'rolling'?
-  , done // do no reuse empty, needs to be complete reset (deleted)
-  } m_state;
-
   vfTest_t m_vfTest; // functions to test & process leg
-};
+
+}; // ComboLeg
 
 // == Combo
 
