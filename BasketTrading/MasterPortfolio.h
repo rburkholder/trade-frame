@@ -350,8 +350,8 @@ private:
   void AddUnderlying( pWatch_t );
 
   using fConstructedWatch_t  = std::function<void(pWatch_t)>;
-  void ConstructDefaultStrategy( UnderlyingWithStrategies& uws );
-  pManageStrategy_t ConstructStrategy( UnderlyingWithStrategies& uws );
+  void ConstructDefaultStrategy( UnderlyingWithStrategies& uws, ManageStrategy::ECombo );
+  pManageStrategy_t ConstructStrategy( UnderlyingWithStrategies& uws, ManageStrategy::ECombo );
   void StartUnderlying( UnderlyingWithStrategies& );
   void Add_ManageStrategy_ToTree( const idPortfolio_t&, pManageStrategy_t );
   void AddAsActiveStrategy( UnderlyingWithStrategies&, pStrategy_t&&, const idPortfolio_t& idPortfolioStrategy );

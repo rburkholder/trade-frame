@@ -544,10 +544,16 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
           [this,sUnderlying,sIqfSymbol,&uws]( ou::tf::TreeItem* pti ){
             pti->NewMenu();
             pti->AppendMenuItem(
-              "Add Strategy",
+              "Add Collar (flex)",
               [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
-                std::cout << "Add Strategy for: " << sUnderlying << std::endl;
-                ConstructDefaultStrategy( uws );
+                std::cout << "Add Collar (flex) for: " << sUnderlying << std::endl;
+                ConstructDefaultStrategy( uws, ManageStrategy::ECombo::flex );
+              });
+            pti->AppendMenuItem(
+              "Add Collar (locked)",
+              [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
+                std::cout << "Add Collar (locked) for: " << sUnderlying << std::endl;
+                ConstructDefaultStrategy( uws, ManageStrategy::ECombo::locked );
               });
             pti->AppendMenuItem(
               "IQFeed Name",
@@ -612,7 +618,7 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
   }
 }
 
-MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( UnderlyingWithStrategies& uws ) {
+MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( UnderlyingWithStrategies& uws, ManageStrategy::ECombo eCombo ) {
 
   const double dblPivot = uws.statistics.setPivots.GetPivotValue( ou::tf::PivotSet::EPivots::PV );
   assert( 0 < dblPivot );
@@ -632,7 +638,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
         //1.0, // TODO: defaults to rising for now, use BollingerTransitions::ReadDailyBars for directional selection
         //uws.pUnderlying->SetPivots(double dblR2, double dblR1, double dblPV, double dblS1, double dblS2)
         dblPivot, // gt is long, lt is short
-        ManageStrategy::ECombo::flex,
+        eCombo,
         uws.pUnderlying->GetWatch(),
         uws.pUnderlying->GetPortfolio(),
         m_spread_specs,
@@ -933,7 +939,7 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
       if ( bStrategyActive ) {
         bConstructDefaultStrategy = false;
 
-        pManageStrategy_t pManageStrategy( ConstructStrategy( uws ) );
+        pManageStrategy_t pManageStrategy( ConstructStrategy( uws, ManageStrategy::ECombo::flex ) );
         Add_ManageStrategy_ToTree( idPortfolioStrategy, pManageStrategy );
 
         for ( mapPosition_t::value_type& vt: cacheCombo.m_mapPosition ) {
@@ -965,11 +971,11 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
   }
 
   if ( bConstructDefaultStrategy) { // create a new strategy by default
-    ConstructDefaultStrategy( uws );
+    ConstructDefaultStrategy( uws, ManageStrategy::ECombo::flex );
   }
 }
 
-void MasterPortfolio::ConstructDefaultStrategy( UnderlyingWithStrategies& uws ) {
+void MasterPortfolio::ConstructDefaultStrategy( UnderlyingWithStrategies& uws, ManageStrategy::ECombo eCombo ) {
   const std::string& sUnderlying( uws.pUnderlying->GetWatch()->GetInstrumentName() );
   if ( uws.pStrategyInWaiting ) {
     std::cout
@@ -978,7 +984,7 @@ void MasterPortfolio::ConstructDefaultStrategy( UnderlyingWithStrategies& uws ) 
       << std::endl;
   }
   else {
-    pManageStrategy_t pManageStrategy( ConstructStrategy( uws ) );
+    pManageStrategy_t pManageStrategy( ConstructStrategy( uws, eCombo ) );
     Add_ManageStrategy_ToTree( sUnderlying + "-construction" , pManageStrategy );
     uws.pStrategyInWaiting = std::make_unique<Strategy>( std::move( pManageStrategy ) );
     uws.pStrategyInWaiting->pManageStrategy->Run();
