@@ -939,7 +939,7 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
       if ( bStrategyActive ) {
         bConstructDefaultStrategy = false;
 
-        pManageStrategy_t pManageStrategy( ConstructStrategy( uws, ManageStrategy::ECombo::flex ) );
+        pManageStrategy_t pManageStrategy( ConstructStrategy( uws, ManageStrategy::ECombo::existing ) );
         Add_ManageStrategy_ToTree( idPortfolioStrategy, pManageStrategy );
 
         for ( mapPosition_t::value_type& vt: cacheCombo.m_mapPosition ) {

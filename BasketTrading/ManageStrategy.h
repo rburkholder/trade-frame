@@ -110,7 +110,7 @@ public:
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
   using fSetChartDataView_t = std::function<void(pChartDataView_t)>;
 
-  enum class ECombo { flex, locked };
+  enum class ECombo { existing, flex, locked };
 
   ManageStrategy(
     //const ou::tf::Bar& barPriorDaily,

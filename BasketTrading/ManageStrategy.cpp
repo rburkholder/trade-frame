@@ -206,6 +206,9 @@ ManageStrategy::ManageStrategy(
     case ECombo::locked:
       ou::tf::option::collar::locked::Bind( m_ct );
       break;
+    case ECombo::existing:
+      // see what happens if nullptr
+      break;
   }
 
   //m_rBarDirection[ 0 ] = EBarDirection::None;
