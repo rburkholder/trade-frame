@@ -279,13 +279,6 @@ ManageStrategy::ManageStrategy(
     m_pWatchUnderlying->OnQuote.Add( MakeDelegate( this, &ManageStrategy::HandleQuoteUnderlying ) );
     m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ManageStrategy::HandleTradeUnderlying ) );
 
-    m_pValidateOptions = std::make_unique<ValidateOptions>(
-        m_pWatchUnderlying,
-        m_mapChains,
-        m_fConstructOption
-      );
-    m_pValidateOptions->SetSize( m_ct.fLegCount() ); // will need to make this generic
-
   }
   catch (...) {
     std::cout << "*** " << "something wrong with " << pInstrumentUnderlying->GetInstrumentName() << " creation." << std::endl;
@@ -735,11 +728,25 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
           const std::string& sUnderlying( m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
 
           try {
+
+            assert( m_ct.fLegCount ); // m_ct defined, eCombo was not ECombo::existing
+
+            if ( !m_pValidateOptions ) { // construct on first use
+              m_pValidateOptions = std::make_unique<ValidateOptions>(
+                  m_pWatchUnderlying,
+                  m_mapChains,
+                  m_fConstructOption
+                );
+              m_pValidateOptions->SetSize( m_ct.fLegCount() ); // will need to make this generic
+            }
+            assert( m_pValidateOptions );
+
             const ou::tf::option::Combo::E20DayDirection direction
               = ( m_dblPivot <= mid )
               ? ou::tf::option::Combo::E20DayDirection::Rising
               : ou::tf::option::Combo::E20DayDirection::Falling;
             const boost::gregorian::date dateBar( bar.DateTime().date() );
+
             if ( m_pValidateOptions->ValidateBidAsk(
               dateBar, mid, 11,
               [this,mid,direction]( const mapChains_t& chains, boost::gregorian::date date, double price, Combo::fLegSelected_t&& fLegSelected ){
