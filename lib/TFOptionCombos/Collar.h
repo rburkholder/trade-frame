@@ -74,6 +74,12 @@ struct ComboTraits {
   fFillLegNote_t fFillLegNote;
   fName_t fName;
   fAddLegOrder_t fAddLegOrder;
+
+  ComboTraits()
+  : fLegCount( nullptr ), fChooseLegs( nullptr )
+  , fFillLegNote( nullptr ), fName( nullptr )
+  , fAddLegOrder( nullptr )
+  {}
 };
 
 namespace collar { // collar
