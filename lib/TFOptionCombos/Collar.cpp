@@ -360,7 +360,7 @@ void ChooseLegs( // throw Chain exceptions
       break;
     case Combo::E20DayDirection::Rising:
       {
-        const double strikeSyntheticBack(  chainBack.Call_Itm( priceUnderlying ) ); // long call
+        const double strikeSyntheticBack(  chainBack.Call_Atm( priceUnderlying ) ); // long call
         const double strikeSyntheticFront( chainFront.Put_Atm( strikeSyntheticBack ) ); // short put
 
         //double strikeCovered( chainFront.Call_Otm( strikeSyntheticBack ) );
