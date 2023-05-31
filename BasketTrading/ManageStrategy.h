@@ -186,6 +186,7 @@ private:
   enum class EmaState { EmaUnstable, EmaUp, EmaDown };
   EmaState m_stateEma;
 
+  // TODO: extract everything this touches to represent new strategy consruction
   ou::tf::option::ComboTraits m_ct;
 
   size_t m_nConfirmationIntervals;
