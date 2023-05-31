@@ -194,7 +194,7 @@ std::string Name(
 , const std::string& sUnderlying
 ) {
 
-  std::string sName( "collar-" + sUnderlying );
+  std::string sName( "collar-flex-" + sUnderlying );
   size_t ix {};
 
   switch ( direction ) {
@@ -432,7 +432,7 @@ std::string Name(
 , const std::string& sUnderlying
 ) {
 
-  std::string sName( "collar-" + sUnderlying );
+  std::string sName( "collar-locked-" + sUnderlying );
   size_t ix {};
 
   switch ( direction ) {
