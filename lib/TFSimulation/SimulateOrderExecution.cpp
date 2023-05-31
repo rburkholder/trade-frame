@@ -218,7 +218,9 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
   // todo: what about self's own crossing orders, could fill with out qoute
 
   if ( !m_mapAsks.empty() ) {
-    mapOrderBook_t::value_type& entry( *m_mapAsks.begin() );
+    mapOrderBook_t::iterator iterOrderBook( m_mapAsks.begin() );
+    //mapOrderBook_t::value_type& entry( *m_mapAsks.begin() );
+    mapOrderBook_t::value_type& entry( *iterOrderBook );
     const double bid( quote.Bid() );
     if ( bid >= entry.first ) {
       if ( 0 < quote.BidSize() ) {
@@ -237,7 +239,7 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
         std::string id = GetExecId();
 
         BOOST_LOG_TRIVIAL(info)
-          << "simulate,"
+          << "simulate"
           << ",lmt_ask"
           << ",size_map=" << m_mapAsks.size()
           << ",order_id=" << idOrder
@@ -258,7 +260,11 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
         CalculateCommission( order, quanApplied );
 
         if ( 0 == nOrderQuanRemaining ) {
-          m_mapAsks.erase( m_mapAsks.begin() );
+          BOOST_LOG_TRIVIAL(info)
+            << "simulate,lmt_ask,erase=("
+            << idOrder << "," << id << ")"
+            ;
+          m_mapAsks.erase( iterOrderBook );
           MigrateActiveToArchive( idOrder );
         }
 
@@ -267,7 +273,9 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
   }
 
   if ( !m_mapBids.empty() && !bProcessed) {
-    mapOrderBook_t::value_type& entry( *m_mapBids.rbegin() );
+    mapOrderBook_t::reverse_iterator iterOrderBook( m_mapBids.rbegin() );
+    //mapOrderBook_t::value_type& entry( *m_mapBids.rbegin() );
+    mapOrderBook_t::value_type& entry( *iterOrderBook );
     const double ask( quote.Ask() );
     if ( ask <= entry.first ) {
       if ( 0 < quote.AskSize() ) {
@@ -286,7 +294,7 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
         std::string id = GetExecId();
 
         BOOST_LOG_TRIVIAL(info)
-          << "simulate,"
+          << "simulate"
           << ",lmt_bid"
           << ",size_map=" << m_mapBids.size()
           << ",order_id=" << idOrder
@@ -307,7 +315,12 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
         CalculateCommission( order, quanApplied );
 
         if ( 0 == nOrderQuanRemaining ) {
-          m_mapBids.erase( --m_mapBids.rbegin().base() );
+          BOOST_LOG_TRIVIAL(info)
+            << "simulate,lmt_bid,erase=("
+            << idOrder << "," << id << ")"
+            ;
+          // https://stackoverflow.com/questions/1830158/how-to-call-erase-with-a-reverse-iterator
+          m_mapBids.erase( std::next( iterOrderBook ).base() );
           MigrateActiveToArchive( idOrder );
         }
       }
