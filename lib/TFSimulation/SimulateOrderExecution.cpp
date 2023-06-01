@@ -218,9 +218,9 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
   // todo: what about self's own crossing orders, could fill with out qoute
 
   if ( !m_mapAsks.empty() ) {
-    mapOrderBook_t::iterator iterOrderBook( m_mapAsks.begin() );
+    mapOrderBook_ask_t::iterator iterOrderBook( m_mapAsks.begin() );
     //mapOrderBook_t::value_type& entry( *m_mapAsks.begin() );
-    mapOrderBook_t::value_type& entry( *iterOrderBook );
+    mapOrderBook_ask_t::value_type& entry( *iterOrderBook );
     const double bid( quote.Bid() );
     if ( bid >= entry.first ) {
       if ( 0 < quote.BidSize() ) {
@@ -273,9 +273,9 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
   }
 
   if ( !m_mapBids.empty() && !bProcessed) {
-    mapOrderBook_t::reverse_iterator iterOrderBook( m_mapBids.rbegin() );
+    mapOrderBook_bid_t::iterator iterOrderBook( m_mapBids.begin() );
     //mapOrderBook_t::value_type& entry( *m_mapBids.rbegin() );
-    mapOrderBook_t::value_type& entry( *iterOrderBook );
+    mapOrderBook_bid_t::value_type& entry( *iterOrderBook );
     const double ask( quote.Ask() );
     if ( ask <= entry.first ) {
       if ( 0 < quote.AskSize() ) {
@@ -320,7 +320,7 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
             << idOrder << "," << id << ")"
             ;
           // https://stackoverflow.com/questions/1830158/how-to-call-erase-with-a-reverse-iterator
-          m_mapBids.erase( std::next( iterOrderBook ).base() );
+          m_mapBids.erase( iterOrderBook );
           MigrateActiveToArchive( idOrder );
         }
       }
@@ -343,7 +343,7 @@ bool OrderExecution::ProcessLimitOrders( const Trade& trade ) {
 
     double bid( trade.Price() );
     if ( !m_mapBids.empty() ) {
-      if ( m_lastQuote.Bid() >= m_mapBids.rbegin()->first ) {
+      if ( m_lastQuote.Bid() >= m_mapBids.begin()->first ) {
         bid = m_lastQuote.Bid();
       }
     }
@@ -395,7 +395,7 @@ void OrderExecution::ProcessDelayQueue( const Quote& quote ) {
               // update the order
                 {
                   bool bFound( false );
-                  for ( mapOrderBook_iter_t iter = m_mapAsks.begin(); iter != m_mapAsks.end(); ++iter ) {
+                  for ( mapOrderBook_ask_t::iterator iter = m_mapAsks.begin(); iter != m_mapAsks.end(); ++iter ) {
                     if ( idOrder == order.GetOrderId() ) {
                       ou::tf::Order& old( *iter->second );
                       assert( OrderType::Limit == old.GetOrderType() );
@@ -406,7 +406,7 @@ void OrderExecution::ProcessDelayQueue( const Quote& quote ) {
                     }
                   }
                   if ( !bFound ) {
-                    for ( mapOrderBook_iter_t iter = m_mapBids.begin(); iter != m_mapBids.end(); ++iter ) {
+                    for ( mapOrderBook_bid_t::iterator iter = m_mapBids.begin(); iter != m_mapBids.end(); ++iter ) {
                       if ( idOrder == order.GetOrderId() ) {
                         ou::tf::Order& old( *iter->second );
                         assert( OrderType::Limit == old.GetOrderType() );
@@ -443,10 +443,10 @@ void OrderExecution::ProcessDelayQueue( const Quote& quote ) {
 
             switch ( order.GetOrderSide() ) {
               case OrderSide::Sell:
-                m_mapAsks.insert( mapOrderBook_pair_t( order.GetPrice1(), pOrderFrontOfQueue ) );
+                m_mapAsks.insert( mapOrderBook_ask_t::value_type( order.GetPrice1(), pOrderFrontOfQueue ) );
                 break;
               case OrderSide::Buy:
-                m_mapBids.insert( mapOrderBook_pair_t( order.GetPrice1(), pOrderFrontOfQueue ) );
+                m_mapBids.insert( mapOrderBook_bid_t::value_type( order.GetPrice1(), pOrderFrontOfQueue ) );
                 break;
               default:
                 assert( false );
@@ -458,10 +458,10 @@ void OrderExecution::ProcessDelayQueue( const Quote& quote ) {
             assert( 0 < order.GetPrice1() );
             switch ( order.GetOrderSide() ) {
               case OrderSide::Sell:
-                m_mapSellStops.insert( mapOrderBook_pair_t( order.GetPrice1(), pOrderFrontOfQueue ) );
+                m_mapSellStops.insert( mapOrderBook_ask_t::value_type( order.GetPrice1(), pOrderFrontOfQueue ) );
                 break;
               case OrderSide::Buy:
-                m_mapBuyStops.insert( mapOrderBook_pair_t( order.GetPrice1(), pOrderFrontOfQueue ) );
+                m_mapBuyStops.insert( mapOrderBook_bid_t::value_type( order.GetPrice1(), pOrderFrontOfQueue ) );
                 break;
               default:
                 assert( false );
@@ -517,7 +517,7 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
 
       // need to check orders in ask limit list
       if ( !bOrderFound ) {
-        for ( mapOrderBook_iter_t iter = m_mapAsks.begin(); iter != m_mapAsks.end(); ++iter ) {
+        for ( mapOrderBook_ask_t::iterator iter = m_mapAsks.begin(); iter != m_mapAsks.end(); ++iter ) {
           ou::tf::Order& order( *iter->second );
           if ( qco.nOrderId == order.GetOrderId() ) {
             m_mapAsks.erase( iter );
@@ -529,7 +529,7 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
 
       // need to check orders in bid limit list
       if ( !bOrderFound ) {
-        for ( mapOrderBook_iter_t iter = m_mapBids.begin(); iter != m_mapBids.end(); ++iter ) {
+        for ( mapOrderBook_bid_t::iterator iter = m_mapBids.begin(); iter != m_mapBids.end(); ++iter ) {
           ou::tf::Order& order( *iter->second );
           if ( qco.nOrderId == order.GetOrderId() ) {
             m_mapBids.erase( iter );
@@ -541,7 +541,7 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
 
       // need to check orders in stop list sells, any partial remaining to commission out? (stop may not be implemented yet)
       if ( !bOrderFound ) {
-        for ( mapOrderBook_iter_t iter = m_mapSellStops.begin(); iter != m_mapSellStops.end(); ++iter ) {
+        for ( mapOrderBook_ask_t::iterator iter = m_mapSellStops.begin(); iter != m_mapSellStops.end(); ++iter ) {
           if ( qco.nOrderId == iter->second->GetOrderId() ) {
             m_mapSellStops.erase( iter );
             bOrderFound = true;
@@ -552,7 +552,7 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
 
       // need to check orders in stop list buys, any partial remaining to commission out? (stop may not be implemented yet)
       if ( !bOrderFound ) {
-        for ( mapOrderBook_iter_t iter = m_mapBuyStops.begin(); iter != m_mapBuyStops.end(); ++iter ) {
+        for ( mapOrderBook_bid_t::iterator iter = m_mapBuyStops.begin(); iter != m_mapBuyStops.end(); ++iter ) {
           if ( qco.nOrderId == iter->second->GetOrderId() ) {
             m_mapBuyStops.erase( iter );
             bOrderFound = true;

@@ -118,14 +118,13 @@ private:
   lOrderQueue_t m_lOrderDelay;  // all orders put in delay queue, taken out then processed as limit or market or stop
   lOrderQueue_t m_lOrderMarket;  // market orders to be processed
 
-  using mapOrderBook_t = std::multimap<double,pOrder_t>;
-  using mapOrderBook_iter_t = mapOrderBook_t::iterator;
-  using mapOrderBook_pair_t = mapOrderBook_t::value_type;
+  using mapOrderBook_ask_t = std::multimap<double,pOrder_t, std::less<double> >;
+  mapOrderBook_ask_t m_mapAsks; // lowest at beginning
+  mapOrderBook_ask_t m_mapSellStops;  // pending sell stops, turned into market order when touched
 
-  mapOrderBook_t m_mapAsks; // lowest at beginning
-  mapOrderBook_t m_mapBids; // highest at end
-  mapOrderBook_t m_mapSellStops;  // pending sell stops, turned into market order when touched
-  mapOrderBook_t m_mapBuyStops;  // pending buy stops, turned into market order when touched
+  using mapOrderBook_bid_t = std::multimap<double,pOrder_t, std::greater<double> >;
+  mapOrderBook_bid_t m_mapBids; // highest at beginning
+  mapOrderBook_bid_t m_mapBuyStops;  // pending buy stops, turned into market order when touched
 
   void ProcessOrderQueues( const Quote& quote );
   void CalculateCommission( Order&, Trade::tradesize_t quan );
