@@ -536,7 +536,7 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
 
         m_pOptionEngine->RegisterUnderlying( uws.pUnderlying->GetWatch() );
 
-        uws.pti = m_ptiTreeUnderlying->AppendChild(
+        uws.ptiUnderlying = m_ptiTreeUnderlying->AppendChild(
           sUnderlying,
           [this,&uws,sUnderlying]( ou::tf::TreeItem* pti ){
             m_fSetChartDataView( uws.pUnderlying->GetChartDataView() );

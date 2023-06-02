@@ -220,12 +220,12 @@ private:
     Statistics statistics;
     ou::tf::Bars m_barsHistory;
     std::atomic_uint32_t m_nQuery;
-    ou::tf::TreeItem* pti;
+    ou::tf::TreeItem* ptiUnderlying;
 
     UnderlyingWithStrategies( pUnderlying_t pUnderlying_ )
     : pUnderlying( std::move( pUnderlying_ ) )
     , m_nQuery {}
-    , pti( nullptr )
+    , ptiUnderlying( nullptr )
     {}
     //UnderlyingWithStrategies( const Statistics&& statistics_ )
     //: statistics( std::move( statistics_ ) ) {}
