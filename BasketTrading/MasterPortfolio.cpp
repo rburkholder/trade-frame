@@ -971,7 +971,7 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
   }
 
   if ( bConstructDefaultStrategy) { // create a new strategy by default
-    ConstructDefaultStrategy( uws, ManageStrategy::ECombo::locked );
+    ConstructDefaultStrategy( uws, ManageStrategy::ECombo::flex );
   }
 }
 
