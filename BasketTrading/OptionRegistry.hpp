@@ -71,8 +71,11 @@ public:
   }
 
   void Add( pOption_t pOption );
-  void Add( pOption_t pOption, pPosition_t pPosition, const std::string& sLegName, ou::tf::option::Combo::vMenuActivation_t&& ma );
+  void Add( pOption_t pOption, const std::string& sLegName );
+  void Add( pOption_t pOption, pPosition_t pPosition, const std::string& sLegName );
   void Remove( pOption_t pOption, bool bRemoveStatistics );
+
+  pChartDataView_t ChartDataView( pOption_t );
 
   void SaveSeries( const std::string& sPrefix );
 
@@ -92,14 +95,16 @@ private:
 
   struct RegistryEntry {
 
-    size_t nReference;
+    size_t nReference_option;
     pOption_t pOption;
+
+    size_t nReference_stats;
     pOptionStatistics_t pOptionStatistics;
 
     RegistryEntry( pOption_t pOption_ )
-    : nReference( 1 ), pOption( std::move( pOption_ ) ) {}
-    //RegistryEntry( pOption_t pOption_, pOptionStatistics_t pOptionStatistics_ )
-    //: nReference( 1 ), pOption( std::move( pOption_ ) ), pOptionStatistics( std::move( pOptionStatistics_ ) ) {}
+    : nReference_option( 1 ), pOption( std::move( pOption_ ) )
+    , nReference_stats {}
+    {}
   };
 
   using mapOption_t = std::unordered_map<std::string,RegistryEntry>; // for m_fStartCalc, m_fStopCalc
@@ -109,5 +114,7 @@ private:
   mapOptionRegistered_t m_mapOptionRegistered;
 
   mapOption_t::iterator LookUp( pOption_t pOption );
+
+  pOptionStatistics_t Add_private( pOption_t pOption, const std::string& sLegName );
 
 };

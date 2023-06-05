@@ -82,6 +82,8 @@ public:
 
   using pOrder_t = ou::tf::Position::pOrder_t;
 
+  using  pOptionRegistry_t = std::shared_ptr<OptionRegistry>;
+
   using fGatherOptions_t = ou::tf::option::fGatherOptions_t;
 
   //using fConstructedWatch_t  = std::function<void(pWatch_t)>;
@@ -98,9 +100,9 @@ public:
   using fAuthorizeUnderlying_t = std::function<bool(pOrder_t&,pPosition_t&,pPortfolio_t&)>;
   using fAuthorizeOption_t     = std::function<bool(pOrder_t&,pPosition_t&,pPortfolio_t&,pWatch_t&)>;
 
-  using fRegisterOption_t = std::function<void(pOption_t&)>;
-  using fStartCalc_t = std::function<void(pOption_t,pWatch_t)>; // option, underlying
-  using fStopCalc_t =  std::function<void(pOption_t,pWatch_t)>; // option, underlying
+  //using fRegisterOption_t = std::function<void(pOption_t&)>;
+  //using fStartCalc_t = std::function<void(pOption_t,pWatch_t)>; // option, underlying
+  //using fStopCalc_t =  std::function<void(pOption_t,pWatch_t)>; // option, underlying
 
   using fInterfaceBookOptionChain_t = std::function<std::pair<wxWindow*,ou::tf::InterfaceBookOptionChain*>()>;
 
@@ -124,11 +126,8 @@ public:
   , fConstructOption_t &&
   , fConstructPosition_t&&
   , fConstructPortfolio_t&&
-  , fRegisterOption_t&&
-  , fStartCalc_t&&
-  , fStopCalc_t&&
-  //, fDeRegisterOption_t&&
   , fSetChartDataView_t&&
+  , pOptionRegistry_t
   , fInterfaceBookOptionChain_t&&
   , fFirstTrade_t
   , fAuthorizeUnderlying_t
@@ -222,7 +221,7 @@ private:
   fAuthorizeUnderlying_t m_fAuthorizeUnderlying;
   fAuthorizeOption_t m_fAuthorizeOption;
 
-  std::unique_ptr<OptionRegistry> m_pOptionRegistry;
+  pOptionRegistry_t m_pOptionRegistry;
 
   // for ManageIVTracker_
   double m_dblStrikeCurrent;

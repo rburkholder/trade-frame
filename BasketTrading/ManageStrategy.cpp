@@ -126,10 +126,8 @@ ManageStrategy::ManageStrategy(
 , fConstructOption_t&& fConstructOption // => m_fConstructOption
 , fConstructPosition_t&& fConstructPosition // => m_fConstructPosition
 , fConstructPortfolio_t&& fConstructPortfolio // => m_fConstructPortfolio
-, fRegisterOption_t&& fRegisterOption // => m_fRegisterOption
-, fStartCalc_t&& fStartCalc // => m_fStartCalc
-, fStopCalc_t&& fStopCalc // => m_fStopCalc
 , fSetChartDataView_t&& fSetChartDataView // => m_fSetChartDataView
+, pOptionRegistry_t pOptionRegistry
 , fInterfaceBookOptionChain_t&& fInterfaceBookOptionChain // => m_fInterfaceBookOptionChain
 , fFirstTrade_t fFirstTrade // => m_fFirstTrade
 , fAuthorizeUnderlying_t fAuthorizeUnderlying // => m_fAuthorizeUnderlying
@@ -165,6 +163,7 @@ ManageStrategy::ManageStrategy(
 , m_dblStrikeCurrent {}
 , m_dblPriceCurrent {}
 
+, m_pOptionRegistry( pOptionRegistry )
 , m_fSetChartDataView( std::move( fSetChartDataView ) )
 
 , m_eTradeDirection( ETradeDirection::None )
@@ -240,15 +239,6 @@ ManageStrategy::ManageStrategy(
   m_pChartDataView->Add( EChartSlot::Price, &m_ceShortExits );
   m_pChartDataView->Add( EChartSlot::Price, &m_ceLongExits );
 
-  m_pOptionRegistry = std::make_unique<OptionRegistry>(
-    std::move( fRegisterOption ),
-    std::move( fStartCalc ),
-    std::move( fStopCalc ),
-    [this]( pChartDataView_t p ){
-      m_fSetChartDataView( p );
-    }
-  );
-
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarQuotes01Sec ) );
   m_bfTrades01Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades01Sec ) );
   m_bfTrades06Sec.SetOnBarComplete( MakeDelegate( this, &ManageStrategy::HandleBarTrades06Sec ) );
@@ -264,8 +254,6 @@ ManageStrategy::ManageStrategy(
     //  std::cout << pInstrumentUnderlying->GetInstrumentName() << " has no contract" << std::endl;
     //  m_stateTrading = TSNoMore;
     //}
-
-    m_pOptionRegistry->AssignWatchUnderlying( m_pWatchUnderlying );
 
     // collect option chains for the underlying
     // TODO: this will be passed in
@@ -300,10 +288,11 @@ ManageStrategy::~ManageStrategy( ) {
   m_vEMA.clear();
 }
 
+// called from MasterPortfolio::Add_ManageStrategy_ToTree
 void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
 
   m_ptiSelf = ptiSelf;
-  m_pOptionRegistry->SetTreeItem( ptiSelf );
+  //m_pOptionRegistry->SetTreeItem( ptiSelf );
 
   m_ptiSelf->NewMenu();
   m_ptiSelf->AppendMenuItem(
@@ -681,7 +670,28 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
     },
     [this]( pOption_t pOption, pPosition_t pPosition, const std::string& sLegType, ou::tf::option::Combo::vMenuActivation_t&& ma ) { // fActivateOption_t
       //std::cout << "Option repository: adding option " << pOption->GetInstrumentName() << std::endl;
-      m_pOptionRegistry->Add( pOption, pPosition, sLegType, std::move( ma ) );
+      //m_pOptionRegistry->Add( pOption, pPosition, sLegType ); // non unique within registry
+      m_pOptionRegistry->Add( pOption, sLegType );
+
+      // NOTE: this no longer belongs here, needs to be moved to when combo leg is attached to combo
+      ou::tf::TreeItem* pti = m_ptiSelf->AppendChild(
+        pOption->GetInstrumentName() + " (" + sLegType + ")",
+        [this,pOption]( ou::tf::TreeItem* ){ // fOnClick_t
+          //m_fSetChartDataView( option_stats.ChartDataView() );
+          m_fSetChartDataView( m_pOptionRegistry->ChartDataView( pOption ) );
+        },
+        [this, ma_=std::move(ma)]( ou::tf::TreeItem* pti ) { // fOnBuildPopUp_t
+          pti->NewMenu();
+          for ( const ou::tf::option::Combo::vMenuActivation_t::value_type& vt: ma_  ) {
+            pti->AppendMenuItem(
+              vt.sLabel,
+              [this,ma_f=&vt.fMenuActivation]( ou::tf::TreeItem* pti ){
+                (*ma_f)();
+              });
+          }
+        }
+      );
+
     },
     [this]( ou::tf::option::Combo* pCombo, pOption_t pOption, const std::string& note )->pPosition_t { // fConstructPosition_t
       pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, note );
@@ -692,7 +702,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
     },
     [this]( pOption_t pOption ){ // fDeactivateOption_t
       //std::cout << "Option repository: removing option " << pOption->GetInstrumentName() << std::endl;
-      m_pOptionRegistry->Remove( pOption, false );
+      m_pOptionRegistry->Remove( pOption, true );
     }
     );
 
@@ -1093,16 +1103,11 @@ void ManageStrategy::HandleAfterRH( const ou::tf::Bar& bar ) {
 }
 
 void ManageStrategy::SaveSeries( const std::string& sPrefix ) {
-  // TODO: pWatchUnderlying should be saved in caller hierarchy
-  if ( m_pOptionRegistry ) {
-    m_pOptionRegistry->SaveSeries( sPrefix );
-  }
-  else {
-    if ( m_pCombo ) {
-      Combo& combo( *m_pCombo );
-      //entry.second.ClosePositions();
-      combo.SaveSeries( sPrefix ); // TODO: generify via Common or Base
-    }
+  // NOTE: not called, series are emitted by uWS in MasterPortfolio
+  if ( m_pCombo ) {
+    Combo& combo( *m_pCombo );
+    //entry.second.ClosePositions();
+    combo.SaveSeries( sPrefix ); // TODO: generify via Common or Base
   }
 }
 

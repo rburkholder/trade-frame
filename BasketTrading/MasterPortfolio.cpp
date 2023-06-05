@@ -501,11 +501,33 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
     pUnderlying_t pUnderlying = std::make_unique<Underlying>( pWatch, pPortfolioUnderlying );
 
     auto result
-      = m_mapUnderlyingWithStrategies.emplace( std::make_pair( sUnderlying, UnderlyingWithStrategies( std::move( pUnderlying ) ) ) );
+      = m_mapUnderlyingWithStrategies.emplace(
+          std::make_pair( sUnderlying, UnderlyingWithStrategies( std::move( pUnderlying ) ) ) );
     assert( result.second );
     UnderlyingWithStrategies& uws( result.first->second );
 
-    const std::string& sIqfSymbol( pWatch->GetInstrument()->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
+    namespace ph = std::placeholders;
+
+    uws.m_pOptionRegistry = std::make_shared<OptionRegistry>(
+    // ManageStrategy::fRegisterOption_t
+          std::bind( &ou::tf::option::Engine::RegisterOption, m_pOptionEngine.get(), ph::_1 ),
+    // ManageStrategy::fStartCalc_t
+          [this]( pOption_t pOption, pWatch_t pUnderlying ){
+            m_pOptionEngine->Add( pOption, pUnderlying );
+          },
+    // ManageStrategy::m_fStopCalc
+          [this]( pOption_t pOption, pWatch_t pUnderlying ){
+            m_pOptionEngine->Remove( pOption, pUnderlying );
+          },
+    // ManageStrategy::m_fSetChartDataView
+          [this]( pChartDataView_t p ){
+            m_fSetChartDataView( p );
+          }
+    );
+
+    uws.InitiOptionRegistry();
+
+    const std::string& sIqfSymbol( pWatch->GetInstrumentName( ou::tf::keytypes::eidProvider_t::EProviderIQF ) );
 
     m_pHistoryRequest->Request(
       sIqfSymbol,
@@ -632,8 +654,6 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
   // until iqfeed supplies contract_size/multiplier in futuresoptios fundamental
   //int32_t multiplier( uws.pUnderlying->GetWatch()->GetInstrument()->GetMultiplier() );
 
-  namespace ph = std::placeholders;
-
   pManageStrategy_t pManageStrategy = std::make_shared<ManageStrategy>(
         //1.0, // TODO: defaults to rising for now, use BollingerTransitions::ReadDailyBars for directional selection
         //uws.pUnderlying->SetPivots(double dblR2, double dblR1, double dblPV, double dblS1, double dblS2)
@@ -732,20 +752,11 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
             }
             return pPortfolio;
           },
-    // ManageStrategy::fRegisterOption_t
-          std::bind( &ou::tf::option::Engine::RegisterOption, m_pOptionEngine.get(), ph::_1 ),
-    // ManageStrategy::fStartCalc_t
-          [this]( pOption_t pOption, pWatch_t pUnderlying ){
-            m_pOptionEngine->Add( pOption, pUnderlying );
-          },
-    // ManageStrategy::m_fStopCalc
-          [this]( pOption_t pOption, pWatch_t pUnderlying ){
-            m_pOptionEngine->Remove( pOption, pUnderlying );
-          },
-    // ManageStrategy::m_fSetChartDataView
+   // ManageStrategy::m_fSetChartDataView
           [this]( pChartDataView_t p ){
             m_fSetChartDataView( p );
           },
+          uws.m_pOptionRegistry,
     // ManageStrategy::m_fInterfaceBookOptionChain
           [this,&uws]()->std::pair<wxWindow*,ou::tf::InterfaceBookOptionChain*>{
 

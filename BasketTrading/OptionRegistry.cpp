@@ -78,10 +78,10 @@ OptionRegistry::mapOption_t::iterator OptionRegistry::LookUp( pOption_t pOption 
 
   }
   else {
-    iterOption->second.nReference++;
+    iterOption->second.nReference_option++;
   }
 
-  BOOST_LOG_TRIVIAL(info) << "OptionRegistry::LookUp " << pOption->GetInstrumentName() << "," << iterOption->second.nReference;
+  BOOST_LOG_TRIVIAL(info) << "OptionRegistry::LookUp " << pOption->GetInstrumentName() << "," << iterOption->second.nReference_option;
   return iterOption;
 }
 
@@ -90,7 +90,16 @@ void OptionRegistry::Add( pOption_t pOption ) {
   //std::cout << "OptionRegistry::Add(simple) " << pOption->GetInstrumentName() << std::endl;
 }
 
-void OptionRegistry::Add( pOption_t pOption, pPosition_t pPosition, const std::string& sLegName, ou::tf::option::Combo::vMenuActivation_t&& ma ) {
+void OptionRegistry::Add( pOption_t pOption, const std::string& sLegName ) {
+  Add_private( std::move( pOption ), sLegName );
+}
+
+void OptionRegistry::Add( pOption_t pOption, pPosition_t pPosition, const std::string& sLegName ) {
+  pOptionStatistics_t pOptionStatistics = Add_private( std::move( pOption ), sLegName );
+  pOptionStatistics->Set( pPosition );
+}
+
+OptionRegistry::pOptionStatistics_t OptionRegistry::Add_private( pOption_t pOption, const std::string& sLegName ) {
 
   mapOption_t::iterator iterOption = LookUp( pOption );
 
@@ -105,45 +114,42 @@ void OptionRegistry::Add( pOption_t pOption, pPosition_t pPosition, const std::s
   }
   else {
     pOptionStatistics = OptionStatistics::Factory( pOption );
-    pOptionStatistics->Set( pPosition );
+    //pOptionStatistics->Set( pPosition );
     iterOption->second.pOptionStatistics = pOptionStatistics;
 
-    OptionStatistics& option_stats( *pOptionStatistics );
-
-    ou::tf::TreeItem* pti = m_ptiParent->AppendChild(
-      pOption->GetInstrumentName() + " (" + sLegName + ")",
-      [this,&option_stats]( ou::tf::TreeItem* ){ // fOnClick_t
-        m_fSetChartDataView( option_stats.ChartDataView() );
-      },
-      [this, ma_=std::move(ma)]( ou::tf::TreeItem* pti ) { // fOnBuildPopUp_t
-        pti->NewMenu();
-        for ( const ou::tf::option::Combo::vMenuActivation_t::value_type& vt: ma_  ) {
-          pti->AppendMenuItem(
-            vt.sLabel,
-            [this,ma_f=&vt.fMenuActivation]( ou::tf::TreeItem* pti ){
-              (*ma_f)();
-            });
-        }
-      }
-    );
-
-    option_stats.Set( pti );
+    //OptionStatistics& option_stats( *pOptionStatistics );
+    //option_stats.Set( pti );
   }
+  iterOption->second.nReference_stats++;
+  return pOptionStatistics;
 }
 
 void OptionRegistry::Remove( pOption_t pOption, bool bRemoveStatistics ) {
 
-  const std::string& sOptionName( pOption->GetInstrument()->GetInstrumentName() );
+  const std::string& sOptionName( pOption->GetInstrumentName() );
   BOOST_LOG_TRIVIAL(info) << "OptionRegistry::Remove: " << sOptionName;
 
   mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
 
-  if ( m_mapOption.end() != iterOption ) {
+  if ( m_mapOption.end() == iterOption ) {
+    BOOST_LOG_TRIVIAL(info) << "OptionRegistry::Remove error, option not found: " << sOptionName;
+  }
+  else {
     RegistryEntry& entry( iterOption->second );
-    assert( 0 != entry.nReference );
-    entry.nReference--;
-    if ( 0 == entry.nReference ) {
+    assert( 0 != entry.nReference_option );
+    entry.nReference_option--;
+    if ( 0 == entry.nReference_option ) {
       m_fStopCalc( pOption, m_pWatchUnderlying );
+      if ( entry.pOptionStatistics ) {
+        if ( !bRemoveStatistics ) {
+          BOOST_LOG_TRIVIAL(warning) << "OptionRegistry::Remove - bRemoveStatistics not set";
+          bRemoveStatistics = true;
+          if ( 1 != entry.nReference_stats ) {
+            BOOST_LOG_TRIVIAL(warning) << "OptionRegistry::Remove - entry.nReference_stats not 1 - is " << entry.nReference_stats;
+            entry.nReference_stats = 1;
+          }
+        }
+      }
     }
     if ( bRemoveStatistics ) {
       //assert( entry.pOptionStatistics );
@@ -152,18 +158,25 @@ void OptionRegistry::Remove( pOption_t pOption, bool bRemoveStatistics ) {
           << "OptionRegistry: " << sOptionName << " has no OptionStatistics to remove";
       }
       else {
-        entry.pOptionStatistics.reset();
+        assert( 0 < entry.nReference_stats );
+        entry.nReference_stats--;
+        if ( 0 == entry.nReference_stats ) {
+          entry.pOptionStatistics.reset();
+        }
       }
     }
-    if ( 0 == entry.nReference ) {
-      //assert( !entry.pOptionStatistics );
+    if ( 0 == entry.nReference_option ) {
+      //assert( !entry.pOptionStatistics );  // TODO: turn this back on
       m_mapOption.erase( iterOption );
     }
   }
-  else {
-    BOOST_LOG_TRIVIAL(info) << "OptionRegistry::Remove error, option not found: " << sOptionName;
-  }
+}
 
+OptionRegistry::pChartDataView_t OptionRegistry::ChartDataView( pOption_t pOption ) {
+  const std::string& sOptionName( pOption->GetInstrumentName() );
+  mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
+  assert( m_mapOption.end() != iterOption );
+  return iterOption->second.pOptionStatistics->ChartDataView();
 }
 
 void OptionRegistry::SaveSeries( const std::string& sPrefix ) {

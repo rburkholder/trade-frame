@@ -46,6 +46,7 @@
 
 #include "Underlying.h"
 #include "ManageStrategy.h"
+#include "OptionRegistry.hpp"
 
 class wxMenu;
 class wxSizer;
@@ -220,7 +221,8 @@ private:
     Statistics statistics;
     ou::tf::Bars m_barsHistory;
     std::atomic_uint32_t m_nQuery;
-    ou::tf::TreeItem* ptiUnderlying;
+    ou::tf::TreeItem* ptiUnderlying; // may not need this anymore, OptionRegistry has it
+    std::shared_ptr<OptionRegistry> m_pOptionRegistry;
 
     UnderlyingWithStrategies( pUnderlying_t pUnderlying_ )
     : pUnderlying( std::move( pUnderlying_ ) )
@@ -244,6 +246,11 @@ private:
       mapStrategyActive.clear();
     }
 
+    void InitiOptionRegistry() {
+      m_pOptionRegistry->AssignWatchUnderlying( pUnderlying->GetWatch() );
+      m_pOptionRegistry->SetTreeItem( ptiUnderlying ); // TODO: need to validate this
+    }
+
     void ClosePositions() {
       for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {
         pStrategy_t& pStrategy( vt.second );
@@ -252,12 +259,15 @@ private:
     }
 
     void SaveSeries( const std::string& sPrefix ) {
+      assert( m_pOptionRegistry );
       pUnderlying->SaveSeries( sPrefix );
-      for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {
-        pStrategy_t& pStrategy( vt.second );
-        pStrategy->pManageStrategy->SaveSeries( sPrefix );
-      }
+      m_pOptionRegistry->SaveSeries( sPrefix );
+      //for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {
+      //  pStrategy_t& pStrategy( vt.second );
+      //  pStrategy->pManageStrategy->SaveSeries( sPrefix );
+      //}
     }
+
     double EmitInfo() {
       double sum {};
       for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {
@@ -266,6 +276,7 @@ private:
       }
       return sum;
     }
+
     void EmitIV() {
       for ( mapStrategy_t::value_type& vt: mapStrategyActive ) {
         pStrategy_t& pStrategy( vt.second );
