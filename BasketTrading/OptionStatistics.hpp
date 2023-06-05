@@ -51,8 +51,8 @@ public:
   pOption_t Option() { return m_pOption; }
   pChartDataView_t ChartDataView() { return m_pdvChart; }
 
-  void Set( pPosition_t pPosition ) { m_pPosition = pPosition; }
-  void Set( ou::tf::TreeItem* pti );
+  void Set( pPosition_t pPosition );
+  void Set( ou::tf::TreeItem* pti );  // don't use in combo, only in independent option lists
 
 protected:
 private:

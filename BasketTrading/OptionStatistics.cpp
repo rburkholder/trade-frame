@@ -45,8 +45,6 @@ OptionStatistics::OptionStatistics( pOption_t pOption )
 
   m_pdvChart->Add( ChartSlot::Spread, &m_ceSpread );
 
-  m_pdvChart->Add( ChartSlot::PL, &m_cePLTotal );
-
   m_pdvChart->Add( ChartSlot::IV, &m_ceImpliedVolatility );
   m_pdvChart->Add( ChartSlot::Delta, &m_ceDelta );
   m_pdvChart->Add( ChartSlot::Gamma, &m_ceGamma );
@@ -71,8 +69,6 @@ OptionStatistics::OptionStatistics( pOption_t pOption )
   m_ceSpread.SetName( "Spread" );
 
   m_ceVolume.SetName( "Volume" );
-
-  m_cePLTotal.SetName( "P/L Position" );
 
   m_ceDelta.SetName( "Delta" );
   m_ceGamma.SetName( "Gamma" );
@@ -117,6 +113,14 @@ void OptionStatistics::Set( ou::tf::TreeItem* pti ) {
     // remove SetOnDeleted?
     m_ptiSelf = pti;
   }
+}
+
+void OptionStatistics::Set( pPosition_t pPosition ) {
+  assert( pPosition );
+  assert( !m_pPosition );
+  m_pPosition = pPosition;
+  m_cePLTotal.SetName( "P/L Position" );
+  m_pdvChart->Add( ChartSlot::PL, &m_cePLTotal );
 }
 
 void OptionStatistics::HandleQuote( const ou::tf::Quote& quote ) {
