@@ -475,7 +475,8 @@ void Futures::StartDepthByOrder() {
             case ou::tf::iqfeed::l2::EOp::Increase:
             case ou::tf::iqfeed::l2::EOp::Insert:
               if ( 0 != ix ) {
-                m_FeatureSet.Ask_IncLimit( ix, depth );            }
+                m_FeatureSet.Ask_IncLimit( ix, depth );
+              }
               break;
             case ou::tf::iqfeed::l2::EOp::Decrease:
             case ou::tf::iqfeed::l2::EOp::Delete:
