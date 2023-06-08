@@ -164,7 +164,7 @@ public:
 
   // TODO: ensure options/positions are not duplicated
   //   ie possible SynthLong overlapping a DltaPlsGmPls
-  const LegNote::values_t& SetPosition( pPosition_t );
+  const LegNote::values_t& AddPosition( pPosition_t );
   void SetChartData( pChartDataView_t pChartData, ou::Colour::EColour );
   void DelChartData();
 

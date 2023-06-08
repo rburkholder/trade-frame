@@ -418,7 +418,7 @@ void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
 
                     pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, ln.Encode() );
                     assert( pPosition );
-                    m_pCombo->SetPosition( pPosition );
+                    m_pCombo->AddPosition( pPosition );
 
                     pOrderCombo->AddLeg( pPosition, quan, side, [](){} /* fLegDone_t&& */ );
                   });
@@ -534,7 +534,7 @@ void ManageStrategy::AddPosition( pPosition_t pPosition ) {
         // TODO: may need special call for colour for non-Open positions
         using LegNote = ou::tf::option::LegNote;
         //const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition, m_pChartDataView, rColour[ m_ixColour++ ] );
-        const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition );
+        const LegNote::values_t& lnValues = pCombo->AddPosition( pPosition );
         if ( LegNote::State::Open == lnValues.m_state ) {
         }
         else {
@@ -673,7 +673,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
       //m_pOptionRegistry->Add( pOption, pPosition, sLegType ); // non unique within registry
       m_pOptionRegistry->Add( pOption, sLegType );
 
-      // NOTE: this no longer belongs here, needs to be moved to when combo leg is attached to combo
+      // TODO: need to use pti to remove when leg fDeactivateOption_t
       ou::tf::TreeItem* pti = m_ptiSelf->AppendChild(
         pOption->GetInstrumentName() + " (" + sLegType + ")",
         [this,pOption]( ou::tf::TreeItem* ){ // fOnClick_t
@@ -696,7 +696,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
     [this]( ou::tf::option::Combo* pCombo, pOption_t pOption, const std::string& note )->pPosition_t { // fConstructPosition_t
       pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, note );
       using LegNote = ou::tf::option::LegNote;
-      const LegNote::values_t& lnValues = pCombo->SetPosition( pPosition );
+      const LegNote::values_t& lnValues = pCombo->AddPosition( pPosition );
       //p->PlaceOrder( lnValues.m_type, ou::tf::OrderSide::Buy, 1 );  // TODO: perform this in the combo, rename to AddPosition?
       return pPosition;
     },
@@ -801,7 +801,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     ou::tf::option::LegNote ln( lnValues );
                     pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, ln.Encode() );
                     assert( pPosition );
-                    combo.SetPosition( pPosition );
+                    combo.AddPosition( pPosition );
                     m_ct.fAddLegOrder( lnValues.m_type, pOrderCombo, ou::tf::OrderSide::Buy, 1, pPosition );
                   }
                   );

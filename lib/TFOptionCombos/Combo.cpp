@@ -192,7 +192,7 @@ void Combo::SetPortfolio( pPortfolio_t pPortfolio ) {
   m_pPortfolio = pPortfolio;
 }
 
-const LegNote::values_t& Combo::SetPosition(  pPosition_t pPositionNew ) {
+const LegNote::values_t& Combo::AddPosition(  pPosition_t pPositionNew ) {
 
   assert( pPositionNew );
   assert( m_pPortfolio->Id() == pPositionNew->GetRow().idPortfolio );
