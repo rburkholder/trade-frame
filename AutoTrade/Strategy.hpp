@@ -160,6 +160,17 @@ private:
   ou::ChartEntryIndicator m_ceProfitLoss;
 
   ou::tf::BarFactory m_bfQuotes01Sec;
+  ou::tf::BarFactory m_bfTrades60Sec;
+
+  ou::tf::Bar m_barPrior;
+  ou::tf::Bar m_barTrigger;
+  ou::tf::Bars m_bars;
+
+  double m_dblStopDelta;
+  double m_dblStop;
+
+  enum class EBarState { Search, EntryWait, ActiveLong, ActiveShort };
+  EBarState m_stateBar;
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
@@ -168,16 +179,19 @@ private:
   void HandleTrin( const ou::tf::Trade& );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
+  void HandleBarTrades60Sec( const ou::tf::Bar& bar );
 
   void HandleRHTrading( const ou::tf::Bar& bar );
+  void HandleRHTrading_01Sec( const ou::tf::Bar& bar );
+  void HandleRHTrading_60Sec( const ou::tf::Bar& bar );
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
 
-  void EnterLong( const ou::tf::Bar& );
-  void EnterShort( const ou::tf::Bar& );
+  void EnterLong( const ptime dt, const double tag );
+  void EnterShort( const ptime dt, const double tag );
 
-  void ExitLong( const ou::tf::Bar& );
-  void ExitShort( const ou::tf::Bar& );
+  void ExitLong( const ptime dt, const double tag );
+  void ExitShort( const ptime dt, const double tag );
 
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );
