@@ -76,6 +76,7 @@ private:
   enum EChartSlot { Price, Volume, Tick, Trin, PL };
   enum class ETradeState {
     Init,  // initiaize state in current market
+    Neutral, // netral state prior to active search
     Search,  // looking for long or short enter
     LongSubmitted, // order has been submitted, waiting for confirmation
     LongExit,  // position exists, looking for exit
@@ -84,11 +85,15 @@ private:
     LongExitSubmitted, // wait for exit to complete
     ShortExitSubmitted, // wait for exit to complete
     EndOfDayCancel,
-    EndOfDayNeutrall,
+    EndOfDayNeutral,
     Done // no more action
     };
 
   ETradeState m_stateTrade;
+
+  enum class ETick {
+
+  };
 
   pPosition_t m_pPosition;
   pWatch_t m_pTick;
@@ -134,6 +139,8 @@ private:
   double m_dblLastTick;
   double m_dblLastTrin;
 
+  ou::tf::Quote m_quote;
+
   pOrder_t m_pOrder;
 
   ou::ChartDataView& m_cdv;
@@ -160,17 +167,9 @@ private:
   ou::ChartEntryIndicator m_ceProfitLoss;
 
   ou::tf::BarFactory m_bfQuotes01Sec;
-  ou::tf::BarFactory m_bfTrades60Sec;
-
-  ou::tf::Bar m_barPrior;
-  ou::tf::Bar m_barTrigger;
-  ou::tf::Bars m_bars;
 
   double m_dblStopDelta;
-  double m_dblStop;
-
-  enum class EBarState { Search, EntryWait, ActiveLong, ActiveShort };
-  EBarState m_stateBar;
+  double m_dblStopAbsolute;
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
@@ -179,7 +178,6 @@ private:
   void HandleTrin( const ou::tf::Trade& );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
-  void HandleBarTrades60Sec( const ou::tf::Bar& bar );
 
   void HandleRHTrading( const ou::tf::Bar& bar );
   void HandleRHTrading_01Sec( const ou::tf::Bar& bar );
