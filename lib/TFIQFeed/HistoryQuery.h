@@ -509,8 +509,8 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
   typename linebuffer_t::const_iterator bgn = (*buf).begin();
   typename linebuffer_t::const_iterator end = (*buf).end();
 
-  std::string s( bgn, end );  // enable for debug
-  //std::cout << s << std::endl;
+  //std::string s( bgn, end );  // enable for debug
+  //std::cout << "** " << s << std::endl;
   // end message is like: 'T,!ENDMSG!'
 
   assert( ( end - bgn ) > 2 );
@@ -524,13 +524,13 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
 
   typename linebuffer_t::const_iterator bgn2 = bgn;  // used for error handling
 
-  bool b = false;
+  bool bParsed = false;
   switch ( chRequestID ) {
     case c_chRidTick: {
         assert ( RetrievalState::RetrieveDataPoints == m_stateRetrieval );
         TickDataPoint* pDP = m_reposTickDataPoint.CheckOutL();
-        b = parse( bgn, end, m_grammarDataPoint, *pDP );
-        if ( b && ( bgn == end ) ) {
+        bParsed = parse( bgn, end, m_grammarDataPoint, *pDP );
+        if ( bParsed && ( bgn == end ) ) {
           //pDP->DateTime = boost::posix_time::time_from_string( pDP->sDateTime );  // very very slow
           pDP->DateTime = posix_time::ptime(
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
@@ -547,8 +547,8 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
     case c_chRidInterval: {
         assert ( RetrievalState::RetrieveIntervals == m_stateRetrieval );
         Interval* pDP = m_reposInterval.CheckOutL();
-        b = parse( bgn, end, m_grammarInterval, *pDP );
-        if ( b && ( bgn == end ) ) {
+        bParsed = parse( bgn, end, m_grammarInterval, *pDP );
+        if ( bParsed && ( bgn == end ) ) {
           //pDP->DateTime = boost::posix_time::time_from_string( pDP->sDateTime );  // very very slow
           pDP->DateTime = posix_time::ptime(
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
@@ -565,8 +565,8 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
     case c_chRidEndOfDay: {
         assert ( RetrievalState::RetrieveEndOfDays == m_stateRetrieval );
         EndOfDay* pDP = m_reposEndOfDay.CheckOutL();
-        b = parse( bgn, end, m_grammarEndOfDay, *pDP );
-        if ( b && ( bgn == end ) ) {
+        bParsed = parse( bgn, end, m_grammarEndOfDay, *pDP );
+        if ( bParsed && ( bgn == end ) ) {
           //pDP->DateTime = boost::posix_time::time_from_string( pDP->sDateTime );  // very very slow
           pDP->DateTime = posix_time::ptime(
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
@@ -587,6 +587,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
       }
       break;
     case c_chCmdSystem: // needs to be processed in idle state
+      bParsed = true; // no parsing, but need the flag set
       std::cout << std::string( bgn3, end ) << std::endl;
       break;
     default:
@@ -596,10 +597,10 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
       }
   }
 
-  if ( !b ) {
+  if ( !bParsed ) {
     if ( 'E' == *bgn2 ) { // indication of an error
-      b = parse( bgn2, end, m_ruleErrorInvalidSymbol );
-      if ( b ) {
+      bParsed = parse( bgn2, end, m_ruleErrorInvalidSymbol );
+      if ( bParsed ) {
         std::cout << "Invalid Symbol" << std::endl;
         m_stateRetrieval = RetrievalState::Idle;
           if ( &HistoryQuery<T>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
@@ -608,8 +609,8 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
       }
     }
     else {
-      b = parse( bgn2, end, m_ruleEndMsg );
-      if ( b ) {
+      bParsed = parse( bgn2, end, m_ruleEndMsg );
+      if ( bParsed ) {
         m_stateRetrieval = RetrievalState::Idle;
           if ( &HistoryQuery<T>::OnHistoryRequestDone != &T::OnHistoryRequestDone ) {
             static_cast<T*>( this )->OnHistoryRequestDone( true );
