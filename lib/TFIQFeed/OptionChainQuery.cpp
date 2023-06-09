@@ -408,8 +408,7 @@ void OptionChainQuery::QueryFuturesOptionChain(
     << "CFO-" << sSymbol
     ;
   std::cout << "request: '" << ss.str() << "'" << std::endl; // for diagnostics
-  ss
-    << "\n";
+  ss << "\n";
   std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
   m_mapOptions.emplace( mapOptions_t::value_type( sSymbol, std::move( fOptionList ) ) );
   m_state = EState::response;
@@ -426,7 +425,6 @@ void OptionChainQuery::QueryEquityOptionChain(
   const std::string& sFilterTwo,  // Ignored if [Filter Type] is "0". If [Filter Type] = "1" then ending strike price or if [Filter Type] = "2" then the number of contracts out of the money   // suggest 12
   fOptionList_t&& fOptionList
 ) {
-
   assert( 0 < sSymbol.size() );
   assert( std::string::npos == sSymbol.find( ',' ) );
   std::stringstream ss;
@@ -441,8 +439,9 @@ void OptionChainQuery::QueryEquityOptionChain(
     << sFilterTwo << ","
     << "CEO-" << sSymbol << ","
     << "1" // 0 = default, exclude non-standard options, 1 = include
-    << "\n";
-  //std::cout << "request: '" << ss.str() << "'" << std::endl;
+    ;
+  std::cout << "request: '" << ss.str() << "'" << std::endl; // for diagnostics
+  ss << "\n";
   std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
   m_mapOptions.emplace( mapOptions_t::value_type( sSymbol, std::move( fOptionList ) ) );
   m_state = EState::response;
