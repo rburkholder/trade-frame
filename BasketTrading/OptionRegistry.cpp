@@ -175,8 +175,10 @@ void OptionRegistry::Remove( pOption_t pOption, bool bRemoveStatistics ) {
 OptionRegistry::pChartDataView_t OptionRegistry::ChartDataView( pOption_t pOption ) {
   const std::string& sOptionName( pOption->GetInstrumentName() );
   mapOption_t::iterator iterOption = m_mapOption.find( sOptionName );
-  assert( m_mapOption.end() != iterOption );
-  return iterOption->second.pOptionStatistics->ChartDataView();
+  pChartDataView_t pChartDataView;
+  if ( m_mapOption.end() == iterOption ) {  }
+  else pChartDataView = iterOption->second.pOptionStatistics->ChartDataView();
+  return pChartDataView;
 }
 
 void OptionRegistry::SaveSeries( const std::string& sPrefix ) {
