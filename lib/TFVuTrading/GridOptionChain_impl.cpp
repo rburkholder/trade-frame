@@ -509,7 +509,7 @@ void GridOptionChain_impl::FillDelegates( int row, ou::tf::option::Delegates& ca
 }
 
 void GridOptionChain_impl::StopStrike( int row ) {
-  //std::cout << "stop strike " << m_vRowIX[row]->first << std::endl;
+  std::cout << "stop strike " << m_vRowIX[row]->first << std::endl;
 
   if ( m_details.m_fOptionDelegates_Detach ) { // TODO: are these called when panel grid is changed or grid destroyed?
     ou::tf::option::Delegates call;
