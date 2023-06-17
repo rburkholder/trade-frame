@@ -45,4 +45,5 @@ date_trading = 2022-04-07  # start of trading day
 days_front = 3             # minimum number of days to front month chain
 days_back = 30             # minimum number of days to back month chain
 symbol = @ESM22            # underlying symbol
+ib_client_id = 6           # client id for simultaneous interactive brokers api
 ```
