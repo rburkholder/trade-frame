@@ -192,7 +192,7 @@ void AppBasketTrading::Init() {
 
 void AppBasketTrading::BuildMasterPortfolio() {
 
-  //std::cout << "BuildMasterPortfolio ..." << std::endl;
+  std::cout << "BuildMasterPortfolio ..." << std::endl;
 
   assert( !m_pMasterPortfolio );
 
@@ -286,6 +286,7 @@ void AppBasketTrading::HandleButtonLoad() {
         // TODO: convert worker to something informative and use
         //   established wx based threading arrangements
         //m_pWorker = new Worker( MakeDelegate( this, &AppBasketTrading::HandleWorkerCompletion ) );
+        assert( m_pMasterPortfolio ); // if no .state file, this may not be present
         m_pMasterPortfolio->Load( m_dtLatestEod );
       //}
       //std::cout << "AppBasketTrading::HandleLoadButton: need database and then start MasterPortfolio" << std::endl;
