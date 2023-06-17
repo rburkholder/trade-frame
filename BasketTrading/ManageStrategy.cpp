@@ -669,13 +669,15 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
       );
     },
     [this]( pOption_t pOption, pPosition_t pPosition, const std::string& sLegType, ou::tf::option::Combo::vMenuActivation_t&& ma ) { // fActivateOption_t
-      //std::cout << "Option repository: adding option " << pOption->GetInstrumentName() << std::endl;
-      //m_pOptionRegistry->Add( pOption, pPosition, sLegType ); // non unique within registry
+
+      const std::string& sOption( pOption->GetInstrumentName() );
+      //std::cout << "Option repository: adding option " << sOption << std::endl;
+
       m_pOptionRegistry->Add( pOption, sLegType );
 
       // TODO: need to use pti to remove when leg fDeactivateOption_t
       ou::tf::TreeItem* pti = m_ptiSelf->AppendChild(
-        pOption->GetInstrumentName() + " (" + sLegType + ")",
+        sOption + " (" + sLegType + ")",
         [this,pOption]( ou::tf::TreeItem* ){ // fOnClick_t
           //m_fSetChartDataView( option_stats.ChartDataView() );
           m_fSetChartDataView( m_pOptionRegistry->ChartDataView( pOption ) );
@@ -692,6 +694,11 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
         }
       );
 
+      mapTreeItem_t::iterator iterTreeItem = m_mapTreeItem.find( sOption );
+      assert( m_mapTreeItem.end() == iterTreeItem );
+      auto result = m_mapTreeItem.emplace( mapTreeItem_t::value_type( sOption, pti ) ) ;
+      assert( result.second );
+
     },
     [this]( ou::tf::option::Combo* pCombo, pOption_t pOption, const std::string& note )->pPosition_t { // fConstructPosition_t
       pPosition_t pPosition = m_fConstructPosition( pCombo->GetPortfolio()->GetRow().idPortfolio, pOption, note );
@@ -701,7 +708,14 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
       return pPosition;
     },
     [this]( pOption_t pOption ){ // fDeactivateOption_t
-      //std::cout << "Option repository: removing option " << pOption->GetInstrumentName() << std::endl;
+      const std::string& sOption( pOption->GetInstrumentName() );
+      //std::cout << "Option repository: removing option " << sOption << std::endl;
+
+      mapTreeItem_t::iterator iterTreeItem = m_mapTreeItem.find( sOption );
+      assert( m_mapTreeItem.end() != iterTreeItem );
+      iterTreeItem->second->Delete();
+      m_mapTreeItem.erase( iterTreeItem );
+
       m_pOptionRegistry->Remove( pOption, true );
     }
     );

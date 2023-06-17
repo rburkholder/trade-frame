@@ -246,6 +246,9 @@ private:
   using pCombo_t = std::unique_ptr<ou::tf::option::Combo>;
   pCombo_t m_pCombo;
 
+  using mapTreeItem_t = std::unordered_map<std::string,ou::tf::TreeItem*>;
+  mapTreeItem_t m_mapTreeItem;
+
   ou::tf::BarFactory m_bfQuotes01Sec; // provides more frequent ticks for Order Monitoring
 
   ou::tf::BarFactory m_bfTrades01Sec; // ema calcs
