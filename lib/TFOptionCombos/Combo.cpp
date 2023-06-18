@@ -39,9 +39,11 @@ namespace option { // options
 Combo::Combo()
 : m_stateNeutral( ENeutral::no_leg )
 , m_fConstructOption( nullptr )
+, m_fOptionRegistryAdd( nullptr )
 , m_fActivateOption( nullptr )
 , m_fConstructPosition( nullptr )
 , m_fDeactivateOption( nullptr )
+, m_fOptionRegistryRemove( nullptr )
 {}
 
 Combo::Combo( Combo&& rhs )
@@ -49,9 +51,11 @@ Combo::Combo( Combo&& rhs )
 , m_setpOrderCombo_Active( std::move( rhs.m_setpOrderCombo_Active ) )
 , m_pPortfolio( std::move( rhs.m_pPortfolio ) )
 , m_fConstructOption( std::move( rhs.m_fConstructOption ) )
+, m_fOptionRegistryAdd( std::move( rhs.m_fOptionRegistryAdd ) )
 , m_fActivateOption( std::move( rhs.m_fActivateOption ) )
 , m_fConstructPosition( std::move( rhs.m_fConstructPosition ) )
 , m_fDeactivateOption( std::move( rhs.m_fDeactivateOption ) )
+, m_fOptionRegistryRemove( std::move( rhs.m_fOptionRegistryRemove ) )
 , m_stateNeutral( rhs.m_stateNeutral )
 {
   assert( rhs.m_mapInitTrackOption.empty() );
@@ -71,18 +75,22 @@ Combo::~Combo() {
 
 // needs to happen before any Legs have been created
 void Combo::Prepare(
-  boost::gregorian::date date,
-  const mapChains_t* pmapChains,
-  const SpreadSpecs& specs,
-  fConstructOption_t&& fConstructOption,
-  fActivateOption_t&& fActivateOption,
-  fConstructPosition_t&& fConstructPosition,
-  fDeactivateOption_t&& fDeactivateOption
+  boost::gregorian::date date
+, const mapChains_t* pmapChains
+, const SpreadSpecs& specs
+, fConstructOption_t&& fConstructOption
+, fOptionRegistryAdd_t&& fOptionRegistryAdd
+, fActivateOption_t&& fActivateOption
+, fConstructPosition_t&& fConstructPosition
+, fDeactivateOption_t&& fDeactivateOption
+, fOptionRegistryRemove_t&& fOptionRegistryRemove
 ) {
   m_fConstructOption = std::move( fConstructOption );
+  m_fOptionRegistryAdd = std::move( fOptionRegistryAdd );
   m_fActivateOption = std::move( fActivateOption );
   m_fConstructPosition = std::move( fConstructPosition );
   m_fDeactivateOption = std::move( fDeactivateOption );
+  m_fOptionRegistryRemove = std::move( fOptionRegistryRemove );
   Init( date, pmapChains, specs );
 }
 

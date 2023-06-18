@@ -138,9 +138,11 @@ public:
     : sLabel( sLabel_ ), fMenuActivation( std::move( f ) ) {}
   };
   using vMenuActivation_t = std::vector<MenuActivation>;
+  using fOptionRegistryAdd_t = std::function<void(pOption_t)>;
   using fActivateOption_t = std::function<void(pOption_t,const std::string& legname, vMenuActivation_t&& )>;
   using fConstructPosition_t = std::function<pPosition_t(Combo*,pOption_t,const std::string&)>; // string is Note from previous position
   using fDeactivateOption_t = std::function<void(pOption_t)>;
+  using fOptionRegistryRemove_t = std::function<void(pOption_t)>;
 
   enum class E20DayDirection { Unknown, Rising, Falling };
 
@@ -151,13 +153,15 @@ public:
   virtual ~Combo(); // may no longer require 'virtual'
 
   void Prepare(
-    boost::gregorian::date date,
-    const mapChains_t*,
-    const SpreadSpecs&,
-    fConstructOption_t&&,
-    fActivateOption_t&&,
-    fConstructPosition_t&&,
-    fDeactivateOption_t&&
+    boost::gregorian::date date
+  , const mapChains_t*
+  , const SpreadSpecs&
+  , fConstructOption_t&&
+  , fOptionRegistryAdd_t&&
+  , fActivateOption_t&&
+  , fConstructPosition_t&&
+  , fDeactivateOption_t&&
+  , fOptionRegistryRemove_t&&
   );
 
   void SetPortfolio( pPortfolio_t );
@@ -195,9 +199,11 @@ protected:
 private:
 
   fConstructOption_t m_fConstructOption;
+  fOptionRegistryAdd_t m_fOptionRegistryAdd;
   fActivateOption_t m_fActivateOption;
   fConstructPosition_t m_fConstructPosition;
   fDeactivateOption_t m_fDeactivateOption;
+  fOptionRegistryRemove_t m_fOptionRegistryRemove;
 
   pPortfolio_t m_pPortfolio; // positions need to be associated with portfolio
 

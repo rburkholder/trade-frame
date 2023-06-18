@@ -668,6 +668,11 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
         }
       );
     },
+    [this]( pOption_t pOption ) { // fOptionRegistryAdd_t
+      //const std::string& sOption( pOption->GetInstrumentName() );
+      //std::cout << "Option repository: adding option " << sOption << std::endl;
+      m_pOptionRegistry->Add( pOption );
+    },
     [this]( pOption_t pOption, const std::string& sLegType, ou::tf::option::Combo::vMenuActivation_t&& ma ) { // fActivateOption_t
 
       const std::string& sOption( pOption->GetInstrumentName() );
@@ -720,6 +725,11 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
       m_mapTreeItem.erase( iterTreeItem );
 
       m_pOptionRegistry->Remove( pOption, true );
+    },
+    [this]( pOption_t pOption ){ // fOptionRegistryRemove_t
+      const std::string& sOption( pOption->GetInstrumentName() );
+      //std::cout << "Option repository: removing option " << sOption << std::endl;
+      m_pOptionRegistry->Remove( pOption, false );
     }
     );
 

@@ -108,7 +108,7 @@ OptionRegistry::pOptionStatistics_t OptionRegistry::Add_private( pOption_t pOpti
     pOptionStatistics = iterOption->second.pOptionStatistics;
     // TODO: test position is correct?
     BOOST_LOG_TRIVIAL(info)
-      << "OptionRegistry::Add, named leg " << sLegName << " exists with " << pOption->GetInstrumentName() << std::endl;
+      << "OptionRegistry::Add " << pOption->GetInstrumentName() << " has named leg " << sLegName  << std::endl;
     // Note: for future fix, the issue here was that a DltaPlsGmPls leg was in place, and the algo wanted to re-use with a SynthLong
     //   ie the two strikes matched as the SynthLong got rolled up
   }
