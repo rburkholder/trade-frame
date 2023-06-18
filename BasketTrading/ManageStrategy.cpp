@@ -668,7 +668,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
         }
       );
     },
-    [this]( pOption_t pOption, pPosition_t pPosition, const std::string& sLegType, ou::tf::option::Combo::vMenuActivation_t&& ma ) { // fActivateOption_t
+    [this]( pOption_t pOption, const std::string& sLegType, ou::tf::option::Combo::vMenuActivation_t&& ma ) { // fActivateOption_t
 
       const std::string& sOption( pOption->GetInstrumentName() );
       //std::cout << "Option repository: adding option " << sOption << std::endl;

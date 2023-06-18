@@ -270,7 +270,7 @@ const LegNote::values_t& Combo::AddPosition(  pPosition_t pPositionNew ) {
     //    LegClose( cleg );
     //  } ) );
 
-    m_fActivateOption( pOption, pPositionNew, ou::tf::option::LegNote::LU( legValues.m_type ), std::move( ma ) );
+    m_fActivateOption( pOption, ou::tf::option::LegNote::LU( legValues.m_type ), std::move( ma ) );
 
   }
   else {

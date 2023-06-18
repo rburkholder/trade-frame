@@ -138,7 +138,7 @@ public:
     : sLabel( sLabel_ ), fMenuActivation( std::move( f ) ) {}
   };
   using vMenuActivation_t = std::vector<MenuActivation>;
-  using fActivateOption_t = std::function<void(pOption_t,pPosition_t,const std::string& legname, vMenuActivation_t&& )>;
+  using fActivateOption_t = std::function<void(pOption_t,const std::string& legname, vMenuActivation_t&& )>;
   using fConstructPosition_t = std::function<pPosition_t(Combo*,pOption_t,const std::string&)>; // string is Note from previous position
   using fDeactivateOption_t = std::function<void(pOption_t)>;
 
