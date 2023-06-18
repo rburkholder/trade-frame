@@ -61,6 +61,7 @@ Combo::~Combo() {
   m_mapComboLeg.clear();
 }
 
+// needs to happen before any Legs have been created
 void Combo::Prepare(
   boost::gregorian::date date,
   const mapChains_t* pmapChains,
@@ -77,20 +78,20 @@ void Combo::Prepare(
   Init( date, pmapChains, specs );
 }
 
-// needs to happen before all Legs have been created
-// called from Combo::Prepare
 void Combo::Init( boost::gregorian::date date, const mapChains_t* pmapChains, const SpreadSpecs& specs ) {
 
   // TODO: check if position is active prior to Initialize
   // TODO: so much happening, almost ready to start firing events on state change
-  // TODO: refactor date, pmapChains
+
+  m_iterChainFront = SelectChain( *pmapChains, date, specs.nDaysFront );
+  m_iterChainBack  = SelectChain( *pmapChains, date, specs.nDaysBack );
 
   // === vertical/diagonal roll for profitable long synthetic when trend is in wrong direction
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::SynthLong,
-      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){
-        InitTrackLongOption( cleg, pmapChains, date, days );
+      [this]( ComboLeg& cleg ){
+        InitTrackLongOption( cleg, m_iterChainBack );
       }
     )
   );
@@ -99,8 +100,8 @@ void Combo::Init( boost::gregorian::date date, const mapChains_t* pmapChains, co
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::Protect,
-      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){
-        InitTrackLongOption( cleg, pmapChains, date, days );
+      [this]( ComboLeg& cleg ){
+        InitTrackLongOption( cleg, m_iterChainBack );
       }
     )
   );
@@ -109,8 +110,8 @@ void Combo::Init( boost::gregorian::date date, const mapChains_t* pmapChains, co
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::SynthShort,
-      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){
-        InitTrackShortOption( cleg, pmapChains, date, days );
+      [this]( ComboLeg& cleg ){
+        InitTrackShortOption( cleg, m_iterChainFront );
       }
     )
   );
@@ -119,8 +120,8 @@ void Combo::Init( boost::gregorian::date date, const mapChains_t* pmapChains, co
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::Cover,
-      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){
-        InitTrackShortOption( cleg, pmapChains, date, days );
+      [this]( ComboLeg& cleg ){
+        InitTrackShortOption( cleg, m_iterChainFront );
       }
     )
   );
@@ -129,8 +130,8 @@ void Combo::Init( boost::gregorian::date date, const mapChains_t* pmapChains, co
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::DltaPlsGmPls, // long call
-      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){
-        InitTrackLongOption( cleg, pmapChains, date, days );
+      [this]( ComboLeg& cleg ){
+        InitTrackLongOption( cleg, m_iterChainBack );
       }
     )
   );
@@ -139,8 +140,8 @@ void Combo::Init( boost::gregorian::date date, const mapChains_t* pmapChains, co
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::DltaPlsGmMns, // short put
-      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){
-        InitTrackLongOption( cleg, pmapChains, date, days );
+      [this]( ComboLeg& cleg ){
+        InitTrackLongOption( cleg, m_iterChainFront );
       }
     )
   );
@@ -149,8 +150,8 @@ void Combo::Init( boost::gregorian::date date, const mapChains_t* pmapChains, co
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::DltaMnsGmPls, // long put
-      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){
-        InitTrackShortOption( cleg, pmapChains, date, days );
+      [this]( ComboLeg& cleg ){
+        InitTrackShortOption( cleg, m_iterChainBack );
       }
     )
   );
@@ -159,8 +160,8 @@ void Combo::Init( boost::gregorian::date date, const mapChains_t* pmapChains, co
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::DltaMnsGmMns, // short call
-      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){
-        InitTrackShortOption( cleg, pmapChains, date, days );
+      [this]( ComboLeg& cleg ){
+        InitTrackShortOption( cleg, m_iterChainFront );
       }
     )
   );
@@ -169,8 +170,8 @@ void Combo::Init( boost::gregorian::date date, const mapChains_t* pmapChains, co
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::Long,
-      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){
-        InitTrackLongOption( cleg, pmapChains, date, days );
+      [this]( ComboLeg& cleg ){
+        InitTrackLongOption( cleg, m_iterChainBack );
       }
     )
   );
@@ -179,8 +180,8 @@ void Combo::Init( boost::gregorian::date date, const mapChains_t* pmapChains, co
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::Short,
-      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){
-        InitTrackShortOption( cleg, pmapChains, date, days );
+      [this]( ComboLeg& cleg ){
+        InitTrackShortOption( cleg, m_iterChainFront );
       }
     )
   );
@@ -343,14 +344,11 @@ void Combo::DelChartData() {
 
 void Combo::InitTracker(
   ComboLeg& cleg,
-  const mapChains_t* pmapChains,
-  boost::gregorian::date date,
-  boost::gregorian::days days_to_expiry
+  citerChain_t citerChain
 ) {
 
   pPosition_t pPosition( cleg.m_leg.GetPosition() );
   assert( pPosition );
-  citerChain_t citerChain = SelectChain( *pmapChains, date, days_to_expiry );
   const chain_t& chain( citerChain->second );
 
   const std::string sNotes( pPosition->Notes() );
@@ -419,12 +417,10 @@ void Combo::PositionNote( pPosition_t& pPosition, LegNote::State state ) {
 
 void Combo::InitTrackLongOption(
   ComboLeg& cleg,
-  const mapChains_t* pmapChains,
-  boost::gregorian::date date,
-  boost::gregorian::days days_to_expiry
+  citerChain_t citerChain
 ) {
 
-  InitTracker( cleg, pmapChains, date, days_to_expiry );
+  InitTracker( cleg, citerChain );
 
   namespace ph = std::placeholders;
   cleg.AddTest( std::bind( &ou::tf::option::Tracker::TestLong, &cleg.m_tracker, ph::_1, ph::_2, ph::_3 ) );
@@ -432,12 +428,10 @@ void Combo::InitTrackLongOption(
 
 void Combo::InitTrackShortOption(
   ComboLeg& cleg,
-  const mapChains_t* pmapChains,
-  boost::gregorian::date date,
-  boost::gregorian::days days_to_expiry
+  citerChain_t citerChain
 ) {
 
-  InitTracker( cleg, pmapChains, date, days_to_expiry );
+  InitTracker( cleg, citerChain );
 
   // a) buy out 0.10 (simply closing the position)
   // b) rotate if itm (somewhere else, affects long & short)

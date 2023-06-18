@@ -220,25 +220,25 @@ private:
   using mapInitTrackOption_t = std::map<LegNote::Type,fInitTrackOption_t>;
   mapInitTrackOption_t m_mapInitTrackOption;
 
+  citerChain_t m_iterChainFront;
+  citerChain_t m_iterChainBack;
+
+  pOption_t m_pOptionNeutralCandidateHigh;
+  pOption_t m_pOptionNeutralCandidateLow;
+
   void InitTracker(
     ComboLeg&,
-    const mapChains_t* pmapChains,
-    boost::gregorian::date date,
-    boost::gregorian::days days_to_expiry
+    citerChain_t
   );
 
   void InitTrackLongOption(
     ComboLeg&,
-    const mapChains_t* pmapChains,
-    boost::gregorian::date date,
-    boost::gregorian::days days_to_expiry
+    citerChain_t
     );
 
   void InitTrackShortOption(
     ComboLeg&,
-    const mapChains_t* pmapChains,
-    boost::gregorian::date date,
-    boost::gregorian::days days_to_expiry
+    citerChain_t
     );
 
   void CalendarRoll( ComboLeg& );
@@ -260,9 +260,6 @@ private:
   void Init( boost::gregorian::date, const mapChains_t*, const SpreadSpecs& );
 
   void PositionNote( pPosition_t&, LegNote::State );
-
-  pOption_t m_pOptionNeutralCandidateHigh;
-  pOption_t m_pOptionNeutralCandidateLow;
 
   void NeutralCandidate( double delta, double gamma );
 
