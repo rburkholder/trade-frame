@@ -694,6 +694,7 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
         }
       );
 
+      assert( pti );
       mapTreeItem_t::iterator iterTreeItem = m_mapTreeItem.find( sOption );
       assert( m_mapTreeItem.end() == iterTreeItem );
       auto result = m_mapTreeItem.emplace( mapTreeItem_t::value_type( sOption, pti ) ) ;
@@ -713,7 +714,9 @@ void ManageStrategy::ComboPrepare( boost::gregorian::date date ) {
 
       mapTreeItem_t::iterator iterTreeItem = m_mapTreeItem.find( sOption );
       assert( m_mapTreeItem.end() != iterTreeItem );
+      assert( nullptr != iterTreeItem->second );
       iterTreeItem->second->Delete();
+      iterTreeItem->second = nullptr;
       m_mapTreeItem.erase( iterTreeItem );
 
       m_pOptionRegistry->Remove( pOption, true );
