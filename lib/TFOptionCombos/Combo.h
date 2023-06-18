@@ -40,6 +40,7 @@
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+
 namespace option { // options
 
 // == ComboLeg
@@ -147,7 +148,7 @@ public:
   Combo( Combo&& );
   Combo( const Combo& ) = delete;
   Combo& operator=( const Combo& ) = delete;
-  virtual ~Combo();
+  virtual ~Combo(); // may no longer require 'virtual'
 
   void Prepare(
     boost::gregorian::date date,
@@ -259,6 +260,11 @@ private:
   void Init( boost::gregorian::date, const mapChains_t*, const SpreadSpecs& );
 
   void PositionNote( pPosition_t&, LegNote::State );
+
+  pOption_t m_pOptionNeutralCandidateHigh;
+  pOption_t m_pOptionNeutralCandidateLow;
+
+  void NeutralCandidate( double delta, double gamma );
 
 };
 

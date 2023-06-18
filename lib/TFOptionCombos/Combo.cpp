@@ -109,7 +109,7 @@ void Combo::Init( boost::gregorian::date date, const mapChains_t* pmapChains, co
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::SynthShort,
-      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){ // make money on the sold premium
+      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){
         InitTrackShortOption( cleg, pmapChains, date, days );
       }
     )
@@ -119,7 +119,7 @@ void Combo::Init( boost::gregorian::date date, const mapChains_t* pmapChains, co
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::Cover,
-      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){ // make money on the sold premium
+      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){
         InitTrackShortOption( cleg, pmapChains, date, days );
       }
     )
@@ -149,7 +149,7 @@ void Combo::Init( boost::gregorian::date date, const mapChains_t* pmapChains, co
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::DltaMnsGmPls, // long put
-      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){ // make money on the sold premium
+      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){
         InitTrackShortOption( cleg, pmapChains, date, days );
       }
     )
@@ -159,7 +159,7 @@ void Combo::Init( boost::gregorian::date date, const mapChains_t* pmapChains, co
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::DltaMnsGmMns, // short call
-      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){ // make money on the sold premium
+      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){
         InitTrackShortOption( cleg, pmapChains, date, days );
       }
     )
@@ -169,7 +169,7 @@ void Combo::Init( boost::gregorian::date date, const mapChains_t* pmapChains, co
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::Long,
-      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){ // make money on the sold premium
+      [this,date,pmapChains,days=specs.nDaysBack]( ComboLeg& cleg ){
         InitTrackLongOption( cleg, pmapChains, date, days );
       }
     )
@@ -179,7 +179,7 @@ void Combo::Init( boost::gregorian::date date, const mapChains_t* pmapChains, co
   m_mapInitTrackOption.emplace(
     std::make_pair(
       LegNote::Type::Short,
-      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){ // make money on the sold premium
+      [this,date,pmapChains,days=specs.nDaysFront]( ComboLeg& cleg ){
         InitTrackShortOption( cleg, pmapChains, date, days );
       }
     )
@@ -521,6 +521,50 @@ void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt
   for ( vRemove_t::value_type iter: vRemove ) { // NOTE: the lambdas above affect this
     m_mapComboLeg.erase( iter );
   };
+
+  //NeutralCandidate( delta, gamma );
+}
+
+void Combo::NeutralCandidate( double delta, double gamma ) {
+  // TODO: track & add delta/gamma restoring legs
+  //   lib/TFOptionCombos/LegNote.h has neutralizing entry suggestions
+  //   create a tracking class operating with OptionRegistry to
+  //     track in a sliding fashion a series of three options,
+  //   depending upon direction, signs & strikes, use some hysterisis to shift the center strike
+  //     to match current delta requirements
+  //   shorts are near expiry, longs are far expiry... reuse the chains tables for selection
+  //   starting at ATM, walk the threesome to the appropriate delta
+
+  if ( 0 == m_setpOrderCombo_Active.size() ) { // no evaluation while orders are outstanding
+    if ( 0.0 < gamma ) {
+      if ( 0.0 < delta ) {
+        // delta plus, gamma plus = long call -> short call to balance ( near date )
+        if ( 0.1 < delta ) {
+          // look for candidate
+        }
+      }
+      else {
+        // delta minus, gamma plus = long put -> short put to balance ( near date )
+        if ( -0.1 > delta ) {
+          // look for candidate
+        }
+      }
+    }
+    else { // 0.0 >= gamma
+      if ( 0.0 < delta ) {
+        // delta plus, gamma minus = short put -> long put to balance ( far date )
+        if ( 0.1 < delta ) {
+          // look for candidate
+        }
+      }
+      else {
+        // delta minus, gamma minus = short call -> long call to balance ( far date )
+        if ( -0.1 > delta ) {
+          // look for candidate
+        }
+      }
+    }
+  }
 }
 
   // TODO:

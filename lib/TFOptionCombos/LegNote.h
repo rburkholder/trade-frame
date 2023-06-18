@@ -39,10 +39,10 @@ public:
   , SynthShort
   , Cover        // short call or put
   , Protect      // long  put or call
-  , DltaPlsGmPls // long call
-  , DltaPlsGmMns // short put
-  , DltaMnsGmPls // long put
-  , DltaMnsGmMns // short call
+  , DltaPlsGmPls // long call  - neutralize: short call
+  , DltaPlsGmMns // short put  - neutralize: long put
+  , DltaMnsGmPls // long put   - neutralize: short put
+  , DltaMnsGmMns // short call - neutralize: long call
   , Long
   , Short
   , _size
