@@ -144,7 +144,7 @@ public:
 
   enum class E20DayDirection { Unknown, Rising, Falling };
 
-  Combo() = default;
+  Combo();
   Combo( Combo&& );
   Combo( const Combo& ) = delete;
   Combo& operator=( const Combo& ) = delete;
@@ -223,6 +223,17 @@ private:
   citerChain_t m_iterChainFront;
   citerChain_t m_iterChainBack;
 
+  enum class ENeutral {
+    no_leg        // initial - no legs available
+  , find_leg_one_call  // load leg and wait for greeks
+  , find_leg_one_put  // load leg and wait for greeks
+  , find_leg_two_call  // load leg and wait for greeks
+  , find_leg_two_put  // load leg and wait for greeks
+  , search_in_call        // shift legs to surround current delta
+  , search_in_put        // shift legs to surround current delta
+  , stable        // current delta is between the two legs
+  } m_stateNeutral;
+
   pOption_t m_pOptionNeutralCandidateHigh;
   pOption_t m_pOptionNeutralCandidateLow;
 
@@ -261,7 +272,7 @@ private:
 
   void PositionNote( pPosition_t&, LegNote::State );
 
-  void NeutralCandidate( double delta, double gamma );
+  void NeutralCandidate( double price, double delta, double gamma );
 
 };
 

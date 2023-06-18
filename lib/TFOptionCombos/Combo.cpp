@@ -36,7 +36,13 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-//Combo::Combo(){}
+Combo::Combo()
+: m_stateNeutral( ENeutral::no_leg )
+, m_fConstructOption( nullptr )
+, m_fActivateOption( nullptr )
+, m_fConstructPosition( nullptr )
+, m_fDeactivateOption( nullptr )
+{}
 
 Combo::Combo( Combo&& rhs )
 : m_mapComboLeg( std::move( rhs.m_mapComboLeg ) )
@@ -46,8 +52,10 @@ Combo::Combo( Combo&& rhs )
 , m_fActivateOption( std::move( rhs.m_fActivateOption ) )
 , m_fConstructPosition( std::move( rhs.m_fConstructPosition ) )
 , m_fDeactivateOption( std::move( rhs.m_fDeactivateOption ) )
+, m_stateNeutral( rhs.m_stateNeutral )
 {
   assert( rhs.m_mapInitTrackOption.empty() );
+  assert( ENeutral::no_leg == m_stateNeutral );
 }
 
 Combo::~Combo() {
@@ -516,10 +524,10 @@ void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt
     m_mapComboLeg.erase( iter );
   };
 
-  //NeutralCandidate( delta, gamma );
+  //NeutralCandidate( dblUnderlyingPrice, delta, gamma );
 }
 
-void Combo::NeutralCandidate( double delta, double gamma ) {
+void Combo::NeutralCandidate( double price, double delta, double gamma ) {
   // TODO: track & add delta/gamma restoring legs
   //   lib/TFOptionCombos/LegNote.h has neutralizing entry suggestions
   //   create a tracking class operating with OptionRegistry to
@@ -529,36 +537,98 @@ void Combo::NeutralCandidate( double delta, double gamma ) {
   //   shorts are near expiry, longs are far expiry... reuse the chains tables for selection
   //   starting at ATM, walk the threesome to the appropriate delta
 
+  static const double c_trigger( 0.2 );
+
+  citerChain_t citerChain;
+  enum class EType { unknown, call, put } leg_type( EType::unknown );
+
   if ( 0 == m_setpOrderCombo_Active.size() ) { // no evaluation while orders are outstanding
     if ( 0.0 < gamma ) {
       if ( 0.0 < delta ) {
         // delta plus, gamma plus = long call -> short call to balance ( near date )
-        if ( 0.1 < delta ) {
-          // look for candidate
+        citerChain = m_iterChainFront;
+        leg_type = EType::call;
+        if ( c_trigger < delta ) {
+          // add candidate
         }
       }
       else {
         // delta minus, gamma plus = long put -> short put to balance ( near date )
-        if ( -0.1 > delta ) {
-          // look for candidate
+        citerChain = m_iterChainFront;
+        leg_type = EType::put;
+        if ( -c_trigger > delta ) {
+          // add candidate
         }
       }
     }
     else { // 0.0 >= gamma
       if ( 0.0 < delta ) {
         // delta plus, gamma minus = short put -> long put to balance ( far date )
-        if ( 0.1 < delta ) {
-          // look for candidate
+        citerChain = m_iterChainBack;
+        leg_type = EType::put;
+        if ( c_trigger < delta ) {
+          // add candidate
         }
       }
       else {
         // delta minus, gamma minus = short call -> long call to balance ( far date )
-        if ( -0.1 > delta ) {
-          // look for candidate
+        citerChain = m_iterChainBack;
+        leg_type = EType::call;
+        if ( -c_trigger > delta ) {
+          // add candidate
         }
       }
     }
   }
+
+  double strike {};
+  std::string name;
+
+  switch ( m_stateNeutral ) {
+    case ENeutral::no_leg:
+      switch ( leg_type ) {
+        case EType::call:
+          strike = citerChain->second.Call_ItmAtm( price );
+          name = citerChain->second.GetIQFeedNameCall( strike );
+          m_stateNeutral = ENeutral::find_leg_one_call;
+          m_fConstructOption(
+            name,
+            [this]( pOption_t pOption ){
+              assert( !m_pOptionNeutralCandidateLow );
+              m_pOptionNeutralCandidateLow = pOption;
+            });
+          break;
+        case EType::put:
+          strike = citerChain->second.Put_ItmAtm( price );
+          name = citerChain->second.GetIQFeedNamePut( strike );
+          m_stateNeutral = ENeutral::find_leg_one_put;
+          m_fConstructOption(
+            name,
+            [this]( pOption_t pOption ){
+              assert( !m_pOptionNeutralCandidateLow );
+              m_pOptionNeutralCandidateLow = pOption;
+            });
+          break;
+        case EType:: unknown:
+          break;
+      }
+      break;
+    case ENeutral::find_leg_one_call:
+      break;
+    case ENeutral::find_leg_one_put:
+      break;
+    case ENeutral::find_leg_two_call:
+      break;
+    case ENeutral::find_leg_two_put:
+      break;
+    case ENeutral::search_in_call:
+      break;
+    case ENeutral::search_in_put:
+      break;
+    case ENeutral::stable:
+      break;
+  }
+
 }
 
   // TODO:
