@@ -38,6 +38,7 @@ namespace option { // options
 
 Combo::Combo()
 : m_stateNeutral( ENeutral::no_leg )
+, m_stateCandidate( LegNote::Type::Neutral )
 , m_fConstructOption( nullptr )
 , m_fOptionRegistryAdd( nullptr )
 , m_fActivateOption( nullptr )
@@ -57,6 +58,7 @@ Combo::Combo( Combo&& rhs )
 , m_fDeactivateOption( std::move( rhs.m_fDeactivateOption ) )
 , m_fOptionRegistryRemove( std::move( rhs.m_fOptionRegistryRemove ) )
 , m_stateNeutral( rhs.m_stateNeutral )
+, m_stateCandidate( rhs.m_stateCandidate )
 {
   assert( rhs.m_mapInitTrackOption.empty() );
   assert( ENeutral::no_leg == m_stateNeutral );
@@ -532,10 +534,10 @@ void Combo::Tick( double dblUnderlyingSlope, double dblUnderlyingPrice, ptime dt
     m_mapComboLeg.erase( iter );
   };
 
-  //NeutralCandidate( dblUnderlyingPrice, delta, gamma );
+  //NeutralCandidate( dblUnderlyingSlope, dblUnderlyingPrice, delta, gamma );
 }
 
-void Combo::NeutralCandidate( double price, double delta, double gamma ) {
+void Combo::NeutralCandidate( double slope, double price, double delta, double gamma ) {
   // TODO: track & add delta/gamma restoring legs
   //   lib/TFOptionCombos/LegNote.h has neutralizing entry suggestions
   //   create a tracking class operating with OptionRegistry to
@@ -545,49 +547,77 @@ void Combo::NeutralCandidate( double price, double delta, double gamma ) {
   //   shorts are near expiry, longs are far expiry... reuse the chains tables for selection
   //   starting at ATM, walk the threesome to the appropriate delta
 
-  static const double c_trigger( 0.2 );
+  static const double c_neutral( 0.05 );
+  static const double c_trigger( 0.20 );
 
   citerChain_t citerChain;
   enum class EType { unknown, call, put } leg_type( EType::unknown );
+  enum class EDir { neutral, converge, diverge } action( EDir::neutral ); // enter position when diverging
+
+  double sign = slope * delta;
+  action = ( 0.0 <= sign ) ? EDir::converge : EDir::diverge;
+
+  // the actively used states for quadrant management
+  //auto state0 = LegNote::Type::Neutral;
+  //auto state1 = LegNote::Type::DltaPlsGmPls;
+  //auto state2 = LegNote::Type::DltaMnsGmPls;
+  //auto state3 = LegNote::Type::DltaPlsGmMns;
+  //auto state4 = LegNote::Type::DltaMnsGmMns;
+
+  LegNote::Type quadrant( LegNote::Type::Neutral );
 
   if ( 0 == m_setpOrderCombo_Active.size() ) { // no evaluation while orders are outstanding
-    if ( 0.0 < gamma ) {
-      if ( 0.0 < delta ) {
+    if ( c_neutral < delta ) {
+      if ( 0.0 <= gamma ) {
         // delta plus, gamma plus = long call -> short call to balance ( near date )
+        quadrant = LegNote::Type::DltaPlsGmPls;
         citerChain = m_iterChainFront;
         leg_type = EType::call;
-        if ( c_trigger < delta ) {
-          // add candidate
-        }
       }
-      else {
-        // delta minus, gamma plus = long put -> short put to balance ( near date )
-        citerChain = m_iterChainFront;
+      else { // 0.0 > gamma
+        // delta plus, gamma minus = short put -> long put to balance ( far date )
+        quadrant = LegNote::Type::DltaPlsGmMns;
+        citerChain = m_iterChainBack;
         leg_type = EType::put;
-        if ( -c_trigger > delta ) {
-          // add candidate
-        }
       }
     }
-    else { // 0.0 >= gamma
-      if ( 0.0 < delta ) {
-        // delta plus, gamma minus = short put -> long put to balance ( far date )
-        citerChain = m_iterChainBack;
-        leg_type = EType::put;
-        if ( c_trigger < delta ) {
-          // add candidate
+    else {
+      if ( -c_neutral > delta ) {
+        if ( 0.0 <= gamma ) {
+          // delta minus, gamma plus = long put -> short put to balance ( near date )
+          quadrant = LegNote::Type::DltaMnsGmPls;
+          citerChain = m_iterChainFront;
+          leg_type = EType::put;
         }
-      }
-      else {
-        // delta minus, gamma minus = short call -> long call to balance ( far date )
-        citerChain = m_iterChainBack;
-        leg_type = EType::call;
-        if ( -c_trigger > delta ) {
-          // add candidate
+        else { // 0.0 > gamma
+          // delta minus, gamma minus = short call -> long call to balance ( far date )
+          quadrant = LegNote::Type::DltaMnsGmMns;
+          citerChain = m_iterChainBack;
+          leg_type = EType::call;
         }
       }
     }
   }
+
+  if ( ( LegNote::Type::Neutral != quadrant ) and ( quadrant != m_stateCandidate ) ) {
+    if ( m_pCandidateHigh ) {
+      m_fOptionRegistryRemove( m_pCandidateHigh->pOption );
+      m_pCandidateHigh.reset();
+    }
+    if ( m_pCandidateLow ) {
+      m_fOptionRegistryRemove( m_pCandidateLow->pOption );
+      m_pCandidateLow.reset();
+    }
+
+    m_stateNeutral = ENeutral::no_leg;
+    m_stateCandidate = quadrant;
+  }
+
+  // action when sign of slope is opposite of sign of delta
+  //   therefore, sign of aggregate delta should change with the added position
+
+  // TODO: need to test for crossing amongst the four quadrants,
+  //   if crossed, then clear out candidates & start again
 
   double strike {};
   std::string name;
@@ -596,34 +626,44 @@ void Combo::NeutralCandidate( double price, double delta, double gamma ) {
     case ENeutral::no_leg:
       switch ( leg_type ) {
         case EType::call:
+          m_stateNeutral = ENeutral::transition;
           strike = citerChain->second.Call_ItmAtm( price );
           name = citerChain->second.GetIQFeedNameCall( strike );
-          m_stateNeutral = ENeutral::find_leg_one_call;
           m_fConstructOption(
             name,
             [this]( pOption_t pOption ){
-              assert( !m_pOptionNeutralCandidateLow );
-              m_pOptionNeutralCandidateLow = pOption;
+              assert( !m_pCandidateLow );
+              m_pCandidateLow = std::make_unique<OptionNeutralCandidate>( pOption );
+              m_fOptionRegistryAdd( pOption );
+              m_stateNeutral = ENeutral::leg_one_call;
             });
           break;
         case EType::put:
+          m_stateNeutral = ENeutral::transition;
           strike = citerChain->second.Put_ItmAtm( price );
           name = citerChain->second.GetIQFeedNamePut( strike );
-          m_stateNeutral = ENeutral::find_leg_one_put;
           m_fConstructOption(
             name,
             [this]( pOption_t pOption ){
-              assert( !m_pOptionNeutralCandidateLow );
-              m_pOptionNeutralCandidateLow = pOption;
+              assert( !m_pCandidateLow );
+              m_pCandidateLow = std::make_unique<OptionNeutralCandidate>( pOption );
+              m_fOptionRegistryAdd( pOption );
+              m_stateNeutral = ENeutral::leg_one_put;
             });
           break;
         case EType:: unknown:
           break;
       }
       break;
-    case ENeutral::find_leg_one_call:
+    case ENeutral::transition:
+      // simply waiting
       break;
-    case ENeutral::find_leg_one_put:
+    case ENeutral::leg_one_call:
+      if ( m_pCandidateLow->bGreekFound ) {
+
+      }
+      break;
+    case ENeutral::leg_one_put:
       break;
     case ENeutral::find_leg_two_call:
       break;
@@ -634,9 +674,20 @@ void Combo::NeutralCandidate( double price, double delta, double gamma ) {
     case ENeutral::search_in_put:
       break;
     case ENeutral::stable:
+      if ( EDir::diverge == action ) {
+        if ( c_trigger < delta ) {
+          // enter into position
+          // and reset candidates
+        }
+        else {
+          if ( -c_trigger > delta ) {
+            // enter into position
+            // and reset candidates
+          }
+        }
+      }
       break;
   }
-
 }
 
   // TODO:

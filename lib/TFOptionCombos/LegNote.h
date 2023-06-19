@@ -35,7 +35,8 @@ public:
 
   enum class State { Open, Expired, Closed };
   enum class Type { // Name_Type relies on this order
-    SynthLong = 0
+    Neutral = 0
+  , SynthLong
   , SynthShort
   , Cover        // short call or put
   , Protect      // long  put or call

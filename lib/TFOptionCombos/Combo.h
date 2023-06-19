@@ -231,8 +231,9 @@ private:
 
   enum class ENeutral {
     no_leg        // initial - no legs available
-  , find_leg_one_call  // load leg and wait for greeks
-  , find_leg_one_put  // load leg and wait for greeks
+  , transition     // waiting for next event
+  , leg_one_call  // load leg and wait for greeks
+  , leg_one_put  // load leg and wait for greeks
   , find_leg_two_call  // load leg and wait for greeks
   , find_leg_two_put  // load leg and wait for greeks
   , search_in_call        // shift legs to surround current delta
@@ -240,8 +241,29 @@ private:
   , stable        // current delta is between the two legs
   } m_stateNeutral;
 
-  pOption_t m_pOptionNeutralCandidateHigh;
-  pOption_t m_pOptionNeutralCandidateLow;
+  LegNote::Type m_stateCandidate;
+
+  struct OptionNeutralCandidate {
+    pOption_t pOption;
+    ou::tf::Greek greek;
+    bool bGreekFound;
+
+    OptionNeutralCandidate(): bGreekFound( false ) {}
+    OptionNeutralCandidate( pOption_t pOption_ )
+    : bGreekFound( false ), pOption( pOption_ )
+    { pOption->OnGreek.Add( MakeDelegate( this, &OptionNeutralCandidate::HandleGreek ) );
+      pOption->StartWatch();
+    }
+    ~OptionNeutralCandidate() {
+      pOption->StopWatch();
+      pOption->OnGreek.Remove( MakeDelegate( this, &OptionNeutralCandidate::HandleGreek ) );
+    }
+    void HandleGreek( const ou::tf::Greek& greek_ ) { greek = greek_; bGreekFound = true; }
+  };
+
+  using pOptionNeutralCandidate_t = std::unique_ptr<OptionNeutralCandidate>;
+  pOptionNeutralCandidate_t m_pCandidateHigh;  // higher strike
+  pOptionNeutralCandidate_t m_pCandidateLow;   // lower strike
 
   void InitTracker(
     ComboLeg&,
@@ -278,7 +300,7 @@ private:
 
   void PositionNote( pPosition_t&, LegNote::State );
 
-  void NeutralCandidate( double price, double delta, double gamma );
+  void NeutralCandidate( double slope, double price, double delta, double gamma );
 
 };
 

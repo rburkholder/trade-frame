@@ -53,7 +53,8 @@ namespace option { // options
 namespace {
   using rName_Type_t = std::array<std::string,(size_t)LegNote::Type::_size>;
   static const rName_Type_t rName_Type = {
-      "SynthLong"
+      "Neutral"
+    , "SynthLong"
     , "SynthShort"
     , "Cover"
     , "Protect"
@@ -77,6 +78,7 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
     // Todo, case insensitive: https://www.boost.org/doc/libs/1_75_0/libs/spirit/doc/html/spirit/qi/reference/string/symbols.html
     #define TYPE_ADD( val ) ( rName_Type[ (size_t)val ], val )
     type_.add
+      TYPE_ADD( LegNote::Type::Neutral )
       TYPE_ADD( LegNote::Type::SynthLong )
       TYPE_ADD( LegNote::Type::SynthShort )
       TYPE_ADD( LegNote::Type::Cover )
