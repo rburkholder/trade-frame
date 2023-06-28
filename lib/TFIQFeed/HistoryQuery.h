@@ -22,6 +22,8 @@
 #include <string>
 #include <sstream>
 
+#include <boost/log/trivial.hpp>
+
 #include <boost/thread/thread.hpp>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -66,6 +68,7 @@ namespace HistoryStructs {
     uint16_t DayCode;
   };
 
+  // "I,LH,2023-06-28 00:00:00,4411.50,4411.25,4411.25,4411.50,42885,55,0,"
   struct Interval {
     unsigned short Year;
     unsigned short Month;
@@ -73,7 +76,6 @@ namespace HistoryStructs {
     unsigned short Hour;
     unsigned short Minute;
     unsigned short Second;
-    unsigned long Micro;
     posix_time::ptime DateTime;
     double High;
     double Low;
@@ -134,7 +136,6 @@ BOOST_FUSION_ADAPT_STRUCT(
   (unsigned short, Hour)
   (unsigned short, Minute)
   (unsigned short, Second)
-  (unsigned long, Micro)
   (double, High)
   (double, Low)
   (double, Open)
@@ -203,7 +204,6 @@ namespace HistoryStructs {
         >> ' ' >> qi::ushort_ // hour
         >> ':' >> qi::ushort_ // minute
         >> ':' >> qi::ushort_ // second
-        >> '.' >> qi::ulong_  // micro
         >> ',' >> qi::double_ // high
         >> ',' >> qi::double_ // low
         >> ',' >> qi::double_ // open
@@ -387,7 +387,7 @@ void HistoryQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
       break;
     case RetrievalState::Done:
       // it is an error to land here
-      std::cout << "Unknown HistoryQuery<T>::OnNetworkLineBuffer RetrievalState::Done" << std::endl;
+      BOOST_LOG_TRIVIAL(error) << "Unknown HistoryQuery<T>::OnNetworkLineBuffer RetrievalState::Done";
       //throw std::logic_error( "RetrievalState::Done");
       //ReturnLineBuffer( wParam );
       break;
@@ -397,7 +397,7 @@ void HistoryQuery<T>::OnNetworkLineBuffer( linebuffer_t* buf ) {
           break;
         default:
           // it is an error to land here
-          std::cout << "Unknown HistoryQuery<T>::OnNetworkLineBuffer RetrievalState::Idle"  << std::endl;
+          BOOST_LOG_TRIVIAL(error) << "Unknown HistoryQuery<T>::OnNetworkLineBuffer RetrievalState::Idle";
           //throw std::logic_error( "RetrievalState::Idle");
           //ReturnLineBuffer( wParam );
           break;
@@ -471,6 +471,7 @@ void HistoryQuery<T>::RetrieveNIntervals( const std::string& sSymbol, unsigned i
     std::stringstream ss;
     boost::this_thread::sleep( boost::posix_time::milliseconds( c_nMillisecondsToSleep ) );
     ss << "HIX," << sSymbol << "," << i << "," << n << ",1," << c_chRidInterval << "\n";
+    //BOOST_LOG_TRIVIAL(trace) << ss.str();
     this->Send( ss.str().c_str() );
   }
 }
@@ -485,6 +486,7 @@ void HistoryQuery<T>::RetrieveNDaysOfIntervals( const std::string& sSymbol, unsi
     std::stringstream ss;
     boost::this_thread::sleep( boost::posix_time::milliseconds( c_nMillisecondsToSleep ) );
     ss << "HID," << sSymbol << "," << i << "," << n << ",,,,1," << c_chRidInterval << "\n";
+    //BOOST_LOG_TRIVIAL(trace) << ss.str();
     this->Send( ss.str().c_str() );
   }
 }
@@ -499,6 +501,7 @@ void HistoryQuery<T>::RetrieveNEndOfDays( const std::string& sSymbol, unsigned i
     std::stringstream ss;
     boost::this_thread::sleep( boost::posix_time::milliseconds( c_nMillisecondsToSleep ) );
     ss << "HDX," << sSymbol << "," << n << ",1," << c_chRidEndOfDay << "\n";
+    //BOOST_LOG_TRIVIAL(trace) << ss.str();
     this->Send( ss.str().c_str() );
   }
 }
@@ -510,7 +513,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
   typename linebuffer_t::const_iterator end = (*buf).end();
 
   //std::string s( bgn, end );  // enable for debug
-  //std::cout << "** " << s << std::endl;
+  //BOOST_LOG_TRIVIAL(trace) << "** " << s;
   // end message is like: 'T,!ENDMSG!'
 
   assert( ( end - bgn ) > 2 );
@@ -552,7 +555,7 @@ void HistoryQuery<T>::ProcessHistoryRetrieval( linebuffer_t* buf ) {
           //pDP->DateTime = boost::posix_time::time_from_string( pDP->sDateTime );  // very very slow
           pDP->DateTime = posix_time::ptime(
             boost::gregorian::date( pDP->Year, pDP->Month, pDP->Day ),
-            boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second, pDP->Micro ) );
+            boost::posix_time::time_duration( pDP->Hour, pDP->Minute, pDP->Second ) );
           //if ( &HistoryQuery<T>::OnHistoryIntervalData != &T::OnHistoryIntervalData ) {
             static_cast<T*>( this )->OnHistoryIntervalData( pDP );
           //}
