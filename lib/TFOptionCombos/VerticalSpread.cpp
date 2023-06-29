@@ -85,20 +85,20 @@ void ChooseLegs( // throw Chain exceptions
       break;
     case ComboTraits::E20DayDirection::Rising: // bull put
       {
-        const double strikeShort( chainVertical.Call_Atm( priceUnderlying ) ); // ATM
-        const double strikeLong(  chainVertical.Call_Otm( strikeShort ) );     // ATM + 1
-
-        fLegSelected( strikeShort,  citerChainVertical->first, chainVertical.GetIQFeedNameCall( strikeShort ) );
-        fLegSelected( strikeLong,   citerChainVertical->first, chainVertical.GetIQFeedNameCall( strikeLong ) );
-      }
-      break;
-    case ComboTraits::E20DayDirection::Falling:
-      {
         const double strikeShort( chainVertical.Put_Atm( priceUnderlying ) ); // ATM
         const double strikeLong(  chainVertical.Put_Otm( strikeShort ) );     // ATM - 1
 
-        fLegSelected( strikeShort,  citerChainVertical->first, chainVertical.GetIQFeedNamePut( strikeShort ) );
-        fLegSelected( strikeLong,   citerChainVertical->first, chainVertical.GetIQFeedNamePut( strikeLong ) );
+        fLegSelected( strikeShort, citerChainVertical->first, chainVertical.GetIQFeedNamePut( strikeShort ) );
+        fLegSelected( strikeLong,  citerChainVertical->first, chainVertical.GetIQFeedNamePut( strikeLong ) );
+      }
+      break;
+    case ComboTraits::E20DayDirection::Falling: // bear call
+      {
+        const double strikeShort( chainVertical.Call_Atm( priceUnderlying ) ); // ATM
+        const double strikeLong(  chainVertical.Call_Otm( strikeShort ) );     // ATM + 1
+
+        fLegSelected( strikeShort, citerChainVertical->first, chainVertical.GetIQFeedNameCall( strikeShort ) );
+        fLegSelected( strikeLong,  citerChainVertical->first, chainVertical.GetIQFeedNameCall( strikeLong ) );
       }
       break;
   }
