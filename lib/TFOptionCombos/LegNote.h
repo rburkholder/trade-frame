@@ -34,7 +34,7 @@ class LegNote {
 public:
 
   enum class State { Open, Expired, Closed };
-  enum class Type { // Name_Type relies on this order
+  enum class Type { // NOTE: update rName_Type, relies on this order
     Neutral = 0
   , SynthLong
   , SynthShort
@@ -51,7 +51,13 @@ public:
   enum class Side { Long, Short };
   enum class Option { Call, Put };
   enum class Momentum { Rise, Fall, Unknown };
-  enum class Algo { Unknown, Collar, BearCall, BullPut };
+  enum class Algo { // NOTE: update rAlgo, relies on this order
+    Unknown
+  , Collar
+  , BearCall, BullPut
+  , RiskReversal, RiskConversion
+  , _size
+  };
 
   struct values_t {
     State m_state;

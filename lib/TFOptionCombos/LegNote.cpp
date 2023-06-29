@@ -65,6 +65,16 @@ namespace {
     , "Long"
     , "Short"
   };
+
+  using rAlgo_t = std::array<std::string,(size_t)LegNote::Algo::_size>;
+  static const rAlgo_t rAlgo = {
+      "Unknown"
+    , "Collar"
+    , "BearCall"
+    , "BullPut"
+    , "RiskReversal"
+    , "RiskConversion"
+  };
 }
 
 namespace qi = boost::spirit::qi;
@@ -113,8 +123,14 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
       ( "unknown", LegNote::Momentum::Unknown )
       ;
 
+    #define ALGO_ADD( val ) ( rAlgo[ (size_t)val ], val )
     algo_.add
-      ( "collar", LegNote::Algo::Collar )
+      ALGO_ADD( LegNote::Algo::Unknown )
+      ALGO_ADD( LegNote::Algo::Collar )
+      ALGO_ADD( LegNote::Algo::BearCall )
+      ALGO_ADD( LegNote::Algo::BullPut )
+      ALGO_ADD( LegNote::Algo::RiskReversal )
+      ALGO_ADD( LegNote::Algo::RiskConversion )
       ;
 
     type =     qi::lit( "type=") >> type_;
@@ -247,12 +263,7 @@ const std::string LegNote::Encode() const {
       break;
   }
 
-  ss << ",algo=";
-  switch ( m_values.m_algo ) {
-    case Algo::Collar:
-      ss << "collar";
-      break;
-  }
+  ss << ",algo=" << rAlgo[ (size_t)m_values.m_algo ];
 
   ss << ",lock=" << ( m_values.m_lock ? "true" : "false" );
 
