@@ -43,7 +43,7 @@
 #include <TFOptions/Chains.h>
 #include <TFOptions/Option.h>
 
-#include <TFOptionCombos/Collar.h>
+#include <TFOptionCombos/Combo.hpp>
 #include <TFOptionCombos/SpreadSpecs.h>
 
 #include <TFTrading/Position.h>

@@ -27,20 +27,14 @@
 
 #include <OUCharting/ChartDataView.h>
 
-#include <TFTrading/Position.h>
 #include <TFTrading/Portfolio.h>
-#include <TFTrading/Order_Combo.hpp>
-
-#include <TFOptions/Chain.h>
 
 #include "Leg.h"
-#include "LegNote.h"
 #include "Tracker.h"
-#include "SpreadSpecs.h"
+#include "ComboTraits.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-
 namespace option { // options
 
 // == ComboLeg
@@ -109,8 +103,6 @@ public:
   using fBuildLeg_t
     = std::function<void(const idPortfolio_t&, EOptionSide, double, fBuildPositionCallBack_t&&)>;
 
-  using fLegSelected_t = std::function<void( double /* strike */, boost::gregorian::date, const std::string&)>;
-
   using pWatch_t      = ou::tf::option::Option::pWatch_t;
   using pOption_t     = ou::tf::option::Option::pOption_t;
 
@@ -143,8 +135,6 @@ public:
   using fConstructPosition_t = std::function<pPosition_t(Combo*,pOption_t,const std::string&)>; // string is Note from previous position
   using fDeactivateOption_t = std::function<void(pOption_t)>;
   using fOptionRegistryRemove_t = std::function<void(pOption_t)>;
-
-  enum class E20DayDirection { Unknown, Rising, Falling };
 
   Combo();
   Combo( Combo&& );

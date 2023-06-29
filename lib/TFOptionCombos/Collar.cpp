@@ -44,13 +44,25 @@ rally (or significant bounce) is perceived to be relatively small.
   along with 0dte and 1dte premium capture
 */
 
+/*
+  2023/06/28 Experimentation indicates that this strategy is a mean reversion strategy
+    * on longer trends, the total delta becomes inverse of direction and is counter productive.
+    * needs a mechanism to re-zero the delta (for possible protection) in prep for trend continuation
+      but reduces profit during mean reversion
+
+    * via the 1118980581 book (see Combo.cpp), this could be mitigated via a reversal or conversion
+      at the time of the roll of one of the longs.  this should boost the delta in the correct direction
+      while, at the same time, protecting the conversion/reversal froma premature mean reversion
+      - use a 7? day chain and roll forward, and risk manage the spread approriately
+*/
+
 #include <map>
 #include <array>
 
 #include <TFOptions/Chains.h>
 
 #include "LegDef.h"
-#include "Collar.h"
+#include "Collar.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -99,7 +111,7 @@ size_t LegCount() {
 }
 
 void ChooseLegs( // throw Chain exceptions
-  Combo::E20DayDirection direction
+  ComboTraits::E20DayDirection direction
 , const mapChains_t& chains
 , boost::gregorian::date date
 , const SpreadSpecs& specs
@@ -118,10 +130,10 @@ void ChooseLegs( // throw Chain exceptions
   const chain_t& chainFront( citerChainFront->second );
 
   switch ( direction ) {
-    case Combo::E20DayDirection::Unknown:
+    case ComboTraits::E20DayDirection::Unknown:
       assert( false );
       break;
-    case Combo::E20DayDirection::Rising:
+    case ComboTraits::E20DayDirection::Rising:
       {
         const double strikeSyntheticBack(  chainBack.Call_Itm( priceUnderlying ) ); // long call
         const double strikeSyntheticFront( chainFront.Put_Atm( strikeSyntheticBack ) ); // short put
@@ -137,7 +149,7 @@ void ChooseLegs( // throw Chain exceptions
         fLegSelected( strikeProtective,     citerChainBack->first,  chainBack.GetIQFeedNamePut(   strikeProtective ) );
       }
       break;
-    case Combo::E20DayDirection::Falling:
+    case ComboTraits::E20DayDirection::Falling:
       {
         const double strikeSyntheticBack(  chainBack.Put_Itm( priceUnderlying ) ); // long put
         const double strikeSyntheticFront( chainFront.Call_Atm( strikeSyntheticBack ) ); // short call
@@ -157,7 +169,7 @@ void ChooseLegs( // throw Chain exceptions
 
 }
 
-void FillLegNote( size_t ix, Combo::E20DayDirection direction, LegNote::values_t& values ) {
+void FillLegNote( size_t ix, ComboTraits::E20DayDirection direction, LegNote::values_t& values ) {
 
   assert( ix < c_nLegs );
 
@@ -166,19 +178,19 @@ void FillLegNote( size_t ix, Combo::E20DayDirection direction, LegNote::values_t
   values.m_lock = false;
 
   switch ( direction ) {
-    case Combo::E20DayDirection::Rising:
+    case ComboTraits::E20DayDirection::Rising:
       values.m_momentum = LegNote::Momentum::Rise;
       values.m_type     = c_rLegDefRise[ix].type;
       values.m_side     = c_rLegDefRise[ix].side;
       values.m_option   = c_rLegDefRise[ix].option;
       break;
-    case Combo::E20DayDirection::Falling:
+    case ComboTraits::E20DayDirection::Falling:
       values.m_momentum = LegNote::Momentum::Fall;
       values.m_type     = c_rLegDefFall[ix].type;
       values.m_side     = c_rLegDefFall[ix].side;
       values.m_option   = c_rLegDefFall[ix].option;
       break;
-    case Combo::E20DayDirection::Unknown:
+    case ComboTraits::E20DayDirection::Unknown:
       assert( false );
       break;
   }
@@ -186,7 +198,7 @@ void FillLegNote( size_t ix, Combo::E20DayDirection direction, LegNote::values_t
 }
 
 std::string Name(
-  Combo::E20DayDirection direction
+  ComboTraits::E20DayDirection direction
 , const mapChains_t& chains
 , boost::gregorian::date date
 , const SpreadSpecs& specs
@@ -198,10 +210,10 @@ std::string Name(
   size_t ix {};
 
   switch ( direction ) {
-    case Combo::E20DayDirection::Rising:
+    case ComboTraits::E20DayDirection::Rising:
       sName += "-rise";
       break;
-    case Combo::E20DayDirection::Falling:
+    case ComboTraits::E20DayDirection::Falling:
       sName += "-fall";
       break;
   }
@@ -336,7 +348,7 @@ size_t LegCount() {
 }
 
 void ChooseLegs( // throw Chain exceptions
-  Combo::E20DayDirection direction
+  ComboTraits::E20DayDirection direction
 , const mapChains_t& chains
 , boost::gregorian::date date
 , const SpreadSpecs& specs
@@ -355,10 +367,10 @@ void ChooseLegs( // throw Chain exceptions
   const chain_t& chainFront( citerChainFront->second );
 
   switch ( direction ) {
-    case Combo::E20DayDirection::Unknown:
+    case ComboTraits::E20DayDirection::Unknown:
       assert( false );
       break;
-    case Combo::E20DayDirection::Rising:
+    case ComboTraits::E20DayDirection::Rising:
       {
         const double strikeSyntheticBack(  chainBack.Call_Atm( priceUnderlying ) ); // long call
         const double strikeSyntheticFront( chainFront.Put_Atm( strikeSyntheticBack ) ); // short put
@@ -375,7 +387,7 @@ void ChooseLegs( // throw Chain exceptions
         fLegSelected( strikeProtective,     citerChainBack->first,  chainBack.GetIQFeedNamePut(   strikeProtective ) );
       }
       break;
-    case Combo::E20DayDirection::Falling:
+    case ComboTraits::E20DayDirection::Falling:
       {
         const double strikeSyntheticBack(  chainBack.Put_Itm( priceUnderlying ) ); // long put
         const double strikeSyntheticFront( chainFront.Call_Atm( strikeSyntheticBack ) ); // short call
@@ -396,7 +408,7 @@ void ChooseLegs( // throw Chain exceptions
 
 }
 
-void FillLegNote( size_t ix, Combo::E20DayDirection direction, LegNote::values_t& values ) {
+void FillLegNote( size_t ix, ComboTraits::E20DayDirection direction, LegNote::values_t& values ) {
 
   assert( ix < c_nLegs );
 
@@ -405,26 +417,26 @@ void FillLegNote( size_t ix, Combo::E20DayDirection direction, LegNote::values_t
   values.m_lock = true;
 
   switch ( direction ) {
-    case Combo::E20DayDirection::Rising:
+    case ComboTraits::E20DayDirection::Rising:
       values.m_momentum = LegNote::Momentum::Rise;
       values.m_type     = c_rLegDefRise[ix].type;
       values.m_side     = c_rLegDefRise[ix].side;
       values.m_option   = c_rLegDefRise[ix].option;
       break;
-    case Combo::E20DayDirection::Falling:
+    case ComboTraits::E20DayDirection::Falling:
       values.m_momentum = LegNote::Momentum::Fall;
       values.m_type     = c_rLegDefFall[ix].type;
       values.m_side     = c_rLegDefFall[ix].side;
       values.m_option   = c_rLegDefFall[ix].option;
       break;
-    case Combo::E20DayDirection::Unknown:
+    case ComboTraits::E20DayDirection::Unknown:
       assert( false );
       break;
   }
 }
 
 std::string Name(
-  Combo::E20DayDirection direction
+  ComboTraits::E20DayDirection direction
 , const mapChains_t& chains
 , boost::gregorian::date date
 , const SpreadSpecs& specs
@@ -436,10 +448,10 @@ std::string Name(
   size_t ix {};
 
   switch ( direction ) {
-    case Combo::E20DayDirection::Rising:
+    case ComboTraits::E20DayDirection::Rising:
       sName += "-rise";
       break;
-    case Combo::E20DayDirection::Falling:
+    case ComboTraits::E20DayDirection::Falling:
       sName += "-fall";
       break;
   }

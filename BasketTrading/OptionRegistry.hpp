@@ -27,7 +27,6 @@
 #include <TFTrading/Position.h>
 
 #include <TFOptions/Option.h>
-#include <TFOptionCombos/Combo.h>
 
 #include "OptionStatistics.hpp"
 

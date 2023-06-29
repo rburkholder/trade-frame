@@ -11,8 +11,9 @@ set(
 #    BearCallSpread.h
 #    BullPutSpread.h
 #    CallBackSpread.h
-    Collar.h
-    Combo.h
+    Collar.hpp
+    Combo.hpp
+    ComboTraits.hpp
 #    Condor.h
     Leg.h
     LegDef.h

@@ -25,12 +25,26 @@
 
 #include <TFOptions/Chains.h>
 
-#include "Combo.h"
+#include "Combo.hpp"
+
+// this is the one:
+//   ___1118980581 2015 Profiting from Weekly Options:
+//     How to Earn Consistent Income Trading Weekly Option Serials (Wiley Trading)
+//    page 97
+
+// __0977869172 2006 (Options_ Perception and Deception & Coulda Woulda Shoulda revised & expanded,
+//   Printed in Color) Charles M Cottle, Charles M Cottle, Sarah E Cottle -
+//   Options Trading_ The Hidden Reality-RiskDoctor
 
 // TODO:
 //   need a mechansism to prevent over-write/duplication of options
 //     ie, when a manual option rolls into an existing one, or an existing rolls into a manual one
 //     all the legs are there, should be able to flag or gate the transition
+
+// use the reversal/conversion in the book to conteract the problems in the Collar.
+//
+//  need to track the number of strikes moved from start
+//  will need to track aggregate delta across multiple strategy instances
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

@@ -82,10 +82,10 @@
 
 #include <wx/window.h>
 
-#include <TFOptionCombos/Collar.h>
+#include <TFOptionCombos/Collar.hpp>
 namespace collar = ou::tf::option::collar;
 
-#include "TFOptionCombos/Combo.h"
+#include "TFOptionCombos/Combo.hpp"
 using Combo = ou::tf::option::Combo;
 
 #include <TFOptionCombos/LegNote.h>
@@ -778,15 +778,15 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             }
             assert( m_pValidateOptions );
 
-            const ou::tf::option::Combo::E20DayDirection direction
+            const ou::tf::option::ComboTraits::E20DayDirection direction
               = ( m_dblPivot <= mid )
-              ? ou::tf::option::Combo::E20DayDirection::Rising
-              : ou::tf::option::Combo::E20DayDirection::Falling;
+              ? ou::tf::option::ComboTraits::E20DayDirection::Rising
+              : ou::tf::option::ComboTraits::E20DayDirection::Falling;
             const boost::gregorian::date dateBar( bar.DateTime().date() );
 
             if ( m_pValidateOptions->ValidateBidAsk(
               dateBar, mid, 11,
-              [this,mid,direction]( const mapChains_t& chains, boost::gregorian::date date, double price, Combo::fLegSelected_t&& fLegSelected ){
+              [this,mid,direction]( const mapChains_t& chains, boost::gregorian::date date, double price, ou::tf::option::fLegSelected_t&& fLegSelected ){
                 m_ct.fChooseLegs( direction, chains, date, m_specsSpread, mid, std::move( fLegSelected ) );
               }
             ) ) {
