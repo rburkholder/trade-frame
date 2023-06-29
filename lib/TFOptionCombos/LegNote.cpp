@@ -74,6 +74,8 @@ namespace {
     , "BullPut"
     , "RiskReversal"
     , "RiskConversion"
+    , "CallBackSpread"
+    , "PutBackSpread"
   };
 }
 
@@ -131,6 +133,8 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
       ALGO_ADD( LegNote::Algo::BullPut )
       ALGO_ADD( LegNote::Algo::RiskReversal )
       ALGO_ADD( LegNote::Algo::RiskConversion )
+      ALGO_ADD( LegNote::Algo::CallBackSpread )
+      ALGO_ADD( LegNote::Algo::PutBackSpread )
       ;
 
     type =     qi::lit( "type=") >> type_;

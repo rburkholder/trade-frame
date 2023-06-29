@@ -8,6 +8,7 @@ PROJECT(TFOptionCombos)
 
 set(
   file_h
+    BackSpread.hpp
     Collar.hpp
     Combo.hpp
     ComboTraits.hpp
@@ -27,6 +28,7 @@ set(
 
 set(
   file_cpp
+    BackSpread.cpp
     Collar.cpp
     Combo.cpp
 #    Condor.cpp

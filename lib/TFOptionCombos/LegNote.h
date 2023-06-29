@@ -56,6 +56,7 @@ public:
   , Collar
   , BearCall, BullPut
   , RiskReversal, RiskConversion
+  , CallBackSpread, PutBackSpread
   , _size
   };
 
