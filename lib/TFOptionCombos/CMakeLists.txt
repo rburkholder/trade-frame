@@ -25,7 +25,7 @@ set(
 #    SyntheticLong.h
 #    SyntheticShort.h
     Tracker.h
-#    VerticalSpread.h
+    VerticalSpread.hpp
   )
 
 set(
@@ -45,7 +45,7 @@ set(
 #    SyntheticLong.cpp
 #    SyntheticShort.cpp
     Tracker.cpp
-#    VerticalSpread.cpp
+    VerticalSpread.cpp
   )
 
 add_library(

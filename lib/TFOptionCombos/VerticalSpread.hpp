@@ -19,71 +19,53 @@
  * Created on June 11, 2019, 8:03 PM
  */
 
-#ifndef VERTICALSPREAD_H
-#define VERTICALSPREAD_H
+#pragma once
 
-#include "Combo.h"
+#include "ComboTraits.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-namespace option { // options
+namespace option { // option
+namespace spread { // spread
+namespace vertical { // vertical
 
-class VerticalSpread: public Combo {
-public:
+// contains 'vertical bear call' and 'vertical bull put'
+// chosen based upon ComboTraits::E20DayDirection
 
-  VerticalSpread();
-  VerticalSpread( const VerticalSpread& rhs ) = delete;
-  VerticalSpread& operator=( const VerticalSpread& rhs ) = delete;
-  VerticalSpread( VerticalSpread&& rhs );
-  virtual ~VerticalSpread();
+size_t LegCount();
 
-  virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
+void ChooseLegs( // throw Chain exceptions
+  ComboTraits::E20DayDirection
+, const mapChains_t& chains
+, boost::gregorian::date
+, const SpreadSpecs&
+, double priceUnderlying
+, const fLegSelected_t&&
+);
 
-  using pOption_t = ou::tf::option::Option::pOption_t;
-  using pOptionPair_t = std::pair<pOption_t,pOption_t>;
-//  bool ValidateSpread( ConstructionTools&, double price, size_t nDuration );
-//  pOptionPair_t ValidatedOptions();
+void FillLegNote( size_t ix, ComboTraits::E20DayDirection, LegNote::values_t& );
 
-  virtual void PlaceOrder( ou::tf::OrderSide::enumOrderSide ); // long vertical, or short vertical
+std::string Name(
+  ComboTraits::E20DayDirection
+, const mapChains_t& chains
+, boost::gregorian::date
+, const SpreadSpecs&
+, double price
+, const std::string& sUnderlying
+);
 
-protected:
-private:
+void AddLegOrder(
+  const LegNote::Type
+, pOrderCombo_t
+, const ou::tf::OrderSide::EOrderSide
+, uint32_t nOrderQuantity
+, pPosition_t
+);
 
-};
+void Bind( ComboTraits& traits );
 
-class ShortVerticalSpread: public VerticalSpread {
-public:
-  ShortVerticalSpread();
-  ShortVerticalSpread( const ShortVerticalSpread& rhs ) = delete;
-  ShortVerticalSpread& operator=( const ShortVerticalSpread& rhs ) = delete;
-  ShortVerticalSpread( ShortVerticalSpread&& rhs );
-  virtual ~ShortVerticalSpread();
-
-  virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
-
-  virtual void PlaceOrder();  // place short vertical spread
-protected:
-private:
-};
-
-class LongVerticalSpread: public VerticalSpread {
-public:
-  LongVerticalSpread();
-  LongVerticalSpread( const VerticalSpread& rhs ) = delete;
-  LongVerticalSpread& operator=( const LongVerticalSpread& rhs ) = delete;
-  LongVerticalSpread( LongVerticalSpread&& rhs );
-  virtual ~LongVerticalSpread();
-
-  virtual void Tick( bool bInTrend, double dblPriceUnderlying, ptime dt );
-
-  virtual void PlaceOrder();  // place long vertical spread
-protected:
-private:
-};
-
+} // namespace vertical
+} // namespace spread
 } // namespace option
 } // namespace tf
 } // namespace ou
-
-#endif /* VERTICALSPREAD_H */
-

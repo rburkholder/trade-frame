@@ -51,7 +51,7 @@ public:
   enum class Side { Long, Short };
   enum class Option { Call, Put };
   enum class Momentum { Rise, Fall, Unknown };
-  enum class Algo { Collar };
+  enum class Algo { Unknown, Collar, BearCall, BullPut };
 
   struct values_t {
     State m_state;
