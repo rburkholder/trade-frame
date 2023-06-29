@@ -88,7 +88,7 @@ void ChooseLegs( // throw Chain exceptions
     case ComboTraits::E20DayDirection::Unknown:
       assert( false );
       break;
-    case ComboTraits::E20DayDirection::Rising: // bull put
+    case ComboTraits::E20DayDirection::Rising: // call
       {
         const double strikeItm1( chainFront.Call_Itm( priceUnderlying ) ); // ITM 1
         const double strikeItm2( chainFront.Call_Itm( strikeItm1 ) );      // ITM 2
@@ -101,7 +101,7 @@ void ChooseLegs( // throw Chain exceptions
         fLegSelected( strikePut2,  citerChainFront->first, chainFront.GetIQFeedNamePut( strikePut2 ) );
       }
       break;
-    case ComboTraits::E20DayDirection::Falling:
+    case ComboTraits::E20DayDirection::Falling: // put
       {
         const double strikeItm1( chainFront.Put_Itm( priceUnderlying ) ); // ITM 1
         const double strikeItm2( chainFront.Put_Itm( strikeItm1 ) );      // ITM 2
