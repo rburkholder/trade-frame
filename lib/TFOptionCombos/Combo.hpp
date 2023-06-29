@@ -80,7 +80,7 @@ private:
 
 // == Combo
 
-class Combo {  // TODO: convert to CRTP?
+class Combo {
 public:
 
   using idPortfolio_t = ou::tf::Portfolio::idPortfolio_t;
