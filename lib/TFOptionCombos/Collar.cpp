@@ -121,7 +121,6 @@ void ChooseLegs( // throw Chain exceptions
 {
 
   using citerChain_t = mapChains_t::const_iterator;
-  using chain_t = ou::tf::option::Chain<ou::tf::option::chain::OptionName>;
 
   citerChain_t citerChainBack = SelectChain( chains, date, specs.nDaysBack );
   const chain_t& chainBack( citerChainBack->second );
@@ -358,7 +357,6 @@ void ChooseLegs( // throw Chain exceptions
 {
 
   using citerChain_t = mapChains_t::const_iterator;
-  using chain_t = ou::tf::option::Chain<ou::tf::option::chain::OptionName>;
 
   citerChain_t citerChainBack = SelectChain( chains, date, specs.nDaysBack );
   const chain_t& chainBack( citerChainBack->second );

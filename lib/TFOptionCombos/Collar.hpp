@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include "ComboTraits.hpp"
 
 namespace ou { // One Unified

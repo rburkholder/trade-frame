@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include <boost/date_time/gregorian/greg_date.hpp>
 
 #include <TFTrading/Position.h>
