@@ -25,6 +25,8 @@
 
 #include <TFOptions/Chains.h>
 
+#include "SpreadSpecs.h"
+
 #include "Combo.hpp"
 
 // this is the one:

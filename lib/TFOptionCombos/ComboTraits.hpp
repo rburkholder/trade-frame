@@ -31,11 +31,12 @@
 #include <TFOptions/Chain.h>
 
 #include "LegNote.h"
-#include "SpreadSpecs.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
+
+class SpreadSpecs;
 
 using chain_t = ou::tf::option::Chain<ou::tf::option::chain::OptionName>;
 using mapChains_t = std::map<boost::gregorian::date, chain_t>;

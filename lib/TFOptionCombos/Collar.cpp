@@ -62,6 +62,8 @@ rally (or significant bounce) is perceived to be relatively small.
 #include <TFOptions/Chains.h>
 
 #include "LegDef.h"
+#include "SpreadSpecs.h"
+
 #include "Collar.hpp"
 
 namespace ou { // One Unified

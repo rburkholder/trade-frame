@@ -25,6 +25,8 @@
 #include <TFOptions/Chains.h>
 
 #include "LegDef.h"
+#include "SpreadSpecs.h"
+
 #include "RiskReversal.hpp"
 
 namespace ou { // One Unified
@@ -40,6 +42,8 @@ namespace { // anonymous
   using rLegDef_t = std::array<LegDef,c_nLegs>;
 
   // NOTE/Caveat: AddLegOrder requires that c_rLegDefRise & c_rLegDefFall have identical LegNote::Side for each entry
+
+  // TOOD: update leg types to reflect adjustements suggested in book Profiting from Weekly Options
 
   static const rLegDef_t c_rLegDefRise = { // rising momentum - risk reversal
     LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Call )
@@ -92,7 +96,7 @@ void ChooseLegs( // throw Chain exceptions
       {
         const double strikeItm1( chainFront.Call_Itm( priceUnderlying ) ); // ITM 1
         const double strikeItm2( chainFront.Call_Itm( strikeItm1 ) );      // ITM 2
-        const double strikeCall1( strikeItm2 );
+        const double strikeCall1(strikeItm2 );
         const double strikePut1( chainFront.Put_Atm( strikeCall1 ) );
         const double strikePut2( chainFront.Put_Otm( strikePut1 ) ); // protection
 
@@ -107,7 +111,7 @@ void ChooseLegs( // throw Chain exceptions
         const double strikeItm2( chainFront.Put_Itm( strikeItm1 ) );      // ITM 2
         const double strikePut1( strikeItm2 );
         const double strikeCall1(chainFront.Call_Atm( strikePut1 ) );
-        const double strikeCall2( chainFront.Call_Otm( strikeCall1 ) ); // protection
+        const double strikeCall2(chainFront.Call_Otm( strikeCall1 ) ); // protection
 
         fLegSelected( strikePut1,  citerChainFront->first, chainFront.GetIQFeedNamePut( strikePut1 ) );
         fLegSelected( strikeCall1, citerChainFront->first, chainFront.GetIQFeedNameCall( strikeCall1 ) );

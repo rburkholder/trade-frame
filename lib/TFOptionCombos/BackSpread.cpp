@@ -25,6 +25,8 @@
 #include <TFOptions/Chains.h>
 
 #include "LegDef.h"
+#include "SpreadSpecs.h"
+
 #include "BackSpread.hpp"
 
 namespace ou { // One Unified
@@ -43,6 +45,8 @@ namespace { // anonymous
   using rLegDef_t = std::array<LegDef,c_nLegs>;
 
   // NOTE/Caveat: AddLegOrder requires that c_rLegDefRise & c_rLegDefFall have identical LegNote::Side for each entry
+
+  // TOOD: update leg types to reflect adjustements suggested in book Profiting from Weekly Options
 
   static const rLegDef_t c_rLegDefRise = { // rising momentum - call
     LegDef( 2, LegNote::Type::Long,  LegNote::Side::Long,  LegNote::Option::Call )
