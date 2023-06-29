@@ -15,7 +15,7 @@
 /*
  * File:    VerticalSpread.h
  * Author:  raymond@burkholder.net
- * Project: TFOptions
+ * Project: TFOptionCombos
  * Created on June 11, 2019, 8:03 PM
  */
 

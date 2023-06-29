@@ -15,7 +15,7 @@
 /*
  * File:    VerticalSpread.cpp
  * Author:  raymond@burkholder.net
- * Project: TFOptions
+ * Project: TFOptionCombos
  * Created on June 11, 2019, 8:03 PM
  */
 
@@ -42,14 +42,14 @@ namespace { // anonymous
 
   // NOTE/Caveat: AddLegOrder requires that c_rLegDefRise & c_rLegDefFall have identical LegNote::Side for each entry
 
-  static const rLegDef_t c_rLegDefRise = { // rising momentum - pull put
-    LegDef( 1, LegNote::Type::Long,  LegNote::Side::Long,  LegNote::Option::Put ),
-    LegDef( 1, LegNote::Type::Short, LegNote::Side::Short, LegNote::Option::Put )
+  static const rLegDef_t c_rLegDefRise = { // rising momentum - bull put
+    LegDef( 1, LegNote::Type::Long,  LegNote::Side::Long,  LegNote::Option::Put )
+  , LegDef( 1, LegNote::Type::Short, LegNote::Side::Short, LegNote::Option::Put )
   };
 
   static const rLegDef_t c_rLegDefFall = { // falling momentum - bear call
-    LegDef( 1, LegNote::Type::Long,  LegNote::Side::Long,  LegNote::Option::Call ),
-    LegDef( 1, LegNote::Type::Short, LegNote::Side::Short, LegNote::Option::Call )
+    LegDef( 1, LegNote::Type::Long,  LegNote::Side::Long,  LegNote::Option::Call )
+  , LegDef( 1, LegNote::Type::Short, LegNote::Side::Short, LegNote::Option::Call )
   };
 
   using mapLegDev_t = std::map<LegNote::Type, size_t>; // lookup into array
@@ -146,9 +146,9 @@ std::string Name(
   std::string sName;
   switch ( direction ) {
     case ComboTraits::E20DayDirection::Rising:
-      sName = "pull-put-";
+      sName = "bull-put";
     case ComboTraits::E20DayDirection::Falling:
-      sName = "bear-call-";
+      sName = "bear-call";
   }
   sName += sUnderlying;
 
