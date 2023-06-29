@@ -8,9 +8,6 @@ PROJECT(TFOptionCombos)
 
 set(
   file_h
-#    BearCallSpread.h
-#    BullPutSpread.h
-#    CallBackSpread.h
     Collar.hpp
     Combo.hpp
     ComboTraits.hpp
@@ -19,31 +16,28 @@ set(
     LegDef.h
     LegNote.h
     SpreadSpecs.h
-#    PutBackSpread.h
 #    Straddle.h
 #    Strangle.h
 #    SyntheticLong.h
 #    SyntheticShort.h
+    RiskReversal.hpp
     Tracker.h
     VerticalSpread.hpp
   )
 
 set(
   file_cpp
-#    BearCallSpread.cpp
-#    BullPutSpread.cpp
-#    CallBackSpread.cpp
     Collar.cpp
     Combo.cpp
 #    Condor.cpp
     Leg.cpp
     LegNote.cpp
     SpreadSpecs.cpp
-#    PutBackSpread.cpp
 #    Straddle.cpp
 #    Strangle.cpp
 #    SyntheticLong.cpp
 #    SyntheticShort.cpp
+    RiskReversal.cpp
     Tracker.cpp
     VerticalSpread.cpp
   )
