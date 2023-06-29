@@ -569,13 +569,31 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
               "Add Collar (flex)",
               [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
                 std::cout << "Add Collar (flex) for: " << sUnderlying << std::endl;
-                ConstructDefaultStrategy( uws, ManageStrategy::ECombo::flex );
+                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::Collar );
+              });
+            //pti->AppendMenuItem(
+            //  "Add Collar (locked)",
+            //  [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
+            //    std::cout << "Add Collar (locked) for: " << sUnderlying << std::endl;
+            //    ConstructDefaultStrategy( uws, ManageStrategy::ECombo::locked );
+            //  });
+            pti->AppendMenuItem(
+              "Add Credit Spread",
+              [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
+                std::cout << "Add Credit Spread for: " << sUnderlying << std::endl;
+                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::CreditSpread );
               });
             pti->AppendMenuItem(
-              "Add Collar (locked)",
+              "Add Protected Synthetic",
               [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
-                std::cout << "Add Collar (locked) for: " << sUnderlying << std::endl;
-                ConstructDefaultStrategy( uws, ManageStrategy::ECombo::locked );
+                std::cout << "Add Protected Synthetic for: " << sUnderlying << std::endl;
+                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::ProtectedSynthetic );
+              });
+            pti->AppendMenuItem(
+              "Add Back Spread",
+              [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
+                std::cout << "Add Back Spread for: " << sUnderlying << std::endl;
+                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::BackSpread );
               });
             pti->AppendMenuItem(
               "IQFeed Name",
@@ -661,7 +679,7 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
   }
 }
 
-MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( UnderlyingWithStrategies& uws, ManageStrategy::ECombo eCombo ) {
+MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( UnderlyingWithStrategies& uws, ou::tf::option::LegNote::Algo algo ) {
 
   const double dblPivot = uws.statistics.setPivots.GetPivotValue( ou::tf::PivotSet::EPivots::PV );
   assert( 0 < dblPivot );
@@ -679,7 +697,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
         //1.0, // TODO: defaults to rising for now, use BollingerTransitions::ReadDailyBars for directional selection
         //uws.pUnderlying->SetPivots(double dblR2, double dblR1, double dblPV, double dblS1, double dblS2)
         dblPivot, // gt is long, lt is short
-        eCombo,
+        algo,
         uws.pUnderlying->GetWatch(),
         uws.pUnderlying->GetPortfolio(),
         m_spread_specs,
@@ -971,7 +989,7 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
       if ( bStrategyActive ) {
         bConstructDefaultStrategy = false;
 
-        pManageStrategy_t pManageStrategy( ConstructStrategy( uws, ManageStrategy::ECombo::existing ) );
+        pManageStrategy_t pManageStrategy( ConstructStrategy( uws, ou::tf::option::LegNote::Algo::Existing ) );
         Add_ManageStrategy_ToTree( idPortfolioStrategy, pManageStrategy );
 
         for ( mapPosition_t::value_type& vt: cacheCombo.m_mapPosition ) {
@@ -1003,11 +1021,11 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
   }
 
   if ( bConstructDefaultStrategy) { // create a new strategy by default
-    ConstructDefaultStrategy( uws, ManageStrategy::ECombo::flex );
+    ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::Collar );
   }
 }
 
-void MasterPortfolio::ConstructDefaultStrategy( UnderlyingWithStrategies& uws, ManageStrategy::ECombo eCombo ) {
+void MasterPortfolio::ConstructDefaultStrategy( UnderlyingWithStrategies& uws, ou::tf::option::LegNote::Algo algo ) {
   const std::string& sUnderlying( uws.pUnderlying->GetWatch()->GetInstrumentName() );
   if ( uws.pStrategyInWaiting ) {
     std::cout
@@ -1016,7 +1034,7 @@ void MasterPortfolio::ConstructDefaultStrategy( UnderlyingWithStrategies& uws, M
       << std::endl;
   }
   else {
-    pManageStrategy_t pManageStrategy( ConstructStrategy( uws, eCombo ) );
+    pManageStrategy_t pManageStrategy( ConstructStrategy( uws, algo ) );
     Add_ManageStrategy_ToTree( sUnderlying + "-construction" , pManageStrategy );
     uws.pStrategyInWaiting = std::make_unique<Strategy>( std::move( pManageStrategy ) );
     uws.pStrategyInWaiting->pManageStrategy->Run();

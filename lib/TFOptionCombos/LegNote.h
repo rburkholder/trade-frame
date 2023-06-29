@@ -53,10 +53,11 @@ public:
   enum class Momentum { Rise, Fall, Unknown };
   enum class Algo { // NOTE: update rAlgo, relies on this order
     Unknown
+  , Existing // for use by ManageStrategy
   , Collar
-  , BearCall, BullPut
-  , RiskReversal, RiskConversion
-  , CallBackSpread, PutBackSpread
+  , CreditSpread, /* ie */ BearCall, BullPut
+  , ProtectedSynthetic, /* ie */ RiskReversal, RiskConversion
+  , BackSpread, /* ie */ CallBackSpread, PutBackSpread  // 1 x 2 ratio
   , _size
   };
 

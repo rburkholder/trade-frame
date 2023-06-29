@@ -69,11 +69,15 @@ namespace {
   using rAlgo_t = std::array<std::string,(size_t)LegNote::Algo::_size>;
   static const rAlgo_t rAlgo = {
       "Unknown"
+    , "Existing"
     , "Collar"
+    , "CreditSpread"
     , "BearCall"
     , "BullPut"
+    , "ProtectedSynthetic"
     , "RiskReversal"
     , "RiskConversion"
+    , "BackSpread"
     , "CallBackSpread"
     , "PutBackSpread"
   };
@@ -128,11 +132,15 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
     #define ALGO_ADD( val ) ( rAlgo[ (size_t)val ], val )
     algo_.add
       ALGO_ADD( LegNote::Algo::Unknown )
+      ALGO_ADD( LegNote::Algo::Existing )
       ALGO_ADD( LegNote::Algo::Collar )
+      ALGO_ADD( LegNote::Algo::CreditSpread )
       ALGO_ADD( LegNote::Algo::BearCall )
       ALGO_ADD( LegNote::Algo::BullPut )
+      ALGO_ADD( LegNote::Algo::ProtectedSynthetic )
       ALGO_ADD( LegNote::Algo::RiskReversal )
       ALGO_ADD( LegNote::Algo::RiskConversion )
+      ALGO_ADD( LegNote::Algo::BackSpread )
       ALGO_ADD( LegNote::Algo::CallBackSpread )
       ALGO_ADD( LegNote::Algo::PutBackSpread )
       ;

@@ -83,7 +83,9 @@
 #include <wx/window.h>
 
 #include <TFOptionCombos/Collar.hpp>
-namespace collar = ou::tf::option::collar;
+#include <TFOptionCombos/VerticalSpread.hpp>
+#include <TFOptionCombos/BackSpread.hpp>
+#include <TFOptionCombos/RiskReversal.hpp>
 
 #include "TFOptionCombos/Combo.hpp"
 using Combo = ou::tf::option::Combo;
@@ -117,7 +119,7 @@ namespace {
 ManageStrategy::ManageStrategy(
   //const ou::tf::Bar& barPriorDaily,
   double dblPivot
-, ECombo eCombo
+, ou::tf::option::LegNote::Algo algo
 , pWatch_t pWatchUnderlying
 , pPortfolio_t pPortfolioOwning // => owning portfolio
 , const ou::tf::option::SpreadSpecs& specSpread
@@ -198,14 +200,20 @@ ManageStrategy::ManageStrategy(
   assert( m_fFirstTrade );
   assert( m_fBar );
 
-  switch ( eCombo ) {
-    case ECombo::flex:
+  switch ( algo ) {
+    case ou::tf::option::LegNote::Algo::Collar:
       ou::tf::option::collar::flex::Bind( m_ct );
       break;
-    case ECombo::locked:
-      ou::tf::option::collar::locked::Bind( m_ct );
+    case ou::tf::option::LegNote::Algo::CreditSpread:
+      ou::tf::option::spread::vertical::Bind( m_ct );
       break;
-    case ECombo::existing:
+    case ou::tf::option::LegNote::Algo::ProtectedSynthetic:
+      ou::tf::option::reversal::Bind( m_ct );
+      break;
+    case ou::tf::option::LegNote::Algo::BackSpread:
+      ou::tf::option::spread::back::Bind( m_ct );
+      break;
+    case ou::tf::option::LegNote::Algo::Existing:
       // see what happens if nullptr
       break;
   }
