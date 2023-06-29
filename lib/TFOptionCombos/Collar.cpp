@@ -81,18 +81,18 @@ namespace {
 
   //long collar: synthetic long, covered call, long put
   static const rLegDef_t c_rLegDefRise = { // rising momentum
-    LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Call ), // synthetic long
-    LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Put  ), // synthetic long
-    LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Call ), // covered
-    LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Put  )  // protective
+    LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Call ) // synthetic long
+  , LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Put  ) // synthetic long
+  , LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Call ) // covered
+  , LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Put  ) // protective
   };
 
   //short collar: synthetic short, covered put, long call
   static const rLegDef_t c_rLegDefFall = { // falling momentum
-    LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Put  ), // synthetic short
-    LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Call ), // synthetic short
-    LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Put  ), // covered
-    LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Call )  // protective
+    LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Put  ) // synthetic short
+  , LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Call ) // synthetic short
+  , LegDef( 1, LegNote::Type::Cover,      LegNote::Side::Short, LegNote::Option::Put  ) // covered
+  , LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Call ) // protective
   };
 
   using mapLegDev_t = std::map<LegNote::Type, size_t>; // lookup into array
