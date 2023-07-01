@@ -3,7 +3,7 @@
 ## Introduction
 
 This is a:
-* library of functions to sink market data, organize time series, build indicators, author algorithms, and issue orders to a broker
+* library of functions to sink market data, organize time series, build indicators, author algorithms, and issue orders to a broker for high-capacity, low-latency trading applications
 * collection of projects using the libraries to carry out various manual & automated trading scenarios
 
 A primary goal of this solution is to provide a means of tracking an [Option Combo Order](lib/TFTrading/Order_Combo.hpp) through the birth to death life-cycle.  It is easy to enter into a option combo with Interactive Brokers with their user interface, but there does not seem to be an effective way to keep the legs grouped for tracking overall profit/loss.
@@ -14,15 +14,7 @@ Positions are composed of a ![Watch](lib/TFTrading/Watch.h) class to record bid/
 
 ![Options](lib/TFOptions/Option.h) inherit from the Watch class to provide ![Greeks](lib/TFTimeSeries/DatedDatum.h), which are computed in real time with an ![Option Engine](lib/TFOptions/Engine.h).
 
-C++ is used throughout for building high-capacity, low-latency trading applications.
-
-A C++17 compiler is used to build the libraries and code. It was built on Windows a number of years ago, 
-but the focus changed towards supporting a Linux environment.  Some work will be needed to make it build on Windows again.
-
-CMake is used for build management.
-
-Note the use of '-march=native' in the root CMakeFiles.txt.  This will cause code to be not necessarily transportable across CPU types'.  Comment out the option if you intend to compile across CPU types, ie, various releases of the Intel instruction set.  
-See the referenced URL for the variety of instructions across CPU releases.
+A [Simulation Interface](lib/TFSimulation/SimulationInterface.hpp) is provided for testing strategies off-line.  The simulator will accept [Orders](lib/TFTrading/Order.h) of type Market and Limit assuming bid/ask data has been captured from the exchange during a live session.  A 50ms - 100ms delay queue has been implemented to better simulate round-trip and slippage effects of order submission.
 
 ## Example
 
@@ -36,18 +28,28 @@ More pictures under ![ComboTrading](ComboTrading)
 
 The AutoTrade project can be used as a template to building your own automated high-frequency trading application.
 
+## Build Environment
+
+A C++17 compiler is used to build the libraries and code. Initially, it was built on Windows a number of years ago,
+but the focus changed towards supporting a Linux environment.  Some work will be needed to make it build on Windows again.
+
+CMake is used for build management.
+
+Note the use of '-march=native' in the root CMakeFiles.txt.  This will cause code to be not necessarily transportable across CPU types.  Comment out the option if you intend to compile across CPU types, ie, various releases of the Intel instruction set.
+See the referenced URL for the variety of instructions across CPU releases.
+
 ## Building
 
 Scripts are library version specific.  Build notes are as of 2021/11/22.
-There are some wxWidget requirements for using a GTK variation of video drivers (I've used Nvidia and Radeon cards successfully).  
+There are some wxWidget requirements for using a GTK variation of video drivers (I've used Nvidia and Radeon cards successfully).
 
-You'll need to have about 10G drive space free to build the project, the related libraries, 
+You'll need to have about 10G drive space free to build the project, the related libraries,
 as well as the installs (from my libs-build repository).
 
-Debian Bookworm is used as the platform.  The library installer is specific to this distribution.  
+Debian Bookworm is used as the platform.  The library installer is specific to this distribution.
 The installer may or may not work with other distributions or flavours.
 
-DTN/IQFeed requires Wine to run.  Starting with the 6.2 release of IQFeed, wine32 is no longer required.  
+DTN/IQFeed requires Wine to run.  Starting with the 6.2 release of IQFeed, wine32 is no longer required.
 An x64-only installation of wine may generate some wine32 messages and errors, but they can be ignored.
 
 
@@ -96,14 +98,14 @@ I use Visual Studio Code as my IDE.  I have the following extensions installed:
 
 The clangd extension provides the language library to provide symbol lookup and cross-referencing.
 
-I have notes for this combination at 
+I have notes for this combination at
   [Visual Studio Code with CMake and Clangd](https://blog.raymond.burkholder.net/index.php?/archives/1037-Visual-Studio-Code-with-CMake-and-Clangd.html)
 
 
 ## Starting Up
 
 * Start the IQFeed daemon by starting Apps -> Wine -> Programs -> IQFeed -> Watchlist [or from the command line: wine ~/.wine/drive_c/Program\ Files/DTN/IQFeed/iqconnect.exe -autoconnect & ] Login with your credentials and checkbox the Save Username/Password and Autoconnect the first time
-* Start Interactive Brokers TWS and connect to a paper trading account 
+* Start Interactive Brokers TWS and connect to a paper trading account
 .* Do Not use an active account for testing
 .* when connecting via an application, you will need to go into the settings to enable the API, and to activate the port
 * IQFeedMarketSymbols project:
@@ -114,7 +116,7 @@ I have notes for this combination at
     * File -> Exit
 * IQFeedGetHistory project:
   * obtains daily ohlc values, used to refresh data
-  * repeats the symbol download, which was done with IQFeedMarketSymbols 
+  * repeats the symbol download, which was done with IQFeedMarketSymbols
   * run the app:
     * ensure the iqfeed daemon is running (you should see active updates in the quote monitor)
     * 'turn on' IQF
@@ -126,7 +128,7 @@ I have notes for this combination at
       * data for a series of symbols will start
       * once the message 'Process Complete' shows, the download is complete
     * 'turn off' IQF
-    * File -> Exit 
+    * File -> Exit
 * more apps to be described here ...
 
 ## Background
@@ -156,7 +158,7 @@ Libraries used (use my lib-build respository to download and build the various d
 * exelformat (included in source)
 * rdaf aka ROOT - library from CERN providing the cling C++ interpreter - optional
 
-NOTE: The code started out on Windows using Visual Studio, and is now predominately tested on Linux Debian.  Some work is required 
+NOTE: The code started out on Windows using Visual Studio, and is now predominately tested on Linux Debian.  Some work is required
 to port back to Windows.  There are various Windows based artifacts in various directories.  They are not fully functional at the moment.
 
 The lib directory has a series of libraries I use throughout the various projects/applications.  Primary libraries include:
@@ -168,7 +170,7 @@ The lib directory has a series of libraries I use throughout the various project
 * ![TFIndicators](lib/TFIndicators) - some indicators
 * ![TFHDF5TimeSeries](lib/TFHDF5TimeSeries) - wraps the HDF5 library for storing time series
 * ![TFOptions](lib/TFOptions) - options calculations
-* ![TFTrading](lib/TFTrading) - manages orders, executions, portfolios, positions, accounts, 
+* ![TFTrading](lib/TFTrading) - manages orders, executions, portfolios, positions, accounts,
 * ![TFVuTrading](lib/TFVuTrading) - provides a number of forms, panels, and related user-interface elements
 * ![OUCharting](lib/OUCharting) - wrapper around ChartDirector for plots and charts
 * ![OUSQL](lib/OUSQL) - which is an ORM wrapper around a sqlite database for maintaining trading records
@@ -192,15 +194,15 @@ The announcement on my blog:  http://blog.raymond.burkholder.net/index.php?/arch
 
 Some other, possibly, related entries:  http://blog.raymond.burkholder.net/index.php?/categories/23-Trading
 
-NOTE: During its infancy, the code used MFC (Microsoft Foundation Classes), some Berkeley DB code, and various other modules, 
-which I now no longer support.  The code remains in the repository for historical value, and for the time it might be 
+NOTE: During its infancy, the code used MFC (Microsoft Foundation Classes), some Berkeley DB code, and various other modules,
+which I now no longer support.  The code remains in the repository for historical value, and for the time it might be
 re-written for current use.
 
 ## Testing
 
 * IQFeed testing: you can utilize the symbol TST$Y, this symbol sends a loop of data 24/7. (2019/03/12)
 
-##
+## Miscellandous
 
 * 2022/07/16 additional package requirement (incorporated into libs-build/build.sh):
   * sudo apt install portaudio19-dev
