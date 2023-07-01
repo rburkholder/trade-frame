@@ -163,9 +163,9 @@ std::string Name(
   std::string sName;
   switch ( direction ) {
     case ComboTraits::E20DayDirection::Rising:
-      sName = "risk-rev";
+      sName = "risk-rev-";
     case ComboTraits::E20DayDirection::Falling:
-      sName = "risk-conv";
+      sName = "risk-conv-";
   }
   sName += sUnderlying;
 

@@ -154,9 +154,9 @@ std::string Name(
   std::string sName;
   switch ( direction ) {
     case ComboTraits::E20DayDirection::Rising:
-      sName = "call-ratio";
+      sName = "call-ratio-";
     case ComboTraits::E20DayDirection::Falling:
-      sName = "put-ratio";
+      sName = "put-ratio-";
   }
   sName += sUnderlying;
 

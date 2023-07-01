@@ -150,9 +150,9 @@ std::string Name(
   std::string sName;
   switch ( direction ) {
     case ComboTraits::E20DayDirection::Rising:
-      sName = "bull-put";
+      sName = "bull-put-";
     case ComboTraits::E20DayDirection::Falling:
-      sName = "bear-call";
+      sName = "bear-call-";
   }
   sName += sUnderlying;
 
