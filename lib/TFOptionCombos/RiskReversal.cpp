@@ -89,7 +89,7 @@ void ChooseLegs( // throw Chain exceptions
   const chain_t& chainFront( citerChainFront->second );
 
   switch ( direction ) {
-    case ComboTraits::EMarketDirection::Unknown:
+    case ComboTraits::EMarketDirection::Select:
       assert( false );
       break;
     case ComboTraits::EMarketDirection::Rising: // call
@@ -144,7 +144,7 @@ void FillLegNote( size_t ix, ComboTraits::EMarketDirection direction, LegNote::v
       values.m_side     = c_rLegDefFall[ix].side;
       values.m_option   = c_rLegDefFall[ix].option;
       break;
-    case ComboTraits::EMarketDirection::Unknown:
+    case ComboTraits::EMarketDirection::Select:
       assert( false );
       break;
   }

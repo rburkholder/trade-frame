@@ -46,7 +46,7 @@ using pOrderCombo_t = ou::tf::OrderCombo::pOrderCombo_t;
 
 struct ComboTraits {
 
-  enum class EMarketDirection { Unknown, Rising, Falling };
+  enum class EMarketDirection { Select, Rising, Falling, NotApplicable };
 
   using fLegCount_t = std::function<size_t()>;
 

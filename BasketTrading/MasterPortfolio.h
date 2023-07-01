@@ -361,8 +361,16 @@ private:
   void AddUnderlying( pWatch_t );
 
   using fConstructedWatch_t  = std::function<void(pWatch_t)>;
-  void ConstructDefaultStrategy( UnderlyingWithStrategies& uws, ou::tf::option::LegNote::Algo );
-  pManageStrategy_t ConstructStrategy( UnderlyingWithStrategies& uws, ou::tf::option::LegNote::Algo );
+  void ConstructDefaultStrategy(
+    UnderlyingWithStrategies& uws,
+    ou::tf::option::LegNote::Algo,
+    ou::tf::option::ComboTraits::EMarketDirection
+    );
+  pManageStrategy_t ConstructStrategy(
+     UnderlyingWithStrategies& uws,
+     ou::tf::option::LegNote::Algo,
+     ou::tf::option::ComboTraits::EMarketDirection
+     );
   void StartUnderlying( UnderlyingWithStrategies& );
   void Add_ManageStrategy_ToTree( const idPortfolio_t&, pManageStrategy_t );
   void AddAsActiveStrategy( UnderlyingWithStrategies&, pStrategy_t&&, const idPortfolio_t& idPortfolioStrategy );

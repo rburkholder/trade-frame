@@ -566,10 +566,16 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
           [this,sUnderlying,sIqfSymbol,&uws]( ou::tf::TreeItem* pti ){
             pti->NewMenu();
             pti->AppendMenuItem(
-              "Add Collar (flex)",
+              "Add Call Collar (flex)",
               [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
-                std::cout << "Add Collar (flex) for: " << sUnderlying << std::endl;
-                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::Collar );
+                std::cout << "Add Call Collar (flex) for: " << sUnderlying << std::endl;
+                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::Collar, ou::tf::option::ComboTraits::EMarketDirection::Rising );
+              });
+            pti->AppendMenuItem(
+              "Add Put Collar (flex)",
+              [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
+                std::cout << "Add Put Collar (flex) for: " << sUnderlying << std::endl;
+                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::Collar, ou::tf::option::ComboTraits::EMarketDirection::Falling );
               });
             //pti->AppendMenuItem(
             //  "Add Collar (locked)",
@@ -578,22 +584,40 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
             //    ConstructDefaultStrategy( uws, ManageStrategy::ECombo::locked );
             //  });
             pti->AppendMenuItem(
-              "Add Credit Spread",
+              "Add Bullish Credit Spread",
               [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
-                std::cout << "Add Credit Spread for: " << sUnderlying << std::endl;
-                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::CreditSpread );
+                std::cout << "Add Bullish Credit Spread for: " << sUnderlying << std::endl;
+                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::BullPut, ou::tf::option::ComboTraits::EMarketDirection::Rising );
               });
             pti->AppendMenuItem(
-              "Add Protected Synthetic",
+              "Add Bearish Credit Spread",
               [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
-                std::cout << "Add Protected Synthetic for: " << sUnderlying << std::endl;
-                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::ProtectedSynthetic );
+                std::cout << "Add Bearish Credit Spread for: " << sUnderlying << std::endl;
+                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::BearCall, ou::tf::option::ComboTraits::EMarketDirection::Falling );
               });
             pti->AppendMenuItem(
-              "Add Back Spread",
+              "Add Bullish Protected Synthetic ",
               [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
-                std::cout << "Add Back Spread for: " << sUnderlying << std::endl;
-                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::BackSpread );
+                std::cout << "Add Bullish Protected Synthetic for: " << sUnderlying << std::endl;
+                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::RiskReversal, ou::tf::option::ComboTraits::EMarketDirection::Rising );
+              });
+            pti->AppendMenuItem(
+              "Add Bearish Protected Synthetic ",
+              [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
+                std::cout << "Add Bearish Protected Synthetic for: " << sUnderlying << std::endl;
+                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::RiskConversion, ou::tf::option::ComboTraits::EMarketDirection::Falling );
+              });
+            pti->AppendMenuItem(
+              "Add Call Back Spread",
+              [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
+                std::cout << "Add Call Back Spread for: " << sUnderlying << std::endl;
+                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::CallBackSpread, ou::tf::option::ComboTraits::EMarketDirection::Rising );
+              });
+            pti->AppendMenuItem(
+              "Add Put Back Spread",
+              [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
+                std::cout << "Add Put Back Spread for: " << sUnderlying << std::endl;
+                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::PutBackSpread, ou::tf::option::ComboTraits::EMarketDirection::Falling );
               });
             pti->AppendMenuItem(
               "IQFeed Name",
@@ -679,7 +703,11 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
   }
 }
 
-MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( UnderlyingWithStrategies& uws, ou::tf::option::LegNote::Algo algo ) {
+MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy(
+  UnderlyingWithStrategies& uws,
+  ou::tf::option::LegNote::Algo algo,
+  ou::tf::option::ComboTraits::EMarketDirection direction
+) {
 
   const double dblPivot = uws.statistics.setPivots.GetPivotValue( ou::tf::PivotSet::EPivots::PV );
   assert( 0 < dblPivot );
@@ -697,6 +725,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy( Underlyin
         //1.0, // TODO: defaults to rising for now, use BollingerTransitions::ReadDailyBars for directional selection
         //uws.pUnderlying->SetPivots(double dblR2, double dblR1, double dblPV, double dblS1, double dblS2)
         dblPivot, // gt is long, lt is short
+        direction,
         algo,
         uws.pUnderlying->GetWatch(),
         uws.pUnderlying->GetPortfolio(),
@@ -989,7 +1018,7 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
       if ( bStrategyActive ) {
         bConstructDefaultStrategy = false;
 
-        pManageStrategy_t pManageStrategy( ConstructStrategy( uws, ou::tf::option::LegNote::Algo::Existing ) );
+        pManageStrategy_t pManageStrategy( ConstructStrategy( uws, ou::tf::option::LegNote::Algo::Existing, ou::tf::option::ComboTraits::EMarketDirection::NotApplicable ) );
         Add_ManageStrategy_ToTree( idPortfolioStrategy, pManageStrategy );
 
         for ( mapPosition_t::value_type& vt: cacheCombo.m_mapPosition ) {
@@ -1021,11 +1050,15 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
   }
 
   if ( bConstructDefaultStrategy) { // create a new strategy by default
-    ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::Collar );
+    ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::Collar, ou::tf::option::ComboTraits::EMarketDirection::Select );
   }
 }
 
-void MasterPortfolio::ConstructDefaultStrategy( UnderlyingWithStrategies& uws, ou::tf::option::LegNote::Algo algo ) {
+void MasterPortfolio::ConstructDefaultStrategy(
+  UnderlyingWithStrategies& uws,
+  ou::tf::option::LegNote::Algo algo,
+  ou::tf::option::ComboTraits::EMarketDirection direction
+) {
   const std::string& sUnderlying( uws.pUnderlying->GetWatch()->GetInstrumentName() );
   if ( uws.pStrategyInWaiting ) {
     std::cout
@@ -1034,7 +1067,7 @@ void MasterPortfolio::ConstructDefaultStrategy( UnderlyingWithStrategies& uws, o
       << std::endl;
   }
   else {
-    pManageStrategy_t pManageStrategy( ConstructStrategy( uws, algo ) );
+    pManageStrategy_t pManageStrategy( ConstructStrategy( uws, algo, direction ) );
     Add_ManageStrategy_ToTree( sUnderlying + "-construction" , pManageStrategy );
     uws.pStrategyInWaiting = std::make_unique<Strategy>( std::move( pManageStrategy ) );
     uws.pStrategyInWaiting->pManageStrategy->Run();

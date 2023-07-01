@@ -119,6 +119,7 @@ namespace {
 ManageStrategy::ManageStrategy(
   //const ou::tf::Bar& barPriorDaily,
   double dblPivot
+, ou::tf::option::ComboTraits::EMarketDirection eMarketDirection
 , ou::tf::option::LegNote::Algo algo
 , pWatch_t pWatchUnderlying
 , pPortfolio_t pPortfolioOwning // => owning portfolio
@@ -140,6 +141,8 @@ ManageStrategy::ManageStrategy(
 : ou::tf::DailyTradeTimeFrame<ManageStrategy>()
 , m_dblOpen {}
 , m_dblPivot( dblPivot )
+, m_algo( algo )
+, m_eMarketDirection( eMarketDirection )
   //m_barPriorDaily( barPriorDaily )
 , m_pWatchUnderlying( pWatchUnderlying )
 , m_pPortfolioOwning( pPortfolioOwning )
@@ -200,17 +203,24 @@ ManageStrategy::ManageStrategy(
   assert( m_fFirstTrade );
   assert( m_fBar );
 
+  assert( ou::tf::option::LegNote::Algo::Unknown != m_algo );
   switch ( algo ) {
     case ou::tf::option::LegNote::Algo::Collar:
       ou::tf::option::collar::flex::Bind( m_ct );
       break;
+    case ou::tf::option::LegNote::Algo::BearCall:
+    case ou::tf::option::LegNote::Algo::BullPut:
     case ou::tf::option::LegNote::Algo::CreditSpread:
       ou::tf::option::spread::vertical::Bind( m_ct );
       break;
+    case ou::tf::option::LegNote::Algo::RiskReversal:
+    case ou::tf::option::LegNote::Algo::RiskConversion:
     case ou::tf::option::LegNote::Algo::ProtectedSynthetic:
       ou::tf::option::reversal::Bind( m_ct );
       break;
     case ou::tf::option::LegNote::Algo::BackSpread:
+    case ou::tf::option::LegNote::Algo::CallBackSpread:
+    case ou::tf::option::LegNote::Algo::PutBackSpread:
       ou::tf::option::spread::back::Bind( m_ct );
       break;
     case ou::tf::option::LegNote::Algo::Existing:
@@ -418,7 +428,12 @@ void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
                     }
 
                     lnValues.m_state = ou::tf::option::LegNote::State::Open;
-                    lnValues.m_algo = ou::tf::option::LegNote::Algo::Collar;
+                    assert( ou::tf::option::LegNote::Algo::Unknown != m_algo );
+                    if ( ou::tf::option::LegNote::Algo::Existing == m_algo ) {
+                      std::cout << "Need to fix app restart for Algo::Existing " << option.GetInstrument()->GetInstrumentName() << std::endl;
+                      // NOTE: I think rolls take care of this prpoerly, not sure about adding legs after app restart
+                    }
+                    lnValues.m_algo = m_algo;
                     lnValues.m_momentum = ou::tf::option::LegNote::Momentum::Unknown;
                     ou::tf::option::LegNote ln( lnValues );
 
@@ -785,21 +800,25 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
               m_pValidateOptions->SetSize( m_ct.fLegCount() ); // will need to make this generic
             }
             assert( m_pValidateOptions );
+            using EMarketDirection = ou::tf::option::ComboTraits::EMarketDirection;
+            assert( EMarketDirection::NotApplicable != m_eMarketDirection );
+            if ( EMarketDirection::Select == m_eMarketDirection ) {
+              m_eMarketDirection
+                = ( m_dblPivot <= mid )
+                ? EMarketDirection::Rising
+                : EMarketDirection::Falling;
+            }
 
-            const ou::tf::option::ComboTraits::EMarketDirection direction
-              = ( m_dblPivot <= mid )
-              ? ou::tf::option::ComboTraits::EMarketDirection::Rising
-              : ou::tf::option::ComboTraits::EMarketDirection::Falling;
             const boost::gregorian::date dateBar( bar.DateTime().date() );
 
             if ( m_pValidateOptions->ValidateBidAsk(
               dateBar, mid, 11,
-              [this,mid,direction]( const mapChains_t& chains, boost::gregorian::date date, double price, ou::tf::option::fLegSelected_t&& fLegSelected ){
-                m_ct.fChooseLegs( direction, chains, date, m_specsSpread, mid, std::move( fLegSelected ) );
+              [this,mid]( const mapChains_t& chains, boost::gregorian::date date, double price, ou::tf::option::fLegSelected_t&& fLegSelected ){
+                m_ct.fChooseLegs( m_eMarketDirection, chains, date, m_specsSpread, mid, std::move( fLegSelected ) );
               }
             ) ) {
 
-              idPortfolio_t idPortfolio = m_ct.fName( direction, m_mapChains, dateBar, m_specsSpread, mid ,sUnderlying );
+              idPortfolio_t idPortfolio = m_ct.fName( m_eMarketDirection, m_mapChains, dateBar, m_specsSpread, mid ,sUnderlying );
 
               if ( m_fAuthorizeSimple( idPortfolio, sUnderlying, false ) ) {
 
@@ -829,10 +848,11 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                 ou::tf::OrderCombo::pOrderCombo_t pOrderCombo = ou::tf::OrderCombo::Factory();
 
                 m_pValidateOptions->Get( // process each option of set
-                  [this,&idPortfolio,&combo,direction,pOrderCombo]( size_t ix, pOption_t pOption ){ // fValidatedOption_t -- need Strategy specific naming
+                  [this,&idPortfolio,&combo,pOrderCombo]( size_t ix, pOption_t pOption ){ // fValidatedOption_t -- need Strategy specific naming
                     // called for each of the legs
                     ou::tf::option::LegNote::values_t lnValues;
-                    m_ct.fFillLegNote( ix, direction, lnValues ); // TODO: need to have the leg type provided by ValidateOptions
+                    assert( ou::tf::option::ComboTraits::EMarketDirection::Select != m_eMarketDirection );
+                    m_ct.fFillLegNote( ix, m_eMarketDirection, lnValues ); // TODO: need to have the leg type provided by ValidateOptions
                     ou::tf::option::LegNote ln( lnValues );
                     pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, ln.Encode() );
                     assert( pPosition );

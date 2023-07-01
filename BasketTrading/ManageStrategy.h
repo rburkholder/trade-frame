@@ -115,6 +115,7 @@ public:
   ManageStrategy(
     //const ou::tf::Bar& barPriorDaily,
     double dblPivot
+  , ou::tf::option::ComboTraits::EMarketDirection
   , ou::tf::option::LegNote::Algo
   , pWatch_t // underlying
   , pPortfolio_t // owning portfolio
@@ -193,7 +194,8 @@ private:
   using volume_t = ou::tf::DatedDatum::volume_t;
 
   double m_dblPivot; // used for generating a buy or a sell entry
-  //double m_dblSlope20DayUnderlying;
+  ou::tf::option::LegNote::Algo m_algo;
+  ou::tf::option::ComboTraits::EMarketDirection m_eMarketDirection;
 
   pWatch_t m_pWatchUnderlying;
 
