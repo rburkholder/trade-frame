@@ -302,6 +302,9 @@ void LegNote::Parse( const std::string& s ) {
     throw std::runtime_error( "LegNote constructor, zero length string" );
   }
 
+  // To Think About:
+  // how long does it take to start this up?  can it be made static and re-entrant?
+  // maybe make a mutex around the parse statement?
   LegNoteParser<std::string::const_iterator> parser;
 
   std::string::const_iterator begin( s.begin() );
