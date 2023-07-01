@@ -72,6 +72,7 @@ void NoRiskInterestRateSeries::SetWatchOff() {
 
 void NoRiskInterestRateSeries::SaveSeries( const std::string& sPrefix ) {
   for ( vInterestRate_t::iterator iter = m_vInterestRate.begin(); m_vInterestRate.end() != iter; ++iter ) {
+    std::cout << "saving rate for " << iter->pWatch->GetInstrumentName() << std::endl;
     iter->pWatch->SaveSeries( sPrefix + "/" + m_sDescription );
   }
 }
