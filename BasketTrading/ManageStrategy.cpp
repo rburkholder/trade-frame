@@ -786,10 +786,10 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
             }
             assert( m_pValidateOptions );
 
-            const ou::tf::option::ComboTraits::E20DayDirection direction
+            const ou::tf::option::ComboTraits::EMarketDirection direction
               = ( m_dblPivot <= mid )
-              ? ou::tf::option::ComboTraits::E20DayDirection::Rising
-              : ou::tf::option::ComboTraits::E20DayDirection::Falling;
+              ? ou::tf::option::ComboTraits::EMarketDirection::Rising
+              : ou::tf::option::ComboTraits::EMarketDirection::Falling;
             const boost::gregorian::date dateBar( bar.DateTime().date() );
 
             if ( m_pValidateOptions->ValidateBidAsk(

@@ -35,7 +35,7 @@ namespace vertical { // vertical
 size_t LegCount();
 
 void ChooseLegs( // throw Chain exceptions
-  ComboTraits::E20DayDirection
+  ComboTraits::EMarketDirection
 , const mapChains_t& chains
 , boost::gregorian::date
 , const SpreadSpecs&
@@ -43,10 +43,10 @@ void ChooseLegs( // throw Chain exceptions
 , const fLegSelected_t&&
 );
 
-void FillLegNote( size_t ix, ComboTraits::E20DayDirection, LegNote::values_t& );
+void FillLegNote( size_t ix, ComboTraits::EMarketDirection, LegNote::values_t& );
 
 std::string Name(
-  ComboTraits::E20DayDirection
+  ComboTraits::EMarketDirection
 , const mapChains_t& chains
 , boost::gregorian::date
 , const SpreadSpecs&

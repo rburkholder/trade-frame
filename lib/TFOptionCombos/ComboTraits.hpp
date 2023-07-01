@@ -46,14 +46,12 @@ using pOrderCombo_t = ou::tf::OrderCombo::pOrderCombo_t;
 
 struct ComboTraits {
 
-  // TODO: refactor E20DayDirection into bull/bear for spread definitions
-  //   has substantial footprint in collar
-  enum class E20DayDirection { Unknown, Rising, Falling };
+  enum class EMarketDirection { Unknown, Rising, Falling };
 
   using fLegCount_t = std::function<size_t()>;
 
   using fChooseLegs_t = std::function<void(
-    E20DayDirection
+    EMarketDirection
   , const mapChains_t& chains
   , boost::gregorian::date
   , const SpreadSpecs&
@@ -62,11 +60,11 @@ struct ComboTraits {
   )>;
 
   using fFillLegNote_t = std::function<void(
-    size_t ix, E20DayDirection, LegNote::values_t&
+    size_t ix, EMarketDirection, LegNote::values_t&
   )>;
 
   using fName_t = std::function<std::string(
-    E20DayDirection
+    EMarketDirection
   , const mapChains_t& chains
   , boost::gregorian::date
   , const SpreadSpecs&
