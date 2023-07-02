@@ -40,11 +40,12 @@ struct Options {
   // shortest EMA
   int nMA1Periods;
 
-  // shortest EMA
   int nMA2Periods;
 
   // longest EMA
   int nMA3Periods;
+
+  int nStochasticPeriods;
 
   // force a simulation run
   bool bSimStart;
@@ -53,7 +54,9 @@ struct Options {
   std::string sGroupDirectory;
 
   Options()
-  : nPeriodWidth( 10 ), nMA1Periods( 8 ), nMA2Periods( 13 ), nMA3Periods( 21 )
+  : nPeriodWidth( 10 )
+  , nMA1Periods( 8 ), nMA2Periods( 13 ), nMA3Periods( 21 )
+  , nStochasticPeriods( 21 )
   , bSimStart( false )
   , nIbInstance( 1 )
   {}

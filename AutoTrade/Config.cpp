@@ -38,6 +38,7 @@ namespace {
   static const std::string sOption_MA1Periods( "ma1_periods" );
   static const std::string sOption_MA2Periods( "ma2_periods" );
   static const std::string sOption_MA3Periods( "ma3_periods" );
+  static const std::string sOption_StochasticPeriods( "stochastic_periods" );
   static const std::string sOption_SimStart( "sim_start" );
   static const std::string sOption_GroupDirectory( "group_directory" );
 
@@ -73,12 +74,16 @@ bool Load( const std::string& sFileName, Options& options ) {
       ( sOption_SymbolTrin.c_str(), po::value<std::string>( &options.sSymbol_Trin)->default_value( "" ), "indicator trin" )
 
       ( sOption_PeriodWidth.c_str(), po::value<int>( &options.nPeriodWidth), "period width (sec)" )
+
       ( sOption_MA1Periods.c_str(),  po::value<int>( &options.nMA1Periods), "ma1 (#periods)" )
       ( sOption_MA2Periods.c_str(),  po::value<int>( &options.nMA2Periods), "ma2 (#periods)" )
       ( sOption_MA3Periods.c_str(),  po::value<int>( &options.nMA3Periods), "ma3 (#periods)" )
 
+      ( sOption_StochasticPeriods.c_str(),  po::value<int>( &options.nStochasticPeriods), "stochastic (#periods)" )
+
+      ( sOption_GroupDirectory.c_str(), po::value<std::string>( &options.sGroupDirectory)->default_value( "" ), "hdf5 group directory, no trailing /" )
+
       ( sOption_SimStart.c_str(), po::value<bool>( &options.bSimStart)->default_value( false ), "auto start simulation" )
-      ( sOption_GroupDirectory.c_str(), po::value<std::string>( &options.sGroupDirectory)->default_value( "" ), "hdf5 group directory" )
 
       ;
 
@@ -102,9 +107,12 @@ bool Load( const std::string& sFileName, Options& options ) {
       bOk &= parse<std::string>( sFileName, vm, sOption_SymbolTrin, options.sSymbol_Trin );
 
       bOk &= parse<int>( sFileName, vm, sOption_PeriodWidth, options.nPeriodWidth );
+
       bOk &= parse<int>( sFileName, vm, sOption_MA1Periods,  options.nMA1Periods );
       bOk &= parse<int>( sFileName, vm, sOption_MA2Periods,  options.nMA2Periods );
       bOk &= parse<int>( sFileName, vm, sOption_MA3Periods,  options.nMA3Periods );
+
+      bOk &= parse<int>( sFileName, vm, sOption_StochasticPeriods,  options.nStochasticPeriods );
 
       bOk &= parse<bool>( sFileName, vm, sOption_SimStart, options.bSimStart );
       bOk &= parse<std::string>( sFileName, vm, sOption_GroupDirectory, options.sGroupDirectory );

@@ -34,6 +34,7 @@ period_width=5 #seconds
 ma1_periods=5
 ma2_periods=8
 ma3_periods=12
+stochastic_periods=17
 group_directory=/app/AutoTrade/20220223 20:05:28.214488-1
 sim_start=off
 ```

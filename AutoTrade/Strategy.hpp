@@ -48,6 +48,8 @@ namespace ou {
   class ChartDataView;
 }
 
+class Stochastic;
+
 class Strategy:
   public ou::tf::DailyTradeTimeFrame<Strategy>
 {
@@ -73,7 +75,8 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, Tick, Trin, PL };
+  enum EChartSlot { Price, Volume, Tick, Stoch, Trin, PL };
+
   enum class ETradeState {
     Init,  // initiaize state in current market
     Neutral, // netral state prior to active search
@@ -134,6 +137,12 @@ private:
 
   using vMA_t = std::vector<MA>;
   vMA_t m_vMA;
+
+  int m_nStochasticPeriods;
+  using pStochastic_t = std::unique_ptr<Stochastic>;
+  pStochastic_t m_pStochastic;
+
+  ou::ChartEntryMark m_cemStochastic;
 
   double m_dblMid;
   double m_dblLastTick;

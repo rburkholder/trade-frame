@@ -23,11 +23,18 @@
 
 #include <TFTrading/Watch.h>
 
+#include <TFBitsNPieces/Stochastic.hpp>
+
 #include "Config.hpp"
 #include "Strategy.hpp"
 
 using pWatch_t = ou::tf::Watch::pWatch_t;
 
+namespace {
+  static const int k_hi = 80;
+  static const int k_lo = 20;
+  //static const boost::posix_time::time_duration c_filter_stoch( 0, 0, 1 );
+}
 Strategy::Strategy( ou::ChartDataView& cdv, const config::Options& options )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
 , m_cdv( cdv )
@@ -56,6 +63,14 @@ Strategy::Strategy( ou::ChartDataView& cdv, const config::Options& options )
 
   m_cemZero.AddMark( 0.0, ou::Colour::Black,  "0" );
   m_cemOne.AddMark(  1.0, ou::Colour::Black,  "1" );
+
+  m_nStochasticPeriods = options.nStochasticPeriods;
+
+  m_cemStochastic.AddMark(  100, ou::Colour::Black,    "" );
+  m_cemStochastic.AddMark( k_hi, ou::Colour::Red,   boost::lexical_cast<std::string>( k_hi ) + "%" );
+  m_cemStochastic.AddMark(   50, ou::Colour::Green, "50%" );
+  m_cemStochastic.AddMark( k_lo, ou::Colour::Blue,  boost::lexical_cast<std::string>( k_lo ) + "%" );
+  m_cemStochastic.AddMark(    0, ou::Colour::Black,    "" );
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
@@ -91,6 +106,8 @@ void Strategy::SetupChart() {
 
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
+  m_cdv.Add( EChartSlot::Stoch, &m_cemStochastic );
+
   m_cdv.Add( EChartSlot::PL, &m_ceProfitLoss );
 
 }
@@ -117,6 +134,9 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   for ( vMA_t::value_type& ma: m_vMA ) {
     ma.AddToView( m_cdv );
   }
+
+  m_pStochastic = std::make_unique<Stochastic>( "", pWatch->GetQuotes(), m_nStochasticPeriods, td, ou::Colour::DeepSkyBlue );
+  m_pStochastic->AddToView( m_cdv , EChartSlot::Price, EChartSlot::Stoch );
 
   pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
   pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
