@@ -47,7 +47,7 @@ public:
   double MinLatest() const { return m_pIndicatorStochastic->Min(); }
   const std::string& MinName() const { return m_ceStochasticMin.GetName(); }
 
-  void RemoveFrmView( ou::ChartDataView& cdv, size_t price, size_t stoch );
+  void RemoveFromView( ou::ChartDataView& cdv, size_t price, size_t stoch );
 
 protected:
 private:

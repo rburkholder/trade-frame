@@ -48,7 +48,7 @@ void Stochastic::AddToView( ou::ChartDataView& cdv, size_t price, size_t stoch )
   cdv.Add( stoch, &m_ceStochastic );
 }
 
-void Stochastic::RemoveFrmView( ou::ChartDataView& cdv, size_t price, size_t stoch ) {
+void Stochastic::RemoveFromView( ou::ChartDataView& cdv, size_t price, size_t stoch ) {
   cdv.Remove( price, &m_ceStochasticMax );
   cdv.Remove( price, &m_ceStochasticMin );
   cdv.Remove( stoch, &m_ceStochastic );
