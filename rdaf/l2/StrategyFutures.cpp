@@ -54,7 +54,7 @@ using pWatch_t = ou::tf::Watch::pWatch_t;
 
 namespace {
   static const unsigned int max_ix = 10; // TODO need to obtain from elsewhere & sync with Symbols
-  static const int k_up = 80;
+  static const int k_hi = 80;
   static const int k_lo = 20;
   static const boost::posix_time::time_duration filter_stoch( 0, 0, 1 );
 }
@@ -98,7 +98,7 @@ Futures::Futures(
   m_ceProfit.SetColour( ou::Colour::Green );
 
   m_cemStochastic.AddMark(  100, ou::Colour::Black,    "" );
-  m_cemStochastic.AddMark( k_up, ou::Colour::Red,   boost::lexical_cast<std::string>( k_up ) + "%" );
+  m_cemStochastic.AddMark( k_hi, ou::Colour::Red,   boost::lexical_cast<std::string>( k_hi ) + "%" );
   m_cemStochastic.AddMark(   50, ou::Colour::Green, "50%" );
   m_cemStochastic.AddMark( k_lo, ou::Colour::Blue,  boost::lexical_cast<std::string>( k_lo ) + "%" );
   m_cemStochastic.AddMark(    0, ou::Colour::Black,    "" );

@@ -219,11 +219,7 @@ private:
   using vStochastic_t = std::vector<pStochastic_t>;
   vStochastic_t m_vStochastic;
 
-  //ou::tf::Prices m_pricesStochastic;
-  //ou::tf::hf::TSEMA<ou::tf::Price> m_emaStochastic;
-
   ou::ChartEntryMark m_cemStochastic;
-  //ou::ChartEntryIndicator m_ceStochastic;
 
   //HiPass m_rHiPass[4];
 
