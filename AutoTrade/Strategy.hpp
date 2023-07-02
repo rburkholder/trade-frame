@@ -144,6 +144,12 @@ private:
 
   ou::ChartEntryMark m_cemStochastic;
 
+  enum class EZigZag { EndPoint1, EndPoint2, LowFound, HighFound } m_eZigZag;
+  double m_dblEndPoint1;
+  double m_dblEndPoint2;
+  double m_dblZigZagDistance;
+  size_t m_nZigZagLegs;
+
   double m_dblMid;
   double m_dblLastTick;
   double m_dblLastTrin;

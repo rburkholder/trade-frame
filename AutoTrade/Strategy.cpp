@@ -33,7 +33,8 @@ using pWatch_t = ou::tf::Watch::pWatch_t;
 namespace {
   static const int k_hi = 80;
   static const int k_lo = 20;
-  //static const boost::posix_time::time_duration c_filter_stoch( 0, 0, 1 );
+  static const double c_zigzag_hi = 96.0;
+  static const double c_zigzag_lo =  4.0;
 }
 Strategy::Strategy( ou::ChartDataView& cdv, const config::Options& options )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
@@ -47,6 +48,7 @@ Strategy::Strategy( ou::ChartDataView& cdv, const config::Options& options )
 , m_bfQuotes01Sec(  1 )
 , m_stateTrade( ETradeState::Init )
 , m_dblMid {}, m_dblLastTick {}, m_dblLastTrin {}
+, m_eZigZag( EZigZag::EndPoint1 ), m_dblEndPoint1( 0.0 ), m_dblEndPoint2( 0.0 ), m_dblZigZagDistance( 0.0 ), m_nZigZagLegs( 0 )
 {
 
   assert( 0 < options.nPeriodWidth );
@@ -293,7 +295,57 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 
-  //TimeTick( bar );
+  double dblStochastic = m_pStochastic->Latest();
+  switch ( m_eZigZag ) {
+    case EZigZag::EndPoint1:
+      m_dblEndPoint1 = m_quote.Midpoint();
+      m_eZigZag = EZigZag::EndPoint2;
+      break;
+    case EZigZag::EndPoint2:
+      if ( c_zigzag_hi < dblStochastic ) {
+        m_eZigZag = EZigZag::HighFound;
+        m_dblEndPoint2 = m_quote.Bid();
+      }
+      else {
+        if ( c_zigzag_lo > dblStochastic ) {
+          m_eZigZag = EZigZag::LowFound;
+          m_dblEndPoint2 = m_quote.Ask();
+        }
+      }
+      break;
+    case EZigZag::HighFound:
+      if ( c_zigzag_hi < dblStochastic ) {
+        double bid = m_quote.Bid();
+        if ( m_dblEndPoint2 < bid ) m_dblEndPoint2 = bid;
+      }
+      else {
+        if ( c_zigzag_lo > dblStochastic ) {
+          m_nZigZagLegs++;
+          m_dblZigZagDistance += m_dblEndPoint2 - m_dblEndPoint1; // endpoint 2 higher than endpoint 1
+          m_dblEndPoint1 = m_dblEndPoint2;
+          m_dblEndPoint2 = m_quote.Bid();
+          m_eZigZag = EZigZag::LowFound;
+        }
+      }
+      break;
+    case EZigZag::LowFound:
+      if ( c_zigzag_lo > dblStochastic ) {
+        double ask = m_quote.Ask();
+        if ( m_dblEndPoint2 > ask ) m_dblEndPoint2 = ask;
+      }
+      else {
+        if ( c_zigzag_hi < dblStochastic ) {
+          m_nZigZagLegs++;
+          m_dblZigZagDistance += m_dblEndPoint1 - m_dblEndPoint2; // endpoint 1 higher than endpoint 2
+          m_dblEndPoint1 = m_dblEndPoint2;
+          m_dblEndPoint2 = m_quote.Ask();
+          m_eZigZag = EZigZag::HighFound;
+        }
+      }
+      break;
+  }
+
+  TimeTick( bar );
 }
 
 /*
@@ -532,6 +584,12 @@ void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_
   if ( m_pPosition ) {
     m_pPosition->ClosePosition();
   }
+
+  std::cout
+    << "zigzag has " << m_nZigZagLegs
+    << " legs with total travel of $" << m_dblZigZagDistance
+    << " averaging $" << m_dblZigZagDistance / m_nZigZagLegs << " per leg"
+    << std::endl;
 }
 
 void Strategy::SaveWatch( const std::string& sPrefix ) {
