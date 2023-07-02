@@ -12,33 +12,31 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include "ZigZag.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-ZigZag::ZigZag( void ) : 
-  m_dblFilterWidth( 1.0 ), 
+ZigZag::ZigZag() :
+  m_dblFilterWidth( 1.0 ),
   m_PatternState( EDirection::Init ),
   m_dblPatternPt0( 0 ), m_dblPatternPt1( 0 ),
   m_cntNewUp( 0 ), m_cntNewDown( 0 ), m_cntTurns( 0 )
   {
 }
 
-ZigZag::ZigZag( double FilterWidth ) : 
-  m_dblFilterWidth( FilterWidth ), 
+ZigZag::ZigZag( double FilterWidth ) :
+  m_dblFilterWidth( FilterWidth ),
   m_PatternState( EDirection::Init ),
   m_dblPatternPt0( 0 ), m_dblPatternPt1( 0 ),
   m_cntNewUp( 0 ), m_cntNewDown( 0 ), m_cntTurns( 0 )
   {
 }
 
-ZigZag::~ZigZag(void) {
+ZigZag::~ZigZag() {
 }
 
-void ZigZag::Check(boost::posix_time::ptime dt, double val) {
+void ZigZag::Check( boost::posix_time::ptime dt, double val ) {
   double dif;
 
   switch ( m_PatternState ) {
@@ -104,7 +102,7 @@ ZigZagTotalMovement::ZigZagTotalMovement( Quotes& quotes, double width )
   m_quotes.OnAppend.Add( MakeDelegate( this, &ZigZagTotalMovement::HandleQuote ) );
 }
 
-ZigZagTotalMovement::~ZigZagTotalMovement( void ) {
+ZigZagTotalMovement::~ZigZagTotalMovement() {
   m_quotes.OnAppend.Remove( MakeDelegate( this, &ZigZagTotalMovement::HandleQuote ) );
   ZigZag::SetOnPeakFound( 0 );
 }

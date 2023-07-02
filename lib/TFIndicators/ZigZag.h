@@ -35,12 +35,12 @@ namespace tf { // TradeFrame
 class ZigZag{
 public:
 
-  ZigZag( void );
-  ZigZag(double FilterWidth);
-  ~ZigZag(void);
+  ZigZag();
+  ZigZag( double FilterWidth );
+  ~ZigZag();
 
   void SetFilterWidth( double width ) { m_dblFilterWidth = width; };
-  double GetFilterWidth( void ) const { return m_dblFilterWidth; };
+  double GetFilterWidth() const { return m_dblFilterWidth; };
 
   void Check( ptime dt, double val );
 
@@ -48,7 +48,7 @@ public:
 
   typedef FastDelegate4<const ZigZag&, ptime, double, EDirection> OnPeakFoundHandler;
   void SetOnPeakFound( OnPeakFoundHandler function ) {
-    OnPeakFound = function; 
+    OnPeakFound = function;
   }
 
   typedef FastDelegate1<const ZigZag&> OnDecisionPointFoundHandler;
@@ -76,8 +76,8 @@ private:
 class ZigZagTotalMovement: public ZigZag {
 public:
   ZigZagTotalMovement( Quotes&, double );
-  ~ZigZagTotalMovement( void );
-  double Sum( void ) const { return m_sum; };
+  ~ZigZagTotalMovement();
+  double Sum() const { return m_sum; };
 protected:
 private:
   double m_sum;
