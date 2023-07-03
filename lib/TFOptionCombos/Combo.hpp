@@ -183,6 +183,7 @@ public:
   bool AreOrdersActive() const;
   void SaveSeries( const std::string& sPrefix );
 
+  void Open( pOrderCombo_t, const std::string& sComment );
   void Submit( pOrderCombo_t, const std::string& sComment );
 
 protected:

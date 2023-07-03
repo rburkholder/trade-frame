@@ -453,7 +453,7 @@ void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
                   });
               }
              );
-            m_pCombo->Submit( pOrderCombo, "ManageStrategy combo positions added" );
+            m_pCombo->Open( pOrderCombo, "ManageStrategy combo positions added" );
           }
         );
 
@@ -870,8 +870,8 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
 
                 m_pValidateOptions->ClearValidation(); // after positions created to keep watch in options from a quick stop/start
 
-                combo.Submit( pOrderCombo, "ManageStrategy Initial OrderCombo Executed" );
-                EmitInfo();
+                combo.Open( pOrderCombo, "ManageStrategy Initial OrderCombo Executed" );
+                //EmitInfo();
                 m_stateTrading = ETradingState::TSComboMonitor;
 
               } // m_fAuthorizeSimple

@@ -494,6 +494,10 @@ void Combo::DeactivatePositionOption( pPosition_t pPosition ) {
   m_fDeactivateOption( pOption );
 }
 
+void Combo::Open( pOrderCombo_t pOrderCombo, const std::string& sComment ) {
+  Submit( pOrderCombo, sComment ); // provides for future changes
+}
+
 void Combo::Submit( pOrderCombo_t pOrderCombo, const std::string& sComment ) {
 
   auto pair = m_setpOrderCombo_Active.insert( pOrderCombo );
@@ -502,7 +506,7 @@ void Combo::Submit( pOrderCombo_t pOrderCombo, const std::string& sComment ) {
 
   pOrderCombo->Submit(
     [this,iter,sComment](){ // fComboDone_t
-      BOOST_LOG_TRIVIAL(info) << "Combo::Submit: (done) " << sComment;
+      BOOST_LOG_TRIVIAL(info) << "Combo::Submit: (ordered) " << sComment;
       m_vOrderComboIter_CleanUp.push_back( iter );
     } );
 }
