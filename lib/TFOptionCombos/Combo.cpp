@@ -253,6 +253,8 @@ const LegNote::values_t& Combo::AddPosition(  pPosition_t pPositionNew ) {
 
     const std::string& sName( pWatch->GetInstrumentName() );
 
+    // TODO: need to test bid/ask spreads ensure orders can be executed
+
     vMenuActivation_t ma;
     ma.emplace_back( MenuActivation(
       "Statistics",
@@ -411,7 +413,7 @@ void Combo::InitTracker(
         pPositionOld->GetActiveSize(),  pPositionOld->GetActiveSide(),
         [](){} );
 
-      PositionNote( pPositionOld, LegNote::State::Closed );
+      PositionNote( pPositionOld, LegNote::State::Closing );
       DeactivatePositionOption( pPositionOld );
 
       Submit( pOrderCombo, "Combo::InitTracker position rolled" );
@@ -421,7 +423,7 @@ void Combo::InitTracker(
     [this]( pPosition_t pPositionOld ) { // fLegClose_t - response to Tick
       // leg will be removed in Tick
 
-      PositionNote( pPositionOld, LegNote::State::Closed );
+      PositionNote( pPositionOld, LegNote::State::Closing );
       DeactivatePositionOption( pPositionOld );
 
       pOrderCombo_t pOrderCombo = ou::tf::OrderCombo::Factory();
