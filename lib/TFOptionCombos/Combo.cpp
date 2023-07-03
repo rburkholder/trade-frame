@@ -400,20 +400,26 @@ void Combo::InitTracker(
       // leg will be removed in Tick
 
       const std::string sNotes( pPositionOld->Notes() );
+      LegNote ln( sNotes );
+      ln.SetState( LegNote::State::Opening );
+      PositionNote( pPositionOld, LegNote::State::Closing );
 
       pOrderCombo_t pOrderCombo = ou::tf::OrderCombo::Factory();
       pOrderCombo->CloseLeg(
         pPositionOld,
-        [](){} );
+        [this, pPositionOld]() mutable {
+          PositionNote( pPositionOld, LegNote::State::Closed );
+        } );
 
       pPosition_t pPosition;
-      pPosition = m_fConstructPosition( this, pOption, sNotes );
+      pPosition = m_fConstructPosition( this, pOption, ln.Encode() );
       pOrderCombo->AddLeg(
         pPosition,
         pPositionOld->GetActiveSize(),  pPositionOld->GetActiveSide(),
-        [](){} );
+        [this,pPosition]() mutable {
+          PositionNote( pPosition, LegNote::State::Open );
+        } );
 
-      PositionNote( pPositionOld, LegNote::State::Closing );
       DeactivatePositionOption( pPositionOld );
 
       Submit( pOrderCombo, "Combo::InitTracker position rolled" );
@@ -429,7 +435,9 @@ void Combo::InitTracker(
       pOrderCombo_t pOrderCombo = ou::tf::OrderCombo::Factory();
       pOrderCombo->CloseLeg(
         pPositionOld,
-        [](){} );
+        [this,pPositionOld]() mutable {
+          PositionNote( pPositionOld, LegNote::State::Closed );
+        } );
 
       Submit( pOrderCombo, "Combo::InitTracker old position closed" );
 
@@ -441,10 +449,12 @@ void Combo::InitTracker(
 void Combo::PositionNote( pPosition_t& pPosition, LegNote::State state ) {
   const std::string sNotes( pPosition->Notes() );
   LegNote ln( sNotes );
-  LegNote::values_t values( ln.Values() );
+  //LegNote::values_t values( ln.Values() );
 
-  values.m_state = state;
-  ln.Assign( values );
+  //values.m_state = state;
+  //ln.Assign( values );
+  //pPosition->SetNotes( ln.Encode() );
+  ln.SetState( state );
   pPosition->SetNotes( ln.Encode() );
 
   auto& instance( ou::tf::PortfolioManager::GlobalInstance() ); // NOTE this direct call!!
