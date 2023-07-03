@@ -83,9 +83,10 @@
 #include <wx/window.h>
 
 #include <TFOptionCombos/Collar.hpp>
-#include <TFOptionCombos/VerticalSpread.hpp>
 #include <TFOptionCombos/BackSpread.hpp>
 #include <TFOptionCombos/RiskReversal.hpp>
+#include <TFOptionCombos/CalendarSpread.hpp>
+#include <TFOptionCombos/VerticalSpread.hpp>
 
 #include "TFOptionCombos/Combo.hpp"
 using Combo = ou::tf::option::Combo;
@@ -222,6 +223,11 @@ ManageStrategy::ManageStrategy(
     case ou::tf::option::LegNote::Algo::CallBackSpread:
     case ou::tf::option::LegNote::Algo::PutBackSpread:
       ou::tf::option::spread::back::Bind( m_ct );
+      break;
+    case ou::tf::option::LegNote::Algo::CalendarSpread:
+    case ou::tf::option::LegNote::Algo::CalendarCall:
+    case ou::tf::option::LegNote::Algo::CalendarPut:
+      ou::tf::option::spread::calendar::Bind( m_ct );
       break;
     case ou::tf::option::LegNote::Algo::Existing:
       // see what happens if nullptr
@@ -853,6 +859,7 @@ void ManageStrategy::RHOption( const ou::tf::Bar& bar ) { // assumes one second 
                     ou::tf::option::LegNote::values_t lnValues;
                     assert( ou::tf::option::ComboTraits::EMarketDirection::Select != m_eMarketDirection );
                     m_ct.fFillLegNote( ix, m_eMarketDirection, lnValues ); // TODO: need to have the leg type provided by ValidateOptions
+                    //lnValues.m_state = ou::tf::option::LegNote::State::Opening;
                     ou::tf::option::LegNote ln( lnValues );
                     pPosition_t pPosition = m_fConstructPosition( idPortfolio, pOption, ln.Encode() );
                     assert( pPosition );
