@@ -58,6 +58,7 @@ public:
   , CreditSpread, /* ie */ BearCall, BullPut
   , ProtectedSynthetic, /* ie */ RiskReversal, RiskConversion
   , BackSpread, /* ie */ CallBackSpread, PutBackSpread  // 1 x 2 ratio
+  , CalendarSpread, CalendarCall, CalendarPut
   , _size
   };
 

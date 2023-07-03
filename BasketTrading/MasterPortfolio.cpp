@@ -620,6 +620,18 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
                 ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::PutBackSpread, ou::tf::option::ComboTraits::EMarketDirection::Falling );
               });
             pti->AppendMenuItem(
+              "Add Call Calendar Spread",
+              [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
+                std::cout << "Add Call Calendar Spread for: " << sUnderlying << std::endl;
+                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::CalendarCall, ou::tf::option::ComboTraits::EMarketDirection::Rising );
+              });
+            pti->AppendMenuItem(
+              "Add Put Calendar Spread",
+              [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
+                std::cout << "Add Put Calendar Spread for: " << sUnderlying << std::endl;
+                ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::CalendarPut, ou::tf::option::ComboTraits::EMarketDirection::Falling );
+              });
+            pti->AppendMenuItem(
               "IQFeed Name",
               [this,sUnderlying,sIqfSymbol]( ou::tf::TreeItem* pti ){
                 std::cout << "Lookup: " << sUnderlying << "=" << sIqfSymbol << std::endl;

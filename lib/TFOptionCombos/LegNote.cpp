@@ -80,6 +80,9 @@ namespace {
     , "BackSpread"
     , "CallBackSpread"
     , "PutBackSpread"
+    , "CalendarSpread"
+    , "CalendarCall"
+    , "CalendarPut"
   };
 }
 
@@ -145,6 +148,9 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
       ALGO_ADD( LegNote::Algo::BackSpread )
       ALGO_ADD( LegNote::Algo::CallBackSpread )
       ALGO_ADD( LegNote::Algo::PutBackSpread )
+      ALGO_ADD( LegNote::Algo::CalendarSpread )
+      ALGO_ADD( LegNote::Algo::CalendarCall )
+      ALGO_ADD( LegNote::Algo::CalendarPut )
       ;
 
     type =     qi::lit( "type=") >> type_;
