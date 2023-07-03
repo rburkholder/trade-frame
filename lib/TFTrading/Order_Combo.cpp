@@ -85,7 +85,7 @@ bool OrderCombo_TrackLeg::Tick( ptime dt ) {
       }
       else {
         state = State::done;
-        m_fLegDone();
+        if ( m_fLegDone ) m_fLegDone();
       }
       break;
     case State::done:
