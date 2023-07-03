@@ -836,6 +836,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy(
           [this]( pChartDataView_t p ){
             m_fSetChartDataView( p );
           },
+    // ManageStrategy::OptionRegistry
           uws.m_pOptionRegistry,
     // ManageStrategy::m_fInterfaceBookOptionChain
           [this,&uws]()->std::pair<wxWindow*,ou::tf::InterfaceBookOptionChain*>{
