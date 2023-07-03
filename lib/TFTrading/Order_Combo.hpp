@@ -52,12 +52,11 @@ private:
 
   enum class State { leg_add, leg_close, active, done } state;
 
-  pPosition_t pPosition;
-  uint32_t nQuantity;
-  ou::tf::OrderSide::EOrderSide side;
-  fLegDone_t fLegDone;
+  uint32_t m_nQuantity;
+  ou::tf::OrderSide::EOrderSide m_side;
+  fLegDone_t m_fLegDone;
 
-  MonitorOrder mo;
+  MonitorOrder m_mo;
 
 };
 

@@ -41,28 +41,28 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-// mo is MonitorOrder
+// m_mo is MonitorOrder
 
 OrderCombo_TrackLeg::OrderCombo_TrackLeg( pPosition_t pPosition_, uint32_t nQuantity_, ou::tf::OrderSide::EOrderSide side_, fLegDone_t&& fLegDone_ )
 : state( State::leg_add )
-, pPosition( pPosition_ ), nQuantity( nQuantity_ ), side( side_ ), fLegDone( std::move( fLegDone_ ) )
-, mo( pPosition_ )
+, m_nQuantity( nQuantity_ ), m_side( side_ ), m_fLegDone( std::move( fLegDone_ ) )
+, m_mo( pPosition_ )
 {}
 
 OrderCombo_TrackLeg::OrderCombo_TrackLeg( pPosition_t pPosition_, fLegDone_t&& fLegDone_ )
 : state( State::leg_close )
-, pPosition( pPosition_ ), nQuantity {}, fLegDone( std::move( fLegDone_ ) )
-, mo( pPosition_ )
+, m_nQuantity {}, m_fLegDone( std::move( fLegDone_ ) )
+, m_mo( pPosition_ )
 {}
 
 void OrderCombo_TrackLeg::Submit() {
 
   switch ( state ) {
     case State::leg_add:
-      mo.PlaceOrder( nQuantity, side );
+      m_mo.PlaceOrder( m_nQuantity, m_side );
       break;
-    case OrderCombo_TrackLeg::State::leg_close:
-      mo.ClosePosition();
+    case State::leg_close:
+      m_mo.ClosePosition();
       break;
     default:
       assert( false );
@@ -74,19 +74,19 @@ bool OrderCombo_TrackLeg::Tick( ptime dt ) {
 
   bool bDone( true ); // done once legs have transitioned away from 'active'
 
-  mo.Tick( dt );
+  m_mo.Tick( dt );
 
   switch ( state ) {
     case State::leg_add:
     case State::leg_close:
       break;
     case State::active:
-      if ( mo.IsActive() ) {
+      if ( m_mo.IsActive() ) {
         bDone = false;
       }
       else {
         state = State::done;
-        fLegDone();
+        m_fLegDone();
       }
       break;
     case State::done:
@@ -96,7 +96,7 @@ bool OrderCombo_TrackLeg::Tick( ptime dt ) {
 }
 
 void OrderCombo_TrackLeg::Cancel() {
-  mo.CancelOrder();
+  m_mo.CancelOrder();
 }
 
 // ==================
