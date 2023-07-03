@@ -92,9 +92,9 @@ void Underlying::SaveSeries( const std::string& sPrefix ) {
   m_pWatch->SaveSeries( sPrefix );
 }
 
-void Underlying::ReadDailyBars( const std::string& sDailyBarPath ) {
-  m_BollingerTransitions.ReadDailyBars( sDailyBarPath, m_cePivots );
-}
+//void Underlying::ReadDailyBars( const std::string& sDailyBarPath ) {
+  //m_BollingerTransitions.ReadDailyBars( sDailyBarPath, m_cePivots );
+//}
 
 void Underlying::PopulateChartDataView( pChartDataView_t pChartDataView ) {
   pChartDataView->Add( EChartSlot::Price, &m_cePrice );

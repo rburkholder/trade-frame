@@ -37,7 +37,7 @@
 #include <TFTrading/Watch.h>
 #include <TFTrading/Portfolio.h>
 
-#include <TFBitsNPieces/BollingerTransitions.h>
+//#include <TFBitsNPieces/BollingerTransitions.h>
 
 //#include "PivotCrossing.h"
 
@@ -58,7 +58,7 @@ public:
   Underlying( pWatch_t, pPortfolio_t );
   ~Underlying();
 
-  void ReadDailyBars( const std::string& sDailyBarPath );
+  //void ReadDailyBars( const std::string& sDailyBarPath ); // not referenced
   void SetPivots( double dblR2, double dblR1, double dblPV, double dblS1, double dblS2 );
   void PopulateChartDataView( pChartDataView_t ); // share data sets
   void PopulateChains( fGatherOptions_t&& );
@@ -104,7 +104,7 @@ private:
   ou::ChartEntryIndicator m_cePLRealized;
   ou::ChartEntryIndicator m_ceCommissionPaid;
 
-  ou::tf::BollingerTransitions m_BollingerTransitions;
+  //ou::tf::BollingerTransitions m_BollingerTransitions;
 
   void HandleQuote( const ou::tf::Quote& quote );
   void HandleTrade( const ou::tf::Trade& trade );
