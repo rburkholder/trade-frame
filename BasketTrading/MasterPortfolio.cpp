@@ -560,10 +560,10 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
 
         uws.ptiUnderlying = m_ptiTreeUnderlying->AppendChild(
           sUnderlying,
-          [this,&uws,sUnderlying]( ou::tf::TreeItem* pti ){
+          [this,&uws,sUnderlying]( ou::tf::TreeItem* pti ){ // fOnClick_t
             m_fSetChartDataView( uws.pUnderlying->GetChartDataView() );
           },
-          [this,sUnderlying,sIqfSymbol,&uws]( ou::tf::TreeItem* pti ){
+          [this,sUnderlying,sIqfSymbol,&uws]( ou::tf::TreeItem* pti ){ // fOnBuildPopUp_t
             pti->NewMenu();
             pti->AppendMenuItem(
               "Add Call Collar (flex)",
