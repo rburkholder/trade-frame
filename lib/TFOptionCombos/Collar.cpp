@@ -207,7 +207,7 @@ std::string Name(
 , const std::string& sUnderlying
 ) {
 
-  std::string sName( "clr-flx-" + sUnderlying );
+  std::string sName( "clr-" + sUnderlying );
   size_t ix {};
 
   switch ( direction ) {
