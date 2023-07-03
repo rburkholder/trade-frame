@@ -25,7 +25,7 @@ find_package(Boost ${TF_BOOST_VERSION} REQUIRED COMPONENTS program_options seria
 set(
   file_h
     BasketTrading.h
-    Config.h
+    Config.hpp
     LegSelected.h
     ManagePosition.h
     ManageStrategy.h

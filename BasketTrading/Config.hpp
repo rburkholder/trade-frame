@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    Config.h
+ * File:    Config.hpp
  * Author:  raymond@burkholder.net
  * Project: BasketTrading
  * Created: October 24, 2021 21:25

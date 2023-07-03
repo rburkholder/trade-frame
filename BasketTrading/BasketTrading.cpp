@@ -35,7 +35,7 @@
 #include <TFVuTrading/FrameControls.h>
 #include <TFVuTrading/PanelFinancialChart.h>
 
-#include "Config.h"
+#include "Config.hpp"
 #include "BasketTrading.h"
 #include "PanelPortfolioStats.h"
 
