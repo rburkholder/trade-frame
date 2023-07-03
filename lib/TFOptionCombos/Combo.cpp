@@ -486,16 +486,13 @@ void Combo::DeactivatePositionOption( pPosition_t pPosition ) {
 
 void Combo::Submit( pOrderCombo_t pOrderCombo, const std::string& sComment ) {
 
-  // TODO: need to confirm legs exist
-
   auto pair = m_setpOrderCombo_Active.insert( pOrderCombo );
-
   assert( pair.second );
   setpOrderCombo_t::iterator iter = pair.first;
 
   pOrderCombo->Submit(
     [this,iter,sComment](){ // fComboDone_t
-      BOOST_LOG_TRIVIAL(info) << "Combo::Submit: " << sComment;
+      BOOST_LOG_TRIVIAL(info) << "Combo::Submit: (done) " << sComment;
       m_vOrderComboIter_CleanUp.push_back( iter );
     } );
 }

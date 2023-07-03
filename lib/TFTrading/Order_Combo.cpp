@@ -56,7 +56,6 @@ OrderCombo_TrackLeg::OrderCombo_TrackLeg( pPosition_t pPosition_, fLegDone_t&& f
 {}
 
 void OrderCombo_TrackLeg::Submit() {
-
   switch ( state ) {
     case State::leg_add:
       m_mo.PlaceOrder( m_nQuantity, m_side );
@@ -155,18 +154,22 @@ void OrderCombo::CloseLeg( pPosition_t pPosition, fLegDone_t&& fLegDone ) {
 }
 
 void OrderCombo::Submit( fComboDone_t&& fComboDone ) {
-
-  assert( EState::loading == m_state );
-  m_state = EState::placing;
-
-  m_fComboDone = std::move( fComboDone );
-
-  for ( vTrack_t::value_type& entry: m_vTrack ) {
-    entry.Submit();
+  if ( EState::bare == m_state ) {
+    std::cout << "OrderCombo::Submit: no legs found" << std::endl;
+    fComboDone();
   }
+  else {
+    assert( EState::loading == m_state );
+    m_state = EState::placing;
 
-  m_state = EState::monitoring;
+    m_fComboDone = std::move( fComboDone );
 
+    for ( vTrack_t::value_type& entry: m_vTrack ) {
+      entry.Submit();
+    }
+
+    m_state = EState::monitoring;
+  }
 }
 
 void OrderCombo::Tick( ptime dt ) {
