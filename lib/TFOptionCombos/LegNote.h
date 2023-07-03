@@ -33,7 +33,7 @@ namespace option { // options
 class LegNote {
 public:
 
-  enum class State { Open, Expired, Closed };
+  enum class State { Opening, Open, Expired, Closing, Closed };
   enum class Type { // NOTE: update rName_Type, relies on this order
     Neutral = 0
   , SynthLong

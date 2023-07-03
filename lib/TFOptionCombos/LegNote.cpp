@@ -108,8 +108,10 @@ struct LegNoteParser: qi::grammar<Iterator, values_t()> {
       ;
 
     state_.add
+      ( "opening", LegNote::State::Opening )
       ( "open",    LegNote::State::Open )
       ( "expired", LegNote::State::Expired )
+      ( "closing", LegNote::State::Closing )
       ( "closed",  LegNote::State::Closed )
       ;
 
@@ -231,8 +233,14 @@ const std::string LegNote::Encode() const {
 
   ss << ",state=";
   switch ( m_values.m_state ) {
+    case State::Opening:
+      ss << "opening";
+      break;
     case State::Open:
       ss << "open";
+      break;
+    case State::Closing:
+      ss << "closing";
       break;
     case State::Closed:
       ss << "closed";
