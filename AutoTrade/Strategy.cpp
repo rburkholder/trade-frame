@@ -125,9 +125,12 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   m_cdv.SetNames( "Moving Average Strategy", pWatch->GetInstrument()->GetInstrumentName() );
 
-  SetupChart();
+  const time_duration td = time_duration( 0, 0, m_nPeriodWidth );
 
-  time_duration td = time_duration( 0, 0, m_nPeriodWidth );
+  m_pStochastic = std::make_unique<Stochastic>( "", pWatch->GetQuotes(), m_nStochasticPeriods, td, ou::Colour::DeepSkyBlue );
+  m_pStochastic->AddToView( m_cdv , EChartSlot::Price, EChartSlot::Stoch );
+
+  SetupChart();
 
   m_vMA.emplace_back( MA( pWatch->GetQuotes(), m_vMAPeriods[0], td, ou::Colour::Gold,  "ma1" ) );
   m_vMA.emplace_back( MA( pWatch->GetQuotes(), m_vMAPeriods[1], td, ou::Colour::Coral, "ma2" ) );
@@ -136,9 +139,6 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
   for ( vMA_t::value_type& ma: m_vMA ) {
     ma.AddToView( m_cdv );
   }
-
-  m_pStochastic = std::make_unique<Stochastic>( "", pWatch->GetQuotes(), m_nStochasticPeriods, td, ou::Colour::DeepSkyBlue );
-  m_pStochastic->AddToView( m_cdv , EChartSlot::Price, EChartSlot::Stoch );
 
   pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
   pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
