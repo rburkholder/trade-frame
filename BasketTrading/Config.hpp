@@ -40,6 +40,13 @@ struct Options {
   boost::gregorian::days nDaysFront;
   boost::gregorian::days nDaysBack;
 
+  size_t nStochasticSeconds;
+
+  Options()
+  : nDaysFront( 1 ), nDaysBack( 7 )
+  , ib_client_id( 1 ), nStochasticSeconds( 300 )
+   {}
+
 };
 
 bool Load( Options& );
