@@ -82,6 +82,8 @@
 
 #include <wx/window.h>
 
+#include <TFTrading/PortfolioManager.h>
+
 #include <TFOptionCombos/Collar.hpp>
 #include <TFOptionCombos/BackSpread.hpp>
 #include <TFOptionCombos/RiskReversal.hpp>
@@ -433,7 +435,7 @@ void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
                         break;
                     }
 
-                    lnValues.m_state = ou::tf::option::LegNote::State::Open;
+                    lnValues.m_state = ou::tf::option::LegNote::State::Opening;
                     assert( ou::tf::option::LegNote::Algo::Unknown != m_algo );
                     if ( ou::tf::option::LegNote::Algo::Existing == m_algo ) {
                       std::cout << "Need to fix app restart for Algo::Existing " << option.GetInstrument()->GetInstrumentName() << std::endl;
@@ -449,7 +451,16 @@ void ManageStrategy::SetTreeItem( ou::tf::TreeItem* ptiSelf ) {
                     assert( pPosition );
                     m_pCombo->AddPosition( pPosition );
 
-                    pOrderCombo->AddLeg( pPosition, quan, side, [](){} /* fLegDone_t&& */ );
+                    pOrderCombo->AddLeg(
+                      pPosition, quan, side,
+                      [pPosition](){ // fLegDone_t&&
+                        const std::string sNotes( pPosition->Notes() );
+                        ou::tf::option::LegNote ln( sNotes );
+                        ln.SetState( ou::tf::option::LegNote::State::Open );
+                        pPosition->SetNotes( ln.Encode() );
+                        auto& instance( ou::tf::PortfolioManager::GlobalInstance() ); // NOTE this direct call!!
+                        instance.PositionUpdateNotes( pPosition );
+                      } );
                   });
               }
              );
