@@ -59,6 +59,7 @@ bool AppBasketTrading::OnInit() {
   if ( Load( config ) ) {
 
     m_dateTrading = config.dateTrading;
+    m_nStochasticSeconds = config.nStochasticSeconds;
     m_spread_specs = ou::tf::option::SpreadSpecs( config.nDaysFront, config.nDaysBack );
     m_dtLatestEod = boost::posix_time::ptime( config.dateHistory, time_duration( 23, 59, 59 ) );
     m_vSymbol = std::move( config.vSymbol );
@@ -200,6 +201,7 @@ void AppBasketTrading::BuildMasterPortfolio() {
 
   m_pMasterPortfolio = std::make_unique<MasterPortfolio>(
     m_dateTrading
+  , m_nStochasticSeconds
   , m_spread_specs
   , std::move( m_vSymbol )
     // aggregation portfolio

@@ -66,6 +66,7 @@ wxSize  MasterPortfolio::m_sizeFramePanelComboOrder;
 
 MasterPortfolio::MasterPortfolio(
   boost::gregorian::date dateTrading
+, size_t nStochasticSeconds
 , ou::tf::option::SpreadSpecs spread_specs // from config file
 , vSymbol_t&& vSymbol
 , pPortfolio_t pMasterPortfolio
@@ -76,6 +77,7 @@ MasterPortfolio::MasterPortfolio(
 : m_bStarted( false )
 , m_nSharesTrading( 0 )
 , m_dateTrading( dateTrading )
+, m_nStochasticSeconds( nStochasticSeconds )
 , m_spread_specs( spread_specs )
 , m_vSymbol( std::move( vSymbol ) )
 , m_pMasterPortfolio( pMasterPortfolio )
@@ -498,7 +500,7 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
       Add( pPortfolioUnderlying );  // update the archive
     }
 
-    pUnderlying_t pUnderlying = std::make_unique<Underlying>( pWatch, pPortfolioUnderlying );
+    pUnderlying_t pUnderlying = std::make_unique<Underlying>( pWatch, pPortfolioUnderlying, m_nStochasticSeconds );
 
     auto result
       = m_mapUnderlyingWithStrategies.emplace(

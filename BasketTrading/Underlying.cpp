@@ -19,11 +19,19 @@
  * Created on 2021/06/19 19:41
  */
 
+#include <TFBitsNPieces/Stochastic.hpp>
+
 #include "Underlying.h"
 
+namespace {
+  static const int k_hi = 80;
+  static const int k_lo = 20;
+}
+
 Underlying::Underlying(
-  pWatch_t pWatch,
-  pPortfolio_t pPortfolio
+  pWatch_t pWatch
+, pPortfolio_t pPortfolio
+, size_t nStochasticSeconds
 )
 :
   m_pWatch( pWatch ),
@@ -58,6 +66,21 @@ Underlying::Underlying(
   m_pChartDataView->Add( EChartSlot::PL, &m_cePLUnRealized );
   m_pChartDataView->Add( EChartSlot::PL, &m_cePLRealized );
   m_pChartDataView->Add( EChartSlot::PL, &m_ceCommissionPaid );
+
+  m_nStochasticPeriods = nStochasticSeconds;
+
+  static const time_duration td = time_duration( 0, 0, 1 );
+
+  m_pStochastic = std::make_unique<Stochastic>( "", pWatch->GetQuotes(), nStochasticSeconds, td, ou::Colour::DeepSkyBlue );
+  m_pStochastic->AddToView( *m_pChartDataView, EChartSlot::Price, EChartSlot::Stoch );
+
+  m_cemStochastic.AddMark(  100, ou::Colour::Black,    "" );
+  m_cemStochastic.AddMark( k_hi, ou::Colour::Red,   boost::lexical_cast<std::string>( k_hi ) + "%" );
+  m_cemStochastic.AddMark(   50, ou::Colour::Green, "50%" );
+  m_cemStochastic.AddMark( k_lo, ou::Colour::Blue,  boost::lexical_cast<std::string>( k_lo ) + "%" );
+  m_cemStochastic.AddMark(    0, ou::Colour::Black,    "" );
+
+  m_pChartDataView->Add( EChartSlot::Stoch, &m_cemStochastic );
 
   m_bfTrades06Sec.SetOnBarComplete( MakeDelegate( this, &Underlying::HandleBarTrades06Sec ) );
 

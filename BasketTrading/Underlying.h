@@ -46,6 +46,8 @@
  //  2) gex calcs
  //  3) structures common to assigned strategies
 
+class Stochastic;
+
 class Underlying {
 public:
 
@@ -55,7 +57,7 @@ public:
   using fGatherOptions_t = ou::tf::option::fGatherOptions_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
-  Underlying( pWatch_t, pPortfolio_t );
+  Underlying( pWatch_t, pPortfolio_t, size_t nStochasticSeconds );
   ~Underlying();
 
   //void ReadDailyBars( const std::string& sDailyBarPath ); // not referenced
@@ -82,7 +84,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, PL, Tick };
+  enum EChartSlot { Price, Volume, PL, Stoch };
 
   using gex_t = ou::tf::option::Aggregate;
 
@@ -103,6 +105,12 @@ private:
   ou::ChartEntryIndicator m_cePLUnRealized;
   ou::ChartEntryIndicator m_cePLRealized;
   ou::ChartEntryIndicator m_ceCommissionPaid;
+
+  int m_nStochasticPeriods;
+  using pStochastic_t = std::unique_ptr<Stochastic>;
+  pStochastic_t m_pStochastic;
+
+  ou::ChartEntryMark m_cemStochastic;
 
   //ou::tf::BollingerTransitions m_BollingerTransitions;
 

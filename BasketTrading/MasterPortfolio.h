@@ -88,6 +88,7 @@ public:
 
   MasterPortfolio(
     boost::gregorian::date dateTrading // from config file
+  , size_t nStochasticSeconds
   , ou::tf::option::SpreadSpecs // from config file
   , vSymbol_t&& vSymbol // from config file? - maybe just send config file?
   , pPortfolio_t pMasterPortfolio
@@ -138,6 +139,7 @@ private:
 
   bool m_bStarted;
 
+  size_t m_nStochasticSeconds;
   boost::gregorian::date m_dateTrading;  // for use in DailyTradeTimeFrame
   ou::tf::option::SpreadSpecs m_spread_specs;
   ptime m_dtLatestEod;
