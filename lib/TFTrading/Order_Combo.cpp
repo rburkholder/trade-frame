@@ -181,7 +181,7 @@ void OrderCombo::Tick( ptime dt ) {
         bDone &= entry.Tick( dt );
       }
       if ( bDone ) {
-        m_fComboDone();
+        if ( m_fComboDone ) m_fComboDone();
         m_state = EState::done;
       }
       }
