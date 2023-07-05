@@ -235,7 +235,9 @@ const LegNote::values_t& Combo::AddPosition(  pPosition_t pPositionNew ) {
   ou::tf::Leg leg;
   const LegNote::values_t& legValues( leg.SetPosition( pPositionNew ) );
 
-  if ( LegNote::State::Open == legValues.m_state ) {
+  if ( ( LegNote::State::Open == legValues.m_state )
+    || ( LegNote::State::Opening == legValues.m_state )
+  ) {
 
     mapComboLeg_t::iterator iterLeg;
 
@@ -303,7 +305,7 @@ const LegNote::values_t& Combo::AddPosition(  pPosition_t pPositionNew ) {
   }
   else {
     BOOST_LOG_TRIVIAL(info)
-      << "Combo::SetPosition "
+      << "Combo::AddPosition "
       << pPositionNew->GetInstrument()->GetInstrumentName()
       << " not open"
       ;
