@@ -106,9 +106,6 @@ private:
   ou::ChartEntryIndicator m_cePLRealized;
   ou::ChartEntryIndicator m_ceCommissionPaid;
 
-  size_t m_nPeriodWidth;
-  size_t m_nStochasticPeriods;
-
   using pStochastic_t = std::unique_ptr<Stochastic>;
   pStochastic_t m_pStochastic;
 

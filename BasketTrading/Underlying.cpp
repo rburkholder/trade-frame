@@ -61,6 +61,15 @@ Underlying::Underlying(
   m_cePLRealized.SetName( "P/L Realized" );
   m_ceCommissionPaid.SetName( "Commissions Paid" );
 
+  m_cemStochastic.AddMark(  100, ou::Colour::Black,    "" );
+  m_cemStochastic.AddMark( k_hi, ou::Colour::Red,   boost::lexical_cast<std::string>( k_hi ) + "%" );
+  m_cemStochastic.AddMark(   50, ou::Colour::Green, "50%" );
+  m_cemStochastic.AddMark( k_lo, ou::Colour::Blue,  boost::lexical_cast<std::string>( k_lo ) + "%" );
+  m_cemStochastic.AddMark(    0, ou::Colour::Black,    "" );
+
+  // this needs to come prior to PopulateChartDataView
+  m_pChartDataView->Add( EChartSlot::Stoch, &m_cemStochastic );
+
   PopulateChartDataView( m_pChartDataView );
 
   m_pChartDataView->Add( EChartSlot::PL, &m_cePLCurrent );
@@ -70,21 +79,10 @@ Underlying::Underlying(
 
   m_bfTrades06Sec.SetOnBarComplete( MakeDelegate( this, &Underlying::HandleBarTrades06Sec ) );
 
-  m_nPeriodWidth = nPeriodWidth;
-  m_nStochasticPeriods = nStochasticPeriods;
+  const time_duration td = time_duration( 0, 0, nPeriodWidth );
 
-  static const time_duration td = time_duration( 0, 0, nPeriodWidth );
-
-  m_pStochastic = std::make_unique<Stochastic>( "", pWatch->GetQuotes(), m_nStochasticPeriods, td, ou::Colour::DeepSkyBlue );
+  m_pStochastic = std::make_unique<Stochastic>( "", pWatch->GetQuotes(), nStochasticPeriods, td, ou::Colour::DeepSkyBlue );
   m_pStochastic->AddToView( *m_pChartDataView, EChartSlot::Price, EChartSlot::Stoch );
-
-  m_cemStochastic.AddMark(  100, ou::Colour::Black,    "" );
-  m_cemStochastic.AddMark( k_hi, ou::Colour::Red,   boost::lexical_cast<std::string>( k_hi ) + "%" );
-  m_cemStochastic.AddMark(   50, ou::Colour::Green, "50%" );
-  m_cemStochastic.AddMark( k_lo, ou::Colour::Blue,  boost::lexical_cast<std::string>( k_lo ) + "%" );
-  m_cemStochastic.AddMark(    0, ou::Colour::Black,    "" );
-
-  m_pChartDataView->Add( EChartSlot::Stoch, &m_cemStochastic );
 
   m_pWatch->OnQuote.Add( MakeDelegate( this, &Underlying::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &Underlying::HandleTrade ) );
