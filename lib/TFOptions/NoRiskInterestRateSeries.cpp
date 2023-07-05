@@ -12,6 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+#include <set>
 #include <algorithm>
 
 #include <boost/assign/std/vector.hpp>
@@ -71,9 +72,15 @@ void NoRiskInterestRateSeries::SetWatchOff() {
 }
 
 void NoRiskInterestRateSeries::SaveSeries( const std::string& sPrefix ) {
+  using setName_t = std::set<std::string>;
+  setName_t setName; // ignore duplicates
   for ( vInterestRate_t::iterator iter = m_vInterestRate.begin(); m_vInterestRate.end() != iter; ++iter ) {
-    std::cout << "saving rate for " << iter->pWatch->GetInstrumentName() << std::endl;
-    iter->pWatch->SaveSeries( sPrefix + "/" + m_sDescription );
+    const std::string& sName( iter->pWatch->GetInstrumentName() );
+    if ( setName.end() == setName.find( sName ) ) {
+      setName.emplace( sName );
+      std::cout << "  saving rate for " << sName << std::endl;
+      iter->pWatch->SaveSeries( sPrefix + "/" + m_sDescription );
+    }
   }
 }
 
