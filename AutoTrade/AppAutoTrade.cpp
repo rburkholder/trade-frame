@@ -162,6 +162,11 @@ bool AppAutoTrade::OnInit() {
   vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppAutoTrade::HandleMenuActionSaveValues ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
+  vItems.clear();
+  vItems.push_back( new mi( "Stop", MakeDelegate( this, &AppAutoTrade::HandleMenuActionStopChart ) ) );
+  vItems.push_back( new mi( "Start", MakeDelegate( this, &AppAutoTrade::HandleMenuActionStartChart ) ) );
+  m_pFrameMain->AddDynamicMenu( "Chart", vItems );
+
   if ( !boost::filesystem::exists( c_sTimeZoneSpec ) ) {
     std::cout << "Required file does not exist:  " << c_sTimeZoneSpec << std::endl;
   }
@@ -203,6 +208,14 @@ void AppAutoTrade::HandleMenuActionSaveValues() {
       std::cout << "  ... Done " << std::endl;
     }
   );
+}
+
+void AppAutoTrade::HandleMenuActionStopChart() {
+  m_pWinChartView->SetChartDataView( nullptr );
+}
+
+void AppAutoTrade::HandleMenuActionStartChart() {
+  m_pWinChartView->SetChartDataView( &m_ChartDataView );
 }
 
 void AppAutoTrade::ConstructLiveInstrument() {

@@ -94,6 +94,9 @@ private:
   void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();
 
+  void HandleMenuActionStopChart();
+  void HandleMenuActionStartChart();
+
   void ConstructLiveInstrument();
   void ConstructSimInstrument();
 
