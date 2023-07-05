@@ -31,7 +31,8 @@ namespace {
 Underlying::Underlying(
   pWatch_t pWatch
 , pPortfolio_t pPortfolio
-, size_t nStochasticSeconds
+, size_t nPeriodWidth
+, size_t nStochasticPeriods
 )
 :
   m_pWatch( pWatch ),
@@ -67,11 +68,14 @@ Underlying::Underlying(
   m_pChartDataView->Add( EChartSlot::PL, &m_cePLRealized );
   m_pChartDataView->Add( EChartSlot::PL, &m_ceCommissionPaid );
 
-  m_nStochasticPeriods = nStochasticSeconds;
+  m_bfTrades06Sec.SetOnBarComplete( MakeDelegate( this, &Underlying::HandleBarTrades06Sec ) );
 
-  static const time_duration td = time_duration( 0, 0, 1 );
+  m_nPeriodWidth = nPeriodWidth;
+  m_nStochasticPeriods = nStochasticPeriods;
 
-  m_pStochastic = std::make_unique<Stochastic>( "", pWatch->GetQuotes(), nStochasticSeconds, td, ou::Colour::DeepSkyBlue );
+  static const time_duration td = time_duration( 0, 0, nPeriodWidth );
+
+  m_pStochastic = std::make_unique<Stochastic>( "", pWatch->GetQuotes(), m_nStochasticPeriods, td, ou::Colour::DeepSkyBlue );
   m_pStochastic->AddToView( *m_pChartDataView, EChartSlot::Price, EChartSlot::Stoch );
 
   m_cemStochastic.AddMark(  100, ou::Colour::Black,    "" );
@@ -81,8 +85,6 @@ Underlying::Underlying(
   m_cemStochastic.AddMark(    0, ou::Colour::Black,    "" );
 
   m_pChartDataView->Add( EChartSlot::Stoch, &m_cemStochastic );
-
-  m_bfTrades06Sec.SetOnBarComplete( MakeDelegate( this, &Underlying::HandleBarTrades06Sec ) );
 
   m_pWatch->OnQuote.Add( MakeDelegate( this, &Underlying::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &Underlying::HandleTrade ) );

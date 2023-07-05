@@ -44,7 +44,8 @@ bool Load( Options& options ) {
     static const std::string sOption_DateTrading( "date_trading" );
     static const std::string sOption_DaysFront( "days_front" );
     static const std::string sOption_DaysBack( "days_back" );
-    static const std::string sOption_StochasticSeconds( "stochastic_seconds" );
+    static const std::string sOption_PeriodWidth( "period_width" );
+    static const std::string sOption_StochasticPeriods( "stochastic_periods" );
 
     std::string sDateHistory;
     std::string sDateTrading;
@@ -59,7 +60,8 @@ bool Load( Options& options ) {
       ( sOption_DateTrading.c_str(), po::value<std::string>(&sDateTrading), "trading date")
       ( sOption_DaysFront.c_str(), po::value<unsigned int>(&nDaysFront), "minimum front month days in future")
       ( sOption_DaysBack.c_str(), po::value<unsigned int>(&nDaysBack), "minimum back month days in future")
-      ( sOption_StochasticSeconds.c_str(), po::value<size_t>(&options.nStochasticSeconds), "stochastic (seconds)" )
+      ( sOption_PeriodWidth.c_str(), po::value<size_t>( &options.nPeriodWidth), "period width (sec)" )
+      ( sOption_StochasticPeriods.c_str(), po::value<size_t>(&options.nStochasticPeriods), "stochastic (#periods)" )
       ;
     po::variables_map vm;
     //po::store( po::parse_command_line( argc, argv, config ), vm );
@@ -130,12 +132,21 @@ bool Load( Options& options ) {
       BOOST_LOG_TRIVIAL(error) << sFilename << " missing '" << sOption_DaysBack << "='";
     }
 
-    if ( 0 < vm.count( sOption_StochasticSeconds ) ) {
-      options.nStochasticSeconds = vm[sOption_StochasticSeconds].as<size_t>();
-      BOOST_LOG_TRIVIAL(info) << "stochastic_seconds " << options.nStochasticSeconds;
+    if ( 0 < vm.count( sOption_PeriodWidth ) ) {
+      options.nPeriodWidth = vm[sOption_PeriodWidth].as<size_t>();
+      BOOST_LOG_TRIVIAL(info) << "period width (seconds) " << options.nPeriodWidth;
     }
     else {
-      BOOST_LOG_TRIVIAL(error) << sFilename << " missing '" << sOption_StochasticSeconds << "='";
+      BOOST_LOG_TRIVIAL(error) << sFilename << " missing '" << sOption_PeriodWidth << "='";
+      //bOk = false; // uses default otherwise
+    }
+
+    if ( 0 < vm.count( sOption_StochasticPeriods ) ) {
+      options.nStochasticPeriods = vm[sOption_StochasticPeriods].as<size_t>();
+      BOOST_LOG_TRIVIAL(info) << "stochastic (#periods) " << options.nStochasticPeriods;
+    }
+    else {
+      BOOST_LOG_TRIVIAL(error) << sFilename << " missing '" << sOption_StochasticPeriods << "='";
       //bOk = false; // uses default otherwise
     }
 

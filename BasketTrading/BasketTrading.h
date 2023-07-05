@@ -71,7 +71,8 @@ private:
   using pPosition_t  = ou::tf::PortfolioManager::pPosition_t;
 
   boost::gregorian::date m_dateTrading; // save the config file instead?
-  size_t m_nStochasticSeconds;
+  size_t m_nPeriodWidth;
+  size_t m_nStochasticPeriods;
   ou::tf::option::SpreadSpecs m_spread_specs; // save the config file instead?
   ptime m_dtLatestEod;
   vSymbol_t m_vSymbol;

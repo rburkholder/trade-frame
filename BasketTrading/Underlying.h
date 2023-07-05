@@ -57,7 +57,7 @@ public:
   using fGatherOptions_t = ou::tf::option::fGatherOptions_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
-  Underlying( pWatch_t, pPortfolio_t, size_t nStochasticSeconds );
+  Underlying( pWatch_t, pPortfolio_t, size_t nPeriodWidth, size_t nStochasticPeriodss );
   ~Underlying();
 
   //void ReadDailyBars( const std::string& sDailyBarPath ); // not referenced
@@ -106,7 +106,9 @@ private:
   ou::ChartEntryIndicator m_cePLRealized;
   ou::ChartEntryIndicator m_ceCommissionPaid;
 
-  int m_nStochasticPeriods;
+  size_t m_nPeriodWidth;
+  size_t m_nStochasticPeriods;
+
   using pStochastic_t = std::unique_ptr<Stochastic>;
   pStochastic_t m_pStochastic;
 
