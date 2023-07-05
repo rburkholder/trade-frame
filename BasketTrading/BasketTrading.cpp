@@ -323,7 +323,7 @@ void AppBasketTrading::HandleButtonClosePositions() {
 void AppBasketTrading::HandleButtonSave(void) {
   CallAfter(
     [this](){
-      std::cout << "Saving ... ";
+      std::cout << "Saving ... " << std::endl;
       if ( m_worker.joinable() ) m_worker.join(); // need to finish off any previous thread
       m_worker = std::thread(
         [this](){
