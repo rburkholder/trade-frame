@@ -49,7 +49,7 @@ protected:
 private:
 
   static const std::size_t c_nTimeSteps = 4;
-  static const std::size_t c_nStrideSize = 2;
+  static const std::size_t c_nStrideSize = 2; // based upon #elements in struct Input
   static const std::size_t c_nInputLayerNodes = c_nTimeSteps * c_nStrideSize;
   static const std::size_t c_nHiddenLayerNodes = c_nInputLayerNodes * 2;
   static const std::size_t c_nOutputLayerNodes = 3;

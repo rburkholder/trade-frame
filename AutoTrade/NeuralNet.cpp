@@ -35,10 +35,11 @@ NeuralNet::NeuralNet()
 NeuralNet::~NeuralNet() {}
 
 void NeuralNet::SetInitialState() {
-  m_matHiddenLayerWeights     = matHiddenLayerWeights_t::Random();
-  m_vecHiddenLayerBiasWeights = vecHiddenLayer_t::Random();
-  m_matOutputLayerWeights     = matOutputLayerWeights_t::Random();
-  m_vecOutputLayerBiasWeights = vecOutputLayer_t::Random();
+  // 0.5 to cut -1.0 .. +1.0 down to -0.5 .. +0.5
+  m_matHiddenLayerWeights     = 0.5 * matHiddenLayerWeights_t::Random();
+  m_vecHiddenLayerBiasWeights = 0.5 * vecHiddenLayer_t::Random();
+  m_matOutputLayerWeights     = 0.5 * matOutputLayerWeights_t::Random();
+  m_vecOutputLayerBiasWeights = 0.5 * vecOutputLayer_t::Random();
 }
 
 void NeuralNet::TrainingStepPattern( const Input& input, const Output& expected ) {
@@ -67,6 +68,8 @@ void NeuralNet::TrainingStepPattern( const Input& input, const Output& expected 
 }
 
 namespace {
+
+  // this book covered the implementation details, as well as the partial deriviatives of the sigmoid functions
   // 0133341860 1994 Fundamentals of Neural Networks: Architectures, Algorithms, and Applications.pdf
   // page 291 - 296
 
@@ -126,7 +129,7 @@ void NeuralNet::TrainingStep() {
   const double t3 = m_outputExpected.sell;     const double z3 = m_vecOutputLayer[ 2 ];
 
   // TODO: to improve the cost function, replace mse with actual trading p/l mse
-  //   but isn't used in this version, just diff between expected (t) and calculated (z)
+  // TODO: after each epoch, output error results
 
   double mse {}; // mean squared error
   double diff = t1 - z1;
@@ -175,3 +178,8 @@ void NeuralNet::TrainingStep() {
   m_vecOutputLayerBiasWeights += vecOutputBiasCorrection;
 
 }
+
+// Neural Networks Math by Michael Taylor: useful for understanding the chained partial derivative implications
+
+// timeseries LSTM with pytorch:
+// 9781800561618 2022 Kunal Sawarkar, Dheeraj Arremsetty - Deep Learning with PyTorch Lightning_ Build and train high-performance artificial intelligence and self-supervised models using Python-Packt.pdf
