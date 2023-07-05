@@ -25,6 +25,7 @@ set(
   file_h
     AppAutoTrade.hpp
     Config.hpp
+    NeuralNet.hpp
     Strategy.hpp
   )
 
@@ -32,6 +33,7 @@ set(
   file_cpp
     AppAutoTrade.cpp
     Config.cpp
+    NeuralNet.cpp
     Strategy.cpp
   )
 
