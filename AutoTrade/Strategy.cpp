@@ -233,39 +233,42 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
 void Strategy::HandleTick( const ou::tf::Trade& trade ) {
   const ou::tf::Price::price_t tick = trade.Price();
-  switch ( m_stateTrade ) {
-    case ETradeState::Search:
-      if ( 100.0 < tick ) {
-        m_dblStopAbsolute = m_quote.Ask() - 0.06;
-        EnterShort( trade.DateTime(), m_quote.Ask() );
-        m_stateTrade = ETradeState::ShortSubmitted;
-      }
-      else {
-        if ( -100.0 > tick ) {
-          m_dblStopAbsolute = m_quote.Bid() + 0.06;
-          EnterLong( trade.DateTime(), m_quote.Bid() );
-          m_stateTrade = ETradeState::LongSubmitted;
+
+  if ( false ) {
+    switch ( m_stateTrade ) {
+      case ETradeState::Search:
+        if ( 100.0 < tick ) {
+          m_dblStopAbsolute = m_quote.Ask() - 0.06;
+          EnterShort( trade.DateTime(), m_quote.Ask() );
+          m_stateTrade = ETradeState::ShortSubmitted;
         }
-      }
-      break;
-    case ETradeState::LongExit:
-      ExitLong( trade.DateTime(), m_dblStopAbsolute );
-      m_stateTrade = ETradeState::LongExitSubmitted;
-      break;
-    case ETradeState::ShortExit:
-      ExitShort( trade.DateTime(), m_dblStopAbsolute );
-      m_stateTrade = ETradeState::ShortExitSubmitted;
-      break;
-    case ETradeState::Neutral:
-      if ( ( 100.0 > tick ) && ( -100.0 < tick ) ) {
-        m_stateTrade = ETradeState::Search;
-      }
-      break;
-    case ETradeState::Init:
-      m_stateTrade = ETradeState::Neutral;
-      break;
-    default:
-      break;
+        else {
+          if ( -100.0 > tick ) {
+            m_dblStopAbsolute = m_quote.Bid() + 0.06;
+            EnterLong( trade.DateTime(), m_quote.Bid() );
+            m_stateTrade = ETradeState::LongSubmitted;
+          }
+        }
+        break;
+      case ETradeState::LongExit:
+        ExitLong( trade.DateTime(), m_dblStopAbsolute );
+        m_stateTrade = ETradeState::LongExitSubmitted;
+        break;
+      case ETradeState::ShortExit:
+        ExitShort( trade.DateTime(), m_dblStopAbsolute );
+        m_stateTrade = ETradeState::ShortExitSubmitted;
+        break;
+      case ETradeState::Neutral:
+        if ( ( 100.0 > tick ) && ( -100.0 < tick ) ) {
+          m_stateTrade = ETradeState::Search;
+        }
+        break;
+      case ETradeState::Init:
+        m_stateTrade = ETradeState::Neutral;
+        break;
+      default:
+        break;
+    }
   }
   m_ceTick.Append( trade.DateTime(), tick );
   m_dblLastTick = tick;
