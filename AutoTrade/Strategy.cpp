@@ -78,6 +78,8 @@ Strategy::Strategy( ou::ChartDataView& cdv, const config::Options& options )
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
 
+  m_ceZigZag.SetColour( ou::Colour::Purple );
+
   m_ceQuoteAsk.SetName( "Ask" );
   m_ceTrade.SetName( "Tick" );
   m_ceQuoteBid.SetName( "Bid" );
@@ -85,6 +87,8 @@ Strategy::Strategy( ou::ChartDataView& cdv, const config::Options& options )
   m_ceVolume.SetName( "Volume" );
 
   m_ceProfitLoss.SetName( "P/L" );
+
+  m_ceZigZag.SetName( "ZigZag" );
 
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
 }
@@ -105,6 +109,8 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::Price, &m_ceShortEntry );
   m_cdv.Add( EChartSlot::Price, &m_ceShortFill );
   m_cdv.Add( EChartSlot::Price, &m_ceShortExit );
+
+  m_cdv.Add( EChartSlot::Price, &m_ceZigZag );
 
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
@@ -303,25 +309,31 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
       break;
     case EZigZag::EndPoint2:
       if ( c_zigzag_hi < dblStochastic ) {
-        m_eZigZag = EZigZag::HighFound;
+        m_dtZigZag = m_quote.DateTime();
         m_dblEndPoint2 = m_quote.Bid();
+        m_eZigZag = EZigZag::HighFound;
       }
       else {
         if ( c_zigzag_lo > dblStochastic ) {
-          m_eZigZag = EZigZag::LowFound;
+          m_dtZigZag = m_quote.DateTime();
           m_dblEndPoint2 = m_quote.Ask();
+          m_eZigZag = EZigZag::LowFound;
         }
       }
       break;
     case EZigZag::HighFound:
       if ( c_zigzag_hi < dblStochastic ) {
         double bid = m_quote.Bid();
-        if ( m_dblEndPoint2 < bid ) m_dblEndPoint2 = bid;
+        if ( m_dblEndPoint2 < bid ) {
+          m_dtZigZag = m_quote.DateTime();
+          m_dblEndPoint2 = bid;
+        }
       }
       else {
         if ( c_zigzag_lo > dblStochastic ) {
           m_nZigZagLegs++;
           m_dblZigZagDistance += m_dblEndPoint2 - m_dblEndPoint1; // endpoint 2 higher than endpoint 1
+          m_ceZigZag.Append( m_dtZigZag, m_dblEndPoint2 );
           m_dblEndPoint1 = m_dblEndPoint2;
           m_dblEndPoint2 = m_quote.Bid();
           m_eZigZag = EZigZag::LowFound;
@@ -331,12 +343,16 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
     case EZigZag::LowFound:
       if ( c_zigzag_lo > dblStochastic ) {
         double ask = m_quote.Ask();
-        if ( m_dblEndPoint2 > ask ) m_dblEndPoint2 = ask;
+        if ( m_dblEndPoint2 > ask ) {
+          m_dtZigZag = m_quote.DateTime();
+          m_dblEndPoint2 = ask;
+        }
       }
       else {
         if ( c_zigzag_hi < dblStochastic ) {
           m_nZigZagLegs++;
           m_dblZigZagDistance += m_dblEndPoint1 - m_dblEndPoint2; // endpoint 1 higher than endpoint 2
+          m_ceZigZag.Append( m_dtZigZag, m_dblEndPoint2 );
           m_dblEndPoint1 = m_dblEndPoint2;
           m_dblEndPoint2 = m_quote.Ask();
           m_eZigZag = EZigZag::HighFound;
@@ -472,7 +488,7 @@ void Strategy::HandleRHTrading_01Sec( const ou::tf::Bar& bar ) { // once a secon
   // TODO: need to deal with congestion, maybe bollinger bands or short duration stochastic
   //   maybe Trin will help
 
-  if ( true ) {
+  if ( false ) {
     switch ( m_stateTrade ) {
       case ETradeState::Search:
         if ( 0.0 < m_dblLastTick ) {

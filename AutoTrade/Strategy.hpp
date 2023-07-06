@@ -179,6 +179,9 @@ private:
   ou::ChartEntryIndicator m_ceTick;
   ou::ChartEntryIndicator m_ceTrin;
 
+  boost::posix_time::ptime m_dtZigZag;
+  ou::ChartEntryIndicator m_ceZigZag;
+
   ou::ChartEntryIndicator m_ceProfitLoss;
 
   ou::tf::BarFactory m_bfQuotes01Sec;
