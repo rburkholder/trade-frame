@@ -22,8 +22,6 @@
 #pragma once
 
 #include <eigen3/Eigen/Core>
-#include <eigen3/Eigen/src/Core/util/Constants.h>
-//#include <eigen3/Eigen/Geometry>
 
 class NeuralNet {
 public:
@@ -43,7 +41,7 @@ public:
   };
 
   void SetInitialState();
-  void TrainingStepPattern( const Input&, const Output& expected );
+  void TrainingStepPattern( const Input&, const Output& );
 
 protected:
 private:

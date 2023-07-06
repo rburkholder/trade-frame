@@ -20,7 +20,6 @@
  */
 
 #include "NeuralNet.hpp"
-#include <cmath>
 
 namespace {
   double c_LearningRate( 0.1 );
@@ -156,6 +155,8 @@ void NeuralNet::TrainingStep() {
 
   vecHiddenLayer_t vecHiddenLayerDelta = vecOutputLayerDelta * matOutputWeightCorrection;
 
+  // https://iamfaisalkhan.com/matrix-manipulations-using-eigen-cplusplus/
+  // Array class may help with this
   vecHiddenLayer_t::iterator iterDelta = vecHiddenLayerDelta.begin();
   vecHiddenLayer_t::const_iterator iterHiddenIn = vecHiddenLayerIn.begin();
   while ( vecHiddenLayerDelta.end() != iterDelta ) {
