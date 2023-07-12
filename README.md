@@ -56,9 +56,9 @@ An x64-only installation of wine may generate some wine32 messages and errors, b
 ```
 # run with bash
 # git for latest code, wine for IQFeed daemon
-sudo apt-get update && apt-get install git wine wget
+sudo apt-get update && apt-get install git wine64 wget
 wget http://www.iqfeed.net/iqfeed_client_6_2_0_25.exe
-wine iqfeed_client_6_2_0_25.exe
+wine64 iqfeed_client_6_2_0_25.exe
 
 # interactive brokers TWS for linux
 wget https://download2.interactivebrokers.com/installers/tws/stable/tws-stable-linux-x64.sh
@@ -84,7 +84,7 @@ cd trade-frame
 mkdir build
 cd build
 cmake ..
-# us--e parallel to use more cpu cores
+# use parallel to use more cpu cores
 cmake --build . --parallel 4 --config Debug
 # cmake --build . --parallel 4 --config Release   # alternate build flavour
 # cmake --build . --target clean  # clean for rebuild
