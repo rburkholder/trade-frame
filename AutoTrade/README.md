@@ -27,7 +27,7 @@ x64/debug/AutoTrade.cfg:
 ib_instance=2
 symbol=SPY
 #symbol=@ES~
-# more combos in ArmsIndex/PanelArmsIndex.cpp
+# more market indicator combinations found  in ArmsIndex/PanelArmsIndex.cpp
 symbol_tick=JT6T.Z
 symbol_trin=RI6T.Z
 period_width=5 #seconds
@@ -40,6 +40,11 @@ sim_start=off
 ```
 
 When there is no data available, set the group directory such nothing follows the '=', and set sim_start to off
+
+Once timeseries data has been saved after a live session, it will be available in the TradeFrame.hdf5.
+The data can be queried by Hdf5Chart.  The path can be copied in Hdf5Chart and pasted in to
+AutoTrade.db file for the 'group_directory=' entry.  Simulation will then use this path 
+for running simulations.
 
 ### x64/debug/AutoTrade.db
 
