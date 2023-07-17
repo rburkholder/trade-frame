@@ -18,8 +18,9 @@ set(BOOST_USE_STATIC_RUNTIME OFF)
 #set(BOOST_INCLUDEDIR "/usr/local/include/boost")
 
 find_package(Boost ${TF_BOOST_VERSION} REQUIRED COMPONENTS system date_time program_options thread filesystem serialization regex log log_setup json)
-find_package(Td 1.8.11 REQUIRED)
 find_package(Torch REQUIRED)
+#telegram:
+find_package(Td 1.8.11 REQUIRED)
 
 #message("boost lib: ${Boost_LIBRARIES}")
 
