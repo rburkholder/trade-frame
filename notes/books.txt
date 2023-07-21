@@ -1,3 +1,10 @@
+2023/06/28
+
+__0470997893 2008 Carol Alexander - 
+`  Market Risk Analysis_ Pricing, Hedging and Trading Financial Instruments (v. 3) (2008, Wiley)
+
+ __0471899755 2001 Market Models A Guide to Financial Data Analysis, 9780471899754 - Carol Alexander
+
 2023/02/07
 
 heavy math version of the c++ book:
