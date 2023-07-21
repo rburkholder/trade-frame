@@ -18,7 +18,6 @@ set(TF_BOOST_VERSION "1.81.0" )
 
 # look in /usr/local/lib/cmake/ for cmake 'find' entries
 # currently has vmime, boost, wt, telegram
-# use like:  find_package(Td 1.8.11 REQUIRED)
 
 add_subdirectory(Alpaca)
 add_subdirectory(ArmsIndex)
