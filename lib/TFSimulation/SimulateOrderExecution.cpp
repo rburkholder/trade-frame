@@ -228,15 +228,25 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
         bProcessed = true;
 
         ou::tf::Order& order( *entry.second );
-
-        nOrderQuanRemaining = order.GetQuanRemaining();
-        assert( 0 != nOrderQuanRemaining );
-
-        Trade::tradesize_t quanApplied = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.BidSize() );
-
         ou::tf::Order::idOrder_t idOrder( order.GetOrderId() );
         int nId( m_nExecId );  // before it gets incremented in next function
         std::string id = GetExecId();
+
+        nOrderQuanRemaining = order.GetQuanRemaining();
+        if ( 0 == nOrderQuanRemaining ) {
+          BOOST_LOG_TRIVIAL(info)
+            << "simulate,error"
+            << ",lmt_ask"
+            << ",size_map=" << m_mapAsks.size()
+            << ",order_id=" << idOrder
+            << ",exec_id=" << id
+            << "," << nOrderQuanRemaining
+            << "," << order.GetInstrument()->GetInstrumentName()
+            ;
+          assert( false );
+        }
+
+        Trade::tradesize_t quanApplied = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.BidSize() );
 
         BOOST_LOG_TRIVIAL(info)
           << "simulate"
@@ -283,15 +293,25 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
         bProcessed = true;
 
         ou::tf::Order& order( *entry.second );
-
-        nOrderQuanRemaining = order.GetQuanRemaining();
-        assert( 0 != nOrderQuanRemaining );
-
-        Trade::tradesize_t quanApplied = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.AskSize() );
-
         ou::tf::Order::idOrder_t idOrder( order.GetOrderId() );
         int nId( m_nExecId );  // before it gets incremented in next function
         std::string id = GetExecId();
+
+        nOrderQuanRemaining = order.GetQuanRemaining();
+        if ( 0 == nOrderQuanRemaining ) {
+          BOOST_LOG_TRIVIAL(info)
+            << "simulate,error"
+            << ",lmt_bid"
+            << ",size_map=" << m_mapBids.size()
+            << ",order_id=" << idOrder
+            << ",exec_id=" << id
+            << "," << nOrderQuanRemaining
+            << "," << order.GetInstrument()->GetInstrumentName()
+            ;
+          assert( false );
+        }
+
+        Trade::tradesize_t quanApplied = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.AskSize() );
 
         BOOST_LOG_TRIVIAL(info)
           << "simulate"
