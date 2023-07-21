@@ -202,6 +202,7 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
                 m_state = m_bSim ? EState::sim_trail : EState::live_trail;
               }
 
+              // Still having problems here
               assert ( m_vpDataViewVisual.dtBegin <= m_vpDataViewVisual.dtEnd );
 
             }
@@ -330,7 +331,10 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
     boost::posix_time::time_duration tdCursorNew; // offset from left
     boost::posix_time::ptime dtCursor;
 
-    if ( m_vpDataViewVisual.HasBoth() ) {
+    bool bBegin = m_vpDataViewVisual.HasBegin();
+    bool bEnd = m_vpDataViewVisual.HasEnd();
+
+    if ( bBegin && bEnd ) {
 
       //assert( m_vpDataViewVisual.dtBegin >= m_vpDataViewExtents.dtBegin );
       //assert( m_vpDataViewVisual.dtEnd <= m_vpDataViewExtents.dtEnd );
