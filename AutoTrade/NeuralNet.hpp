@@ -32,12 +32,17 @@ public:
   struct Input {
     double stochastic;  // range -1.0 .. +1.0 equiv to 0 .. 100
     double tick;  // range -1.0 .. +1.0
+    Input(): stochastic {}, tick {} {}
+    Input( double stochastic_, double tick_ ): stochastic( stochastic_ ), tick( tick_ ) {}
   };
 
   struct Output {
     double buy;
     double neutral;
     double sell;
+    Output(): buy {}, neutral {}, sell {} {}
+    Output( double buy_, double neutral_, double sell_ )
+    : buy( buy_ ), neutral( neutral_ ), sell( sell_ ) {}
   };
 
   void SetInitialState();

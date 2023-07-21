@@ -49,6 +49,7 @@ namespace ou {
 }
 
 class Stochastic;
+class Strategy_impl;
 
 class Strategy:
   public ou::tf::DailyTradeTimeFrame<Strategy>
@@ -144,11 +145,15 @@ private:
 
   ou::ChartEntryMark m_cemStochastic;
 
+  double m_dblStochastic;
   enum class EZigZag { EndPoint1, EndPoint2, LowFound, HighFound } m_eZigZag;
   double m_dblEndPoint1;
   double m_dblEndPoint2;
   double m_dblZigZagDistance;
   size_t m_nZigZagLegs;
+
+  using pStrategy_impl_t = std::unique_ptr<Strategy_impl>;
+  pStrategy_impl_t m_pStrategy_impl;
 
   double m_dblMid;
   double m_dblLastTick;

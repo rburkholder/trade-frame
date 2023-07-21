@@ -27,6 +27,7 @@ set(
     Config.hpp
     NeuralNet.hpp
     Strategy.hpp
+    Strategy_impl.hpp
   )
 
 set(
@@ -35,6 +36,7 @@ set(
     Config.cpp
     NeuralNet.cpp
     Strategy.cpp
+    Strategy_impl.cpp
   )
 
 add_executable(

@@ -184,3 +184,6 @@ void NeuralNet::TrainingStep() {
 
 // timeseries LSTM with pytorch:
 // 9781800561618 2022 Kunal Sawarkar, Dheeraj Arremsetty - Deep Learning with PyTorch Lightning_ Build and train high-performance artificial intelligence and self-supervised models using Python-Packt.pdf
+
+// An introduction to building a basic feedforward neural network with backpropagation in Python.
+// https://enlight.nyc/projects/neural-network

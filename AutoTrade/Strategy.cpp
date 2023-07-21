@@ -27,6 +27,7 @@
 
 #include "Config.hpp"
 #include "Strategy.hpp"
+#include "Strategy_impl.hpp"
 
 using pWatch_t = ou::tf::Watch::pWatch_t;
 
@@ -48,6 +49,7 @@ Strategy::Strategy( ou::ChartDataView& cdv, const config::Options& options )
 , m_bfQuotes01Sec(  1 )
 , m_stateTrade( ETradeState::Init )
 , m_dblMid {}, m_dblLastTick {}, m_dblLastTrin {}
+, m_dblStochastic {}
 , m_eZigZag( EZigZag::EndPoint1 ), m_dblEndPoint1( 0.0 ), m_dblEndPoint2( 0.0 ), m_dblZigZagDistance( 0.0 ), m_nZigZagLegs( 0 )
 {
 
@@ -91,6 +93,8 @@ Strategy::Strategy( ou::ChartDataView& cdv, const config::Options& options )
   m_ceZigZag.SetName( "ZigZag" );
 
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
+
+  m_pStrategy_impl = std::make_unique<Strategy_impl>();
 }
 
 Strategy::~Strategy() {
@@ -232,7 +236,11 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 }
 
 void Strategy::HandleTick( const ou::tf::Trade& trade ) {
+
   const ou::tf::Price::price_t tick = trade.Price();
+  m_ceTick.Append( trade.DateTime(), tick );
+
+  m_pStrategy_impl->Queue( NeuralNet::Input( m_dblStochastic, tick ) );
 
   if ( false ) {
     switch ( m_stateTrade ) {
@@ -270,7 +278,6 @@ void Strategy::HandleTick( const ou::tf::Trade& trade ) {
         break;
     }
   }
-  m_ceTick.Append( trade.DateTime(), tick );
   m_dblLastTick = tick;
 }
 
@@ -304,60 +311,66 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 
-  double dblStochastic = m_pStochastic->Latest();
+  m_dblStochastic = m_pStochastic->Latest();
   switch ( m_eZigZag ) {
     case EZigZag::EndPoint1:
       m_dblEndPoint1 = m_quote.Midpoint();
       m_eZigZag = EZigZag::EndPoint2;
       break;
     case EZigZag::EndPoint2:
-      if ( c_zigzag_hi < dblStochastic ) {
+      if ( c_zigzag_hi < m_dblStochastic ) {
         m_dtZigZag = m_quote.DateTime();
         m_dblEndPoint2 = m_quote.Bid();
+        m_pStrategy_impl->Submit( NeuralNet::Output( 1.0, 0.0, 0.0 ) );
         m_eZigZag = EZigZag::HighFound;
       }
       else {
-        if ( c_zigzag_lo > dblStochastic ) {
+        if ( c_zigzag_lo > m_dblStochastic ) {
           m_dtZigZag = m_quote.DateTime();
           m_dblEndPoint2 = m_quote.Ask();
+          m_pStrategy_impl->Submit( NeuralNet::Output( 0.0, 0.0, 1.0 ) );
           m_eZigZag = EZigZag::LowFound;
         }
       }
       break;
     case EZigZag::HighFound:
-      if ( c_zigzag_hi < dblStochastic ) {
+      if ( c_zigzag_hi < m_dblStochastic ) {
         double bid = m_quote.Bid();
         if ( m_dblEndPoint2 < bid ) {
           m_dtZigZag = m_quote.DateTime();
           m_dblEndPoint2 = bid;
+          m_pStrategy_impl->Submit( NeuralNet::Output( 1.0, 0.0, 0.0 ) );
         }
       }
       else {
-        if ( c_zigzag_lo > dblStochastic ) {
+        if ( c_zigzag_lo > m_dblStochastic ) {
           m_nZigZagLegs++;
           m_dblZigZagDistance += m_dblEndPoint2 - m_dblEndPoint1; // endpoint 2 higher than endpoint 1
           m_ceZigZag.Append( m_dtZigZag, m_dblEndPoint2 );
           m_dblEndPoint1 = m_dblEndPoint2;
           m_dblEndPoint2 = m_quote.Bid();
+          m_pStrategy_impl->Submit( NeuralNet::Output( 0.0, 0.0, 1.0 ) );
           m_eZigZag = EZigZag::LowFound;
         }
       }
       break;
     case EZigZag::LowFound:
-      if ( c_zigzag_lo > dblStochastic ) {
+      if ( c_zigzag_lo > m_dblStochastic ) {
         double ask = m_quote.Ask();
         if ( m_dblEndPoint2 > ask ) {
           m_dtZigZag = m_quote.DateTime();
           m_dblEndPoint2 = ask;
+          m_pStrategy_impl->Submit( NeuralNet::Output( 0.0, 0.0, 1.0 ) );
         }
       }
       else {
-        if ( c_zigzag_hi < dblStochastic ) {
+        if ( c_zigzag_hi < m_dblStochastic ) {
           m_nZigZagLegs++;
           m_dblZigZagDistance += m_dblEndPoint1 - m_dblEndPoint2; // endpoint 1 higher than endpoint 2
           m_ceZigZag.Append( m_dtZigZag, m_dblEndPoint2 );
           m_dblEndPoint1 = m_dblEndPoint2;
           m_dblEndPoint2 = m_quote.Ask();
+          m_pStrategy_impl->Submit( NeuralNet::Output( 1.0, 0.0, 0.0 ) );
           m_eZigZag = EZigZag::HighFound;
         }
       }
