@@ -71,6 +71,7 @@ namespace {
   // this book covered the implementation details, as well as the partial deriviatives of the sigmoid functions
   // 0133341860 1994 Fundamentals of Neural Networks: Architectures, Algorithms, and Applications.pdf
   // page 291 - 296
+  // raw implementation of feed-forward backpropogation neural net
 
   inline double binary_sigmoid( double x ) { return 1.0 / ( 1.0 + std::exp( -x ) ); } // 0.0 .. 1.0
   inline double binary_sigmoid_pd1( double x ) {
