@@ -34,6 +34,13 @@
 
 using boost::asio::ip::tcp;
 
+// 2023/10/01
+// https://www.boost.org/doc/libs/1_83_0/doc/html/boost_asio/overview/implementation.html#boost_asio.overview.implementation.linux_kernel_5_10
+  //If BOOST_ASIO_HAS_IO_URING is defined, uses io_uring for file-related asynchonous operations.
+  //Uses epoll for demultiplexing other event sources.
+  //Optionally uses io_uring for all asynchronous operations if, in addition to BOOST_ASIO_HAS_IO_URING, BOOST_ASIO_DISABLE_EPOLL is defined to disable epoll.
+
+
 // http://www.codeproject.com/KB/wtl/WTLIntellisense.aspx
 // http://think-async.com/Asio/Recipes
 
