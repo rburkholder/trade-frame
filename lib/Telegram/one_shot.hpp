@@ -50,7 +50,7 @@ public:
   );
   virtual ~one_shot();
 
-  using fDone_t = std::function<void(bool,const std::string&)>; // false, not ok; true, fine
+  using fDone_t = std::function<void(bool,int,const std::string&)>; // false, not ok; true, fine
 
   void run(
     const std::string& sHost

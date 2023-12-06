@@ -24,18 +24,16 @@
 
 #include <vector>
 #include <stdexcept>
+#include <functional>
 #include <string_view>
 
-#include <iostream>
-#include <functional>
-
 #include <boost/json.hpp>
-
 #include <boost/asio/strand.hpp>
+#include <boost/log/trivial.hpp>
 
 #include "one_shot.hpp"
-// this needs to be factored out properly
-#include "root_certificates.hpp"
+
+#include "root_certificates.hpp" // this needs to be factored out properly
 
 #include "Bot.hpp"
 
@@ -154,16 +152,25 @@ Update tag_invoke( json::value_to_tag<Update>, json::value const& jv ) {
 // structure Update_Result
 
 struct Update_Result {
+
   bool bOk;
-  std::vector<Update> result;
+  std::vector<Update> vResult;
+
+  Update_Result(): bOk( false ) {};
+  Update_Result( const std::vector<Update>& vResult_ ): bOk( true ), vResult( vResult_ ) {}
 };
 
 Update_Result tag_invoke( json::value_to_tag<Update_Result>, json::value const& jv ) {
   json::object const& obj = jv.as_object();
-  return Update_Result {
-    json::value_to<bool>( obj.at( "ok" ) ),
-    json::value_to<std::vector<Update> >( obj.at( "result" ) )
-  };
+  bool bOk = json::value_to<bool>( obj.at( "ok" ) );
+  if ( bOk ) {
+    return Update_Result {
+      json::value_to<std::vector<Update> >( obj.at( "result" ) )
+    };
+  }
+  else {
+    return Update_Result();
+  }
 }
 
 // class Bot
@@ -172,6 +179,7 @@ Bot::Bot( const std::string& sToken )
 : m_sToken( sToken )
 , m_idChat {}
 , m_ssl_context( ssl::context::tlsv12_client )
+, m_fCommand( nullptr )
 {
   // This holds the root certificate used for verification
   // NOTE: this needs to be fixed, based upon comments in the include header
@@ -194,16 +202,19 @@ Bot::~Bot() {
   }
 }
 
+void Bot::SetCommand( fCommand_t&& f ) {
+  m_fCommand = std::move( f );
+}
+
 void Bot::GetMe() {
   if ( m_pWorkGuard ) {
     auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
     request->get(
-      c_sHost
-    , c_sPort
+      c_sHost, c_sPort
     , m_sToken
     , "getMe"
-    , [this]( bool bStatus, const std::string& message ){
-        std::cout << message << std::endl;
+    , [this]( bool bStatus, int ec, const std::string& message ){
+        BOOST_LOG_TRIVIAL(info) << message;
       }
     );
 
@@ -214,88 +225,113 @@ void Bot::PollUpdate( uint64_t offset ) {
   if ( m_pWorkGuard ) {
 
     json::object UpdateRequest;
-    UpdateRequest[ "timeout" ] = 1;
+    //UpdateRequest[ "timeout" ] = 0; // 0 is default short polling, for testing purposes only https://core.telegram.org/bots/api#sendmessage
+    UpdateRequest[ "timeout" ] = 43; // seconds
     if ( 0 < offset ) {
       UpdateRequest[ "offset" ] = offset;
     }
     std::string sRequest = json::serialize( UpdateRequest );
-    //std::string sRequest( "[\"timeout\":1]" );
-    //std::cout << "request='" << sRequest << "'" << std::endl;
+    //BOOST_LOG_TRIVIAL(trace) << "request='" << sRequest << "'";
 
     auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
-    request->get(
-      c_sHost
-    , c_sPort
+    request->get( // https://core.telegram.org/bots/api#getupdates
+      c_sHost, c_sPort
     , m_sToken
     , "getUpdates"
     , sRequest
-    , [this]( bool bStatus, const std::string& message ){
+    , [this]( bool bStatus, int ec, const std::string& message ){
         if ( bStatus ) {
-          //std::cout << "update received: '" << message << "'" << std::endl;
+          //BOOST_LOG_TRIVIAL(info) << "update received: '" << message << "'";
           try {
 
+            uint64_t offset {};
             json::error_code jec;
             json::value jv = json::parse( message, jec );
 
             if ( jec.failed() ) {
-              std::cerr << "json convert problem: " << jec.what() << std::endl;
+              BOOST_LOG_TRIVIAL(error) << "json convert problem: " << jec.what();
             }
             else {
-              Update_Result ur( json::value_to<Update_Result>( jv ) );
 
+              Update_Result ur( json::value_to<Update_Result>( jv ) );
               if ( ur.bOk ) {
-                uint64_t offset {};
-                for ( const std::vector<Update>::value_type& vt: ur.result ) {
+                for ( const std::vector<Update>::value_type& vt: ur.vResult ) {
                   if ( vt.id > offset ) {
                     // extract the chat id
                     offset = vt.id;
                     m_idChat = vt.message.chat.id;
-                    std::cout
-                      << "msg from="
+                    BOOST_LOG_TRIVIAL(info)
+                      << "msg " << vt.id << " from="
                       << vt.message.from.id
                       << "(" << vt.message.from.svUserName << ")"
                       << ",chat=" << vt.message.chat.id
                       << "(" << vt.message.chat.svUserName << ")"
                       << ",type=" << vt.message.chat.svType
                       << ",text=" << vt.message.svText
-                      << std::endl;
+                      ;
 
                     // extract any message entities
                     for ( const MessageEntity& me: vt.message.vMessageEntity ) {
+                      const std::string s( vt.message.svText.substr( me.offset, me.length ) );
                       if ( "bot_command" == me.svType ) {
-                        std::cout
-                          << "  bot_command=" << vt.message.svText.substr( me.offset, me.length )
-                          << std::endl;
+                        BOOST_LOG_TRIVIAL(info)
+                          << "bot_command=" << s
+                          ;
+                        try {
+                          if ( m_fCommand ) {
+                            m_fCommand( s );
+                          }
+                        }
+                        catch(...) {
+                          BOOST_LOG_TRIVIAL(error) << "m_fCommand exception";
+                        }
                       }
                       else {
-                        std::cout
-                          << "  other entity="
+                        BOOST_LOG_TRIVIAL(info)
+                          << "other entity="
                           << me.svType
-                          << "(" << vt.message.svText.substr( me.offset, me.length )
+                          << "(" << s
                           << ")"
                           //<< ",offset=" << me.offset
                           //<< ",length=" << me.length
-                          << std::endl;
+                          ;
                       }
                     }
                   }
+                  else {
+                    BOOST_LOG_TRIVIAL(error) << "Bot::PollUpdate vt.id <= offset," << vt.id << ',' << offset << ',' << message;
+                  }
                 }
-
-                PollUpdate( ( 0 == offset ) ? 0 : offset + 1 );
               }
+              else {
+                // Bot::PollUpdate {"ok":false,"error_code":429,"description":"Too Many Requests: retry after 5","parameters":{"retry_after":5}}
+                BOOST_LOG_TRIVIAL(error) << "Bot::PollUpdate bOk false, message: " << message;
+                // TODO: track time of last message, how can we be sending too many too fast?
+              }
+
             }
-
+            PollUpdate( ( 0 == offset ) ? 0 : offset + 1 ); // restart, regardless of error, may generate loop (offset is not cleared) if malformed messages?
           }
-          catch( std::invalid_argument ) {
-            std::cerr << "PollUpdate invalid argument" << std::endl;
+          catch( const std::invalid_argument& ec ) {
+            BOOST_LOG_TRIVIAL(error) << "Bot::PollUpdate std::invalid_argument," << ec.what() << ',' << message;
           }
-          catch (...) {
-            std::cerr << "PollUpdate: unknown issue" << std::endl;
+          catch( const std::exception& ec ) {
+            BOOST_LOG_TRIVIAL(error) << "Bot::PollUpdate std::exception," << ec.what() << ',' << message;
           }
-
+          catch(...) {
+            BOOST_LOG_TRIVIAL(error) << "Bot::PollUpdate unknown issue," << message;
+          }
         }
         else {
-          std::cerr << "PollUpdate bad status" << std::endl;
+          switch ( ec ) {
+            case 1: // The socket was closed due to a timeout [as expected]
+              PollUpdate( 0 ); // perform another poll
+              break;
+            default:
+              BOOST_LOG_TRIVIAL(error) << "Bot::PollUpdate bad status";
+              break;
+          }
+
         }
       }
     );
@@ -310,7 +346,7 @@ void Bot::SendMessage( const std::string& sMessage) {
 
   if ( m_pWorkGuard ) {
     if ( 0 == m_idChat ) {
-      std::cout << "telegram send message: no chat id set" << std::endl;
+      BOOST_LOG_TRIVIAL(warning) << "telegram send message: no chat id set";
     }
     else {
 
@@ -319,17 +355,17 @@ void Bot::SendMessage( const std::string& sMessage) {
       UpdateRequest[ "parse_mode" ] = "HTML";
       UpdateRequest[ "text" ] = sMessage;
       std::string sRequest = json::serialize( UpdateRequest );
-      //std::cout << "request='" << sRequest << "'" << std::endl;
+      //BOOST_LOG_TRIVIAL(debug) << "telegram tx: '" << sRequest << "'";
+      BOOST_LOG_TRIVIAL(trace) << "telegram tx: " << sRequest;
 
       auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
       request->post(
-        c_sHost
-      , c_sPort
+        c_sHost, c_sPort
       , m_sToken
       , "sendMessage"
       , sRequest
-      , [this]( bool bStatus, const std::string& message ){
-          //std::cout << "telegram response: " << message << std::endl;
+      , [this]( bool bStatus, int ec, const std::string& message ){
+          BOOST_LOG_TRIVIAL(trace) << "telegram rx: " << message;
         }
       );
     }
@@ -370,12 +406,11 @@ void Bot::SetMyCommands() {
 
     auto request = std::make_shared<bot::session::one_shot>( asio::make_strand( m_io ), m_ssl_context );
     request->post(
-      c_sHost
-    , c_sPort
+      c_sHost, c_sPort
     , m_sToken
     , "setMyCommands"
     , sRequest
-    , [this]( bool bStatus, const std::string& message ){
+    , [this]( bool bStatus, int ec, const std::string& message ){
         //std::cout << "telegram setMyCommands response: " << message << std::endl;
       }
     );

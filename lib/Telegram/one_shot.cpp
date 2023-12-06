@@ -21,7 +21,7 @@
 
 // TODO: look at http return codes
 
-#include <iostream>
+#include <boost/log/trivial.hpp>
 
 #include <boost/beast/version.hpp>
 
@@ -34,11 +34,11 @@ namespace session {
 namespace { // anonymous
 
 const static int nVersion( 11 );
-const static std::string sUserAgent( "ounl.tradeframe/1.0" );
+const static std::string sUserAgent( "ounl.telegram/1.0" );
 
 // Report a failure
 void fail( beast::error_code ec, char const* what ) {
-  std::cerr << what << ": " << ec.message() << "\n";
+  BOOST_LOG_TRIVIAL(error) << what << ": (" << ec.value() << ')' << ec.message();
 }
 
 } // namespace anonymous
@@ -52,14 +52,14 @@ one_shot::one_shot(
 , m_fWriteRequest( nullptr )
 , m_fDone( nullptr )
 {
-  //std::cout << "telegram_bot::one_shot construction" << std::endl; // ensuring proper timing of handling
+  //BOOST_LOG_TRIVIAL(info) << "telegram_bot::one_shot construction"; // ensuring proper timing of handling
 
   // Allow for an unlimited body size
   m_parser.body_limit( ( std::numeric_limits<std::uint64_t>::max )() );
   }
 
 one_shot::~one_shot() {
-  //std::cout << "telegram_bot::one_shot destruction" << std::endl;  // ensuring proper timing of handling
+  //BOOST_LOG_TRIVIAL(info) << "telegram_bot::one_shot destruction";  // ensuring proper timing of handling
   //m_stream.shutdown();  // doesn't like this
   m_buffer.clear();
   m_response.clear();
@@ -78,7 +78,7 @@ void one_shot::run(
   if( !SSL_set_tlsext_host_name( m_stream.native_handle(), sHost.c_str() ) )
   {
     beast::error_code ec{ static_cast<int>( ::ERR_get_error()), asio::error::get_ssl_category() };
-    std::cerr << ec.message() << "\n";
+    BOOST_LOG_TRIVIAL(error) << ec.message();
     return;
   }
 
@@ -94,7 +94,7 @@ void one_shot::run(
   //req_.prepare_payload();
 
   m_fWriteRequest = [this](){ write_empty(); };
-  m_fDone = []( bool, const std::string& ){};
+  m_fDone = []( bool, int, const std::string& ){}; // prepopulated dummy entry
 
   // Look up the domain name
   m_resolver.async_resolve(
@@ -121,8 +121,8 @@ void one_shot::get(
   if( !SSL_set_tlsext_host_name( m_stream.native_handle(), sHost.c_str() ) )
   {
     beast::error_code ec{ static_cast<int>( ::ERR_get_error()), asio::error::get_ssl_category() };
-    std::cerr << ec.message() << "\n";
-    m_fDone( false, ec.message() );
+    BOOST_LOG_TRIVIAL(error) << ec.message();
+    m_fDone( false, ec.value(), ec.message() );
     return;
   }
 
@@ -134,7 +134,7 @@ void one_shot::get(
 
   //m_request_empty.target( sTarget );
   const std::string s( "/bot" + sTelegramToken + "/" + sTarget );
-  //std::cout << "get request: '" << s << "'" << std::endl;
+  //BOOST_LOG_TRIVIAL(info) << "get request: '" << s << "'";
   m_request_empty.target( s );
 
   m_fWriteRequest = [this](){ write_empty(); };
@@ -165,8 +165,8 @@ void one_shot::get(
   if( !SSL_set_tlsext_host_name( m_stream.native_handle(), sHost.c_str() ) )
   {
     beast::error_code ec{ static_cast<int>( ::ERR_get_error()), asio::error::get_ssl_category() };
-    std::cerr << ec.message() << "\n";
-    m_fDone( false, ec.message() );
+    BOOST_LOG_TRIVIAL(error) << ec.message();
+    m_fDone( false, ec.value(), ec.message() );
     return;
   }
 
@@ -178,7 +178,7 @@ void one_shot::get(
   m_request_body.set( http::field::content_type, "application/json" );
 
   const std::string sTarget( "/bot" + sTelegramToken + "/" + sCommand );
-  //std::cout << "get request: '" << s << "'" << std::endl;
+  //BOOST_LOG_TRIVIAL(info) << "get request: '" << s << "'";
   m_request_body.target( sTarget );
 
   m_request_body.body() = sBody;
@@ -212,8 +212,8 @@ void one_shot::post(
   if( !SSL_set_tlsext_host_name( m_stream.native_handle(), sHost.c_str() ) )
   {
     beast::error_code ec{ static_cast<int>( ::ERR_get_error()), asio::error::get_ssl_category() };
-    std::cerr << ec.message() << "\n";
-    m_fDone( false, ec.message() );
+    BOOST_LOG_TRIVIAL(error) << ec.message();
+    m_fDone( false, ec.value(), ec.message() );
     return;
   }
 
@@ -225,13 +225,13 @@ void one_shot::post(
   m_request_body.set( http::field::content_type, "application/json" );
 
   const std::string sTarget( "/bot" + sTelegramToken + "/" + sCommand );
-  //std::cout << "post target: '" << sTarget << "'" << std::endl;
+  //BOOST_LOG_TRIVIAL(info) << "post target: '" << sTarget << "'";
   m_request_body.target( sTarget );
 
   m_request_body.body() = sBody;
   m_request_body.prepare_payload();
 
-  //std::cout << m_request_body << std::endl;
+  //BOOST_LOG_TRIVIAL(info) << m_request_body;
 
   m_fWriteRequest = [this](){ write_body(); };
 
@@ -260,8 +260,8 @@ void one_shot::delete_(
   if( !SSL_set_tlsext_host_name( m_stream.native_handle(), sHost.c_str() ) )
   {
     beast::error_code ec{ static_cast<int>( ::ERR_get_error()), asio::error::get_ssl_category() };
-    std::cerr << ec.message() << "\n";
-    m_fDone( false, ec.message() );
+    BOOST_LOG_TRIVIAL(error) << ec.message();
+    m_fDone( false, ec.value(), ec.message() );
     return;
   }
 
@@ -292,13 +292,13 @@ void one_shot::on_resolve(
 ) {
   if ( ec ) {
     fail( ec, "os.on_resolve");
-    m_fDone( false, "os.on_resolve" );
+    m_fDone( false, ec.value(), "os.on_resolve" );
   }
   else {
     // Set a timeout on the operation
     beast::get_lowest_layer( m_stream ).expires_after( std::chrono::seconds( 15 ) );
 
-    //std::cout << "os.on_resolve" << std::endl;
+    //BOOST_LOG_TRIVIAL(info) << "os.on_resolve";
 
     // Make the connection on the IP address we get from a lookup
     beast::get_lowest_layer( m_stream ).async_connect(
@@ -313,11 +313,11 @@ void one_shot::on_resolve(
 void one_shot::on_connect( beast::error_code ec, tcp::resolver::results_type::endpoint_type et ) {
   if ( ec ) {
     fail( ec, "os.on_connect" );
-    m_fDone( false, "os.on_connect" );
+    m_fDone( false, ec.value(), "os.on_connect" );
   }
   else {
 
-    //std::cout << "os.on_connect" << std::endl;
+    //BOOST_LOG_TRIVIAL(info) << "os.on_connect";
 
     // Perform the SSL handshake
     m_stream.async_handshake(
@@ -334,11 +334,11 @@ void one_shot::on_handshake( beast::error_code ec ) {
 
   if ( ec ) {
     fail( ec, "os.on_handshake" );
-    m_fDone( false, "os.on_handshake" );
+    m_fDone( false, ec.value(), "os.on_handshake" );
   }
   else {
 
-    //std::cout << "os.ssl_handshake" << std::endl;
+    //BOOST_LOG_TRIVIAL(info) << "os.ssl_handshake";
 
     // Set a timeout on the operation
     beast::get_lowest_layer( m_stream ).expires_after( std::chrono::seconds( 15 ) );
@@ -350,7 +350,7 @@ void one_shot::on_handshake( beast::error_code ec ) {
 
 void one_shot::write_empty() {
 
-  //std::cout << "os.write_empty" << std::endl;
+  //BOOST_LOG_TRIVIAL(info) << "os.write_empty";
 
   // Send the HTTP request to the remote host
   http::async_write( m_stream, m_request_empty,
@@ -363,7 +363,7 @@ void one_shot::write_empty() {
 
 void one_shot::write_body() {
 
-  //std::cout << "os.write_body" << std::endl;
+  //BOOST_LOG_TRIVIAL(info) << "os.write_body";
 
   // Send the HTTP request to the remote host
   http::async_write( m_stream, m_request_body,
@@ -382,11 +382,11 @@ void one_shot::on_write(
 
   if ( ec ) {
     fail( ec, "os.on_write" );
-    m_fDone( false, "os.on_write" );
+    m_fDone( false, ec.value(), "os.on_write" );
   }
   else {
 
-    //std::cout << "os.on_write" << std::endl;
+    //BOOST_LOG_TRIVIAL(info) << "os.on_write";
 
     // Receive the HTTP response
     http::async_read(
@@ -423,18 +423,24 @@ void one_shot::on_read( beast::error_code ec, std::size_t bytes_transferred ) {
   boost::ignore_unused( bytes_transferred );
 
   if ( ec ) {
-    fail( ec, "os.on_read" );
-    m_fDone( false, "os.on_read" );
+    switch (ec.value() ) {
+      case 1: // closed due to timeout, handled in regular call
+        break;
+      default:
+        fail( ec, "os.on_read" );
+        break;
+    }
+    m_fDone( false, ec.value(), "os.on_read" );
   }
   else {
 
-    //std::cout << "os.on_read" << std::endl;
-    //std::cout << "get():" << m_parser.get() << std::endl;
+    //BOOST_LOG_TRIVIAL(info) << "os.on_read";
+    //BOOST_LOG_TRIVIAL(info) << "get():" << m_parser.get();
     auto body = m_parser.get().body();
-    //std::cout << "body():" << m_parser.get().body() << std::endl;
+    //BOOST_LOG_TRIVIAL(info) << "body():" << m_parser.get().body();
 
     //m_fDone( true, m_response.body() );
-    m_fDone( true, body );
+    m_fDone( true, ec.value(), body );
     // Set a timeout on the operation
     beast::get_lowest_layer( m_stream ).expires_after( std::chrono::seconds( 15 ) );
 
@@ -449,7 +455,7 @@ void one_shot::on_read( beast::error_code ec, std::size_t bytes_transferred ) {
 }
 
 void one_shot::on_shutdown( beast::error_code ec ) {
-  //std::cout << "os.on_shutdown" << std::endl;
+  //BOOST_LOG_TRIVIAL(info) << "os.on_shutdown";
   if ( ec == asio::error::eof ) {
       // Rationale:
       // http://stackoverflow.com/questions/25587403/boost-asio-ssl-async-shutdown-always-finishes-with-an-error

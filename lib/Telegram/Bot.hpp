@@ -44,6 +44,9 @@ public:
 
   void SendMessage( const std::string& );
 
+  using fCommand_t = std::function<void( const std::string& )>;
+  void SetCommand( fCommand_t&& );
+
 protected:
 private:
 
@@ -60,6 +63,8 @@ private:
   using pWorkGuard_t = std::unique_ptr<work_guard_t>;
 
   pWorkGuard_t m_pWorkGuard;
+
+  fCommand_t m_fCommand;
 
   void PollUpdate( uint64_t offset );
   void PollUpdates();
