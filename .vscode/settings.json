@@ -11,5 +11,6 @@
   "editor.tabSize": 2,
   "files.associations": {
     "*.ipp": "cpp"
-  }
+  },
+  "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json"
 }

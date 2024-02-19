@@ -316,7 +316,7 @@ bool AppAutoTrade::OnInit() {
       std::cout << "telegram: no token available" << std::endl;
     }
     else {
-      m_telegram_bot = std::make_unique<telegram::Bot>( m_choices.sTelegramToken );
+      m_telegram_bot = std::make_unique<ou::telegram::Bot>( m_choices.sTelegramToken );
 
       vItems.clear();
       vItems.push_back( new mi( "Get Me", MakeDelegate( this, &AppAutoTrade::Telegram_GetMe ) ) );

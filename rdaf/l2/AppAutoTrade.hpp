@@ -38,7 +38,7 @@
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
-#include <Telegram/Bot.hpp>
+#include <ou/telegram/Bot.hpp>
 
 #include <TFTrading/DBWrapper.h>
 
@@ -171,7 +171,7 @@ private:
 
   void StartRdaf( const std::string& sFilePrefix );
 
-  std::unique_ptr<telegram::Bot> m_telegram_bot;
+  std::unique_ptr<ou::telegram::Bot> m_telegram_bot;
   void Telegram_GetMe();
   void Telegram_SendMessage();
 
