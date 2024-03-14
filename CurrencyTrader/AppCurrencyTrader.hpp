@@ -93,11 +93,14 @@ private:
   pProvider_t       m_data;
   pProvider_t       m_exec;
 
-  pProviderSim_t    m_sim;    // simulation - [ data,execution ]
   pProviderIB_t     m_tws;    // live - [ execution ]
+  //pProviderSim_t    m_sim;    // simulation - [ data,execution ]
   //pProviderIQFeed_t m_iqf;    // live - [ data ], simulation - [ execution ]
 
-  std::string m_sSimulationDateTime;  // used for l2 output streaming file name
+  //std::string m_sSimulationDateTime;  // used for l2 output streaming file name
+
+  std::string m_sTSDataStreamStarted;
+  int m_nTSDataStreamSequence;
 
   std::unique_ptr<ou::tf::db> m_pdb;
 
@@ -108,14 +111,16 @@ private:
 
   ou::ChartDataView m_dvChart; // the data
 
-  ou::Delegate<int> m_OnSimulationComplete;
+  //ou::Delegate<int> m_OnSimulationComplete;
+
+  void HandleMenuActionSaveValues();
+
+  void SaveState();
+  void LoadState();
 
   virtual bool OnInit();
   void OnClose( wxCloseEvent& event );
   virtual int OnExit();
-
-  void SaveState();
-  void LoadState();
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

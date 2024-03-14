@@ -22,6 +22,8 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
+#include <boost/lexical_cast.hpp>
+
 #include <wx/sizer.h>
 
 #include <TFVuTrading/FrameMain.h>
@@ -52,8 +54,23 @@ bool AppCurrencyTrader::OnInit() {
 
   wxApp::OnInit();
 
-  if ( !config::Load( c_sChoicesFilename, m_choices ) ) {
+  m_nTSDataStreamSequence = 0;
+
+  if ( config::Load( c_sChoicesFilename, m_choices ) ) {
+  }
+  else {
     return false;
+  }
+
+  {
+    std::stringstream ss;
+    auto dt = ou::TimeSource::GlobalInstance().External();
+    ss
+      << ou::tf::Instrument::BuildDate( dt.date() )
+      << " "
+      << dt.time_of_day()
+      ;
+    m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
 
   m_tws = ou::tf::ib::TWS::Factory();
@@ -78,6 +95,29 @@ bool AppCurrencyTrader::OnInit() {
   sizerUpper = new wxBoxSizer(wxHORIZONTAL);
   sizerFrame->Add( sizerUpper, 0, wxEXPAND, 2);
 
+  // TODO: make the panel conditional on simulation flag
+  m_pPanelProviderControl = new ou::tf::v2::PanelProviderControl( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+  m_pPanelProviderControl->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+  m_pPanelProviderControl->Show();
+
+  sizerUpper->Add( m_pPanelProviderControl, 0, wxALIGN_LEFT, 2);
+
+  m_pPanelProviderControl->Add(
+    m_tws,
+    false, false, true, false,
+    [](){}, // fConnecting
+    [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
+      //ConfirmProviders();
+    },
+    [](){}, // fDisconnecting
+    [](){}  // fDisconnected
+  );
+
+  // for now, overwrite old database on each start
+  if ( boost::filesystem::exists( c_sDbName ) ) {
+    boost::filesystem::remove( c_sDbName );
+  }
+
   // this needs to be placed after the providers are registered
   m_pdb = std::make_unique<ou::tf::db>( c_sDbName ); // construct database
 
@@ -95,6 +135,21 @@ bool AppCurrencyTrader::OnInit() {
 
   return 1;
 }
+
+void AppCurrencyTrader::HandleMenuActionSaveValues() {
+  std::cout << "Saving collected values ... " << std::endl;
+  CallAfter(
+    [this](){
+      m_nTSDataStreamSequence++;
+      //m_pStrategy->SaveWatch(
+      //  "/app/" + c_sAppNamePrefix + "/" +
+      //  m_sTSDataStreamStarted + "-" +
+      //  boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) ); // sequence number on each save
+      std::cout << "  ... Done " << std::endl;
+    }
+  );
+}
+
 
 void AppCurrencyTrader::SaveState() {
   std::cout << "Saving Config ..." << std::endl;
