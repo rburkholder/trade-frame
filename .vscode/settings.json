@@ -1,5 +1,5 @@
 {
-  "clangd.path": "/usr/bin/clangd",
+  "clangd.path": "/home/rpb/.config/Code/User/globalStorage/llvm-vs-code-extensions.vscode-clangd/install/17.0.3/clangd_17.0.3/bin/clangd",
   "clangd.arguments": [
     ],
   "C_Cpp.autocomplete": "Disabled",
