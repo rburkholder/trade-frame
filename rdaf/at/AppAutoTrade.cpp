@@ -56,7 +56,7 @@
 #include <TFVuTrading/PanelProviderControlv2.hpp>
 
 #include "Strategy.h"
-#include "AppAutoTrade.h"
+#include "AppAutoTrade.hpp"
 
 namespace {
   static const std::string sAppName( "ROOT AutoTrade (rdaf_at)" );
@@ -106,7 +106,7 @@ bool AppAutoTrade::OnInit() {
   m_bL2Connected = false;
 
   if ( !ou::tf::config::Load( sChoicesFilename, m_choices ) ) {
-    return 0;
+    return false;
   }
 
   m_iqfeed = ou::tf::iqfeed::Provider::Factory();

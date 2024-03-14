@@ -23,9 +23,9 @@ find_package(Boost ${TF_BOOST_VERSION} REQUIRED COMPONENTS system date_time prog
 
 set(
   file_h
-    AppAutoTrade.h
+    AppAutoTrade.hpp
     ConfigParser.hpp
-    Strategy.h
+    Strategy.hpp
   )
 
 set(

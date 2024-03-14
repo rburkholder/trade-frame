@@ -40,7 +40,7 @@
 
 #include <TFVuTrading/TreeItem.hpp>
 
-#include "Strategy.h"
+#include "Strategy.hpp"
 
 using pWatch_t = ou::tf::Watch::pWatch_t;
 
