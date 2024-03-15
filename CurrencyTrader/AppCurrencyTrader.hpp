@@ -28,6 +28,7 @@
 #include <wx/splitter.h>
 
 #include <OUCharting/ChartDataView.h>
+#include <OUCharting/ChartEntryIndicator.h>
 
 #include <TFTrading/DBWrapper.h>
 
@@ -38,10 +39,12 @@
 
 #include "Config.hpp"
 
+class Strategy;
 class FrameMain;
 
 class wxTreeCtrl;
 class wxTreeEvent;
+class wxSplitterWindow;
 
 namespace ou {
 namespace tf {
@@ -102,18 +105,30 @@ private:
   std::string m_sTSDataStreamStarted;
   int m_nTSDataStreamSequence;
 
+  std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
+
   std::unique_ptr<ou::tf::db> m_pdb;
 
-  //ou::ChartEntryIndicator m_ceUnRealized;
-  //ou::ChartEntryIndicator m_ceRealized;
-  //ou::ChartEntryIndicator m_ceCommissionsPaid;
-  //ou::ChartEntryIndicator m_ceTotal;
+  ou::ChartEntryIndicator m_ceUnRealized;
+  ou::ChartEntryIndicator m_ceRealized;
+  ou::ChartEntryIndicator m_ceCommissionsPaid;
+  ou::ChartEntryIndicator m_ceTotal;
 
   ou::ChartDataView m_dvChart; // the data
 
+  pPortfolio_t m_pPortfolioUSD;
+
+  using pStrategy_t = std::unique_ptr<Strategy>;
+  using mapStrategy_t = std::map<std::string,pStrategy_t>;
+  mapStrategy_t m_mapStrategy;
+
   //ou::Delegate<int> m_OnSimulationComplete;
 
+  void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();
+
+  void LoadPortfolio( const std::string& sName );
+  void ConfirmProviders();
 
   void SaveState();
   void LoadState();
@@ -121,6 +136,7 @@ private:
   virtual bool OnInit();
   void OnClose( wxCloseEvent& event );
   virtual int OnExit();
+
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

@@ -25,12 +25,14 @@ set(
   file_h
     AppCurrencyTrader.hpp
     Config.hpp
+    Strategy.hpp
   )
 
 set(
   file_cpp
-  AppCurrencyTrader.cpp
+    AppCurrencyTrader.cpp
     Config.cpp
+    Strategy.cpp
   )
 
 add_executable(

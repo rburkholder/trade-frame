@@ -24,7 +24,14 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <wx/menu.h>
 #include <wx/sizer.h>
+#include <wx/splitter.h>
+#include <wx/treectrl.h>
+
+//#include <TFTrading/Watch.h>
+//#include <TFTrading/Position.h>
+#include <TFTrading/BuildInstrument.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/TreeItem.hpp>
@@ -32,6 +39,7 @@
 #include <TFVuTrading/WinChartView.h>
 #include <TFVuTrading/PanelProviderControlv2.hpp>
 
+#include "Strategy.hpp"
 #include "AppCurrencyTrader.hpp"
 
 namespace {
@@ -42,6 +50,8 @@ namespace {
   static const std::string c_sDbName(          c_sDirectory + '/' + c_sAppName + ".db" );
   static const std::string c_sStateFileName(   c_sDirectory + '/' + c_sAppName + ".state" );
   static const std::string c_sChoicesFilename( c_sDirectory + '/' + c_sAppName + ".cfg" );
+
+  static const std::string c_sMenuItemPortfolio( "_USD" );
 }
 
 IMPLEMENT_APP(AppCurrencyTrader)
@@ -104,14 +114,32 @@ bool AppCurrencyTrader::OnInit() {
 
   m_pPanelProviderControl->Add(
     m_tws,
-    false, false, true, false,
+    true, false, true, false,
     [](){}, // fConnecting
     [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
-      //ConfirmProviders();
+      ConfirmProviders();
     },
     [](){}, // fDisconnecting
     [](){}  // fDisconnected
   );
+
+  m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+  m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+  sizerUpper->Add(m_pPanelLogging, 2, wxEXPAND, 2);
+
+  sizerLower = new wxBoxSizer(wxVERTICAL);
+  sizerFrame->Add(sizerLower, 1, wxEXPAND, 2);
+
+  m_splitterData = new wxSplitterWindow( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(100, 100), wxSP_3DBORDER|wxSP_3DSASH|wxNO_BORDER );
+  m_splitterData->SetMinimumPaneSize(20);
+
+  m_treeSymbols = new wxTreeCtrl( m_splitterData, wxID_ANY, wxDefaultPosition, wxSize(100, 100), wxTR_SINGLE );
+
+  m_pWinChartView = new ou::tf::WinChartView( m_splitterData, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
+  m_pWinChartView->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+
+  m_splitterData->SplitVertically(m_treeSymbols, m_pWinChartView, 50);
+  sizerLower->Add(m_splitterData, 1, wxGROW, 2);
 
   // for now, overwrite old database on each start
   if ( boost::filesystem::exists( c_sDbName ) ) {
@@ -121,9 +149,49 @@ bool AppCurrencyTrader::OnInit() {
   // this needs to be placed after the providers are registered
   m_pdb = std::make_unique<ou::tf::db>( c_sDbName ); // construct database
 
+  m_ceUnRealized.SetName( "unrealized" );
+  m_ceRealized.SetName( "realized" );
+  m_ceCommissionsPaid.SetName( "commission" );
+  m_ceTotal.SetName( "total" );
+
+  m_ceUnRealized.SetColour( ou::Colour::Blue );
+  m_ceRealized.SetColour( ou::Colour::Purple );
+  m_ceCommissionsPaid.SetColour( ou::Colour::Red );
+  m_ceTotal.SetColour( ou::Colour::Green );
+
+  m_dvChart.Add( 0, &m_ceUnRealized );
+  m_dvChart.Add( 0, &m_ceRealized );
+  m_dvChart.Add( 0, &m_ceTotal );
+  m_dvChart.Add( 2, &m_ceCommissionsPaid );
+
   m_pWinChartView->SetChartDataView( &m_dvChart );
 
+  TreeItem::Bind( m_pFrameMain, m_treeSymbols );
+  m_pTreeItemRoot = new TreeItem( m_treeSymbols, "/" ); // initialize tree
+  //wxTreeItemId idPortfolio = m_treeSymbols->AppendItem( idRoot, sMenuItemPortfolio, -1, -1, new CustomItemData( sMenuItemPortfolio ) );
+  //m_treeSymbols->Bind( wxEVT_TREE_ITEM_MENU, &AppAutoTrade::HandleTreeEventItemMenu, this, m_treeSymbols->GetId() );
+  //m_treeSymbols->Bind( wxEVT_TREE_ITEM_RIGHT_CLICK, &AppAutoTrade::HandleTreeEventItemRightClick, this, m_treeSymbols->GetId() );
+  //m_treeSymbols->Bind( wxEVT_TREE_SEL_CHANGED, &AppAutoTrade::HandleTreeEventItemChanged, this, m_treeSymbols->GetId() );
+  m_pTreeItemPortfolio = m_pTreeItemRoot->AppendChild(
+    c_sMenuItemPortfolio,
+    [this]( TreeItem* pTreeItem ){
+      m_pWinChartView->SetChartDataView( &m_dvChart );
+    }
+  );
+
+  m_treeSymbols->ExpandAll();
+
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppCurrencyTrader::OnClose, this );  // start close of windows and controls
+
+  FrameMain::vpItems_t vItems;
+  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+
+  vItems.clear(); // maybe wrap this whole menu in the sim conditional
+  vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionCloseAndDone ) ) );
+  //if ( !m_choices.bStartSimulator ) {
+    vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSaveValues ) ) );
+  //}
+  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   CallAfter(
     [this](){
@@ -134,6 +202,13 @@ bool AppCurrencyTrader::OnInit() {
   m_pFrameMain->Show( true );
 
   return 1;
+}
+
+void AppCurrencyTrader::HandleMenuActionCloseAndDone() {
+  std::cout << "Closing & Done" << std::endl;
+  for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
+    //vt.second->CloseAndDone();
+  }
 }
 
 void AppCurrencyTrader::HandleMenuActionSaveValues() {
@@ -150,6 +225,8 @@ void AppCurrencyTrader::HandleMenuActionSaveValues() {
   );
 }
 
+void AppCurrencyTrader::ConfirmProviders() {
+}
 
 void AppCurrencyTrader::SaveState() {
   std::cout << "Saving Config ..." << std::endl;
