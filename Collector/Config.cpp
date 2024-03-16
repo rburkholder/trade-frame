@@ -30,8 +30,8 @@ namespace po = boost::program_options;
 #include "Config.hpp"
 
 namespace {
-  static const std::string sChoice_SymbolName("symbol_name" );
-  static const std::string sChoice_StopTime("stop_time" );
+  static const std::string sChoice_SymbolName( "symbol_name" );
+  static const std::string sChoice_StopTime(   "stop_time" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bRequired, T& dest ) {
