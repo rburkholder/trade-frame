@@ -73,13 +73,13 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
       ( sChoice_StopTime.c_str(),   po::value<std::string>( &choices.m_sStopTime ), "stop time HH:mm:ss UTC" )
       ( sChoice_StartTime.c_str(),   po::value<std::string>( &choices.m_sStartTime ), "start time HH:mm:ss UTC" )
-      ( sChoice_MaxLifeTime.c_str(),   po::value<std::string>( &choices.m_sMaxTradeLifeTime ), "max life time HH:mm:ss UTC" )
+      ( sChoice_MaxLifeTime.c_str(),   po::value<std::string>( &choices.m_sMaxTradeLifeTime ), "max life time HH:mm:ss" )
 
       ( sChoice_PipProfit.c_str(), po::value<unsigned int>( &choices.m_nPipProfit ), "pip profit taking" )
       ( sChoice_PipStopLoss.c_str(), po::value<unsigned int>( &choices.m_nPipStopLoss ), "pip stop loss" )
-      ( sChoice_PipTrailingStop.c_str(), po::value<unsigned int>( &choices.m_nPipTrailingStop ), "pip trailing stop" )
+      ( sChoice_PipTrailingStop.c_str(), po::value<unsigned int>( &choices.m_nPipTrailingStop )->default_value( 0 ), "pip trailing stop" )
 
-      ( sChoice_LotSize.c_str(), po::value<unsigned int>( &choices.m_nLotSize ), "lot size" )
+      ( sChoice_LotSize.c_str(), po::value<unsigned int>( &choices.m_nLotSize )->default_value( 1 ), "lot size" )
       ;
     po::variables_map vm;
 
