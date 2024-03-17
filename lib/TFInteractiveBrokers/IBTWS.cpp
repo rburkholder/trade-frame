@@ -37,7 +37,7 @@
 #include "client/CommissionReport.h"
 
 #include "client/EClientSocket.h"
-#include "client/EPosixClientSocketPlatform.h"
+//#include "client/EPosixClientSocketPlatform.h"
 
 #include "IBTWS.h"
 
@@ -323,6 +323,12 @@ void TWS::RequestContractDetails(
     if ( "COMEX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC, IQFeed supplied
     if ( "COMEX_GBX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC, IQFeed supplied
     //if ( "CME" == pInstrument->GetExchangeName() ) contract.exchange = "GLOBEX";   // ES?, IQFeed supplied
+    break;
+  case InstrumentType::Currency:
+    //contract.exchange = "IDEAL"; // can be IDEAL (paper) or IDEALPRO (real)
+    contract.secType = "CASH";
+    contract.symbol = ou::tf::Currency::Name[ pInstrument->GetCurrencyBase() ];
+    contract.currency = ou::tf::Currency::Name[ pInstrument->GetCurrencyCounter() ];
     break;
   default:
     assert( false );
@@ -1153,8 +1159,6 @@ void TWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
 //    << std::endl;
 
   using vString_t = std::vector<std::string>;
-  vString_t vExchange;
-  vString_t vMarketRuleId;
 
   using iterString_t = std::string::const_iterator;
   iterString_t bgn, end;
@@ -1162,17 +1166,23 @@ void TWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
   ParseStrings<iterString_t> grammarStrings;
   bool bOk;
 
-  bgn = contractDetails.validExchanges.begin();
-  end = contractDetails.validExchanges.end();
+  vString_t vExchange;
+  if ( 0 < contractDetails.validExchanges.size() ) {
+    bgn = contractDetails.validExchanges.begin();
+    end = contractDetails.validExchanges.end();
 
-  bOk = parse( bgn, end, grammarStrings, vExchange );
-  assert( bOk );
+    bOk = parse( bgn, end, grammarStrings, vExchange );
+    assert( bOk );
+  }
 
-  bgn = contractDetails.marketRuleIds.begin();
-  end = contractDetails.marketRuleIds.end();
+  vString_t vMarketRuleId;
+  if ( 0 < contractDetails.marketRuleIds.size() ) {
+    bgn = contractDetails.marketRuleIds.begin();
+    end = contractDetails.marketRuleIds.end();
 
-  bOk = parse( bgn, end, grammarStrings, vMarketRuleId );
-  assert( bOk );
+    bOk = parse( bgn, end, grammarStrings, vMarketRuleId );
+    assert( bOk );
+  }
 
   assert( vExchange.size() == vMarketRuleId.size() );
 
@@ -1347,9 +1357,9 @@ void TWS::BuildInstrumentFromContractDetails( const ContractDetails& details, pI
 
   const Contract& contract( details.contract );
 
-  std::string sBaseName( contract.symbol );  // need to look at this (was sUnderlying)
-  std::string sLocalSymbol( contract.localSymbol );  // and this to name them properly
-  std::string sExchange( contract.exchange );
+  const std::string& sSymbol( contract.symbol );  // need to look at this (was sUnderlying)
+  const std::string& sLocalSymbol( contract.localSymbol );  // and this to name them properly
+        std::string  sExchange( contract.exchange );
 
   OptionSide::EOptionSide os( OptionSide::Unknown );
 
@@ -1394,11 +1404,11 @@ void TWS::BuildInstrumentFromContractDetails( const ContractDetails& details, pI
 
   switch ( it ) {
     case InstrumentType::Stock:
-      if ( 0 == pInstrument.get() ) {
-	      pInstrument = Instrument::pInstrument_t( new Instrument( sBaseName, it, sExchange ) );
+      if ( nullptr == pInstrument.get() ) {
+	      pInstrument = Instrument::pInstrument_t( new Instrument( sSymbol, it, sExchange ) );
       }
       else {
-	      if ( pInstrument->GetInstrumentName( Instrument::eidProvider_t::EProviderIB ) != sBaseName )
+	      if ( pInstrument->GetInstrumentName( Instrument::eidProvider_t::EProviderIB ) != sSymbol )
           throw std::runtime_error( "IBTWS::BuildInstrumentFromContract: Stock, underlying no match" );
       }
       break;
@@ -1486,18 +1496,18 @@ void TWS::BuildInstrumentFromContractDetails( const ContractDetails& details, pI
 //      pInstrument->SetCommonCalcExpiry( dtExpiryInSymbol );
       break;
     case InstrumentType::Future:
-      if ( 0 == pInstrument.get() ) {
-	      pInstrument = Instrument::pInstrument_t( new Instrument( sBaseName, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month() ) );
+      if ( nullptr == pInstrument.get() ) {
+	      pInstrument = Instrument::pInstrument_t( new Instrument( sSymbol, it, sExchange, dtExpiryRequested.year(), dtExpiryRequested.month() ) );
       }
       else {
       }
       break;
     case InstrumentType::Currency: {
-      // 20151227 will need to step this to see if it works, with no sUnderlying
+
       bFound = false;
       Currency::ECurrency base = Currency::_Count;
       for ( int ix = 0; ix < Currency::_Count; ++ix ) {
-        if ( 0 == strcmp( Currency::Name[ ix ], sBaseName.c_str() ) ) {
+        if ( 0 == strcmp( Currency::Name[ ix ], contract.currency.c_str() ) ) {
           bFound = true;
           base = static_cast<Currency::ECurrency>( ix );
           break;
@@ -1506,16 +1516,10 @@ void TWS::BuildInstrumentFromContractDetails( const ContractDetails& details, pI
       if ( !bFound )
         throw std::out_of_range( "base currency lookup not found" );
 
-      const char* szCounter = NULL;
-      szCounter = strchr( sLocalSymbol.c_str(), '.' );
-      if ( NULL == szCounter )
-        throw std::out_of_range( "counter currency not in LocalSymbol" );
-      ++szCounter;  // advance to character after '.'
-
       bFound = false;
       Currency::ECurrency counter = Currency::_Count;
       for ( int ix = 0; ix < Currency::_Count; ++ix ) {
-        if ( 0 == strcmp( Currency::Name[ ix ], szCounter ) ) {
+        if ( 0 == strcmp( Currency::Name[ ix ], contract.symbol.c_str() ) ) {
           bFound = true;
           counter = static_cast<Currency::ECurrency>( ix );
           break;
@@ -1524,12 +1528,11 @@ void TWS::BuildInstrumentFromContractDetails( const ContractDetails& details, pI
       if ( !bFound )
         throw std::out_of_range( "counter currency lookup not found" );
 
-      //if ( "" == sExchange )  // won't match because already set above
-     sExchange = "IDEALPRO";
-
-     assert( 0 == pInstrument.get() );  // maybe incorrect at some time in the future
-      //pInstrument = Instrument::pInstrument_t( new Instrument( sLocalSymbol, sUnderlying, it, sExchange, base, counter ) );
-      pInstrument = Instrument::pInstrument_t( new Instrument( sLocalSymbol, it, sExchange, base, counter ) );
+      if ( nullptr == pInstrument.get() ) {
+        pInstrument = std::make_shared<ou::tf::Instrument>( contract.localSymbol, ou::tf::InstrumentType::Currency,
+          contract.exchange, base, counter
+          );
+      }
       }
       break;
     case InstrumentType::Index:
