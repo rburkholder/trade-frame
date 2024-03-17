@@ -64,7 +64,10 @@ namespace Currency {
   typedef std::string type;
   // enumeration is subject to change, so do not use enumeration in persistent storage
   enum ECurrency { USD, GBP, CAD, CHF, HKD, JPY, EUR, KRW, LTL, AUD, CZK, DKK, NZD, HUF, ILS, _Count };
-  extern const char* Name[];
+  extern const char* Name[]; // indexed by ECurrency
+
+  using pair_t = std::pair<ECurrency,ECurrency>;
+  pair_t Split( const std::string& );  // eg: EUR.USD
 }
 
   // * instrument dialog may be limited to a subset of instruments

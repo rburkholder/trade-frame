@@ -241,12 +241,15 @@ void AppCurrencyTrader::ConfirmProviders() {
           << "providers available"
           ;
 
+        const std::string sCurrencyPair( "USD.CAD" );
+        ou::tf::Currency::pair_t pairCurrency( ou::tf::Currency::Split( sCurrencyPair ) );
+
         ou::tf::Instrument::pInstrument_t pInstrument
         = std::make_shared<ou::tf::Instrument>(
-          "USD.CAD",
+          sCurrencyPair,
           ou::tf::InstrumentType::Currency, "IDEAL", // virtual paper
           //ou::tf::InstrumentType::Currency, "IDEALPRO", // actual trading
-          ou::tf::Currency::USD, ou::tf::Currency::CAD );
+          pairCurrency.first, pairCurrency.second );
         m_tws->RequestContractDetails(
           pInstrument->GetInstrumentName(),
           pInstrument,
