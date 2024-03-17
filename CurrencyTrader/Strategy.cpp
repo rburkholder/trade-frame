@@ -20,3 +20,13 @@
  */
 
 #include "Strategy.hpp"
+
+Strategy::Strategy( pPosition_t pPosition )
+: m_pPosition( pPosition )
+{
+
+}
+
+Strategy::~Strategy() {
+
+}

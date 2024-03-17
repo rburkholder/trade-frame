@@ -21,8 +21,17 @@
 
 #pragma once
 
+#include <TFTrading/Position.h>
+
 class Strategy {
 public:
+
+  using pPosition_t = ou::tf::Position::pPosition_t;
+
+  Strategy( pPosition_t );
+  ~Strategy();
+
 protected:
 private:
+  pPosition_t m_pPosition;
 };

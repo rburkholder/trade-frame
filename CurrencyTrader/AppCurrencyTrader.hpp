@@ -71,6 +71,8 @@ private:
   using TreeItem = ou::tf::TreeItem;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
 
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
   using pProviderSim_t = ou::tf::SimulationProvider::pProvider_t;
   using pProviderIB_t = ou::tf::ib::TWS::pProvider_t;
@@ -118,7 +120,8 @@ private:
 
   ou::ChartDataView m_dvChart; // the data
 
-  pPortfolio_t m_pPortfolioUSD;
+  pPortfolio_t m_pPortfolioUSD; // base currency
+  //pPortfolio_t m_pPortfolioForex;
 
   using pStrategy_t = std::unique_ptr<Strategy>;
   using mapStrategy_t = std::map<std::string,pStrategy_t>;
@@ -129,8 +132,10 @@ private:
   void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();
 
-  void LoadPortfolio( const std::string& sName );
+  void LoadPortfolioCurrency(); // base currency portfolio
+  //void LoadPortfolioForex();    // strategy positions
   void ConfirmProviders();
+  void BuildStrategy( pInstrument_t );
 
   void SaveState();
   void LoadState();
