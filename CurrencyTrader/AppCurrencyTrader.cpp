@@ -19,10 +19,11 @@
  * Created: March 09, 2024 19:58:27
  */
 
+#include <boost/log/trivial.hpp>
+#include <boost/lexical_cast.hpp>
+
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
-
-#include <boost/lexical_cast.hpp>
 
 #include <wx/menu.h>
 #include <wx/sizer.h>
@@ -31,7 +32,8 @@
 
 //#include <TFTrading/Watch.h>
 //#include <TFTrading/Position.h>
-#include <TFTrading/BuildInstrument.h>
+#include <TFTrading/Instrument.h>
+//#include <TFTrading/BuildInstrument.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/TreeItem.hpp>
@@ -46,7 +48,7 @@ namespace {
   static const std::string c_sAppName( "CurrencyTrader" );
   static const std::string c_sVendorName( "One Unified Net Limited" );
 
-  static const std::string c_sDirectory( "" );
+  static const std::string c_sDirectory( "." );
   static const std::string c_sDbName(          c_sDirectory + '/' + c_sAppName + ".db" );
   static const std::string c_sStateFileName(   c_sDirectory + '/' + c_sAppName + ".state" );
   static const std::string c_sChoicesFilename( c_sDirectory + '/' + c_sAppName + ".cfg" );
@@ -64,6 +66,7 @@ bool AppCurrencyTrader::OnInit() {
 
   wxApp::OnInit();
 
+  m_bProvidersConfirmed = false;
   m_nTSDataStreamSequence = 0;
 
   if ( config::Load( c_sChoicesFilename, m_choices ) ) {
@@ -117,6 +120,8 @@ bool AppCurrencyTrader::OnInit() {
     true, false, true, false,
     [](){}, // fConnecting
     [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
+      if ( bD1 ) m_data = m_tws;
+      if ( bX1 ) m_exec = m_tws;
       ConfirmProviders();
     },
     [](){}, // fDisconnecting
@@ -226,6 +231,46 @@ void AppCurrencyTrader::HandleMenuActionSaveValues() {
 }
 
 void AppCurrencyTrader::ConfirmProviders() {
+  if ( m_bProvidersConfirmed ) {}
+  else {
+    if ( m_data && m_exec ) {
+      if ( m_data->Connected() && m_exec->Connected() ) {
+        BOOST_LOG_TRIVIAL(info)
+          << "ConfirmProviders: data(" << m_data->GetName() << ") "
+          << "& execution(" << m_exec->GetName() << ") "
+          << "providers available"
+          ;
+
+        ou::tf::Instrument::pInstrument_t pInstrument
+        = std::make_shared<ou::tf::Instrument>(
+          "USD.CAD",
+          ou::tf::InstrumentType::Currency, "IDEAL", // virtual paper
+          //ou::tf::InstrumentType::Currency, "IDEALPRO", // actual trading
+          ou::tf::Currency::USD, ou::tf::Currency::CAD );
+        m_tws->RequestContractDetails(
+          pInstrument->GetInstrumentName(),
+          pInstrument,
+          []( const ContractDetails& details, ou::tf::Instrument::pInstrument_t& pInstrument ){
+            std::cout << "contract found: "
+                     << details.contract.localSymbol
+              << ',' << details.contract.conId
+              << ',' << details.mdSizeMultiplier
+              << ',' << details.contract.exchange
+              << ',' << details.validExchanges
+              << ',' << details.timeZoneId
+              //<< ',' << details.liquidHours
+              //<< ',' << details.tradingHours
+              << ',' << "market rule id " << details.marketRuleIds
+              << std::endl;
+          },
+          []( bool bDone ){
+            std::cout  << "IB contract request done" << std::endl;
+          }
+        );
+      }
+    }
+    m_bProvidersConfirmed = true;
+  }
 }
 
 void AppCurrencyTrader::SaveState() {

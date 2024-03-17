@@ -51,7 +51,7 @@ namespace tf {
   class TreeItem;
   class PanelLogging;
   class WinChartView;
-  class BuildInstrument;
+  //class BuildInstrument;
 namespace v2 {
   class PanelProviderControl;
 }
@@ -93,6 +93,8 @@ private:
 
   //wxTimer m_timerOneSecond;
 
+  bool m_bProvidersConfirmed;
+
   pProvider_t       m_data;
   pProvider_t       m_exec;
 
@@ -105,7 +107,7 @@ private:
   std::string m_sTSDataStreamStarted;
   int m_nTSDataStreamSequence;
 
-  std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
+  //std::unique_ptr<ou::tf::BuildInstrument> m_pBuildInstrument;
 
   std::unique_ptr<ou::tf::db> m_pdb;
 
