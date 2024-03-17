@@ -177,11 +177,10 @@ public:
     };
 
     TableRowDef( // currency
-      const idInstrument_t& idInstrument_, const idInstrument_t& idCounterInstrument_,
+      const idInstrument_t& idInstrument_,
       InstrumentType::EInstrumentType eType_, idExchange_t idExchange_,
       Currency::ECurrency eCurrency_, Currency::ECurrency eCounterCurrency_ )
       : idInstrument( idInstrument_ ), eType( eType_ ), idExchange( idExchange_ ),
-//        idUnderlying( idCounterInstrument_ ),
 	      eCurrency( eCurrency_ ), eCounterCurrency( eCounterCurrency_ ),
         dblStrike( 0.0 ), eOptionSide( OptionSide::Unknown ),
         nYear( 0 ), nMonth( 0 ), nDay( 0 ), dtExpiry( boost::posix_time::not_a_date_time ),
@@ -225,7 +224,6 @@ public:
     );
   Instrument(  // currency
     const idInstrument_t& idInstrument,
-//    const idInstrument_t& idCounterInstrument,
     InstrumentType::EInstrumentType eType, const idExchange_t& idExchange,
     Currency::ECurrency base, Currency::ECurrency counter );
 
@@ -263,6 +261,8 @@ public:
 
   void SetCurrency( Currency::ECurrency eCurrency ) { m_row.eCurrency = eCurrency; };
   const char *GetCurrencyName() const { return Currency::Name[ m_row.eCurrency ]; };
+  Currency::ECurrency GetCurrencyBase() const { return m_row.eCurrency; }
+  Currency::ECurrency GetCurrencyCounter() const { return m_row.eCounterCurrency; }
 
   double GetStrike() const { return m_row.dblStrike; };
   boost::uint16_t GetExpiryYear() const { return m_row.nYear; };
