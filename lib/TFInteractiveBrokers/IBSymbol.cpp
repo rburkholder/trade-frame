@@ -94,13 +94,25 @@ void Symbol::AcceptTickPrice(TickType tickType, double price) {
 
 void Symbol::AcceptTickSize(TickType tickType, Decimal size_decimal) {
 
-  // go native at some point?  [high conversion overhead]
-  uint32_t size = __bid64_to_uint32_rnint( size_decimal );
+  // 2024/03/17 found with a BID_SIZE forex quote
+  static const Decimal scary( 0x7c00000000000000 ); // 8935141660703064064
+
+  uint32_t size;
+  if ( scary == size_decimal ) {
+    size = 0;
+  }
+  else {
+    // go native at some point?  [high conversion overhead]
+    uint32_t size = __bid64_to_uint32_rnint( size_decimal );
+  }
 
   switch ( m_pInstrument->GetInstrumentType() ) {
   case InstrumentType::Stock:
   case InstrumentType::ETF:
     size *= 100;
+    break;
+  case InstrumentType::Currency:
+    // any re-sizing?
     break;
   default:
     break;
