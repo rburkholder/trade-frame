@@ -31,6 +31,7 @@ namespace po = boost::program_options;
 
 namespace {
   static const std::string sChoice_SymbolName(      "symbol_name" );
+  static const std::string sChoice_sExchange(       "exchange" );
   static const std::string sOption_IbInstance(      "ib_instance" );
   static const std::string sChoice_StartTime(       "start_time" );
   static const std::string sChoice_StopTime(        "stop_time" );
@@ -68,6 +69,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     po::options_description config( "currency trader config" );
     config.add_options()
       ( sChoice_SymbolName.c_str(), po::value<std::string>( &choices.m_sSymbolName ), "symbol name" )
+      ( sChoice_sExchange.c_str(), po::value<std::string>( &choices.m_sExchange ), "exchange name" )
 
       ( sOption_IbInstance.c_str(), po::value<int>( &choices.m_nIbInstance)->default_value( 1 ), "IB instance" )
 
@@ -94,6 +96,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
       bOk &= parse<std::string>( sFileName, vm, sChoice_SymbolName, true, choices.m_sSymbolName );
       std::replace_if( choices.m_sSymbolName.begin(), choices.m_sSymbolName.end(), [](char ch)->bool{return '~' == ch;}, '#' );
+
+      bOk &= parse<std::string>( sFileName, vm, sChoice_sExchange, true, choices.m_sExchange );
 
       bOk &= parse<std::string>( sFileName, vm, sChoice_StopTime, true, choices.m_sStopTime );
       choices.m_tdStopTime = boost::posix_time::duration_from_string( choices.m_sStopTime );

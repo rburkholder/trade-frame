@@ -30,6 +30,7 @@ namespace config {
 struct Choices {
 
   std::string m_sSymbolName;
+  std::string m_sExchange;
 
   int m_nIbInstance; // Interactive Brokers api instance
 

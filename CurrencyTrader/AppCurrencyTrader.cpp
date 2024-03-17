@@ -19,6 +19,8 @@
  * Created: March 09, 2024 19:58:27
  */
 
+#include <algorithm>
+
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -241,15 +243,17 @@ void AppCurrencyTrader::ConfirmProviders() {
           << "providers available"
           ;
 
-        const std::string sCurrencyPair( "USD.CAD" );
-        ou::tf::Currency::pair_t pairCurrency( ou::tf::Currency::Split( sCurrencyPair ) );
+        std::string sSymbolName( m_choices.m_sSymbolName );
+        std::transform(sSymbolName.begin(), sSymbolName.end(), sSymbolName.begin(), ::toupper);
+
+        ou::tf::Currency::pair_t pairCurrency( ou::tf::Currency::Split( sSymbolName ) );
 
         ou::tf::Instrument::pInstrument_t pInstrument
-        = std::make_shared<ou::tf::Instrument>(
-          sCurrencyPair,
-          ou::tf::InstrumentType::Currency, "IDEAL", // virtual paper
-          //ou::tf::InstrumentType::Currency, "IDEALPRO", // actual trading
-          pairCurrency.first, pairCurrency.second );
+          = std::make_shared<ou::tf::Instrument>(
+              m_choices.m_sSymbolName,
+              ou::tf::InstrumentType::Currency, m_choices.m_sExchange, // virtual paper
+              pairCurrency.first, pairCurrency.second
+              );
         m_tws->RequestContractDetails(
           pInstrument->GetInstrumentName(),
           pInstrument,
