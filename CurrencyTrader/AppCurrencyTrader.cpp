@@ -134,6 +134,10 @@ bool AppCurrencyTrader::OnInit() {
     [](){}  // fDisconnected
   );
 
+  m_timerOneSecond.SetOwner( this );
+  Bind( wxEVT_TIMER, &AppCurrencyTrader::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
+  m_timerOneSecond.Start( 500 );
+
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
   m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
   sizerUpper->Add(m_pPanelLogging, 2, wxEXPAND, 2);
@@ -369,10 +373,24 @@ void AppCurrencyTrader::BuildStrategy( pInstrument_t pInstrument ) {
     auto result = m_mapStrategy.emplace( idInstrument, std::move( pStrategy ) );
     assert( result.second );
     iterStrategy = result.first;
+
+    TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
+      idInstrument,
+      [this,idInstrument]( TreeItem* pTreeItem ){
+        mapStrategy_t::iterator iter = m_mapStrategy.find( idInstrument );
+        assert( m_mapStrategy.end() != iter );
+        m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
+      }
+    );
+
+    m_treeSymbols->ExpandAll();
   }
   else {
     assert( false );
   }
+}
+
+void AppCurrencyTrader::HandleOneSecondTimer( wxTimerEvent& event ) {
 
 }
 
@@ -407,8 +425,8 @@ void AppCurrencyTrader::OnClose( wxCloseEvent& event ) {
   //m_pFrameControls->Close();
 
   //if ( !m_choices.bStartSimulator ) {
-  //  m_timerOneSecond.Stop();
-  //  Unbind( wxEVT_TIMER, &AppAutoTrade::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
+    m_timerOneSecond.Stop();
+    Unbind( wxEVT_TIMER, &AppCurrencyTrader::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
   //}
 
   //m_mapStrategy.clear();

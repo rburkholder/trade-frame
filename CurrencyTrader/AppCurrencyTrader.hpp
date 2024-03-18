@@ -25,6 +25,7 @@
 #include <boost/serialization/split_member.hpp>
 
 #include <wx/app.h>
+#include <wx/timer.h>
 #include <wx/splitter.h>
 
 #include <OUCharting/ChartDataView.h>
@@ -93,7 +94,7 @@ private:
   TreeItem* m_pTreeItemPortfolio;
   wxTreeCtrl* m_treeSymbols;
 
-  //wxTimer m_timerOneSecond;
+  wxTimer m_timerOneSecond;
 
   bool m_bProvidersConfirmed;
 
@@ -128,6 +129,8 @@ private:
   mapStrategy_t m_mapStrategy;
 
   //ou::Delegate<int> m_OnSimulationComplete;
+
+  void HandleOneSecondTimer( wxTimerEvent& event );
 
   void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();
