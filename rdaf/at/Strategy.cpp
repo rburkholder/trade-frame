@@ -28,7 +28,7 @@
 
 // no longer use iostream, std::cout has a multithread contention problem
 //   due to it being captured to the gui, and is not thread safe
- #include <boost/log/trivial.hpp>
+#include <boost/log/trivial.hpp>
 
 #include <boost/lexical_cast.hpp>
 
