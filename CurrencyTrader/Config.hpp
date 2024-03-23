@@ -48,6 +48,8 @@ struct Choices {
   unsigned int m_nPipTrailingStop;
   unsigned int m_nLotSize;
 
+  unsigned int m_nBarSeconds;
+
 };
 
 bool Load( const std::string& sFileName, Choices& );

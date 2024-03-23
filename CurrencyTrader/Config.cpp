@@ -40,6 +40,7 @@ namespace {
   static const std::string sChoice_PipStopLoss(     "pip_stop_loss" );
   static const std::string sChoice_PipTrailingStop( "pip_trailing_stop" );
   static const std::string sChoice_LotSize(         "lot_size" );
+  static const std::string sChoice_BarSeconds(      "bar_seconds" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bRequired, T& dest ) {
@@ -82,6 +83,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       ( sChoice_PipTrailingStop.c_str(), po::value<unsigned int>( &choices.m_nPipTrailingStop )->default_value( 0 ), "pip trailing stop" )
 
       ( sChoice_LotSize.c_str(), po::value<unsigned int>( &choices.m_nLotSize )->default_value( 1 ), "lot size" )
+
+      ( sChoice_BarSeconds.c_str(), po::value<unsigned int>( &choices.m_nBarSeconds )->default_value( 15 * 60 ), "trading bar width (seconds)" )
       ;
     po::variables_map vm;
 
@@ -112,6 +115,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       bOk &= parse<unsigned int>( sFileName, vm, sChoice_PipStopLoss, true, choices.m_nPipStopLoss );
       bOk &= parse<unsigned int>( sFileName, vm, sChoice_PipTrailingStop, true, choices.m_nPipTrailingStop );
       bOk &= parse<unsigned int>( sFileName, vm, sChoice_LotSize, true, choices.m_nLotSize );
+
+      bOk &= parse<unsigned int>( sFileName, vm, sChoice_BarSeconds, true, choices.m_nBarSeconds );
     }
 
   }
