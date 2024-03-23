@@ -27,8 +27,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-class SpreadSpecs {
-public:
+struct SpreadSpecs {
 
   using days_t = boost::gregorian::days;
 
@@ -48,8 +47,6 @@ public:
   : nDaysFront( nDaysFront_ ), nDaysBack( nDaysBack_ )
   {}
 
-protected:
-private:
 };
 
 } // namespace option
