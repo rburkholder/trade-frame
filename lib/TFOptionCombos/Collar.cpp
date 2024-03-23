@@ -81,7 +81,7 @@ namespace {
 
   // NOTE/Caveat: AddLegOrder requires that c_rLegDefRise & c_rLegDefFall have identical LegNote::Side for each entry
 
-  //long collar: synthetic long, covered call, long put
+  //rising collar: synthetic long, covered call, long put
   static const rLegDef_t c_rLegDefRise = { // rising momentum
     LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Call ) // synthetic long
   , LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Put  ) // synthetic long
@@ -89,7 +89,7 @@ namespace {
   , LegDef( 1, LegNote::Type::Protect,    LegNote::Side::Long,  LegNote::Option::Put  ) // protective
   };
 
-  //short collar: synthetic short, covered put, long call
+  //falling collar: synthetic short, covered put, long call
   static const rLegDef_t c_rLegDefFall = { // falling momentum
     LegDef( 1, LegNote::Type::SynthLong,  LegNote::Side::Long,  LegNote::Option::Put  ) // synthetic short
   , LegDef( 1, LegNote::Type::SynthShort, LegNote::Side::Short, LegNote::Option::Call ) // synthetic short
