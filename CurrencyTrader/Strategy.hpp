@@ -25,6 +25,8 @@
 #include <OUCharting/ChartEntryVolume.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
+#include <TFTimeSeries/BarFactory.h>
+
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
@@ -56,6 +58,11 @@ private:
 
   ou::tf::TreeItem* m_pTreeItemSymbol;
 
+  ou::tf::BarFactory m_bfQuotes01Sec;
+  ou::tf::BarFactory m_bfTrading;  // default to 15 minutes
+
+  ou::tf::Bars m_barsTrading;
+
   ou::ChartDataView m_cdv;
 
   ou::ChartEntryIndicator m_ceQuoteAsk;
@@ -69,5 +76,8 @@ private:
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
+
+  void HandleBarQuotes01Sec( const ou::tf::Bar& );
+  void HandleBarTrading( const ou::tf::Bar& );
 
 };

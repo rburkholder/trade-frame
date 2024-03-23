@@ -23,6 +23,8 @@
 
 Strategy::Strategy( pPosition_t pPosition )
 : m_pPosition( pPosition )
+, m_bfQuotes01Sec( 1 )
+, m_bfTrading( 3 * 60 ) // TODO: obtain from config file
 {
 
   assert( m_pPosition );
@@ -47,6 +49,10 @@ Strategy::Strategy( pPosition_t pPosition )
 
   m_cdv.SetNames( "AutoTrade", m_pPosition->GetInstrument()->GetInstrumentName() );
 
+  m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
+  m_bfTrading.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarTrading ) );
+
+  //m_pWatch->RecordSeries( false );
   m_pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
 
@@ -55,6 +61,10 @@ Strategy::Strategy( pPosition_t pPosition )
 Strategy::~Strategy() {
   m_pWatch->OnQuote.Remove( MakeDelegate( this, &Strategy::HandleQuote ) );
   m_pWatch->OnTrade.Remove( MakeDelegate( this, &Strategy::HandleTrade ) );
+  //m_pWatch->RecordSeries( true );
+
+  m_bfQuotes01Sec.SetOnBarComplete( nullptr );
+  m_bfTrading.SetOnBarComplete( nullptr );
 
   m_cdv.Clear();
 }
@@ -71,7 +81,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
   //TimeTick( quote );
 
-  //m_bfQuotes01Sec.Add( dt, quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
+  m_bfQuotes01Sec.Add( dt, quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
 
 }
 
@@ -82,9 +92,20 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   m_ceTrade.Append( dt, trade.Price() );
   m_ceVolume.Append( dt, trade.Volume() );
 
+  m_bfTrading.Add( dt, trade.Price(), trade.Volume() );
+
   //const double mid = m_quote.Midpoint();
   //const ou::tf::Trade::price_t price = trade.Price();
 
+}
+
+void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& ) {
+  // calculate ema
+}
+
+void Strategy::HandleBarTrading( const ou::tf::Bar& ) {
+  // calculate ATR to determine volatility
+  // calculate swing points
 }
 
 void Strategy::SaveWatch( const std::string& sPrefix ) {
