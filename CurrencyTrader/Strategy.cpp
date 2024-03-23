@@ -101,7 +101,6 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
 }
 
-<<<<<<< Updated upstream
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 }
 
@@ -176,7 +175,8 @@ void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_
       }
       break;
   }
-=======
+}
+
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& ) {
   // calculate ema
 }
@@ -184,7 +184,6 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& ) {
 void Strategy::HandleBarTrading( const ou::tf::Bar& ) {
   // calculate ATR to determine volatility
   // calculate swing points
->>>>>>> Stashed changes
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& ) {

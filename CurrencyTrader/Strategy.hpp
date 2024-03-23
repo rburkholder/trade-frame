@@ -111,17 +111,15 @@ private:
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
 
-<<<<<<< Updated upstream
   void HandleRHTrading( const ou::tf::Bar& bar );
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
 
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );
-=======
+
   void HandleBarQuotes01Sec( const ou::tf::Bar& );
   void HandleBarTrading( const ou::tf::Bar& );
->>>>>>> Stashed changes
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& );
   void HandleBarTrading( const ou::tf::Bar& );
