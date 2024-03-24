@@ -22,6 +22,9 @@
 #pragma once
 
 #include <OUCharting/ChartDataView.h>
+#include <OUCharting/ChartEntryBars.h>
+#include <OUCharting/ChartEntryMark.h>
+#include <OUCharting/ChartEntryShape.h>
 #include <OUCharting/ChartEntryVolume.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
@@ -31,14 +34,17 @@
 #include <TFTrading/Position.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
-
 namespace ou {
 namespace tf {
   class TreeItem;
 }
 }
 
-class Strategy {
+class Strategy:
+  public ou::tf::DailyTradeTimeFrame<Strategy>
+{
+  friend class boost::serialization::access;
+  friend ou::tf::DailyTradeTimeFrame<Strategy>;
 public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -55,6 +61,22 @@ protected:
 private:
 
   enum EChartSlot { Price, Volume, SD, MASlope, MA, Stoch };
+  enum class ETradeState {
+    Init,  // initiaize state in current market
+    Search,  // looking for long or short enter
+    LongSubmitted, // order has been submitted, waiting for confirmation
+    LongExit,  // position exists, looking for exit
+    ShortSubmitted,  // order has been submitted, waiting for confirmtaion
+    ShortExit,  // position exists, looking for exit
+    LongExitSubmitted, // wait for exit to complete
+    ShortExitSubmitted, // wait for exit to complete
+    NoTrade, // from the config file, no trading, might be a future
+    EndOfDayCancel,
+    EndOfDayNeutral,
+    Done // no more action
+    };
+
+  using pOrder_t = ou::tf::Order::pOrder_t;
 
   ou::tf::TreeItem* m_pTreeItemSymbol;
 
@@ -71,11 +93,30 @@ private:
   ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryVolume m_ceVolume;
 
+  ou::ChartEntryShape m_ceLongEntry;
+  ou::ChartEntryShape m_ceLongFill;
+  ou::ChartEntryShape m_ceLongExit;
+  ou::ChartEntryShape m_ceShortEntry;
+  ou::ChartEntryShape m_ceShortFill;
+  ou::ChartEntryShape m_ceShortExit;
+
+  ou::ChartEntryIndicator m_ceProfitLoss;
+
+  pOrder_t m_pOrder;
   pWatch_t m_pWatch;
   pPosition_t m_pPosition;
 
+  ETradeState m_stateTrade;
+
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
+
+  void HandleRHTrading( const ou::tf::Bar& bar );
+  void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
+  void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
+
+  void HandleOrderCancelled( const ou::tf::Order& );
+  void HandleOrderFilled( const ou::tf::Order& );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& );
   void HandleBarTrading( const ou::tf::Bar& );

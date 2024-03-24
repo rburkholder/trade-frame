@@ -19,6 +19,8 @@
  * Created: March 14, 2024 21:32:07
  */
 
+#include <boost/log/trivial.hpp>
+
 #include "Strategy.hpp"
 
 Strategy::Strategy( pPosition_t pPosition )
@@ -97,6 +99,82 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   //const double mid = m_quote.Midpoint();
   //const ou::tf::Trade::price_t price = trade.Price();
 
+}
+
+void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
+}
+
+void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
+  m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+  m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  switch ( m_stateTrade ) {
+    case ETradeState::EndOfDayCancel:
+    case ETradeState::EndOfDayNeutral:
+      BOOST_LOG_TRIVIAL(info) << "order " << order.GetOrderId() << " cancelled - end of day";
+      break;
+    case ETradeState::LongExitSubmitted:
+    case ETradeState::ShortExitSubmitted:
+      //assert( false );  // TODO: need to figure out a plan to retry exit
+      BOOST_LOG_TRIVIAL(error) << "order " << order.GetOrderId() << " cancelled - state machine needs fixes";
+      m_stateTrade = ETradeState::Done;
+      break;
+    default:
+      m_stateTrade = ETradeState::Search;
+  }
+  m_pOrder.reset();
+}
+
+void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
+  m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
+  m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
+  switch ( m_stateTrade ) {
+    case ETradeState::LongSubmitted:
+      m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Long Fill" );
+      m_stateTrade = ETradeState::LongExit;
+      break;
+    case ETradeState::ShortSubmitted:
+      m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Fill" );
+      m_stateTrade = ETradeState::ShortExit;
+      break;
+    case ETradeState::LongExitSubmitted:
+      m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Long Exit Fill" );
+      m_stateTrade = ETradeState::Search;
+      break;
+    case ETradeState::ShortExitSubmitted:
+      m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Exit Fill" );
+      m_stateTrade = ETradeState::Search;
+      break;
+    case ETradeState::EndOfDayCancel:
+    case ETradeState::EndOfDayNeutral:
+      // figure out what labels to apply
+      break;
+    case ETradeState::Done:
+      break;
+    default:
+       assert( false ); // TODO: unravel the state mess if we get here
+  }
+  m_pOrder.reset();
+}
+
+void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
+  m_stateTrade = ETradeState::EndOfDayCancel;
+  if ( m_pPosition ) {
+    m_pPosition->CancelOrders();
+  }
+}
+
+void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
+  switch ( m_stateTrade ) {
+    case ETradeState::NoTrade:
+      // do nothing
+      break;
+    default:
+      m_stateTrade = ETradeState::EndOfDayNeutral;
+      if ( m_pPosition ) {
+        m_pPosition->ClosePosition();
+      }
+      break;
+  }
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& ) {
