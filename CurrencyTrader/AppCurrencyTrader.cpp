@@ -391,7 +391,23 @@ void AppCurrencyTrader::BuildStrategy( pInstrument_t pInstrument ) {
 }
 
 void AppCurrencyTrader::HandleOneSecondTimer( wxTimerEvent& event ) {
+  // TODO: perform a timed update on the chart?
 
+  double dblUnRealized;
+  double dblRealized;
+  double dblCommissionsPaid;
+  double dblTotal;
+
+  if ( m_pPortfolioUSD ) {
+    m_pPortfolioUSD->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+
+    ptime dt = ou::TimeSource::GlobalInstance().Internal();
+
+    m_ceUnRealized.Append( dt, dblUnRealized );
+    m_ceRealized.Append( dt, dblRealized );
+    m_ceCommissionsPaid.Append( dt, dblCommissionsPaid );
+    m_ceTotal.Append( dt, dblTotal );
+  }
 }
 
 void AppCurrencyTrader::SaveState() {
