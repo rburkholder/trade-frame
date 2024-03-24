@@ -92,6 +92,10 @@ bool AppCurrencyTrader::OnInit() {
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
 
+  m_iqf = ou::tf::iqfeed::Provider::Factory();
+  m_iqf->SetName( "iq01" );
+  //m_iqf->SetThreadCount( m_choices.nThreads );
+
   m_tws = ou::tf::ib::TWS::Factory();
   m_tws->SetName( "ib01" );
   m_tws->SetClientId( m_choices.m_nIbInstance );
@@ -120,6 +124,19 @@ bool AppCurrencyTrader::OnInit() {
   m_pPanelProviderControl->Show();
 
   sizerUpper->Add( m_pPanelProviderControl, 0, wxALIGN_LEFT, 2);
+
+  m_pPanelProviderControl->Add(
+    m_iqf,
+    true, false, true, false,
+    [](){}, // fConnecting
+    [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
+      if ( bD1 ) m_data = m_iqf;
+      if ( bX1 ) m_exec = m_iqf;
+      ConfirmProviders();
+    },
+    [](){}, // fDisconnecting
+    [](){}  // fDisconnected
+  );
 
   m_pPanelProviderControl->Add(
     m_tws,
@@ -256,27 +273,33 @@ void AppCurrencyTrader::ConfirmProviders() {
 
         LoadPortfolioCurrency();
 
-        std::string sSymbolName( m_choices.m_sSymbolName );
-        std::transform(sSymbolName.begin(), sSymbolName.end(), sSymbolName.begin(), ::toupper);
-
-        using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-
         pInstrument_t pInstrument;
         ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
 
-        pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIB, sSymbolName );
+        pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderUserBase, m_choices.m_sSymbolName );
         if ( pInstrument ) { // skip the build
           BuildStrategy( pInstrument );
         }
         else { // build the instrument
 
+          std::string sSymbolName( m_choices.m_sSymbolName );
+          std::transform(sSymbolName.begin(), sSymbolName.end(), sSymbolName.begin(), ::toupper);
           ou::tf::Currency::pair_t pairCurrency( ou::tf::Currency::Split( sSymbolName ) );
+
+          const std::string sCurrency1( ou::tf::Currency::Name[ pairCurrency.first ] );
+          const std::string sCurrency2( ou::tf::Currency::Name[ pairCurrency.second ] );
+
+          const std::string sSymbolName_IQFeed( sCurrency1 + sCurrency2 + ".FXCM" );
+          const std::string sSymbolName_IB( sCurrency1 + '.' + sCurrency2 );
+
           pInstrument
             = std::make_shared<ou::tf::Instrument>(
                 m_choices.m_sSymbolName,
                 ou::tf::InstrumentType::Currency, m_choices.m_sExchange, // virtual paper
                 pairCurrency.first, pairCurrency.second
                 );
+          pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIB, sSymbolName_IB );
+          pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIQF, sSymbolName_IQFeed );
 
           m_tws->RequestContractDetails(
             pInstrument->GetInstrumentName(),
@@ -294,7 +317,7 @@ void AppCurrencyTrader::ConfirmProviders() {
                 << ',' << "market rule id " << details.marketRuleIds
                 << std::endl;
 
-              pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIB, pInstrument->GetInstrumentName() );
+              //pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIB, pInstrument->GetInstrumentName() );
               ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
               im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
               BuildStrategy( pInstrument );
@@ -330,7 +353,6 @@ void AppCurrencyTrader::LoadPortfolioCurrency() {
 
 void AppCurrencyTrader::BuildStrategy( pInstrument_t pInstrument ) {
 
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 

@@ -33,6 +33,7 @@
 
 #include <TFTrading/DBWrapper.h>
 
+#include <TFIQFeed/Provider.h>
 #include <TFInteractiveBrokers/IBTWS.h>
 #include <TFSimulation/SimulationProvider.h>
 
@@ -77,7 +78,7 @@ private:
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
   using pProviderSim_t = ou::tf::SimulationProvider::pProvider_t;
   using pProviderIB_t = ou::tf::ib::TWS::pProvider_t;
-  //using pProviderIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
+  using pProviderIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
 
   using fInstrumentConstructed_t = std::function<void(const std::string&)>;
 
@@ -103,7 +104,7 @@ private:
 
   pProviderIB_t     m_tws;    // live - [ execution ]
   //pProviderSim_t    m_sim;    // simulation - [ data,execution ]
-  //pProviderIQFeed_t m_iqf;    // live - [ data ], simulation - [ execution ]
+  pProviderIQFeed_t m_iqf;    // live - [ data ], simulation - [ execution ]
 
   //std::string m_sSimulationDateTime;  // used for l2 output streaming file name
 
