@@ -59,7 +59,7 @@ namespace Currency {
         ;
 
       ruleCurrency %= symCurrency;
-      ruleStart &= ruleCurrency >> qi::lit( '.' ) >> ruleCurrency;
+      ruleStart &= ruleCurrency >> -qi::lit( ":,.-" ) >> ruleCurrency;
 
     }
 
