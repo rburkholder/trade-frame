@@ -19,6 +19,10 @@
  * Created: March 14, 2024 21:32:07
  */
 
+// see ATR trading notes at bottom
+// TODO: load daily bars to calculate TR over last number of days
+// TODO: change some of the screeners to use TR rather than bar ranges
+
 #include <boost/log/trivial.hpp>
 
 #include "Strategy.hpp"
@@ -26,7 +30,7 @@
 Strategy::Strategy( pPosition_t pPosition )
 : m_pPosition( pPosition )
 , m_bfQuotes01Sec( 1 )
-, m_bfTrading( 3 * 60 ) // TODO: obtain from config file
+, m_bfTrading( 60 )
 {
 
   assert( m_pPosition );
@@ -51,11 +55,20 @@ Strategy::Strategy( pPosition_t pPosition )
 
   m_cdv.SetNames( "Currency Trader", m_pPosition->GetInstrument()->GetInstrumentName() );
 
+  // supplied by 1 second mid-quote
   m_pEmaCurrency = std::make_unique<EMA>( 3 * 60, m_cdv, EChartSlot::Price );
   m_pEmaCurrency->Set( ou::Colour::Purple, "Price EMA" );
 
+  // supplied by 1 minute trade bar
+  m_pATRFast = std::make_unique<EMA>( 3, m_cdv, EChartSlot::ATR );
+  m_pATRFast->Set( ou::Colour::Green, "ATR Fast" );
+
+  // supplied by 1 minute trade bar
+  m_pATRSlow = std::make_unique<EMA>( 14, m_cdv, EChartSlot::ATR );
+  m_pATRSlow->Set( ou::Colour::Green, "ATR Slow" );
+
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
-  m_bfTrading.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarTrading ) );
+  m_bfTrading.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleMinuteBar ) );
 
   //m_pWatch->RecordSeries( false );
   m_pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
@@ -71,7 +84,10 @@ Strategy::~Strategy() {
   m_bfQuotes01Sec.SetOnBarComplete( nullptr );
   m_bfTrading.SetOnBarComplete( nullptr );
 
+  m_pATRFast.reset();
+  m_pATRSlow.reset();
   m_pEmaCurrency.reset();
+
   m_cdv.Clear();
 }
 
@@ -185,8 +201,13 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   m_pEmaCurrency->Update( bar.DateTime(), bar.Close() );
 }
 
-void Strategy::HandleBarTrading( const ou::tf::Bar& ) {
-  // calculate ATR to determine volatility
+void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
+
+  const ptime dt( bar.DateTime() );
+
+  m_pATRFast->Update( dt, m_TRFast.Update( bar ) );
+  m_pATRSlow->Update( dt, m_TRSlow.Update( bar ) );
+
   // calculate swing points
 }
 
@@ -195,3 +216,60 @@ void Strategy::SaveWatch( const std::string& sPrefix ) {
     m_pWatch->SaveSeries( sPrefix );
   }
 }
+
+  // The ATR is commonly used as an exit method that can be applied
+  // no matter how the entry decision is made. One popular technique
+  // is known as the "chandelier exit" and was developed by Chuck LeBeau:
+  //   place a trailing stop under the highest high the stock has reached
+  //   since you entered the trade. The distance between the highest high
+  //   and the stop level is defined as some multiple multiplied by the ATR.
+
+  // While the ATR doesn't tell us in which direction the breakout will occur,
+  // it can be added to the closing price, and the trader can buy whenever
+  // the next day's price trades above that value.
+
+  // ATR can be used to set up entry signals.
+  // ATR breakout systems are commonly used by short-term traders to time entries.
+  // This system adds the ATR, or a multiple of the ATR, to the next day's open
+  // and buys when prices move above that level. Short trades are the opposite;
+  // the ATR or a multiple of the ATR is subtracted from the open and entries
+  // occur when that level is broken.
+
+  // maybe ATR could be connected with Darvis for timing entries.
+
+  // To adjust for volatility you can take 10 000 (or whatever number you set as default)
+  // and divide by the Average True Range over the last 100 days.
+  // This way you allocate more capital to the least volatile stocks compared to the ones more volatile.
+
+  // https://tradeciety.com/how-to-use-the-atr-indicator-guide for Kelner bands
+  // ATR can be used to calculate typical PIP movement per day for trading volatility
+  // use to calculate daily ATR for an idea of daily trading ranges
+
+  // Timing Trades: ATR is crucial in deciding when to execute trades.
+  // A high ATR, signaling high volatility, suggests larger price fluctuations and may be suitable
+  // for breakout strategies or anticipating major market shifts.
+  // A low ATR, indicating a quieter market, may favor strategies suited to a range-bound environment.
+
+  // Setting Stop Losses: In determining stop-loss orders, ATR is invaluable.
+  // It helps traders set stop losses that reflect current market volatility.
+  // In a high-volatility (high ATR) scenario, a larger stop loss might be necessary
+  // to avoid early exits due to market volatility. In contrast, in low-volatility (low ATR) markets,
+  // tighter stop losses could be more effective, minimizing losses while
+  // preventing unnecessary position exits.
+
+  // Risk Management: ATR assists in risk management by providing insights into market volatility.
+  // Traders can adjust their position sizes in response to this.
+  // In volatile markets, reducing position sizes helps manage risk,
+  // while in more stable conditions, larger positions might be beneficial.
+
+  // Market Sentiment: ATR can also offer indirect indications of market sentiment.
+  // A rapid increase in ATR may signal growing market tension or excitement,
+  // potentially indicating upcoming significant market movements.
+  // A gradual decrease in ATR can suggest a stabilizing market,
+  // often leading to a consolidation phase.
+
+  // ATR can be instrumental in weighing a limit or a market order.
+  // The volatility measured by ATR can guide traders in deciding
+  // whether to opt for a limit order, seeking a specific price point,
+  // or a market order, executing a trade at the current market price,
+  // depending on the market’s perceived stability or volatility.

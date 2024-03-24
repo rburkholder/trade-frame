@@ -60,7 +60,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, SD, MASlope, MA, Stoch };
+  enum EChartSlot { Price, Volume, ATR, SD, MASlope, MA, Stoch };
   enum class ETradeState {
     Init,  // initiaize state in current market
     Search,  // looking for long or short enter
@@ -109,7 +109,7 @@ private:
 
   ETradeState m_stateTrade;
 
-  struct EMA {
+  struct EMA { // Exponential Moving Average
 
     double dblCoef1; // smaller - used on arriving value
     double dblCoef2; // 1 - dblCoef1 (larger), used on prior ema
@@ -146,6 +146,36 @@ private:
   using pEMA_t = std::unique_ptr<EMA>;
   pEMA_t m_pEmaCurrency;
 
+  struct TR { // True Range
+
+    double close;
+
+    TR(): close {} {}
+
+    double Update( const ou::tf::Bar& bar ) {
+
+      const double hi( bar.High() );
+      const double lo( bar.Low() );
+
+      const double upper( hi >= close ? hi - close : close - hi );
+      const double lower( lo >= close ? lo - close : close - lo );
+
+      double range( hi - lo );
+      if ( upper > range ) range = upper;
+      if ( lower > range ) range = lower;
+
+      close = bar.Close();
+
+      return range;
+    }
+  };
+
+  TR m_TRFast;
+  pEMA_t m_pATRFast;
+
+  TR m_TRSlow;
+  pEMA_t m_pATRSlow;
+
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
 
@@ -157,6 +187,6 @@ private:
   void HandleOrderFilled( const ou::tf::Order& );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& );
-  void HandleBarTrading( const ou::tf::Bar& );
+  void HandleMinuteBar( const ou::tf::Bar& );
 
 };
