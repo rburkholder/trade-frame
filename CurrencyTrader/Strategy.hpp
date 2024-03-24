@@ -121,7 +121,4 @@ private:
   void HandleBarQuotes01Sec( const ou::tf::Bar& );
   void HandleBarTrading( const ou::tf::Bar& );
 
-  void HandleBarQuotes01Sec( const ou::tf::Bar& );
-  void HandleBarTrading( const ou::tf::Bar& );
-
 };

@@ -186,15 +186,6 @@ void Strategy::HandleBarTrading( const ou::tf::Bar& ) {
   // calculate swing points
 }
 
-void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& ) {
-  // calculate ema
-}
-
-void Strategy::HandleBarTrading( const ou::tf::Bar& ) {
-  // calculate ATR to determine volatility
-  // calculate swing points
-}
-
 void Strategy::SaveWatch( const std::string& sPrefix ) {
   if ( m_pWatch ) {
     m_pWatch->SaveSeries( sPrefix );
