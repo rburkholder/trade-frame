@@ -49,7 +49,10 @@ Strategy::Strategy( pPosition_t pPosition )
 
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
-  m_cdv.SetNames( "AutoTrade", m_pPosition->GetInstrument()->GetInstrumentName() );
+  m_cdv.SetNames( "Currency Trader", m_pPosition->GetInstrument()->GetInstrumentName() );
+
+  m_pEmaCurrency = std::make_unique<EMA>( 3 * 60, m_cdv, EChartSlot::Price );
+  m_pEmaCurrency->Set( ou::Colour::Purple, "Price EMA" );
 
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
   m_bfTrading.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarTrading ) );
@@ -68,12 +71,13 @@ Strategy::~Strategy() {
   m_bfQuotes01Sec.SetOnBarComplete( nullptr );
   m_bfTrading.SetOnBarComplete( nullptr );
 
+  m_pEmaCurrency.reset();
   m_cdv.Clear();
 }
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
-  ptime dt( quote.DateTime() );
+  const ptime dt( quote.DateTime() );
 
   m_ceQuoteAsk.Append( dt, quote.Ask() );
   m_ceQuoteBid.Append( dt, quote.Bid() );
@@ -89,15 +93,14 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
 void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
-  ptime dt( trade.DateTime() );
+  const ptime dt( trade.DateTime() );
+  const ou::tf::Trade::price_t  price(  trade.Price() );
+  const ou::tf::Trade::volume_t volume( trade.Volume() );
 
-  m_ceTrade.Append( dt, trade.Price() );
-  m_ceVolume.Append( dt, trade.Volume() );
+  m_ceTrade.Append( dt, price );
+  m_ceVolume.Append( dt, volume );
 
-  m_bfTrading.Add( dt, trade.Price(), trade.Volume() );
-
-  //const double mid = m_quote.Midpoint();
-  //const ou::tf::Trade::price_t price = trade.Price();
+  m_bfTrading.Add( dt, price, volume );
 
 }
 
@@ -177,8 +180,9 @@ void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_
   }
 }
 
-void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& ) {
-  // calculate ema
+void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
+  assert( m_pEmaCurrency );
+  m_pEmaCurrency->Update( bar.DateTime(), bar.Close() );
 }
 
 void Strategy::HandleBarTrading( const ou::tf::Bar& ) {

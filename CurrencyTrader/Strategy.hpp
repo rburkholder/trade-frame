@@ -77,6 +77,7 @@ private:
     };
 
   using pOrder_t = ou::tf::Order::pOrder_t;
+  using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
   ou::tf::TreeItem* m_pTreeItemSymbol;
 
@@ -107,6 +108,43 @@ private:
   pPosition_t m_pPosition;
 
   ETradeState m_stateTrade;
+
+  struct EMA {
+
+    double dblCoef1; // smaller - used on arriving value
+    double dblCoef2; // 1 - dblCoef1 (larger), used on prior ema
+    double dblEmaLatest;
+    unsigned int ixSlot;
+
+    ou::ChartEntryIndicator m_ceEma;
+    ou::ChartDataView& m_cdv;
+
+    EMA( unsigned int nIntervals, ou::ChartDataView& cdv, unsigned int ixSlot_ )
+    : dblEmaLatest {}, m_cdv( cdv ), ixSlot( ixSlot_ )
+    {
+      dblCoef1 = 2.0 / ( nIntervals + 1 );
+      dblCoef2 = 1.0 - dblCoef1;
+      m_cdv.Add( ixSlot, &m_ceEma );
+    }
+
+    ~EMA() {
+      m_cdv.Remove( ixSlot, &m_ceEma );
+    }
+
+    void Set( ou::Colour::EColour colour, const std::string& sName ) {
+      m_ceEma.SetName( sName );
+      m_ceEma.SetColour( colour );
+    }
+
+    double Update( boost::posix_time::ptime dt, double value ) {
+      dblEmaLatest = ( dblCoef1 * value ) + ( dblCoef2 * dblEmaLatest );
+      m_ceEma.Append( dt, dblEmaLatest );
+      return dblEmaLatest;
+    }
+  };
+
+  using pEMA_t = std::unique_ptr<EMA>;
+  pEMA_t m_pEmaCurrency;
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
