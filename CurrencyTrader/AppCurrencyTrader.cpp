@@ -248,10 +248,14 @@ void AppCurrencyTrader::HandleMenuActionSaveValues() {
   CallAfter(
     [this](){
       m_nTSDataStreamSequence++;
-      //m_pStrategy->SaveWatch(
-      //  "/app/" + c_sAppNamePrefix + "/" +
-      //  m_sTSDataStreamStarted + "-" +
-      //  boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) ); // sequence number on each save
+      const std::string sPath(
+        "/app/" + c_sAppName + "/" +
+        m_sTSDataStreamStarted + "-" +
+        boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) // sequence number on each save
+      );
+      for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
+        vt.second->SaveWatch( sPath );
+      }
       std::cout << "  ... Done " << std::endl;
     }
   );
