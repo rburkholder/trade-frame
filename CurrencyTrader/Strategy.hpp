@@ -111,6 +111,8 @@ private:
 
   struct EMA { // Exponential Moving Average
 
+    bool bBootStrapped;
+
     double dblCoef1; // smaller - used on arriving value
     double dblCoef2; // 1 - dblCoef1 (larger), used on prior ema
     double dblEmaLatest;
@@ -120,7 +122,7 @@ private:
     ou::ChartDataView& m_cdv;
 
     EMA( unsigned int nIntervals, ou::ChartDataView& cdv, unsigned int ixSlot_ )
-    : dblEmaLatest {}, m_cdv( cdv ), ixSlot( ixSlot_ )
+    : bBootStrapped( false ), dblEmaLatest {}, m_cdv( cdv ), ixSlot( ixSlot_ )
     {
       dblCoef1 = 2.0 / ( nIntervals + 1 );
       dblCoef2 = 1.0 - dblCoef1;
@@ -137,7 +139,15 @@ private:
     }
 
     double Update( boost::posix_time::ptime dt, double value ) {
-      dblEmaLatest = ( dblCoef1 * value ) + ( dblCoef2 * dblEmaLatest );
+
+      if ( bBootStrapped ) {
+        bBootStrapped = true;
+        dblEmaLatest = value;
+      }
+      else {
+        dblEmaLatest = ( dblCoef1 * value ) + ( dblCoef2 * dblEmaLatest );
+      }
+
       m_ceEma.Append( dt, dblEmaLatest );
       return dblEmaLatest;
     }
