@@ -44,7 +44,7 @@ Strategy::Strategy( pPosition_t pPosition )
   m_ceVolume.SetName(   "Volume" );
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
-  m_ceTrade.SetColour( ou::Colour::DarkGreen );
+  m_ceTrade.SetColour( ou::Colour::Green );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
 
   m_cdv.Add( EChartSlot::Price, &m_ceQuoteAsk );
