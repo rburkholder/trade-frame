@@ -141,11 +141,11 @@ private:
     double Update( boost::posix_time::ptime dt, double value ) {
 
       if ( bBootStrapped ) {
-        bBootStrapped = true;
-        dblEmaLatest = value;
+        dblEmaLatest = ( dblCoef1 * value ) + ( dblCoef2 * dblEmaLatest );
       }
       else {
-        dblEmaLatest = ( dblCoef1 * value ) + ( dblCoef2 * dblEmaLatest );
+        bBootStrapped = true;
+        dblEmaLatest = value;
       }
 
       m_ceEma.Append( dt, dblEmaLatest );
