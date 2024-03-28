@@ -14,6 +14,8 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_symbols.hpp>
 
+#include <boost/fusion/include/std_pair.hpp>
+
 #include <boost/phoenix/core.hpp>
 
 #include "TradingEnumerations.h"
@@ -59,13 +61,15 @@ namespace Currency {
         ;
 
       ruleCurrency %= symCurrency;
-      ruleStart &= ruleCurrency >> -qi::lit( ":,.-" ) >> ruleCurrency;
+      ruleStart %= ruleCurrency 
+                >> -( qi::lit( '.' ) | qi::lit( ':' ) | qi::lit( '-' ) ) 
+                >> ruleCurrency;
 
     }
 
     qi::symbols<char, ECurrency> symCurrency;
 
-    qi::rule<Iterator, ECurrency> ruleCurrency;
+    qi::rule<Iterator, ECurrency()> ruleCurrency;
     qi::rule<Iterator, pair_t()> ruleStart;
   };
 
@@ -76,6 +80,7 @@ namespace Currency {
 
     pair_t pairCurrency( Currency::EUR, Currency::USD );
     bool b = parse( sPair.begin(), sPair.end(), parserCurrencyPair, pairCurrency );
+    assert( b );
     return pairCurrency;
   }
 }
