@@ -29,7 +29,8 @@ namespace config {
 
 struct Choices {
 
-  std::string m_sSymbolName;
+  using vSymbolName_t = std::vector<std::string>;
+  vSymbolName_t m_vSymbolName;
   std::string m_sExchange;
 
   int m_nIbInstance; // Interactive Brokers api instance

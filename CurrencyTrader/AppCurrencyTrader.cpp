@@ -280,58 +280,60 @@ void AppCurrencyTrader::ConfirmProviders() {
         pInstrument_t pInstrument;
         ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
 
-        pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderUserBase, m_choices.m_sSymbolName );
-        if ( pInstrument ) { // skip the build
-          BuildStrategy( pInstrument );
-        }
-        else { // build the instrument
+        for ( const config::Choices::vSymbolName_t::value_type& name: m_choices.m_vSymbolName ) {
+          pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderUserBase, name );
+          if ( pInstrument ) { // skip the build
+            BuildStrategy( pInstrument );
+          }
+          else { // build the instrument
 
-          std::string sSymbolName( m_choices.m_sSymbolName );
-          std::transform(sSymbolName.begin(), sSymbolName.end(), sSymbolName.begin(), ::toupper);
-          ou::tf::Currency::pair_t pairCurrency( ou::tf::Currency::Split( sSymbolName ) );
+            std::string sSymbolName( name );
+            std::transform(sSymbolName.begin(), sSymbolName.end(), sSymbolName.begin(), ::toupper);
+            ou::tf::Currency::pair_t pairCurrency( ou::tf::Currency::Split( sSymbolName ) );
 
-          const std::string sCurrency1( ou::tf::Currency::Name[ pairCurrency.first ] );
-          const std::string sCurrency2( ou::tf::Currency::Name[ pairCurrency.second ] );
+            const std::string sCurrency1( ou::tf::Currency::Name[ pairCurrency.first ] );
+            const std::string sCurrency2( ou::tf::Currency::Name[ pairCurrency.second ] );
 
-          const std::string sSymbolName_IQFeed( sCurrency1 + sCurrency2 + ".FXCM" );
-          const std::string sSymbolName_IB( sCurrency1 + '.' + sCurrency2 );
+            const std::string sSymbolName_IQFeed( sCurrency1 + sCurrency2 + ".FXCM" );
+            const std::string sSymbolName_IB( sCurrency1 + '.' + sCurrency2 );
 
-          pInstrument
-            = std::make_shared<ou::tf::Instrument>(
-                m_choices.m_sSymbolName,
-                ou::tf::InstrumentType::Currency, m_choices.m_sExchange, // virtual paper
-                pairCurrency.first, pairCurrency.second
-                );
-          pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIB, sSymbolName_IB );
-          pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIQF, sSymbolName_IQFeed );
+            pInstrument
+              = std::make_shared<ou::tf::Instrument>(
+                  name,
+                  ou::tf::InstrumentType::Currency, m_choices.m_sExchange, // virtual paper
+                  pairCurrency.first, pairCurrency.second
+                  );
+            pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIB, sSymbolName_IB );
+            pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIQF, sSymbolName_IQFeed );
 
-          m_tws->RequestContractDetails(
-            pInstrument->GetInstrumentName(),
-            pInstrument,
-            [this]( const ContractDetails& details, ou::tf::Instrument::pInstrument_t& pInstrument ){
-              std::cout << "IB contract found: "
-                      << details.contract.localSymbol
-                << ',' << details.contract.conId
-                << ',' << details.mdSizeMultiplier
-                << ',' << details.contract.exchange
-                << ',' << details.validExchanges
-                << ',' << details.timeZoneId
-                //<< ',' << details.liquidHours
-                //<< ',' << details.tradingHours
-                << ',' << "market rule id " << details.marketRuleIds
-                << std::endl;
+            m_tws->RequestContractDetails(
+              pInstrument->GetInstrumentName(),
+              pInstrument,
+              [this]( const ContractDetails& details, ou::tf::Instrument::pInstrument_t& pInstrument ){
+                std::cout << "IB contract found: "
+                        << details.contract.localSymbol
+                  << ',' << details.contract.conId
+                  << ',' << details.mdSizeMultiplier
+                  << ',' << details.contract.exchange
+                  << ',' << details.validExchanges
+                  << ',' << details.timeZoneId
+                  //<< ',' << details.liquidHours
+                  //<< ',' << details.tradingHours
+                  << ',' << "market rule id " << details.marketRuleIds
+                  << std::endl;
 
-              //pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIB, pInstrument->GetInstrumentName() );
-              ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
-              im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-              BuildStrategy( pInstrument );
-            },
-            [this]( bool bDone ){
-              if ( 0 == m_mapStrategy.size() ) {
-                std::cout  << "IB contract request incomplete" << std::endl;
+                //pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIB, pInstrument->GetInstrumentName() );
+                ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+                im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+                BuildStrategy( pInstrument );
+              },
+              [this]( bool bDone ){
+                if ( 0 == m_mapStrategy.size() ) {
+                  std::cout  << "IB contract request incomplete" << std::endl;
+                }
               }
-            }
-          );
+            );
+          }
         }
       }
     }

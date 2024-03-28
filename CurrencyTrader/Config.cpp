@@ -69,7 +69,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
     po::options_description config( "currency trader config" );
     config.add_options()
-      ( sChoice_SymbolName.c_str(), po::value<std::string>( &choices.m_sSymbolName ), "symbol name" )
+      ( sChoice_SymbolName.c_str(), po::value<Choices::vSymbolName_t>( &choices.m_vSymbolName ), "symbol name" )
       ( sChoice_sExchange.c_str(), po::value<std::string>( &choices.m_sExchange ), "exchange name" )
 
       ( sOption_IbInstance.c_str(), po::value<int>( &choices.m_nIbInstance)->default_value( 1 ), "IB instance" )
@@ -97,8 +97,18 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     else {
       po::store( po::parse_config_file( ifs, config), vm );
 
-      bOk &= parse<std::string>( sFileName, vm, sChoice_SymbolName, true, choices.m_sSymbolName );
-      std::replace_if( choices.m_sSymbolName.begin(), choices.m_sSymbolName.end(), [](char ch)->bool{return '~' == ch;}, '#' );
+      //bOk &= parse<Choices::vSymbolName_t>( sFileName, vm, sChoice_SymbolName, true, choices.m_vSymbolName );
+      if ( 0 < vm.count( sChoice_SymbolName ) ) {
+        choices.m_vSymbolName = std::move( vm[sChoice_SymbolName].as<Choices::vSymbolName_t>() );
+        for ( Choices::vSymbolName_t::value_type& vt: choices.m_vSymbolName ) {
+          std::replace_if( vt.begin(), vt.end(), [](char ch)->bool{return '~' == ch;}, '#' );
+          BOOST_LOG_TRIVIAL(info) << sChoice_SymbolName << " = " << vt;
+        }
+      }
+      else {
+        BOOST_LOG_TRIVIAL(error) << sFileName << " missing '" << sChoice_SymbolName << "='";
+        bOk = false;
+      }
 
       bOk &= parse<std::string>( sFileName, vm, sChoice_sExchange, true, choices.m_sExchange );
 
