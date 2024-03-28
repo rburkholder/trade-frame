@@ -127,7 +127,7 @@ bool AppCurrencyTrader::OnInit() {
 
   m_pPanelProviderControl->Add(
     m_iqf,
-    true, false, true, false,
+    true, false, false, false,
     [](){}, // fConnecting
     [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
       if ( bD1 ) m_data = m_iqf;
@@ -140,7 +140,7 @@ bool AppCurrencyTrader::OnInit() {
 
   m_pPanelProviderControl->Add(
     m_tws,
-    true, false, true, false,
+    false, false, true, false,
     [](){}, // fConnecting
     [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
       if ( bD1 ) m_data = m_tws;
@@ -277,10 +277,10 @@ void AppCurrencyTrader::ConfirmProviders() {
 
         LoadPortfolioCurrency();
 
-        pInstrument_t pInstrument;
         ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
 
         for ( const config::Choices::vSymbolName_t::value_type& name: m_choices.m_vSymbolName ) {
+          pInstrument_t pInstrument;
           pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderUserBase, name );
           if ( pInstrument ) { // skip the build
             BuildStrategy( pInstrument );
@@ -297,6 +297,14 @@ void AppCurrencyTrader::ConfirmProviders() {
             const std::string sSymbolName_IQFeed( sCurrency1 + sCurrency2 + ".FXCM" );
             const std::string sSymbolName_IB( sCurrency1 + '.' + sCurrency2 );
 
+            BOOST_LOG_TRIVIAL(info)
+              << "Compose " 
+              << name << ',' 
+              << sSymbolName << ',' 
+              << sSymbolName_IQFeed << ','
+              << sSymbolName_IB
+              ;
+              
             pInstrument
               = std::make_shared<ou::tf::Instrument>(
                   name,
