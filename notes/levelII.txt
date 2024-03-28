@@ -1,3 +1,8 @@
+2023/09/12
+
+Order Imbalance Based Strategy in High Frequency Trading
+https://palmislandtraders.com/econ136/hftois.pdf
+
 2008/05/05
 Calculate average positive, average positive maximum
 Calculate average negative, average negative maximum
@@ -187,3 +192,4 @@ http://www.gummy-stuff.org/VMA.htm
             
          
 ===================================
+
