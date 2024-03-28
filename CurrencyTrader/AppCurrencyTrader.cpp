@@ -200,6 +200,10 @@ bool AppCurrencyTrader::OnInit() {
 
   TreeItem::Bind( m_pFrameMain, m_treeSymbols );
   m_pTreeItemRoot = new TreeItem( m_treeSymbols, "/" ); // initialize tree
+  m_pTreeItemRoot->SetOnClick( 
+    [this]( TreeItem* pTreeItem ){
+      m_pWinChartView->SetChartDataView( nullptr );
+    } );
   //wxTreeItemId idPortfolio = m_treeSymbols->AppendItem( idRoot, sMenuItemPortfolio, -1, -1, new CustomItemData( sMenuItemPortfolio ) );
   //m_treeSymbols->Bind( wxEVT_TREE_ITEM_MENU, &AppAutoTrade::HandleTreeEventItemMenu, this, m_treeSymbols->GetId() );
   //m_treeSymbols->Bind( wxEVT_TREE_ITEM_RIGHT_CLICK, &AppAutoTrade::HandleTreeEventItemRightClick, this, m_treeSymbols->GetId() );
