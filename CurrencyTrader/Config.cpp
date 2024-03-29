@@ -31,6 +31,7 @@ namespace po = boost::program_options;
 
 namespace {
   static const std::string sChoice_SymbolName(      "symbol_name" );
+  static const std::string sChoice_PairSetting(     "pair_setting" );
   static const std::string sChoice_sExchange(       "exchange" );
   static const std::string sOption_IbInstance(      "ib_instance" );
   static const std::string sChoice_StartTime(       "start_time" );
@@ -70,6 +71,9 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     po::options_description config( "currency trader config" );
     config.add_options()
       ( sChoice_SymbolName.c_str(), po::value<Choices::vSymbolName_t>( &choices.m_vSymbolName ), "symbol name" )
+
+      //( sChoice_PairSetting.c_str(), po::value<Choices::vPairSettings_t>( &choices.m_vPairSettings )->default_value( Choices::vPairSettings_t() ), "pair settings <name,start<hh:mm::ss>,stop<hh:mm:ss>>" )
+
       ( sChoice_sExchange.c_str(), po::value<std::string>( &choices.m_sExchange ), "exchange name" )
 
       ( sOption_IbInstance.c_str(), po::value<int>( &choices.m_nIbInstance)->default_value( 1 ), "IB instance" )
@@ -109,6 +113,9 @@ bool Load( const std::string& sFileName, Choices& choices ) {
         BOOST_LOG_TRIVIAL(error) << sFileName << " missing '" << sChoice_SymbolName << "='";
         bOk = false;
       }
+
+      //bOk &= parse<Choices::vPairSettings_t>( sFileName, vm, sChoice_PairSetting, false, choices.m_vPairSettings );
+      // to be parsed into PairSettings structure
 
       bOk &= parse<std::string>( sFileName, vm, sChoice_sExchange, true, choices.m_sExchange );
 
