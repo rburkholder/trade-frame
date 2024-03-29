@@ -22,6 +22,7 @@
 #pragma once
 
 #include <string>
+#include <ostream>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -29,14 +30,18 @@ namespace config {
 
 struct Choices {
 
-  using vSymbolName_t = std::vector<std::string>;
-  vSymbolName_t m_vSymbolName;
   std::string m_sExchange;
 
   struct PairSettings {
+
     std::string m_sName;
     boost::posix_time::time_duration m_tdStartTime;
     boost::posix_time::time_duration m_tdStopTime;
+
+    PairSettings()
+    : m_tdStartTime( boost::posix_time::not_a_date_time )
+    , m_tdStopTime( boost::posix_time::not_a_date_time )
+    {}
 
     PairSettings( std::string&& sName,
                   boost::posix_time::time_duration tdStartTime,
@@ -72,18 +77,30 @@ struct Choices {
       }
       return *this;
     }
+
+    void Parse( const std::string& ); // perform the parser here?
+
+    // non member function - output
+    friend std::ostream& operator<<( std::ostream& os, PairSettings const& ps ) {
+      //return os << ps._i;
+      return os;
+    }
+
+    // non member function - input
+    friend std::istream& operator>>( std::istream& is, PairSettings& ps ){
+      //return os >> ps._i;
+      std::string input;
+      is >> input;
+      ps.Parse( input );
+      return is;
+    }
+
   };
 
   using vPairSettings_t = std::vector<PairSettings>;
   vPairSettings_t m_vPairSettings;
 
   int m_nIbInstance; // Interactive Brokers api instance
-
-  std::string m_sStartTime;
-  boost::posix_time::time_duration m_tdStartTime;
-
-  std::string m_sStopTime;
-  boost::posix_time::time_duration m_tdStopTime;
 
   std::string m_sMaxTradeLifeTime; // minutes
   boost::posix_time::time_duration m_tdMaxTradeLifeTime;

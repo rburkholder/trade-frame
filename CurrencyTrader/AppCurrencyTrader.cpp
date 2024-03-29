@@ -200,7 +200,7 @@ bool AppCurrencyTrader::OnInit() {
 
   TreeItem::Bind( m_pFrameMain, m_treeSymbols );
   m_pTreeItemRoot = new TreeItem( m_treeSymbols, "/" ); // initialize tree
-  m_pTreeItemRoot->SetOnClick( 
+  m_pTreeItemRoot->SetOnClick(
     [this]( TreeItem* pTreeItem ){
       m_pWinChartView->SetChartDataView( nullptr );
     } );
@@ -283,15 +283,15 @@ void AppCurrencyTrader::ConfirmProviders() {
 
         ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
 
-        for ( const config::Choices::vSymbolName_t::value_type& name: m_choices.m_vSymbolName ) {
+        for ( const config::Choices::vPairSettings_t::value_type& ps: m_choices.m_vPairSettings ) {
           pInstrument_t pInstrument;
-          pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderUserBase, name );
+          pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderUserBase, ps.m_sName );
           if ( pInstrument ) { // skip the build
             BuildStrategy( pInstrument );
           }
           else { // build the instrument
 
-            std::string sSymbolName( name );
+            std::string sSymbolName( ps.m_sName );
             std::transform(sSymbolName.begin(), sSymbolName.end(), sSymbolName.begin(), ::toupper);
             ou::tf::Currency::pair_t pairCurrency( ou::tf::Currency::Split( sSymbolName ) );
 
@@ -302,16 +302,16 @@ void AppCurrencyTrader::ConfirmProviders() {
             const std::string sSymbolName_IB( sCurrency1 + '.' + sCurrency2 );
 
             BOOST_LOG_TRIVIAL(info)
-              << "Compose " 
-              << name << ',' 
-              << sSymbolName << ',' 
+              << "Compose "
+              << ps.m_sName << ','
+              << sSymbolName << ','
               << sSymbolName_IQFeed << ','
               << sSymbolName_IB
               ;
-              
+
             pInstrument
               = std::make_shared<ou::tf::Instrument>(
-                  name,
+                  ps.m_sName,
                   ou::tf::InstrumentType::Currency, m_choices.m_sExchange, // virtual paper
                   pairCurrency.first, pairCurrency.second
                   );

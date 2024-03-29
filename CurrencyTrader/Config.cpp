@@ -22,6 +22,12 @@
 #include <fstream>
 #include <exception>
 
+#include <boost/phoenix/core.hpp>
+
+#include <boost/fusion/include/vector.hpp>
+
+#include <boost/spirit/include/qi.hpp>
+
 #include <boost/log/trivial.hpp>
 
 #include <boost/program_options.hpp>
@@ -30,12 +36,9 @@ namespace po = boost::program_options;
 #include "Config.hpp"
 
 namespace {
-  static const std::string sChoice_SymbolName(      "symbol_name" );
   static const std::string sChoice_PairSetting(     "pair_setting" );
   static const std::string sChoice_sExchange(       "exchange" );
   static const std::string sOption_IbInstance(      "ib_instance" );
-  static const std::string sChoice_StartTime(       "start_time" );
-  static const std::string sChoice_StopTime(        "stop_time" );
   static const std::string sChoice_MaxLifeTime(     "max_life_time" );
   static const std::string sChoice_PipProfit(       "pip_profit" );
   static const std::string sChoice_PipStopLoss(     "pip_stop_loss" );
@@ -60,7 +63,77 @@ namespace {
   }
 }
 
+// https://www.boost.org/doc/libs/master/libs/spirit/example/qi/parse_date.cpp
+// define custom transformation
+namespace boost { namespace spirit { namespace traits {
+  template<>
+  struct transform_attribute<
+      boost::posix_time::time_duration, fusion::vector<unsigned short, unsigned short, unsigned short>, qi::domain>
+  {
+      typedef fusion::vector<unsigned short, unsigned short, unsigned short> time_parts;
+
+      typedef time_parts type;
+
+      static time_parts pre( boost::posix_time::time_duration ) {
+        return time_parts();
+      }
+
+      static void post( boost::posix_time::time_duration& td, time_parts const& v )
+      {
+        td = boost::posix_time::time_duration(
+              fusion::at_c<0>(v)
+            , fusion::at_c<1>(v)
+            , fusion::at_c<2>(v))
+            ;
+      }
+
+      static void fail( boost::posix_time::time_duration& ) {}
+  };
+}}}
+
+//std::ostream& operator<<( std::ostream& stream, config::Choices::vPairSettings_t& ps ) { return stream; }
+
+BOOST_FUSION_ADAPT_STRUCT(
+  config::Choices::PairSettings,
+  (std::string, m_sName)
+  (boost::posix_time::time_duration, m_tdStartTime)
+  (boost::posix_time::time_duration, m_tdStopTime)
+)
+
 namespace config {
+
+namespace qi = boost::spirit::qi;
+
+template<typename Iterator>
+struct ParserPairSettings: qi::grammar<Iterator, Choices::PairSettings()> {
+  ParserPairSettings(): ParserPairSettings::base_type( ruleStart ) {
+
+    ruleName %= +( qi::char_ - qi::char_( ',' ) );
+    ruleValue %= qi::ushort_;
+    ruleTime %= ruleValue >> qi::lit( ':' )
+             >> ruleValue >> qi::lit( ':' )
+             >> ruleValue
+             ;
+    ruleStart %= ruleName >> qi::lit( ',' )
+              >> ruleTime >> qi::lit( ',' )
+              >> ruleTime
+              ;
+
+  }
+
+  typedef boost::fusion::vector<unsigned short, unsigned short, unsigned short> time_parts;
+
+  qi::rule<Iterator, std::string()> ruleName;
+  qi::rule<Iterator, unsigned short()> ruleValue;
+  qi::rule<Iterator, time_parts()> ruleTime;
+  qi::rule<Iterator, Choices::PairSettings()> ruleStart;
+};
+
+void Choices::PairSettings::Parse( const std::string& s ) {
+  static ParserPairSettings<std::string::const_iterator> parser;
+  bool b = parse( s.begin(), s.end(), parser, *this );
+  assert( b );
+}
 
 bool Load( const std::string& sFileName, Choices& choices ) {
 
@@ -70,16 +143,13 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
     po::options_description config( "currency trader config" );
     config.add_options()
-      ( sChoice_SymbolName.c_str(), po::value<Choices::vSymbolName_t>( &choices.m_vSymbolName ), "symbol name" )
 
-      //( sChoice_PairSetting.c_str(), po::value<Choices::vPairSettings_t>( &choices.m_vPairSettings )->default_value( Choices::vPairSettings_t() ), "pair settings <name,start<hh:mm::ss>,stop<hh:mm:ss>>" )
+      ( sChoice_PairSetting.c_str(), po::value<Choices::vPairSettings_t>( &choices.m_vPairSettings ), "pair settings <name,start<hh:mm::ss>,stop<hh:mm:ss>>" )
 
       ( sChoice_sExchange.c_str(), po::value<std::string>( &choices.m_sExchange ), "exchange name" )
 
       ( sOption_IbInstance.c_str(), po::value<int>( &choices.m_nIbInstance)->default_value( 1 ), "IB instance" )
 
-      ( sChoice_StopTime.c_str(),   po::value<std::string>( &choices.m_sStopTime ), "stop time HH:mm:ss UTC" )
-      ( sChoice_StartTime.c_str(),   po::value<std::string>( &choices.m_sStartTime ), "start time HH:mm:ss UTC" )
       ( sChoice_MaxLifeTime.c_str(),   po::value<std::string>( &choices.m_sMaxTradeLifeTime ), "max life time HH:mm:ss" )
 
       ( sChoice_PipProfit.c_str(), po::value<unsigned int>( &choices.m_nPipProfit ), "pip profit taking" )
@@ -101,29 +171,21 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     else {
       po::store( po::parse_config_file( ifs, config), vm );
 
-      //bOk &= parse<Choices::vSymbolName_t>( sFileName, vm, sChoice_SymbolName, true, choices.m_vSymbolName );
-      if ( 0 < vm.count( sChoice_SymbolName ) ) {
-        choices.m_vSymbolName = std::move( vm[sChoice_SymbolName].as<Choices::vSymbolName_t>() );
-        for ( Choices::vSymbolName_t::value_type& vt: choices.m_vSymbolName ) {
-          std::replace_if( vt.begin(), vt.end(), [](char ch)->bool{return '~' == ch;}, '#' );
-          BOOST_LOG_TRIVIAL(info) << sChoice_SymbolName << " = " << vt;
+      //bOk &= parse<Choices::vPairSettings_t>( sFileName, vm, sChoice_PairSetting, false, choices.m_vPairSettings );
+      // move back into the parse with appropriate ostream
+      if ( 0 < vm.count( sChoice_PairSetting ) ) {
+        choices.m_vPairSettings = std::move( vm[sChoice_PairSetting].as<Choices::vPairSettings_t>() );
+        for ( Choices::vPairSettings_t::value_type& vt: choices.m_vPairSettings ) {
+          BOOST_LOG_TRIVIAL(info) << sChoice_PairSetting << " = " << vt.m_sName;
         }
       }
       else {
-        BOOST_LOG_TRIVIAL(error) << sFileName << " missing '" << sChoice_SymbolName << "='";
+        BOOST_LOG_TRIVIAL(error) << sFileName << " missing '" << sChoice_PairSetting << "='";
         bOk = false;
       }
 
-      //bOk &= parse<Choices::vPairSettings_t>( sFileName, vm, sChoice_PairSetting, false, choices.m_vPairSettings );
-      // to be parsed into PairSettings structure
-
       bOk &= parse<std::string>( sFileName, vm, sChoice_sExchange, true, choices.m_sExchange );
-
-      bOk &= parse<std::string>( sFileName, vm, sChoice_StopTime, true, choices.m_sStopTime );
-      choices.m_tdStopTime = boost::posix_time::duration_from_string( choices.m_sStopTime );
-
-      bOk &= parse<std::string>( sFileName, vm, sChoice_StartTime, true, choices.m_sStartTime );
-      choices.m_tdStartTime = boost::posix_time::duration_from_string( choices.m_sStartTime );
+      bOk &= parse<int>( sFileName, vm, sOption_IbInstance, true, choices.m_nIbInstance );
 
       bOk &= parse<std::string>( sFileName, vm, sChoice_MaxLifeTime, true, choices.m_sMaxTradeLifeTime );
       choices.m_tdMaxTradeLifeTime = boost::posix_time::duration_from_string( choices.m_sMaxTradeLifeTime );
