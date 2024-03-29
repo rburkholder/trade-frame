@@ -41,11 +41,20 @@ Strategy::Strategy( pPosition_t pPosition )
   m_ceTrade.SetName(    "Tick" );
   m_ceQuoteBid.SetName( "Bid" );
 
+  m_ceBarsTradeRise.SetName( "Trades" );
+  m_ceBarsTradeFall.SetName( "Trades" );
+
   m_ceVolume.SetName(   "Volume" );
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
+
+  m_ceBarsTradeRise.SetColour( ou::Colour::Green );
+  m_ceBarsTradeFall.SetColour( ou::Colour::Red );
+
+  m_cdv.Add( EChartSlot::Price, &m_ceBarsTradeRise );
+  m_cdv.Add( EChartSlot::Price, &m_ceBarsTradeFall );
 
   m_cdv.Add( EChartSlot::Price, &m_ceQuoteAsk );
   m_cdv.Add( EChartSlot::Price, &m_ceTrade );
@@ -207,6 +216,12 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
 
   const ptime dt( bar.DateTime() );
+  if ( bar.Close() >= bar.Open() ) {
+    m_ceBarsTradeRise.AppendBar( bar );
+  }
+  else {
+    m_ceBarsTradeFall.AppendBar( bar );
+  }
 
   m_pATRFast->Update( dt, m_TRFast.Update( bar ) );
   m_pATRSlow->Update( dt, m_TRSlow.Update( bar ) );
