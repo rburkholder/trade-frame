@@ -44,7 +44,7 @@ Strategy::Strategy( pPosition_t pPosition )
   m_ceVolume.SetName(   "Volume" );
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
-  m_ceTrade.SetColour( ou::Colour::Green );
+  m_ceTrade.SetColour( ou::Colour::DarkGreen );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
 
   m_cdv.Add( EChartSlot::Price, &m_ceQuoteAsk );
@@ -93,12 +93,13 @@ Strategy::~Strategy() {
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
+  m_quote = quote;
+
   const ptime dt( quote.DateTime() );
 
   m_ceQuoteAsk.Append( dt, quote.Ask() );
   m_ceQuoteBid.Append( dt, quote.Bid() );
 
-  //m_quote = quote;
   //m_quotes.Append( quote );
 
   //TimeTick( quote );
@@ -110,13 +111,15 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
   const ptime dt( trade.DateTime() );
-  const ou::tf::Trade::price_t  price(  trade.Price() );
+  //const ou::tf::Trade::price_t  price(  trade.Price() );
   const ou::tf::Trade::volume_t volume( trade.Volume() );
 
-  m_ceTrade.Append( dt, price );
-  m_ceVolume.Append( dt, volume );
+  // m_ceTrade.Append( dt, price ); // for iqfeed, is same as bid price for fxcm
+  const double fake_price( m_quote.Midpoint() );
+  m_ceTrade.Append( dt, fake_price );
+  m_ceVolume.Append( dt, volume ); // iqfeed shows as 1 for fxcm
 
-  m_bfTrading.Add( dt, price, volume );
+  m_bfTrading.Add( dt, fake_price, volume );
 
 }
 

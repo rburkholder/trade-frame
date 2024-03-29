@@ -88,6 +88,8 @@ private:
 
   ou::ChartDataView m_cdv;
 
+  ou::tf::Quote m_quote;
+
   ou::ChartEntryIndicator m_ceQuoteAsk;
   ou::ChartEntryIndicator m_ceQuoteBid;
 
