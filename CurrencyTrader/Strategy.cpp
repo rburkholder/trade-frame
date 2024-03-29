@@ -126,7 +126,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   // m_ceTrade.Append( dt, price ); // for iqfeed, is same as bid price for fxcm
   const double fake_price( m_quote.Midpoint() );
   m_ceTrade.Append( dt, fake_price );
-  m_ceVolume.Append( dt, volume ); // iqfeed shows as 1 for fxcm
+  //m_ceVolume.Append( dt, volume ); // iqfeed shows as 1 for fxcm
 
   m_bfTrading.Add( dt, fake_price, volume );
 
@@ -222,6 +222,8 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
   else {
     m_ceBarsTradeFall.AppendBar( bar );
   }
+
+  m_ceVolume.Append( dt, bar.Volume() ); // iqfeed shows as 1 for fxcm
 
   m_pATRFast->Update( dt, m_TRFast.Update( bar ) );
   m_pATRSlow->Update( dt, m_TRSlow.Update( bar ) );
