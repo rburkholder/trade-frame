@@ -57,8 +57,6 @@ Strategy::Strategy()
 
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
-  m_cdv.SetNames( "Currency Trader", m_pPosition->GetInstrument()->GetInstrumentName() );
-
   // supplied by 1 second mid-quote
   m_pEmaCurrency = std::make_unique<EMA>( 3 * 60, m_cdv, EChartSlot::Price );
   m_pEmaCurrency->Set( ou::Colour::Purple, "Price EMA" );
@@ -77,9 +75,12 @@ Strategy::Strategy()
 }
 
 Strategy::~Strategy() {
-  m_pWatch->OnQuote.Remove( MakeDelegate( this, &Strategy::HandleQuote ) );
-  m_pWatch->OnTrade.Remove( MakeDelegate( this, &Strategy::HandleTrade ) );
-  //m_pWatch->RecordSeries( true );
+
+  if ( m_pWatch ) {
+    m_pWatch->OnQuote.Remove( MakeDelegate( this, &Strategy::HandleQuote ) );
+    m_pWatch->OnTrade.Remove( MakeDelegate( this, &Strategy::HandleTrade ) );
+    //m_pWatch->RecordSeries( true );
+  }
 
   m_bfQuotes01Sec.SetOnBarComplete( nullptr );
   m_bfTrading.SetOnBarComplete( nullptr );
@@ -97,6 +98,8 @@ void Strategy::SetPosition( pPosition_t pPosition ) {
 
   m_pPosition = pPosition;
   m_pWatch = m_pPosition->GetWatch();
+
+  m_cdv.SetNames( "Currency Trader", m_pPosition->GetInstrument()->GetInstrumentName() );
 
   //m_pWatch->RecordSeries( false );
   m_pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
