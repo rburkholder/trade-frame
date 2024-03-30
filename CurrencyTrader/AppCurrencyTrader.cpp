@@ -19,10 +19,10 @@
  * Created: March 09, 2024 19:58:27
  */
 
-#include <algorithm>
-
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include <boost/regex.hpp>
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
@@ -57,8 +57,8 @@ namespace {
   static const std::string c_sMenuItemPortfolio( "_USD" );
 
   static const std::string c_sPortfolioCurrencyName( "USD" ); // pre-created, needs to be uppercase
-  //static const std::string c_sPortfolioSimulationName( "sim" );
-  //static const std::string c_sPortfolioRealTimeName( "live" );
+  static const std::string c_sPortfolioSimulationName( "sim" );
+  static const std::string c_sPortfolioRealTimeName( "live" );
   static const std::string c_sPortfolioName( "forex" );
 }
 
@@ -92,14 +92,6 @@ bool AppCurrencyTrader::OnInit() {
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
   }
 
-  m_iqf = ou::tf::iqfeed::Provider::Factory();
-  m_iqf->SetName( "iq01" );
-  //m_iqf->SetThreadCount( m_choices.nThreads );
-
-  m_tws = ou::tf::ib::TWS::Factory();
-  m_tws->SetName( "ib01" );
-  m_tws->SetClientId( m_choices.m_nIbInstance );
-
   m_pFrameMain = new FrameMain( 0, wxID_ANY,c_sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
 
@@ -118,42 +110,109 @@ bool AppCurrencyTrader::OnInit() {
   sizerUpper = new wxBoxSizer(wxHORIZONTAL);
   sizerFrame->Add( sizerUpper, 0, wxEXPAND, 2);
 
-  // TODO: make the panel conditional on simulation flag
-  m_pPanelProviderControl = new ou::tf::v2::PanelProviderControl( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-  m_pPanelProviderControl->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-  m_pPanelProviderControl->Show();
+  //auto dt = ou::TimeSource::GlobalInstance().External();
+  //boost::gregorian::date dateSim( dt.date() ); // dateSim used later in a loop
 
-  sizerUpper->Add( m_pPanelProviderControl, 0, wxALIGN_LEFT, 2);
+  FrameMain::vpItems_t vItems;
+  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
 
-  m_pPanelProviderControl->Add(
-    m_iqf,
-    true, false, false, false,
-    [](){}, // fConnecting
-    [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
-      if ( bD1 ) m_data = m_iqf;
-      if ( bX1 ) m_exec = m_iqf;
-      ConfirmProviders();
-    },
-    [](){}, // fDisconnecting
-    [](){}  // fDisconnected
-  );
+  if ( 0 == m_choices.m_sHdf5SimSet.size() ) { // live setup
 
-  m_pPanelProviderControl->Add(
-    m_tws,
-    false, false, true, false,
-    [](){}, // fConnecting
-    [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
-      if ( bD1 ) m_data = m_tws;
-      if ( bX1 ) m_exec = m_tws;
-      ConfirmProviders();
-    },
-    [](){}, // fDisconnecting
-    [](){}  // fDisconnected
-  );
+    m_iqf = ou::tf::iqfeed::Provider::Factory();
+    m_iqf->SetName( "iq01" );
+    //m_iqf->SetThreadCount( m_choices.nThreads );
 
-  m_timerOneSecond.SetOwner( this );
-  Bind( wxEVT_TIMER, &AppCurrencyTrader::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
-  m_timerOneSecond.Start( 500 );
+    m_tws = ou::tf::ib::TWS::Factory();
+    m_tws->SetName( "ib01" );
+    m_tws->SetClientId( m_choices.m_nIbInstance );
+
+    // TODO: make the panel conditional on simulation flag
+    m_pPanelProviderControl = new ou::tf::v2::PanelProviderControl( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    m_pPanelProviderControl->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+    m_pPanelProviderControl->Show();
+
+    sizerUpper->Add( m_pPanelProviderControl, 0, wxALIGN_LEFT, 2);
+
+    m_pPanelProviderControl->Add(
+      m_iqf,
+      true, false, false, false,
+      [](){}, // fConnecting
+      [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
+        if ( bD1 ) m_data = m_iqf;
+        if ( bX1 ) m_exec = m_iqf;
+        ConfirmProvidersLive();
+      },
+      [](){}, // fDisconnecting
+      [](){}  // fDisconnected
+    );
+
+    m_pPanelProviderControl->Add(
+      m_tws,
+      false, false, true, false,
+      [](){}, // fConnecting
+      [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
+        if ( bD1 ) m_data = m_tws;
+        if ( bX1 ) m_exec = m_tws;
+        ConfirmProvidersLive();
+      },
+      [](){}, // fDisconnecting
+      [](){}  // fDisconnected
+    );
+
+    m_timerOneSecond.SetOwner( this );
+    Bind( wxEVT_TIMER, &AppCurrencyTrader::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
+    m_timerOneSecond.Start( 500 );
+
+    vItems.clear(); // maybe wrap this whole menu in the sim conditional
+    vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionCloseAndDone ) ) );
+    //if ( !m_choices.bStartSimulator ) {
+      vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSaveValues ) ) );
+    //}
+    m_pFrameMain->AddDynamicMenu( "Actions", vItems );
+
+  }
+  else { // sim setup
+
+    // m_sim does not need to be in PanelProviderControl
+
+    m_sim = ou::tf::SimulationProvider::Factory();
+    //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will post across unsynchronized threads
+    m_sim->SetGroupDirectory( m_choices.m_sHdf5SimSet );
+
+    // 20221220-09:20:13.187534
+    bool bOk( true );
+    boost::smatch what;
+
+    boost::gregorian::date date;
+    boost::regex exprDate { "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
+    if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprDate ) ) {
+      date = boost::gregorian::from_undelimited_string( what[ 0 ] );
+    }
+    else bOk = false;
+
+    boost::posix_time::time_duration time;
+    boost::regex exprTime { "([0-9][0-9]:[0-9][0-9]:[0-9][0-9])" };
+    if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprTime ) ) {
+      time = boost::posix_time::duration_from_string( what[ 0 ] );
+    }
+    else bOk = false;
+
+    if ( bOk ) {
+      ptime dtUTC = ptime( date, time );
+      boost::local_time::local_date_time lt( dtUTC, ou::TimeSource::TimeZoneNewYork() );
+      boost::posix_time::ptime dtStart = lt.local_time();
+      std::cout << "times: " << dtUTC << "(UTC) is " << dtStart << "(eastern)" << std::endl;
+      //dateSim = Strategy::Futures::MarketOpenDate( dtUTC ); //
+      //std::cout << "simulation date: " << dateSim << std::endl;
+
+      //m_sSimulationDateTime = boost::posix_time::to_iso_string( dtUTC );
+
+    }
+    else {
+      assert( false );
+    }
+
+  }
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
   m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
@@ -211,6 +270,9 @@ bool AppCurrencyTrader::OnInit() {
   m_pTreeItemPortfolio = m_pTreeItemRoot->AppendChild(
     c_sMenuItemPortfolio,
     [this]( TreeItem* pTreeItem ){
+      if ( 0 == m_choices.m_sHdf5SimSet.size() ) {
+        m_pWinChartView->SetSim( true );
+      }
       m_pWinChartView->SetChartDataView( &m_dvChart );
     }
   );
@@ -219,25 +281,72 @@ bool AppCurrencyTrader::OnInit() {
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppCurrencyTrader::OnClose, this );  // start close of windows and controls
 
-  FrameMain::vpItems_t vItems;
-  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
-
-  vItems.clear(); // maybe wrap this whole menu in the sim conditional
-  vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionCloseAndDone ) ) );
-  //if ( !m_choices.bStartSimulator ) {
-    vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSaveValues ) ) );
-  //}
-  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
-
   CallAfter(
     [this](){
       LoadState();
     }
   );
 
+  if ( 0 != m_choices.m_sHdf5SimSet.size() ) {
+    CallAfter(
+      [this](){
+        m_sim->OnConnected.Add( MakeDelegate( this, &AppCurrencyTrader::HandleSimConnected ) );
+        m_sim->Connect();
+      }
+    );
+  }
+
   m_pFrameMain->Show( true );
 
   return 1;
+}
+
+void AppCurrencyTrader::HandleSimConnected( int ) {
+  ConfirmProvidersSim();
+}
+
+void AppCurrencyTrader::ConfirmProvidersSim() {
+
+  //LoadPortfolio( c_sPortfolioSimulationName );
+  //for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
+  //  ConstructInstrument_Sim( c_sPortfolioSimulationName, vt.first );
+  //}
+
+  FrameMain::vpItems_t vItems;
+  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+  vItems.push_back( new mi( "Start", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSimStart ) ) );
+  vItems.push_back( new mi( "Stop",  MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSimStop ) ) );
+  vItems.push_back( new mi( "Stats",  MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSimEmitStats ) ) );
+  m_pFrameMain->AddDynamicMenu( "Simulation", vItems );
+
+  m_sim->SetOnSimulationComplete( MakeDelegate( this, &AppCurrencyTrader::HandleSimComplete ) );
+}
+
+void AppCurrencyTrader::HandleMenuActionSimStart() {
+  CallAfter(
+    [this](){
+      m_sim->Run();
+    }
+  );
+}
+
+void AppCurrencyTrader::HandleMenuActionSimStop() {
+  CallAfter(
+    [this](){
+      m_sim->Stop();
+    }
+  );
+}
+
+void AppCurrencyTrader::HandleMenuActionSimEmitStats() {
+  std::stringstream ss;
+  m_sim->EmitStats( ss );
+  std::cout << "Sim Stats: " << ss.str() << std::endl;
+}
+
+void AppCurrencyTrader::HandleSimComplete() {
+  m_OnSimulationComplete( 0 );
+  BOOST_LOG_TRIVIAL(info) << "simulation complete";
 }
 
 void AppCurrencyTrader::HandleMenuActionCloseAndDone() {
@@ -265,7 +374,7 @@ void AppCurrencyTrader::HandleMenuActionSaveValues() {
   );
 }
 
-void AppCurrencyTrader::ConfirmProviders() {
+void AppCurrencyTrader::ConfirmProvidersLive() {
   if ( m_bProvidersConfirmed ) {}
   else {
     if ( m_data && m_exec ) {
@@ -409,10 +518,12 @@ void AppCurrencyTrader::BuildStrategy( pInstrument_t pInstrument ) {
 
   mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( idInstrument );
   if ( m_mapStrategy.end() == iterStrategy ) {
-    pStrategy_t pStrategy = std::make_unique<Strategy>( pPosition );
+    pStrategy_t pStrategy = std::make_unique<Strategy>();
     auto result = m_mapStrategy.emplace( idInstrument, std::move( pStrategy ) );
     assert( result.second );
     iterStrategy = result.first;
+
+    iterStrategy->second->SetPosition( pPosition ); // TODO: will need to move to after ConfirmProviders
 
     TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
       idInstrument,

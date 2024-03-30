@@ -103,10 +103,8 @@ private:
   pProvider_t       m_exec;
 
   pProviderIB_t     m_tws;    // live - [ execution ]
-  //pProviderSim_t    m_sim;    // simulation - [ data,execution ]
+  pProviderSim_t    m_sim;    // simulation - [ data,execution ]
   pProviderIQFeed_t m_iqf;    // live - [ data ], simulation - [ execution ]
-
-  //std::string m_sSimulationDateTime;  // used for l2 output streaming file name
 
   std::string m_sTSDataStreamStarted;
   int m_nTSDataStreamSequence;
@@ -129,7 +127,7 @@ private:
   using mapStrategy_t = std::map<std::string,pStrategy_t>;
   mapStrategy_t m_mapStrategy;
 
-  //ou::Delegate<int> m_OnSimulationComplete;
+  ou::Delegate<int> m_OnSimulationComplete;
 
   void HandleOneSecondTimer( wxTimerEvent& event );
 
@@ -138,8 +136,16 @@ private:
 
   void LoadPortfolioCurrency(); // base currency portfolio
   //void LoadPortfolioForex();    // strategy positions
-  void ConfirmProviders();
+  void ConfirmProvidersLive();
   void BuildStrategy( pInstrument_t );
+
+  void HandleSimConnected( int );
+  void ConfirmProvidersSim();
+  void HandleMenuActionSimStart();
+  void HandleMenuActionSimStop();
+  void HandleMenuActionSimEmitStats();
+
+  void HandleSimComplete();
 
   void SaveState();
   void LoadState();

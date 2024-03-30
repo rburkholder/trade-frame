@@ -27,15 +27,10 @@
 
 #include "Strategy.hpp"
 
-Strategy::Strategy( pPosition_t pPosition )
-: m_pPosition( pPosition )
-, m_bfQuotes01Sec( 1 )
+Strategy::Strategy()
+: m_bfQuotes01Sec( 1 )
 , m_bfTrading( 60 )
 {
-
-  assert( m_pPosition );
-
-  m_pWatch = m_pPosition->GetWatch();
 
   m_ceQuoteAsk.SetName( "Ask" );
   m_ceTrade.SetName(    "Tick" );
@@ -79,10 +74,6 @@ Strategy::Strategy( pPosition_t pPosition )
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
   m_bfTrading.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleMinuteBar ) );
 
-  //m_pWatch->RecordSeries( false );
-  m_pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
-  m_pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
-
 }
 
 Strategy::~Strategy() {
@@ -98,6 +89,19 @@ Strategy::~Strategy() {
   m_pEmaCurrency.reset();
 
   m_cdv.Clear();
+}
+
+void Strategy::SetPosition( pPosition_t pPosition ) {
+
+  assert( pPosition );
+
+  m_pPosition = pPosition;
+  m_pWatch = m_pPosition->GetWatch();
+
+  //m_pWatch->RecordSeries( false );
+  m_pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
+  m_pWatch->OnTrade.Add( MakeDelegate( this, &Strategy::HandleTrade ) );
+
 }
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {

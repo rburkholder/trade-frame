@@ -50,9 +50,10 @@ public:
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  Strategy( pPosition_t );
+  Strategy();
   ~Strategy();
 
+  void SetPosition( pPosition_t );
   void SaveWatch( const std::string& sPrefix );
 
   ou::ChartDataView& GetChartDataView() { return m_cdv; }
