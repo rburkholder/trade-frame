@@ -104,122 +104,34 @@ bool AppCurrencyTrader::OnInit() {
   wxBoxSizer* sizerUpper;
   wxBoxSizer* sizerLower;
 
-  sizerFrame = new wxBoxSizer(wxVERTICAL);
-  m_pFrameMain->SetSizer(sizerFrame);
+  sizerFrame = new wxBoxSizer( wxVERTICAL );
+  m_pFrameMain->SetSizer( sizerFrame );
 
-  sizerUpper = new wxBoxSizer(wxHORIZONTAL);
+  sizerUpper = new wxBoxSizer( wxHORIZONTAL );
   sizerFrame->Add( sizerUpper, 0, wxEXPAND, 2);
 
-  //auto dt = ou::TimeSource::GlobalInstance().External();
-  //boost::gregorian::date dateSim( dt.date() ); // dateSim used later in a loop
-
-  FrameMain::vpItems_t vItems;
-  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+  sizerLower = new wxBoxSizer( wxVERTICAL );
+  sizerFrame->Add( sizerLower, 1, wxEXPAND, 2 );
 
   if ( 0 == m_choices.m_sHdf5SimSet.size() ) { // live setup
-
-    m_iqf = ou::tf::iqfeed::Provider::Factory();
-    m_iqf->SetName( "iq01" );
-    //m_iqf->SetThreadCount( m_choices.nThreads );
-
-    m_tws = ou::tf::ib::TWS::Factory();
-    m_tws->SetName( "ib01" );
-    m_tws->SetClientId( m_choices.m_nIbInstance );
-
-    // TODO: make the panel conditional on simulation flag
-    m_pPanelProviderControl = new ou::tf::v2::PanelProviderControl( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-    m_pPanelProviderControl->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-    m_pPanelProviderControl->Show();
-
-    sizerUpper->Add( m_pPanelProviderControl, 0, wxALIGN_LEFT, 2);
-
-    m_pPanelProviderControl->Add(
-      m_iqf,
-      true, false, false, false,
-      [](){}, // fConnecting
-      [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
-        if ( bD1 ) m_data = m_iqf;
-        if ( bX1 ) m_exec = m_iqf;
-        ConfirmProvidersLive();
-      },
-      [](){}, // fDisconnecting
-      [](){}  // fDisconnected
-    );
-
-    m_pPanelProviderControl->Add(
-      m_tws,
-      false, false, true, false,
-      [](){}, // fConnecting
-      [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
-        if ( bD1 ) m_data = m_tws;
-        if ( bX1 ) m_exec = m_tws;
-        ConfirmProvidersLive();
-      },
-      [](){}, // fDisconnecting
-      [](){}  // fDisconnected
-    );
-
-    m_timerOneSecond.SetOwner( this );
-    Bind( wxEVT_TIMER, &AppCurrencyTrader::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
-    m_timerOneSecond.Start( 500 );
-
-    vItems.clear(); // maybe wrap this whole menu in the sim conditional
-    vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionCloseAndDone ) ) );
-    //if ( !m_choices.bStartSimulator ) {
-      vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSaveValues ) ) );
-    //}
-    m_pFrameMain->AddDynamicMenu( "Actions", vItems );
-
+    BuildProviders_Live( sizerUpper );
   }
   else { // sim setup
-
-    // m_sim does not need to be in PanelProviderControl
-
-    m_sim = ou::tf::SimulationProvider::Factory();
-    //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will post across unsynchronized threads
-    m_sim->SetGroupDirectory( m_choices.m_sHdf5SimSet );
-
-    // 20221220-09:20:13.187534
-    bool bOk( true );
-    boost::smatch what;
-
-    boost::gregorian::date date;
-    boost::regex exprDate { "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
-    if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprDate ) ) {
-      date = boost::gregorian::from_undelimited_string( what[ 0 ] );
-    }
-    else bOk = false;
-
-    boost::posix_time::time_duration time;
-    boost::regex exprTime { "([0-9][0-9]:[0-9][0-9]:[0-9][0-9])" };
-    if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprTime ) ) {
-      time = boost::posix_time::duration_from_string( what[ 0 ] );
-    }
-    else bOk = false;
-
-    if ( bOk ) {
-      ptime dtUTC = ptime( date, time );
-      boost::local_time::local_date_time lt( dtUTC, ou::TimeSource::TimeZoneNewYork() );
-      boost::posix_time::ptime dtStart = lt.local_time();
-      std::cout << "times: " << dtUTC << "(UTC) is " << dtStart << "(eastern)" << std::endl;
-      //dateSim = Strategy::Futures::MarketOpenDate( dtUTC ); //
-      //std::cout << "simulation date: " << dateSim << std::endl;
-
-      //m_sSimulationDateTime = boost::posix_time::to_iso_string( dtUTC );
-
-    }
-    else {
-      assert( false );
-    }
-
+    BuildProviders_Sim();
   }
 
+  // for now, overwrite old database on each start
+  if ( boost::filesystem::exists( c_sDbName ) ) {
+    boost::filesystem::remove( c_sDbName );
+  }
+
+  // this needs to be placed after the providers are registered
+  m_pdb = std::make_unique<ou::tf::db>( c_sDbName ); // construct database
+
+  // TODO: put logging panel with a resize slider at bottom of FrameMain
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
   m_pPanelLogging->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-  sizerUpper->Add(m_pPanelLogging, 2, wxEXPAND, 2);
-
-  sizerLower = new wxBoxSizer(wxVERTICAL);
-  sizerFrame->Add(sizerLower, 1, wxEXPAND, 2);
+  sizerUpper->Add( m_pPanelLogging, 2, wxEXPAND, 2);
 
   m_splitterData = new wxSplitterWindow( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxSize(100, 100), wxSP_3DBORDER|wxSP_3DSASH|wxNO_BORDER );
   m_splitterData->SetMinimumPaneSize(20);
@@ -232,14 +144,24 @@ bool AppCurrencyTrader::OnInit() {
   m_splitterData->SplitVertically(m_treeSymbols, m_pWinChartView, 50);
   sizerLower->Add(m_splitterData, 1, wxGROW, 2);
 
-  // for now, overwrite old database on each start
-  if ( boost::filesystem::exists( c_sDbName ) ) {
-    boost::filesystem::remove( c_sDbName );
-  }
+  PopulatePortfolioChart();
+  PopulateTreeRoot();
+  ConstructStrategyList();
 
-  // this needs to be placed after the providers are registered
-  m_pdb = std::make_unique<ou::tf::db>( c_sDbName ); // construct database
+  m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppCurrencyTrader::OnClose, this );  // start close of windows and controls
 
+  CallAfter(
+    [this](){
+      LoadState();
+    }
+  );
+
+  m_pFrameMain->Show( true );
+
+  return 1;
+}
+
+void AppCurrencyTrader::PopulatePortfolioChart() {
   m_ceUnRealized.SetName( "unrealized" );
   m_ceRealized.SetName( "realized" );
   m_ceCommissionsPaid.SetName( "commission" );
@@ -250,13 +172,15 @@ bool AppCurrencyTrader::OnInit() {
   m_ceCommissionsPaid.SetColour( ou::Colour::Red );
   m_ceTotal.SetColour( ou::Colour::Green );
 
-  m_dvChart.Add( 0, &m_ceUnRealized );
-  m_dvChart.Add( 0, &m_ceRealized );
-  m_dvChart.Add( 0, &m_ceTotal );
-  m_dvChart.Add( 2, &m_ceCommissionsPaid );
+  m_dvPortfolio.Add( 0, &m_ceUnRealized );
+  m_dvPortfolio.Add( 0, &m_ceRealized );
+  m_dvPortfolio.Add( 0, &m_ceTotal );
+  m_dvPortfolio.Add( 2, &m_ceCommissionsPaid );
 
-  m_pWinChartView->SetChartDataView( &m_dvChart );
+  m_pWinChartView->SetChartDataView( &m_dvPortfolio );
+}
 
+void AppCurrencyTrader::PopulateTreeRoot() {
   TreeItem::Bind( m_pFrameMain, m_treeSymbols );
   m_pTreeItemRoot = new TreeItem( m_treeSymbols, "/" ); // initialize tree
   m_pTreeItemRoot->SetOnClick(
@@ -273,39 +197,152 @@ bool AppCurrencyTrader::OnInit() {
       if ( 0 == m_choices.m_sHdf5SimSet.size() ) {
         m_pWinChartView->SetSim( true );
       }
-      m_pWinChartView->SetChartDataView( &m_dvChart );
+      m_pWinChartView->SetChartDataView( &m_dvPortfolio );
     }
   );
 
   m_treeSymbols->ExpandAll();
+}
 
-  m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppCurrencyTrader::OnClose, this );  // start close of windows and controls
+void AppCurrencyTrader::ConstructStrategyList() {
+  assert( 0 == m_mapStrategy.size() );
+  for ( config::Choices::PairSettings& ps: m_choices.m_vPairSettings ) {
+    const ou::tf::Instrument::idInstrument_t& idInstrument( ps.m_sName );
+    mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( idInstrument );
+    if ( m_mapStrategy.end() == iterStrategy ) {
+      pStrategy_t pStrategy = std::make_unique<Strategy>();
+      auto result = m_mapStrategy.emplace( idInstrument, std::move( pStrategy ) );
+      assert( result.second );
+      iterStrategy = result.first;
 
-  CallAfter(
-    [this](){
-      LoadState();
+      //iterStrategy->second->SetPosition( pPosition ); // TODO: will need to move to after ConfirmProviders
+
+      TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
+        idInstrument,
+        [this,idInstrument]( TreeItem* pTreeItem ){
+          mapStrategy_t::iterator iter = m_mapStrategy.find( idInstrument );
+          assert( m_mapStrategy.end() != iter );
+          m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
+        }
+      );
+
     }
+    else {
+      assert( false );
+    }
+  }
+  m_treeSymbols->ExpandAll();
+}
+
+void AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
+
+  m_iqf = ou::tf::iqfeed::Provider::Factory();
+  m_iqf->SetName( "iq01" );
+  //m_iqf->SetThreadCount( m_choices.nThreads );
+
+  m_tws = ou::tf::ib::TWS::Factory();
+  m_tws->SetName( "ib01" );
+  m_tws->SetClientId( m_choices.m_nIbInstance );
+
+  // TODO: make the panel conditional on simulation flag
+  m_pPanelProviderControl = new ou::tf::v2::PanelProviderControl( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+  m_pPanelProviderControl->SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+  m_pPanelProviderControl->Show();
+
+  sizer->Add( m_pPanelProviderControl, 0, wxALIGN_LEFT, 2);
+
+  m_pPanelProviderControl->Add(
+    m_iqf,
+    true, false, false, false,
+    [](){}, // fConnecting
+    [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
+      if ( bD1 ) m_data = m_iqf;
+      if ( bX1 ) m_exec = m_iqf;
+      ConfirmProviders_Live();
+    },
+    [](){}, // fDisconnecting
+    [](){}  // fDisconnected
   );
 
-  if ( 0 != m_choices.m_sHdf5SimSet.size() ) {
-    CallAfter(
-      [this](){
-        m_sim->OnConnected.Add( MakeDelegate( this, &AppCurrencyTrader::HandleSimConnected ) );
-        m_sim->Connect();
-      }
-    );
+  m_pPanelProviderControl->Add(
+    m_tws,
+    false, false, true, false,
+    [](){}, // fConnecting
+    [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
+      if ( bD1 ) m_data = m_tws;
+      if ( bX1 ) m_exec = m_tws;
+      ConfirmProviders_Live();
+    },
+    [](){}, // fDisconnecting
+    [](){}  // fDisconnected
+  );
+
+  // TODO: add to a clean up routine
+  m_timerOneSecond.SetOwner( this );
+  Bind( wxEVT_TIMER, &AppCurrencyTrader::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
+  m_timerOneSecond.Start( 500 );
+
+  FrameMain::vpItems_t vItems;
+  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+
+  vItems.clear(); // maybe wrap this whole menu in the sim conditional
+  vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionCloseAndDone ) ) );
+  //if ( !m_choices.bStartSimulator ) {
+    vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSaveValues ) ) );
+  //}
+  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
+}
+
+void AppCurrencyTrader::BuildProviders_Sim() {
+
+  // m_sim does not need to be in PanelProviderControl
+  m_sim = ou::tf::SimulationProvider::Factory();
+  //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will post across unsynchronized threads
+  m_sim->SetGroupDirectory( m_choices.m_sHdf5SimSet );
+
+  // 20221220-09:20:13.187534
+  bool bOk( true );
+  boost::smatch what;
+
+  boost::gregorian::date date;
+  boost::regex exprDate { "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
+  if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprDate ) ) {
+    date = boost::gregorian::from_undelimited_string( what[ 0 ] );
   }
+  else bOk = false;
 
-  m_pFrameMain->Show( true );
+  boost::posix_time::time_duration time;
+  boost::regex exprTime { "([0-9][0-9]:[0-9][0-9]:[0-9][0-9])" };
+  if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprTime ) ) {
+    time = boost::posix_time::duration_from_string( what[ 0 ] );
+  }
+  else bOk = false;
 
-  return 1;
+  if ( bOk ) {
+    ptime dtUTC = ptime( date, time );
+    boost::local_time::local_date_time lt( dtUTC, ou::TimeSource::TimeZoneNewYork() );
+    boost::posix_time::ptime dtStart = lt.local_time();
+    std::cout << "times: " << dtUTC << "(UTC) is " << dtStart << "(eastern)" << std::endl;
+    //dateSim = Strategy::Futures::MarketOpenDate( dtUTC ); //
+    //std::cout << "simulation date: " << dateSim << std::endl;
+
+    //m_sSimulationDateTime = boost::posix_time::to_iso_string( dtUTC );
+
+  }
+  else {
+    assert( false );
+  }
+}
+
+void AppCurrencyTrader::ConstructStrategy( const std::string& sName ) {
+
 }
 
 void AppCurrencyTrader::HandleSimConnected( int ) {
-  ConfirmProvidersSim();
+  ConfirmProviders_Sim();
 }
 
-void AppCurrencyTrader::ConfirmProvidersSim() {
+void AppCurrencyTrader::ConfirmProviders_Sim() {
 
   //LoadPortfolio( c_sPortfolioSimulationName );
   //for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
@@ -320,6 +357,13 @@ void AppCurrencyTrader::ConfirmProvidersSim() {
   m_pFrameMain->AddDynamicMenu( "Simulation", vItems );
 
   m_sim->SetOnSimulationComplete( MakeDelegate( this, &AppCurrencyTrader::HandleSimComplete ) );
+  m_sim->OnConnected.Add( MakeDelegate( this, &AppCurrencyTrader::HandleSimConnected ) );
+
+  CallAfter(
+    [this](){
+      m_sim->Connect();
+    }
+  );
 }
 
 void AppCurrencyTrader::HandleMenuActionSimStart() {
@@ -374,7 +418,7 @@ void AppCurrencyTrader::HandleMenuActionSaveValues() {
   );
 }
 
-void AppCurrencyTrader::ConfirmProvidersLive() {
+void AppCurrencyTrader::ConfirmProviders_Live() {
   if ( m_bProvidersConfirmed ) {}
   else {
     if ( m_data && m_exec ) {
@@ -399,61 +443,8 @@ void AppCurrencyTrader::ConfirmProvidersLive() {
             BuildStrategy( pInstrument );
           }
           else { // build the instrument
-
-            std::string sSymbolName( ps.m_sName );
-            std::transform(sSymbolName.begin(), sSymbolName.end(), sSymbolName.begin(), ::toupper);
-            ou::tf::Currency::pair_t pairCurrency( ou::tf::Currency::Split( sSymbolName ) );
-
-            const std::string sCurrency1( ou::tf::Currency::Name[ pairCurrency.first ] );
-            const std::string sCurrency2( ou::tf::Currency::Name[ pairCurrency.second ] );
-
-            const std::string sSymbolName_IQFeed( sCurrency1 + sCurrency2 + ".FXCM" );
-            const std::string sSymbolName_IB( sCurrency1 + '.' + sCurrency2 );
-
-            BOOST_LOG_TRIVIAL(info)
-              << "Compose "
-              << ps.m_sName << ','
-              << sSymbolName << ','
-              << sSymbolName_IQFeed << ','
-              << sSymbolName_IB
-              ;
-
-            pInstrument
-              = std::make_shared<ou::tf::Instrument>(
-                  ps.m_sName,
-                  ou::tf::InstrumentType::Currency, m_choices.m_sExchange, // virtual paper
-                  pairCurrency.first, pairCurrency.second
-                  );
-            pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIB, sSymbolName_IB );
-            pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIQF, sSymbolName_IQFeed );
-
-            m_tws->RequestContractDetails(
-              pInstrument->GetInstrumentName(),
-              pInstrument,
-              [this]( const ContractDetails& details, ou::tf::Instrument::pInstrument_t& pInstrument ){
-                std::cout << "IB contract found: "
-                        << details.contract.localSymbol
-                  << ',' << details.contract.conId
-                  << ',' << details.mdSizeMultiplier
-                  << ',' << details.contract.exchange
-                  << ',' << details.validExchanges
-                  << ',' << details.timeZoneId
-                  //<< ',' << details.liquidHours
-                  //<< ',' << details.tradingHours
-                  << ',' << "market rule id " << details.marketRuleIds
-                  << std::endl;
-
-                //pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIB, pInstrument->GetInstrumentName() );
-                ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
-                im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-                BuildStrategy( pInstrument );
-              },
-              [this]( bool bDone ){
-                if ( 0 == m_mapStrategy.size() ) {
-                  std::cout  << "IB contract request incomplete" << std::endl;
-                }
-              }
-            );
+            pInstrument = ConstructInstrumentBase( ps.m_sName, m_choices.m_sExchange );
+            ConstructInstrument_Live( pInstrument );
           }
         }
       }
@@ -516,29 +507,84 @@ void AppCurrencyTrader::BuildStrategy( pInstrument_t pInstrument ) {
     BOOST_LOG_TRIVIAL(info) << "real time position constructed: " << pPosition->GetInstrument()->GetInstrumentName();
   }
 
-  mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( idInstrument );
-  if ( m_mapStrategy.end() == iterStrategy ) {
-    pStrategy_t pStrategy = std::make_unique<Strategy>();
-    auto result = m_mapStrategy.emplace( idInstrument, std::move( pStrategy ) );
-    assert( result.second );
-    iterStrategy = result.first;
+}
 
-    iterStrategy->second->SetPosition( pPosition ); // TODO: will need to move to after ConfirmProviders
+AppCurrencyTrader::pInstrument_t AppCurrencyTrader::ConstructInstrumentBase( const std::string& sName, const std::string& sExchange  ) {
 
-    TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
-      idInstrument,
-      [this,idInstrument]( TreeItem* pTreeItem ){
-        mapStrategy_t::iterator iter = m_mapStrategy.find( idInstrument );
-        assert( m_mapStrategy.end() != iter );
-        m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
+  pInstrument_t pInstrument;
+
+  std::string sSymbolName( sName );
+  std::transform(sSymbolName.begin(), sSymbolName.end(), sSymbolName.begin(), ::toupper);
+  ou::tf::Currency::pair_t pairCurrency( ou::tf::Currency::Split( sSymbolName ) );
+
+  pInstrument
+    = std::make_shared<ou::tf::Instrument>(
+        sName,
+        ou::tf::InstrumentType::Currency, sExchange,
+        pairCurrency.first, pairCurrency.second
+        );
+
+  return pInstrument;
+}
+
+void AppCurrencyTrader::ConstructInstrument_Live( pInstrument_t pInstrument ) {
+  const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+  const ou::tf::Currency::ECurrency eCurrencyOne( pInstrument->GetCurrencyBase() );
+  const ou::tf::Currency::ECurrency eCurrencyTwo( pInstrument->GetCurrencyCounter() );
+
+  const std::string sCurrency1( ou::tf::Currency::Name[ eCurrencyOne ] );
+  const std::string sCurrency2( ou::tf::Currency::Name[ eCurrencyTwo ] );
+
+  const std::string sSymbolName_IQFeed( sCurrency1 + sCurrency2 + ".FXCM" );
+  const std::string sSymbolName_IB( sCurrency1 + '.' + sCurrency2 );
+
+  BOOST_LOG_TRIVIAL(info)
+    << "Compose "
+    << idInstrument << ','
+    << sSymbolName_IQFeed << ','
+    << sSymbolName_IB
+    ;
+
+  pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIB, sSymbolName_IB );
+  pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIQF, sSymbolName_IQFeed );
+
+  m_tws->RequestContractDetails(
+    pInstrument->GetInstrumentName(),
+    pInstrument,
+    [this]( const ContractDetails& details, ou::tf::Instrument::pInstrument_t& pInstrument ){
+      std::cout << "IB contract found: "
+              << details.contract.localSymbol
+        << ',' << details.contract.conId
+        << ',' << details.mdSizeMultiplier
+        << ',' << details.contract.exchange
+        << ',' << details.validExchanges
+        << ',' << details.timeZoneId
+        //<< ',' << details.liquidHours
+        //<< ',' << details.tradingHours
+        << ',' << "market rule id " << details.marketRuleIds
+        << std::endl;
+
+      //pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIB, pInstrument->GetInstrumentName() );
+      ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+      im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+      BuildStrategy( pInstrument );
+    },
+    [this]( bool bDone ){
+      if ( 0 == m_mapStrategy.size() ) {
+        std::cout  << "IB contract request incomplete" << std::endl;
       }
-    );
+    }
+  );
+}
 
-    m_treeSymbols->ExpandAll();
-  }
-  else {
-    assert( false );
-  }
+AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition_Live( pInstrument_t pInstrument ) {
+  pPosition_t pPosition;
+  return pPosition;
+}
+
+AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition_Sim( pInstrument_t pInstrument ) {
+  pPosition_t pPosition;
+  return pPosition;
 }
 
 void AppCurrencyTrader::HandleOneSecondTimer( wxTimerEvent& event ) {
@@ -585,18 +631,16 @@ void AppCurrencyTrader::LoadState() {
 void AppCurrencyTrader::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
 
-  //m_pWinChartView->SetChartDataView( nullptr, false );
-  //delete m_pChartData;
-  //m_pChartData = nullptr;
-
-  //m_pFrameControls->Close();
-
-  //if ( !m_choices.bStartSimulator ) {
+  if ( m_timerOneSecond.IsRunning() ) {
     m_timerOneSecond.Stop();
     Unbind( wxEVT_TIMER, &AppCurrencyTrader::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
-  //}
+  }
 
-  //m_mapStrategy.clear();
+  m_pWinChartView->SetChartDataView( nullptr, false );
+
+  SaveState();
+
+  m_mapStrategy.clear();
 
   //m_pBuildInstrument.reset();
 
@@ -616,17 +660,55 @@ void AppCurrencyTrader::OnClose( wxCloseEvent& event ) {
 //    }
 //  }
 
-//  if ( 0 != OnPanelClosing ) OnPanelClosing();
-  // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a
-  SaveState();
-
   event.Skip();  // auto followed by Destroy();
 }
 
 int AppCurrencyTrader::OnExit() {
   // Exit Steps: #4
-//  DelinkFromPanelProviderControl();  generates stack errors
-
   return wxAppConsole::OnExit();
 }
+
+/*
+https://www.forex.com/en-us/forex-trading/what-is-forex-trading/
+
+Every currency in forex trading is signified by three letters. These are known as the ISO 4217 Currency Codes.
+
+The first two letters denote the country. The third represents the currency name.
+
+    AUD = Australia dollar
+    USD = United States dollar
+
+Forex currency pair nicknames
+
+    GBP/USD – Cable
+    EUR/CHF – Swissy
+    EUR/USD – Fiber
+    EUR/GBP – Chunnel 
+    NZD/USD – Kiwi
+
+Major currency pairs
+Over a quarter of all forex trades are in EUR/USD.   the major pairs to have the tightest spreads
+
+    EUR/USD – the euro vs the US dollar 
+    USD/JPY – the US dollar versus the Japanese yen
+    GBP/USD – British pound sterling versus the US dollar
+    AUD/USD – the Australian dollar versus the US dollar 
+    USD/CHF – the US dollar versus the Swiss franc
+    USD/CAD – the US dollar versus the Canadian dollar
+
+Minor currency pairs
+
+Minor pairs are currency pairs that don’t include the US dollar.
+They are also known as cross pairs.
+
+Examples include:
+
+    EUR/GBP – the euro versus British pound sterling
+    EUR/CHF – the euro versus the Swiss franc
+    GBP/AUD – British pound sterling versus the Australian dollar
+    GBP/JPY – British pound sterling versus the Japanese yen
+    CAD/JPY – the Canadian dollar versus Japanese yen
+    CHF/JPY – the Swiss franc versus the Japanese yen
+    EUR/NZD – the euro versus the New Zealand dollar
+
+*/

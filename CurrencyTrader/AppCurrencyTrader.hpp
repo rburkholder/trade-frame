@@ -44,6 +44,7 @@
 class Strategy;
 class FrameMain;
 
+class wxBoxSizer;
 class wxTreeCtrl;
 class wxTreeEvent;
 class wxSplitterWindow;
@@ -71,9 +72,10 @@ protected:
 private:
 
   using TreeItem = ou::tf::TreeItem;
-  using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using pPosition_t = ou::tf::Position::pPosition_t;
+  using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
 
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
   using pProviderSim_t = ou::tf::SimulationProvider::pProvider_t;
@@ -118,7 +120,7 @@ private:
   ou::ChartEntryIndicator m_ceCommissionsPaid;
   ou::ChartEntryIndicator m_ceTotal;
 
-  ou::ChartDataView m_dvChart; // the data
+  ou::ChartDataView m_dvPortfolio; // the data
 
   pPortfolio_t m_pPortfolioUSD; // base currency
   //pPortfolio_t m_pPortfolioForex;
@@ -129,22 +131,38 @@ private:
 
   ou::Delegate<int> m_OnSimulationComplete;
 
+  void BuildProviders_Live( wxBoxSizer* );
+  void BuildProviders_Sim();
+
+  void PopulatePortfolioChart();
+  void PopulateTreeRoot();
+  void ConstructStrategyList();
+
   void HandleOneSecondTimer( wxTimerEvent& event );
 
   void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();
 
-  void LoadPortfolioCurrency(); // base currency portfolio
-  //void LoadPortfolioForex();    // strategy positions
-  void ConfirmProvidersLive();
+  void ConstructStrategy( const std::string& );
+
   void BuildStrategy( pInstrument_t );
 
+  void LoadPortfolioCurrency(); // base currency portfolio
+
+  pInstrument_t ConstructInstrumentBase( const std::string& sName, const std::string& sExchange );
+
+  void ConfirmProviders_Live();
+  void ConstructInstrument_Live( pInstrument_t );
+  pPosition_t ConstructPosition_Live( pInstrument_t );
+
+  void ConfirmProviders_Sim();
+  void ConstructInstrument_Sim( pInstrument_t );
+  pPosition_t ConstructPosition_Sim( pInstrument_t );
+
   void HandleSimConnected( int );
-  void ConfirmProvidersSim();
   void HandleMenuActionSimStart();
   void HandleMenuActionSimStop();
   void HandleMenuActionSimEmitStats();
-
   void HandleSimComplete();
 
   void SaveState();
