@@ -38,6 +38,8 @@ namespace po = boost::program_options;
 namespace {
   static const std::string sChoice_PairSetting(     "pair_setting" );
   static const std::string sChoice_sExchange(       "exchange" );
+  static const std::string sChoice_sHdf5File(       "hdf5_file" );
+  static const std::string sChoice_sHdf5SimSet(     "hdf5_sim_set" );
   static const std::string sOption_IbInstance(      "ib_instance" );
   static const std::string sChoice_MaxLifeTime(     "max_life_time" );
   static const std::string sChoice_PipProfit(       "pip_profit" );
@@ -148,7 +150,10 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
       ( sChoice_sExchange.c_str(), po::value<std::string>( &choices.m_sExchange ), "exchange name" )
 
-      ( sOption_IbInstance.c_str(), po::value<int>( &choices.m_nIbInstance)->default_value( 1 ), "IB instance" )
+      ( sChoice_sHdf5File.c_str(), po::value<std::string>( &choices.m_sHdf5File )->default_value( "TradeFrame.hdf5" ), "hdf5 path/file" )
+      ( sChoice_sHdf5SimSet.c_str(), po::value<std::string>( &choices.m_sHdf5SimSet )->default_value( "" ), "hdf5 simulation set" ) // simulate when supplied
+
+      ( sOption_IbInstance.c_str(), po::value<int>( &choices.m_nIbInstance )->default_value( 1 ), "IB instance" )
 
       ( sChoice_MaxLifeTime.c_str(),   po::value<std::string>( &choices.m_sMaxTradeLifeTime ), "max life time HH:mm:ss" )
 
@@ -185,6 +190,10 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       }
 
       bOk &= parse<std::string>( sFileName, vm, sChoice_sExchange, true, choices.m_sExchange );
+
+      bOk &= parse<std::string>( sFileName, vm, sChoice_sHdf5File, true, choices.m_sHdf5File );
+      bOk &= parse<std::string>( sFileName, vm, sChoice_sHdf5SimSet, true, choices.m_sHdf5SimSet );
+
       bOk &= parse<int>( sFileName, vm, sOption_IbInstance, true, choices.m_nIbInstance );
 
       bOk &= parse<std::string>( sFileName, vm, sChoice_MaxLifeTime, true, choices.m_sMaxTradeLifeTime );

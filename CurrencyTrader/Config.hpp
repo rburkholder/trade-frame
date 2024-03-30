@@ -31,6 +31,8 @@ namespace config {
 struct Choices {
 
   std::string m_sExchange;
+  std::string m_sHdf5File; // optional
+  std::string m_sHdf5SimSet; // run simulation if present
 
   struct PairSettings {
 
