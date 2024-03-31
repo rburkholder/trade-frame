@@ -146,6 +146,7 @@ bool AppCurrencyTrader::OnInit() {
 
   PopulatePortfolioChart();
   PopulateTreeRoot();
+  LoadPortfolioCurrency();
   ConstructStrategyList();
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppCurrencyTrader::OnClose, this );  // start close of windows and controls
@@ -205,7 +206,9 @@ void AppCurrencyTrader::PopulateTreeRoot() {
 }
 
 void AppCurrencyTrader::ConstructStrategyList() {
+
   assert( 0 == m_mapStrategy.size() );
+
   for ( config::Choices::PairSettings& ps: m_choices.m_vPairSettings ) {
     const ou::tf::Instrument::idInstrument_t& idInstrument( ps.m_sName );
     mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( idInstrument );
@@ -213,9 +216,7 @@ void AppCurrencyTrader::ConstructStrategyList() {
       pStrategy_t pStrategy = std::make_unique<Strategy>();
       auto result = m_mapStrategy.emplace( idInstrument, std::move( pStrategy ) );
       assert( result.second );
-      iterStrategy = result.first;
-
-      //iterStrategy->second->SetPosition( pPosition ); // TODO: will need to move to after ConfirmProviders
+      //iterStrategy = result.first;
 
       TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
         idInstrument,
@@ -258,7 +259,7 @@ void AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
     [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
       if ( bD1 ) m_data = m_iqf;
       if ( bX1 ) m_exec = m_iqf;
-      ConfirmProviders_Live();
+      ConfirmProviders();
     },
     [](){}, // fDisconnecting
     [](){}  // fDisconnected
@@ -271,7 +272,7 @@ void AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
     [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
       if ( bD1 ) m_data = m_tws;
       if ( bX1 ) m_exec = m_tws;
-      ConfirmProviders_Live();
+      ConfirmProviders();
     },
     [](){}, // fDisconnecting
     [](){}  // fDisconnected
@@ -285,11 +286,8 @@ void AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
   FrameMain::vpItems_t vItems;
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
 
-  vItems.clear(); // maybe wrap this whole menu in the sim conditional
   vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionCloseAndDone ) ) );
-  //if ( !m_choices.bStartSimulator ) {
-    vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSaveValues ) ) );
-  //}
+  vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSaveValues ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 }
 
@@ -297,6 +295,7 @@ void AppCurrencyTrader::BuildProviders_Sim() {
 
   // m_sim does not need to be in PanelProviderControl
   m_sim = ou::tf::SimulationProvider::Factory();
+  m_data = m_exec = m_sim;
   //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will post across unsynchronized threads
   m_sim->SetGroupDirectory( m_choices.m_sHdf5SimSet );
 
@@ -332,38 +331,28 @@ void AppCurrencyTrader::BuildProviders_Sim() {
   else {
     assert( false );
   }
-}
-
-void AppCurrencyTrader::ConstructStrategy( const std::string& sName ) {
-
-}
-
-void AppCurrencyTrader::HandleSimConnected( int ) {
-  ConfirmProviders_Sim();
-}
-
-void AppCurrencyTrader::ConfirmProviders_Sim() {
-
-  //LoadPortfolio( c_sPortfolioSimulationName );
-  //for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-  //  ConstructInstrument_Sim( c_sPortfolioSimulationName, vt.first );
-  //}
 
   FrameMain::vpItems_t vItems;
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+
   vItems.push_back( new mi( "Start", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSimStart ) ) );
   vItems.push_back( new mi( "Stop",  MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSimStop ) ) );
   vItems.push_back( new mi( "Stats",  MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSimEmitStats ) ) );
   m_pFrameMain->AddDynamicMenu( "Simulation", vItems );
 
-  m_sim->SetOnSimulationComplete( MakeDelegate( this, &AppCurrencyTrader::HandleSimComplete ) );
   m_sim->OnConnected.Add( MakeDelegate( this, &AppCurrencyTrader::HandleSimConnected ) );
+  m_sim->SetOnSimulationComplete( MakeDelegate( this, &AppCurrencyTrader::HandleSimComplete ) );
 
   CallAfter(
     [this](){
       m_sim->Connect();
     }
   );
+
+}
+
+void AppCurrencyTrader::HandleSimConnected( int ) {
+  ConfirmProviders();
 }
 
 void AppCurrencyTrader::HandleMenuActionSimStart() {
@@ -418,7 +407,7 @@ void AppCurrencyTrader::HandleMenuActionSaveValues() {
   );
 }
 
-void AppCurrencyTrader::ConfirmProviders_Live() {
+void AppCurrencyTrader::ConfirmProviders() {
   if ( m_bProvidersConfirmed ) {}
   else {
     if ( m_data && m_exec ) {
@@ -432,19 +421,18 @@ void AppCurrencyTrader::ConfirmProviders_Live() {
           << "providers available"
           ;
 
-        LoadPortfolioCurrency();
-
         ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
 
         for ( const config::Choices::vPairSettings_t::value_type& ps: m_choices.m_vPairSettings ) {
           pInstrument_t pInstrument;
           pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderUserBase, ps.m_sName );
           if ( pInstrument ) { // skip the build
-            BuildStrategy( pInstrument );
+            pPosition_t pPosition = ConstructPosition( pInstrument );
+            PopulateStrategy( pPosition );
           }
           else { // build the instrument
             pInstrument = ConstructInstrumentBase( ps.m_sName, m_choices.m_sExchange );
-            ConstructInstrument_Live( pInstrument );
+            EnhanceInstrument( pInstrument ); // has a PopulateStrategy
           }
         }
       }
@@ -469,7 +457,14 @@ void AppCurrencyTrader::LoadPortfolioCurrency() {
   }
 }
 
-void AppCurrencyTrader::BuildStrategy( pInstrument_t pInstrument ) {
+void AppCurrencyTrader::PopulateStrategy( pPosition_t pPosition ) {
+  const ou::tf::Instrument::idInstrument_t& idInstrument( pPosition->GetInstrument()->GetInstrumentName( ) );
+  mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( idInstrument );
+  assert( m_mapStrategy.end() != iterStrategy );
+  iterStrategy->second->SetPosition( pPosition ); // TODO: will need to move to after ConfirmProviders
+}
+
+AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( pInstrument_t pInstrument ) {
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
@@ -487,26 +482,39 @@ void AppCurrencyTrader::BuildStrategy( pInstrument_t pInstrument ) {
     switch ( m_exec->ID() ) {
       case ou::tf::keytypes::EProviderIB:
         pPosition = pm.ConstructPosition(
-          c_sPortfolioCurrencyName, idInstrument, "algo_" + c_sPortfolioName,
+          c_sPortfolioCurrencyName, idInstrument, c_sPortfolioName + "_ib",
           m_exec->GetName(), m_data->GetName(), m_tws,
           pWatch
         );
         break;
       case ou::tf::keytypes::EProviderIQF:
-        //pPosition = pm.ConstructPosition(
-        //  c_sPortfolioCurrencyName, idInstrument, c_sPortfolioName,
-        //  m_exec->GetName(), m_data->GetName(), m_iqf,
-        //  pWatch
-        //);
-        assert( false );
+        pPosition = pm.ConstructPosition(
+          c_sPortfolioCurrencyName, idInstrument, c_sPortfolioName + "_iqf",
+          m_exec->GetName(), m_data->GetName(), m_iqf,
+          pWatch
+        );
+        break;
+      case ou::tf::keytypes::EProviderSimulator:
+        pPosition = pm.ConstructPosition(
+          c_sPortfolioCurrencyName, idInstrument, c_sPortfolioName + "_sim",
+          m_exec->GetName(), m_data->GetName(), m_sim,
+          pWatch
+        );
         break;
       default:
         assert( false );
 
     }
-    BOOST_LOG_TRIVIAL(info) << "real time position constructed: " << pPosition->GetInstrument()->GetInstrumentName();
+    BOOST_LOG_TRIVIAL(info)
+      << "position constructed: "
+      << pPosition->GetInstrument()->GetInstrumentName() << ','
+      << pPosition->GetDataProvider()->GetName() << ','
+      << pPosition->GetExecutionProvider()->GetName()
+      ;
   }
 
+  assert( pPosition );
+  return pPosition;
 }
 
 AppCurrencyTrader::pInstrument_t AppCurrencyTrader::ConstructInstrumentBase( const std::string& sName, const std::string& sExchange  ) {
@@ -516,6 +524,10 @@ AppCurrencyTrader::pInstrument_t AppCurrencyTrader::ConstructInstrumentBase( con
   std::string sSymbolName( sName );
   std::transform(sSymbolName.begin(), sSymbolName.end(), sSymbolName.begin(), ::toupper);
   ou::tf::Currency::pair_t pairCurrency( ou::tf::Currency::Split( sSymbolName ) );
+
+  // TODO: use ConstructInstrument like for PortfolioManager for position/portfolio?
+  //   will need an updated registration with alternate names?
+  //   will need an updated registration with IB contract assginment?
 
   pInstrument
     = std::make_shared<ou::tf::Instrument>(
@@ -527,16 +539,18 @@ AppCurrencyTrader::pInstrument_t AppCurrencyTrader::ConstructInstrumentBase( con
   return pInstrument;
 }
 
-void AppCurrencyTrader::ConstructInstrument_Live( pInstrument_t pInstrument ) {
+void AppCurrencyTrader::EnhanceInstrument( pInstrument_t pInstrument ) {
+
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+
   const ou::tf::Currency::ECurrency eCurrencyOne( pInstrument->GetCurrencyBase() );
   const ou::tf::Currency::ECurrency eCurrencyTwo( pInstrument->GetCurrencyCounter() );
 
   const std::string sCurrency1( ou::tf::Currency::Name[ eCurrencyOne ] );
   const std::string sCurrency2( ou::tf::Currency::Name[ eCurrencyTwo ] );
 
-  const std::string sSymbolName_IQFeed( sCurrency1 + sCurrency2 + ".FXCM" );
   const std::string sSymbolName_IB( sCurrency1 + '.' + sCurrency2 );
+  const std::string sSymbolName_IQFeed( sCurrency1 + sCurrency2 + ".FXCM" );
 
   BOOST_LOG_TRIVIAL(info)
     << "Compose "
@@ -545,46 +559,47 @@ void AppCurrencyTrader::ConstructInstrument_Live( pInstrument_t pInstrument ) {
     << sSymbolName_IB
     ;
 
-  pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIB, sSymbolName_IB );
-  pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIQF, sSymbolName_IQFeed );
+  const auto eIB = ou::tf::keytypes::EProviderIB;
+  const auto eIqf = ou::tf::keytypes::EProviderIQF;
 
-  m_tws->RequestContractDetails(
-    pInstrument->GetInstrumentName(),
-    pInstrument,
-    [this]( const ContractDetails& details, ou::tf::Instrument::pInstrument_t& pInstrument ){
-      std::cout << "IB contract found: "
-              << details.contract.localSymbol
-        << ',' << details.contract.conId
-        << ',' << details.mdSizeMultiplier
-        << ',' << details.contract.exchange
-        << ',' << details.validExchanges
-        << ',' << details.timeZoneId
-        //<< ',' << details.liquidHours
-        //<< ',' << details.tradingHours
-        << ',' << "market rule id " << details.marketRuleIds
-        << std::endl;
+  pInstrument->SetAlternateName( eIB,  sSymbolName_IB );
+  pInstrument->SetAlternateName( eIqf, sSymbolName_IQFeed );
 
-      //pInstrument->SetAlternateName( ou::tf::keytypes::EProviderIB, pInstrument->GetInstrumentName() );
-      ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
-      im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-      BuildStrategy( pInstrument );
-    },
-    [this]( bool bDone ){
-      if ( 0 == m_mapStrategy.size() ) {
-        std::cout  << "IB contract request incomplete" << std::endl;
+  if ( ( eIB == m_data->ID() ) || ( eIB == m_exec->ID() ) ) {
+    m_tws->RequestContractDetails(
+      idInstrument,
+      pInstrument,
+      [this]( const ContractDetails& details, ou::tf::Instrument::pInstrument_t& pInstrument ){
+        BOOST_LOG_TRIVIAL(info) << "IB contract found: "
+                << details.contract.localSymbol
+          << ',' << details.contract.conId
+          << ',' << details.mdSizeMultiplier
+          << ',' << details.contract.exchange
+          << ',' << details.validExchanges
+          << ',' << details.timeZoneId
+          //<< ',' << details.liquidHours
+          //<< ',' << details.tradingHours
+          << ',' << "market rule id " << details.marketRuleIds
+          ;
+
+        ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+        im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+        pPosition_t pPosition = ConstructPosition( pInstrument );
+        PopulateStrategy( pPosition );
+      },
+      [this,pInstrument]( bool bDone ){
+        if ( 0 == pInstrument->GetContract() ) {
+          BOOST_LOG_TRIVIAL(error)  << "IB contract incomplete " << pInstrument->GetInstrumentName();
+        }
       }
-    }
-  );
-}
-
-AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition_Live( pInstrument_t pInstrument ) {
-  pPosition_t pPosition;
-  return pPosition;
-}
-
-AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition_Sim( pInstrument_t pInstrument ) {
-  pPosition_t pPosition;
-  return pPosition;
+    );
+  }
+  else {
+    ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+    im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+    pPosition_t pPosition = ConstructPosition( pInstrument );
+    PopulateStrategy( pPosition );
+  }
 }
 
 void AppCurrencyTrader::HandleOneSecondTimer( wxTimerEvent& event ) {

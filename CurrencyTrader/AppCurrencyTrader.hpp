@@ -137,33 +137,25 @@ private:
   void PopulatePortfolioChart();
   void PopulateTreeRoot();
   void ConstructStrategyList();
-
-  void HandleOneSecondTimer( wxTimerEvent& event );
-
-  void HandleMenuActionCloseAndDone();
-  void HandleMenuActionSaveValues();
-
-  void ConstructStrategy( const std::string& );
-
-  void BuildStrategy( pInstrument_t );
-
   void LoadPortfolioCurrency(); // base currency portfolio
 
+  void ConfirmProviders();
   pInstrument_t ConstructInstrumentBase( const std::string& sName, const std::string& sExchange );
+  void EnhanceInstrument( pInstrument_t );
 
-  void ConfirmProviders_Live();
-  void ConstructInstrument_Live( pInstrument_t );
-  pPosition_t ConstructPosition_Live( pInstrument_t );
-
-  void ConfirmProviders_Sim();
-  void ConstructInstrument_Sim( pInstrument_t );
-  pPosition_t ConstructPosition_Sim( pInstrument_t );
+  pPosition_t ConstructPosition( pInstrument_t );
+  void PopulateStrategy( pPosition_t );
 
   void HandleSimConnected( int );
   void HandleMenuActionSimStart();
   void HandleMenuActionSimStop();
   void HandleMenuActionSimEmitStats();
   void HandleSimComplete();
+
+  void HandleOneSecondTimer( wxTimerEvent& event );
+
+  void HandleMenuActionCloseAndDone();
+  void HandleMenuActionSaveValues();
 
   void SaveState();
   void LoadState();
