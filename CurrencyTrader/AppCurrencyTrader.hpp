@@ -131,8 +131,8 @@ private:
 
   ou::Delegate<int> m_OnSimulationComplete;
 
-  void BuildProviders_Live( wxBoxSizer* );
-  void BuildProviders_Sim();
+  bool BuildProviders_Live( wxBoxSizer* );
+  bool BuildProviders_Sim();
 
   void PopulatePortfolioChart();
   void PopulateTreeRoot();

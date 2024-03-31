@@ -119,11 +119,17 @@ bool AppCurrencyTrader::OnInit() {
   sizerLower = new wxBoxSizer( wxVERTICAL );
   sizerFrame->Add( sizerLower, 1, wxEXPAND, 2 );
 
+  bool bOk( true );
   if ( 0 == m_choices.m_sHdf5SimSet.size() ) { // live setup
-    BuildProviders_Live( sizerUpper );
+    bOk = BuildProviders_Live( sizerUpper );
   }
   else { // sim setup
-    BuildProviders_Sim();
+    bOk = BuildProviders_Sim();
+  }
+
+  if ( !bOk ) {
+    BOOST_LOG_TRIVIAL(error) << "failure with building provider";
+    return false;
   }
 
   // for now, overwrite old database on each start
@@ -241,7 +247,7 @@ void AppCurrencyTrader::ConstructStrategyList() {
   m_treeSymbols->ExpandAll();
 }
 
-void AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
+bool AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
 
   m_iqf = ou::tf::iqfeed::Provider::Factory();
   m_iqf->SetName( "iq01" );
@@ -295,9 +301,13 @@ void AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
   vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionCloseAndDone ) ) );
   vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSaveValues ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
+
+  return true;
 }
 
-void AppCurrencyTrader::BuildProviders_Sim() {
+bool AppCurrencyTrader::BuildProviders_Sim() {
+
+  bool bOk( true );
 
   // m_sim does not need to be in PanelProviderControl
   m_sim = ou::tf::SimulationProvider::Factory();
@@ -313,30 +323,38 @@ void AppCurrencyTrader::BuildProviders_Sim() {
   catch( const H5::Exception& e ) {
     // need to look at lib/TFHDF5TimeSeries/HDF5DataManager.cpp line 100 for refinement
     BOOST_LOG_TRIVIAL(error) << "group open failed (1) " << m_choices.m_sHdf5File << ',' << m_choices.m_sHdf5SimSet;
-    assert( false );
+    bOk = false;
+  }
+  catch( const std::exception& e ) {
+    BOOST_LOG_TRIVIAL(error) << "group open failed (2) " << m_choices.m_sHdf5File << ',' << m_choices.m_sHdf5SimSet;
+    bOk = false;
   }
   catch( ... ) {
-    BOOST_LOG_TRIVIAL(error) << "group open failed (2) " << m_choices.m_sHdf5File << ',' << m_choices.m_sHdf5SimSet;
-    assert( false );
+    BOOST_LOG_TRIVIAL(error) << "group open failed (3) " << m_choices.m_sHdf5File << ',' << m_choices.m_sHdf5SimSet;
+    bOk = false;
   }
-
-  // 20221220-09:20:13.187534
-  bool bOk( true );
-  boost::smatch what;
 
   boost::gregorian::date date;
-  boost::regex exprDate { "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
-  if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprDate ) ) {
-    date = boost::gregorian::from_undelimited_string( what[ 0 ] );
-  }
-  else bOk = false;
-
   boost::posix_time::time_duration time;
-  boost::regex exprTime { "([0-9][0-9]:[0-9][0-9]:[0-9][0-9])" };
-  if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprTime ) ) {
-    time = boost::posix_time::duration_from_string( what[ 0 ] );
+
+  if ( bOk ) {
+    // 20221220-09:20:13.187534
+    boost::smatch what;
+
+    boost::regex exprDate { "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
+    if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprDate ) ) {
+      date = boost::gregorian::from_undelimited_string( what[ 0 ] );
+    }
+    else bOk = false;
+
+    boost::regex exprTime { "([0-9][0-9]:[0-9][0-9]:[0-9][0-9])" };
+    if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprTime ) ) {
+      time = boost::posix_time::duration_from_string( what[ 0 ] );
+    }
+    else {
+      bOk = false;
+    }
   }
-  else bOk = false;
 
   if ( bOk ) {
     ptime dtUTC = ptime( date, time );
@@ -347,29 +365,28 @@ void AppCurrencyTrader::BuildProviders_Sim() {
     //std::cout << "simulation date: " << dateSim << std::endl;
 
     //m_sSimulationDateTime = boost::posix_time::to_iso_string( dtUTC );
-
-  }
-  else {
-    assert( false );
   }
 
-  FrameMain::vpItems_t vItems;
-  using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
+  if ( bOk ) {
+    FrameMain::vpItems_t vItems;
+    using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
 
-  vItems.push_back( new mi( "Start", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSimStart ) ) );
-  vItems.push_back( new mi( "Stop",  MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSimStop ) ) );
-  vItems.push_back( new mi( "Stats",  MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSimEmitStats ) ) );
-  m_pFrameMain->AddDynamicMenu( "Simulation", vItems );
+    vItems.push_back( new mi( "Start", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSimStart ) ) );
+    vItems.push_back( new mi( "Stop",  MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSimStop ) ) );
+    vItems.push_back( new mi( "Stats",  MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSimEmitStats ) ) );
+    m_pFrameMain->AddDynamicMenu( "Simulation", vItems );
 
-  m_sim->OnConnected.Add( MakeDelegate( this, &AppCurrencyTrader::HandleSimConnected ) );
-  m_sim->SetOnSimulationComplete( MakeDelegate( this, &AppCurrencyTrader::HandleSimComplete ) );
+    m_sim->OnConnected.Add( MakeDelegate( this, &AppCurrencyTrader::HandleSimConnected ) );
+    m_sim->SetOnSimulationComplete( MakeDelegate( this, &AppCurrencyTrader::HandleSimComplete ) );
 
-  CallAfter(
-    [this](){
-      m_sim->Connect();
-    }
-  );
+    CallAfter(
+      [this](){
+        m_sim->Connect();
+      }
+    );
+  }
 
+  return bOk;
 }
 
 void AppCurrencyTrader::HandleSimConnected( int ) {
