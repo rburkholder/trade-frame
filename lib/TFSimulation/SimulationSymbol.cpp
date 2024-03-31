@@ -24,13 +24,15 @@ namespace tf { // TradeFrame
 
 // sDirectory needs to be available on instantiation to enable signal availability
 SimulationSymbol::SimulationSymbol(
-  const std::string &sSymbol,
-  pInstrument_cref pInstrument,
-  const std::string &sGroup
-  )
-: Symbol<SimulationSymbol>( pInstrument ), m_sDirectory( sGroup )
-{
-}
+  const std::string& sSymbol
+, pInstrument_cref pInstrument
+, const std::string& sGroup
+, const std::string& sFileName
+)
+: Symbol<SimulationSymbol>( pInstrument )
+, m_sDirectory( sGroup )
+, m_sFileName( sFileName )
+{}
 
 SimulationSymbol::~SimulationSymbol() {
 }
@@ -39,7 +41,7 @@ void SimulationSymbol::StartTradeWatch() {
   if ( 0 == m_trades.Size() ) {
     try {
       std::string sPath( m_sDirectory + Trades::Directory() + GetId() );
-      ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
+      ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO, m_sFileName );
       HDF5TimeSeriesContainer<Trade> tradeRepository( dm, sPath );
       HDF5TimeSeriesContainer<Trade>::iterator begin, end;
       begin = tradeRepository.begin();
@@ -60,7 +62,7 @@ void SimulationSymbol::StartQuoteWatch() {
   if ( 0 == m_quotes.Size() ) {
     try {
       std::string sPath( m_sDirectory + Quotes::Directory() + GetId() );
-      ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
+      ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO, m_sFileName );
       HDF5TimeSeriesContainer<Quote> quoteRepository( dm, sPath );
       HDF5TimeSeriesContainer<Quote>::iterator begin, end;
       begin = quoteRepository.begin();
@@ -81,7 +83,7 @@ void SimulationSymbol::StartGreekWatch() {
   if ( ( 0 == m_greeks.Size() ) && ( m_pInstrument->IsOption() ) )  {
     try {
       std::string sPath( m_sDirectory + Greeks::Directory() + GetId() );
-      ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
+      ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO, m_sFileName );
       HDF5TimeSeriesContainer<Greek> greekRepository( dm, sPath );
       HDF5TimeSeriesContainer<Greek>::iterator begin, end;
       begin = greekRepository.begin();
@@ -102,7 +104,7 @@ void SimulationSymbol::StartDepthByMMWatch() {
   if ( 0 == m_depths_mm.Size() )  {
     try {
       std::string sPath( m_sDirectory + DepthsByMM::Directory() + GetId() );
-      ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
+      ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO, m_sFileName );
       HDF5TimeSeriesContainer<DepthByMM> depthRepository( dm, sPath );
       HDF5TimeSeriesContainer<DepthByMM>::iterator begin, end;
       begin = depthRepository.begin();
@@ -123,7 +125,7 @@ void SimulationSymbol::StartDepthByOrderWatch() {
   if ( 0 == m_depths_order.Size() )  {
     try {
       std::string sPath( m_sDirectory + DepthsByOrder::Directory() + GetId() );
-      ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO );
+      ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RO, m_sFileName );
       HDF5TimeSeriesContainer<DepthByOrder> depthRepository( dm, sPath );
       HDF5TimeSeriesContainer<DepthByOrder>::iterator begin, end;
       begin = depthRepository.begin();

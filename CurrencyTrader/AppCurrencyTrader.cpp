@@ -297,6 +297,9 @@ void AppCurrencyTrader::BuildProviders_Sim() {
   m_sim = ou::tf::SimulationProvider::Factory();
   m_data = m_exec = m_sim;
   //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will post across unsynchronized threads
+  if ( 0 < m_choices.m_sHdf5File.size() ) {
+    m_sim->SetHdf5FileName( m_choices.m_sHdf5File );
+  }
   m_sim->SetGroupDirectory( m_choices.m_sHdf5SimSet );
 
   // 20221220-09:20:13.187534
@@ -321,7 +324,7 @@ void AppCurrencyTrader::BuildProviders_Sim() {
     ptime dtUTC = ptime( date, time );
     boost::local_time::local_date_time lt( dtUTC, ou::TimeSource::TimeZoneNewYork() );
     boost::posix_time::ptime dtStart = lt.local_time();
-    std::cout << "times: " << dtUTC << "(UTC) is " << dtStart << "(eastern)" << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "times: " << dtUTC << "(UTC) is " << dtStart << "(eastern)" << std::endl;
     //dateSim = Strategy::Futures::MarketOpenDate( dtUTC ); //
     //std::cout << "simulation date: " << dateSim << std::endl;
 
@@ -500,6 +503,7 @@ AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( pInstrument
           m_exec->GetName(), m_data->GetName(), m_sim,
           pWatch
         );
+        m_sim->SetCommission( idInstrument, 0.0 );
         break;
       default:
         assert( false );

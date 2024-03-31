@@ -70,8 +70,11 @@ public:
   virtual void Connect();
   virtual void Disconnect();
 
-  void SetGroupDirectory( const std::string sGroupDirectory );  // eg /basket/20080620
-  const std::string& GetGroupDirectory() const { return m_sGroupDirectory; };
+  void SetHdf5FileName( const std::string& );
+  const std::string& GetGdf5FileName() const { return m_sHdf5FileName; }
+
+  void SetGroupDirectory( const std::string& );  // eg /basket/20080620
+  const std::string& GetGroupDirectory() const { return m_sGroupDirectory; }
 
   void Run( bool bAsync = true );
   void Stop();
@@ -94,6 +97,7 @@ public:
 
 protected:
 
+  std::string m_sHdf5FileName;
   std::string m_sGroupDirectory;
 
   ptime m_dtSimStart;

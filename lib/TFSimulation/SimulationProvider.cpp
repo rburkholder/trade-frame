@@ -29,6 +29,7 @@ namespace tf { // TradeFrame
 SimulationProvider::SimulationProvider()
 : sim::SimulationInterface<SimulationProvider,SimulationSymbol>()
 , m_pMerge( nullptr )
+, m_sHdf5FileName( HDF5DataManager::GetHdf5FileDefault() )
 {
   m_sName = "Simulator";
   m_nID = keytypes::EProviderSimulator;
@@ -52,8 +53,13 @@ SimulationProvider::~SimulationProvider() {
   }
 }
 
-void SimulationProvider::SetGroupDirectory( const std::string sGroupDirectory ) {
-  HDF5DataManager dm( HDF5DataManager::RO );
+void SimulationProvider::SetHdf5FileName( const std::string& sHdf5FileName ) {
+  assert( 0 < sHdf5FileName.size() );
+  m_sHdf5FileName = sHdf5FileName;
+}
+
+void SimulationProvider::SetGroupDirectory( const std::string& sGroupDirectory ) {
+  HDF5DataManager dm( HDF5DataManager::RO, m_sHdf5FileName );
   std::string s;
   if( !dm.GroupExists( sGroupDirectory ) )
     throw std::invalid_argument( "Could not find: " + sGroupDirectory );
@@ -85,7 +91,7 @@ void SimulationProvider::Disconnect() {
 }
 
 SimulationProvider::pSymbol_t SimulationProvider::NewCSymbol( pInstrument_t pInstrument ) {
-  pSymbol_t pSymbol( new SimulationSymbol( pInstrument->GetInstrumentName( ID() ), pInstrument, m_sGroupDirectory) );
+  pSymbol_t pSymbol( new SimulationSymbol( pInstrument->GetInstrumentName( ID() ), pInstrument, m_sGroupDirectory, m_sHdf5FileName ) );
   inherited_t::AddCSymbol( pSymbol );
   return pSymbol;
 }

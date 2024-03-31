@@ -31,9 +31,11 @@ public:
   using pInstrument_t = inherited_t::pInstrument_t;
   using pInstrument_cref = inherited_t::pInstrument_cref;
 
-  SimulationSymbol( const std::string& sSymbol,
-                    pInstrument_cref pInstrument,
-                    const std::string& sGroup ); // base with trades/ quotes/, greeks/, depths/
+  SimulationSymbol( const std::string& sSymbol
+                  , pInstrument_cref pInstrument
+                  , const std::string& sGroup
+                  , const std::string& sFileName
+                  ); // base with trades/ quotes/, greeks/, depths/
   virtual ~SimulationSymbol();
 
 protected:
@@ -62,6 +64,7 @@ protected:
 
 private:
 
+  std::string m_sFileName;
   std::string m_sDirectory;
 
   Quotes m_quotes;
