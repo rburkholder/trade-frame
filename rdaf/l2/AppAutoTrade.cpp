@@ -790,7 +790,6 @@ void AppAutoTrade::ConstructInstrument_Sim( const std::string& sRunPortfolioName
 
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
   im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_sim );
 
   pPosition_t pPosition;
   if ( pm.PositionExists( sRunPortfolioName, idInstrument ) ) {
