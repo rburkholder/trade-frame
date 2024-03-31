@@ -21,7 +21,7 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-const char HDF5DataManager::c_H5FileName[] = "TradeFrame.hdf5";
+const std::string HDF5DataManager::c_sH5FileName( "TradeFrame.hdf5" );
 //H5::H5File HDF5DataManager::m_H5File;
 //unsigned int HDF5DataManager::m_RefCount = 0;
 
@@ -30,10 +30,11 @@ const char HDF5DataManager::c_H5FileName[] = "TradeFrame.hdf5";
 //  needs a good rethink and re-architect for file handle handling
 
 HDF5DataManager::HDF5DataManager( enumFileOptionType fot )
-: HDF5DataManager( fot, c_H5FileName )
+: HDF5DataManager( fot, c_sH5FileName )
 {}
 
 HDF5DataManager::HDF5DataManager( enumFileOptionType fot, const std::string& sH5FileName ) {
+  assert( 0 < sH5FileName.size() );
 //  ++m_RefCount;
 //  if ( 1 == m_RefCount ) {
     //std::cout << "Opening DataManager" << std::endl;

@@ -30,6 +30,8 @@ public:
   HDF5DataManager( enumFileOptionType, const std::string& sName ); // alternate hdf5 file
   ~HDF5DataManager();
 
+  static const std::string& GetHdf5FileDefault() { return c_sH5FileName; }
+
   H5::H5File *GetH5File() { return &m_H5File; };
   bool GroupExists( const std::string &sGroup );
   void AddGroup( const std::string &sGroupPath );  // last group needs trailing '/'
@@ -44,7 +46,7 @@ public:
   void IteratePathParts( const std::string& sPath, fCallbackIteratorPath_t&& );
 
 protected:
-  static const char c_H5FileName[];
+  static const std::string c_sH5FileName;
 //  static unsigned int m_RefCount;
 //  static H5::H5File m_H5File;
   H5::H5File m_H5File;
