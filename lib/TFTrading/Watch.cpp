@@ -365,7 +365,7 @@ void Watch::HandleIQFeedSummaryMessage( ou::tf::iqfeed::IQFeedSymbol::pSummary_t
 
 void Watch::SaveSeries( const std::string& sPrefix ) {
 
-  size_t step {};
+  //size_t step {};
   ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
 
   try {
@@ -385,19 +385,19 @@ void Watch::SaveSeries( const std::string& sPrefix ) {
 
     if ( 0 != m_trades.Size() ) {
       sPathName = sPrefix + Trades::Directory() + m_pInstrument->GetInstrumentName();
-      step = 1;
+      //step = 1;
       HDF5WriteTimeSeries<ou::tf::Trades> wtsTrades( dm, true, true, 5, 256 );
-      step = 2;
+      //step = 2;
       wtsTrades.Write( sPathName, &m_trades );
-      step = 3;
+      //step = 3;
       HDF5Attributes attrTrades( dm, sPathName );
-      step = 4;
+      //step = 4;
       attrTrades.SetSignature( ou::tf::Trade::Signature() );
-      step = 5;
+      //step = 5;
       attrTrades.SetMultiplier( m_pInstrument->GetMultiplier() );
-      step = 6;
+      //step = 6;
       attrTrades.SetSignificantDigits( m_pInstrument->GetSignificantDigits() );
-      step = 7;
+      //step = 7;
       attrTrades.SetProviderType( m_pDataProvider->ID() );
     }
 
@@ -429,7 +429,7 @@ void Watch::SaveSeries( const std::string& sPrefix ) {
       << "Watch::SaveSeries error: "
       << sPrefix << ","
       << m_pInstrument->GetInstrumentName()
-      << ",step=" << step
+      //<< ",step=" << step
       << std::endl;
   }
 
