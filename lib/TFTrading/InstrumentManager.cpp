@@ -18,7 +18,9 @@
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
 
+#include "Exchange.h"
 #include "InstrumentManager.h"
+#include "AlternateInstrumentNames.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -77,7 +79,6 @@ InstrumentManager::pInstrument_t InstrumentManager::ConstructOption(
 
 InstrumentManager::pInstrument_t InstrumentManager::ConstructCurrency(
   idInstrument_cref idInstrumentName,
-//  idInstrument_cref idCounterInstrument,
   const std::string& sExchangeName,
   Currency::ECurrency base, Currency::ECurrency counter ) {
   pInstrument_t pInstrument(
@@ -114,7 +115,7 @@ void InstrumentManager::SaveAlternateInstrumentName(
   keyAltName_ref_t key( idProvider, idAlternate );
   mapAltNames_t::const_iterator iter = m_mapAltNames.find( key );
   if ( m_mapAltNames.end() != iter ) {
-    std::cout
+    std::cerr
       << "InstrumentManager::SaveAlternateInstrumentName alt name exists: "
       << idProvider << "," << idAlternate
       << " for " << pInstrument->GetInstrumentName()

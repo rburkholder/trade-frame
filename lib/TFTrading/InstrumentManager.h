@@ -23,9 +23,7 @@
 
 #include "KeyTypes.h"
 
-#include "Exchange.h"
 #include "Instrument.h"
-#include "AlternateInstrumentNames.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -62,7 +60,6 @@ public:
     double strike );
   pInstrument_t ConstructCurrency(
     idInstrument_cref idInstrumentName,
-//    idInstrument_cref idCounterInstrument,
     const std::string& sExchangeName,
     Currency::ECurrency base, Currency::ECurrency counter );
 
