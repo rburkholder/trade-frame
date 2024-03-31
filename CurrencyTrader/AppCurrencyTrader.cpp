@@ -81,6 +81,12 @@ bool AppCurrencyTrader::OnInit() {
     return false;
   }
 
+  if ( boost::filesystem::exists( m_choices.m_sHdf5File ) ) {}
+  else {
+    BOOST_LOG_TRIVIAL(error) << m_choices.m_sHdf5File << " does not exist";
+    return false;
+  }
+
   {
     std::stringstream ss;
     auto dt = ou::TimeSource::GlobalInstance().External();
@@ -159,7 +165,7 @@ bool AppCurrencyTrader::OnInit() {
 
   m_pFrameMain->Show( true );
 
-  return 1;
+  return true;
 }
 
 void AppCurrencyTrader::PopulatePortfolioChart() {
@@ -297,10 +303,22 @@ void AppCurrencyTrader::BuildProviders_Sim() {
   m_sim = ou::tf::SimulationProvider::Factory();
   m_data = m_exec = m_sim;
   //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will post across unsynchronized threads
-  if ( 0 < m_choices.m_sHdf5File.size() ) {
-    m_sim->SetHdf5FileName( m_choices.m_sHdf5File );
+
+  try {
+    if ( 0 < m_choices.m_sHdf5File.size() ) {
+      m_sim->SetHdf5FileName( m_choices.m_sHdf5File );
+    }
+    m_sim->SetGroupDirectory( m_choices.m_sHdf5SimSet );
   }
-  m_sim->SetGroupDirectory( m_choices.m_sHdf5SimSet );
+  catch( const H5::Exception& e ) {
+    // need to look at lib/TFHDF5TimeSeries/HDF5DataManager.cpp line 100 for refinement
+    BOOST_LOG_TRIVIAL(error) << "group open failed (1) " << m_choices.m_sHdf5File << ',' << m_choices.m_sHdf5SimSet;
+    assert( false );
+  }
+  catch( ... ) {
+    BOOST_LOG_TRIVIAL(error) << "group open failed (2) " << m_choices.m_sHdf5File << ',' << m_choices.m_sHdf5SimSet;
+    assert( false );
+  }
 
   // 20221220-09:20:13.187534
   bool bOk( true );
