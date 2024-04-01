@@ -170,6 +170,10 @@ private:
 
     double Update( const ou::tf::Bar& bar ) {
 
+      if ( 0.0 == close ) {
+        close = bar.Open(); // prime the value one time
+      }
+
       const double hi( bar.High() );
       const double lo( bar.Low() );
 
