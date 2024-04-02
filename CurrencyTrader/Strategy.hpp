@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <array>
+
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryBars.h>
 #include <OUCharting/ChartEntryMark.h>
@@ -106,6 +108,9 @@ private:
   ou::ChartEntryShape m_ceShortEntry;
   ou::ChartEntryShape m_ceShortFill;
   ou::ChartEntryShape m_ceShortExit;
+
+  ou::ChartEntryShape m_ceSwingHi;
+  ou::ChartEntryShape m_ceSwingLo;
 
   ou::ChartEntryIndicator m_ceProfitLoss;
 
@@ -195,6 +200,18 @@ private:
 
   TR m_TRSlow;
   pEMA_t m_pATRSlow;
+
+  struct Swing {
+    double price;
+    boost::posix_time::ptime dt;
+    Swing(): price {} {}
+    void Update( const ou::tf::Bar& bar ) {
+      price = bar.Close();
+      dt = bar.DateTime();
+    }
+  };
+  using rSwing_t = std::array<Swing, 5>;
+  rSwing_t m_swing;
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

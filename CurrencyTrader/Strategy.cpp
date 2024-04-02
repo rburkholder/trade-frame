@@ -30,6 +30,8 @@
 Strategy::Strategy()
 : m_bfQuotes01Sec( 1 )
 , m_bfTrading( 60 )
+, m_ceSwingHi( ou::ChartEntryShape::EShape::Long,  ou::Colour::Purple )
+, m_ceSwingLo( ou::ChartEntryShape::EShape::Short, ou::Colour::HotPink )
 {
 
   m_ceQuoteAsk.SetName( "Ask" );
@@ -54,6 +56,9 @@ Strategy::Strategy()
   m_cdv.Add( EChartSlot::Price, &m_ceQuoteAsk );
   m_cdv.Add( EChartSlot::Price, &m_ceTrade );
   m_cdv.Add( EChartSlot::Price, &m_ceQuoteBid );
+
+  m_cdv.Add( EChartSlot::Price, &m_ceSwingHi );
+  m_cdv.Add( EChartSlot::Price, &m_ceSwingLo );
 
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
@@ -236,6 +241,28 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
   m_pATRSlow->Update( dt, m_TRSlow.Update( bar ) );
 
   // calculate swing points
+
+  Swing& a( m_swing[ 0 ] );
+  Swing& b( m_swing[ 1 ] );
+  Swing& c( m_swing[ 2 ] );
+  Swing& d( m_swing[ 3 ] );
+  Swing& e( m_swing[ 4 ] );
+
+  a = b; b = c; c = d; d = e; e.Update( bar );
+
+  {
+    double x = a.price > b.price ? a.price : b.price;
+    double y = d.price > e.price ? d.price : e.price;
+    double z = x > y ? x : y;
+    if ( c.price > z ) m_ceSwingHi.AddLabel( c.dt, c.price, "Swing Hi" );
+  }
+
+  {
+    double x = a.price < b.price ? a.price : b.price;
+    double y = d.price < e.price ? d.price : e.price;
+    double z = x <  y ? x : y;
+    if ( c.price < z ) m_ceSwingLo.AddLabel( c.dt, c.price, "Swing Lo" );
+  }
 }
 
 void Strategy::SaveWatch( const std::string& sPrefix ) {
