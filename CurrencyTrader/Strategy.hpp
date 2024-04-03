@@ -207,7 +207,7 @@ private:
     Swing(): price {} {}
     void Update( const ou::tf::Bar& bar ) {
       price = bar.Close();
-      dt = bar.DateTime();
+      dt = bar.DateTime(); // TODO: add bar width to set properly
     }
   };
   using rSwing_t = std::array<Swing, 5>;
