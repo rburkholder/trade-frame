@@ -50,15 +50,15 @@ Strategy::Strategy()
   m_ceBarsTradeRise.SetColour( ou::Colour::Green );
   m_ceBarsTradeFall.SetColour( ou::Colour::Red );
 
-  m_cdv.Add( EChartSlot::Price, &m_ceBarsTradeRise );
-  m_cdv.Add( EChartSlot::Price, &m_ceBarsTradeFall );
+  m_cdv.Add( EChartSlot::Price, &m_ceSwingHi );
+  m_cdv.Add( EChartSlot::Price, &m_ceSwingLo );
 
   m_cdv.Add( EChartSlot::Price, &m_ceQuoteAsk );
   m_cdv.Add( EChartSlot::Price, &m_ceTrade );
   m_cdv.Add( EChartSlot::Price, &m_ceQuoteBid );
 
-  m_cdv.Add( EChartSlot::Price, &m_ceSwingHi );
-  m_cdv.Add( EChartSlot::Price, &m_ceSwingLo );
+  m_cdv.Add( EChartSlot::Price, &m_ceBarsTradeRise );
+  m_cdv.Add( EChartSlot::Price, &m_ceBarsTradeFall );
 
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
