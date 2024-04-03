@@ -57,6 +57,7 @@ public:
   void SetGoNeutral( boost::posix_time::ptime dtGoNeutral ) { m_dtGoNeutral = dtGoNeutral; }
   void SetRegularHoursClose( boost::posix_time::ptime dtRHClose ) { m_dtRHClose = dtRHClose; }
   void SetMarketClose( boost::posix_time::ptime dtMarketClose ) { m_dtMarketClose = dtMarketClose; }
+  void SetSoftwareReset( boost::posix_time::ptime dtSoftwareReset ) { m_dtSoftwareReset = dtSoftwareReset; }
 
   boost::posix_time::ptime GetMarketOpen() const { return m_dtMarketOpen; }
   boost::posix_time::ptime GetRegularHoursOpen() const { return m_dtRHOpen; }
@@ -66,10 +67,11 @@ public:
   boost::posix_time::ptime GetGoNeutral() const { return m_dtGoNeutral; }
   boost::posix_time::ptime GetRegularHoursClose() const { return m_dtRHClose; }
   boost::posix_time::ptime GetMarketClose() const { return m_dtMarketClose; }
+  boost::posix_time::ptime GetSoftwareReset() const { return m_dtSoftwareReset; }
 
 protected:
 
-  enum class TimeFrame { Closed, PreRH, BellHeard, PauseForQuotes, RHTrading, Cancel, Cancelling, GoNeutral, GoingNeutral, WaitForRHClose, AtRHClose, AfterRH };
+  enum class TimeFrame { Done, PreRH, BellHeard, PauseForQuotes, RHTrading, Cancel, Cancelling, GoNeutral, GoingNeutral, WaitForRHClose, AtRHClose, AfterRH, Closed, SoftwareReset };
 
   TimeFrame CurrentTimeFrame() const { return m_stateTimeFrame; }
 
@@ -84,12 +86,14 @@ protected:
   template<typename DD> void HandleAfterRH( const DD& dd ) {}
   template<typename DD> void HandleEndOfMarket( const DD& dd ) {}
   template<typename DD> void HandleMarketClosed( const DD& dd ) {}
+  template<typename DD> void HandleSoftwareReset( const DD& dd ) {}
 
   // event change one shots
   void HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration ) {}
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) {}
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) {}
   void HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration ) {}
+  void HandleSoftwareReset( boost::gregorian::date, boost::posix_time::time_duration ) {} // nay need time based if no data
 
 private:
   boost::posix_time::ptime m_dtMarketOpen;
@@ -101,6 +105,7 @@ private:
   boost::posix_time::ptime m_dtWaitForRHClose;
   boost::posix_time::ptime m_dtRHClose;
   boost::posix_time::ptime m_dtMarketClose;
+  boost::posix_time::ptime m_dtSoftwareReset;
 
   TimeFrame m_stateTimeFrame;
 
@@ -108,7 +113,7 @@ private:
 
 template<class T>
 DailyTradeTimeFrame<T>::DailyTradeTimeFrame()
-  : m_stateTimeFrame( TimeFrame::Closed )
+: m_stateTimeFrame( TimeFrame::Closed )
   // turn these into traits:  equities, futures, currencies
 {
   InitForUSEquityExchanges( ou::TimeSource::GlobalInstance().External().date() );
@@ -116,7 +121,7 @@ DailyTradeTimeFrame<T>::DailyTradeTimeFrame()
 
 template<class T>
 DailyTradeTimeFrame<T>::DailyTradeTimeFrame( boost::gregorian::date date )
-  : m_stateTimeFrame( TimeFrame::Closed )
+: m_stateTimeFrame( TimeFrame::Closed )
   // turn these into traits:  equities, futures, currencies
 {
   InitForUSEquityExchanges( date );
@@ -133,6 +138,7 @@ void DailyTradeTimeFrame<T>::InitForUSEquityExchanges( boost::gregorian::date da
   m_dtWaitForRHClose      = Normalize( date, boost::posix_time::time_duration( 15, 59,  0 ), "America/New_York" );
   m_dtRHClose             = Normalize( date, boost::posix_time::time_duration( 16,  0,  0 ), "America/New_York" );
   m_dtMarketClose         = Normalize( date, boost::posix_time::time_duration( 17, 30,  0 ), "America/New_York" );
+  m_dtSoftwareReset       = Normalize( date, boost::posix_time::time_duration( 17, 45,  0 ), "America/New_York" );
 }
 
 template<class T>
@@ -155,8 +161,8 @@ boost::gregorian::date DailyTradeTimeFrame<T>::MarketOpenDate( boost::posix_time
 // (contractDetails).liquidHours  "20211031:CLOSED;20211101:0830-20211101:1500"
 // (contractDetails).timeZoneId   "US/Central"
 
-template<class T>
-void DailyTradeTimeFrame<T>::InitForUS24HourFutures( boost::gregorian::date date ) { // needs normalized date
+template<class T> // used for forex as well
+void DailyTradeTimeFrame<T>::InitForUS24HourFutures( boost::gregorian::date date ) { // needs normalized date 
   m_dtMarketOpen          = Normalize( date                                     , boost::posix_time::time_duration( 17, 45,  0 ), "America/New_York" );
   m_dtRHOpen              = Normalize( date                                     , boost::posix_time::time_duration( 18,  0,  0 ), "America/New_York" );
   m_dtStartTrading        = Normalize( date                                     , boost::posix_time::time_duration( 18,  0, 30 ), "America/New_York" );
@@ -168,6 +174,7 @@ void DailyTradeTimeFrame<T>::InitForUS24HourFutures( boost::gregorian::date date
   // will need to generify this:  ES till 15:15, GC till 17:00
   m_dtRHClose             = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17,  0,  0 ), "America/New_York" );
   m_dtMarketClose         = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17, 15,  0 ), "America/New_York" );
+  m_dtSoftwareReset       = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17, 30,  0 ), "America/New_York" );
 }
 
 template<class T>
@@ -271,14 +278,16 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
     break;
   case TimeFrame::Closed:
     //ss << dt << "," << m_dtMarketOpen;
-    if ( (  dt >= m_dtMarketOpen )
-      ) {
-        m_stateTimeFrame = TimeFrame::PreRH;
-        static_cast<T*>(this)->HandlePreOpen( dd );
+    if ( dt >= m_dtSoftwareReset ) {
+      m_stateTimeFrame = TimeFrame::Done;
+      static_cast<T*>(this)->HandleSoftwareReset( dd );
     }
     else {
       static_cast<T*>(this)->HandleMarketClosed( dd );
     }
+    break;
+  case TimeFrame::Done:
+    // spin wheels
     break;
   case TimeFrame::BellHeard:
     assert( false );  // shouldn't reach here
