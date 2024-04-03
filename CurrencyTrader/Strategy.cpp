@@ -50,8 +50,8 @@ Strategy::Strategy()
   m_ceBarsTradeRise.SetColour( ou::Colour::Green );
   m_ceBarsTradeFall.SetColour( ou::Colour::Red );
 
-  m_cdv.Add( EChartSlot::Price, &m_ceSwingHi );
   m_cdv.Add( EChartSlot::Price, &m_ceSwingLo );
+  m_cdv.Add( EChartSlot::Price, &m_ceSwingHi );
 
   m_cdv.Add( EChartSlot::Price, &m_ceQuoteAsk );
   m_cdv.Add( EChartSlot::Price, &m_ceTrade );
@@ -254,14 +254,14 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
     double x = a.price > b.price ? a.price : b.price;
     double y = d.price > e.price ? d.price : e.price;
     double z = x > y ? x : y;
-    if ( c.price > z ) m_ceSwingHi.AddLabel( c.dt, c.price, "Swing Hi" );
+    if ( c.price > z ) m_ceSwingLo.AddLabel( c.dt, c.price, "Swing Lo" );
   }
 
   {
     double x = a.price < b.price ? a.price : b.price;
     double y = d.price < e.price ? d.price : e.price;
     double z = x <  y ? x : y;
-    if ( c.price < z ) m_ceSwingLo.AddLabel( c.dt, c.price, "Swing Lo" );
+    if ( c.price < z ) m_ceSwingHi.AddLabel( c.dt, c.price, "Swing Hi" );
   }
 }
 
