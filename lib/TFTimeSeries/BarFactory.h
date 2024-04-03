@@ -30,12 +30,12 @@ public:
   typedef Bar::price_t price_t;
 
   BarFactory( duration_t nSeconds = 60);
-  virtual ~BarFactory(void);
+  virtual ~BarFactory();
   void Add( const ptime &, price_t, volume_t);
   void Add( const Trade &trade ) { Add( trade.DateTime(), trade.Price(), trade.Volume() ); };
   Bar getCurrentBar() const { return m_bar; };
   void SetBarWidth( duration_t seconds ) { m_nBarWidthSeconds = seconds; };
-  duration_t GetBarWidth( void ) const { return m_nBarWidthSeconds; };
+  duration_t GetBarWidth() const { return m_nBarWidthSeconds; };
 
   typedef FastDelegate1<const Bar&> OnNewBarStartedHandler;  // turn this into a phoenix lambda function?
   void SetOnNewBarStarted( OnNewBarStartedHandler function ) {

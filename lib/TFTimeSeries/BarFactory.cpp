@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <algorithm>
 
 #include "BarFactory.h"
@@ -26,15 +24,15 @@ BarFactory::BarFactory(duration_t nSeconds) :
 {
 }
 
-BarFactory::~BarFactory(void) {
-  OnNewBarStarted = NULL;
-  OnBarUpdated = NULL;
-  OnBarComplete = NULL;
+BarFactory::~BarFactory() {
+  OnNewBarStarted = nullptr;
+  OnBarUpdated = nullptr;
+  OnBarComplete = nullptr;
 }
 
 void BarFactory::Add(const ptime &dt, price_t val, volume_t volume) {
-  duration_t seconds = dt.time_of_day().total_seconds();
-  duration_t interval = seconds / m_nBarWidthSeconds;
+  const duration_t seconds = dt.time_of_day().total_seconds();
+  const duration_t interval = seconds / m_nBarWidthSeconds;
   if ( m_bar.IsNull() ) {
     m_bar.Close( val );
     m_bar.High( val );
@@ -44,11 +42,11 @@ void BarFactory::Add(const ptime &dt, price_t val, volume_t volume) {
     m_curInterval = interval;
     m_bar.DateTime( ptime( dt.date(), time_duration( 0, 0, interval * m_nBarWidthSeconds, 0 ) ) );
     m_dtLastIntermediateEmission = dt - m_1Sec; // prime the value
-    if ( 0 != OnNewBarStarted ) OnNewBarStarted( m_bar );
+    if ( nullptr != OnNewBarStarted ) OnNewBarStarted( m_bar );
   }
   else {
     if ( interval != m_curInterval ) { // emit bar and start again
-      if ( 0 != OnBarComplete ) OnBarComplete( m_bar );
+      if ( nullptr != OnBarComplete ) OnBarComplete( m_bar );
       m_bar.Close( val );
       m_bar.High( val );
       m_bar.Low( val );
@@ -67,7 +65,7 @@ void BarFactory::Add(const ptime &dt, price_t val, volume_t volume) {
     }
   }
   if ( m_1Sec <= ( dt - m_dtLastIntermediateEmission ) ) {
-    if ( 0 != OnBarUpdated ) OnBarUpdated( m_bar );
+    if ( nullptr != OnBarUpdated ) OnBarUpdated( m_bar );
     m_dtLastIntermediateEmission = dt;
   }
   
