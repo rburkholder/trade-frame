@@ -201,13 +201,19 @@ private:
   pEMA_t m_pATRSlow;
 
   struct Swing {
-    double price;
+
+    double hi;
+    double lo;
     boost::posix_time::ptime dt;
-    Swing(): price {} {}
+
+    Swing(): hi {}, lo {} {}
+
     void Update( const ou::tf::Bar& bar ) {
-      price = bar.Close();
+      hi = bar.High();
+      lo = bar.Low();
       dt = bar.DateTime(); // TODO: add bar width to set properly
     }
+
   };
   using rSwing_t = std::array<Swing, 5>;
   rSwing_t m_swing;

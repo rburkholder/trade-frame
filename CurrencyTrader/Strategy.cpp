@@ -241,17 +241,17 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
   a = b; b = c; c = d; d = e; e.Update( bar );
 
   {
-    const double x = a.price > b.price ? a.price : b.price;
-    const double y = d.price > e.price ? d.price : e.price;
+    const double x = a.hi > b.hi ? a.hi : b.hi;
+    const double y = d.hi > e.hi ? d.hi : e.hi;
     const double z = x > y ? x : y;
-    if ( c.price > z ) m_ceSwingLo.AddLabel( c.dt, c.price, "Swing Lo" );
+    if ( c.hi > z ) m_ceSwingLo.AddLabel( c.dt, c.hi, "Swing Lo" );
   }
 
   {
-    const double x = a.price < b.price ? a.price : b.price;
-    const double y = d.price < e.price ? d.price : e.price;
+    const double x = a.lo < b.lo ? a.lo : b.lo;
+    const double y = d.lo < e.lo ? d.lo : e.lo;
     const double z = x < y ? x : y;
-    if ( c.price < z ) m_ceSwingHi.AddLabel( c.dt, c.price, "Swing Hi" );
+    if ( c.lo < z ) m_ceSwingHi.AddLabel( c.dt, c.lo, "Swing Hi" );
   }
 }
 
