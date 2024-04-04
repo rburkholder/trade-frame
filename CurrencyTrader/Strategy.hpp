@@ -96,8 +96,7 @@ private:
   ou::ChartEntryIndicator m_ceQuoteAsk;
   ou::ChartEntryIndicator m_ceQuoteBid;
 
-  ou::ChartEntryBars m_ceBarsTradeRise;
-  ou::ChartEntryBars m_ceBarsTradeFall;
+  ou::ChartEntryBars m_ceBarsTrade;
 
   ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryVolume m_ceVolume;

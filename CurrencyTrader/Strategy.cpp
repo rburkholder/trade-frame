@@ -38,17 +38,13 @@ Strategy::Strategy()
   m_ceTrade.SetName(    "Tick" );
   m_ceQuoteBid.SetName( "Bid" );
 
-  m_ceBarsTradeRise.SetName( "Trades" );
-  m_ceBarsTradeFall.SetName( "Trades" );
+  m_ceBarsTrade.SetName( "Trades" );
 
   m_ceVolume.SetName(   "Volume" );
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
-
-  m_ceBarsTradeRise.SetColour( ou::Colour::Green );
-  m_ceBarsTradeFall.SetColour( ou::Colour::Red );
 
   m_cdv.Add( EChartSlot::Price, &m_ceSwingLo );
   m_cdv.Add( EChartSlot::Price, &m_ceSwingHi );
@@ -57,8 +53,7 @@ Strategy::Strategy()
   m_cdv.Add( EChartSlot::Price, &m_ceTrade );
   m_cdv.Add( EChartSlot::Price, &m_ceQuoteBid );
 
-  m_cdv.Add( EChartSlot::Price, &m_ceBarsTradeRise );
-  m_cdv.Add( EChartSlot::Price, &m_ceBarsTradeFall );
+  m_cdv.Add( EChartSlot::Price, &m_ceBarsTrade );
 
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
@@ -228,12 +223,7 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
 
   const ptime dt( bar.DateTime() );
-  if ( bar.Close() >= bar.Open() ) {
-    m_ceBarsTradeRise.AppendBar( bar );
-  }
-  else {
-    m_ceBarsTradeFall.AppendBar( bar );
-  }
+  m_ceBarsTrade.AppendBar( bar );
 
   m_ceVolume.Append( dt, bar.Volume() ); // iqfeed shows as 1 for fxcm
 
