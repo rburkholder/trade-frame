@@ -22,34 +22,34 @@ namespace ou { // One Unified
 class ChartEntryBars :
   public ChartEntryTime {
 public:
-  ChartEntryBars(void);
+  ChartEntryBars();
   //ChartEntryBars(size_type nSize);
-  virtual ~ChartEntryBars(void);
+  virtual ~ChartEntryBars();
   virtual void Reserve( size_type );
   void AppendBar( const ou::tf::Bar& bar ); // uses thread crossing buffer
   virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
-  virtual void Clear( void );
+  virtual void Clear();
 
 //  template<typename Iterator>
 //  void AppendBars( Iterator begin, Iterator end ); // no thread crossing buffer, not implemented yet
 
 protected:
-  DoubleArray GetOpen( void ) const {
+  DoubleArray GetOpen() const {
 //    vdouble_t::const_iterator iter = m_vOpen.begin();
 //    return DoubleArray( &(*iter), static_cast<int>( m_vOpen.size() ) );
     return DoubleArray( &m_vOpen[ IxStart() ], CntElements() );
   }
-  DoubleArray GetHigh( void ) const {
+  DoubleArray GetHigh() const {
     //vdouble_t::const_iterator iter = m_vHigh.begin();
     //return DoubleArray( &(*iter), static_cast<int>( m_vHigh.size() ) );
     return DoubleArray( &m_vHigh[ IxStart() ], CntElements() );
   }
-  DoubleArray GetLow( void ) const {
+  DoubleArray GetLow() const {
     //vdouble_t::const_iterator iter = m_vLow.begin();
     //return DoubleArray( &(*iter), static_cast<int>( m_vLow.size() ) );
     return DoubleArray( &m_vLow[ IxStart() ], CntElements() );
   }
-  DoubleArray GetClose( void ) const {
+  DoubleArray GetClose() const {
     //vdouble_t::const_iterator iter = m_vClose.begin();
     //return DoubleArray( &(*iter), static_cast<int>( m_vClose.size() ) );
     return DoubleArray( &m_vClose[ IxStart() ], CntElements() );
@@ -64,7 +64,7 @@ private:
 
   ou::tf::Queue<ou::tf::Bar> m_queueBars;
 
-  void ClearQueue( void );
+  void ClearQueue();
   void Pop( const ou::tf::Bar& bar );
 };
 

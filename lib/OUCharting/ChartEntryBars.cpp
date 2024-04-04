@@ -24,7 +24,7 @@ namespace ou { // One Unified
 // CChartEntryBars, volume portion of bar is in ChartEntryVolume.h
 //
 
-ChartEntryBars::ChartEntryBars(void)
+ChartEntryBars::ChartEntryBars()
 : ChartEntryTime()
 {
 }
@@ -34,7 +34,7 @@ ChartEntryBars::ChartEntryBars(void)
 //{
 //}
 
-ChartEntryBars::~ChartEntryBars(void) {
+ChartEntryBars::~ChartEntryBars() {
   m_vOpen.clear();
   m_vHigh.clear();
   m_vLow.clear();
@@ -50,7 +50,7 @@ void ChartEntryBars::Reserve( size_type nSize ) {
 }
 
 
-void ChartEntryBars::AppendBar(const ou::tf::Bar &bar) {
+void ChartEntryBars::AppendBar( const ou::tf::Bar &bar ) {
 //  if ( m_bUseThreadSafety ) {
 //    while ( !m_lfBar.push( bar ) ) {};
 //  }
@@ -60,7 +60,7 @@ void ChartEntryBars::AppendBar(const ou::tf::Bar &bar) {
   m_queueBars.Append( bar );
 }
 
-void ChartEntryBars::ClearQueue( void ) {
+void ChartEntryBars::ClearQueue() {
   namespace args = boost::phoenix::placeholders;
   m_queueBars.Sync( boost::phoenix::bind( &ChartEntryBars::Pop, this, args::arg1 ) );
 }
@@ -73,7 +73,7 @@ void ChartEntryBars::Pop( const ou::tf::Bar& bar ) {
   m_vClose.push_back( bar.Close() );
 }
 
-bool ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) {
+bool ChartEntryBars::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
 
   bool bAdded( false );
 
@@ -114,7 +114,7 @@ bool ChartEntryBars::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttri
   return bAdded;
 }
 
-void ChartEntryBars::Clear( void ) {
+void ChartEntryBars::Clear() {
   ClearQueue();
   m_vOpen.clear();
   m_vHigh.clear();
