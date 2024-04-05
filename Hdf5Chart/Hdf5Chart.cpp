@@ -14,6 +14,8 @@
 
 #include <iostream>
 
+#include <boost/log/trivial.hpp>
+
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 
@@ -26,14 +28,35 @@
 #include "Hdf5Chart.h"
 
 namespace {
-  const static std::string sStateFileName = "Hdf5Chart.state";
+  static const std::string c_sAppName( "Hdf5Chart" );
+  static const std::string c_sVendorName( "One Unified Net Limited" );
+  static const std::string c_sStateFileName = "Hdf5Chart.state";
+  static const std::string c_sChoicesFilename( c_sAppName + ".cfg" );
 }
 
 IMPLEMENT_APP(AppHdf5Chart)
 
 bool AppHdf5Chart::OnInit() {
 
-  m_pFrameMain = new FrameMain( 0, wxID_ANY, "Hdf5 Chart" );
+  wxApp::SetVendorName( c_sVendorName );
+  wxApp::SetAppDisplayName( c_sAppName );
+  wxApp::SetVendorDisplayName( "(c)2024 " + c_sVendorName );
+
+  wxApp::OnInit();
+
+  if ( config::Load( c_sChoicesFilename, m_choices ) ) {
+  }
+  else {
+    return false;
+  }
+
+  if ( boost::filesystem::exists( m_choices.m_sHdf5File ) ) {}
+  else {
+    BOOST_LOG_TRIVIAL(error) << m_choices.m_sHdf5File << " does not exist";
+    return false;
+  }
+
+  m_pFrameMain = new FrameMain( nullptr, wxID_ANY, "Hdf5 Chart" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
   //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
@@ -59,7 +82,9 @@ bool AppHdf5Chart::OnInit() {
   m_pPanelLogging->SetMinSize( wxSize( 100, 100 ) );
 //  m_pPanelLogging->Show( true );
 
-  m_pPanelChartHdf5 = new ou::tf::PanelChartHdf5( m_pFrameMain, wxID_ANY );
+  m_pPanelChartHdf5 = new ou::tf::PanelChartHdf5( m_choices.m_sHdf5File );
+  m_pPanelChartHdf5->Create( m_pFrameMain, wxID_ANY );
+  //m_pPanelChartHdf5 = new ou::tf::PanelChartHdf5( m_pFrameMain, wxID_ANY );
   sizerMain->Add( m_pPanelChartHdf5, 1, wxALL | wxEXPAND, 0);
 
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
@@ -97,7 +122,7 @@ bool AppHdf5Chart::OnInit() {
 
 void AppHdf5Chart::SaveState() {
   std::cout << "Saving Config ..." << std::endl;
-  std::ofstream ofs( sStateFileName );
+  std::ofstream ofs( c_sStateFileName );
   boost::archive::text_oarchive oa(ofs);
   oa & *this;
   std::cout << "  done." << std::endl;
@@ -106,7 +131,7 @@ void AppHdf5Chart::SaveState() {
 void AppHdf5Chart::LoadState() {
   try {
     std::cout << "Loading Config ..." << std::endl;
-    std::ifstream ifs( sStateFileName );
+    std::ifstream ifs( c_sStateFileName );
     boost::archive::text_iarchive ia(ifs);
     ia & *this;
     std::cout << "  done." << std::endl;

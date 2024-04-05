@@ -29,10 +29,18 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-PanelChartHdf5::PanelChartHdf5(void)
+PanelChartHdf5::PanelChartHdf5()
 : wxPanel(),
   m_pChartDataView( nullptr ), m_pWinChartView( nullptr ), m_pdm( nullptr )
 {
+  Init();
+}
+
+PanelChartHdf5::PanelChartHdf5( const std::string& sFileName )
+: wxPanel(),
+  m_pChartDataView( nullptr ), m_pWinChartView( nullptr ), m_pdm( nullptr )
+{
+  m_pdm = new ou::tf::HDF5DataManager( ou::tf::HDF5DataManager::RO, sFileName );
   Init();
 }
 
@@ -41,10 +49,10 @@ PanelChartHdf5::PanelChartHdf5( wxWindow* parent, wxWindowID id, const wxPoint& 
   m_pChartDataView( nullptr ), m_pWinChartView( nullptr ), m_pdm( nullptr )
 {
   Init();
-  Create(parent, id, pos, size, style);
+  Create( parent, id, pos, size, style );
 }
 
-PanelChartHdf5::~PanelChartHdf5(void) {
+PanelChartHdf5::~PanelChartHdf5() {
   m_pWinChartView->SetChartDataView( nullptr );
   if ( nullptr != m_pChartDataView ) delete m_pChartDataView;
   if ( nullptr != m_pdm ) delete m_pdm;
@@ -112,7 +120,9 @@ void PanelChartHdf5::CreateControls() {
   m_pWinChartView = new WinChartView( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
   sizerRight->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 5);
 
-  m_pdm = new ou::tf::HDF5DataManager( ou::tf::HDF5DataManager::RO );
+  if ( nullptr == m_pdm ) {
+    m_pdm = new ou::tf::HDF5DataManager( ou::tf::HDF5DataManager::RO );
+  }
 
   m_sCurrentPath = "/";
 

@@ -23,6 +23,8 @@
 
 #include <TFBitsNPieces/FrameWork01.h>
 
+#include "Config.hpp"
+
 class FrameMain;
 
 namespace ou {
@@ -39,6 +41,8 @@ class AppHdf5Chart:
 public:
 protected:
 private:
+
+  config::Choices m_choices;
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelLogging* m_pPanelLogging;

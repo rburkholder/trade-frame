@@ -37,13 +37,14 @@ namespace tf { // TradeFrame
 class PanelChartHdf5: public wxPanel {
 public:
 
-  PanelChartHdf5(void);
+  PanelChartHdf5();
+  PanelChartHdf5( const std::string& sFileName );
   PanelChartHdf5(
     wxWindow* parent, wxWindowID id = SYMBOL_PANEL_CHARTHDF5_IDNAME,
     const wxPoint& pos = SYMBOL_PANEL_CHARTHDF5_POSITION,
     const wxSize& size = SYMBOL_PANEL_CHARTHDF5_SIZE,
     long style = SYMBOL_PANEL_CHARTHDF5_STYLE );
-  virtual ~PanelChartHdf5(void);
+  virtual ~PanelChartHdf5();
 
   bool Create( wxWindow* parent,
     wxWindowID id = SYMBOL_PANEL_CHARTHDF5_IDNAME,
