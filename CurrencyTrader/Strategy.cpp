@@ -63,11 +63,11 @@ Strategy::Strategy()
 
   // supplied by 1 minute trade bar
   m_pATRFast = std::make_unique<EMA>( 3, m_cdv, EChartSlot::ATR );
-  m_pATRFast->Set( ou::Colour::Green, "ATR Fast" );
+  m_pATRFast->Set( ou::Colour::Blue, "ATR Fast" );
 
   // supplied by 1 minute trade bar
   m_pATRSlow = std::make_unique<EMA>( 14, m_cdv, EChartSlot::ATR );
-  m_pATRSlow->Set( ou::Colour::Green, "ATR Slow" );
+  m_pATRSlow->Set( ou::Colour::Crimson, "ATR Slow" );
 
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
   m_bfTrading.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleMinuteBar ) );
