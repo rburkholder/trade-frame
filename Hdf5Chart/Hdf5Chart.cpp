@@ -23,9 +23,9 @@
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
-#include <TFVuTrading/PanelChartHdf5.h>
+#include <TFVuTrading/PanelChartHdf5.hpp>
 
-#include "Hdf5Chart.h"
+#include "Hdf5Chart.hpp"
 
 namespace {
   static const std::string c_sAppName( "Hdf5Chart" );

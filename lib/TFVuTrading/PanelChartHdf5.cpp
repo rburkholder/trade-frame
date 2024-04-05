@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include <vector>
-
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
 
@@ -22,7 +20,7 @@
 
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 
-#include "PanelChartHdf5.h"
+#include "PanelChartHdf5.hpp"
 
 // TODO: make use of smart pointers
 

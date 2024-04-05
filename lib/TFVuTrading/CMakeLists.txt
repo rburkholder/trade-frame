@@ -45,7 +45,7 @@ set(
     ModelPosition.h
     Mouse.hpp
     NotebookOptionChains.h
-    PanelChartHdf5.h
+    PanelChartHdf5.hpp
     PanelComboOrder.hpp
     PanelFinancialChart.h
     PanelLogging.h
