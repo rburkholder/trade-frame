@@ -83,7 +83,7 @@ InstrumentFilter<S,TS>::InstrumentFilter(
 
   namespace ph = std::placeholders;
   ou::tf::hdf5::IterateGroups ig(
-    m_sRootPath,
+    m_dm, m_sRootPath,
     std::bind( &InstrumentFilter<S,TS>::HandleGroup, this, ph::_1, ph::_2 ),
     std::bind( &InstrumentFilter<S,TS>::HandleObject, this, ph::_1, ph::_2 )
     );

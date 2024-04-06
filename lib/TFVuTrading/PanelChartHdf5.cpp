@@ -126,7 +126,7 @@ void PanelChartHdf5::CreateControls() {
 
   namespace args = boost::phoenix::placeholders;
   ou::tf::hdf5::IterateGroups ig(
-    "/",
+    *m_pdm, std::string( "/" ),
     boost::phoenix::bind( &PanelChartHdf5::HandleLoadTreeHdf5Group, this, args::arg1, args::arg2 ),
     boost::phoenix::bind( &PanelChartHdf5::HandleLoadTreeHdf5Object, this, args::arg1, args::arg2 )
     );
