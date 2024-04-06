@@ -218,6 +218,30 @@ private:
   using rSwing_t = std::array<Swing, 5>;
   rSwing_t m_swing;
 
+  struct SwingTrack {
+
+    boost::posix_time::ptime dtComputed;
+    boost::posix_time::ptime dtPeak;
+    double dblPeak;
+    boost::posix_time::ptime dtSignal;
+    double dblSignal;
+
+    SwingTrack(
+      boost::posix_time::ptime dtComputed_
+    , boost::posix_time::ptime dtPeak_
+    , double dblPeak_
+    , boost::posix_time::ptime dtSignal_
+    , double dblSignal_
+    )
+    : dtComputed( dtComputed_ )
+    , dtPeak( dtPeak_ ), dblPeak( dblPeak_ )
+    , dtSignal( dtSignal_ ), dblSignal( dblSignal_ )
+    {}
+  };
+
+  using vSwingTrack_t = std::vector<SwingTrack>;
+  vSwingTrack_t m_vSwingTrack;
+
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
 

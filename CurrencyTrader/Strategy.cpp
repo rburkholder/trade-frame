@@ -244,14 +244,36 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
     const double x = a.hi > b.hi ? a.hi : b.hi;
     const double y = d.hi > e.hi ? d.hi : e.hi;
     const double z = x > y ? x : y;
-    if ( c.hi > z ) m_ceSwingLo.AddLabel( c.dt, c.hi, "Swing Lo" );
+    if ( c.hi > z ) {
+      m_ceSwingLo.AddLabel( c.dt, c.hi, "Swing Lo" );
+      m_vSwingTrack.emplace_back( SwingTrack(
+        bar.DateTime(),
+        c.dt, c.hi,
+        e.dt, e.hi ) );
+      //std::cout
+      //         << m_pWatch->GetInstrumentName()
+      //  << ',' << "hi"
+      //  << ',' << c.hi << ',' << e.hi
+      //  << std::endl;
+    }
   }
 
   {
     const double x = a.lo < b.lo ? a.lo : b.lo;
     const double y = d.lo < e.lo ? d.lo : e.lo;
     const double z = x < y ? x : y;
-    if ( c.lo < z ) m_ceSwingHi.AddLabel( c.dt, c.lo, "Swing Hi" );
+    if ( c.lo < z ) {
+      m_ceSwingHi.AddLabel( c.dt, c.lo, "Swing Hi" );
+      m_vSwingTrack.emplace_back( SwingTrack(
+        bar.DateTime(),
+        c.dt, c.lo,
+        e.dt, e.lo ) );
+      //std::cout
+      //         << m_pWatch->GetInstrumentName()
+      //  << ',' << "lo"
+      //  << ',' << c.lo << ',' << e.lo
+      //  << std::endl;
+    }
   }
 }
 
