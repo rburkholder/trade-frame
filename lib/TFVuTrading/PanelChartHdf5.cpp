@@ -12,9 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include <boost/phoenix/core.hpp>
-#include <boost/phoenix/bind/bind_member_function.hpp>
-
 #include <wx/sizer.h>
 #include <wx/splitter.h>
 
@@ -124,11 +121,10 @@ void PanelChartHdf5::CreateControls() {
 
   m_sCurrentPath = "/";
 
-  namespace args = boost::phoenix::placeholders;
   ou::tf::hdf5::IterateGroups ig(
     *m_pdm, std::string( "/" ),
-    boost::phoenix::bind( &PanelChartHdf5::HandleLoadTreeHdf5Group, this, args::arg1, args::arg2 ),
-    boost::phoenix::bind( &PanelChartHdf5::HandleLoadTreeHdf5Object, this, args::arg1, args::arg2 )
+    [this]( const std::string& group,const std::string& name ){ HandleLoadTreeHdf5Group( group, name ); },
+    [this]( const std::string& group,const std::string& name ){ HandleLoadTreeHdf5Object( group, name ); }
     );
 
   Bind( wxEVT_DESTROY, &PanelChartHdf5::OnDestroy, this );  // start close of windows and controls
@@ -158,8 +154,7 @@ void PanelChartHdf5::HandleLoadTreeHdf5Group( const std::string& s1, const std::
   if ( "depths_o" == s2 ) m_eLatestDatumType = CustomItemData::DepthsByOrder;
   m_sCurrentPath = s1;
   m_curTreeItem = m_pHdf5Root->GetRootItem();  // should be '/'
-  namespace args = boost::phoenix::placeholders;
-  m_pdm->IteratePathParts( s1, boost::phoenix::bind( &PanelChartHdf5::HandleBuildTreePathParts, this, args::arg1 ) );
+  m_pdm->IteratePathParts( s1, [this]( const std::string& path){ HandleBuildTreePathParts( path ); } );
 }
 
 void PanelChartHdf5::HandleLoadTreeHdf5Object( const std::string& s1, const std::string& s2 ) {
