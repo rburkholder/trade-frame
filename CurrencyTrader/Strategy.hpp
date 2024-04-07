@@ -242,6 +242,10 @@ private:
   using vSwingTrack_t = std::vector<SwingTrack>;
   vSwingTrack_t m_vSwingTrack;
 
+  unsigned int m_nHi;
+           int m_nNet;
+  unsigned int m_nLo;
+
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
 

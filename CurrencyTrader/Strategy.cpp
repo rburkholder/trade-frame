@@ -32,6 +32,7 @@ Strategy::Strategy()
 , m_bfTrading( 60 )
 , m_ceSwingHi( ou::ChartEntryShape::EShape::Long,  ou::Colour::Purple )
 , m_ceSwingLo( ou::ChartEntryShape::EShape::Short, ou::Colour::HotPink )
+, m_nLo {}, m_nNet {}, m_nHi {}
 {
 
   m_ceQuoteAsk.SetName( "Ask" );
@@ -250,6 +251,8 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
         bar.DateTime(),
         c.dt, c.hi,
         e.dt, e.hi ) );
+      m_nHi++;
+      m_nNet++;
       //std::cout
       //         << m_pWatch->GetInstrumentName()
       //  << ',' << "hi"
@@ -268,6 +271,8 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
         bar.DateTime(),
         c.dt, c.lo,
         e.dt, e.lo ) );
+      m_nLo++;
+      m_nNet--;
       //std::cout
       //         << m_pWatch->GetInstrumentName()
       //  << ',' << "lo"
