@@ -148,6 +148,7 @@ void ChartEntryTime::AppendFg( boost::posix_time::ptime dt ) {
         ;
 
       // do these go in with IncCntElements instead?
+      assert( boost::posix_time::not_a_date_time!= dt );  // validate for TODO below
       m_vDateTime.push_back( dt );
       m_vChartTime.push_back( converted );
 
@@ -191,6 +192,7 @@ void ChartEntryTime::SetViewPort( const range_t& range ) {
 
     vDateTime_t::const_iterator citerBegin( m_vDateTime.begin() );
     vDateTime_t::const_iterator citerEnd( m_vDateTime.end() );
+    //const auto diff( citerEnd - citerBegin ); // created for diagnostic use
 
     if ( boost::posix_time::not_a_date_time != m_rangeViewPort.dtBegin ) {
       citerBegin = std::lower_bound( m_vDateTime.begin(), m_vDateTime.end(), m_rangeViewPort.dtBegin );

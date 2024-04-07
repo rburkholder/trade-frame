@@ -206,7 +206,7 @@ void ChartMaster::DrawChart() {
 }
 
 void ChartMaster::RenderChart() {
-  if ( m_bHasData ) {
+  if ( m_bHasData ) {  // Did you 'm_pWinChartView->SetSim( true );'?
     bool bCursor( true );
     if ( m_bCrossHair ) {
       bCursor = DrawDynamicLayer();
