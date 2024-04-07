@@ -30,6 +30,7 @@
 Strategy::Strategy()
 : m_bfQuotes01Sec( 1 )
 , m_bfTrading( 60 )
+, m_stateTrade( ETradeState::Init )
 , m_ceSwingHi( ou::ChartEntryShape::EShape::Long,  ou::Colour::Purple )
 , m_ceSwingLo( ou::ChartEntryShape::EShape::Short, ou::Colour::HotPink )
 , m_nLo {}, m_nNet {}, m_nHi {}
@@ -141,6 +142,34 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
+  switch ( m_stateTrade ) {
+    case ETradeState::Init:
+      break;
+    case ETradeState::Search:
+      break;
+    case ETradeState::LongSubmitted:
+      break;
+    case ETradeState::LongExit:
+      break;
+    case ETradeState::ShortSubmitted:
+      break;
+    case ETradeState::ShortExit:
+      break;
+    case ETradeState::LongExitSubmitted:
+      break;
+    case ETradeState::ShortExitSubmitted:
+      break;
+    case ETradeState::NoTrade:
+      break;
+    case ETradeState::EndOfDayCancel:
+      break;
+    case ETradeState::EndOfDayNeutral:
+      break;
+    case ETradeState::Done:
+      break;
+    default:
+      assert( false );
+  }
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
@@ -219,6 +248,7 @@ void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   assert( m_pEmaCurrency );
   m_pEmaCurrency->Update( bar.DateTime(), bar.Close() );
+  TimeTick( bar );
 }
 
 void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
