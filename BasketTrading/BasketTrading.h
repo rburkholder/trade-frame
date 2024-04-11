@@ -44,7 +44,7 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
 
-#include "MasterPortfolio.h"
+#include "MasterPortfolio.hpp"
 
 class wxSizer;
 class wxRadioButton;

@@ -28,9 +28,9 @@ set(
     Config.hpp
     LegSelected.h
     ManagePosition.h
-    ManageStrategy.h
-    MasterPortfolio.h
-    MoneyManager.h
+    ManageStrategy.hpp
+    MasterPortfolio.hpp
+    MoneyManager.hpp
     OptionRegistry.hpp
     OptionStatistics.hpp
     PanelBasketTradingMain.h
@@ -38,7 +38,7 @@ set(
     PivotCrossing.h
     Sentiment.h
     SymbolSelection.h
-    Underlying.h
+    Underlying.hpp
     ValidateOptions.h
   )
 

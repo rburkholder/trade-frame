@@ -15,7 +15,6 @@
 // _148423314X 2017 Data Mining Algorithms in C++: Data Patterns and Algorithms for Modern Applications
 //    may have some interesting thoughts on data mining inter-day and intra-day data for relationships
 
-#include <set>
 #include <algorithm>
 
 #include <wx/menu.h>
@@ -37,8 +36,8 @@
 #include <TFVuTrading/PanelFinancialChart.h>
 #include <TFVuTrading/PanelComboOrder.hpp>
 
-#include "MoneyManager.h"
-#include "MasterPortfolio.h"
+#include "MoneyManager.hpp"
+#include "MasterPortfolio.hpp"
 
 namespace {
   const std::string sUnderlyingPortfolioPrefix( "portfolio-" );

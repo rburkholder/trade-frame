@@ -21,7 +21,7 @@
 // TODO: need to implement margin calculations with options
 #include <TFOptions/Margin.h>
 
-#include "MoneyManager.h"
+#include "MoneyManager.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

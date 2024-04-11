@@ -44,8 +44,8 @@
 
 #include <TFOptionCombos/SpreadSpecs.h>
 
-#include "Underlying.h"
-#include "ManageStrategy.h"
+#include "Underlying.hpp"
+#include "ManageStrategy.hpp"
 #include "OptionRegistry.hpp"
 
 class wxMenu;

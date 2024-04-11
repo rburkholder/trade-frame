@@ -12,7 +12,7 @@
  ************************************************************************/
 
 /*
- * File:   ManageStrategy.h
+ * File:   ManageStrategy.hpp
  * Author: raymond@burkholder.net
  *
  * Created: August 26, 2018, 6:46 PM

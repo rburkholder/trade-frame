@@ -98,7 +98,7 @@ using Combo = ou::tf::option::Combo;
 #include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/InterfaceBookOptionChain.hpp>
 
-#include "ManageStrategy.h"
+#include "ManageStrategy.hpp"
 #include "OptionRegistry.hpp"
 
 namespace {

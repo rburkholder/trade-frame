@@ -21,7 +21,7 @@
 
 #include <TFBitsNPieces/Stochastic.hpp>
 
-#include "Underlying.h"
+#include "Underlying.hpp"
 
 namespace {
   static const int k_hi = 80;

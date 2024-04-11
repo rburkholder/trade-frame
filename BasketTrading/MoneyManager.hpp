@@ -12,7 +12,7 @@
  ************************************************************************/
 
 /*
- * File:   MoneyManager.h
+ * File:   MoneyManager.hpp
  * Author: raymond@burkholder.net
  *
  * Created on June 5, 2019, 8:37 AM
