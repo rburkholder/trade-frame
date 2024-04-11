@@ -35,6 +35,8 @@
 #include <OUCharting/ChartEntryVolume.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
+#include <ou/telegram/Bot.hpp>
+
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFIQFeed/MarketSymbol.h>
@@ -311,6 +313,7 @@ private:
       pChartDataView->Remove( 0, &m_ceEma ); // helps with non-deterministic cleanup
     }
 
+
     void SetName( const std::string& sName ) {
       m_ceEma.SetName( sName );
     }
@@ -350,6 +353,8 @@ private:
   using pEMA_t = std::shared_ptr<EMA>;
   using vEMA_t = std::vector<pEMA_t>;
   vEMA_t m_vEMA;
+
+  std::unique_ptr<ou::telegram::Bot> m_telegram_bot;
 
   void ComboPrepare( boost::gregorian::date );
 

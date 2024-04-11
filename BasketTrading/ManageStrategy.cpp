@@ -236,6 +236,8 @@ ManageStrategy::ManageStrategy(
       break;
   }
 
+  //m_telegram_bot = std::make_unique<ou::telegram::Bot>( m_choices.sTelegramToken );
+
   //m_rBarDirection[ 0 ] = EBarDirection::None;
   //m_rBarDirection[ 1 ] = EBarDirection::None;
   //m_rBarDirection[ 2 ] = EBarDirection::None;
