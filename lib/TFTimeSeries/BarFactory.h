@@ -53,6 +53,7 @@ public:
 protected:
 
   duration_t m_nBarWidthSeconds;
+  duration_t m_nBarWidthSecondsBy2; // shift bar over half a bar for chartdir
   duration_t m_curInterval; // current bar interval
   ptime m_dtBarStart;
   ptime m_dtLastIntermediateEmission; // changes emitted no less than 1 second apart

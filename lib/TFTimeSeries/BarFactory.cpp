@@ -22,6 +22,7 @@ namespace tf { // TradeFrame
 BarFactory::BarFactory(duration_t nSeconds) : 
   m_nBarWidthSeconds( std::max<duration_t>( 1, nSeconds ) ), m_1Sec( time_duration( 0, 0, 1 ) ), m_curInterval( 0 ) 
 {
+  m_nBarWidthSecondsBy2 = m_nBarWidthSeconds / 2;
 }
 
 BarFactory::~BarFactory() {
@@ -46,7 +47,11 @@ void BarFactory::Add(const ptime &dt, price_t val, volume_t volume) {
   }
   else {
     if ( interval != m_curInterval ) { // emit bar and start again
-      if ( nullptr != OnBarComplete ) OnBarComplete( m_bar );
+      if ( nullptr != OnBarComplete ) {
+        // slide the bar to be centered in the time slot for chartdir
+        m_bar.DateTime( m_bar.DateTime() + time_duration( 0, 0, m_nBarWidthSecondsBy2 ) );
+        OnBarComplete( m_bar );
+      }
       m_bar.Close( val );
       m_bar.High( val );
       m_bar.Low( val );
@@ -54,7 +59,11 @@ void BarFactory::Add(const ptime &dt, price_t val, volume_t volume) {
       m_bar.Volume( volume );
       m_curInterval = interval;
       m_bar.DateTime( ptime( dt.date(), time_duration( 0, 0, interval * m_nBarWidthSeconds, 0 ) ) );
-      if ( 0 != OnNewBarStarted ) OnNewBarStarted( m_bar );
+      if ( nullptr != OnNewBarStarted ) {
+        ou::tf::Bar bar( m_bar );
+        bar.DateTime( bar.DateTime() + time_duration( 0, 0, m_nBarWidthSecondsBy2 ) );
+        OnNewBarStarted( bar );
+      }
     }
     else { // update current interval
       m_bar.Close( val );
@@ -65,7 +74,11 @@ void BarFactory::Add(const ptime &dt, price_t val, volume_t volume) {
     }
   }
   if ( m_1Sec <= ( dt - m_dtLastIntermediateEmission ) ) {
-    if ( nullptr != OnBarUpdated ) OnBarUpdated( m_bar );
+    if ( nullptr != OnBarUpdated ) {
+      ou::tf::Bar bar( m_bar );
+      bar.DateTime( bar.DateTime() + time_duration( 0, 0, m_nBarWidthSecondsBy2 ) );
+      OnBarUpdated( bar );
+    }
     m_dtLastIntermediateEmission = dt;
   }
   
