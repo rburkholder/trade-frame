@@ -98,6 +98,7 @@ bool ChartEntryBars::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttr
         0x0000ff00, 0x00ff0000, 0xFFFF0001
         );
       //candle->setDataGap( 0 );
+      candle->setLineWidth( 3 );
 
       candle->setXData( daXData );
       pAttributes->dblXMin = daXData[0];
