@@ -312,11 +312,13 @@ bool AppCurrencyTrader::BuildProviders_Sim() {
 
   bool bOk( true );
 
-  // m_sim does not need to be in PanelProviderControl
+  // construct m_sim
+  //   does not need to be in PanelProviderControl
   m_sim = ou::tf::SimulationProvider::Factory();
   m_data = m_exec = m_sim;
   //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will post across unsynchronized threads
 
+  // ensure hdf5 data is available
   try {
     if ( 0 < m_choices.m_sHdf5File.size() ) {
       m_sim->SetHdf5FileName( m_choices.m_sHdf5File );
@@ -337,30 +339,32 @@ bool AppCurrencyTrader::BuildProviders_Sim() {
     bOk = false;
   }
 
-  boost::gregorian::date date;
-  boost::posix_time::time_duration time;
+  boost::gregorian::date simDate;
+  boost::posix_time::time_duration simTime;
 
+  // extract date, time from group directory name
   if ( bOk ) {
     // 20221220-09:20:13.187534
     boost::smatch what;
 
-    boost::regex exprDate { "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
+    static const boost::regex exprDate { "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
     if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprDate ) ) {
-      date = boost::gregorian::from_undelimited_string( what[ 0 ] );
+      simDate = boost::gregorian::from_undelimited_string( what[ 0 ] );
     }
     else bOk = false;
 
-    boost::regex exprTime { "([0-9][0-9]:[0-9][0-9]:[0-9][0-9])" };
+    static const boost::regex exprTime { "([0-9][0-9]:[0-9][0-9]:[0-9][0-9])" };
     if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprTime ) ) {
-      time = boost::posix_time::duration_from_string( what[ 0 ] );
+      simTime = boost::posix_time::duration_from_string( what[ 0 ] );
     }
     else {
       bOk = false;
     }
   }
 
+  // construct the simulation date/time
   if ( bOk ) {
-    ptime dtUTC = ptime( date, time );
+    ptime dtUTC = ptime( simDate, simTime );
     boost::local_time::local_date_time lt( dtUTC, ou::TimeSource::TimeZoneNewYork() );
     boost::posix_time::ptime dtStart = lt.local_time();
     BOOST_LOG_TRIVIAL(info) << "times: " << dtUTC << "(UTC) is " << dtStart << "(eastern)" << std::endl;
@@ -370,6 +374,7 @@ bool AppCurrencyTrader::BuildProviders_Sim() {
     //m_sSimulationDateTime = boost::posix_time::to_iso_string( dtUTC );
   }
 
+  // construct the simulation menu, attach the events, and start simulation
   if ( bOk ) {
     FrameMain::vpItems_t vItems;
     using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
