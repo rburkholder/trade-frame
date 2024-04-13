@@ -53,8 +53,10 @@ public:
   void SetMarketOpen( boost::posix_time::ptime dtMarketOpen ) { m_dtMarketOpen = dtMarketOpen; }
   void SetRegularHoursOpen( boost::posix_time::ptime dtRHOpen ) { m_dtRHOpen = dtRHOpen; }
   void SetStartTrading( boost::posix_time::ptime dtStartTrading ) { m_dtStartTrading = dtStartTrading; }
+  void SetNoon( boost::posix_time::ptime dtNoon ) { m_dtNoon = dtNoon; }
   void SetCancellation( boost::posix_time::ptime dtTimeForCancellation ) { m_dtTimeForCancellation = dtTimeForCancellation; }
   void SetGoNeutral( boost::posix_time::ptime dtGoNeutral ) { m_dtGoNeutral = dtGoNeutral; }
+  void SetWaitForRegularHoursClose( boost::posix_time::ptime dtRHWaitForClose ) { m_dtWaitForRHClose = dtRHWaitForClose; }
   void SetRegularHoursClose( boost::posix_time::ptime dtRHClose ) { m_dtRHClose = dtRHClose; }
   void SetMarketClose( boost::posix_time::ptime dtMarketClose ) { m_dtMarketClose = dtMarketClose; }
   void SetSoftwareReset( boost::posix_time::ptime dtSoftwareReset ) { m_dtSoftwareReset = dtSoftwareReset; }
@@ -65,6 +67,7 @@ public:
   boost::posix_time::ptime GetNoon() const { return m_dtNoon; }
   boost::posix_time::ptime GetCancellation() const { return m_dtTimeForCancellation; }
   boost::posix_time::ptime GetGoNeutral() const { return m_dtGoNeutral; }
+  boost::posix_time::ptime GetWaitForRegularHoursClose() const { return m_dtWaitForRHClose; }
   boost::posix_time::ptime GetRegularHoursClose() const { return m_dtRHClose; }
   boost::posix_time::ptime GetMarketClose() const { return m_dtMarketClose; }
   boost::posix_time::ptime GetSoftwareReset() const { return m_dtSoftwareReset; }
@@ -162,7 +165,7 @@ boost::gregorian::date DailyTradeTimeFrame<T>::MarketOpenDate( boost::posix_time
 // (contractDetails).timeZoneId   "US/Central"
 
 template<class T> // used for forex as well
-void DailyTradeTimeFrame<T>::InitForUS24HourFutures( boost::gregorian::date date ) { // needs normalized date 
+void DailyTradeTimeFrame<T>::InitForUS24HourFutures( boost::gregorian::date date ) { // needs normalized date
   m_dtMarketOpen          = Normalize( date                                     , boost::posix_time::time_duration( 17, 45,  0 ), "America/New_York" );
   m_dtRHOpen              = Normalize( date                                     , boost::posix_time::time_duration( 18,  0,  0 ), "America/New_York" );
   m_dtStartTrading        = Normalize( date                                     , boost::posix_time::time_duration( 18,  0, 30 ), "America/New_York" );
