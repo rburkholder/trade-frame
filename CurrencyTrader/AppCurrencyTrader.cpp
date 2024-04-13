@@ -364,10 +364,10 @@ bool AppCurrencyTrader::BuildProviders_Sim() {
 
   // construct the simulation date/time
   if ( bOk ) {
-    ptime dtUTC = ptime( simDate, simTime );
-    boost::local_time::local_date_time lt( dtUTC, ou::TimeSource::TimeZoneNewYork() );
+    m_dtSimulation = ptime( simDate, simTime );
+    boost::local_time::local_date_time lt( m_dtSimulation, ou::TimeSource::TimeZoneNewYork() );
     boost::posix_time::ptime dtStart = lt.local_time();
-    BOOST_LOG_TRIVIAL(info) << "times: " << dtUTC << "(UTC) is " << dtStart << "(eastern)" << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "times: " << m_dtSimulation << "(UTC) is " << dtStart << "(eastern)" << std::endl;
     //dateSim = Strategy::Futures::MarketOpenDate( dtUTC ); //
     //std::cout << "simulation date: " << dateSim << std::endl;
 
