@@ -39,36 +39,45 @@ struct Choices {
     std::string m_sName;
     boost::posix_time::time_duration m_tdStartTime;
     boost::posix_time::time_duration m_tdStopTime;
+    std::string m_sTimeZone; // Europe/London GMT
 
     PairSettings()
     : m_tdStartTime( boost::posix_time::not_a_date_time )
     , m_tdStopTime( boost::posix_time::not_a_date_time )
     {}
 
-    PairSettings( std::string&& sName,
-                  boost::posix_time::time_duration tdStartTime,
-                  boost::posix_time::time_duration tdStopTime
+    PairSettings( std::string&& sName
+                , boost::posix_time::time_duration tdStartTime
+                , boost::posix_time::time_duration tdStopTime
+                , std::string&& sTimeZone
                   )
-    : m_sName( std::move( sName ) ), m_tdStartTime( tdStartTime ), m_tdStopTime( tdStopTime )
+    : m_sName( std::move( sName ) )
+    , m_tdStartTime( tdStartTime ), m_tdStopTime( tdStopTime )
+    , m_sTimeZone( std::move( sTimeZone ) )
     {}
 
-    PairSettings( const std::string& sName,
-                  const boost::posix_time::time_duration tdStartTime,
-                  const boost::posix_time::time_duration tdStopTime
+    PairSettings( const std::string& sName
+                , const boost::posix_time::time_duration tdStartTime
+                , const boost::posix_time::time_duration tdStopTime
+                , const std::string& sTimeZone
                   )
-    : m_sName( sName ), m_tdStartTime( tdStartTime ), m_tdStopTime( tdStopTime )
+    : m_sName( sName )
+    , m_tdStartTime( tdStartTime ), m_tdStopTime( tdStopTime )
+    , m_sTimeZone( sTimeZone )
     {}
 
     PairSettings( PairSettings&& ps )
     : m_sName( std::move( ps.m_sName ) )
     , m_tdStartTime( ps.m_tdStartTime )
     , m_tdStopTime( ps.m_tdStopTime )
+    , m_sTimeZone( std::move( ps.m_sTimeZone ) )
     {}
 
     PairSettings( const PairSettings& ps )
     : m_sName( ps.m_sName )
     , m_tdStartTime( ps.m_tdStartTime )
     , m_tdStopTime( ps.m_tdStopTime )
+    , m_sTimeZone( ps.m_sTimeZone )
     {}
 
     const PairSettings& operator=( const PairSettings& ps ) {
@@ -76,13 +85,14 @@ struct Choices {
         m_sName = ps.m_sName;
         m_tdStartTime = ps.m_tdStartTime;
         m_tdStopTime = ps.m_tdStopTime;
+        m_sTimeZone = ps.m_sTimeZone;
       }
       return *this;
     }
 
     void Parse( const std::string& ); // perform the parser here?
 
-    // non member function - output
+    // non member function - output - not used
     friend std::ostream& operator<<( std::ostream& os, PairSettings const& ps ) {
       //return os << ps._i;
       return os;

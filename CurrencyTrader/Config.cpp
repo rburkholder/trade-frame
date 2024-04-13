@@ -100,6 +100,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   (std::string, m_sName)
   (boost::posix_time::time_duration, m_tdStartTime)
   (boost::posix_time::time_duration, m_tdStopTime)
+  (std::string, m_sTimeZone)
 )
 
 namespace config {
@@ -116,9 +117,12 @@ struct ParserPairSettings: qi::grammar<Iterator, Choices::PairSettings()> {
              >> ruleValue >> qi::lit( ':' )
              >> ruleValue
              ;
+    ruleTimeZone %= +qi::char_("A-Za-z0-9_/") // https://github.com/boost-vault/date_time/blob/master/date_time_zonespec.csv
+                 ;
     ruleStart %= ruleName >> qi::lit( ',' )
               >> ruleTime >> qi::lit( ',' )
-              >> ruleTime
+              >> ruleTime >> qi::lit( ',' )
+              >> ruleTimeZone
               ;
 
   }
@@ -128,6 +132,7 @@ struct ParserPairSettings: qi::grammar<Iterator, Choices::PairSettings()> {
   qi::rule<Iterator, std::string()> ruleName;
   qi::rule<Iterator, unsigned short()> ruleValue;
   qi::rule<Iterator, time_parts()> ruleTime;
+  qi::rule<Iterator, std::string()> ruleTimeZone;
   qi::rule<Iterator, Choices::PairSettings()> ruleStart;
 };
 
@@ -146,7 +151,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     po::options_description config( "currency trader config" );
     config.add_options()
 
-      ( sChoice_PairSetting.c_str(), po::value<Choices::vPairSettings_t>( &choices.m_vPairSettings ), "pair settings <name,start<hh:mm::ss>,stop<hh:mm:ss>>" )
+      ( sChoice_PairSetting.c_str(), po::value<Choices::vPairSettings_t>( &choices.m_vPairSettings ), "pair settings <name,start<hh:mm::ss>,stop<hh:mm:ss>,tz>" )
 
       ( sChoice_sExchange.c_str(), po::value<std::string>( &choices.m_sExchange ), "exchange name" )
 
@@ -181,7 +186,13 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       if ( 0 < vm.count( sChoice_PairSetting ) ) {
         choices.m_vPairSettings = std::move( vm[sChoice_PairSetting].as<Choices::vPairSettings_t>() );
         for ( Choices::vPairSettings_t::value_type& vt: choices.m_vPairSettings ) {
-          BOOST_LOG_TRIVIAL(info) << sChoice_PairSetting << " = " << vt.m_sName;
+          BOOST_LOG_TRIVIAL(info)
+            << sChoice_PairSetting << " = "
+            << vt.m_sName << ','
+            << vt.m_tdStartTime << ','
+            << vt.m_tdStopTime << ','
+            << vt.m_sTimeZone
+            ;
         }
       }
       else {
