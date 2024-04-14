@@ -206,6 +206,29 @@ void AppCurrencyTrader::PopulateTreeRoot() {
   m_treeSymbols->ExpandAll();
 }
 
+boost::gregorian::date AppCurrencyTrader::AdjustTimeFrame( boost::gregorian::date date_utc, boost::posix_time::time_duration time_utc ) {
+
+  ou::TimeSource& ts( ou::TimeSource::GlobalInstance() );
+  auto tz = ts.LoadTimeZone( "America/New_York" );
+
+  static const auto dtStart( boost::posix_time::time_duration( 17, 30, 0 ) );
+  const boost::local_time::local_date_time ldt_start( date_utc, dtStart, tz, boost::local_time::local_date_time::EXCEPTION_ON_ERROR );
+  const boost::posix_time::time_duration residual( ldt_start.utc_time().time_of_day() );
+
+  const auto temp_utc = ( residual <= time_utc ) ? date_utc : date_utc - boost::gregorian::date_duration( 1 );
+  const boost::local_time::local_date_time ldt_new( boost::posix_time::ptime( temp_utc, residual ), tz );
+  const boost::gregorian::date date_new = ldt_new.local_time().date();
+
+  BOOST_LOG_TRIVIAL(info)
+    << "original=" << date_utc << ' ' << time_utc
+    << ",start=" << ldt_start.utc_time() << "(utc)," << ldt_start.local_time() << "(local)"
+    << ",residual=" << residual << "(utc)"
+    << ",final=" << date_new
+    ;
+
+  return date_new;
+}
+
 void AppCurrencyTrader::ConstructStrategyList() {
 
   assert( 0 == m_mapStrategy.size() );
@@ -214,27 +237,37 @@ void AppCurrencyTrader::ConstructStrategyList() {
     const ou::tf::Instrument::idInstrument_t& idInstrument( ps.m_sName );
     mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( idInstrument );
     if ( m_mapStrategy.end() == iterStrategy ) {
+
       pStrategy_t pStrategy = std::make_unique<Strategy>();
       auto result = m_mapStrategy.emplace( idInstrument, std::move( pStrategy ) );
       assert( result.second );
 
       iterStrategy = result.first;
       Strategy& strategy( *iterStrategy->second );
-      strategy.InitFor24HourMarkets( m_startDate );
+      strategy.InitFor24HourMarkets( m_startDateMkt );
 
       ou::TimeSource& ts( ou::TimeSource::GlobalInstance() );
       auto tz = ts.LoadTimeZone( ps.m_sTimeZone );
 
-      auto MarketOpen_UTC = strategy.GetRegularHoursOpen();
-      boost::local_time::local_date_time MarketOpen_Local( MarketOpen_UTC, tz );
+      const auto MarketOpen_UTC = strategy.GetRegularHoursOpen();
+      const boost::local_time::local_date_time MarketOpen_Local( MarketOpen_UTC, tz );
 
-      //BOOST_LOG_TRIVIAL(info)
-      //  << ps.m_sName << ','
-      //  << "open,"
-      //  << MarketOpen_UTC << ','
-      //  << MarketOpen_Local.utc_time() << ','
-      //  << MarketOpen_Local.local_time()
-      //  ;
+      const auto MarketClose_UTC = strategy.GetRegularHoursClose();
+      const boost::local_time::local_date_time MarketClose_Local( MarketClose_UTC, tz );
+
+      bool bLog( false );
+
+      if ( bLog ) {
+        BOOST_LOG_TRIVIAL(info)
+          << ps.m_sName
+          << " mo_raw_utc=" << MarketOpen_UTC
+          << ",mo_lcl_utc=" << MarketOpen_Local.utc_time()
+          << ",mo_lcl_local=" << MarketOpen_Local.local_time()
+          << ",mc_raw_utc=" << MarketClose_UTC
+          << ",mc_lcl_utc=" << MarketClose_Local.utc_time()
+          << ",mc_lcl_local=" << MarketClose_Local.local_time()
+          ;
+      }
 
       boost::posix_time::ptime dtStart_Local( MarketOpen_Local.local_time().date(), ps.m_tdStartTime );
       if ( dtStart_Local < MarketOpen_Local.local_time() ) {
@@ -265,28 +298,50 @@ void AppCurrencyTrader::ConstructStrategyList() {
       boost::local_time::local_date_time lt_close( dtClose_Local.date(), dtClose_Local.time_of_day(), tz, boost::local_time::local_date_time::EXCEPTION_ON_ERROR );
       boost::posix_time::ptime lt_close_utc( lt_close.utc_time() );
 
-      //BOOST_LOG_TRIVIAL(info)
-      //  << ps.m_sName << ','
-      //  << "utc range,"
-      //  << lt_open_utc << ','
-      //  << lt_close_utc << ','
-      //  << strategy.GetRegularHoursClose()
-      //  ;
+      if ( bLog ) {
+        BOOST_LOG_TRIVIAL(info)
+          << ps.m_sName
+          << " lt_open_utc=" << lt_open_utc
+          << " lt_close_utc=" << lt_close_utc
+          << " close=" << MarketClose_UTC
+          ;
+      }
 
       assert( lt_open_utc < lt_close_utc );
-      assert( lt_close_utc <= strategy.GetRegularHoursClose() );
+      assert( lt_close_utc <= MarketClose_UTC );
 
       strategy.SetCancellation( lt_close_utc - boost::posix_time::time_duration( 0, 3, 0 ) );
       strategy.SetGoNeutral( lt_close_utc - boost::posix_time::time_duration( 0, 2, 55 ) );
       strategy.SetWaitForRegularHoursClose( lt_close_utc - boost::posix_time::time_duration( 0, 2, 0 ) );
       strategy.SetRegularHoursClose( lt_close_utc );
 
-      //BOOST_LOG_TRIVIAL(info)
-      //  << ps.m_sName << ','
-      //  << "local range,"
-      //  << dtStart_Local << ','
-      //  << dtClose_Local
-      //  ;
+      if ( bLog ) {
+        BOOST_LOG_TRIVIAL(info)
+          << ps.m_sName
+          << " local start=" << dtStart_Local
+          << " local close=" << dtClose_Local
+          ;
+
+        BOOST_LOG_TRIVIAL(info)
+          << ps.m_sName << ' '
+          << strategy.GetMarketOpen() << ','
+          << strategy.GetRegularHoursOpen() << ','
+          << strategy.GetStartTrading() << ','
+          << strategy.GetNoon() << ','
+          << strategy.GetCancellation() << ','
+          << strategy.GetGoNeutral() << ','
+          << strategy.GetWaitForRegularHoursClose() << ','
+          << strategy.GetRegularHoursClose() << ','
+          << strategy.GetMarketClose() << ','
+          << strategy.GetSoftwareReset()
+          ;
+      }
+
+      BOOST_LOG_TRIVIAL(info)
+        << ps.m_sName
+        << " active market utc "
+        << lt_open_utc << " - " << lt_close_utc
+        ;
 
       TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
         idInstrument,
@@ -358,16 +413,19 @@ bool AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
 
   {
     auto dt = ou::TimeSource::GlobalInstance().External();
-    m_startDate = dt.date();
-    m_startTime = dt.time_of_day();
+    m_startDateUTC = dt.date();
+    m_startTimeUTC = dt.time_of_day();
 
     std::stringstream ss;
     ss
-      << ou::tf::Instrument::BuildDate( m_startDate )
+      << ou::tf::Instrument::BuildDate( m_startDateUTC )
       << " "
-      << m_startTime
+      << m_startTimeUTC
       ;
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
+
+    m_startDateMkt = AdjustTimeFrame( m_startDateUTC, m_startTimeUTC );
+
   }
 
   FrameMain::vpItems_t vItems;
@@ -419,13 +477,13 @@ bool AppCurrencyTrader::BuildProviders_Sim() {
 
     static const boost::regex exprDate { "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
     if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprDate ) ) {
-      m_startDate = boost::gregorian::from_undelimited_string( what[ 0 ] );
+      m_startDateUTC = boost::gregorian::from_undelimited_string( what[ 0 ] );
     }
     else bOk = false;
 
     static const boost::regex exprTime { "([0-9][0-9]:[0-9][0-9]:[0-9][0-9])" };
     if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprTime ) ) {
-      m_startTime = boost::posix_time::duration_from_string( what[ 0 ] );
+      m_startTimeUTC = boost::posix_time::duration_from_string( what[ 0 ] );
     }
     else {
       bOk = false;
@@ -434,10 +492,13 @@ bool AppCurrencyTrader::BuildProviders_Sim() {
 
   // construct the simulation date/time
   if ( bOk ) {
-    const boost::posix_time::ptime dtSimulation( ptime( m_startDate, m_startTime ) );
+
+    m_startDateMkt = AdjustTimeFrame( m_startDateUTC, m_startTimeUTC );
+
+    const boost::posix_time::ptime dtSimulation( ptime( m_startDateUTC, m_startTimeUTC ) );
     boost::local_time::local_date_time lt( dtSimulation, ou::TimeSource::TimeZoneNewYork() );
     boost::posix_time::ptime dtStart = lt.local_time();
-    BOOST_LOG_TRIVIAL(info) << "times: " << dtSimulation << "(UTC) is " << dtStart << "(eastern)" << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "times: " << dtSimulation << "(UTC) is " << dtStart << "(eastern)";
     //dateSim = Strategy::Futures::MarketOpenDate( dtUTC ); //
     //std::cout << "simulation date: " << dateSim << std::endl;
 
