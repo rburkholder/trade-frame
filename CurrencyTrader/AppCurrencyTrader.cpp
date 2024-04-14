@@ -87,17 +87,6 @@ bool AppCurrencyTrader::OnInit() {
     return false;
   }
 
-  {
-    std::stringstream ss;
-    auto dt = ou::TimeSource::GlobalInstance().External();
-    ss
-      << ou::tf::Instrument::BuildDate( dt.date() )
-      << " "
-      << dt.time_of_day()
-      ;
-    m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
-  }
-
   m_pFrameMain = new FrameMain( 0, wxID_ANY,c_sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
 
@@ -228,7 +217,10 @@ void AppCurrencyTrader::ConstructStrategyList() {
       pStrategy_t pStrategy = std::make_unique<Strategy>();
       auto result = m_mapStrategy.emplace( idInstrument, std::move( pStrategy ) );
       assert( result.second );
-      //iterStrategy = result.first;
+
+      iterStrategy = result.first;
+      Strategy& strategy( *iterStrategy->second );
+      strategy.InitForUS24HourFutures( m_startDate );
 
       TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
         idInstrument,
@@ -298,6 +290,20 @@ bool AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
   Bind( wxEVT_TIMER, &AppCurrencyTrader::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
   m_timerOneSecond.Start( 500 );
 
+  {
+    auto dt = ou::TimeSource::GlobalInstance().External();
+    m_startDate = dt.date();
+    m_startTime = dt.time_of_day();
+
+    std::stringstream ss;
+    ss
+      << ou::tf::Instrument::BuildDate( m_startDate )
+      << " "
+      << m_startTime
+      ;
+    m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
+  }
+
   FrameMain::vpItems_t vItems;
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
 
@@ -347,13 +353,13 @@ bool AppCurrencyTrader::BuildProviders_Sim() {
 
     static const boost::regex exprDate { "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
     if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprDate ) ) {
-      m_simDate = boost::gregorian::from_undelimited_string( what[ 0 ] );
+      m_startDate = boost::gregorian::from_undelimited_string( what[ 0 ] );
     }
     else bOk = false;
 
     static const boost::regex exprTime { "([0-9][0-9]:[0-9][0-9]:[0-9][0-9])" };
     if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprTime ) ) {
-      m_simTime = boost::posix_time::duration_from_string( what[ 0 ] );
+      m_startTime = boost::posix_time::duration_from_string( what[ 0 ] );
     }
     else {
       bOk = false;
@@ -362,7 +368,7 @@ bool AppCurrencyTrader::BuildProviders_Sim() {
 
   // construct the simulation date/time
   if ( bOk ) {
-    const boost::posix_time::ptime dtSimulation( ptime( m_simDate, m_simTime ) );
+    const boost::posix_time::ptime dtSimulation( ptime( m_startDate, m_startTime ) );
     boost::local_time::local_date_time lt( dtSimulation, ou::TimeSource::TimeZoneNewYork() );
     boost::posix_time::ptime dtStart = lt.local_time();
     BOOST_LOG_TRIVIAL(info) << "times: " << dtSimulation << "(UTC) is " << dtStart << "(eastern)" << std::endl;
@@ -437,6 +443,7 @@ void AppCurrencyTrader::HandleMenuActionSaveValues() {
   std::cout << "Saving collected values ... " << std::endl;
   CallAfter(
     [this](){
+      assert( 0 < m_sTSDataStreamStarted.size() );
       m_nTSDataStreamSequence++;
       const std::string sPath(
         "/app/" + c_sAppName + "/" +
