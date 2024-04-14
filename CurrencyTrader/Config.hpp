@@ -39,7 +39,7 @@ struct Choices {
     std::string m_sName;
     boost::posix_time::time_duration m_tdStartTime;
     boost::posix_time::time_duration m_tdStopTime;
-    std::string m_sTimeZone; // Europe/London GMT
+    std::string m_sTimeZone; // reference: Europe/London is GMT
 
     PairSettings()
     : m_tdStartTime( boost::posix_time::not_a_date_time )
