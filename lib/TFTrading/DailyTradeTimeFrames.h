@@ -44,6 +44,14 @@ public:
 
   static boost::gregorian::date MarketOpenDate( boost::posix_time::ptime dt );
   static boost::posix_time::ptime Normalize( boost::gregorian::date date, boost::posix_time::time_duration time, const std::string& zone ) {
+    // timezone names found in https://github.com/boostorg/date_time/blob/master/data/date_time_zonespec.csv
+    // convert to https://en.wikipedia.org/wiki/Tz_database, https://nodatime.org/TimeZones at some point
+    // more info: https://stackoverflow.com/questions/16086962/how-to-get-a-time-zone-from-a-location-using-latitude-and-longitude-coordinates#16086964
+    // use https://github.com/HowardHinnant/date or C++20 chrono
+    // https://www.iana.org/time-zones, http://www.boost.org/doc/libs/1_57_0/libs/locale/doc/html/dates_times_timezones.html
+    // https://en.wikipedia.org/wiki/Tz_database
+    // see lib/OUCommon/TimeSource.cpp
+    // https://howardhinnant.github.io/date/tz.html, Time Zone Database Parser <- this may be the way
     return ou::TimeSource::ConvertRegionalToUtc( date, time, zone );
   }
 

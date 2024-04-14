@@ -13,6 +13,9 @@
 
 #include "TimeSource.h"
 
+// use https://github.com/HowardHinnant/date or C++20 chrono
+// https://en.wikipedia.org/wiki/Tz_database
+
 namespace ou {
 
 bool TimeSource::m_bTzLoaded( false );
