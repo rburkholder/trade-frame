@@ -194,12 +194,16 @@ void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
   switch ( m_stateTrade ) {
     case ETradeState::EndOfDayCancel:
     case ETradeState::EndOfDayNeutral:
-      BOOST_LOG_TRIVIAL(info) << "order " << order.GetOrderId() << " cancelled - end of day";
+      BOOST_LOG_TRIVIAL(info)
+        << m_pWatch->GetInstrumentName()
+        << " order " << order.GetOrderId() << " cancelled - end of day";
       break;
     case ETradeState::LongExitSubmitted:
     case ETradeState::ShortExitSubmitted:
       //assert( false );  // TODO: need to figure out a plan to retry exit
-      BOOST_LOG_TRIVIAL(error) << "order " << order.GetOrderId() << " cancelled - state machine needs fixes";
+      BOOST_LOG_TRIVIAL(error)
+        << m_pWatch->GetInstrumentName()
+        << " order " << order.GetOrderId() << " cancelled - state machine needs fixes";
       m_stateTrade = ETradeState::Done;
       break;
     default:
@@ -259,6 +263,15 @@ void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_
       }
       break;
   }
+}
+
+void Strategy::HandleAtRHClose( boost::gregorian::date date, boost::posix_time::time_duration time ) { // one shot
+  BOOST_LOG_TRIVIAL(info)
+    << m_pWatch->GetInstrumentName()
+    << " swing delta "
+    << m_nNet
+    << ',' << date << 'T' << time
+    ;
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {

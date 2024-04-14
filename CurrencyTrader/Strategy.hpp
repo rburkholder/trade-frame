@@ -255,6 +255,7 @@ private:
   void HandleRHTrading( const ou::tf::Bar& bar );
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
+  void HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration );
 
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );
