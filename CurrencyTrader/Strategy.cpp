@@ -292,7 +292,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
     const double y = d.hi > e.hi ? d.hi : e.hi;
     const double z = x > y ? x : y;
     if ( c.hi > z ) {
-      m_ceSwingLo.AddLabel( c.dt, c.hi, "Swing Lo" );
+      m_ceSwingLo.AddLabel( c.dt, c.hi, "Swing Dn" );
       m_vSwingTrack.emplace_back( SwingTrack(
         bar.DateTime(),
         c.dt, c.hi,
@@ -312,7 +312,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
     const double y = d.lo < e.lo ? d.lo : e.lo;
     const double z = x < y ? x : y;
     if ( c.lo < z ) {
-      m_ceSwingHi.AddLabel( c.dt, c.lo, "Swing Hi" );
+      m_ceSwingHi.AddLabel( c.dt, c.lo, "Swing Up" );
       m_vSwingTrack.emplace_back( SwingTrack(
         bar.DateTime(),
         c.dt, c.lo,
