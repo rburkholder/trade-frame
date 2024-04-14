@@ -222,6 +222,72 @@ void AppCurrencyTrader::ConstructStrategyList() {
       Strategy& strategy( *iterStrategy->second );
       strategy.InitFor24HourMarkets( m_startDate );
 
+      ou::TimeSource& ts( ou::TimeSource::GlobalInstance() );
+      auto tz = ts.LoadTimeZone( ps.m_sTimeZone );
+
+      auto MarketOpen_UTC = strategy.GetRegularHoursOpen();
+      boost::local_time::local_date_time MarketOpen_Local( MarketOpen_UTC, tz );
+
+      //BOOST_LOG_TRIVIAL(info)
+      //  << ps.m_sName << ','
+      //  << "open,"
+      //  << MarketOpen_UTC << ','
+      //  << MarketOpen_Local.utc_time() << ','
+      //  << MarketOpen_Local.local_time()
+      //  ;
+
+      boost::posix_time::ptime dtStart_Local( MarketOpen_Local.local_time().date(), ps.m_tdStartTime );
+      if ( dtStart_Local < MarketOpen_Local.local_time() ) {
+        dtStart_Local = boost::posix_time::ptime(
+          MarketOpen_Local.local_time().date() + boost::gregorian::date_duration( 1 ),
+          ps.m_tdStartTime
+        );
+      }
+      assert( MarketOpen_Local.local_time() <= dtStart_Local );
+
+      boost::local_time::local_date_time lt_open( dtStart_Local.date(), dtStart_Local.time_of_day(), tz, boost::local_time::local_date_time::EXCEPTION_ON_ERROR );
+      boost::posix_time::ptime lt_open_utc( lt_open.utc_time() );
+
+      assert( MarketOpen_UTC <= lt_open_utc );
+
+      strategy.SetRegularHoursOpen( lt_open_utc );
+      strategy.SetStartTrading( lt_open_utc + boost::posix_time::time_duration( 0, 0, 30 ) );
+
+      boost::posix_time::ptime dtClose_Local( dtStart_Local.date(), ps.m_tdStopTime );
+      if ( dtStart_Local >= dtClose_Local ) {
+        dtClose_Local = boost::posix_time::ptime(
+          dtStart_Local.date() + boost::gregorian::date_duration( 1 ),
+          ps.m_tdStopTime
+        );
+      }
+      assert( dtStart_Local < dtClose_Local );
+
+      boost::local_time::local_date_time lt_close( dtClose_Local.date(), dtClose_Local.time_of_day(), tz, boost::local_time::local_date_time::EXCEPTION_ON_ERROR );
+      boost::posix_time::ptime lt_close_utc( lt_close.utc_time() );
+
+      //BOOST_LOG_TRIVIAL(info)
+      //  << ps.m_sName << ','
+      //  << "utc range,"
+      //  << lt_open_utc << ','
+      //  << lt_close_utc << ','
+      //  << strategy.GetRegularHoursClose()
+      //  ;
+
+      assert( lt_open_utc < lt_close_utc );
+      assert( lt_close_utc <= strategy.GetRegularHoursClose() );
+
+      strategy.SetCancellation( lt_close_utc - boost::posix_time::time_duration( 0, 3, 0 ) );
+      strategy.SetGoNeutral( lt_close_utc - boost::posix_time::time_duration( 0, 2, 55 ) );
+      strategy.SetWaitForRegularHoursClose( lt_close_utc - boost::posix_time::time_duration( 0, 2, 0 ) );
+      strategy.SetRegularHoursClose( lt_close_utc );
+
+      //BOOST_LOG_TRIVIAL(info)
+      //  << ps.m_sName << ','
+      //  << "local range,"
+      //  << dtStart_Local << ','
+      //  << dtClose_Local
+      //  ;
+
       TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
         idInstrument,
         [this,idInstrument]( TreeItem* pTreeItem ){
