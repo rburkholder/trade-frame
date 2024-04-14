@@ -339,23 +339,21 @@ bool AppCurrencyTrader::BuildProviders_Sim() {
     bOk = false;
   }
 
-  boost::gregorian::date simDate;
-  boost::posix_time::time_duration simTime;
-
   // extract date, time from group directory name
+  // TODO: maybe set datetime as an attribute in the hdf5 group
   if ( bOk ) {
     // 20221220-09:20:13.187534
     boost::smatch what;
 
     static const boost::regex exprDate { "(20[2-3][0-9][0-1][0-9][0-3][0-9])" };
     if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprDate ) ) {
-      simDate = boost::gregorian::from_undelimited_string( what[ 0 ] );
+      m_simDate = boost::gregorian::from_undelimited_string( what[ 0 ] );
     }
     else bOk = false;
 
     static const boost::regex exprTime { "([0-9][0-9]:[0-9][0-9]:[0-9][0-9])" };
     if ( boost::regex_search( m_choices.m_sHdf5SimSet, what, exprTime ) ) {
-      simTime = boost::posix_time::duration_from_string( what[ 0 ] );
+      m_simTime = boost::posix_time::duration_from_string( what[ 0 ] );
     }
     else {
       bOk = false;
@@ -364,10 +362,10 @@ bool AppCurrencyTrader::BuildProviders_Sim() {
 
   // construct the simulation date/time
   if ( bOk ) {
-    m_dtSimulation = ptime( simDate, simTime );
-    boost::local_time::local_date_time lt( m_dtSimulation, ou::TimeSource::TimeZoneNewYork() );
+    const boost::posix_time::ptime dtSimulation( ptime( m_simDate, m_simTime ) );
+    boost::local_time::local_date_time lt( dtSimulation, ou::TimeSource::TimeZoneNewYork() );
     boost::posix_time::ptime dtStart = lt.local_time();
-    BOOST_LOG_TRIVIAL(info) << "times: " << m_dtSimulation << "(UTC) is " << dtStart << "(eastern)" << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "times: " << dtSimulation << "(UTC) is " << dtStart << "(eastern)" << std::endl;
     //dateSim = Strategy::Futures::MarketOpenDate( dtUTC ); //
     //std::cout << "simulation date: " << dateSim << std::endl;
 

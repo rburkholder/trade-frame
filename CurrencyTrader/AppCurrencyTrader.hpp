@@ -129,7 +129,9 @@ private:
   using mapStrategy_t = std::map<std::string,pStrategy_t>;
   mapStrategy_t m_mapStrategy;
 
-  boost::posix_time::ptime m_dtSimulation; // provided from group name
+  boost::gregorian::date m_simDate; // provided from group name
+  boost::posix_time::time_duration m_simTime; // provided from group name
+
   ou::Delegate<int> m_OnSimulationComplete;
 
   bool BuildProviders_Live( wxBoxSizer* );
