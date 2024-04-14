@@ -124,7 +124,7 @@ private:
 
 template<class T>
 DailyTradeTimeFrame<T>::DailyTradeTimeFrame()
-: m_stateTimeFrame( TimeFrame::Closed )
+: m_stateTimeFrame( TimeFrame::PreRH )
   // turn these into traits:  equities, futures, currencies
 {
   InitForUSEquityExchanges( ou::TimeSource::GlobalInstance().External().date() );
@@ -132,7 +132,7 @@ DailyTradeTimeFrame<T>::DailyTradeTimeFrame()
 
 template<class T>
 DailyTradeTimeFrame<T>::DailyTradeTimeFrame( boost::gregorian::date date )
-: m_stateTimeFrame( TimeFrame::Closed )
+: m_stateTimeFrame( TimeFrame::PreRH )
   // turn these into traits:  equities, futures, currencies
 {
   InitForUSEquityExchanges( date );
@@ -185,7 +185,7 @@ void DailyTradeTimeFrame<T>::InitFor24HourMarkets( boost::gregorian::date date )
   // will need to generify this:  ES till 15:15, GC till 17:00
   m_dtRHClose             = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17,  0,  0 ), "America/New_York" );
   m_dtMarketClose         = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17, 15,  0 ), "America/New_York" );
-  m_dtSoftwareReset       = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17, 30,  0 ), "America/New_York" );
+  m_dtSoftwareReset       = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17, 35,  0 ), "America/New_York" );
 }
 
 template<class T>
@@ -194,7 +194,6 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
 
   std::stringstream ss;
 
-  //time_duration td( dd.DateTime().time_of_day() );
   boost::posix_time::ptime dt( dd.DateTime() );
 
   static_cast<T*>(this)->HandleCommon( dd );
@@ -274,7 +273,7 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
     }
     break;
   case TimeFrame::PreRH:
-    ss << dt << "," << m_dtRHOpen;
+    //ss << dt << "," << m_dtRHOpen;
     if ( dt >= m_dtRHOpen ) {
       m_stateTimeFrame = TimeFrame::BellHeard;
       boost::gregorian::date date( dt.date() );
@@ -290,8 +289,9 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
   case TimeFrame::Closed:
     //ss << dt << "," << m_dtMarketOpen;
     if ( dt >= m_dtSoftwareReset ) {
-      m_stateTimeFrame = TimeFrame::Done;
+      m_stateTimeFrame = TimeFrame::SoftwareReset;
       static_cast<T*>(this)->HandleSoftwareReset( dd );
+      m_stateTimeFrame = TimeFrame::Done;
     }
     else {
       static_cast<T*>(this)->HandleMarketClosed( dd );
