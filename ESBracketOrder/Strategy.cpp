@@ -79,7 +79,7 @@ Strategy::Strategy( pWatch_t pWatch )
   std::cout << "ou::TimeSource::GlobalInstance().External(): " << dtNow << std::endl;
   boost::gregorian::date dateMarketOpen( MarketOpenDate( dtNow ) );
   std::cout << "MarketOpenDate: " << dateMarketOpen << std::endl;
-  InitForUS24HourFutures( dateMarketOpen );
+  InitFor24HourMarkets( dateMarketOpen );
 
   if ( false ) { // false for standard day time trading, true for 24 hour futures trading
     // this may be offset incorrectly.

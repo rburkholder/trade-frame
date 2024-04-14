@@ -56,7 +56,7 @@ public:
   }
 
   void InitForUSEquityExchanges( boost::gregorian::date );
-  void InitForUS24HourFutures( boost::gregorian::date );
+  void InitFor24HourMarkets( boost::gregorian::date );
 
   void SetMarketOpen( boost::posix_time::ptime dtMarketOpen ) { m_dtMarketOpen = dtMarketOpen; }
   void SetRegularHoursOpen( boost::posix_time::ptime dtRHOpen ) { m_dtRHOpen = dtRHOpen; }
@@ -173,7 +173,7 @@ boost::gregorian::date DailyTradeTimeFrame<T>::MarketOpenDate( boost::posix_time
 // (contractDetails).timeZoneId   "US/Central"
 
 template<class T> // used for forex as well
-void DailyTradeTimeFrame<T>::InitForUS24HourFutures( boost::gregorian::date date ) { // needs normalized date
+void DailyTradeTimeFrame<T>::InitFor24HourMarkets( boost::gregorian::date date ) { // needs normalized date
   m_dtMarketOpen          = Normalize( date                                     , boost::posix_time::time_duration( 17, 45,  0 ), "America/New_York" );
   m_dtRHOpen              = Normalize( date                                     , boost::posix_time::time_duration( 18,  0,  0 ), "America/New_York" );
   m_dtStartTrading        = Normalize( date                                     , boost::posix_time::time_duration( 18,  0, 30 ), "America/New_York" );

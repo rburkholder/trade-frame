@@ -983,7 +983,7 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy(
   // TODO: will need this generic for equities and futures
   switch ( uws.pUnderlying->GetWatch()->GetInstrument()->GetInstrumentType() ) {
     case ou::tf::InstrumentType::Future:
-      pManageStrategy->InitForUS24HourFutures( m_dateTrading );
+      pManageStrategy->InitFor24HourMarkets( m_dateTrading );
       break;
     case ou::tf::InstrumentType::Stock:
       pManageStrategy->InitForUSEquityExchanges( m_dateTrading );

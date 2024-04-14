@@ -72,7 +72,7 @@ Strategy::Strategy(
 
   ptime dt( ou::TimeSource::GlobalInstance().External() );  // provided in utc
   boost::gregorian::date date( MarketOpenDate( dt ) );
-  InitForUS24HourFutures( date );
+  InitFor24HourMarkets( date );
   // this may be offset incorrectly.
   //SetRegularHoursOpen( Normalize( dt.date(), dt.time_of_day(), "America/New_York" ) );  // collect some data first
   ptime dtMo( GetMarketOpen() );

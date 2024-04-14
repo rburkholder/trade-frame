@@ -421,7 +421,7 @@ bool AppAutoTrade::OnInit() {
         if ( m_choices.bStartSimulator ) {
           // need to vefify proper period when collector starts at 5:30est
           //pStrategy->InitForUSEquityExchanges( dateSim );
-          pStrategyFutures->InitForUS24HourFutures( dateSim );
+          pStrategyFutures->InitFor24HourMarkets( dateSim );
           m_pWinChartView->SetSim( true );
         }
 

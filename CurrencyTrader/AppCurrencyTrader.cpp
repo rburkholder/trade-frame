@@ -220,7 +220,7 @@ void AppCurrencyTrader::ConstructStrategyList() {
 
       iterStrategy = result.first;
       Strategy& strategy( *iterStrategy->second );
-      strategy.InitForUS24HourFutures( m_startDate );
+      strategy.InitFor24HourMarkets( m_startDate );
 
       TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
         idInstrument,
