@@ -98,7 +98,7 @@ protected:
   template<typename DD> void HandleAfterRH( const DD& dd ) {}
   template<typename DD> void HandleEndOfMarket( const DD& dd ) {}
   template<typename DD> void HandleMarketClosed( const DD& dd ) {}
-  template<typename DD> void HandleSoftwareReset( const DD& dd ) {}
+  template<typename DD> bool HandleSoftwareReset( const DD& dd ) { return false; } // restart state machine
 
   // event change one shots
   void HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration ) {}
@@ -320,8 +320,13 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
     //ss << dt << "," << m_dtMarketOpen;
     if ( dt >= m_dtSoftwareReset ) {
       m_stateTimeFrame = TimeFrame::SoftwareReset;
-      static_cast<T*>(this)->HandleSoftwareReset( dd );
-      m_stateTimeFrame = TimeFrame::Done;
+      if ( static_cast<T*>(this)->HandleSoftwareReset( dd ) ) {
+        m_stateTimeFrame = TimeFrame::PreRH;
+      }
+      else {
+        m_stateTimeFrame = TimeFrame::Done;
+      }
+
     }
     else {
       static_cast<T*>(this)->HandleMarketClosed( dd );
