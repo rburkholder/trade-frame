@@ -28,13 +28,30 @@
 #include "Strategy.hpp"
 
 Strategy::Strategy()
-: m_bfQuotes01Sec( 1 )
+: DailyTradeTimeFrame<Strategy>()
+, m_bfQuotes01Sec( 1 )
 , m_bfTrading( 60 )
 , m_stateTrade( ETradeState::Init )
 , m_ceSwingHi( ou::ChartEntryShape::EShape::Long,  ou::Colour::Purple )
 , m_ceSwingLo( ou::ChartEntryShape::EShape::Short, ou::Colour::HotPink )
 , m_nLo {}, m_nNet {}, m_nHi {}
 {
+  Init();
+}
+
+Strategy::Strategy(  boost::gregorian::date date )
+: DailyTradeTimeFrame<Strategy>( date )
+, m_bfQuotes01Sec( 1 )
+, m_bfTrading( 60 )
+, m_stateTrade( ETradeState::Init )
+, m_ceSwingHi( ou::ChartEntryShape::EShape::Long,  ou::Colour::Purple )
+, m_ceSwingLo( ou::ChartEntryShape::EShape::Short, ou::Colour::HotPink )
+, m_nLo {}, m_nNet {}, m_nHi {}
+{
+  Init();
+}
+
+void Strategy::Init() {
 
   m_ceQuoteAsk.SetName( "Ask" );
   m_ceTrade.SetName(    "Tick" );
@@ -73,7 +90,6 @@ Strategy::Strategy()
 
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
   m_bfTrading.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleMinuteBar ) );
-
 }
 
 Strategy::~Strategy() {

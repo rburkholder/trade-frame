@@ -53,6 +53,7 @@ public:
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   Strategy();
+  Strategy( boost::gregorian::date );
   ~Strategy();
 
   void SetPosition( pPosition_t );
@@ -245,6 +246,8 @@ private:
   unsigned int m_nHi;
            int m_nNet;
   unsigned int m_nLo;
+
+  void Init();
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
