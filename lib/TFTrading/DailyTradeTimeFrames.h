@@ -43,6 +43,7 @@ public:
   void TimeTick( const DD& dd );
 
   static boost::gregorian::date MarketOpenDate( boost::posix_time::ptime dt );
+  static boost::gregorian::date AdjustTimeFrame( boost::gregorian::date date_utc, boost::posix_time::time_duration time_utc );
   static boost::posix_time::ptime Normalize( boost::gregorian::date date, boost::posix_time::time_duration time, const std::string& zone ) {
     // timezone names found in https://github.com/boostorg/date_time/blob/master/data/date_time_zonespec.csv
     // convert to https://en.wikipedia.org/wiki/Tz_database, https://nodatime.org/TimeZones at some point
@@ -166,6 +167,35 @@ boost::gregorian::date DailyTradeTimeFrame<T>::MarketOpenDate( boost::posix_time
   return date;
 }
 
+template<class T>
+boost::gregorian::date DailyTradeTimeFrame<T>::AdjustTimeFrame( boost::gregorian::date date_utc, boost::posix_time::time_duration time_utc ) {
+  //calculate a date suitable for calling InitFor24HourMarkets
+
+  ou::TimeSource& ts( ou::TimeSource::GlobalInstance() );
+  auto tz = ts.LoadTimeZone( "America/New_York" );
+
+  // determine UTC version of market session
+  static const auto dtStart( boost::posix_time::time_duration( 17, 30, 0 ) );
+  const boost::local_time::local_date_time ldt_start( date_utc, dtStart, tz, boost::local_time::local_date_time::EXCEPTION_ON_ERROR );
+  const boost::posix_time::time_duration residual( ldt_start.utc_time().time_of_day() );
+
+  // may need move date back a day for proper start of market
+  const auto temp_utc = ( residual <= time_utc ) ? date_utc : date_utc - boost::gregorian::date_duration( 1 );
+
+  // convert the date to market time for use in InitFor24HourMarkets
+  const boost::local_time::local_date_time ldt_new( boost::posix_time::ptime( temp_utc, residual ), tz );
+  const boost::gregorian::date date_new = ldt_new.local_time().date();
+
+  //BOOST_LOG_TRIVIAL(info)
+  //  << "original=" << date_utc << ' ' << time_utc
+  //  << ",start=" << ldt_start.utc_time() << "(utc)," << ldt_start.local_time() << "(local)"
+  //  << ",residual=" << residual << "(utc)"
+  //  << ",final=" << date_new
+  //  ;
+
+  return date_new;
+}
+
 // TODO: based upon interior notes below, may need to instance this per future
 //   override this initializer, or create a specific one
 // (contractDetails).tradingHours ";20211031:1700-20211101:1500"
@@ -173,7 +203,7 @@ boost::gregorian::date DailyTradeTimeFrame<T>::MarketOpenDate( boost::posix_time
 // (contractDetails).timeZoneId   "US/Central"
 
 template<class T> // used for forex as well
-void DailyTradeTimeFrame<T>::InitFor24HourMarkets( boost::gregorian::date date ) { // needs normalized date
+void DailyTradeTimeFrame<T>::InitFor24HourMarkets( boost::gregorian::date date ) { // date from AdjustTimeFrame
   m_dtMarketOpen          = Normalize( date                                     , boost::posix_time::time_duration( 17, 45,  0 ), "America/New_York" );
   m_dtRHOpen              = Normalize( date                                     , boost::posix_time::time_duration( 18,  0,  0 ), "America/New_York" );
   m_dtStartTrading        = Normalize( date                                     , boost::posix_time::time_duration( 18,  0, 30 ), "America/New_York" );

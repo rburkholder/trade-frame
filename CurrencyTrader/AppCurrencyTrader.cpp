@@ -206,29 +206,6 @@ void AppCurrencyTrader::PopulateTreeRoot() {
   m_treeSymbols->ExpandAll();
 }
 
-boost::gregorian::date AppCurrencyTrader::AdjustTimeFrame( boost::gregorian::date date_utc, boost::posix_time::time_duration time_utc ) {
-
-  ou::TimeSource& ts( ou::TimeSource::GlobalInstance() );
-  auto tz = ts.LoadTimeZone( "America/New_York" );
-
-  static const auto dtStart( boost::posix_time::time_duration( 17, 30, 0 ) );
-  const boost::local_time::local_date_time ldt_start( date_utc, dtStart, tz, boost::local_time::local_date_time::EXCEPTION_ON_ERROR );
-  const boost::posix_time::time_duration residual( ldt_start.utc_time().time_of_day() );
-
-  const auto temp_utc = ( residual <= time_utc ) ? date_utc : date_utc - boost::gregorian::date_duration( 1 );
-  const boost::local_time::local_date_time ldt_new( boost::posix_time::ptime( temp_utc, residual ), tz );
-  const boost::gregorian::date date_new = ldt_new.local_time().date();
-
-  BOOST_LOG_TRIVIAL(info)
-    << "original=" << date_utc << ' ' << time_utc
-    << ",start=" << ldt_start.utc_time() << "(utc)," << ldt_start.local_time() << "(local)"
-    << ",residual=" << residual << "(utc)"
-    << ",final=" << date_new
-    ;
-
-  return date_new;
-}
-
 void AppCurrencyTrader::ConstructStrategyList() {
 
   assert( 0 == m_mapStrategy.size() );
@@ -244,7 +221,9 @@ void AppCurrencyTrader::ConstructStrategyList() {
 
       iterStrategy = result.first;
       Strategy& strategy( *iterStrategy->second );
-      strategy.InitFor24HourMarkets( m_startDateMkt );
+
+      boost::gregorian::date adjusted_date = Strategy::AdjustTimeFrame( m_startDateUTC, m_startTimeUTC );
+      strategy.InitFor24HourMarkets( adjusted_date );
 
       ou::TimeSource& ts( ou::TimeSource::GlobalInstance() );
       auto tz = ts.LoadTimeZone( ps.m_sTimeZone );
@@ -424,8 +403,6 @@ bool AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
       ;
     m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
 
-    m_startDateMkt = AdjustTimeFrame( m_startDateUTC, m_startTimeUTC );
-
   }
 
   FrameMain::vpItems_t vItems;
@@ -492,8 +469,6 @@ bool AppCurrencyTrader::BuildProviders_Sim() {
 
   // construct the simulation date/time
   if ( bOk ) {
-
-    m_startDateMkt = AdjustTimeFrame( m_startDateUTC, m_startTimeUTC );
 
     const boost::posix_time::ptime dtSimulation( ptime( m_startDateUTC, m_startTimeUTC ) );
     boost::local_time::local_date_time lt( dtSimulation, ou::TimeSource::TimeZoneNewYork() );

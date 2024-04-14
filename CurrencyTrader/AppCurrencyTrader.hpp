@@ -129,13 +129,10 @@ private:
   using mapStrategy_t = std::map<std::string,pStrategy_t>;
   mapStrategy_t m_mapStrategy;
 
-  boost::gregorian::date           m_startDateMkt; // used for Strategy timeframe
   boost::gregorian::date           m_startDateUTC;
   boost::posix_time::time_duration m_startTimeUTC;
 
   ou::Delegate<int> m_OnSimulationComplete;
-
-  boost::gregorian::date AdjustTimeFrame( boost::gregorian::date, boost::posix_time::time_duration );
 
   bool BuildProviders_Live( wxBoxSizer* );
   bool BuildProviders_Sim();
