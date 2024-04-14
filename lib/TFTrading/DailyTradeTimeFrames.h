@@ -55,7 +55,7 @@ public:
     return ou::TimeSource::ConvertRegionalToUtc( date, time, zone );
   }
 
-  void InitForUSEquityExchanges( boost::gregorian::date ); // can be used by simulation
+  void InitForUSEquityExchanges( boost::gregorian::date );
   void InitForUS24HourFutures( boost::gregorian::date );
 
   void SetMarketOpen( boost::posix_time::ptime dtMarketOpen ) { m_dtMarketOpen = dtMarketOpen; }
