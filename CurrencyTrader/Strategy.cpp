@@ -159,9 +159,22 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   switch ( m_stateTrade ) {
-    case ETradeState::Init:
+    case ETradeState::Init: // Strategy starts in this state
+      m_stateTrade = ETradeState::Search;
       break;
     case ETradeState::Search:
+      switch ( m_state.swing ) {
+        case State::Swing::up:
+          m_state.sum += m_state.last - m_quote.Midpoint();
+          m_state.swing = State::Swing::none;
+          break;
+        case State::Swing::none:
+          break;
+        case State::Swing::down:
+          m_state.sum += m_quote.Midpoint() - m_state.last;
+          m_state.swing = State::Swing::none;
+          break;
+      }
       break;
     case ETradeState::LongSubmitted:
       break;
@@ -268,9 +281,9 @@ void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_
 void Strategy::HandleAtRHClose( boost::gregorian::date date, boost::posix_time::time_duration time ) { // one shot
   BOOST_LOG_TRIVIAL(info)
     << m_pWatch->GetInstrumentName()
-    << " swing delta "
-    << m_nNet
-    << ',' << date << 'T' << time
+    << " swing delta " << m_nNet
+    << ", sum " << m_state.sum
+    << ", " << date << 'T' << time
     ;
 }
 
@@ -312,6 +325,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
         e.dt, e.hi ) );
       m_nHi++;
       m_nNet++;
+      m_state.swing = State::Swing::down;
       //std::cout
       //         << m_pWatch->GetInstrumentName()
       //  << ',' << "hi"
@@ -332,6 +346,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
         e.dt, e.lo ) );
       m_nLo++;
       m_nNet--;
+      m_state.swing = State::Swing::up;
       //std::cout
       //         << m_pWatch->GetInstrumentName()
       //  << ',' << "lo"

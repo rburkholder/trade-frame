@@ -247,6 +247,20 @@ private:
            int m_nNet;
   unsigned int m_nLo;
 
+  struct State {
+    enum class Swing { none, up, down } swing;
+    enum class Cross { none, above, below } cross; // ema
+    double last;
+    double sum;
+    State()
+    : swing( Swing::none )
+    , cross( Cross::none ) 
+    , last {}
+    , sum {}
+    {}
+  };
+  State m_state;
+
   void Init();
 
   void HandleQuote( const ou::tf::Quote& );
