@@ -158,6 +158,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
+  const double mid( m_quote.Midpoint() );
   switch ( m_stateTrade ) {
     case ETradeState::Init: // Strategy starts in this state
       m_stateTrade = ETradeState::Search;
@@ -165,13 +166,15 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     case ETradeState::Search:
       switch ( m_state.swing ) {
         case State::Swing::up:
-          m_state.sum += m_state.last - m_quote.Midpoint();
+          m_state.sum += m_state.last - mid;
+          m_state.last = mid;
           m_state.swing = State::Swing::none;
           break;
         case State::Swing::none:
           break;
         case State::Swing::down:
-          m_state.sum += m_quote.Midpoint() - m_state.last;
+          m_state.sum += mid - m_state.last;
+          m_state.last = mid;
           m_state.swing = State::Swing::none;
           break;
       }
