@@ -52,12 +52,15 @@ public:
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
+  using fResetSoftware_t = std::function<bool()>;
+
   Strategy();
   Strategy( boost::gregorian::date );
   ~Strategy();
 
   void SetPosition( pPosition_t );
   void SaveWatch( const std::string& sPrefix );
+  void SetResetSoftware( fResetSoftware_t&& f ) { m_fResetSoftware = std::move( f ); }
 
   ou::ChartDataView& GetChartDataView() { return m_cdv; }
 
@@ -261,15 +264,18 @@ private:
   };
   State m_state;
 
+  fResetSoftware_t m_fResetSoftware;
+
   void Init();
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
 
-  void HandleRHTrading( const ou::tf::Bar& bar );
+  void HandleRHTrading( const ou::tf::Bar& );
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration );
+  bool HandleSoftwareReset( const ou::tf::Bar& );
 
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );

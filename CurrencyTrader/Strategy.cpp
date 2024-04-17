@@ -35,6 +35,7 @@ Strategy::Strategy()
 , m_ceSwingHi( ou::ChartEntryShape::EShape::Long,  ou::Colour::Purple )
 , m_ceSwingLo( ou::ChartEntryShape::EShape::Short, ou::Colour::HotPink )
 , m_nLo {}, m_nNet {}, m_nHi {}
+, m_fResetSoftware( nullptr )
 {
   Init();
 }
@@ -47,6 +48,7 @@ Strategy::Strategy(  boost::gregorian::date date )
 , m_ceSwingHi( ou::ChartEntryShape::EShape::Long,  ou::Colour::Purple )
 , m_ceSwingLo( ou::ChartEntryShape::EShape::Short, ou::Colour::HotPink )
 , m_nLo {}, m_nNet {}, m_nHi {}
+, m_fResetSoftware( nullptr )
 {
   Init();
 }
@@ -356,6 +358,15 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
       //  << ',' << c.lo << ',' << e.lo
       //  << std::endl;
     }
+  }
+}
+
+bool Strategy::HandleSoftwareReset( const ou::tf::Bar& ) {
+  if ( nullptr != m_fResetSoftware ) {
+    return m_fResetSoftware();
+  }
+  else {
+    return false;
   }
 }
 

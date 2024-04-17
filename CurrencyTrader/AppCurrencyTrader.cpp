@@ -322,6 +322,21 @@ void AppCurrencyTrader::ConstructStrategyList() {
         << lt_open_utc << " - " << lt_close_utc
         ;
 
+      if ( 0 == m_choices.m_sHdf5SimSet.size() ) {
+        strategy.SetResetSoftware( [this]()->bool {
+          if ( m_tws ) {
+            if ( m_tws->Connected() ) {
+              BOOST_LOG_TRIVIAL(info) << "tws connected";
+            }
+            else {
+              BOOST_LOG_TRIVIAL(info) << "reconnecting tws";
+              m_tws->Connect();
+            }
+          }
+          return true;
+        } );
+      }
+
       TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
         idInstrument,
         [this,idInstrument]( TreeItem* pTreeItem ){
@@ -375,14 +390,21 @@ bool AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
   m_pPanelProviderControl->Add(
     m_tws,
     false, false, true, false,
-    [](){}, // fConnecting
+    [](){
+      BOOST_LOG_TRIVIAL(info) << "panel: tws connecting";
+    }, // fConnecting
     [this]( bool bD1, bool bD2, bool bX1, bool bX2 ){ // fConnected
+      BOOST_LOG_TRIVIAL(info) << "panel: tws connected";
       if ( bD1 ) m_data = m_tws;
       if ( bX1 ) m_exec = m_tws;
       ConfirmProviders();
     },
-    [](){}, // fDisconnecting
-    [](){}  // fDisconnected
+    [](){
+      BOOST_LOG_TRIVIAL(info) << "panel: tws disconnecting";
+    }, // fDisconnecting
+    [](){
+      BOOST_LOG_TRIVIAL(info) << "panel: tws disconnected";
+    }  // fDisconnected
   );
 
   // TODO: add to a clean up routine
