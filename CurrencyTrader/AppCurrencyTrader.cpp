@@ -324,6 +324,7 @@ void AppCurrencyTrader::ConstructStrategyList() {
 
       if ( 0 == m_choices.m_sHdf5SimSet.size() ) {
         strategy.SetResetSoftware( [this]()->bool {
+          SetStreamStartDateTime();
           if ( m_tws ) {
             if ( m_tws->Connected() ) {
               BOOST_LOG_TRIVIAL(info) << "tws connected";
@@ -355,6 +356,20 @@ void AppCurrencyTrader::ConstructStrategyList() {
     }
   }
   m_treeSymbols->ExpandAll();
+}
+
+void AppCurrencyTrader::SetStreamStartDateTime() {
+  auto dt = ou::TimeSource::GlobalInstance().External();
+  m_startDateUTC = dt.date();
+  m_startTimeUTC = dt.time_of_day();
+
+  std::stringstream ss;
+  ss
+    << ou::tf::Instrument::BuildDate( m_startDateUTC )
+    << " "
+    << m_startTimeUTC
+    ;
+  m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
 }
 
 bool AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
@@ -412,20 +427,7 @@ bool AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
   Bind( wxEVT_TIMER, &AppCurrencyTrader::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
   m_timerOneSecond.Start( 500 );
 
-  {
-    auto dt = ou::TimeSource::GlobalInstance().External();
-    m_startDateUTC = dt.date();
-    m_startTimeUTC = dt.time_of_day();
-
-    std::stringstream ss;
-    ss
-      << ou::tf::Instrument::BuildDate( m_startDateUTC )
-      << " "
-      << m_startTimeUTC
-      ;
-    m_sTSDataStreamStarted = ss.str();  // will need to make this generic if need some for multiple providers.
-
-  }
+  SetStreamStartDateTime();
 
   FrameMain::vpItems_t vItems;
   using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects

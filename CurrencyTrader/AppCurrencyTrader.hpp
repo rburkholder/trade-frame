@@ -137,6 +137,8 @@ private:
   bool BuildProviders_Live( wxBoxSizer* );
   bool BuildProviders_Sim();
 
+  void SetStreamStartDateTime();
+
   void PopulatePortfolioChart();
   void PopulateTreeRoot();
   void ConstructStrategyList();
