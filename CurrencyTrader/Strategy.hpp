@@ -72,11 +72,13 @@ private:
     Init,  // initiaize state in current market
     Search,  // looking for long or short enter
     LongSubmitted, // order has been submitted, waiting for confirmation
-    LongExit,  // position exists, looking for exit
+    LongExitSignal,  // position exists, looking for exit
     ShortSubmitted,  // order has been submitted, waiting for confirmtaion
-    ShortExit,  // position exists, looking for exit
+    ShortExitSignal,  // position exists, looking for exit
     LongExitSubmitted, // wait for exit to complete
     ShortExitSubmitted, // wait for exit to complete
+    Cancelling,
+    Cancelled,
     NoTrade, // from the config file, no trading, might be a future
     EndOfDayCancel,
     EndOfDayNeutral,
@@ -266,7 +268,14 @@ private:
 
   fResetSoftware_t m_fResetSoftware;
 
-  void Init();
+  pOrder_t m_pOrderPending;
+
+  std::string m_sProfitDescription;
+  double m_dblProfitMax;
+  double m_dblUnRealized;
+  double m_dblProfitMin;
+
+void Init();
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
@@ -277,8 +286,21 @@ private:
   void HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration );
   bool HandleSoftwareReset( const ou::tf::Bar& );
 
+  void EnterLong( const ou::tf::Quote& );
+  void EnterShort( const ou::tf::Quote& );
+
+  void ExitLong( const ou::tf::Quote& );
+  void ExitShort( const ou::tf::Quote& );
+
+  void ExitPosition( const ou::tf::Quote& );
+
+  void ShowOrder( pOrder_t );
+
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );
+
+  void HandleExitOrderCancelled( const ou::tf::Order& );
+  void HandleExitOrderFilled( const ou::tf::Order& );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& );
   void HandleMinuteBar( const ou::tf::Bar& );
