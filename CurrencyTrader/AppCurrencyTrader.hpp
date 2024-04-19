@@ -148,7 +148,7 @@ private:
   pInstrument_t ConstructInstrumentBase( const std::string& sName, const std::string& sExchange );
   void EnhanceInstrument( pInstrument_t );
 
-  pPosition_t ConstructPosition( pInstrument_t );
+  pPosition_t ConstructPosition( const std::string& sName, pInstrument_t );
   void PopulateStrategy( pPosition_t );
 
   void HandleSimConnected( int );
@@ -168,7 +168,6 @@ private:
   virtual bool OnInit();
   void OnClose( wxCloseEvent& event );
   virtual int OnExit();
-
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

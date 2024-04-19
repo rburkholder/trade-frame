@@ -604,7 +604,7 @@ void AppCurrencyTrader::ConfirmProviders() {
           pInstrument_t pInstrument;
           pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderUserBase, ps.m_sName );
           if ( pInstrument ) { // skip the build
-            pPosition_t pPosition = ConstructPosition( pInstrument );
+            pPosition_t pPosition = ConstructPosition( pInstrument->GetInstrumentName(), pInstrument );
             PopulateStrategy( pPosition );
           }
           else { // build the instrument
@@ -641,50 +641,53 @@ void AppCurrencyTrader::PopulateStrategy( pPosition_t pPosition ) {
   iterStrategy->second->SetPosition( pPosition ); // TODO: will need to move to after ConfirmProviders
 }
 
-AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( pInstrument_t pInstrument ) {
+AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( const std::string& sName, pInstrument_t pInstrument ) {
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
-  using pPosition_t = ou::tf::Position::pPosition_t;
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
 
+  std::string sPositionName;
+  switch ( m_exec->ID() ) {
+    case ou::tf::keytypes::EProviderIB:
+      sPositionName = sName + "_ib";
+      break;
+    case ou::tf::keytypes::EProviderIQF:
+      sPositionName = sName + "_iqf";
+      break;
+    case ou::tf::keytypes::EProviderSimulator:
+     sPositionName = sName + "_sim";
+     break;
+    default:
+      assert( false );
+  }
+
   pPosition_t pPosition;
-  if ( pm.PositionExists( c_sPortfolioCurrencyName, idInstrument ) ) {
-    pPosition = pm.GetPosition( c_sPortfolioCurrencyName, idInstrument );
-    BOOST_LOG_TRIVIAL(info) << "position loaded " << pPosition->GetInstrument()->GetInstrumentName();
+
+  if ( pm.PositionExists( c_sPortfolioCurrencyName, sPositionName ) ) {
+    pPosition = pm.GetPosition( c_sPortfolioCurrencyName, sPositionName );
+    BOOST_LOG_TRIVIAL(info) 
+      << "position loaded " 
+      << pPosition->GetRow().sName << ','
+      << pPosition->GetInstrument()->GetInstrumentName()
+      ;
   }
   else {
     pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_data );
-    switch ( m_exec->ID() ) {
-      case ou::tf::keytypes::EProviderIB:
-        pPosition = pm.ConstructPosition(
-          c_sPortfolioCurrencyName, idInstrument, c_sPortfolioName + "_ib",
-          m_exec->GetName(), m_data->GetName(), m_tws,
-          pWatch
-        );
-        break;
-      case ou::tf::keytypes::EProviderIQF:
-        pPosition = pm.ConstructPosition(
-          c_sPortfolioCurrencyName, idInstrument, c_sPortfolioName + "_iqf",
-          m_exec->GetName(), m_data->GetName(), m_iqf,
-          pWatch
-        );
-        break;
-      case ou::tf::keytypes::EProviderSimulator:
-        pPosition = pm.ConstructPosition(
-          c_sPortfolioCurrencyName, idInstrument, c_sPortfolioName + "_sim",
-          m_exec->GetName(), m_data->GetName(), m_sim,
-          pWatch
-        );
-        m_sim->SetCommission( idInstrument, 0.0 );
-        break;
-      default:
-        assert( false );
-
+    pPosition = pm.ConstructPosition(
+      c_sPortfolioCurrencyName, sPositionName, c_sPortfolioName,
+      m_exec->GetName(), m_data->GetName(), m_exec,
+      pWatch
+    );
+    if ( ou::tf::keytypes::EProviderSimulator == m_exec->ID() ) {
+      m_sim->SetCommission( idInstrument, 0.0 );
     }
+
     BOOST_LOG_TRIVIAL(info)
       << "position constructed: "
+      << pPosition->GetRow().idPortfolio << ','
+      << pPosition->GetRow().sName << ','
       << pPosition->GetInstrument()->GetInstrumentName() << ','
       << pPosition->GetDataProvider()->GetName() << ','
       << pPosition->GetExecutionProvider()->GetName()
@@ -762,7 +765,7 @@ void AppCurrencyTrader::EnhanceInstrument( pInstrument_t pInstrument ) {
 
         ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
         im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-        pPosition_t pPosition = ConstructPosition( pInstrument );
+        pPosition_t pPosition = ConstructPosition( pInstrument->GetInstrumentName(), pInstrument );
         PopulateStrategy( pPosition );
       },
       [this,pInstrument]( bool bDone ){
@@ -775,7 +778,7 @@ void AppCurrencyTrader::EnhanceInstrument( pInstrument_t pInstrument ) {
   else {
     ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
     im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-    pPosition_t pPosition = ConstructPosition( pInstrument );
+    pPosition_t pPosition = ConstructPosition( pInstrument->GetInstrumentName(), pInstrument );
     PopulateStrategy( pPosition );
   }
 }
