@@ -331,6 +331,7 @@ void AppCurrencyTrader::ConstructStrategyList() {
             }
             else {
               BOOST_LOG_TRIVIAL(info) << "reconnecting tws";
+              m_tws->Disconnect();
               m_tws->Connect();
             }
           }
@@ -402,6 +403,7 @@ bool AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
     [](){}  // fDisconnected
   );
 
+  // TODO: need to test the updates for disconnecting & disconnected when TWS recycles each night
   m_pPanelProviderControl->Add(
     m_tws,
     false, false, true, false,
