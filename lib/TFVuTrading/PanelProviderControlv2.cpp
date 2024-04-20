@@ -69,7 +69,7 @@ struct ProviderWidgets {
     m_pProvider->OnConnecting.Remove( MakeDelegate( this, &ProviderWidgets::Connecting ) );
     m_pProvider->OnConnected.Remove( MakeDelegate( this, &ProviderWidgets::Connected ) );
     m_pProvider->OnDisconnecting.Remove( MakeDelegate( this, &ProviderWidgets::Disconnecting ) );
-    m_pProvider->OnDisconnected.Remove( MakeDelegate( this, &ProviderWidgets::Disonnected ) );
+    m_pProvider->OnDisconnected.Remove( MakeDelegate( this, &ProviderWidgets::Disconnected ) );
     m_pProvider.reset();
   }
 
@@ -90,7 +90,7 @@ struct ProviderWidgets {
     m_pProvider->OnConnecting.Add( MakeDelegate( this, &ProviderWidgets::Connecting ) );
     m_pProvider->OnConnected.Add( MakeDelegate( this, &ProviderWidgets::Connected ) );
     m_pProvider->OnDisconnecting.Add( MakeDelegate( this, &ProviderWidgets::Disconnecting ) );
-    m_pProvider->OnDisconnected.Add( MakeDelegate( this, &ProviderWidgets::Disonnected ) );
+    m_pProvider->OnDisconnected.Add( MakeDelegate( this, &ProviderWidgets::Disconnected ) );
     ou::tf::ProviderManager::GlobalInstance().Register( m_pProvider );
     Enable();
   }
@@ -132,6 +132,9 @@ struct ProviderWidgets {
     switch ( m_state ) {
     case ProviderState::Off:
       m_btnState->SetLabelText( "Off->On" );
+      if ( m_btnState->GetValue() ) {
+        m_btnState->SetValue( false );
+      }
       m_btnState->Enable();
       //if ( ( ProviderOff == m_stateIQFeed ) && ( ProviderOff == m_stateIB ) && ( ProviderOff == m_stateSimulator ) ) {
       //  EnableAllRadio();
@@ -146,6 +149,9 @@ struct ProviderWidgets {
       break;
     case ProviderState::On:
       m_btnState->SetLabelText( "On->Off" );
+      if ( !m_btnState->GetValue() ) {
+        m_btnState->SetValue( true );
+      }
       m_btnState->Enable();
       break;
     case ProviderState::GoingOff:
@@ -170,7 +176,7 @@ struct ProviderWidgets {
     if ( m_fDisconnecting ) m_fDisconnecting();
   }
 
-  void Disonnected( int ) { // handle event
+  void Disconnected( int ) { // handle event
     m_owner->CallAfter( [this](){ SetState( ProviderState::Off ); });
     if ( m_fDisconnected ) m_fDisconnected();
   }
