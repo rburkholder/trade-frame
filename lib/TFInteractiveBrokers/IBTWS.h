@@ -212,6 +212,8 @@ private:
   void ConnectOptions( const std::string& );
   void processMessages();
 
+  void Disconnect( bool bFinal, bool bIBInitiated, bool bUserInitiated );
+
   long m_time;
   int m_idClient; // for session uniqueness when multiple applications are connected to TWS
 
@@ -280,8 +282,6 @@ private:
   mapMarketRule_t m_mapMarketRule;
 
   bool MarketRuleExists( const int );
-
-  void DisconnectCommon( bool bSignalEnd );
 
 };
 

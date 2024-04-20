@@ -12,13 +12,14 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include <limits>
 #include <memory>
 #include <string>
 #include <chrono>
 #include <iostream>
 //#include <sstream>
 #include <stdexcept>
+
+#include <boost/log/trivial.hpp>
 
 #include <boost/regex.hpp>
 #include <boost/date_time.hpp>
@@ -122,7 +123,7 @@ TWS::~TWS() {
   m_vTickerToSymbol.clear();
   m_mapContractToSymbol.clear();
 
-  Disconnect();
+  Disconnect( true, false, true );
 
 }
 
@@ -146,60 +147,65 @@ void TWS::ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost:
 
 void TWS::Connect() {
 
-  if ( m_pTWS ) {
-    std::cout << "IB EClientSocket exists" << std::endl;
-  }
-  else {
-
-    OnConnecting( 0 );
-
-    m_pTWS = std::make_unique<EClientSocket>( this, &m_osSignal );
-
-    //m_pTWS->setConnectOptions( "+PACEAPI" ); //  https://www.interactivebrokers.com/en/index.php?f=24356 (needs version >=974)
-    bool bOk = m_pTWS->eConnect( m_sIPAddress.c_str(), m_nPort, m_idClient );
-    if ( bOk ) {
-
-      m_bConnected = true;
-
-      {
-        std::unique_lock lock( m_mutexThreadSync );
-
-        m_bThreadSync = false;
-        m_thrdIBMessages = std::move( std::thread( std::bind( &TWS::processMessages, this ) ) );
-        m_cvThreadSync.wait(
-          lock,
-          [this](){
-            if ( m_bThreadSync ) {
-              //std::cout << "thread notified" << std::endl;
-              m_pTWS->reqCurrentTime();
-              usleep( 50000 );
-              m_pTWS->reqNewsBulletins( true );
-//              m_pTWS->reqOpenOrders();
-              //ExecutionFilter filter;
-              //pTWS->reqExecutions( filter );
-              usleep( 50000 );
-              m_pTWS->reqAccountUpdates( true, "" );
-
-              OnConnected( 0 );
-            }
-            return m_bThreadSync;
-          } );
-      }
-
+    if ( m_pTWS ) {
+      BOOST_LOG_TRIVIAL(info)  << "IB EClientSocket exists";
     }
     else {
-      // need to integrate common stuff from Disconnect, most everything but the thread bit
-      std::cout << "TWS::Connect fail" << std::endl;
-      Disconnect();
+      m_pTWS = std::make_unique<EClientSocket>( this, &m_osSignal );
     }
-  }
+
+    if ( m_pTWS->isConnected() ) {
+      assert( m_thrdIBMessages.joinable() );
+    }
+    else {
+      OnConnecting( 0 );
+
+      if ( m_thrdIBMessages.joinable() ) { // clean out previous stuff
+        m_thrdIBMessages.join();
+      }
+
+      //m_pTWS->setConnectOptions( "+PACEAPI" ); //  https://www.interactivebrokers.com/en/index.php?f=24356 (needs version >=974)
+      bool bOk = m_pTWS->eConnect( m_sIPAddress.c_str(), m_nPort, m_idClient );
+      if ( bOk ) {
+
+        m_bConnected = true;
+
+        {
+          std::unique_lock lock( m_mutexThreadSync );
+
+          m_bThreadSync = false;
+          m_thrdIBMessages = std::move( std::thread( std::bind( &TWS::processMessages, this ) ) );
+          m_cvThreadSync.wait(
+            lock,
+            [this](){
+              if ( m_bThreadSync ) {
+                //std::cout << "thread notified" << std::endl;
+                m_pTWS->reqCurrentTime();
+                usleep( 50000 );
+                m_pTWS->reqNewsBulletins( true );
+          //     m_pTWS->reqOpenOrders();
+                //ExecutionFilter filter;
+                //pTWS->reqExecutions( filter );
+                usleep( 50000 );
+                m_pTWS->reqAccountUpdates( true, "" );
+
+                OnConnected( 0 );
+              }
+              return m_bThreadSync;
+            } );
+        }
+      }
+      else {
+        // need to integrate common stuff from Disconnect, most everything but the thread bit
+        std::cout << "TWS::Connect fail" << std::endl;
+        Disconnect( false, false, true );
+      }
+    }
 }
 
 // this is executed in non-main thread, and the events below will be called from the processing here
 // so... be aware of cross thread issues
 void TWS::processMessages() {
-
-  bool bOK = true;
 
   std::unique_ptr<EReader> pReader;
   pReader = std::make_unique<EReader>( m_pTWS.get(), &m_osSignal );
@@ -212,71 +218,87 @@ void TWS::processMessages() {
   //std::cout << "thread notifying" << std::endl;
   m_cvThreadSync.notify_one();
 
-  try {
-    while ( bOK && m_bConnected ) {
-    // maybe only activate while messages are queued up
-    //   but will lose something when receiving market data
-    //while ( m_bConnected ) {
-      // TODO: convert the custom bit into the new code - should be ok, new code uses EMutexGuard in EReader.cpp
-      //bOK = pTWS->checkMessages();  // code in EClientSocketBaseImpl.h has code change on linux for select()
+  try { // should this be within the while?
+    while ( m_bConnected ) {
 
       errno = 0;
       m_osSignal.waitForSignal();
       pReader->processMsgs();
 
       switch ( errno ) {
-        case 0:  // ignore
+        case 0:  // ignore, heartbeat?
           break;
-        case 2:  // ignore
+        case 2:  // ignore, per-message signal
+          BOOST_LOG_TRIVIAL(debug) << "IB processMessages 2";
           errno = 0;
           break;
         default:
-          std::cout
+          BOOST_LOG_TRIVIAL(error)
             << "IB status id=" << errno << " [" << strerror(errno) << "]"
             << ",connected=" << m_pTWS->isConnected()
-            << std::endl;
+            ;
           errno = 0;
       }
     }
 
   }
   catch(...) {
-    std::cout << "TWS socket failure, need to disconnect and restart ..." << std::endl;;
+    BOOST_LOG_TRIVIAL(error) << "IB socket failure, need to disconnect and restart ...";
     // probably need to run Disconnect or DisconnectCommon
-    bOK = false;
+    m_bConnected = false;  // placeholder for debug
   }
 
-  pReader.reset();
+  //BOOST_LOG_TRIVIAL(debug) << "IB pReader.reset()";
+  pReader.reset(); // NOTE: this deadlocks with connectionClosed()
 
-  m_bConnected = false;  // placeholder for debug
-
-  // need to deal with pre=mature exit so that flags get reset
-  // maybe a state machine would keep track
+  //BOOST_LOG_TRIVIAL(debug) << "IB processMessages exit";
 
 }
 
 void TWS::Disconnect() {
-  // check to see if there are any watches happening, and get them disconnected
-  if ( m_pTWS ) {
-    DisconnectCommon( true );
-    m_pTWS.reset();
+  Disconnect( false, false, true );
+}
+
+void TWS::Disconnect( bool bFinal, bool bIBInitiated, bool bUserInitiated ) {
+
+  assert( bIBInitiated != bUserInitiated );
+
+  // TODO: check to see if there are any watches happening, and get them disconnected
+
+  if ( m_pTWS ) {  // called by IB, so deadlock when exiting
+
+    //BOOST_LOG_TRIVIAL(debug) << "IB Disconnecting";
+    OnDisconnecting( 0 );
+    m_bConnected = false;
+
+    if ( bUserInitiated ) {
+      //BOOST_LOG_TRIVIAL(debug) << "IB Disconnect SignalEnd edisconnect pre";
+      m_pTWS->eDisconnect( false );
+      //BOOST_LOG_TRIVIAL(debug) << "IB Disconnect SignalEnd edisconnect post";
+    }
+
+    if ( bUserInitiated ) { // can't join in connectionClosed thread, will deadlock pReader.reset()
+      //BOOST_LOG_TRIVIAL(debug) << "IB Disconnect SignalEnd threadjoin pre";
+      if ( m_thrdIBMessages.joinable() ) {
+        m_thrdIBMessages.join();  // wait for message processing to exit
+      }
+      //BOOST_LOG_TRIVIAL(debug) << "IB Disconnect delete pre";
+      m_pTWS.reset();  // NOTE: since it still exists, re-use it when possible (exists with bIBInitiated)
+      //BOOST_LOG_TRIVIAL(debug) << "IB Disconnect delete post";
+    }
+
+    //BOOST_LOG_TRIVIAL(debug) << "IB Disconnect signal pre";
+    OnDisconnected( 0 );
+
+  }
+  else {
+    BOOST_LOG_TRIVIAL(error) << "IB quiesced";
   }
 }
 
-void TWS::DisconnectCommon( bool bSignalEnd ){
-
-  OnDisconnecting( 0 );
-  m_bConnected = false;
-
-  if ( bSignalEnd ) {
-    m_pTWS->eDisconnect();
-    m_thrdIBMessages.join();  // wait for message processing to exit
-  }
-
-  OnDisconnected( 0 );
-  m_ss.str("");
-  m_ss << "IB Disconnected " << std::endl;
-
+void TWS::connectionClosed() {
+  BOOST_LOG_TRIVIAL(info) << "IB Initiated Connection Close";
+  Disconnect( false, true, false );
 }
 
 void TWS::RequestContractDetails(
@@ -1707,11 +1729,6 @@ void TWS::updateAccountValue(const std::string& key, const std::string& val,
   }
   AccountValue av( key, val, currency, accountName );
   if ( 0 != OnAccountValueHandler ) OnAccountValueHandler( av );
-}
-
-void TWS::connectionClosed() {
-  std::cout << "IB Connection Closed" << std::endl;
-  m_bConnected = false;
 }
 
 void TWS::marketRule( int marketRuleId, const vPriceIncrement_t& priceIncrements ) {
