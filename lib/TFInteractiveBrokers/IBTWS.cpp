@@ -229,7 +229,7 @@ void TWS::processMessages() {
         case 0:  // ignore, heartbeat?
           break;
         case 2:  // ignore, per-message signal
-          BOOST_LOG_TRIVIAL(debug) << "IB processMessages 2";
+          //BOOST_LOG_TRIVIAL(debug) << "IB processMessages 2";
           errno = 0;
           break;
         default:
