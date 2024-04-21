@@ -149,7 +149,7 @@ private:
   void EnhanceInstrument( pInstrument_t );
 
   pPosition_t ConstructPosition( const std::string& sName, pInstrument_t );
-  void PopulateStrategy( pPosition_t );
+  void PopulateStrategy( pInstrument_t );
 
   void HandleSimConnected( int );
   void HandleMenuActionSimStart();

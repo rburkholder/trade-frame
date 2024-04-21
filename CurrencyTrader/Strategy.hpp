@@ -49,16 +49,18 @@ class Strategy:
   friend ou::tf::DailyTradeTimeFrame<Strategy>;
 public:
 
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   using fResetSoftware_t = std::function<bool()>;
+  using fConstructPosition_t = std::function<pPosition_t(pInstrument_t,const std::string&)>;
 
   Strategy();
   Strategy( boost::gregorian::date );
   ~Strategy();
 
-  void SetPosition( pPosition_t );
+  void SetInstrument( pInstrument_t, fConstructPosition_t&& );
   void SaveWatch( const std::string& sPrefix );
   void SetResetSoftware( fResetSoftware_t&& f ) { m_fResetSoftware = std::move( f ); }
 
@@ -259,7 +261,7 @@ private:
     double sum;
     State()
     : swing( Swing::none )
-    , cross( Cross::none ) 
+    , cross( Cross::none )
     , last {}
     , sum {}
     {}

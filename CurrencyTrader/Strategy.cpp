@@ -112,8 +112,10 @@ Strategy::~Strategy() {
   m_cdv.Clear();
 }
 
-void Strategy::SetPosition( pPosition_t pPosition ) {
+void Strategy::SetInstrument( pInstrument_t pInstrument, fConstructPosition_t&& f ) {
+  assert( pInstrument );
 
+  pPosition_t pPosition = f( pInstrument, pInstrument->GetInstrumentName() +"_up" );
   assert( pPosition );
 
   m_pPosition = pPosition;

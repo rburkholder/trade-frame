@@ -606,8 +606,7 @@ void AppCurrencyTrader::ConfirmProviders() {
           pInstrument_t pInstrument;
           pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderUserBase, ps.m_sName );
           if ( pInstrument ) { // skip the build
-            pPosition_t pPosition = ConstructPosition( pInstrument->GetInstrumentName(), pInstrument );
-            PopulateStrategy( pPosition );
+            PopulateStrategy( pInstrument );
           }
           else { // build the instrument
             pInstrument = ConstructInstrumentBase( ps.m_sName, m_choices.m_sExchange );
@@ -636,11 +635,17 @@ void AppCurrencyTrader::LoadPortfolioCurrency() {
   }
 }
 
-void AppCurrencyTrader::PopulateStrategy( pPosition_t pPosition ) {
-  const ou::tf::Instrument::idInstrument_t& idInstrument( pPosition->GetInstrument()->GetInstrumentName( ) );
+void AppCurrencyTrader::PopulateStrategy( pInstrument_t pInstrument ) {
+
+  const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName( ) );
   mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( idInstrument );
   assert( m_mapStrategy.end() != iterStrategy );
-  iterStrategy->second->SetPosition( pPosition ); // TODO: will need to move to after ConfirmProviders
+
+  iterStrategy->second->SetInstrument(
+    pInstrument,
+    [this]( pInstrument_t pInstrument, const std::string& sPositionPrefix )->pPosition_t{
+      return ConstructPosition( sPositionPrefix, pInstrument );
+    } );
 }
 
 AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( const std::string& sName, pInstrument_t pInstrument ) {
@@ -781,8 +786,7 @@ void AppCurrencyTrader::EnhanceInstrument( pInstrument_t pInstrument ) {
 
         ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
         im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-        pPosition_t pPosition = ConstructPosition( pInstrument->GetInstrumentName(), pInstrument );
-        PopulateStrategy( pPosition );
+        PopulateStrategy( pInstrument );
       },
       [this,pInstrument]( bool bDone ){
         if ( 0 == pInstrument->GetContract() ) {
@@ -794,8 +798,7 @@ void AppCurrencyTrader::EnhanceInstrument( pInstrument_t pInstrument ) {
   else {
     ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
     im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-    pPosition_t pPosition = ConstructPosition( pInstrument->GetInstrumentName(), pInstrument );
-    PopulateStrategy( pPosition );
+    PopulateStrategy( pInstrument );
   }
 }
 
