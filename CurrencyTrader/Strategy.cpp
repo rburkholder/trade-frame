@@ -169,14 +169,12 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     case State::Swing::up:
       m_state.sum += m_state.last - mid;
       m_state.last = mid;
-      m_state.swing = State::Swing::none;
       break;
     case State::Swing::none:
       break;
     case State::Swing::down:
       m_state.sum += mid - m_state.last;
       m_state.last = mid;
-      m_state.swing = State::Swing::none;
       break;
   }
 
@@ -185,16 +183,36 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       m_stateTrade = ETradeState::Search;
       break;
     case ETradeState::Search:
+      switch ( m_state.swing ) {
+        case State::Swing::up:
+          EnterLong( m_quote );
+          break;
+        case State::Swing::none:
+          break;
+        case State::Swing::down:
+          break;
+      }
       break;
     case ETradeState::LongSubmitted:
+      // wait for exectuion
       break;
     case ETradeState::LongExitSignal:
+      switch ( m_state.swing ) {
+        case State::Swing::up:
+          break;
+        case State::Swing::none:
+          break;
+        case State::Swing::down:
+          ExitLong( m_quote );
+          break;
+      }
       break;
     case ETradeState::ShortSubmitted:
       break;
     case ETradeState::ShortExitSignal:
       break;
     case ETradeState::LongExitSubmitted:
+      // wait for execution
       break;
     case ETradeState::ShortExitSubmitted:
       break;
@@ -209,6 +227,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     default:
       assert( false );
   }
+
+  m_state.swing = State::Swing::none;
 }
 
 void Strategy::EnterLong( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
