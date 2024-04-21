@@ -650,17 +650,17 @@ AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( const std::
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
 
-  std::string sPositionName;
+  std::string sPositionName( sName );
 
   switch ( m_data->ID() ) {
     case ou::tf::keytypes::EProviderIB:
-      sPositionName = sName + "_ib";
+      sPositionName += "_ib";
       break;
     case ou::tf::keytypes::EProviderIQF:
-      sPositionName = sName + "_iqf";
+      sPositionName += "_iqf";
       break;
     case ou::tf::keytypes::EProviderSimulator:
-     sPositionName = sName + "_sim";
+     sPositionName += "_sim";
      break;
     default:
       assert( false );
