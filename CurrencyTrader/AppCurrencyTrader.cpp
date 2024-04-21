@@ -686,6 +686,7 @@ AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( const std::
     pPosition = pm.GetPosition( c_sPortfolioCurrencyName, sPositionName );
     BOOST_LOG_TRIVIAL(info)
       << "position loaded "
+      << pPosition->GetRow().idPortfolio << ','
       << pPosition->GetRow().sName << ','
       << pPosition->GetInstrument()->GetInstrumentName()
       ;
@@ -705,9 +706,7 @@ AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( const std::
       << "position constructed: "
       << pPosition->GetRow().idPortfolio << ','
       << pPosition->GetRow().sName << ','
-      << pPosition->GetInstrument()->GetInstrumentName() << ','
-      << pPosition->GetDataProvider()->GetName() << ','
-      << pPosition->GetExecutionProvider()->GetName()
+      << pPosition->GetInstrument()->GetInstrumentName()
       ;
   }
 
