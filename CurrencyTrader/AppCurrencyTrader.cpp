@@ -651,7 +651,8 @@ AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( const std::
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
 
   std::string sPositionName;
-  switch ( m_exec->ID() ) {
+
+  switch ( m_data->ID() ) {
     case ou::tf::keytypes::EProviderIB:
       sPositionName = sName + "_ib";
       break;
@@ -665,12 +666,26 @@ AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( const std::
       assert( false );
   }
 
+  switch ( m_exec->ID() ) {
+    case ou::tf::keytypes::EProviderIB:
+      sPositionName += "_ib";
+      break;
+    case ou::tf::keytypes::EProviderIQF:
+      sPositionName += "_iqf";
+      break;
+    case ou::tf::keytypes::EProviderSimulator:
+     sPositionName += "_sim";
+     break;
+    default:
+      assert( false );
+  }
+
   pPosition_t pPosition;
 
   if ( pm.PositionExists( c_sPortfolioCurrencyName, sPositionName ) ) {
     pPosition = pm.GetPosition( c_sPortfolioCurrencyName, sPositionName );
-    BOOST_LOG_TRIVIAL(info) 
-      << "position loaded " 
+    BOOST_LOG_TRIVIAL(info)
+      << "position loaded "
       << pPosition->GetRow().sName << ','
       << pPosition->GetInstrument()->GetInstrumentName()
       ;
