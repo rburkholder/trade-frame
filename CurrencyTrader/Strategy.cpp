@@ -63,6 +63,12 @@ void Strategy::Init() {
 
   m_ceVolume.SetName(   "Volume" );
 
+  m_ceRealized.SetName( "Realized" );
+  m_ceUnRealized.SetName( "Unrealized" );
+
+  m_ceRealized.SetColour( ou::Colour::Pink );
+  m_ceUnRealized.SetColour( ou::Colour::Purple );
+
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
@@ -77,6 +83,9 @@ void Strategy::Init() {
   m_cdv.Add( EChartSlot::Price, &m_ceBarsTrade );
 
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
+
+  m_cdv.Add( EChartSlot::PL, &m_ceRealized );
+  m_cdv.Add( EChartSlot::PL, &m_ceUnRealized );
 
   // supplied by 1 second mid-quote
   m_pEmaCurrency = std::make_unique<EMA>( 3 * 60, m_cdv, EChartSlot::Price );
@@ -163,7 +172,15 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
+  const auto dt( bar.DateTime() );
   const double mid( m_quote.Midpoint() );
+
+  double unrealized, realized, commission, total;
+  m_pPosition->QueryStats( unrealized, realized, commission, total );
+  m_ceUnRealized.Append( dt, unrealized );
+  m_ceRealized.Append( dt, realized );
+  m_ceProfitLoss.Append( dt, commission );
+  m_ceCommission.Append( dt, total );
 
   switch ( m_state.swing ) {
     case State::Swing::up:

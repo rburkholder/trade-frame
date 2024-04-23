@@ -69,7 +69,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, ATR, SD, MASlope, MA, Stoch };
+  enum EChartSlot { Price, Volume, ATR, SD, MASlope, MA, Stoch, PL, Commission };
   enum class ETradeState {
     Init,  // initiaize state in current market
     Search,  // looking for long or short enter
@@ -119,7 +119,10 @@ private:
   ou::ChartEntryShape m_ceSwingHi;
   ou::ChartEntryShape m_ceSwingLo;
 
+  ou::ChartEntryIndicator m_ceUnRealized;
+  ou::ChartEntryIndicator m_ceRealized;
   ou::ChartEntryIndicator m_ceProfitLoss;
+  ou::ChartEntryIndicator m_ceCommission;
 
   //pOrder_t m_pOrder;
   pWatch_t m_pWatch;
