@@ -777,6 +777,7 @@ void AppCurrencyTrader::EnhanceInstrument( pInstrument_t pInstrument ) {
           << ',' << details.contract.conId
           << ',' << details.mdSizeMultiplier
           << ',' << details.contract.exchange
+          << ',' << details.contract.secType
           << ',' << details.validExchanges
           << ',' << details.timeZoneId
           //<< ',' << details.liquidHours
