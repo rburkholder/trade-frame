@@ -35,9 +35,8 @@
 #include "client/EReaderOSSignal.h"
 #include "client/EReader.h"
 
-#include "client/Contract.h"
 #include "client/Order.h"
-#include "client/OrderState.h"
+#include "client/Contract.h"
 #include "client/Execution.h"
 
 #include "IBSymbol.h"  // has settings for IBString, which affects the following TWS includes.
