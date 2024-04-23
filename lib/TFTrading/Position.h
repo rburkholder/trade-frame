@@ -15,7 +15,6 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <sstream>
 
 #include <boost/tuple/tuple.hpp>
 
