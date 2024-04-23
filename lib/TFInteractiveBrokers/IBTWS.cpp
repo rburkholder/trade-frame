@@ -631,6 +631,15 @@ void TWS::PlaceOrder( pOrder_t pOrder ) {
         assert( false );  // need to fix this formatter, use the boost::gregorian date stuff
       }
       break;
+    case InstrumentType::Currency:
+      //twsorder.cashQty = 20000;
+      //contract.currency = "";
+      contract.secType = "CASH";
+      contract.symbol = Currency::Name[pOrder->GetInstrument()->GetCurrencyBase()];
+      contract.currency = Currency::Name[pOrder->GetInstrument()->GetCurrencyCounter()];
+      break;
+    default:
+      break;
   }
   twsorder.action = pOrder->GetOrderSideName();
   twsorder.totalQuantity = __bid64_from_uint32( pOrder->GetQuanOrdered() );
