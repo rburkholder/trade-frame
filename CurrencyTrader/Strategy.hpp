@@ -121,7 +121,7 @@ private:
 
   ou::ChartEntryIndicator m_ceProfitLoss;
 
-  pOrder_t m_pOrder;
+  //pOrder_t m_pOrder;
   pWatch_t m_pWatch;
   pPosition_t m_pPosition;
 
