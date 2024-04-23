@@ -35,10 +35,9 @@
 #include <TFTrading/KeyTypes.h>
 #include <TFTrading/OrderManager.h>
 
-#include "client/CommissionReport.h"
-
+#include "client/OrderState.h"
 #include "client/EClientSocket.h"
-//#include "client/EPosixClientSocketPlatform.h"
+#include "client/CommissionReport.h"
 
 #include "IBTWS.h"
 
