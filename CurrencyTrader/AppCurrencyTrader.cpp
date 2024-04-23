@@ -773,7 +773,7 @@ void AppCurrencyTrader::EnhanceInstrument( pInstrument_t pInstrument ) {
       pInstrument,
       [this]( const ContractDetails& details, ou::tf::Instrument::pInstrument_t& pInstrument ){
         BOOST_LOG_TRIVIAL(info) << "IB contract found: "
-                << details.contract.localSymbol
+                 << details.contract.localSymbol
           << ',' << details.contract.conId
           << ',' << details.mdSizeMultiplier
           << ',' << details.contract.exchange
