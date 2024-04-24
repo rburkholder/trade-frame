@@ -17,7 +17,7 @@
 // timezone reference:
 // https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
-#include <boost/date_time/posix_time/posix_time.hpp>
+//#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <OUCommon/TimeSource.h>
 
@@ -58,6 +58,7 @@ public:
 
   void InitForUSEquityExchanges( boost::gregorian::date );
   void InitFor24HourMarkets( boost::gregorian::date );
+  void InitForNextDay();
 
   void SetMarketOpen( boost::posix_time::ptime dtMarketOpen ) { m_dtMarketOpen = dtMarketOpen; }
   void SetRegularHoursOpen( boost::posix_time::ptime dtRHOpen ) { m_dtRHOpen = dtRHOpen; }
@@ -216,6 +217,20 @@ void DailyTradeTimeFrame<T>::InitFor24HourMarkets( boost::gregorian::date date )
   m_dtRHClose             = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17,  0,  0 ), "America/New_York" );
   m_dtMarketClose         = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17, 15,  0 ), "America/New_York" );
   m_dtSoftwareReset       = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17, 35,  0 ), "America/New_York" );
+}
+
+template<typename T>
+void DailyTradeTimeFrame<T>::InitForNextDay() {
+  m_dtMarketOpen          += boost::gregorian::date_duration( 1 );
+  m_dtRHOpen              += boost::gregorian::date_duration( 1 );
+  m_dtStartTrading        += boost::gregorian::date_duration( 1 );
+  m_dtNoon                += boost::gregorian::date_duration( 1 );
+  m_dtTimeForCancellation += boost::gregorian::date_duration( 1 );
+  m_dtGoNeutral           += boost::gregorian::date_duration( 1 );
+  m_dtWaitForRHClose      += boost::gregorian::date_duration( 1 );
+  m_dtRHClose             += boost::gregorian::date_duration( 1 );
+  m_dtMarketClose         += boost::gregorian::date_duration( 1 );
+  m_dtSoftwareReset       += boost::gregorian::date_duration( 1 );
 }
 
 template<class T>
