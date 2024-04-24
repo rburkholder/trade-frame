@@ -66,12 +66,18 @@ void Strategy::Init() {
   m_ceRealized.SetName( "Realized" );
   m_ceUnRealized.SetName( "Unrealized" );
 
-  m_ceRealized.SetColour( ou::Colour::Pink );
+  m_ceRealized.SetColour( ou::Colour::DarkCyan );
   m_ceUnRealized.SetColour( ou::Colour::Purple );
 
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
+
+  m_cdv.Add( EChartSlot::Price, &m_ceLongEntry );
+  m_cdv.Add( EChartSlot::Price, &m_ceLongExit );
+
+  m_cdv.Add( EChartSlot::Price, &m_ceShortEntry );
+  m_cdv.Add( EChartSlot::Price, &m_ceShortExit );
 
   m_cdv.Add( EChartSlot::Price, &m_ceSwingLo );
   m_cdv.Add( EChartSlot::Price, &m_ceSwingHi );
