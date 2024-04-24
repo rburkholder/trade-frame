@@ -323,8 +323,10 @@ void AppCurrencyTrader::ConstructStrategyList() {
         ;
 
       if ( 0 == m_choices.m_sHdf5SimSet.size() ) {
-        strategy.SetResetSoftware( [this]()->bool {
+        strategy.SetResetSoftware( [this,&strategy]()->bool {
+          HandleMenuActionSaveValues();
           SetStreamStartDateTime();
+          strategy.InitForNextDay();
           if ( m_tws ) {
             if ( m_tws->Connected() ) {
               BOOST_LOG_TRIVIAL(info) << "tws connected";
