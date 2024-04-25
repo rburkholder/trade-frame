@@ -101,6 +101,7 @@ BOOST_FUSION_ADAPT_STRUCT(
   (boost::posix_time::time_duration, m_tdStartTime)
   (boost::posix_time::time_duration, m_tdStopTime)
   (std::string, m_sTimeZone)
+  (double, m_dblTradingAmount)
 )
 
 namespace config {
@@ -117,6 +118,7 @@ struct ParserPairSettings: qi::grammar<Iterator, Choices::PairSettings()> {
              >> ruleValue >> qi::lit( ':' )
              >> ruleValue
              ;
+    ruleDouble %= qi::double_;
     ruleTimeZone %= +qi::char_("A-Za-z0-9_/") // https://github.com/boost-vault/date_time/blob/master/date_time_zonespec.csv
                  ;
     ruleStart %= ruleName >> qi::lit( ',' )
@@ -133,6 +135,7 @@ struct ParserPairSettings: qi::grammar<Iterator, Choices::PairSettings()> {
   qi::rule<Iterator, unsigned short()> ruleValue;
   qi::rule<Iterator, time_parts()> ruleTime;
   qi::rule<Iterator, std::string()> ruleTimeZone;
+  qi::rule<Iterator, double()> ruleDouble;
   qi::rule<Iterator, Choices::PairSettings()> ruleStart;
 };
 
@@ -188,10 +191,11 @@ bool Load( const std::string& sFileName, Choices& choices ) {
         for ( Choices::vPairSettings_t::value_type& vt: choices.m_vPairSettings ) {
           BOOST_LOG_TRIVIAL(info)
             << sChoice_PairSetting << " = "
-            << vt.m_sName << ','
-            << vt.m_tdStartTime << ','
-            << vt.m_tdStopTime << ','
-            << vt.m_sTimeZone
+                   << vt.m_sName
+            << ',' << vt.m_tdStartTime
+            << ',' << vt.m_tdStopTime
+            << ',' << vt.m_sTimeZone 
+            << ',' << vt.m_dblTradingAmount
             ;
         }
       }

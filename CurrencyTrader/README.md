@@ -3,12 +3,12 @@ $ cat CurrencyTrader.cfg
 ib_instance   = 11
 
               # pair    start    stop     timezone
-pair_setting  = eur.usd,01:00:00,11:00:00,America/Edmonton
-pair_setting  = gbp.usd,01:00:00,11:00:00,America/Edmonton
-pair_setting  = usd.cad,06:00:00,11:00:00,America/Edmonton
-pair_setting  = usd.jpy,19:00:00,23:00:00,America/Edmonton
-pair_setting  = aud.usd,19:00:00,23:00:00,America/Edmonton
-pair_setting  = nzd.usd,19:00:00,23:00:00,America/Edmonton
+pair_setting  = eur.usd,01:00:00,11:00:00,America/Edmonton,100000
+pair_setting  = gbp.usd,01:00:00,11:00:00,America/Edmonton,100000
+pair_setting  = usd.cad,06:00:00,11:00:00,America/Edmonton,100000
+pair_setting  = usd.jpy,19:00:00,23:00:00,America/Edmonton,1000000
+pair_setting  = aud.usd,19:00:00,23:00:00,America/Edmonton,100000
+pair_setting  = nzd.usd,19:00:00,23:00:00,America/Edmonton,100000
 
 exchange      = IDEAL   # IDEAL (paper trading), IDEALPRO (live)
 

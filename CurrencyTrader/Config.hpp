@@ -40,30 +40,36 @@ struct Choices {
     boost::posix_time::time_duration m_tdStartTime;
     boost::posix_time::time_duration m_tdStopTime;
     std::string m_sTimeZone; // reference: Europe/London is GMT
+    double m_dblTradingAmount;
 
     PairSettings()
     : m_tdStartTime( boost::posix_time::not_a_date_time )
     , m_tdStopTime( boost::posix_time::not_a_date_time )
+    , m_dblTradingAmount {}
     {}
 
     PairSettings( std::string&& sName
                 , boost::posix_time::time_duration tdStartTime
                 , boost::posix_time::time_duration tdStopTime
                 , std::string&& sTimeZone
+                , double dblTradingAmount
                   )
     : m_sName( std::move( sName ) )
     , m_tdStartTime( tdStartTime ), m_tdStopTime( tdStopTime )
     , m_sTimeZone( std::move( sTimeZone ) )
+    , m_dblTradingAmount( dblTradingAmount )
     {}
 
     PairSettings( const std::string& sName
                 , const boost::posix_time::time_duration tdStartTime
                 , const boost::posix_time::time_duration tdStopTime
                 , const std::string& sTimeZone
+                , const double dblTradingAmount
                   )
     : m_sName( sName )
     , m_tdStartTime( tdStartTime ), m_tdStopTime( tdStopTime )
     , m_sTimeZone( sTimeZone )
+    , m_dblTradingAmount( dblTradingAmount )
     {}
 
     PairSettings( PairSettings&& ps )
@@ -71,6 +77,7 @@ struct Choices {
     , m_tdStartTime( ps.m_tdStartTime )
     , m_tdStopTime( ps.m_tdStopTime )
     , m_sTimeZone( std::move( ps.m_sTimeZone ) )
+    , m_dblTradingAmount( ps.m_dblTradingAmount )
     {}
 
     PairSettings( const PairSettings& ps )
@@ -78,6 +85,7 @@ struct Choices {
     , m_tdStartTime( ps.m_tdStartTime )
     , m_tdStopTime( ps.m_tdStopTime )
     , m_sTimeZone( ps.m_sTimeZone )
+    , m_dblTradingAmount( ps.m_dblTradingAmount )
     {}
 
     const PairSettings& operator=( const PairSettings& ps ) {
@@ -86,6 +94,7 @@ struct Choices {
         m_tdStartTime = ps.m_tdStartTime;
         m_tdStopTime = ps.m_tdStopTime;
         m_sTimeZone = ps.m_sTimeZone;
+        m_dblTradingAmount = ps.m_dblTradingAmount;
       }
       return *this;
     }
