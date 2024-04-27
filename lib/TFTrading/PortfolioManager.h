@@ -73,7 +73,7 @@ public:
   ~PortfolioManager() {};
 
   bool PortfolioExists( const idPortfolio_t& idPortfolio );
-  bool PositionExists( const idPortfolio_t& idPortfolio, const std::string& sName );
+  bool PositionExists( const idPortfolio_t& idPortfolio, const std::string& sNamePosition );
 
   pPortfolio_t ConstructPortfolio(
     const idPortfolio_t& idPortfolio, const idAccountOwner_t& idAccountOwner, const idPortfolio_t& idOwner,
@@ -83,22 +83,23 @@ public:
   void DeletePortfolio( const idPortfolio_t& idPortfolio );
 
   pPosition_t ConstructPosition( // old mechanism
-    const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm,
+    const idPortfolio_t& idPortfolio, const std::string& sNamePosition, const std::string& sAlgorithm,
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
     const pProvider_t& pExecutionProvider, const pProvider_t& pDataProvider,
     pInstrument_t pInstrument
     );
 
   pPosition_t ConstructPosition( // new mechanism
-    const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm,
+    const idPortfolio_t& idPortfolio, const std::string& sNamePosition,
+    const std::string& sAlgorithm,
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
     const pProvider_t& pExecutionProvider,
     pWatch_t pWatch
     );
 
-  pPosition_t GetPosition( const idPortfolio_t& idPortfolio, const std::string& sName );
-  void UpdatePosition( const idPortfolio_t& idPortfolio, const std::string& sName ); // TODO: may not be funcfional
-  void DeletePosition( const idPortfolio_t& idPortfolio, const std::string& sName );
+  pPosition_t GetPosition( const idPortfolio_t& idPortfolio, const std::string& sNamePosition );
+  void UpdatePosition( const idPortfolio_t& idPortfolio, const std::string& sNamePosition ); // TODO: may not be funcfional
+  void DeletePosition( const idPortfolio_t& idPortfolio, const std::string& sNamePosition );
 
   using OnPositionNeedsDetailsHandler = FastDelegate1<pPosition_t&>;
   void SetOnPositionNeedDetails( OnPositionNeedsDetailsHandler function ) {
@@ -153,7 +154,7 @@ private:
   using fConstructPosition_t = std::function<pPosition_t()>;
 
   void ConstructPosition( // re-factored code
-    const idPortfolio_t& idPortfolio, const std::string& sName,
+    const idPortfolio_t& idPortfolio, const std::string& sNamePosition,
     fConstructPosition_t&&
   );
 

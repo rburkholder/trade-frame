@@ -455,7 +455,8 @@ void PortfolioManager::DeletePortfolio( const idPortfolio_t& idPortfolio ) {
 //
 
 PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // old mechanism
-    const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm,
+    const idPortfolio_t& idPortfolio, const std::string& sNamePosition,
+    const std::string& sAlgorithm,
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
     const pProvider_t& pExecutionProvider, const pProvider_t& pDataProvider,
     pInstrument_t pInstrument )
@@ -463,9 +464,9 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // old mechan
   pPosition_t pPosition;
 
   ConstructPosition(
-    idPortfolio, sName,
+    idPortfolio, sNamePosition,
     [&,pInstrument,pExecutionProvider, pDataProvider]()mutable->pPosition_t{
-      pPosition = std::make_shared<ou::tf::Position>( pInstrument, pExecutionProvider, pDataProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm );
+      pPosition = std::make_shared<ou::tf::Position>( pInstrument, pExecutionProvider, pDataProvider, idExecutionAccount, idDataAccount, idPortfolio, sNamePosition, sAlgorithm );
       return pPosition;
     } );
 
@@ -473,7 +474,7 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // old mechan
 }
 
 PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // new mechanism
-    const idPortfolio_t& idPortfolio, const std::string& sName, const std::string& sAlgorithm,
+    const idPortfolio_t& idPortfolio, const std::string& sNamePosition, const std::string& sAlgorithm,
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
     const pProvider_t& pExecutionProvider,
     pWatch_t pWatch )
@@ -481,9 +482,9 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // new mechan
   pPosition_t pPosition;
 
   ConstructPosition(
-    idPortfolio, sName,
+    idPortfolio, sNamePosition,
     [&,pWatch,pExecutionProvider]()->pPosition_t{
-      pPosition = std::make_shared<ou::tf::Position>( pWatch, pExecutionProvider, idExecutionAccount, idDataAccount, idPortfolio, sName, sAlgorithm );
+      pPosition = std::make_shared<ou::tf::Position>( pWatch, pExecutionProvider, idExecutionAccount, idDataAccount, idPortfolio, sNamePosition, sAlgorithm );
       return pPosition;
     } );
 
@@ -491,7 +492,7 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // new mechan
 }
 
 void PortfolioManager::ConstructPosition( // re-factored code
-    const idPortfolio_t& idPortfolio, const std::string& sName,
+    const idPortfolio_t& idPortfolio, const std::string& sNamePosition,
     fConstructPosition_t&& fConstructPosition
   )
 {
@@ -499,24 +500,24 @@ void PortfolioManager::ConstructPosition( // re-factored code
   GetPortfolio( idPortfolio );
   mapPortfolios_iter_t iterPortfolio = m_mapPortfolios.find( idPortfolio );
   if ( m_mapPortfolios.end() == iterPortfolio ) {  // should exist as we already just 'got' it
-    throw std::runtime_error( "ConstructPosition: idPortfolio does not exist" );
+    throw std::runtime_error( "ConstructPosition: portfolio " + idPortfolio + " does not exist" );
   }
 
-  if ( "" == sName ) {
-    throw std::runtime_error( "ConstructPosition: name is empty" );
+  if ( sNamePosition.empty() ) {
+    throw std::runtime_error( "ConstructPosition: position name is empty" );
   }
 
   auto& [id,portfolio] = *iterPortfolio;
 
-  mapPosition_iter_t iterPosition = portfolio.mapPosition.find( sName );
+  mapPosition_iter_t iterPosition = portfolio.mapPosition.find( sNamePosition );
   if ( portfolio.mapPosition.end() != iterPosition ) {
-    throw std::runtime_error( "ConstructPosition:  sName already exists" );
+    throw std::runtime_error( "ConstructPosition:  position " + sNamePosition + " exists" );
   }
 
   pPosition_t pPosition;
   pPosition = fConstructPosition();
 
-  portfolio.mapPosition.insert( mapPosition_pair_t( sName, pPosition ) );
+  portfolio.mapPosition.insert( mapPosition_pair_t( sNamePosition, pPosition ) );
 
   if ( nullptr == m_pSession ) {
     throw std::runtime_error( "ConstructPosition:  database session not available" );
@@ -531,13 +532,13 @@ void PortfolioManager::ConstructPosition( // re-factored code
   pPosition->OnUpdateCommissionForPortfolioManager.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnCommission ) );
   pPosition->OnUpdateExecutionForPortfolioManager.Add( MakeDelegate( this, &PortfolioManager::HandlePositionOnExecution ) );
 
-  portfolio.pPortfolio->AddPosition( sName, pPosition );
+  portfolio.pPortfolio->AddPosition( sNamePosition, pPosition );
 
   OnPositionAdded( pPosition );
 
 }
 
-bool PortfolioManager::PositionExists( const idPortfolio_t& idPortfolio, const std::string& sName ) {
+bool PortfolioManager::PositionExists( const idPortfolio_t& idPortfolio, const std::string& sNamePosition ) {
 
   assert( 0 != idPortfolio.size() );
 
@@ -546,11 +547,11 @@ bool PortfolioManager::PositionExists( const idPortfolio_t& idPortfolio, const s
     return false;
   }
 
-  assert( 0 != sName.size() );
+  assert( 0 != sNamePosition.size() );
 
   auto& [id,portfolio] = *iterPortfolio;
 
-  mapPosition_iter_t iterPosition = portfolio.mapPosition.find( sName );
+  mapPosition_iter_t iterPosition = portfolio.mapPosition.find( sNamePosition );
   if ( portfolio.mapPosition.end() == iterPosition ) {
     return false;
   }
@@ -558,22 +559,22 @@ bool PortfolioManager::PositionExists( const idPortfolio_t& idPortfolio, const s
   return true;
 }
 
-PortfolioManager::pPosition_t PortfolioManager::GetPosition( const idPortfolio_t& idPortfolio, const std::string& sName ) {
+PortfolioManager::pPosition_t PortfolioManager::GetPosition( const idPortfolio_t& idPortfolio, const std::string& sNamePosition ) {
 
   assert( 0 != idPortfolio.size() );
 
   mapPortfolios_iter_t iterPortfolio = m_mapPortfolios.find( idPortfolio );
   if ( m_mapPortfolios.end() == iterPortfolio ) {
-    throw std::runtime_error( "GetPosition:  idPortfolio does not exist" );
+    throw std::runtime_error( "GetPosition: portfolio " + idPortfolio + " does not exist" );
   }
 
-  assert( 0 != sName.size() );
+  assert( !sNamePosition.empty() );
 
   auto& [id,portfolio] = *iterPortfolio;
 
-  mapPosition_iter_t iterPosition = portfolio.mapPosition.find( sName );
+  mapPosition_iter_t iterPosition = portfolio.mapPosition.find( sNamePosition );
   if ( portfolio.mapPosition.end() == iterPosition ) {
-    const std::string sError( "GetPosition: " + sName + " does not exist" );
+    const std::string sError( "GetPosition: " + sNamePosition + " does not exist" );
     throw std::runtime_error( sError );
   }
 
