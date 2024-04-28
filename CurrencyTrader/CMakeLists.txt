@@ -26,6 +26,7 @@ set(
     AppCurrencyTrader.hpp
     Config.hpp
     Strategy.hpp
+    TrackOrder.hpp
   )
 
 set(
@@ -33,6 +34,7 @@ set(
     AppCurrencyTrader.cpp
     Config.cpp
     Strategy.cpp
+    TrackOrder.cpp
   )
 
 add_executable(

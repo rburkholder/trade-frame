@@ -37,6 +37,8 @@
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
+#include "TrackOrder.hpp"
+
 namespace ou {
 namespace tf {
   class TreeItem;
@@ -70,22 +72,6 @@ protected:
 private:
 
   enum EChartSlot { Price, Volume, ATR, SD, MASlope, MA, Stoch, PL, Commission };
-  enum class ETradeState {
-    Init,  // initiaize state in current market
-    Search,  // looking for long or short enter
-    LongSubmitted, // order has been submitted, waiting for confirmation
-    LongExitSignal,  // position exists, looking for exit
-    ShortSubmitted,  // order has been submitted, waiting for confirmtaion
-    ShortExitSignal,  // position exists, looking for exit
-    LongExitSubmitted, // wait for exit to complete
-    ShortExitSubmitted, // wait for exit to complete
-    Cancelling,
-    Cancelled,
-    NoTrade, // from the config file, no trading, might be a future
-    EndOfDayCancel,
-    EndOfDayNeutral,
-    Done // no more action
-    };
 
   using pOrder_t = ou::tf::Order::pOrder_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
@@ -109,13 +95,6 @@ private:
   ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryVolume m_ceVolume;
 
-  ou::ChartEntryShape m_ceLongEntry;
-  ou::ChartEntryShape m_ceLongFill;
-  ou::ChartEntryShape m_ceLongExit;
-  ou::ChartEntryShape m_ceShortEntry;
-  ou::ChartEntryShape m_ceShortFill;
-  ou::ChartEntryShape m_ceShortExit;
-
   ou::ChartEntryShape m_ceSwingHi;
   ou::ChartEntryShape m_ceSwingLo;
 
@@ -129,11 +108,8 @@ private:
   pWatch_t m_pWatch;
   pPortfolio_t m_pPortfolio;
 
-  struct Entry {
-    ETradeState m_stateTrade;
-    pPosition_t m_pPosition;
-    Entry(): m_stateTrade( ETradeState::Init ) {}
-  } m_up;
+  TrackOrder m_up;
+  TrackOrder m_dn;
 
   struct EMA { // Exponential Moving Average
 
@@ -278,13 +254,6 @@ private:
 
   fResetSoftware_t m_fResetSoftware;
 
-  pOrder_t m_pOrderPending;
-
-  std::string m_sProfitDescription;
-  double m_dblProfitMax;
-  double m_dblUnRealized;
-  double m_dblProfitMin;
-
 void Init();
 
   void HandleQuote( const ou::tf::Quote& );
@@ -296,23 +265,10 @@ void Init();
   void HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration );
   bool HandleSoftwareReset( const ou::tf::Bar& );
 
-  void EnterLong( const ou::tf::Quote& );
-  void EnterShort( const ou::tf::Quote& );
-
-  void ExitLong( const ou::tf::Quote& );
-  void ExitShort( const ou::tf::Quote& );
-
-  void ExitPosition( const ou::tf::Quote& );
-
-  void ShowOrder( pOrder_t );
-
-  void HandleOrderCancelled( const ou::tf::Order& );
-  void HandleOrderFilled( const ou::tf::Order& );
-
-  void HandleExitOrderCancelled( const ou::tf::Order& );
-  void HandleExitOrderFilled( const ou::tf::Order& );
-
   void HandleBarQuotes01Sec( const ou::tf::Bar& );
   void HandleMinuteBar( const ou::tf::Bar& );
+
+  void RunStateUp( TrackOrder& );
+  void RunStateDn( TrackOrder& );
 
 };
