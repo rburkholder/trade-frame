@@ -31,7 +31,6 @@ Strategy::Strategy()
 : DailyTradeTimeFrame<Strategy>()
 , m_bfQuotes01Sec( 1 )
 , m_bfTrading( 60 )
-, m_stateTrade( ETradeState::Init )
 , m_ceSwingHi( ou::ChartEntryShape::EShape::Long,  ou::Colour::Purple )
 , m_ceSwingLo( ou::ChartEntryShape::EShape::Short, ou::Colour::HotPink )
 , m_nLo {}, m_nNet {}, m_nHi {}
@@ -137,10 +136,10 @@ void Strategy::SetInstrument( pInstrument_t pInstrument, pPortfolio_t pPortfolio
   pPosition_t pPosition = f( pInstrument, pInstrument->GetInstrumentName() +":up" );
   assert( pPosition );
 
-  m_pPosition = pPosition;
-  m_pWatch = m_pPosition->GetWatch();
+  m_up.m_pPosition = pPosition;
+  m_pWatch = m_up.m_pPosition->GetWatch(); // TODO: obtain watch independently
 
-  m_cdv.SetNames( "Currency Trader", m_pPosition->GetInstrument()->GetInstrumentName() );
+  m_cdv.SetNames( "Currency Trader", m_up.m_pPosition->GetInstrument()->GetInstrumentName() );
 
   //m_pWatch->RecordSeries( false );
   m_pWatch->OnQuote.Add( MakeDelegate( this, &Strategy::HandleQuote ) );
@@ -186,7 +185,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   const double mid( m_quote.Midpoint() );
 
   double unrealized, realized, commission, total;
-  m_pPosition->QueryStats( unrealized, realized, commission, total );
+  m_up.m_pPosition->QueryStats( unrealized, realized, commission, total );
   m_ceUnRealized.Append( dt, unrealized );
   m_ceRealized.Append( dt, realized );
   m_ceProfitLoss.Append( dt, commission );
@@ -205,9 +204,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       break;
   }
 
-  switch ( m_stateTrade ) {
+  switch ( m_up.m_stateTrade ) {
     case ETradeState::Init: // Strategy starts in this state
-      m_stateTrade = ETradeState::Search;
+      // TODO: emit current PIP size
+      m_up.m_stateTrade = ETradeState::Search;
       break;
     case ETradeState::Search:
       switch ( m_state.swing ) {
@@ -264,16 +264,16 @@ void Strategy::EnterLong( const ou::tf::Quote& quote ) { // limit orders, in rea
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, c_quantity );
+  pOrder_t pOrder = m_up.m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, c_quantity );
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
   assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   m_ceLongEntry.AddLabel( quote.DateTime(), dblMidPoint, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  m_stateTrade = ETradeState::LongSubmitted;
+  m_up.m_stateTrade = ETradeState::LongSubmitted;
   m_pOrderPending = pOrder;
-  m_pPosition->PlaceOrder( pOrder );
+  m_up.m_pPosition->PlaceOrder( pOrder );
   //ShowOrder( pOrder );
 }
 
@@ -281,48 +281,48 @@ void Strategy::EnterShort( const ou::tf::Quote& quote ) { // limit orders, in re
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, c_quantity );
+  pOrder_t pOrder = m_up.m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, c_quantity );
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
   assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   m_ceShortEntry.AddLabel( quote.DateTime(), dblMidPoint, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  m_stateTrade = ETradeState::ShortSubmitted;
+  m_up.m_stateTrade = ETradeState::ShortSubmitted;
   m_pOrderPending = pOrder;
-  m_pPosition->PlaceOrder( pOrder );
+  m_up.m_pPosition->PlaceOrder( pOrder );
   //ShowOrder( pOrder );
 }
 
 void Strategy::ExitLong( const ou::tf::Quote& quote ) {
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, c_quantity );
+  pOrder_t pOrder = m_up.m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, c_quantity );
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
   assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   m_ceLongExit.AddLabel( quote.DateTime(), dblMidPoint, "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  m_stateTrade = ETradeState::LongExitSubmitted;
+  m_up.m_stateTrade = ETradeState::LongExitSubmitted;
   m_pOrderPending = pOrder;
-  m_pPosition->PlaceOrder( pOrder );
+  m_up.m_pPosition->PlaceOrder( pOrder );
   //ShowOrder( pOrder );
 }
 
 void Strategy::ExitShort( const ou::tf::Quote& quote ) {
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, c_quantity );
+  pOrder_t pOrder = m_up.m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, c_quantity );
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
   assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
   m_ceShortExit.AddLabel( quote.DateTime(), dblMidPoint, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  m_stateTrade = ETradeState::ShortExitSubmitted;
+  m_up.m_stateTrade = ETradeState::ShortExitSubmitted;
   m_pOrderPending = pOrder;
-  m_pPosition->PlaceOrder( pOrder );
+  m_up.m_pPosition->PlaceOrder( pOrder );
   //ShowOrder( pOrder );
 }
 
@@ -336,7 +336,7 @@ void Strategy::ShowOrder( pOrder_t pOrder ) {
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
   m_pOrderPending->OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrderPending->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  switch ( m_stateTrade ) {
+  switch ( m_up.m_stateTrade ) {
     case ETradeState::EndOfDayCancel:
     case ETradeState::EndOfDayNeutral:
       BOOST_LOG_TRIVIAL(info)
@@ -349,10 +349,10 @@ void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
       BOOST_LOG_TRIVIAL(error)
         << m_pWatch->GetInstrumentName()
         << " order " << order.GetOrderId() << " cancelled - state machine needs fixes";
-      m_stateTrade = ETradeState::Done;
+      m_up.m_stateTrade = ETradeState::Done;
       break;
     default:
-      m_stateTrade = ETradeState::Search;
+      m_up.m_stateTrade = ETradeState::Search;
   }
   m_pOrderPending.reset();
 }
@@ -360,22 +360,22 @@ void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
 void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
   m_pOrderPending->OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrderPending->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  switch ( m_stateTrade ) {
+  switch ( m_up.m_stateTrade ) {
     case ETradeState::LongSubmitted:
       m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Long Fill" );
-      m_stateTrade = ETradeState::LongExitSignal;
+      m_up.m_stateTrade = ETradeState::LongExitSignal;
       break;
     case ETradeState::ShortSubmitted:
       m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Fill" );
-      m_stateTrade = ETradeState::ShortExitSignal;
+      m_up.m_stateTrade = ETradeState::ShortExitSignal;
       break;
     case ETradeState::LongExitSubmitted:
       m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Long Exit Fill" );
-      m_stateTrade = ETradeState::Search;
+      m_up.m_stateTrade = ETradeState::Search;
       break;
     case ETradeState::ShortExitSubmitted:
       m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Exit Fill" );
-      m_stateTrade = ETradeState::Search;
+      m_up.m_stateTrade = ETradeState::Search;
       break;
     case ETradeState::EndOfDayCancel:
     case ETradeState::EndOfDayNeutral:
@@ -393,11 +393,12 @@ void Strategy::ExitPosition( const ou::tf::Quote& quote ) {
   pOrder_t pOrder;
   double dblMidPoint( quote.Midpoint() );
 
-  if ( m_pPosition->IsActive() ) {
-    assert( 1 == m_pPosition->GetActiveSize() );
-    switch ( m_pPosition->GetRow().eOrderSideActive ) {
+  if ( m_up.m_pPosition->IsActive() ) {
+    assert( false ); // size of 1 not going to work with currency
+    assert( 1 == m_up.m_pPosition->GetActiveSize() );
+    switch ( m_up.m_pPosition->GetRow().eOrderSideActive ) {
       case ou::tf::OrderSide::EOrderSide::Buy:
-        pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
+        pOrder = m_up.m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, 1 );
         pOrder->SetSignalPrice( dblMidPoint );
         pOrder->SetDescription(
             m_sProfitDescription + ","
@@ -409,12 +410,12 @@ void Strategy::ExitPosition( const ou::tf::Quote& quote ) {
         pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
         pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
         m_ceLongExit.AddLabel( quote.DateTime(), dblMidPoint, "LxS2-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-        m_stateTrade = ETradeState::LongExitSubmitted;
-        m_pPosition->PlaceOrder( pOrder );
+        m_up.m_stateTrade = ETradeState::LongExitSubmitted;
+        m_up.m_pPosition->PlaceOrder( pOrder );
         ShowOrder( pOrder );
         break;
       case ou::tf::OrderSide::EOrderSide::Sell:
-        pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
+        pOrder = m_up.m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, 1 );
         pOrder->SetSignalPrice( dblMidPoint );
         pOrder->SetDescription(
             m_sProfitDescription + ","
@@ -426,8 +427,8 @@ void Strategy::ExitPosition( const ou::tf::Quote& quote ) {
         pOrder->OnOrderCancelled.Add( MakeDelegate( this, &Strategy::HandleExitOrderCancelled ) );
         pOrder->OnOrderFilled.Add( MakeDelegate( this, &Strategy::HandleExitOrderFilled ) );
         m_ceShortExit.AddLabel( quote.DateTime(), dblMidPoint, "SxS2-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-        m_stateTrade = ETradeState::ShortExitSubmitted;
-        m_pPosition->PlaceOrder( pOrder );
+        m_up.m_stateTrade = ETradeState::ShortExitSubmitted;
+        m_up.m_pPosition->PlaceOrder( pOrder );
         ShowOrder( pOrder );
         break;
       default:
@@ -435,7 +436,7 @@ void Strategy::ExitPosition( const ou::tf::Quote& quote ) {
     }
   }
   else {
-    m_stateTrade = ETradeState::Search;
+    m_up.m_stateTrade = ETradeState::Search;
   }
 }
 
@@ -447,11 +448,11 @@ void Strategy::HandleExitOrderCancelled( const ou::tf::Order& order ) {
   switch ( order.GetOrderSide() ) {
     case ou::tf::OrderSide::EOrderSide::Buy: // is dt filled at 'internal' time?
       //m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetSignalPrice(), "LxC-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
-      m_stateTrade = ETradeState::Cancelled;  // or use cancelled for custom processing
+      m_up.m_stateTrade = ETradeState::Cancelled;  // or use cancelled for custom processing
       break;
     case ou::tf::OrderSide::EOrderSide::Sell: // is dt filled at 'internal' time?
       //m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetSignalPrice(), "SxC-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
-      m_stateTrade = ETradeState::Cancelled;  // or use cancelled for custom processing
+      m_up.m_stateTrade = ETradeState::Cancelled;  // or use cancelled for custom processing
       break;
     default:
       assert( false );
@@ -466,17 +467,17 @@ void Strategy::HandleExitOrderFilled( const ou::tf::Order& order ) {
   switch ( order.GetOrderSide() ) {
     case ou::tf::OrderSide::EOrderSide::Buy:
       //m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "LxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
-      switch( m_stateTrade ) {
+      switch( m_up.m_stateTrade ) {
         case ETradeState::ShortExitSubmitted:
-          m_stateTrade = ETradeState::Search;
+          m_up.m_stateTrade = ETradeState::Search;
           break;
       }
       break;
     case ou::tf::OrderSide::EOrderSide::Sell:
       //m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "SxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
-      switch( m_stateTrade ) {
+      switch( m_up.m_stateTrade ) {
         case ETradeState::LongExitSubmitted:
-          m_stateTrade = ETradeState::Search;
+          m_up.m_stateTrade = ETradeState::Search;
           break;
       }
       break;
@@ -486,21 +487,21 @@ void Strategy::HandleExitOrderFilled( const ou::tf::Order& order ) {
 }
 
 void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
-  m_stateTrade = ETradeState::EndOfDayCancel;
-  if ( m_pPosition ) {
-    m_pPosition->CancelOrders();
+  m_up.m_stateTrade = ETradeState::EndOfDayCancel;
+  if ( m_up.m_pPosition ) {
+    m_up.m_pPosition->CancelOrders();
   }
 }
 
 void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
-  switch ( m_stateTrade ) {
+  switch ( m_up.m_stateTrade ) {
     case ETradeState::NoTrade:
       // do nothing
       break;
     default:
-      m_stateTrade = ETradeState::EndOfDayNeutral;
-      if ( m_pPosition ) {
-        m_pPosition->ClosePosition();
+      m_up.m_stateTrade = ETradeState::EndOfDayNeutral;
+      if ( m_up.m_pPosition ) {
+        m_up.m_pPosition->ClosePosition();
       }
       break;
   }

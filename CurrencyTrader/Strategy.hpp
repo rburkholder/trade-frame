@@ -126,12 +126,14 @@ private:
   ou::ChartEntryIndicator m_ceProfitLoss;
   ou::ChartEntryIndicator m_ceCommission;
 
-  //pOrder_t m_pOrder;
   pWatch_t m_pWatch;
-  pPosition_t m_pPosition;
   pPortfolio_t m_pPortfolio;
 
-  ETradeState m_stateTrade;
+  struct Entry {
+    ETradeState m_stateTrade;
+    pPosition_t m_pPosition;
+    Entry(): m_stateTrade( ETradeState::Init ) {}
+  } m_up;
 
   struct EMA { // Exponential Moving Average
 
