@@ -34,6 +34,7 @@
 
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
+#include <TFTrading/Portfolio.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
 namespace ou {
@@ -52,6 +53,7 @@ public:
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
+  using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
 
   using fResetSoftware_t = std::function<bool()>;
   using fConstructPosition_t = std::function<pPosition_t(pInstrument_t,const std::string&)>;
@@ -60,7 +62,7 @@ public:
   //Strategy( boost::gregorian::date ); // disable as dates are updated daily
   ~Strategy();
 
-  void SetInstrument( pInstrument_t, fConstructPosition_t&& );
+  void SetInstrument( pInstrument_t, pPortfolio_t, fConstructPosition_t&& );
   void SaveWatch( const std::string& sPrefix );
   void SetResetSoftware( fResetSoftware_t&& f ) { m_fResetSoftware = std::move( f ); }
 
@@ -127,6 +129,7 @@ private:
   //pOrder_t m_pOrder;
   pWatch_t m_pWatch;
   pPosition_t m_pPosition;
+  pPortfolio_t m_pPortfolio;
 
   ETradeState m_stateTrade;
 

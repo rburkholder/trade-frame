@@ -59,7 +59,7 @@ namespace {
   static const std::string c_sPortfolioCurrencyName( "USD" ); // pre-created, needs to be uppercase
   static const std::string c_sPortfolioSimulationName( "sim" );
   static const std::string c_sPortfolioRealTimeName( "live" );
-  static const std::string c_sPortfolioName( "forex" );
+  static const std::string c_sAlgorithmName( "forex_swing" );
 }
 
 IMPLEMENT_APP(AppCurrencyTrader)
@@ -640,24 +640,40 @@ void AppCurrencyTrader::LoadPortfolioCurrency() {
 void AppCurrencyTrader::PopulateStrategy( pInstrument_t pInstrument ) {
 
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName( ) );
+
   mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( idInstrument );
   assert( m_mapStrategy.end() != iterStrategy );
 
+  ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
+  pPortfolio_t pPortfolio;
+
+  if ( pm.PortfolioExists( idInstrument ) ) {
+    pPortfolio = pm.GetPortfolio( idInstrument );
+  }
+  else {
+    pPortfolio
+      = pm.ConstructPortfolio(
+          idInstrument, "tf01", c_sPortfolioCurrencyName,
+          ou::tf::Portfolio::EPortfolioType::Aggregate,
+          pInstrument->GetCurrencyName()
+        );
+  }
+
   iterStrategy->second->SetInstrument(
-    pInstrument,
-    [this]( pInstrument_t pInstrument, const std::string& sPositionPrefix )->pPosition_t{
-      return ConstructPosition( sPositionPrefix, pInstrument );
+    pInstrument, pPortfolio,
+    [this, pPortfolio]( pInstrument_t pInstrument, const std::string& sPositionPrefix )->pPosition_t{
+      return ConstructPosition( pPortfolio, sPositionPrefix, pInstrument );
     } );
 }
 
-AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( const std::string& sName, pInstrument_t pInstrument ) {
+AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( pPortfolio_t pPortfolio, const std::string& sPositionPrefix, pInstrument_t pInstrument ) {
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
 
-  std::string sPositionName( sName );
+  std::string sPositionName( sPositionPrefix );
 
   switch ( m_data->ID() ) {
     case ou::tf::keytypes::EProviderIB:
@@ -687,10 +703,11 @@ AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( const std::
       assert( false );
   }
 
+  const std::string& idPortfolio( pPortfolio->GetRow().idPortfolio );
   pPosition_t pPosition;
 
-  if ( pm.PositionExists( c_sPortfolioCurrencyName, sPositionName ) ) {
-    pPosition = pm.GetPosition( c_sPortfolioCurrencyName, sPositionName );
+  if ( pm.PositionExists( idPortfolio, sPositionName ) ) {
+    pPosition = pm.GetPosition( idPortfolio, sPositionName );
     BOOST_LOG_TRIVIAL(info)
       << "position loaded "
       << pPosition->GetRow().idPortfolio << ','
@@ -701,8 +718,8 @@ AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( const std::
   else {
     pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_data );
     pPosition = pm.ConstructPosition(
-      c_sPortfolioCurrencyName, sPositionName,
-      c_sPortfolioName /* algorithm name */,
+      idPortfolio, sPositionName,
+      c_sAlgorithmName,
       m_exec, pWatch
     );
     if ( ou::tf::keytypes::EProviderSimulator == m_exec->ID() ) {

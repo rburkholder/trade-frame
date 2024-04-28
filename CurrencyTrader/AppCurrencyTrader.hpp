@@ -148,7 +148,7 @@ private:
   pInstrument_t ConstructInstrumentBase( const std::string& sName, const std::string& sExchange );
   void EnhanceInstrument( pInstrument_t );
 
-  pPosition_t ConstructPosition( const std::string& sName, pInstrument_t );
+  pPosition_t ConstructPosition( pPortfolio_t pPortfolio, const std::string& sPositionPrefix, pInstrument_t );
   void PopulateStrategy( pInstrument_t );
 
   void HandleSimConnected( int );

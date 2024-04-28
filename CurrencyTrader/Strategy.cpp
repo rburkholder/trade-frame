@@ -127,8 +127,12 @@ Strategy::~Strategy() {
   m_cdv.Clear();
 }
 
-void Strategy::SetInstrument( pInstrument_t pInstrument, fConstructPosition_t&& f ) {
+void Strategy::SetInstrument( pInstrument_t pInstrument, pPortfolio_t pPortfolio, fConstructPosition_t&& f ) {
+
   assert( pInstrument );
+  assert( pPortfolio );
+
+  m_pPortfolio = pPortfolio; // TODO: update portfolio metrics to chart
 
   pPosition_t pPosition = f( pInstrument, pInstrument->GetInstrumentName() +":up" );
   assert( pPosition );
