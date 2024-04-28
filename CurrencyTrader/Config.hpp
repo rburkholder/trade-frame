@@ -40,36 +40,36 @@ struct Choices {
     boost::posix_time::time_duration m_tdStartTime;
     boost::posix_time::time_duration m_tdStopTime;
     std::string m_sTimeZone; // reference: Europe/London is GMT
-    double m_dblTradingAmount;
+    std::uint32_t m_nTradingAmount;
 
     PairSettings()
     : m_tdStartTime( boost::posix_time::not_a_date_time )
     , m_tdStopTime( boost::posix_time::not_a_date_time )
-    , m_dblTradingAmount {}
+    , m_nTradingAmount {}
     {}
 
     PairSettings( std::string&& sName
                 , boost::posix_time::time_duration tdStartTime
                 , boost::posix_time::time_duration tdStopTime
                 , std::string&& sTimeZone
-                , double dblTradingAmount
+                , std::uint32_t dblTradingAmount
                   )
     : m_sName( std::move( sName ) )
     , m_tdStartTime( tdStartTime ), m_tdStopTime( tdStopTime )
     , m_sTimeZone( std::move( sTimeZone ) )
-    , m_dblTradingAmount( dblTradingAmount )
+    , m_nTradingAmount( dblTradingAmount )
     {}
 
     PairSettings( const std::string& sName
                 , const boost::posix_time::time_duration tdStartTime
                 , const boost::posix_time::time_duration tdStopTime
                 , const std::string& sTimeZone
-                , const double dblTradingAmount
+                , const std::uint32_t m_nTradingAmount
                   )
     : m_sName( sName )
     , m_tdStartTime( tdStartTime ), m_tdStopTime( tdStopTime )
     , m_sTimeZone( sTimeZone )
-    , m_dblTradingAmount( dblTradingAmount )
+    , m_nTradingAmount( m_nTradingAmount )
     {}
 
     PairSettings( PairSettings&& ps )
@@ -77,7 +77,7 @@ struct Choices {
     , m_tdStartTime( ps.m_tdStartTime )
     , m_tdStopTime( ps.m_tdStopTime )
     , m_sTimeZone( std::move( ps.m_sTimeZone ) )
-    , m_dblTradingAmount( ps.m_dblTradingAmount )
+    , m_nTradingAmount( ps.m_nTradingAmount )
     {}
 
     PairSettings( const PairSettings& ps )
@@ -85,7 +85,7 @@ struct Choices {
     , m_tdStartTime( ps.m_tdStartTime )
     , m_tdStopTime( ps.m_tdStopTime )
     , m_sTimeZone( ps.m_sTimeZone )
-    , m_dblTradingAmount( ps.m_dblTradingAmount )
+    , m_nTradingAmount( ps.m_nTradingAmount )
     {}
 
     const PairSettings& operator=( const PairSettings& ps ) {
@@ -94,7 +94,7 @@ struct Choices {
         m_tdStartTime = ps.m_tdStartTime;
         m_tdStopTime = ps.m_tdStopTime;
         m_sTimeZone = ps.m_sTimeZone;
-        m_dblTradingAmount = ps.m_dblTradingAmount;
+        m_nTradingAmount = ps.m_nTradingAmount;
       }
       return *this;
     }
