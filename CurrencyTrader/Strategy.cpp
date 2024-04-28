@@ -39,7 +39,7 @@ Strategy::Strategy()
   Init();
 }
 /*
-Strategy::Strategy(  boost::gregorian::date date )
+Strategy::Strategy( boost::gregorian::date date )
 : DailyTradeTimeFrame<Strategy>( date )
 , m_bfQuotes01Sec( 1 )
 , m_bfTrading( 60 )
@@ -126,18 +126,18 @@ Strategy::~Strategy() {
   m_cdv.Clear();
 }
 
-void Strategy::SetInstrument( pInstrument_t pInstrument, pPortfolio_t pPortfolio, fConstructPosition_t&& f ) {
+void Strategy::SetWatch( pWatch_t pWatch, pPortfolio_t pPortfolio, fConstructPosition_t&& f ) {
 
-  assert( pInstrument );
+  assert( pWatch );
   assert( pPortfolio );
 
+  m_pWatch = pWatch;
   m_pPortfolio = pPortfolio; // TODO: update portfolio metrics to chart
 
-  pPosition_t pPosition = f( pInstrument, pInstrument->GetInstrumentName() +":up" );
+  pPosition_t pPosition = f( pWatch, pWatch->GetInstrumentName() +":up" );
   assert( pPosition );
 
   m_up.m_pPosition = pPosition;
-  m_pWatch = m_up.m_pPosition->GetWatch(); // TODO: obtain watch independently
 
   m_cdv.SetNames( "Currency Trader", m_up.m_pPosition->GetInstrument()->GetInstrumentName() );
 

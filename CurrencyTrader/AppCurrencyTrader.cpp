@@ -659,21 +659,23 @@ void AppCurrencyTrader::PopulateStrategy( pInstrument_t pInstrument ) {
         );
   }
 
-  iterStrategy->second->SetInstrument(
-    pInstrument, pPortfolio,
-    [this, pPortfolio]( pInstrument_t pInstrument, const std::string& sPositionPrefix )->pPosition_t{
-      return ConstructPosition( pPortfolio, sPositionPrefix, pInstrument );
+  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_data );
+
+  iterStrategy->second->SetWatch(
+    pWatch, pPortfolio,
+    [this, pPortfolio]( pWatch_t pWatch, const std::string& sPositionPrefix )->pPosition_t{
+      return ConstructPosition( pPortfolio, sPositionPrefix, pWatch );
     } );
 }
 
-AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( pPortfolio_t pPortfolio, const std::string& sPositionPrefix, pInstrument_t pInstrument ) {
-
-  using pWatch_t = ou::tf::Watch::pWatch_t;
+AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( pPortfolio_t pPortfolio, const std::string& sPositionPrefix, pWatch_t pWatch ) {
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
-  const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+  const ou::tf::Instrument::idInstrument_t& idInstrument( pWatch->GetInstrumentName() );
 
   std::string sPositionName( sPositionPrefix );
+
+  assert( pWatch->GetProvider()->ID() == m_data->ID() );
 
   switch ( m_data->ID() ) {
     case ou::tf::keytypes::EProviderIB:
@@ -716,7 +718,6 @@ AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( pPortfolio_
       ;
   }
   else {
-    pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_data );
     pPosition = pm.ConstructPosition(
       idPortfolio, sPositionName,
       c_sAlgorithmName,

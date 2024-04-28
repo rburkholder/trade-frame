@@ -74,6 +74,7 @@ private:
   using TreeItem = ou::tf::TreeItem;
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using pWatch_t = ou::tf::Watch::pWatch_t;
   using pPosition_t = ou::tf::Position::pPosition_t;
   using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
 
@@ -148,7 +149,7 @@ private:
   pInstrument_t ConstructInstrumentBase( const std::string& sName, const std::string& sExchange );
   void EnhanceInstrument( pInstrument_t );
 
-  pPosition_t ConstructPosition( pPortfolio_t pPortfolio, const std::string& sPositionPrefix, pInstrument_t );
+  pPosition_t ConstructPosition( pPortfolio_t pPortfolio, const std::string& sPositionPrefix, pWatch_t );
   void PopulateStrategy( pInstrument_t );
 
   void HandleSimConnected( int );
