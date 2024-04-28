@@ -50,12 +50,6 @@ void Strategy::Init() {
 
   m_ceVolume.SetName(   "Volume" );
 
-  m_ceRealized.SetName( "Realized" );
-  m_ceUnRealized.SetName( "Unrealized" );
-
-  m_ceRealized.SetColour( ou::Colour::DarkCyan );
-  m_ceUnRealized.SetColour( ou::Colour::Purple );
-
   m_ceQuoteAsk.SetColour( ou::Colour::Red );
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
   m_ceQuoteBid.SetColour( ou::Colour::Blue );
@@ -71,8 +65,9 @@ void Strategy::Init() {
 
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
-  m_cdv.Add( EChartSlot::PL, &m_ceRealized );
-  m_cdv.Add( EChartSlot::PL, &m_ceUnRealized );
+  m_plUp.Init( m_cdv, EChartSlot::PL_Up );
+  m_plTtl.Init( m_cdv, EChartSlot::PL_Ttl );
+  m_plDn.Init( m_cdv, EChartSlot::PL_Dn );
 
   // supplied by 1 second mid-quote
   m_pEmaCurrency = std::make_unique<EMA>( 3 * 60, m_cdv, EChartSlot::Price );
@@ -176,10 +171,22 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   double unrealized, realized, commission, total;
 
   m_up.m_pPosition->QueryStats( unrealized, realized, commission, total );
-  m_ceUnRealized.Append( dt, unrealized );
-  m_ceRealized.Append( dt, realized );
-  m_ceProfitLoss.Append( dt, commission );
-  m_ceCommission.Append( dt, total );
+  m_plUp.m_ceUnRealized.Append( dt, unrealized );
+  m_plUp.m_ceRealized.Append( dt, realized );
+  m_plUp.m_ceProfitLoss.Append( dt, commission );
+  m_plUp.m_ceCommission.Append( dt, total );
+
+  m_pPortfolio->QueryStats( unrealized, realized, commission, total );
+  m_plTtl.m_ceUnRealized.Append( dt, unrealized );
+  m_plTtl.m_ceRealized.Append( dt, realized );
+  m_plTtl.m_ceProfitLoss.Append( dt, commission );
+  m_plTtl.m_ceCommission.Append( dt, total );
+
+  m_dn.m_pPosition->QueryStats( unrealized, realized, commission, total );
+  m_plDn.m_ceUnRealized.Append( dt, unrealized );
+  m_plDn.m_ceRealized.Append( dt, realized );
+  m_plDn.m_ceProfitLoss.Append( dt, commission );
+  m_plDn.m_ceCommission.Append( dt, total );
 
   switch ( m_state.swing ) {
     case State::Swing::up:
@@ -193,6 +200,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       m_state.last = mid;
       break;
   }
+
+  // things to check:
+  //   track ATR at swingup/swingdn
+  //   check distance from ema, if large correction, don't trade, if a few ATRs away, then consider trading
 
   RunStateUp( m_up );
   RunStateDn( m_dn );

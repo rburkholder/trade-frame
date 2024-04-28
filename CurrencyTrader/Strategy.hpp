@@ -71,7 +71,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, ATR, SD, MASlope, MA, Stoch, PL, Commission };
+  enum EChartSlot { Price, Volume, ATR, SD, MASlope, MA, Stoch, PL_Up, PL_Ttl, PL_Dn, Commission };
 
   using pOrder_t = ou::tf::Order::pOrder_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
@@ -98,10 +98,28 @@ private:
   ou::ChartEntryShape m_ceSwingHi;
   ou::ChartEntryShape m_ceSwingLo;
 
-  ou::ChartEntryIndicator m_ceUnRealized;
-  ou::ChartEntryIndicator m_ceRealized;
-  ou::ChartEntryIndicator m_ceProfitLoss;
-  ou::ChartEntryIndicator m_ceCommission;
+  struct PL {
+
+    ou::ChartEntryIndicator m_ceUnRealized;
+    ou::ChartEntryIndicator m_ceRealized;
+    ou::ChartEntryIndicator m_ceProfitLoss;
+    ou::ChartEntryIndicator m_ceCommission;
+
+    void Init( ou::ChartDataView& cdv, int slot ) {
+      m_ceRealized.SetName( "Realized" );
+      m_ceUnRealized.SetName( "Unrealized" );
+
+      m_ceRealized.SetColour( ou::Colour::DarkCyan );
+      m_ceUnRealized.SetColour( ou::Colour::Purple );
+
+      cdv.Add( slot, &m_ceRealized );
+      cdv.Add( slot, &m_ceUnRealized );
+    }
+  };
+
+  struct PL m_plUp;
+  struct PL m_plTtl;
+  struct PL m_plDn;
 
   ou::tf::Order::quantity_t m_quantityToOrder;
 
