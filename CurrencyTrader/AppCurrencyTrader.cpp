@@ -701,9 +701,9 @@ AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( const std::
   else {
     pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_data );
     pPosition = pm.ConstructPosition(
-      c_sPortfolioCurrencyName, sPositionName, c_sPortfolioName,
-      m_exec->GetName(), m_data->GetName(), m_exec,
-      pWatch
+      c_sPortfolioCurrencyName, sPositionName,
+      c_sPortfolioName /* algorithm name */,
+      m_exec, pWatch
     );
     if ( ou::tf::keytypes::EProviderSimulator == m_exec->ID() ) {
       m_sim->SetCommission( idInstrument, 0.0 );

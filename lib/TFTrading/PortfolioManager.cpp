@@ -473,7 +473,7 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // old mechan
   return pPosition;
 }
 
-PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // new mechanism
+PortfolioManager::pPosition_t PortfolioManager::ConstructPosition(
     const idPortfolio_t& idPortfolio, const std::string& sNamePosition, const std::string& sAlgorithm,
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
     const pProvider_t& pExecutionProvider,
@@ -485,6 +485,24 @@ PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // new mechan
     idPortfolio, sNamePosition,
     [&,pWatch,pExecutionProvider]()->pPosition_t{
       pPosition = std::make_shared<ou::tf::Position>( pWatch, pExecutionProvider, idExecutionAccount, idDataAccount, idPortfolio, sNamePosition, sAlgorithm );
+      return pPosition;
+    } );
+
+  return pPosition;
+}
+
+PortfolioManager::pPosition_t PortfolioManager::ConstructPosition( // new mechanism
+  const idPortfolio_t& idPortfolio, const std::string& sNamePosition
+, const std::string& sAlgorithm
+, const pProvider_t& pExecutionProvider, pWatch_t pWatch
+)
+{
+  pPosition_t pPosition;
+
+  ConstructPosition(
+    idPortfolio, sNamePosition,
+    [&,pWatch,pExecutionProvider]()->pPosition_t{
+      pPosition = std::make_shared<ou::tf::Position>( pWatch, pExecutionProvider, idPortfolio, sNamePosition, sAlgorithm );
       return pPosition;
     } );
 

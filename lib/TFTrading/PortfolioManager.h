@@ -89,12 +89,18 @@ public:
     pInstrument_t pInstrument
     );
 
-  pPosition_t ConstructPosition( // new mechanism
+  pPosition_t ConstructPosition(
     const idPortfolio_t& idPortfolio, const std::string& sNamePosition,
     const std::string& sAlgorithm,
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
     const pProvider_t& pExecutionProvider,
     pWatch_t pWatch
+    );
+
+  pPosition_t ConstructPosition( // new mechanism
+    const idPortfolio_t& idPortfolio, const std::string& sNamePosition,
+    const std::string& sAlgorithm,
+    const pProvider_t& pExecutionProvider, pWatch_t pWatch
     );
 
   pPosition_t GetPosition( const idPortfolio_t& idPortfolio, const std::string& sNamePosition );

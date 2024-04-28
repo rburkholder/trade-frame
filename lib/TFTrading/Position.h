@@ -173,11 +173,14 @@ public:
 
   Position( pInstrument_t&, pProvider_t pExecutionProvider, pProvider_t pDataProvider, // persisted Position (old style construction)
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
-    const idPortfolio_t&, const std::string& sName, const std::string& sAlgorithm );
+    const idPortfolio_t&, const std::string& sNamePosition, const std::string& sAlgorithm );
   Position( pWatch_t, pProvider_t pExecutionProvider );  // in memory Position (new style construction)
-  Position( pWatch_t, pProvider_t pExecutionProvider,   // persisted Position (new style construction)
+  Position( pWatch_t, pProvider_t pExecutionProvider,   // persisted Position
     const idAccount_t& idExecutionAccount, const idAccount_t& idDataAccount,
-    const idPortfolio_t&, const std::string& sName, const std::string& sAlgorithm );
+    const idPortfolio_t&, const std::string& sNamePosition, const std::string& sAlgorithm );
+  Position(  // persisted Position (streamlined style construction)
+    pWatch_t, pProvider_t pExecutionProvider,
+    const idPortfolio_t&, const std::string& sNamePosition, const std::string& sAlgorithm );
   Position( pInstrument_t&, pProvider_t pExecutionProvider, pProvider_t pDataProvider );
   Position( pInstrument_t&, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const std::string& sNotes );
   Position( pInstrument_t&, pProvider_t pExecutionProvider, pProvider_t pDataProvider, const TableRowDef& row );
