@@ -57,7 +57,7 @@ public:
   using fConstructPosition_t = std::function<pPosition_t(pInstrument_t,const std::string&)>;
 
   Strategy();
-  Strategy( boost::gregorian::date );
+  //Strategy( boost::gregorian::date ); // disable as dates are updated daily
   ~Strategy();
 
   void SetInstrument( pInstrument_t, fConstructPosition_t&& );

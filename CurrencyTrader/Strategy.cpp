@@ -39,7 +39,7 @@ Strategy::Strategy()
 {
   Init();
 }
-
+/*
 Strategy::Strategy(  boost::gregorian::date date )
 : DailyTradeTimeFrame<Strategy>( date )
 , m_bfQuotes01Sec( 1 )
@@ -52,7 +52,7 @@ Strategy::Strategy(  boost::gregorian::date date )
 {
   Init();
 }
-
+*/
 void Strategy::Init() {
 
   m_ceQuoteAsk.SetName( "Ask" );
