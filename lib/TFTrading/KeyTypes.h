@@ -15,8 +15,6 @@
 
 #include <string>
 
-#include <boost/cstdint.hpp>
-
 #include "TradingEnumerations.h"
 
 namespace ou { // One Unified
@@ -32,7 +30,7 @@ using idAccountOwner_t = std::string;
 using idAccount_t = std::string;
 // CashManager
 //typedef Currency::type idCashAccount_t;
-using idCashTransaction_t = boost::int64_t;
+using idCashTransaction_t = std::int64_t;
 using idCurrency_t = std::string;  // three character designation
 // ProviderManager
 //typedef boost::uint16_t idProvider_t;  // identifies instance of a provider
@@ -42,10 +40,10 @@ enum eidProvider_t {
 , EProviderUserBase=900/*, _EProviderCount*/ };
 // PortfolioManager
 using idPortfolio_t = std::string;
-using idPosition_t = boost::int64_t;  // auto increment
+using idPosition_t = std::int64_t;  // auto increment
 // OrderManager
-using idOrder_t = boost::int64_t;  // supplied/sync'd with execution provider
-using idExecution_t = boost::int64_t; // auto increment
+using idOrder_t = std::int64_t;  // supplied/sync'd with execution provider
+using idExecution_t = std::int64_t; // auto increment
 
 } // namespace keytypes
 
