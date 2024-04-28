@@ -57,8 +57,7 @@ public:
   using fResetSoftware_t = std::function<bool()>;
   using fConstructPosition_t = std::function<pPosition_t(pWatch_t,const std::string&)>;
 
-  Strategy();
-  //Strategy( boost::gregorian::date ); // disable as dates are updated daily
+  Strategy( ou::tf::Order::quantity_t );
   ~Strategy();
 
   void SetWatch( pWatch_t, pPortfolio_t, fConstructPosition_t&& );
@@ -124,6 +123,8 @@ private:
   ou::ChartEntryIndicator m_ceRealized;
   ou::ChartEntryIndicator m_ceProfitLoss;
   ou::ChartEntryIndicator m_ceCommission;
+
+  ou::tf::Order::quantity_t m_quantityToOrder;
 
   pWatch_t m_pWatch;
   pPortfolio_t m_pPortfolio;

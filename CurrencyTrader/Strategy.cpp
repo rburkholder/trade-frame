@@ -27,8 +27,9 @@
 
 #include "Strategy.hpp"
 
-Strategy::Strategy()
+Strategy::Strategy( ou::tf::Order::quantity_t quantity )
 : DailyTradeTimeFrame<Strategy>()
+, m_quantityToOrder( quantity )
 , m_bfQuotes01Sec( 1 )
 , m_bfTrading( 60 )
 , m_ceSwingHi( ou::ChartEntryShape::EShape::Long,  ou::Colour::Purple )
@@ -38,20 +39,7 @@ Strategy::Strategy()
 {
   Init();
 }
-/*
-Strategy::Strategy( boost::gregorian::date date )
-: DailyTradeTimeFrame<Strategy>( date )
-, m_bfQuotes01Sec( 1 )
-, m_bfTrading( 60 )
-, m_stateTrade( ETradeState::Init )
-, m_ceSwingHi( ou::ChartEntryShape::EShape::Long,  ou::Colour::Purple )
-, m_ceSwingLo( ou::ChartEntryShape::EShape::Short, ou::Colour::HotPink )
-, m_nLo {}, m_nNet {}, m_nHi {}
-, m_fResetSoftware( nullptr )
-{
-  Init();
-}
-*/
+
 void Strategy::Init() {
 
   m_ceQuoteAsk.SetName( "Ask" );
@@ -258,13 +246,11 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   m_state.swing = State::Swing::none;
 }
 
-const int c_quantity( 100000 );
-
 void Strategy::EnterLong( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  pOrder_t pOrder = m_up.m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, c_quantity );
+  pOrder_t pOrder = m_up.m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityToOrder );
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
   assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );
@@ -281,7 +267,7 @@ void Strategy::EnterShort( const ou::tf::Quote& quote ) { // limit orders, in re
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  pOrder_t pOrder = m_up.m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, c_quantity );
+  pOrder_t pOrder = m_up.m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityToOrder );
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
   assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );
@@ -297,7 +283,7 @@ void Strategy::EnterShort( const ou::tf::Quote& quote ) { // limit orders, in re
 void Strategy::ExitLong( const ou::tf::Quote& quote ) {
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
-  pOrder_t pOrder = m_up.m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, c_quantity );
+  pOrder_t pOrder = m_up.m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityToOrder );
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
   assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );
@@ -313,7 +299,7 @@ void Strategy::ExitLong( const ou::tf::Quote& quote ) {
 void Strategy::ExitShort( const ou::tf::Quote& quote ) {
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
-  pOrder_t pOrder = m_up.m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, c_quantity );
+  pOrder_t pOrder = m_up.m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityToOrder );
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
   assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );

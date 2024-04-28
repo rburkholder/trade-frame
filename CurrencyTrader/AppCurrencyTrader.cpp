@@ -215,7 +215,7 @@ void AppCurrencyTrader::ConstructStrategyList() {
     mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( idInstrument );
     if ( m_mapStrategy.end() == iterStrategy ) {
 
-      pStrategy_t pStrategy = std::make_unique<Strategy>();
+      pStrategy_t pStrategy = std::make_unique<Strategy>( ps.m_nTradingAmount );
       auto result = m_mapStrategy.emplace( idInstrument, std::move( pStrategy ) );
       assert( result.second );
 
