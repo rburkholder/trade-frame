@@ -1302,10 +1302,10 @@ void TWS::contractDetails( int reqId, const ContractDetails& contractDetails ) {
       handler( contractDetails, pInstrument );
   }
   catch ( std::runtime_error& e ) {
-    std::cout << "IBTWS::contractDetails handler exception: " << e.what() << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "IBTWS::contractDetails handler exception: " << e.what();
   }
   catch (...) {
-    std::cout << "IBTWS unknown error when delegating contractDetails" << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "IBTWS contractDetails unknown error when delegating";
   }
 
 }
