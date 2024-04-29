@@ -11,7 +11,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include <sstream>
 #include <stdexcept>
 
 #include "Portfolio.h"
@@ -76,16 +75,7 @@ Portfolio::pPosition_t Portfolio::AddPosition( const std::string &sName, pPositi
     throw std::runtime_error( "Portfolio::Add1 position " + sName + " already exists" );
   }
 
-  // prepare to add position to instrument named map
-  // instrument can only have one position associated with it
-  const std::string& sInstrumentName( pPosition->GetInstrument()->GetInstrumentName() );
-  mapPositions_iter_t iterInst = m_mapPositionsViaInstrumentName.find( sInstrumentName );
-  if ( m_mapPositionsViaInstrumentName.end() != iterInst ) {
-    throw std::runtime_error( "Portfolio::Add2 instrument " + sInstrumentName + " can only have one position" );
-  }
-
   m_mapPositionsViaUserName.insert( mapPositions_pair_t( sName, pPosition ) );
-  m_mapPositionsViaInstrumentName.insert( mapPositions_pair_t( sInstrumentName, pPosition ) );
 
   pPosition->OnUnRealizedPL.Add( MakeDelegate( this, &Portfolio::HandleUnRealizedPL ) );
   pPosition->OnExecution.Add( MakeDelegate( this, &Portfolio::HandleExecution ) );
@@ -101,19 +91,11 @@ void Portfolio::DeletePosition( const std::string& sName ) {
     throw std::runtime_error( "Portfolio::Delete1 position does not exist" );
   }
 
-  const std::string& sInstrumentName( iterUser->second->GetInstrument()->GetInstrumentName() );
-  mapPositions_iter_t iterInst = m_mapPositionsViaInstrumentName.find( sInstrumentName );
-  if ( m_mapPositionsViaInstrumentName.end() == iterInst ) {
-    throw std::runtime_error( "Portfolio::Delete2 position does not exist" );
-  }
-
   iterUser->second->OnCommission.Remove( MakeDelegate( this, &Portfolio::HandleCommission ) );
   iterUser->second->OnExecution.Remove( MakeDelegate( this, &Portfolio::HandleExecution ) );
   iterUser->second->OnUnRealizedPL.Remove( MakeDelegate( this, &Portfolio::HandleUnRealizedPL ) );
 
   m_mapPositionsViaUserName.erase( iterUser );
-  m_mapPositionsViaInstrumentName.erase( iterInst );
-
 }
 
 void Portfolio::RenamePosition( const std::string& sOld, const std::string& sNew ) {

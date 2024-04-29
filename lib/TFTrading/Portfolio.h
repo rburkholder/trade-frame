@@ -177,7 +177,6 @@ private:
   typedef std::pair<std::string, pPosition_t> mapPositions_pair_t;
   typedef mapPositions_t::iterator mapPositions_iter_t;
   mapPositions_t m_mapPositionsViaUserName;
-  mapPositions_t m_mapPositionsViaInstrumentName;
 
   typedef std::map<idPortfolio_t, pPortfolio_t> mapPortfolios_t;
   typedef std::pair<idPortfolio_t, pPortfolio_t> mapPortfolios_pair_t;
