@@ -709,7 +709,7 @@ AppCurrencyTrader::pPosition_t AppCurrencyTrader::ConstructPosition( pPortfolio_
   const std::string& idPortfolio( pPortfolio->GetRow().idPortfolio );
   pPosition_t pPosition;
 
-  BOOST_LOG_TRIVIAL(debug) << "ConstructPosition position name: " << sPositionName;
+  //BOOST_LOG_TRIVIAL(debug) << "ConstructPosition position name: " << sPositionName;
 
   if ( pm.PositionExists( idPortfolio, sPositionName ) ) {
     pPosition = pm.GetPosition( idPortfolio, sPositionName );
