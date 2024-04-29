@@ -73,7 +73,7 @@ Portfolio::pPosition_t Portfolio::AddPosition( const std::string &sName, pPositi
   // prepare to add position to user named map
   mapPositions_iter_t iterUser = m_mapPositionsViaUserName.find( sName );
   if ( m_mapPositionsViaUserName.end() != iterUser ) {
-    throw std::runtime_error( "Portfolio::Add1 position already exists" );
+    throw std::runtime_error( "Portfolio::Add1 position " + sName + " already exists" );
   }
 
   // prepare to add position to instrument named map
@@ -81,7 +81,7 @@ Portfolio::pPosition_t Portfolio::AddPosition( const std::string &sName, pPositi
   const std::string& sInstrumentName( pPosition->GetInstrument()->GetInstrumentName() );
   mapPositions_iter_t iterInst = m_mapPositionsViaInstrumentName.find( sInstrumentName );
   if ( m_mapPositionsViaInstrumentName.end() != iterInst ) {
-    throw std::runtime_error( "Portfolio::Add2 position already exists" );
+    throw std::runtime_error( "Portfolio::Add2 instrument " + sInstrumentName + " can only have one position" );
   }
 
   m_mapPositionsViaUserName.insert( mapPositions_pair_t( sName, pPosition ) );
