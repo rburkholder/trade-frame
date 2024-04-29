@@ -124,7 +124,8 @@ struct ParserPairSettings: qi::grammar<Iterator, Choices::PairSettings()> {
     ruleStart %= ruleName >> qi::lit( ',' )
               >> ruleTime >> qi::lit( ',' )
               >> ruleTime >> qi::lit( ',' )
-              >> ruleTimeZone
+              >> ruleTimeZone >> qi::lit( ',' )
+              >> ruleTradingAmount
               ;
 
   }
