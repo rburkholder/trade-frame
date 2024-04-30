@@ -406,12 +406,17 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
 }
 
 bool Strategy::HandleSoftwareReset( const ou::tf::Bar& ) {
+  // TO FIX: performed for each instrument.  perform only once per clock cycle
+  //   so needs a latch on the called side
+  /*
   if ( nullptr != m_fResetSoftware ) {
     return m_fResetSoftware();
   }
   else {
     return false;
   }
+  */
+  return false;
 }
 
 void Strategy::SaveWatch( const std::string& sPrefix ) {
