@@ -199,6 +199,17 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       m_state.sum += mid - m_state.last;
       m_state.last = mid;
       break;
+    case State::Swing::init:
+      {
+        // one time calc pip
+        auto minTick( m_pWatch->GetInstrument()->GetMinTick() );
+        BOOST_LOG_TRIVIAL(info)
+         << minTick
+         << ',' << (double) m_quantityToOrder * minTick
+         ;
+      }
+      m_state.swing = State::Swing::none;
+      break;
   }
 
   // things to check:
