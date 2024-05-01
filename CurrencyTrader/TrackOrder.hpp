@@ -50,17 +50,17 @@ public:
     Done // no more action
     };
 
-    ETradeState m_stateTrade;
+  ETradeState m_stateTrade;
 
-    using pPosition_t = ou::tf::Position::pPosition_t;
-    using quantity_t = ou::tf::Order::quantity_t;
+  using pPosition_t = ou::tf::Position::pPosition_t;
+  using quantity_t = ou::tf::Order::quantity_t;
 
-    pPosition_t m_pPosition;
+  pPosition_t m_pPosition;
 
-    TrackOrder();
-    ~TrackOrder();
+  TrackOrder();
+  ~TrackOrder();
 
-    void Set( quantity_t, pPosition_t, ou::ChartDataView&, int slot );
+  void Set( quantity_t, pPosition_t, ou::ChartDataView&, int slot );
 
   void EnterLong( const ou::tf::Quote& );
   void EnterShort( const ou::tf::Quote& );
