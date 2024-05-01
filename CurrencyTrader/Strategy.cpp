@@ -204,8 +204,12 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         // one time calc pip
         auto minTick( m_pWatch->GetInstrument()->GetMinTick() );
         BOOST_LOG_TRIVIAL(info)
-         << minTick
-         << ',' << (double) m_quantityToOrder * minTick
+                << m_pWatch->GetInstrumentName()
+         << ',' << "mintick="  << minTick
+         << ',' << "midprice=" << mid
+         << ',' << "pip_0=" << (double) m_quantityToOrder * minTick
+         << ',' << "pip_*=" << (double) m_quantityToOrder * minTick * mid
+         << ',' << "pip_/=" << (double) m_quantityToOrder * minTick / mid
          ;
       }
       m_state.swing = State::Swing::none;
