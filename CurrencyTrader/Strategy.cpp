@@ -235,7 +235,9 @@ void Strategy::RunStateUp( TrackOrder& to ) {
     case TrackOrder::ETradeState::Search:
       switch ( m_state.swing ) {
         case State::Swing::up:
-          to.EnterLong( m_quote );
+          if ( m_pEmaCurrency->dblEmaLatest > m_quote.Midpoint() ) {
+            to.EnterLong( m_quote );
+          }
           break;
         case State::Swing::none:
           break;
@@ -292,7 +294,9 @@ void Strategy::RunStateDn( TrackOrder& to ) {
         case State::Swing::none:
           break;
         case State::Swing::down:
-          to.EnterShort( m_quote );
+          if ( m_pEmaCurrency->dblEmaLatest < m_quote.Midpoint() ) {
+            to.EnterShort( m_quote );
+          }
           break;
       }
       break;
