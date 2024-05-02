@@ -117,9 +117,9 @@ private:
     }
   };
 
-  struct PL m_plUp;
-  struct PL m_plTtl;
-  struct PL m_plDn;
+  PL m_plUp;
+  PL m_plTtl;
+  PL m_plDn;
 
   ou::tf::Order::quantity_t m_quantityToOrder;
 
