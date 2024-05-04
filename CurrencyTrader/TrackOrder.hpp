@@ -36,12 +36,9 @@ public:
   enum class ETradeState {
     Init,  // initiaize state in current market
     Search,  // looking for long or short enter
-    LongSubmitted, // order has been submitted, waiting for confirmation
-    LongExitSignal,  // position exists, looking for exit
-    ShortSubmitted,  // order has been submitted, waiting for confirmtaion
-    ShortExitSignal,  // position exists, looking for exit
-    LongExitSubmitted, // wait for exit to complete
-    ShortExitSubmitted, // wait for exit to complete
+    EntrySubmitted, // order has been submitted, waiting for confirmation
+    ExitSignal,  // position exists, looking for exit
+    ExitSubmitted, // wait for exit to complete
     Cancelling,
     Cancelled,
     NoTrade, // from the config file, no trading, might be a future
@@ -81,12 +78,10 @@ private:
   double m_dblUnRealized;
   double m_dblProfitMin;
 
-  ou::ChartEntryShape m_ceLongEntry;
-  ou::ChartEntryShape m_ceLongFill;
-  ou::ChartEntryShape m_ceLongExit;
-  ou::ChartEntryShape m_ceShortEntry;
-  ou::ChartEntryShape m_ceShortFill;
-  ou::ChartEntryShape m_ceShortExit;
+  ou::ChartEntryShape m_ceEntrySubmit;
+  ou::ChartEntryShape m_ceEntryFill;
+  ou::ChartEntryShape m_ceExitSubmit;
+  ou::ChartEntryShape m_ceExitFill;
 
   ou::tf::Order::quantity_t m_quantityToOrder;
 
@@ -97,8 +92,8 @@ private:
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );
 
-  void HandleExitOrderCancelled( const ou::tf::Order& );
-  void HandleExitOrderFilled( const ou::tf::Order& );
+  void HandleExitOrderCancelled( const ou::tf::Order& ); // unused
+  void HandleExitOrderFilled( const ou::tf::Order& ); // unused
 
   void ExitPosition( const ou::tf::Quote& );
 

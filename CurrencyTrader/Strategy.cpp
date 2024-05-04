@@ -245,10 +245,10 @@ void Strategy::RunStateUp( TrackOrder& to ) {
           break;
       }
       break;
-    case TrackOrder::ETradeState::LongSubmitted:
+    case TrackOrder::ETradeState::EntrySubmitted:
       // wait for exectuion
       break;
-    case TrackOrder::ETradeState::LongExitSignal:
+    case TrackOrder::ETradeState::ExitSignal:
       switch ( m_state.swing ) {
         case State::Swing::up:
           break;
@@ -259,14 +259,8 @@ void Strategy::RunStateUp( TrackOrder& to ) {
           break;
       }
       break;
-    case TrackOrder::ETradeState::ShortSubmitted:
-      break;
-    case TrackOrder::ETradeState::ShortExitSignal:
-      break;
-    case TrackOrder::ETradeState::LongExitSubmitted:
+    case TrackOrder::ETradeState::ExitSubmitted:
       // wait for execution
-      break;
-    case TrackOrder::ETradeState::ShortExitSubmitted:
       break;
     case TrackOrder::ETradeState::NoTrade:
       break;
@@ -300,14 +294,10 @@ void Strategy::RunStateDn( TrackOrder& to ) {
           break;
       }
       break;
-    case TrackOrder::ETradeState::LongSubmitted:
-      break;
-    case TrackOrder::ETradeState::LongExitSignal:
-      break;
-    case TrackOrder::ETradeState::ShortSubmitted:
+    case TrackOrder::ETradeState::EntrySubmitted:
       // wait for exectuion
       break;
-    case TrackOrder::ETradeState::ShortExitSignal:
+    case TrackOrder::ETradeState::ExitSignal:
       switch ( m_state.swing ) {
         case State::Swing::up:
           to.ExitShort( m_quote );
@@ -318,9 +308,7 @@ void Strategy::RunStateDn( TrackOrder& to ) {
           break;
       }
       break;
-    case TrackOrder::ETradeState::LongExitSubmitted:
-      break;
-    case TrackOrder::ETradeState::ShortExitSubmitted:
+    case TrackOrder::ETradeState::ExitSubmitted:
       // wait for execution
       break;
     case TrackOrder::ETradeState::NoTrade:

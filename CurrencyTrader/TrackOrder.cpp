@@ -39,11 +39,11 @@ void TrackOrder::Set( quantity_t quantity, pPosition_t pPosition, ou::ChartDataV
   assert( pPosition );
   m_pPosition = pPosition;
 
-  cdv.Add( slot, &m_ceLongEntry );
-  cdv.Add( slot, &m_ceLongExit );
+  cdv.Add( slot, &m_ceEntrySubmit );
+  cdv.Add( slot, &m_ceEntryFill );
 
-  cdv.Add( slot, &m_ceShortEntry );
-  cdv.Add( slot, &m_ceShortExit );
+  cdv.Add( slot, &m_ceExitSubmit );
+  cdv.Add( slot, &m_ceExitFill );
 
 }
 
@@ -57,8 +57,8 @@ void TrackOrder::EnterLong( const ou::tf::Quote& quote ) { // limit orders, in r
   pOrder->SetSignalPrice( dblMidPoint );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrder::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackOrder::HandleOrderFilled ) );
-  m_ceLongEntry.AddLabel( quote.DateTime(), dblMidPoint, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  m_stateTrade = ETradeState::LongSubmitted;
+  m_ceEntrySubmit.AddLabel( quote.DateTime(), dblMidPoint, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  m_stateTrade = ETradeState::EntrySubmitted;
   m_pOrderPending = pOrder;
   m_pPosition->PlaceOrder( pOrder );
   //ShowOrder( pOrder );
@@ -74,8 +74,8 @@ void TrackOrder::EnterShort( const ou::tf::Quote& quote ) { // limit orders, in 
   pOrder->SetSignalPrice( dblMidPoint );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrder::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackOrder::HandleOrderFilled ) );
-  m_ceShortEntry.AddLabel( quote.DateTime(), dblMidPoint, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  m_stateTrade = ETradeState::ShortSubmitted;
+  m_ceEntrySubmit.AddLabel( quote.DateTime(), dblMidPoint, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  m_stateTrade = ETradeState::EntrySubmitted;
   m_pOrderPending = pOrder;
   m_pPosition->PlaceOrder( pOrder );
   //ShowOrder( pOrder );
@@ -90,8 +90,8 @@ void TrackOrder::ExitLong( const ou::tf::Quote& quote ) {
   pOrder->SetSignalPrice( dblMidPoint );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrder::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackOrder::HandleOrderFilled ) );
-  m_ceLongExit.AddLabel( quote.DateTime(), dblMidPoint, "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  m_stateTrade = ETradeState::LongExitSubmitted;
+  m_ceExitSubmit.AddLabel( quote.DateTime(), dblMidPoint, "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  m_stateTrade = ETradeState::ExitSubmitted;
   m_pOrderPending = pOrder;
   m_pPosition->PlaceOrder( pOrder );
   //ShowOrder( pOrder );
@@ -106,8 +106,8 @@ void TrackOrder::ExitShort( const ou::tf::Quote& quote ) {
   pOrder->SetSignalPrice( dblMidPoint );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrder::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackOrder::HandleOrderFilled ) );
-  m_ceShortExit.AddLabel( quote.DateTime(), dblMidPoint, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  m_stateTrade = ETradeState::ShortExitSubmitted;
+  m_ceExitSubmit.AddLabel( quote.DateTime(), dblMidPoint, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  m_stateTrade = ETradeState::ExitSubmitted;
   m_pOrderPending = pOrder;
   m_pPosition->PlaceOrder( pOrder );
   //ShowOrder( pOrder );
@@ -130,12 +130,18 @@ void TrackOrder::HandleOrderCancelled( const ou::tf::Order& order ) {
         << m_pPosition->GetInstrument()->GetInstrumentName()
         << " order " << order.GetOrderId() << " cancelled - end of day";
       break;
-    case ETradeState::LongExitSubmitted:
-    case ETradeState::ShortExitSubmitted:
+    case ETradeState::EntrySubmitted:
+      // cancels will happen due to limit time out
+      BOOST_LOG_TRIVIAL(info)
+        << m_pPosition->GetInstrument()->GetInstrumentName()
+        << " order " << order.GetOrderId() << " entry cancelled";
+      m_stateTrade = ETradeState::Search;
+      break;
+    case ETradeState::ExitSubmitted:
       //assert( false );  // TODO: need to figure out a plan to retry exit
       BOOST_LOG_TRIVIAL(error)
         << m_pPosition->GetInstrument()->GetInstrumentName()
-        << " order " << order.GetOrderId() << " cancelled - state machine needs fixes";
+        << " order " << order.GetOrderId() << " exit cancelled - state machine needs fixes";
       m_stateTrade = ETradeState::Done;
       break;
     default:
@@ -148,20 +154,12 @@ void TrackOrder::HandleOrderFilled( const ou::tf::Order& order ) {
   m_pOrderPending->OnOrderCancelled.Remove( MakeDelegate( this, &TrackOrder::HandleOrderCancelled ) );
   m_pOrderPending->OnOrderFilled.Remove( MakeDelegate( this, &TrackOrder::HandleOrderFilled ) );
   switch ( m_stateTrade ) {
-    case ETradeState::LongSubmitted:
-      m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Long Fill" );
-      m_stateTrade = ETradeState::LongExitSignal;
+    case ETradeState::EntrySubmitted:
+      m_ceEntryFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Entry Fill" );
+      m_stateTrade = ETradeState::ExitSignal;
       break;
-    case ETradeState::ShortSubmitted:
-      m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Fill" );
-      m_stateTrade = ETradeState::ShortExitSignal;
-      break;
-    case ETradeState::LongExitSubmitted:
-      m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Long Exit Fill" );
-      m_stateTrade = ETradeState::Search;
-      break;
-    case ETradeState::ShortExitSubmitted:
-      m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Exit Fill" );
+    case ETradeState::ExitSubmitted:
+      m_ceExitFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Exit Fill" );
       m_stateTrade = ETradeState::Search;
       break;
     case ETradeState::EndOfDayCancel:
@@ -197,6 +195,7 @@ void TrackOrder::HandleGoNeutral( boost::gregorian::date, boost::posix_time::tim
   }
 }
 
+// unused
 void TrackOrder::HandleExitOrderCancelled( const ou::tf::Order& order ) {
   ou::tf::Order& order_( const_cast<ou::tf::Order&>( order ) );
   order_.OnOrderCancelled.Remove( MakeDelegate( this, &TrackOrder::HandleExitOrderCancelled ) );
@@ -216,6 +215,7 @@ void TrackOrder::HandleExitOrderCancelled( const ou::tf::Order& order ) {
   }
 }
 
+// unused
 void TrackOrder::HandleExitOrderFilled( const ou::tf::Order& order ) {
   ou::tf::Order& order_( const_cast<ou::tf::Order&>( order ) );
   order_.OnOrderCancelled.Remove( MakeDelegate( this, &TrackOrder::HandleExitOrderCancelled ) );
@@ -225,7 +225,7 @@ void TrackOrder::HandleExitOrderFilled( const ou::tf::Order& order ) {
     case ou::tf::OrderSide::EOrderSide::Buy:
       //m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "LxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
       switch( m_stateTrade ) {
-        case ETradeState::ShortExitSubmitted:
+        case ETradeState::ExitSubmitted:
           m_stateTrade = ETradeState::Search;
           break;
       }
@@ -233,7 +233,7 @@ void TrackOrder::HandleExitOrderFilled( const ou::tf::Order& order ) {
     case ou::tf::OrderSide::EOrderSide::Sell:
       //m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "SxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
       switch( m_stateTrade ) {
-        case ETradeState::LongExitSubmitted:
+        case ETradeState::ExitSubmitted:
           m_stateTrade = ETradeState::Search;
           break;
       }
@@ -263,8 +263,8 @@ void TrackOrder::ExitPosition( const ou::tf::Quote& quote ) {
           );
         pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrder::HandleExitOrderCancelled ) );
         pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackOrder::HandleExitOrderFilled ) );
-        m_ceLongExit.AddLabel( quote.DateTime(), dblMidPoint, "LxS2-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-        m_stateTrade = ETradeState::LongExitSubmitted;
+        m_ceExitSubmit.AddLabel( quote.DateTime(), dblMidPoint, "LxS2-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+        m_stateTrade = ETradeState::ExitSubmitted;
         m_pPosition->PlaceOrder( pOrder );
         ShowOrder( pOrder );
         break;
@@ -280,8 +280,8 @@ void TrackOrder::ExitPosition( const ou::tf::Quote& quote ) {
           );
         pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrder::HandleExitOrderCancelled ) );
         pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackOrder::HandleExitOrderFilled ) );
-        m_ceShortExit.AddLabel( quote.DateTime(), dblMidPoint, "SxS2-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-        m_stateTrade = ETradeState::ShortExitSubmitted;
+        m_ceExitSubmit.AddLabel( quote.DateTime(), dblMidPoint, "SxS2-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+        m_stateTrade = ETradeState::ExitSubmitted;
         m_pPosition->PlaceOrder( pOrder );
         ShowOrder( pOrder );
         break;
