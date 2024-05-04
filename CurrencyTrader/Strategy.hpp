@@ -126,8 +126,8 @@ private:
   pWatch_t m_pWatch;
   pPortfolio_t m_pPortfolio;
 
-  TrackOrder m_up;
-  TrackOrder m_dn;
+  TrackOrder m_to_up;
+  TrackOrder m_to_dn;
 
   struct EMA { // Exponential Moving Average
 

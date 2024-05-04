@@ -116,13 +116,13 @@ void Strategy::SetWatch( pWatch_t pWatch, pPortfolio_t pPortfolio, fConstructPos
   {
     pPosition_t pPosition = f( pWatch, pWatch->GetInstrumentName() +":up" );
     assert( pPosition );
-    m_up.Set( m_quantityToOrder, pPosition, m_cdv, EChartSlot::Price );
+    m_to_up.Set( m_quantityToOrder, pPosition, m_cdv, EChartSlot::Price );
   }
 
   {
     pPosition_t pPosition = f( pWatch, pWatch->GetInstrumentName() +":dn" );
     assert( pPosition );
-    m_dn.Set( m_quantityToOrder, pPosition, m_cdv, EChartSlot::Price );
+    m_to_dn.Set( m_quantityToOrder, pPosition, m_cdv, EChartSlot::Price );
   }
 
   //m_pWatch->RecordSeries( false );
@@ -170,7 +170,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   double unrealized, realized, commission, total;
 
-  m_up.m_pPosition->QueryStats( unrealized, realized, commission, total );
+  m_to_up.m_pPosition->QueryStats( unrealized, realized, commission, total );
   m_plUp.m_ceUnRealized.Append( dt, unrealized );
   m_plUp.m_ceRealized.Append( dt, realized );
   m_plUp.m_ceProfitLoss.Append( dt, commission );
@@ -182,7 +182,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   m_plTtl.m_ceProfitLoss.Append( dt, commission );
   m_plTtl.m_ceCommission.Append( dt, total );
 
-  m_dn.m_pPosition->QueryStats( unrealized, realized, commission, total );
+  m_to_dn.m_pPosition->QueryStats( unrealized, realized, commission, total );
   m_plDn.m_ceUnRealized.Append( dt, unrealized );
   m_plDn.m_ceRealized.Append( dt, realized );
   m_plDn.m_ceProfitLoss.Append( dt, commission );
@@ -220,8 +220,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   //   track ATR at swingup/swingdn
   //   check distance from ema, if large correction, don't trade, if a few ATRs away, then consider trading
 
-  RunStateUp( m_up );
-  RunStateDn( m_dn );
+  RunStateUp( m_to_up );
+  RunStateDn( m_to_dn );
 
   m_state.swing = State::Swing::none;
 }
@@ -337,13 +337,13 @@ void Strategy::RunStateDn( TrackOrder& to ) {
 }
 
 void Strategy::HandleCancel( boost::gregorian::date date, boost::posix_time::time_duration td ) { // one shot
-  m_up.HandleCancel( date, td );
-  m_dn.HandleCancel( date, td );
+  m_to_up.HandleCancel( date, td );
+  m_to_dn.HandleCancel( date, td );
 }
 
 void Strategy::HandleGoNeutral( boost::gregorian::date date, boost::posix_time::time_duration td ) { // one shot
-  m_up.HandleGoNeutral( date, td );
-  m_dn.HandleGoNeutral( date, td );
+  m_to_up.HandleGoNeutral( date, td );
+  m_to_dn.HandleGoNeutral( date, td );
 }
 
 void Strategy::HandleAtRHClose( boost::gregorian::date date, boost::posix_time::time_duration time ) { // one shot
