@@ -58,10 +58,16 @@ void TrackOrder::QueryStats( double& unrealized, double& realized, double& commi
 
 // see TFTrading/MonitorOrder.cpp
 double TrackOrder::PriceInterval( double price ) const {
+  double interval {};
   auto pProvider( m_pPosition->GetExecutionProvider() );
-  assert( ou::tf::keytypes::EProviderIB == pProvider->ID() );
-  auto idRule = m_pPosition->GetInstrument()->GetExchangeRule();
-  double interval = ou::tf::ib::TWS::Cast( pProvider )->GetInterval( price, idRule );
+  if ( ou::tf::keytypes::EProviderIB == pProvider->ID() ) {
+    auto idRule = m_pPosition->GetInstrument()->GetExchangeRule();
+    double interval = ou::tf::ib::TWS::Cast( pProvider )->GetInterval( price, idRule );
+  }
+  else {
+    interval = m_pPosition->GetInstrument()->GetMinTick();
+  }
+  assert( 0.0 < interval );
   return interval;
 }
 
