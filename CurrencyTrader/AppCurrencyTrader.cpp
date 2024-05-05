@@ -798,9 +798,10 @@ void AppCurrencyTrader::EnhanceInstrument( pInstrument_t pInstrument ) {
         BOOST_LOG_TRIVIAL(info) << "IB contract found: "
                  << details.contract.localSymbol
           << ',' << details.contract.conId
-          << ',' << details.mdSizeMultiplier
-          << ',' << details.contract.exchange
           << ',' << details.contract.secType
+          << ',' << details.mdSizeMultiplier
+          << ',' << details.minTick
+          << ',' << details.contract.exchange
           << ',' << details.validExchanges
           << ',' << details.timeZoneId
           //<< ',' << details.liquidHours
