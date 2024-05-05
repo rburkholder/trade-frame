@@ -132,7 +132,7 @@ void Position::Construction() {
   assert( nullptr != m_pWatch.get() );
   assert( nullptr != m_pWatch->GetProvider().get() );  // new validation, and could trip up some code
   m_dblMultiplier = m_pWatch->GetInstrument()->GetMultiplier();
-  std::cout << m_pWatch->GetInstrumentName() << " multiplier=" << m_dblMultiplier << std::endl;
+  //std::cout << m_pWatch->GetInstrumentName() << " multiplier=" << m_dblMultiplier << std::endl;
 //  HandleQuote( m_pWatch->LastQuote() ); // ensure we have at least one quote (some options don't quote on very otm) -- watch not yet activated
   m_pWatch->OnQuote.Add( MakeDelegate( this, &Position::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &Position::HandleTrade ) );
