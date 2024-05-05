@@ -71,6 +71,8 @@ double TrackOrder::PriceInterval( double price ) const {
   return interval;
 }
 
+// TODO: save exchange rules with instrument in hdf5 when possible
+
 // see TFTrading/MonitorOrder.cpp
 double TrackOrder::Normalize( double price ) const {
   double interval = PriceInterval( price );
