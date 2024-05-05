@@ -25,6 +25,8 @@
 
 #include "TrackOrder.hpp"
 
+// TODO: may desire events/callbacks/lambdas on order completion
+
 TrackOrder::TrackOrder()
 : m_stateTrade( ETradeState::Init )
 {}
@@ -45,6 +47,10 @@ void TrackOrder::Set( quantity_t quantity, pPosition_t pPosition, ou::ChartDataV
   cdv.Add( slot, &m_ceExitSubmit );
   cdv.Add( slot, &m_ceExitFill );
 
+}
+
+void TrackOrder::QueryStats( double& unrealized, double& realized, double& commission, double& total ) {
+  m_pPosition->QueryStats( unrealized, realized, commission, total );
 }
 
 void TrackOrder::Common( pOrder_t& pOrder ) {
@@ -271,6 +277,7 @@ void TrackOrder::HandleExitOrderFilled( const ou::tf::Order& order ) {
   }
 }
 
+// unused
 void TrackOrder::ExitPosition( const ou::tf::Quote& quote ) {
   pOrder_t pOrder;
   double dblMidPoint( quote.Midpoint() );

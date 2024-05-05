@@ -170,7 +170,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   double unrealized, realized, commission, total;
 
-  m_to_up.m_pPosition->QueryStats( unrealized, realized, commission, total );
+  m_to_up.QueryStats( unrealized, realized, commission, total );
   m_plUp.m_ceUnRealized.Append( dt, unrealized );
   m_plUp.m_ceRealized.Append( dt, realized );
   m_plUp.m_ceProfitLoss.Append( dt, commission );
@@ -182,7 +182,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   m_plTtl.m_ceProfitLoss.Append( dt, commission );
   m_plTtl.m_ceCommission.Append( dt, total );
 
-  m_to_dn.m_pPosition->QueryStats( unrealized, realized, commission, total );
+  m_to_dn.QueryStats( unrealized, realized, commission, total );
   m_plDn.m_ceUnRealized.Append( dt, unrealized );
   m_plDn.m_ceRealized.Append( dt, realized );
   m_plDn.m_ceProfitLoss.Append( dt, commission );

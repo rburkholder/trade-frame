@@ -52,12 +52,12 @@ public:
   using pPosition_t = ou::tf::Position::pPosition_t;
   using quantity_t = ou::tf::Order::quantity_t;
 
-  pPosition_t m_pPosition;
-
   TrackOrder();
   ~TrackOrder();
 
   void Set( quantity_t, pPosition_t, ou::ChartDataView&, int slot );
+
+  void QueryStats( double& unrealized, double& realized, double& commission, double& total );
 
   void EnterLongLmt( const ou::tf::Quote& );
   void EnterLongMkt( const ou::tf::Quote& );
@@ -92,6 +92,7 @@ private:
   ou::tf::Order::quantity_t m_quantityToOrder;
 
   pOrder_t m_pOrderPending;
+  pPosition_t m_pPosition;
 
   void Common( pOrder_t& );
   void EnterCommon( pOrder_t& );
@@ -105,6 +106,6 @@ private:
   void HandleExitOrderCancelled( const ou::tf::Order& ); // unused
   void HandleExitOrderFilled( const ou::tf::Order& ); // unused
 
-  void ExitPosition( const ou::tf::Quote& );
+  void ExitPosition( const ou::tf::Quote& ); // unused
 
 };
