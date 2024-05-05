@@ -12,7 +12,6 @@
  ************************************************************************/
 
 #include <cassert>
-#include <stdexcept>
 
 #include <boost/fusion/include/std_pair.hpp>
 
