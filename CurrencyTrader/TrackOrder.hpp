@@ -59,10 +59,16 @@ public:
 
   void Set( quantity_t, pPosition_t, ou::ChartDataView&, int slot );
 
+  void EnterLongLmt( const ou::tf::Quote& );
   void EnterLongMkt( const ou::tf::Quote& );
+
+  void EnterShortLmt( const ou::tf::Quote& );
   void EnterShortMkt( const ou::tf::Quote& );
 
+  void ExitLongLmt( const ou::tf::Quote& );
   void ExitLongMkt( const ou::tf::Quote& );
+
+  void ExitShortLmt( const ou::tf::Quote& );
   void ExitShortMkt( const ou::tf::Quote& );
 
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
