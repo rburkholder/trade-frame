@@ -23,6 +23,8 @@
 // TODO: load daily bars to calculate TR over last number of days
 // TODO: change some of the screeners to use TR rather than bar ranges
 
+// TODO: how many swings are on the proper side of ema?
+
 #include <boost/log/trivial.hpp>
 
 #include "Strategy.hpp"
@@ -206,8 +208,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
         double tick = m_to_up.PriceInterval( mid );
         BOOST_LOG_TRIVIAL(info)
                 << m_pWatch->GetInstrumentName()
-         << ',' << "interval="  << tick  // use the market rule
          << ',' << "midprice=" << mid
+         << ',' << "interval="  << tick
          << ',' << "pip_0=" << ( (double) m_quantityToOrder * tick )
          << ',' << "pip_*=" << ( (double) m_quantityToOrder * tick ) * mid
          << ',' << "pip_/=" << ( (double) m_quantityToOrder * tick ) / mid // this lines up best
@@ -230,7 +232,6 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 void Strategy::RunStateUp( TrackOrder& to ) {
   switch ( to.m_stateTrade ) {
     case TrackOrder::ETradeState::Init: // Strategy starts in this state
-      // TODO: emit current PIP size
       to.m_stateTrade = TrackOrder::ETradeState::Search;
       break;
     case TrackOrder::ETradeState::Search:
@@ -279,7 +280,6 @@ void Strategy::RunStateUp( TrackOrder& to ) {
 void Strategy::RunStateDn( TrackOrder& to ) {
   switch ( to.m_stateTrade ) {
     case TrackOrder::ETradeState::Init: // Strategy starts in this state
-      // TODO: emit current PIP size
       to.m_stateTrade = TrackOrder::ETradeState::Search;
       break;
     case TrackOrder::ETradeState::Search:
@@ -362,11 +362,11 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
 
   // calculate swing points
 
-  Swing& a( m_swing[ 0 ] );
-  Swing& b( m_swing[ 1 ] );
-  Swing& c( m_swing[ 2 ] );
-  Swing& d( m_swing[ 3 ] );
-  Swing& e( m_swing[ 4 ] );
+  Swing& a( m_rSwing[ 0 ] );
+  Swing& b( m_rSwing[ 1 ] );
+  Swing& c( m_rSwing[ 2 ] );
+  Swing& d( m_rSwing[ 3 ] );
+  Swing& e( m_rSwing[ 4 ] );
 
   a = b; b = c; c = d; d = e; e.Update( bar );
 

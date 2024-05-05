@@ -226,7 +226,7 @@ private:
 
   };
   using rSwing_t = std::array<Swing, 5>;
-  rSwing_t m_swing;
+  rSwing_t m_rSwing;
 
   struct SwingTrack {
 
