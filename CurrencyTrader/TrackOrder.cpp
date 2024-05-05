@@ -47,7 +47,7 @@ void TrackOrder::Set( quantity_t quantity, pPosition_t pPosition, ou::ChartDataV
 
 }
 
-void TrackOrder::Common( pOrder_t pOrder ) {
+void TrackOrder::Common( pOrder_t& pOrder ) {
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrder::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackOrder::HandleOrderFilled ) );
   assert( !m_pOrderPending );
@@ -56,11 +56,13 @@ void TrackOrder::Common( pOrder_t pOrder ) {
   //ShowOrder( pOrder );
 }
 
-void TrackOrder::EnterCommon( pOrder_t pOrder ) {
+void TrackOrder::EnterCommon( pOrder_t& pOrder ) {
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
   m_stateTrade = ETradeState::EntrySubmitted;
   Common( pOrder );
 }
+
+// TODO: limit orders need to be normalized
 
 void TrackOrder::EnterLongLmt( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
   double dblMidPoint( quote.Midpoint() );
@@ -98,7 +100,7 @@ void TrackOrder::EnterShortMkt( const ou::tf::Quote& quote ) { // limit orders, 
   EnterCommon( pOrder );
 }
 
-void TrackOrder::ExitCommon( pOrder_t pOrder ) {
+void TrackOrder::ExitCommon( pOrder_t& pOrder ) {
   m_stateTrade = ETradeState::ExitSubmitted;
   Common( pOrder );
 }
@@ -139,7 +141,7 @@ void TrackOrder::ExitShortMkt( const ou::tf::Quote& quote ) {
   ExitCommon( pOrder );
 }
 
-void TrackOrder::ShowOrder( pOrder_t pOrder ) {
+void TrackOrder::ShowOrder( pOrder_t& pOrder ) {
   //m_pTreeItemOrder = m_pTreeItemSymbol->AppendChild(
   //    "Order "
   //  + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() )

@@ -93,11 +93,11 @@ private:
 
   pOrder_t m_pOrderPending;
 
-  void Common( pOrder_t );
-  void EnterCommon( pOrder_t );
-  void ExitCommon( pOrder_t );
+  void Common( pOrder_t& );
+  void EnterCommon( pOrder_t& );
+  void ExitCommon( pOrder_t& );
 
-  void ShowOrder( pOrder_t );
+  void ShowOrder( pOrder_t& );
 
   void HandleOrderCancelled( const ou::tf::Order& );
   void HandleOrderFilled( const ou::tf::Order& );
