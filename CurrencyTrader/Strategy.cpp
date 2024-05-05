@@ -236,7 +236,7 @@ void Strategy::RunStateUp( TrackOrder& to ) {
       switch ( m_state.swing ) {
         case State::Swing::up:
           if ( m_pEmaCurrency->dblEmaLatest > m_quote.Midpoint() ) {
-            to.EnterLongMkt( m_quote );
+            to.EnterLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
           }
           break;
         case State::Swing::none:
@@ -255,7 +255,7 @@ void Strategy::RunStateUp( TrackOrder& to ) {
         case State::Swing::none:
           break;
         case State::Swing::down:
-          to.ExitLongMkt( m_quote );
+          to.ExitLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
           break;
       }
       break;
@@ -289,7 +289,7 @@ void Strategy::RunStateDn( TrackOrder& to ) {
           break;
         case State::Swing::down:
           if ( m_pEmaCurrency->dblEmaLatest < m_quote.Midpoint() ) {
-            to.EnterShortMkt( m_quote );
+            to.EnterShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
           }
           break;
       }
@@ -300,7 +300,7 @@ void Strategy::RunStateDn( TrackOrder& to ) {
     case TrackOrder::ETradeState::ExitSignal:
       switch ( m_state.swing ) {
         case State::Swing::up:
-          to.ExitShortMkt( m_quote );
+          to.ExitShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
           break;
         case State::Swing::none:
           break;

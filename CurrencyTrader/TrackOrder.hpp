@@ -25,8 +25,6 @@
 
 #include <OUCharting/ChartEntryShape.h>
 
-#include <TFTimeSeries/DatedDatum.h>
-
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
 
@@ -52,6 +50,22 @@ public:
   using pPosition_t = ou::tf::Position::pPosition_t;
   using quantity_t = ou::tf::Order::quantity_t;
 
+  struct OrderArgs {
+
+    boost::posix_time::ptime dt;
+    double signal;
+    double limit;
+
+    OrderArgs(): signal {}, limit {} {}
+
+    OrderArgs( boost::posix_time::ptime dt_, double signal_ )
+    : dt( dt_ ), signal( signal_ ), limit{} {}
+
+    OrderArgs( boost::posix_time::ptime dt_, double signal_, double limit_ )
+    : dt( dt_ ), signal( signal_ ), limit( limit_ )
+    {}
+  };
+
   TrackOrder();
   ~TrackOrder();
 
@@ -59,17 +73,17 @@ public:
 
   void QueryStats( double& unrealized, double& realized, double& commission, double& total );
 
-  void EnterLongLmt( const ou::tf::Quote& );
-  void EnterLongMkt( const ou::tf::Quote& );
+  void EnterLongLmt( const OrderArgs& );
+  void EnterLongMkt( const OrderArgs& );
 
-  void EnterShortLmt( const ou::tf::Quote& );
-  void EnterShortMkt( const ou::tf::Quote& );
+  void EnterShortLmt( const OrderArgs& );
+  void EnterShortMkt( const OrderArgs& );
 
-  void ExitLongLmt( const ou::tf::Quote& );
-  void ExitLongMkt( const ou::tf::Quote& );
+  void ExitLongLmt( const OrderArgs& );
+  void ExitLongMkt( const OrderArgs& );
 
-  void ExitShortLmt( const ou::tf::Quote& );
-  void ExitShortMkt( const ou::tf::Quote& );
+  void ExitShortLmt( const OrderArgs& );
+  void ExitShortMkt( const OrderArgs& );
 
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );

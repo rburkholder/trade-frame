@@ -70,39 +70,35 @@ void TrackOrder::EnterCommon( pOrder_t& pOrder ) {
 
 // TODO: limit orders need to be normalized
 
-void TrackOrder::EnterLongLmt( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
-  double dblMidPoint( quote.Midpoint() );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityToOrder, quote.Bid() );
+void TrackOrder::EnterLongLmt( const OrderArgs& args ) { // limit orders, in real, will need to be normalized
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityToOrder, args.limit );
   assert( pOrder );
-  pOrder->SetSignalPrice( dblMidPoint );
-  m_ceEntrySubmit.AddLabel( quote.DateTime(), dblMidPoint, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  pOrder->SetSignalPrice( args.signal );
+  m_ceEntrySubmit.AddLabel( args.dt, args.signal, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   EnterCommon( pOrder );
 }
 
-void TrackOrder::EnterLongMkt( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
-  double dblMidPoint( quote.Midpoint() );
+void TrackOrder::EnterLongMkt( const OrderArgs& args ) { // limit orders, in real, will need to be normalized
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityToOrder );
   assert( pOrder );
-  pOrder->SetSignalPrice( dblMidPoint );
-  m_ceEntrySubmit.AddLabel( quote.DateTime(), dblMidPoint, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  pOrder->SetSignalPrice( args.signal );
+  m_ceEntrySubmit.AddLabel( args.dt, args.signal, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   EnterCommon( pOrder );
 }
 
-void TrackOrder::EnterShortLmt( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
-  double dblMidPoint( quote.Midpoint() );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityToOrder, quote.Ask() );
+void TrackOrder::EnterShortLmt( const OrderArgs& args ) { // limit orders, in real, will need to be normalized
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityToOrder, args.limit );
   assert( pOrder );
-  pOrder->SetSignalPrice( dblMidPoint );
-  m_ceEntrySubmit.AddLabel( quote.DateTime(), dblMidPoint, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  pOrder->SetSignalPrice( args.signal );
+  m_ceEntrySubmit.AddLabel( args.dt, args.signal, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   EnterCommon( pOrder );
 }
 
-void TrackOrder::EnterShortMkt( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
-  double dblMidPoint( quote.Midpoint() );
+void TrackOrder::EnterShortMkt( const OrderArgs& args ) { // limit orders, in real, will need to be normalized
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityToOrder );
   assert( pOrder );
-  pOrder->SetSignalPrice( dblMidPoint );
-  m_ceEntrySubmit.AddLabel( quote.DateTime(), dblMidPoint, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  pOrder->SetSignalPrice( args.signal );
+  m_ceEntrySubmit.AddLabel( args.dt, args.signal, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   EnterCommon( pOrder );
 }
 
@@ -111,39 +107,35 @@ void TrackOrder::ExitCommon( pOrder_t& pOrder ) {
   Common( pOrder );
 }
 
-void TrackOrder::ExitLongLmt( const ou::tf::Quote& quote ) {
-  double dblMidPoint( quote.Midpoint() );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityToOrder, quote.Ask() );
+void TrackOrder::ExitLongLmt( const OrderArgs& args ) {
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityToOrder, args.limit );
   assert( pOrder );
-  pOrder->SetSignalPrice( dblMidPoint );
-  m_ceExitSubmit.AddLabel( quote.DateTime(), dblMidPoint, "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  pOrder->SetSignalPrice( args.signal );
+  m_ceExitSubmit.AddLabel( args.dt, args.signal, "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   ExitCommon( pOrder );
 }
 
-void TrackOrder::ExitLongMkt( const ou::tf::Quote& quote ) {
-  double dblMidPoint( quote.Midpoint() );
+void TrackOrder::ExitLongMkt( const OrderArgs& args ) {
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityToOrder );
   assert( pOrder );
-  pOrder->SetSignalPrice( dblMidPoint );
-  m_ceExitSubmit.AddLabel( quote.DateTime(), dblMidPoint, "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  pOrder->SetSignalPrice( args.signal );
+  m_ceExitSubmit.AddLabel( args.dt, args.signal, "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   ExitCommon( pOrder );
 }
 
-void TrackOrder::ExitShortLmt( const ou::tf::Quote& quote ) {
-  double dblMidPoint( quote.Midpoint() );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityToOrder, quote.Bid() );
+void TrackOrder::ExitShortLmt( const OrderArgs& args ) {
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityToOrder, args.limit );
   assert( pOrder );
-  pOrder->SetSignalPrice( dblMidPoint );
-  m_ceExitSubmit.AddLabel( quote.DateTime(), dblMidPoint, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  pOrder->SetSignalPrice( args.signal );
+  m_ceExitSubmit.AddLabel( args.dt, args.signal, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   ExitCommon( pOrder );
 }
 
-void TrackOrder::ExitShortMkt( const ou::tf::Quote& quote ) {
-  double dblMidPoint( quote.Midpoint() );
+void TrackOrder::ExitShortMkt( const OrderArgs& args ) {
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityToOrder );
   assert( pOrder );
-  pOrder->SetSignalPrice( dblMidPoint );
-  m_ceExitSubmit.AddLabel( quote.DateTime(), dblMidPoint, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  pOrder->SetSignalPrice( args.signal );
+  m_ceExitSubmit.AddLabel( args.dt, args.signal, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   ExitCommon( pOrder );
 }
 
