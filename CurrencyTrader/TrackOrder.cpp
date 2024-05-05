@@ -47,38 +47,45 @@ void TrackOrder::Set( quantity_t quantity, pPosition_t pPosition, ou::ChartDataV
 
 }
 
-void TrackOrder::EnterLong( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
-  double dblMidPoint( quote.Midpoint() );
-  //assert( nullptr == m_pOrderPending.get() );
-  m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityToOrder );
-  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
-  assert( pOrder );
-  pOrder->SetSignalPrice( dblMidPoint );
+void TrackOrder::Common( pOrder_t pOrder ) {
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrder::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackOrder::HandleOrderFilled ) );
-  m_ceEntrySubmit.AddLabel( quote.DateTime(), dblMidPoint, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  m_stateTrade = ETradeState::EntrySubmitted;
   m_pOrderPending = pOrder;
   m_pPosition->PlaceOrder( pOrder );
   //ShowOrder( pOrder );
 }
 
+void TrackOrder::EnterCommon( pOrder_t pOrder ) {
+  m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
+  m_stateTrade = ETradeState::EntrySubmitted;
+  Common( pOrder );
+}
+
+void TrackOrder::EnterLong( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
+  double dblMidPoint( quote.Midpoint() );
+  //assert( nullptr == m_pOrderPending.get() );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityToOrder );
+  //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
+  assert( pOrder );
+  pOrder->SetSignalPrice( dblMidPoint );
+  m_ceEntrySubmit.AddLabel( quote.DateTime(), dblMidPoint, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  EnterCommon( pOrder );
+}
+
 void TrackOrder::EnterShort( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
-  m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityToOrder );
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
   assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );
-  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrder::HandleOrderCancelled ) );
-  pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackOrder::HandleOrderFilled ) );
   m_ceEntrySubmit.AddLabel( quote.DateTime(), dblMidPoint, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  m_stateTrade = ETradeState::EntrySubmitted;
-  m_pOrderPending = pOrder;
-  m_pPosition->PlaceOrder( pOrder );
-  //ShowOrder( pOrder );
+  EnterCommon( pOrder );
+}
+
+void TrackOrder::ExitCommon( pOrder_t pOrder ) {
+  m_stateTrade = ETradeState::ExitSubmitted;
+  Common( pOrder );
 }
 
 void TrackOrder::ExitLong( const ou::tf::Quote& quote ) {
@@ -88,13 +95,8 @@ void TrackOrder::ExitLong( const ou::tf::Quote& quote ) {
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, 1, m_quote.Ask() );
   assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );
-  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrder::HandleOrderCancelled ) );
-  pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackOrder::HandleOrderFilled ) );
   m_ceExitSubmit.AddLabel( quote.DateTime(), dblMidPoint, "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  m_stateTrade = ETradeState::ExitSubmitted;
-  m_pOrderPending = pOrder;
-  m_pPosition->PlaceOrder( pOrder );
-  //ShowOrder( pOrder );
+  ExitCommon( pOrder );
 }
 
 void TrackOrder::ExitShort( const ou::tf::Quote& quote ) {
@@ -104,13 +106,8 @@ void TrackOrder::ExitShort( const ou::tf::Quote& quote ) {
   //pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, 1, m_quote.Bid() );
   assert( pOrder );
   pOrder->SetSignalPrice( dblMidPoint );
-  pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrder::HandleOrderCancelled ) );
-  pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackOrder::HandleOrderFilled ) );
   m_ceExitSubmit.AddLabel( quote.DateTime(), dblMidPoint, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  m_stateTrade = ETradeState::ExitSubmitted;
-  m_pOrderPending = pOrder;
-  m_pPosition->PlaceOrder( pOrder );
-  //ShowOrder( pOrder );
+  ExitCommon( pOrder );
 }
 
 void TrackOrder::ShowOrder( pOrder_t pOrder ) {
