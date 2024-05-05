@@ -53,7 +53,8 @@ void TrackOrder::QueryStats( double& unrealized, double& realized, double& commi
   m_pPosition->QueryStats( unrealized, realized, commission, total );
 }
 
-void TrackOrder::Common( pOrder_t& pOrder ) {
+void TrackOrder::Common( const OrderArgs& args, pOrder_t& pOrder ) {
+  pOrder->SetSignalPrice( args.signal );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrder::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackOrder::HandleOrderFilled ) );
   assert( !m_pOrderPending );
@@ -62,10 +63,10 @@ void TrackOrder::Common( pOrder_t& pOrder ) {
   //ShowOrder( pOrder );
 }
 
-void TrackOrder::EnterCommon( pOrder_t& pOrder ) {
+void TrackOrder::EnterCommon( const OrderArgs& args, pOrder_t& pOrder ) {
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
   m_stateTrade = ETradeState::EntrySubmitted;
-  Common( pOrder );
+  Common( args, pOrder );
 }
 
 // TODO: limit orders need to be normalized
@@ -73,70 +74,62 @@ void TrackOrder::EnterCommon( pOrder_t& pOrder ) {
 void TrackOrder::EnterLongLmt( const OrderArgs& args ) { // limit orders, in real, will need to be normalized
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityToOrder, args.limit );
   assert( pOrder );
-  pOrder->SetSignalPrice( args.signal );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  EnterCommon( pOrder );
+  EnterCommon( args, pOrder );
 }
 
 void TrackOrder::EnterLongMkt( const OrderArgs& args ) { // limit orders, in real, will need to be normalized
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityToOrder );
   assert( pOrder );
-  pOrder->SetSignalPrice( args.signal );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  EnterCommon( pOrder );
+  EnterCommon( args, pOrder );
 }
 
 void TrackOrder::EnterShortLmt( const OrderArgs& args ) { // limit orders, in real, will need to be normalized
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityToOrder, args.limit );
   assert( pOrder );
-  pOrder->SetSignalPrice( args.signal );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  EnterCommon( pOrder );
+  EnterCommon( args, pOrder );
 }
 
 void TrackOrder::EnterShortMkt( const OrderArgs& args ) { // limit orders, in real, will need to be normalized
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityToOrder );
   assert( pOrder );
-  pOrder->SetSignalPrice( args.signal );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  EnterCommon( pOrder );
+  EnterCommon( args, pOrder );
 }
 
-void TrackOrder::ExitCommon( pOrder_t& pOrder ) {
+void TrackOrder::ExitCommon( const OrderArgs& args, pOrder_t& pOrder ) {
   m_stateTrade = ETradeState::ExitSubmitted;
-  Common( pOrder );
+  Common( args, pOrder );
 }
 
 void TrackOrder::ExitLongLmt( const OrderArgs& args ) {
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityToOrder, args.limit );
   assert( pOrder );
-  pOrder->SetSignalPrice( args.signal );
   m_ceExitSubmit.AddLabel( args.dt, args.signal, "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  ExitCommon( pOrder );
+  ExitCommon( args, pOrder );
 }
 
 void TrackOrder::ExitLongMkt( const OrderArgs& args ) {
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityToOrder );
   assert( pOrder );
-  pOrder->SetSignalPrice( args.signal );
   m_ceExitSubmit.AddLabel( args.dt, args.signal, "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  ExitCommon( pOrder );
+  ExitCommon( args, pOrder );
 }
 
 void TrackOrder::ExitShortLmt( const OrderArgs& args ) {
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityToOrder, args.limit );
   assert( pOrder );
-  pOrder->SetSignalPrice( args.signal );
   m_ceExitSubmit.AddLabel( args.dt, args.signal, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  ExitCommon( pOrder );
+  ExitCommon( args, pOrder );
 }
 
 void TrackOrder::ExitShortMkt( const OrderArgs& args ) {
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityToOrder );
   assert( pOrder );
-  pOrder->SetSignalPrice( args.signal );
   m_ceExitSubmit.AddLabel( args.dt, args.signal, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  ExitCommon( pOrder );
+  ExitCommon( args, pOrder );
 }
 
 void TrackOrder::ShowOrder( pOrder_t& pOrder ) {

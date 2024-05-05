@@ -108,9 +108,9 @@ private:
   pOrder_t m_pOrderPending;
   pPosition_t m_pPosition;
 
-  void Common( pOrder_t& );
-  void EnterCommon( pOrder_t& );
-  void ExitCommon( pOrder_t& );
+  void Common( const OrderArgs&, pOrder_t& );
+  void EnterCommon( const OrderArgs&, pOrder_t& );
+  void ExitCommon( const OrderArgs&, pOrder_t& );
 
   void ShowOrder( pOrder_t& );
 
