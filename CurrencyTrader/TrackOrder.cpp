@@ -61,7 +61,7 @@ void TrackOrder::EnterCommon( pOrder_t pOrder ) {
   Common( pOrder );
 }
 
-void TrackOrder::EnterLong( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
+void TrackOrder::EnterLongMkt( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityToOrder );
@@ -72,7 +72,7 @@ void TrackOrder::EnterLong( const ou::tf::Quote& quote ) { // limit orders, in r
   EnterCommon( pOrder );
 }
 
-void TrackOrder::EnterShort( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
+void TrackOrder::EnterShortMkt( const ou::tf::Quote& quote ) { // limit orders, in real, will need to be normalized
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityToOrder );
@@ -88,7 +88,7 @@ void TrackOrder::ExitCommon( pOrder_t pOrder ) {
   Common( pOrder );
 }
 
-void TrackOrder::ExitLong( const ou::tf::Quote& quote ) {
+void TrackOrder::ExitLongMkt( const ou::tf::Quote& quote ) {
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityToOrder );
@@ -99,7 +99,7 @@ void TrackOrder::ExitLong( const ou::tf::Quote& quote ) {
   ExitCommon( pOrder );
 }
 
-void TrackOrder::ExitShort( const ou::tf::Quote& quote ) {
+void TrackOrder::ExitShortMkt( const ou::tf::Quote& quote ) {
   double dblMidPoint( quote.Midpoint() );
   //assert( nullptr == m_pOrderPending.get() );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityToOrder );
