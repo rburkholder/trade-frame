@@ -76,6 +76,8 @@ public:
 
   void Set( quantity_t, pPosition_t, ou::ChartDataView&, int slot );
 
+  double PriceInterval( double price ) const;
+
   void QueryStats( double& unrealized, double& realized, double& commission, double& total );
 
   void EnterLongLmt( const OrderArgs& );
@@ -113,7 +115,6 @@ private:
   pOrder_t m_pOrderPending;
   pPosition_t m_pPosition;
 
-  double PriceInterval( double price ) const; // called by Normalize only
   double Normalize( double price ) const;
 
   void SetGoodTill( const OrderArgs&, pOrder_t& );

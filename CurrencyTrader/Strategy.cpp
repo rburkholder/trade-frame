@@ -202,14 +202,15 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
     case State::Swing::init:
       {
         // one time calc pip
-        auto minTick( m_pWatch->GetInstrument()->GetMinTick() );
+        //auto minTick( m_pWatch->GetInstrument()->GetMinTick() );
+        double tick = m_to_up.PriceInterval( mid );
         BOOST_LOG_TRIVIAL(info)
                 << m_pWatch->GetInstrumentName()
-         << ',' << "mintick="  << minTick
+         << ',' << "interval="  << tick  // use the market rule
          << ',' << "midprice=" << mid
-         << ',' << "pip_0=" << (double) m_quantityToOrder * minTick
-         << ',' << "pip_*=" << (double) m_quantityToOrder * minTick * mid
-         << ',' << "pip_/=" << (double) m_quantityToOrder * minTick / mid
+         << ',' << "pip_0=" << ( (double) m_quantityToOrder * tick )
+         << ',' << "pip_*=" << ( (double) m_quantityToOrder * tick ) * mid
+         << ',' << "pip_/=" << ( (double) m_quantityToOrder * tick ) / mid // this lines up best
          ;
       }
       m_state.swing = State::Swing::none;
