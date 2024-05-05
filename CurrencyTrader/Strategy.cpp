@@ -24,6 +24,7 @@
 // TODO: change some of the screeners to use TR rather than bar ranges
 
 // TODO: how many swings are on the proper side of ema?
+// TODO: reverse the PIP calc to force order to $10USD / PIP
 
 #include <boost/log/trivial.hpp>
 
@@ -192,13 +193,13 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   switch ( m_state.swing ) {
     case State::Swing::up:
-      m_state.sum += m_state.last - mid;
+      m_state.sum += ( m_state.last - mid );
       m_state.last = mid;
       break;
     case State::Swing::none:
       break;
     case State::Swing::down:
-      m_state.sum += mid - m_state.last;
+      m_state.sum += ( mid - m_state.last );
       m_state.last = mid;
       break;
     case State::Swing::init:
@@ -370,7 +371,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
 
   a = b; b = c; c = d; d = e; e.Update( bar );
 
-  {
+  { // highest point
     const double x = a.hi > b.hi ? a.hi : b.hi;
     const double y = d.hi > e.hi ? d.hi : e.hi;
     const double z = x > y ? x : y;
@@ -391,7 +392,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
     }
   }
 
-  {
+  { // lowest point
     const double x = a.lo < b.lo ? a.lo : b.lo;
     const double y = d.lo < e.lo ? d.lo : e.lo;
     const double z = x < y ? x : y;
