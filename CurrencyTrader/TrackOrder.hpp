@@ -55,14 +55,19 @@ public:
     boost::posix_time::ptime dt;
     double signal;
     double limit;
+    int duration; // limit order duration seconds
 
-    OrderArgs(): signal {}, limit {} {}
+    OrderArgs(): signal {}, limit {}, duration {} {}
 
     OrderArgs( boost::posix_time::ptime dt_, double signal_ )
-    : dt( dt_ ), signal( signal_ ), limit{} {}
+    : dt( dt_ ), signal( signal_ ), limit{}, duration {} {}
 
     OrderArgs( boost::posix_time::ptime dt_, double signal_, double limit_ )
-    : dt( dt_ ), signal( signal_ ), limit( limit_ )
+    : dt( dt_ ), signal( signal_ ), limit( limit_ ), duration {}
+    {}
+
+    OrderArgs( boost::posix_time::ptime dt_, double signal_, double limit_, int duration_ )
+    : dt( dt_ ), signal( signal_ ), limit( limit_ ), duration( duration_ )
     {}
   };
 
@@ -107,6 +112,8 @@ private:
 
   pOrder_t m_pOrderPending;
   pPosition_t m_pPosition;
+
+  void SetGoodTill( const OrderArgs&, pOrder_t& );
 
   void Common( const OrderArgs&, pOrder_t& );
   void EnterCommon( const OrderArgs&, pOrder_t& );
