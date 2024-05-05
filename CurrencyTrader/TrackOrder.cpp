@@ -23,6 +23,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <TFInteractiveBrokers/IBTWS.h>
+
 #include "TrackOrder.hpp"
 
 // TODO: may desire events/callbacks/lambdas on order completion
@@ -39,6 +41,7 @@ void TrackOrder::Set( quantity_t quantity, pPosition_t pPosition, ou::ChartDataV
   m_quantityToOrder = quantity;
 
   assert( pPosition );
+  assert( !m_pPosition );
   m_pPosition = pPosition;
 
   cdv.Add( slot, &m_ceEntrySubmit );
@@ -51,6 +54,21 @@ void TrackOrder::Set( quantity_t quantity, pPosition_t pPosition, ou::ChartDataV
 
 void TrackOrder::QueryStats( double& unrealized, double& realized, double& commission, double& total ) {
   m_pPosition->QueryStats( unrealized, realized, commission, total );
+}
+
+// see TFTrading/MonitorOrder.cpp
+double TrackOrder::PriceInterval( double price ) const {
+  auto pProvider( m_pPosition->GetExecutionProvider() );
+  assert( ou::tf::keytypes::EProviderIB == pProvider->ID() );
+  auto idRule = m_pPosition->GetInstrument()->GetExchangeRule();
+  double interval = ou::tf::ib::TWS::Cast( pProvider )->GetInterval( price, idRule );
+  return interval;
+}
+
+// see TFTrading/MonitorOrder.cpp
+double TrackOrder::Normalize( double price ) const {
+  double interval = PriceInterval( price );
+  return m_pPosition->GetInstrument()->NormalizeOrderPrice( price, interval );
 }
 
 void TrackOrder::SetGoodTill( const OrderArgs& args, pOrder_t& pOrder ) {
@@ -83,10 +101,8 @@ void TrackOrder::EnterCommon( const OrderArgs& args, pOrder_t& pOrder ) {
   Common( args, pOrder );
 }
 
-// TODO: limit orders need to be normalized
-
 void TrackOrder::EnterLongLmt( const OrderArgs& args ) {
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityToOrder, args.limit );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityToOrder, Normalize( args.limit ) );
   assert( pOrder );
   SetGoodTill( args, pOrder );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
@@ -101,7 +117,7 @@ void TrackOrder::EnterLongMkt( const OrderArgs& args ) {
 }
 
 void TrackOrder::EnterShortLmt( const OrderArgs& args ) {
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityToOrder, args.limit );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityToOrder, Normalize( args.limit ) );
   assert( pOrder );
   SetGoodTill( args, pOrder );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
@@ -121,7 +137,7 @@ void TrackOrder::ExitCommon( const OrderArgs& args, pOrder_t& pOrder ) {
 }
 
 void TrackOrder::ExitLongLmt( const OrderArgs& args ) {
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityToOrder, args.limit );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityToOrder, Normalize( args.limit ) );
   assert( pOrder );
   SetGoodTill( args, pOrder );
   m_ceExitSubmit.AddLabel( args.dt, args.signal, "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
@@ -136,7 +152,7 @@ void TrackOrder::ExitLongMkt( const OrderArgs& args ) {
 }
 
 void TrackOrder::ExitShortLmt( const OrderArgs& args ) {
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityToOrder, args.limit );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityToOrder, Normalize( args.limit ) );
   assert( pOrder );
   SetGoodTill( args, pOrder );
   m_ceExitSubmit.AddLabel( args.dt, args.signal, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );

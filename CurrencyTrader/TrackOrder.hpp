@@ -113,6 +113,9 @@ private:
   pOrder_t m_pOrderPending;
   pPosition_t m_pPosition;
 
+  double PriceInterval( double price ) const; // called by NormalizePrice only
+  double Normalize( double price ) const;
+
   void SetGoodTill( const OrderArgs&, pOrder_t& );
 
   void Common( const OrderArgs&, pOrder_t& );
