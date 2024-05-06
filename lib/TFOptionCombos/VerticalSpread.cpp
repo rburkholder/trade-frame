@@ -35,6 +35,8 @@ namespace option { // option
 namespace spread { // spread
 namespace vertical { // vertical
 
+// may need to break out into vertical::bearcall, vertical::bullput
+
 namespace { // anonymous
 
   static const size_t c_nLegs( 2 );
@@ -70,7 +72,7 @@ size_t LegCount() {
 }
 
 void ChooseLegs( // throw Chain exceptions
-  ComboTraits::EMarketDirection direction
+  ComboTraits::EMarketDirection direction // direction = expected => buy, else sell
 , const mapChains_t& chains
 , boost::gregorian::date date
 , const SpreadSpecs& specs
@@ -151,8 +153,10 @@ std::string Name(
   switch ( direction ) {
     case ComboTraits::EMarketDirection::Rising:
       sName = "bull-put-";
+      break;
     case ComboTraits::EMarketDirection::Falling:
       sName = "bear-call-";
+      break;
   }
   sName += sUnderlying;
 
@@ -187,11 +191,11 @@ void AddLegOrder(
   const LegNote::Type type
 , pOrderCombo_t pOrderCombo
 , const ou::tf::OrderSide::EOrderSide side
-, uint32_t nOrderQuantity
+, uint32_t nOrderQuantity // TODO: need to multiply by what is in static table
 , pPosition_t pPosition
 ) {
   switch ( side ) {
-    case ou::tf::OrderSide::Buy: // bull put
+    case ou::tf::OrderSide::Buy:  // need a selector for bull put or bear call
       {
         mapLegDev_t::const_iterator iter = mapLegDef.find( type );
         assert( mapLegDef.end() != iter );
@@ -206,17 +210,17 @@ void AddLegOrder(
         }
       }
       break;
-    case ou::tf::OrderSide::Sell: // bear call
+    case ou::tf::OrderSide::Sell:
       {
         mapLegDev_t::const_iterator iter = mapLegDef.find( type );
         assert( mapLegDef.end() != iter );
         const LegDef& leg( c_rLegDefFall[ iter->second ] ); // note the Caveat at top of file
         switch ( leg.side ) {
           case LegNote::Side::Long:
-            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Buy, [](){} );
+            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Sell, [](){} );
             break;
           case LegNote::Side::Short:
-            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Sell, [](){} );
+            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Buy, [](){} );
             break;
         }
       }
