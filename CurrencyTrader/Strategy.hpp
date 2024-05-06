@@ -257,12 +257,12 @@ private:
   unsigned int m_nLo;
 
   struct State {
-    enum class Swing { init, up, down, none } swing;
+    enum class Swing { none, up, down } swing;
     enum class Cross { none, above, below } cross; // ema
     double last;
     double sum;
     State()
-    : swing( Swing::init )
+    : swing( Swing::none )
     , cross( Cross::none )
     , last {}
     , sum {}
@@ -277,6 +277,7 @@ void Init();
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
 
+  void HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleRHTrading( const ou::tf::Bar& );
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );

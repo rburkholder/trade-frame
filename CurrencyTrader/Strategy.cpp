@@ -166,6 +166,21 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
 }
 
+void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration ) {
+  // one time calc pip
+  //auto minTick( m_pWatch->GetInstrument()->GetMinTick() );
+  const double mid( m_quote.Midpoint() );
+  double tick = m_to_up.PriceInterval( mid );
+  BOOST_LOG_TRIVIAL(info)
+          << m_pWatch->GetInstrumentName()
+    << ',' << "midprice=" << mid
+    << ',' << "interval="  << tick
+    << ',' << "pip_0=" << ( (double) m_quantityToOrder * tick )
+    << ',' << "pip_*=" << ( (double) m_quantityToOrder * tick ) * mid
+    << ',' << "pip_/=" << ( (double) m_quantityToOrder * tick ) / mid // this lines up best
+    ;
+}
+
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   const auto dt( bar.DateTime() );
@@ -202,22 +217,6 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       m_state.sum += ( mid - m_state.last );
       m_state.last = mid;
       break;
-    case State::Swing::init:
-      {
-        // one time calc pip
-        //auto minTick( m_pWatch->GetInstrument()->GetMinTick() );
-        double tick = m_to_up.PriceInterval( mid );
-        BOOST_LOG_TRIVIAL(info)
-                << m_pWatch->GetInstrumentName()
-         << ',' << "midprice=" << mid
-         << ',' << "interval="  << tick
-         << ',' << "pip_0=" << ( (double) m_quantityToOrder * tick )
-         << ',' << "pip_*=" << ( (double) m_quantityToOrder * tick ) * mid
-         << ',' << "pip_/=" << ( (double) m_quantityToOrder * tick ) / mid // this lines up best
-         ;
-      }
-      m_state.swing = State::Swing::none;
-      break;
   }
 
   // things to check:
@@ -238,7 +237,7 @@ void Strategy::RunStateUp( TrackOrder& to ) {
     case TrackOrder::ETradeState::Search:
       switch ( m_state.swing ) {
         case State::Swing::up:
-          if ( m_pEmaCurrency->dblEmaLatest > m_quote.Midpoint() ) {
+          if ( m_pEmaCurrency->dblEmaLatest > m_quote.Midpoint() ) { // need to track if crossed or touched
             to.EnterLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
           }
           break;
@@ -290,7 +289,7 @@ void Strategy::RunStateDn( TrackOrder& to ) {
         case State::Swing::none:
           break;
         case State::Swing::down:
-          if ( m_pEmaCurrency->dblEmaLatest < m_quote.Midpoint() ) {
+          if ( m_pEmaCurrency->dblEmaLatest < m_quote.Midpoint() ) { // need to track if crossed or touched
             to.EnterShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
           }
           break;
@@ -362,7 +361,6 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
   m_pATRSlow->Update( dt, m_TRSlow.Update( bar ) );
 
   // calculate swing points
-
   Swing& a( m_rSwing[ 0 ] );
   Swing& b( m_rSwing[ 1 ] );
   Swing& c( m_rSwing[ 2 ] );
@@ -412,6 +410,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
       //  << std::endl;
     }
   }
+
 }
 
 bool Strategy::HandleSoftwareReset( const ou::tf::Bar& ) {
