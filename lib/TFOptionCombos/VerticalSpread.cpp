@@ -42,16 +42,16 @@ namespace { // anonymous
   using LegDef = ou::tf::option::LegDef;
   using rLegDef_t = std::array<LegDef,c_nLegs>;
 
-  // NOTE/Caveat: AddLegOrder requires that c_rLegDefRise & c_rLegDefFall have identical LegNote::Side for each entry
+  // Note/Caveat: AddLegOrder requires that c_rLegDefRise & c_rLegDefFall have identical LegNote::Side for each entry
 
   // TOOD: update leg types to reflect adjustements suggested in book Profiting from Weekly Options
 
-  static const rLegDef_t c_rLegDefRise = { // rising momentum - bull put
+  static const rLegDef_t c_rLegDefRise = { // rising momentum - bull put - buy side
     LegDef( 1, LegNote::Type::Long,  LegNote::Side::Long,  LegNote::Option::Put )
   , LegDef( 1, LegNote::Type::Short, LegNote::Side::Short, LegNote::Option::Put )
   };
 
-  static const rLegDef_t c_rLegDefFall = { // falling momentum - bear call
+  static const rLegDef_t c_rLegDefFall = { // falling momentum - bear call - sell side
     LegDef( 1, LegNote::Type::Long,  LegNote::Side::Long,  LegNote::Option::Call )
   , LegDef( 1, LegNote::Type::Short, LegNote::Side::Short, LegNote::Option::Call )
   };
@@ -182,6 +182,7 @@ std::string Name(
 }
 
 // long by default for entry, short doesn't make much sense due to combo combinations
+// TODO: need to select the bear-call and bull-put properly
 void AddLegOrder(
   const LegNote::Type type
 , pOrderCombo_t pOrderCombo
@@ -190,7 +191,7 @@ void AddLegOrder(
 , pPosition_t pPosition
 ) {
   switch ( side ) {
-    case ou::tf::OrderSide::Buy: // usual entry
+    case ou::tf::OrderSide::Buy: // bull put
       {
         mapLegDev_t::const_iterator iter = mapLegDef.find( type );
         assert( mapLegDef.end() != iter );
@@ -205,17 +206,17 @@ void AddLegOrder(
         }
       }
       break;
-    case ou::tf::OrderSide::Sell: // unusual entry
+    case ou::tf::OrderSide::Sell: // bear call
       {
         mapLegDev_t::const_iterator iter = mapLegDef.find( type );
         assert( mapLegDef.end() != iter );
         const LegDef& leg( c_rLegDefFall[ iter->second ] ); // note the Caveat at top of file
         switch ( leg.side ) {
           case LegNote::Side::Long:
-            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Sell, [](){} );
+            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Buy, [](){} );
             break;
           case LegNote::Side::Short:
-            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Buy, [](){} );
+            pOrderCombo->AddLeg( pPosition, nOrderQuantity, ou::tf::OrderSide::Sell, [](){} );
             break;
         }
       }
