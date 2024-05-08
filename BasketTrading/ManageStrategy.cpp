@@ -212,9 +212,13 @@ ManageStrategy::ManageStrategy(
       ou::tf::option::collar::flex::Bind( m_ct );
       break;
     case ou::tf::option::LegNote::Algo::BearCall:
+      ou::tf::option::spread::bear_call::Bind( m_ct );
+      break;
     case ou::tf::option::LegNote::Algo::BullPut:
+      ou::tf::option::spread::bull_put::Bind( m_ct );
+      break;
     case ou::tf::option::LegNote::Algo::CreditSpread:
-      ou::tf::option::spread::vertical::Bind( m_ct );
+      assert( false );
       break;
     case ou::tf::option::LegNote::Algo::RiskReversal:
     case ou::tf::option::LegNote::Algo::RiskConversion:
