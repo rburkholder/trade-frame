@@ -142,7 +142,7 @@ void AddLegOrder(
   const LegNote::Type type
 , pOrderCombo_t pOrderCombo
 , const ou::tf::OrderSide::EOrderSide side
-, uint32_t nOrderQuantity // TODO: need to multiply by what is in static table
+, uint32_t nOrderQuantity
 , pPosition_t pPosition
 ) {
   switch ( side ) {
@@ -295,17 +295,15 @@ std::string Name(
   return sName;
 }
 
-// long by default for entry, short doesn't make much sense due to combo combinations
-// TODO: need to select the bear-call and bull-put properly
 void AddLegOrder(
   const LegNote::Type type
 , pOrderCombo_t pOrderCombo
 , const ou::tf::OrderSide::EOrderSide side
-, uint32_t nOrderQuantity // TODO: need to multiply by what is in static table
+, uint32_t nOrderQuantity
 , pPosition_t pPosition
 ) {
   switch ( side ) {
-    case ou::tf::OrderSide::Buy:  // need a selector for bull put or bear call
+    case ou::tf::OrderSide::Buy:
       {
         mapLegDev_t::const_iterator iter = mapLegDef.find( type );
         assert( mapLegDef.end() != iter );
