@@ -121,6 +121,13 @@ private:
   ou::ChartEntryIndicator m_ceCommissionsPaid;
   ou::ChartEntryIndicator m_ceTotal;
 
+  struct Currency {
+    double amount;  // TODO: convert to decimal?
+    Currency(): amount {} {}
+  };
+  using mapCurrency_t = std::map<ou::tf::Currency::ECurrency, Currency>;
+  mapCurrency_t m_mapCurrency;
+
   ou::ChartDataView m_dvPortfolio; // the data
 
   pPortfolio_t m_pPortfolioUSD; // base currency
@@ -150,6 +157,7 @@ private:
   void EnhanceInstrument( pInstrument_t );
 
   pPosition_t ConstructPosition( pPortfolio_t pPortfolio, const std::string& sPositionPrefix, pWatch_t );
+  void PopulateCurrencies( ou::tf::Currency::ECurrency, ou::tf::Currency::ECurrency );
   void PopulateStrategy( pInstrument_t );
 
   void HandleSimConnected( int );

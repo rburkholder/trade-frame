@@ -638,7 +638,25 @@ void AppCurrencyTrader::LoadPortfolioCurrency() {
   }
 }
 
+void AppCurrencyTrader::PopulateCurrencies( ou::tf::Currency::ECurrency currency1, ou::tf::Currency::ECurrency currency2 ) {
+  mapCurrency_t::iterator iterCurrency;
+
+  iterCurrency = m_mapCurrency.find( currency1 );
+  if ( m_mapCurrency.end() == iterCurrency ) {
+    m_mapCurrency.emplace( currency1, Currency() );
+  }
+
+  iterCurrency = m_mapCurrency.find( currency2 );
+  if ( m_mapCurrency.end() == iterCurrency ) {
+    m_mapCurrency.emplace( currency2, Currency() );
+  }
+}
+
 void AppCurrencyTrader::PopulateStrategy( pInstrument_t pInstrument ) {
+
+  assert( pInstrument );
+
+  PopulateCurrencies( pInstrument->GetCurrencyBase(), pInstrument->GetCurrencyCounter() );
 
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName( ) );
 
