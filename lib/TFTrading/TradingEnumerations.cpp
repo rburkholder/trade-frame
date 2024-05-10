@@ -38,27 +38,33 @@ namespace Currency {
 
   namespace qi = boost::spirit::qi;
 
+  const char* Name[] = { "USD", "GBP", "CAD", "CHF", "HKD", "JPY", "EUR", "KRW", "LTL", "AUD", "CZK", "DKK", "NZD", "HUF", "ILS", "VOID" };
+
+  void FillSymbols(  qi::symbols<char, ECurrency>& list ) {
+    list.add
+      ( "USD", ECurrency::USD )
+      ( "GBP", ECurrency::GBP )
+      ( "CAD", ECurrency::CAD )
+      ( "CHF", ECurrency::CHF )
+      ( "HKD", ECurrency::HKD )
+      ( "JPY", ECurrency::JPY )
+      ( "EUR", ECurrency::EUR )
+      ( "KRW", ECurrency::KRW )
+      ( "LTL", ECurrency::LTL )
+      ( "AUD", ECurrency::AUD )
+      ( "CZK", ECurrency::CZK )
+      ( "DKK", ECurrency::DKK )
+      ( "NZD", ECurrency::NZD )
+      ( "HUF", ECurrency::HUF )
+      ( "ILS", ECurrency::ILS )
+      ;
+  }
+
   template<typename Iterator>
   struct ParserCurrencyPair: qi::grammar<Iterator, pair_t()> {
     ParserCurrencyPair(): ParserCurrencyPair::base_type( ruleStart ) {
 
-      symCurrency.add
-        ( "USD", ECurrency::USD )
-        ( "GBP", ECurrency::GBP )
-        ( "CAD", ECurrency::CAD )
-        ( "CHF", ECurrency::CHF )
-        ( "HKD", ECurrency::HKD )
-        ( "JPY", ECurrency::JPY )
-        ( "EUR", ECurrency::EUR )
-        ( "KRW", ECurrency::KRW )
-        ( "LTL", ECurrency::LTL )
-        ( "AUD", ECurrency::AUD )
-        ( "CZK", ECurrency::CZK )
-        ( "DKK", ECurrency::DKK )
-        ( "NZD", ECurrency::NZD )
-        ( "HUF", ECurrency::HUF )
-        ( "ILS", ECurrency::ILS )
-        ;
+      FillSymbols( symCurrency );
 
       ruleCurrency %= symCurrency;
       ruleStart %= ruleCurrency 
@@ -73,8 +79,6 @@ namespace Currency {
     qi::rule<Iterator, pair_t()> ruleStart;
   };
 
-  const char* Name[] = { "USD", "GBP", "CAD", "CHF", "HKD", "JPY", "EUR", "KRW", "LTL", "AUD", "CZK", "DKK", "NZD", "HUF", "ILS", "VOID" };
-
   pair_t Split( const std::string& sPair ) {
     static ParserCurrencyPair<std::string::const_iterator> parserCurrencyPair;
 
@@ -83,6 +87,31 @@ namespace Currency {
     assert( b );
     return pairCurrency;
   }
+
+  template<typename Iterator>
+  struct ParserCurrencyName: qi::grammar<Iterator, ECurrency()> {
+    ParserCurrencyName(): ParserCurrencyName::base_type( ruleCurrency ) {
+
+      FillSymbols( symCurrency );
+
+      ruleCurrency %= symCurrency;
+
+    }
+
+    qi::symbols<char, ECurrency> symCurrency;
+
+    qi::rule<Iterator, ECurrency()> ruleCurrency;
+  };
+
+  ECurrency ParseName( const std::string& sName ) {
+    static ParserCurrencyName<std::string::const_iterator> parserCurrencyName;
+    ECurrency currency( Currency::USD );
+
+    bool b = parse( sName.begin(), sName.end(), parserCurrencyName, currency );
+    assert( b );
+    return currency;
+  }
+
 }
 
 namespace OrderSide {
