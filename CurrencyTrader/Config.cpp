@@ -36,6 +36,8 @@ namespace po = boost::program_options;
 #include "Config.hpp"
 
 namespace {
+  static const std::string sChoice_BaseCurrency(    "base_currency" );
+  static const std::string sChoice_CurrencyTopUp(   "base_currency_top_up" );
   static const std::string sChoice_PairSetting(     "pair_setting" );
   static const std::string sChoice_sExchange(       "exchange" );
   static const std::string sChoice_sHdf5File(       "hdf5_file" );
@@ -155,6 +157,9 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     po::options_description config( "currency trader config" );
     config.add_options()
 
+      ( sChoice_BaseCurrency.c_str(), po::value<std::string>( &choices.m_sBaseCurrency )->default_value( "usd" ), "base currency" )
+      ( sChoice_CurrencyTopUp.c_str(), po::value<double>( &choices.m_dblBaseCurrencyTopUp )->default_value( 1000000.00 ), "base currency top up" )
+
       ( sChoice_PairSetting.c_str(), po::value<Choices::vPairSettings_t>( &choices.m_vPairSettings ), "pair settings <name,start<hh:mm::ss>,stop<hh:mm:ss>,tz>" )
 
       ( sChoice_sExchange.c_str(), po::value<std::string>( &choices.m_sExchange ), "exchange name" )
@@ -205,22 +210,25 @@ bool Load( const std::string& sFileName, Choices& choices ) {
         bOk = false;
       }
 
-      bOk &= parse<std::string>( sFileName, vm, sChoice_sExchange, true, choices.m_sExchange );
+      bOk &= parse<typeof choices.m_sBaseCurrency>( sFileName, vm, sChoice_BaseCurrency, true, choices.m_sBaseCurrency );
+      bOk &= parse<typeof choices.m_dblBaseCurrencyTopUp>( sFileName, vm, sChoice_CurrencyTopUp, true, choices.m_dblBaseCurrencyTopUp );
 
-      bOk &= parse<std::string>( sFileName, vm, sChoice_sHdf5File, true, choices.m_sHdf5File );
-      bOk &= parse<std::string>( sFileName, vm, sChoice_sHdf5SimSet, true, choices.m_sHdf5SimSet );
+      bOk &= parse<typeof choices.m_sExchange>( sFileName, vm, sChoice_sExchange, true, choices.m_sExchange );
 
-      bOk &= parse<int>( sFileName, vm, sOption_IbInstance, true, choices.m_nIbInstance );
+      bOk &= parse<typeof choices.m_sHdf5File>( sFileName, vm, sChoice_sHdf5File, true, choices.m_sHdf5File );
+      bOk &= parse<typeof choices.m_sHdf5SimSet>( sFileName, vm, sChoice_sHdf5SimSet, true, choices.m_sHdf5SimSet );
 
-      bOk &= parse<std::string>( sFileName, vm, sChoice_MaxLifeTime, true, choices.m_sMaxTradeLifeTime );
+      bOk &= parse<typeof choices.m_nIbInstance>( sFileName, vm, sOption_IbInstance, true, choices.m_nIbInstance );
+
+      bOk &= parse<typeof choices.m_sMaxTradeLifeTime>( sFileName, vm, sChoice_MaxLifeTime, true, choices.m_sMaxTradeLifeTime );
       choices.m_tdMaxTradeLifeTime = boost::posix_time::duration_from_string( choices.m_sMaxTradeLifeTime );
 
-      bOk &= parse<unsigned int>( sFileName, vm, sChoice_PipProfit, true, choices.m_nPipProfit );
-      bOk &= parse<unsigned int>( sFileName, vm, sChoice_PipStopLoss, true, choices.m_nPipStopLoss );
-      bOk &= parse<unsigned int>( sFileName, vm, sChoice_PipTrailingStop, true, choices.m_nPipTrailingStop );
-      bOk &= parse<unsigned int>( sFileName, vm, sChoice_LotSize, true, choices.m_nLotSize );
+      bOk &= parse<typeof choices.m_nPipProfit>( sFileName, vm, sChoice_PipProfit, true, choices.m_nPipProfit );
+      bOk &= parse<typeof choices.m_nPipStopLoss>( sFileName, vm, sChoice_PipStopLoss, true, choices.m_nPipStopLoss );
+      bOk &= parse<typeof choices.m_nPipTrailingStop>( sFileName, vm, sChoice_PipTrailingStop, true, choices.m_nPipTrailingStop );
+      bOk &= parse<typeof choices.m_nLotSize>( sFileName, vm, sChoice_LotSize, true, choices.m_nLotSize );
 
-      bOk &= parse<unsigned int>( sFileName, vm, sChoice_BarSeconds, true, choices.m_nBarSeconds );
+      bOk &= parse<typeof choices.m_nBarSeconds>( sFileName, vm, sChoice_BarSeconds, true, choices.m_nBarSeconds );
     }
 
   }
