@@ -68,6 +68,7 @@ namespace Currency {
 
   using pair_t = std::pair<ECurrency,ECurrency>;
   pair_t Split( const std::string& );  // eg: EUR.USD
+  ECurrency ParseName( const std::string& sName ); // eg: USD
 }
 
   // * instrument dialog may be limited to a subset of instruments

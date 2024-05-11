@@ -124,6 +124,8 @@ private:
   struct Currency {
     double amount;  // TODO: convert to decimal?
     Currency(): amount {} {}
+    Currency( double amount_ ): amount( amount_ ) {}
+    Currency( Currency&& rhs ): amount( rhs.amount ) {}
   };
   using mapCurrency_t = std::map<ou::tf::Currency::ECurrency, Currency>;
   mapCurrency_t m_mapCurrency;
