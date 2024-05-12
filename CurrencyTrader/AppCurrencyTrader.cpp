@@ -228,14 +228,6 @@ void AppCurrencyTrader::ConstructStrategyList() {
                ou::tf::Currency::ECurrency dst, double credit,
                double commission ){
 
-          //BOOST_LOG_TRIVIAL(info)
-          //  << "debit,"
-          //  << ou::tf::Currency::Name[ src ] << ',' << debit << ','
-          //  << "credit,"
-          //  << ou::tf::Currency::Name[ dst ] << ',' << credit << ','
-          //  << commission
-          //  ;
-
           mapCurrency_t::iterator iterSrc = m_mapCurrency.find( src );
           assert( m_mapCurrency.end() != iterSrc );
           mapCurrency_t::iterator iterDst = m_mapCurrency.find( dst );
@@ -243,7 +235,15 @@ void AppCurrencyTrader::ConstructStrategyList() {
           iterSrc->second.amount -= debit;    // TODO record as a db transaction
           iterDst->second.amount += credit;
           m_dblCommissionTotal += commission;
-          // TODO: update gui?
+
+          BOOST_LOG_TRIVIAL(info)
+            << "acct,debit,"
+            << ou::tf::Currency::Name[ src ] << ',' << iterSrc->second.amount << ','
+            << "credit,"
+            << ou::tf::Currency::Name[ dst ] << ',' << iterDst->second.amount << ','
+            << m_dblCommissionTotal
+            ;
+
           }
       );
       auto result = m_mapStrategy.emplace( idInstrument, std::move( pStrategy ) );
