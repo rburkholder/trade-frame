@@ -123,6 +123,9 @@ private:
   pOrder_t m_pOrderPending;
   pPosition_t m_pPosition;
 
+  ou::tf::Currency::ECurrency m_cur1;
+  ou::tf::Currency::ECurrency m_cur2;
+
   double Normalize( double price ) const;
 
   void SetGoodTill( const OrderArgs&, pOrder_t& );

@@ -29,8 +29,6 @@
 
 #include "TrackOrder.hpp"
 
-// TODO: may desire events/callbacks/lambdas on order completion
-
 TrackOrder::TrackOrder()
 : m_stateTrade( ETradeState::Init )
 , m_quantityToOrder {}
@@ -50,6 +48,10 @@ void TrackOrder::Set( pPosition_t pPosition, ou::ChartDataView& cdv, int slot ) 
   assert( pPosition );
   assert( !m_pPosition );
   m_pPosition = pPosition;
+
+  ou::tf::Instrument::pInstrument_t pInstrument( pPosition->GetInstrument() );
+  m_cur1 = pInstrument->GetCurrencyBase();
+  m_cur2 = pInstrument->GetCurrencyCounter();
 
   cdv.Add( slot, &m_ceEntrySubmit );
   cdv.Add( slot, &m_ceEntryFill );
@@ -233,19 +235,34 @@ void TrackOrder::HandleOrderFilled( const ou::tf::Order& order ) {
 
   assert( m_fTransferFunds );
   double exchange_rate = order.GetAverageFillPrice();
-  auto quantity = order.GetQuanFilled();
+
+  auto quantity_base = order.GetQuanFilled();
+  double quantity_converted = quantity_base / exchange_rate;
+
   auto commission = order.GetIncrementalCommission();
-  ou::tf::Instrument::pInstrument_t pInstrument = order.GetInstrument();
-  ou::tf::Currency::ECurrency cur1( pInstrument->GetCurrencyBase() );
-  ou::tf::Currency::ECurrency cur2( pInstrument->GetCurrencyCounter() );
+
   switch( order.GetOrderSide() ) {
     case ou::tf::OrderSide::Buy:
       // TODO: confirm against gui
-      m_fTransferFunds( cur1, quantity / exchange_rate, cur2, m_quantityToOrder, commission );
+      BOOST_LOG_TRIVIAL(info)
+        << "buy,debit,"
+        << ou::tf::Currency::Name[ m_cur1 ] << ',' << quantity_converted << ','
+        << "credit,"
+        << ou::tf::Currency::Name[ m_cur2 ] << ',' << quantity_base << ','
+        << commission
+        ;
+      m_fTransferFunds( m_cur1, quantity_converted, m_cur2, quantity_base, commission );
       break;
     case ou::tf::OrderSide::Sell:
       // TODO: confirm against gui
-      m_fTransferFunds( cur2, m_quantityToOrder, cur1, quantity / exchange_rate, commission );
+      BOOST_LOG_TRIVIAL(info)
+        << "sell,debit,"
+        << ou::tf::Currency::Name[ m_cur2 ] << ',' << quantity_base << ','
+        << "credit,"
+        << ou::tf::Currency::Name[ m_cur1 ] << ',' << quantity_converted << ','
+        << commission
+        ;
+      m_fTransferFunds( m_cur2, quantity_base, m_cur1, quantity_converted, commission );
       break;
     default:
       assert( false );
