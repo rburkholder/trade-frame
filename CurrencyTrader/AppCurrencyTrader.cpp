@@ -232,12 +232,21 @@ void AppCurrencyTrader::ConstructStrategyList() {
           assert( m_mapCurrency.end() != iterSrc );
           mapCurrency_t::iterator iterDst = m_mapCurrency.find( dst );
           assert( m_mapCurrency.end() != iterDst );
+
+          BOOST_LOG_TRIVIAL(info)
+            << "acct,before,debit,"
+            << ou::tf::Currency::Name[ src ] << ',' << iterSrc->second.amount << ','
+            << "credit,"
+            << ou::tf::Currency::Name[ dst ] << ',' << iterDst->second.amount << ','
+            << m_dblCommissionTotal
+            ;
+
           iterSrc->second.amount -= debit;    // TODO record as a db transaction
           iterDst->second.amount += credit;
           m_dblCommissionTotal += commission;
 
           BOOST_LOG_TRIVIAL(info)
-            << "acct,debit,"
+            << "acct,after,debit,"
             << ou::tf::Currency::Name[ src ] << ',' << iterSrc->second.amount << ','
             << "credit,"
             << ou::tf::Currency::Name[ dst ] << ',' << iterDst->second.amount << ','
