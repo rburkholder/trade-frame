@@ -30,9 +30,9 @@
 
 #include "Strategy.hpp"
 
-Strategy::Strategy( ou::tf::Order::quantity_t quantity )
+Strategy::Strategy()
 : DailyTradeTimeFrame<Strategy>()
-, m_quantityToOrder( quantity )
+, m_quantityToOrder {}
 , m_bfQuotes01Sec( 1 )
 , m_bfTrading( 60 )
 , m_ceSwingHi( ou::ChartEntryShape::EShape::Long,  ou::Colour::Purple )
@@ -106,6 +106,13 @@ Strategy::~Strategy() {
   m_cdv.Clear();
 }
 
+void Strategy::SetTransaction( ou::tf::Order::quantity_t quantity, fTransferFunds_t&& f ) {
+
+  m_to_up.Set( quantity, f ); // make a copy of f
+  m_to_dn.Set( quantity, f ); // make a copy of f
+
+}
+
 void Strategy::SetWatch( pWatch_t pWatch, pPortfolio_t pPortfolio, fConstructPosition_t&& f ) {
 
   assert( pWatch );
@@ -119,13 +126,13 @@ void Strategy::SetWatch( pWatch_t pWatch, pPortfolio_t pPortfolio, fConstructPos
   {
     pPosition_t pPosition = f( pWatch, pWatch->GetInstrumentName() +":up" );
     assert( pPosition );
-    m_to_up.Set( m_quantityToOrder, pPosition, m_cdv, EChartSlot::Price );
+    m_to_up.Set( pPosition, m_cdv, EChartSlot::Price );
   }
 
   {
     pPosition_t pPosition = f( pWatch, pWatch->GetInstrumentName() +":dn" );
     assert( pPosition );
-    m_to_dn.Set( m_quantityToOrder, pPosition, m_cdv, EChartSlot::Price );
+    m_to_dn.Set( pPosition, m_cdv, EChartSlot::Price );
   }
 
   //m_pWatch->RecordSeries( false );

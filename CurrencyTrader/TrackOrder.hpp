@@ -50,6 +50,12 @@ public:
   using pPosition_t = ou::tf::Position::pPosition_t;
   using quantity_t = ou::tf::Order::quantity_t;
 
+  using fTransferFunds_t = std::function<void(
+    ou::tf::Currency::ECurrency, double debit,
+    ou::tf::Currency::ECurrency, double credit,
+    double commission
+    )>;
+
   struct OrderArgs {
 
     boost::posix_time::ptime dt;
@@ -74,7 +80,8 @@ public:
   TrackOrder();
   ~TrackOrder();
 
-  void Set( quantity_t, pPosition_t, ou::ChartDataView&, int slot );
+  void Set( quantity_t, fTransferFunds_t& );
+  void Set( pPosition_t, ou::ChartDataView&, int slot );
 
   double PriceInterval( double price ) const;
 
@@ -111,6 +118,7 @@ private:
   ou::ChartEntryShape m_ceExitFill;
 
   ou::tf::Order::quantity_t m_quantityToOrder;
+  fTransferFunds_t m_fTransferFunds;
 
   pOrder_t m_pOrderPending;
   pPosition_t m_pPosition;

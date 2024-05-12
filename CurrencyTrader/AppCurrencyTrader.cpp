@@ -74,6 +74,7 @@ bool AppCurrencyTrader::OnInit() {
 
   m_bProvidersConfirmed = false;
   m_nTSDataStreamSequence = 0;
+  m_dblCommissionTotal = 0.0;
 
   if ( config::Load( c_sChoicesFilename, m_choices ) ) {
   }
@@ -220,7 +221,22 @@ void AppCurrencyTrader::ConstructStrategyList() {
     if ( m_mapStrategy.end() == iterStrategy ) {
 
       assert( 0 < ps.m_nTradingAmount );
-      pStrategy_t pStrategy = std::make_unique<Strategy>( ps.m_nTradingAmount );
+      pStrategy_t pStrategy = std::make_unique<Strategy>();
+      pStrategy->SetTransaction(
+        ps.m_nTradingAmount,
+        [this](ou::tf::Currency::ECurrency src, double debit,
+               ou::tf::Currency::ECurrency dst, double credit,
+               double commission ){
+          mapCurrency_t::iterator iterSrc = m_mapCurrency.find( src );
+          assert( m_mapCurrency.end() != iterSrc );
+          mapCurrency_t::iterator iterDst = m_mapCurrency.find( dst );
+          assert( m_mapCurrency.end() != iterDst );
+          iterSrc->second.amount -= debit;    // TODO record as a db transaction
+          iterDst->second.amount += credit;
+          m_dblCommissionTotal += commission;
+          // TODO: update gui?
+          }
+      );
       auto result = m_mapStrategy.emplace( idInstrument, std::move( pStrategy ) );
       assert( result.second );
 

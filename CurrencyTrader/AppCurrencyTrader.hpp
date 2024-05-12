@@ -129,6 +129,7 @@ private:
   };
   using mapCurrency_t = std::map<ou::tf::Currency::ECurrency, Currency>;
   mapCurrency_t m_mapCurrency;
+  double m_dblCommissionTotal;
 
   ou::ChartDataView m_dvPortfolio; // the data
 

@@ -59,9 +59,12 @@ public:
   using fResetSoftware_t = std::function<bool()>;
   using fConstructPosition_t = std::function<pPosition_t(pWatch_t,const std::string&)>;
 
-  Strategy( ou::tf::Order::quantity_t );
+  using fTransferFunds_t = TrackOrder::fTransferFunds_t;
+
+  Strategy();
   ~Strategy();
 
+  void SetTransaction( ou::tf::Order::quantity_t, fTransferFunds_t&& );
   void SetWatch( pWatch_t, pPortfolio_t, fConstructPosition_t&& );
   void SaveWatch( const std::string& sPrefix );
   void SetResetSoftware( fResetSoftware_t&& f ) { m_fResetSoftware = std::move( f ); }
