@@ -227,6 +227,15 @@ void AppCurrencyTrader::ConstructStrategyList() {
         [this](ou::tf::Currency::ECurrency src, double debit,
                ou::tf::Currency::ECurrency dst, double credit,
                double commission ){
+
+          //BOOST_LOG_TRIVIAL(info)
+          //  << "debit,"
+          //  << ou::tf::Currency::Name[ src ] << ',' << debit << ','
+          //  << "credit,"
+          //  << ou::tf::Currency::Name[ dst ] << ',' << credit << ','
+          //  << commission
+          //  ;
+
           mapCurrency_t::iterator iterSrc = m_mapCurrency.find( src );
           assert( m_mapCurrency.end() != iterSrc );
           mapCurrency_t::iterator iterDst = m_mapCurrency.find( dst );
