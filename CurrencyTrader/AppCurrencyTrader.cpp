@@ -88,15 +88,6 @@ bool AppCurrencyTrader::OnInit() {
     return false;
   }
 
-  {
-    std::string sName( m_choices.m_sBaseCurrency );
-    std::transform(sName.begin(), sName.end(), sName.begin(), ::toupper);
-
-    ou::tf::Currency::ECurrency base_currency = ou::tf::Currency::ParseName( sName );
-    auto result = m_mapCurrency.emplace( base_currency, Currency( m_choices.m_dblBaseCurrencyTopUp ) );
-    assert( result.second );
-  }
-
   m_pFrameMain = new FrameMain( 0, wxID_ANY,c_sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
 
@@ -117,6 +108,22 @@ bool AppCurrencyTrader::OnInit() {
 
   sizerLower = new wxBoxSizer( wxVERTICAL );
   sizerFrame->Add( sizerLower, 1, wxEXPAND, 2 );
+
+  m_pPanelCurrencyStats = new PanelCurrencyStats( m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER );
+  sizerUpper->Add( m_pPanelCurrencyStats, 0, wxEXPAND, 2);
+  sizerUpper->AddSpacer( 2 );
+
+  {
+    std::string sName( m_choices.m_sBaseCurrency );
+    std::transform(sName.begin(), sName.end(), sName.begin(), ::toupper);
+
+    ou::tf::Currency::ECurrency base_currency = ou::tf::Currency::ParseName( sName );
+    auto result = m_mapCurrency.emplace( base_currency, Currency( m_choices.m_dblBaseCurrencyTopUp ) );
+    assert( result.second );
+    Currency& currency( result.first->second );
+
+    currency.fUpdateCurrency = std::move( m_pPanelCurrencyStats->AddCurrency( sName ) );
+  }
 
   bool bOk( true );
   if ( 0 == m_choices.m_sHdf5SimSet.size() ) { // live setup
@@ -686,12 +693,26 @@ void AppCurrencyTrader::PopulateCurrencies( ou::tf::Currency::ECurrency currency
 
   iterCurrency = m_mapCurrency.find( currency1 );
   if ( m_mapCurrency.end() == iterCurrency ) {
-    m_mapCurrency.emplace( currency1, Currency() );
+    auto result = m_mapCurrency.emplace( currency1, Currency() );
+    assert( result.second );
+    Currency& currency( result.first->second );
+    m_pFrameMain->CallAfter(
+      [this, &currency, currency1](){
+        currency.fUpdateCurrency = std::move( m_pPanelCurrencyStats->AddCurrency( ou::tf::Currency::Name[ currency1 ] ) );
+        m_pFrameMain->Layout();
+      } );
   }
 
   iterCurrency = m_mapCurrency.find( currency2 );
   if ( m_mapCurrency.end() == iterCurrency ) {
-    m_mapCurrency.emplace( currency2, Currency() );
+    auto result = m_mapCurrency.emplace( currency2, Currency() );
+    assert( result.second );
+    Currency& currency( result.first->second );
+    m_pFrameMain->CallAfter(
+      [this, &currency, currency2](){
+        currency.fUpdateCurrency = std::move( m_pPanelCurrencyStats->AddCurrency( ou::tf::Currency::Name[ currency2 ] ) );
+        m_pFrameMain->Layout();
+      } );
   }
 }
 
@@ -905,6 +926,11 @@ void AppCurrencyTrader::HandleOneSecondTimer( wxTimerEvent& event ) {
     m_ceRealized.Append( dt, dblRealized );
     m_ceCommissionsPaid.Append( dt, dblCommissionsPaid );
     m_ceTotal.Append( dt, dblTotal );
+  }
+
+  for ( const mapCurrency_t::value_type& vt: m_mapCurrency ) {
+    // TODO: convert to update only on change
+    vt.second.fUpdateCurrency( vt.second.amount );
   }
 }
 

@@ -25,6 +25,7 @@ set(
   file_h
     AppCurrencyTrader.hpp
     Config.hpp
+    PanelCurrencyStats.hpp
     Strategy.hpp
     TrackOrder.hpp
   )
@@ -33,6 +34,7 @@ set(
   file_cpp
     AppCurrencyTrader.cpp
     Config.cpp
+    PanelCurrencyStats.cpp
     Strategy.cpp
     TrackOrder.cpp
   )

@@ -40,6 +40,7 @@
 #include <TFBitsNPieces/FrameWork02.hpp>
 
 #include "Config.hpp"
+#include "PanelCurrencyStats.hpp"
 
 class Strategy;
 class FrameMain;
@@ -91,6 +92,7 @@ private:
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::WinChartView* m_pWinChartView;
   ou::tf::v2::PanelProviderControl* m_pPanelProviderControl;
+  PanelCurrencyStats* m_pPanelCurrencyStats;
 
   wxSplitterWindow* m_splitterData;
 
@@ -123,9 +125,18 @@ private:
 
   struct Currency {
     double amount;  // TODO: convert to decimal?
-    Currency(): amount {} {}
-    Currency( double amount_ ): amount( amount_ ) {}
-    Currency( Currency&& rhs ): amount( rhs.amount ) {}
+    PanelCurrencyStats::fUpdateCurrency_t fUpdateCurrency;
+
+    Currency(): amount {}, fUpdateCurrency( nullptr ) {}
+
+    Currency( double amount_ )
+    : amount( amount_ ), fUpdateCurrency( nullptr )
+    {}
+
+    Currency( Currency&& rhs )
+    : amount( rhs.amount )
+    , fUpdateCurrency( std::move( rhs.fUpdateCurrency ) )
+    {}
   };
   using mapCurrency_t = std::map<ou::tf::Currency::ECurrency, Currency>;
   mapCurrency_t m_mapCurrency;
