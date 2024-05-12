@@ -88,9 +88,14 @@ bool AppCurrencyTrader::OnInit() {
     return false;
   }
 
-  ou::tf::Currency::ECurrency base_currency = ou::tf::Currency::ParseName( m_choices.m_sBaseCurrency );
-  auto result = m_mapCurrency.emplace( base_currency, Currency( m_choices.m_dblBaseCurrencyTopUp ) );
-  assert( result.second );
+  {
+    std::string sName( m_choices.m_sBaseCurrency );
+    std::transform(sName.begin(), sName.end(), sName.begin(), ::toupper);
+
+    ou::tf::Currency::ECurrency base_currency = ou::tf::Currency::ParseName( sName );
+    auto result = m_mapCurrency.emplace( base_currency, Currency( m_choices.m_dblBaseCurrencyTopUp ) );
+    assert( result.second );
+  }
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY,c_sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
