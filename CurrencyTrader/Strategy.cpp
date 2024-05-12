@@ -175,7 +175,6 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
 void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration ) {
   // one time calc pip
-  //auto minTick( m_pWatch->GetInstrument()->GetMinTick() );
   const double mid( m_quote.Midpoint() );
   double tick = m_to_up.PriceInterval( mid );
   BOOST_LOG_TRIVIAL(info)
