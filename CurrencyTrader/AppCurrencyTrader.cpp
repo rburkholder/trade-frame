@@ -890,6 +890,7 @@ void AppCurrencyTrader::EnhanceInstrument( pInstrument_t pInstrument ) {
           //<< ',' << details.tradingHours
           << ',' << "market rule id " << details.marketRuleIds
           ;
+        m_tws->Sync( pInstrument ); // obtain market rule list
 
         ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
         im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
