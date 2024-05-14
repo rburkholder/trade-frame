@@ -147,7 +147,7 @@ void TWS::ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost:
 void TWS::Connect() {
 
     if ( m_pTWS ) {
-      BOOST_LOG_TRIVIAL(info)  << "IB EClientSocket exists";
+      BOOST_LOG_TRIVIAL(info) << "IB EClientSocket exists";
     }
     else {
       m_pTWS = std::make_unique<EClientSocket>( this, &m_osSignal );
@@ -1745,15 +1745,11 @@ void TWS::updateAccountValue(const std::string& key, const std::string& val,
 
 void TWS::marketRule( int marketRuleId, const vPriceIncrement_t& priceIncrements ) {
 
-  std::cout
-    << "IB::marketRule " << marketRuleId
-    << ":"
-    //<< std::endl
-    ;
   for ( const vPriceIncrement_t::value_type& vt: priceIncrements ) {
-    std::cout << " " << vt.lowEdge << "=" << vt.increment;
+    BOOST_LOG_TRIVIAL(info) 
+      << "IB::marketRule " << marketRuleId
+      << " " << vt.lowEdge << "=" << vt.increment;
   }
-  std::cout << std::endl;
 
   mapMarketRule_t::iterator iter = m_mapMarketRule.find( marketRuleId );
   if ( m_mapMarketRule.end() == iter ) {
@@ -1793,11 +1789,11 @@ double TWS::GetInterval( const double price, const int rule ) {
   double interval( 0.01 );
   mapMarketRule_t::const_iterator iter = m_mapMarketRule.find( rule );
   if ( m_mapMarketRule.end() == iter ) {
-    std::cout
-    << "IB Price interval not found: " << rule
-    << ", default to " << interval
-    << " for price " << price
-    << std::endl;
+    BOOST_LOG_TRIVIAL(info) 
+      << "IB Price interval not found: " << rule
+      << ", default to " << interval
+      << " for price " << price
+      ;
   }
   else {
     const vPriceIncrement_t& vIntervals( iter->second );
@@ -1811,6 +1807,7 @@ double TWS::GetInterval( const double price, const int rule ) {
         }
     }
   }
+  assert( 0.0 < interval );
   return interval;
 }
 
