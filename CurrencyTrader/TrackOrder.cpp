@@ -71,7 +71,7 @@ double TrackOrder::PriceInterval( double price ) const {
   auto pProvider( m_pPosition->GetExecutionProvider() );
   if ( ou::tf::keytypes::EProviderIB == pProvider->ID() ) {
     auto idRule = m_pPosition->GetInstrument()->GetExchangeRule();
-    double interval = ou::tf::ib::TWS::Cast( pProvider )->GetInterval( price, idRule );
+    interval = ou::tf::ib::TWS::Cast( pProvider )->GetInterval( price, idRule );
   }
   else {
     interval = m_pPosition->GetInstrument()->GetMinTick();
