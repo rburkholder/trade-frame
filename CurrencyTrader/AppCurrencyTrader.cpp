@@ -196,7 +196,8 @@ void AppCurrencyTrader::PopulatePortfolioChart() {
   m_dvPortfolio.Add( 0, &m_ceTotal );
   m_dvPortfolio.Add( 2, &m_ceCommissionsPaid );
 
-  m_pWinChartView->SetChartDataView( &m_dvPortfolio );
+  //m_pWinChartView->SetChartDataView( &m_dvPortfolio );
+  m_pWinChartView->SetChartDataView( nullptr ); // not chart to start with
 }
 
 void AppCurrencyTrader::PopulateTreeRoot() {
