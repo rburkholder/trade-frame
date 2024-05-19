@@ -61,14 +61,14 @@ PanelCurrencyStats::fUpdateCurrency_t PanelCurrencyStats::AddCurrency( const std
   Currency& currency( iter->second );
 
   currency.m_sizer = new wxBoxSizer( wxHORIZONTAL );
-  m_sizerCurrencies->Add( currency.m_sizer, 0, wxALIGN_LEFT|wxLEFT|wxRIGHT|wxTOP, 2 );
+  m_sizerCurrencies->Add( currency.m_sizer, 0, wxGROW|wxLEFT|wxRIGHT|wxTOP, 2 );
 
   wxStaticText* name = new wxStaticText( this, wxID_ANY, sName, wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT );
-  currency.m_sizer->Add( name, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2 );
+  currency.m_sizer->Add( name, 1, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxTOP, 2 );
 
   wxStaticText* textAmount = new wxStaticText( this, wxID_ANY, _("amount"), wxDefaultPosition, wxSize(60, -1), wxALIGN_RIGHT );
   currency.m_textAmount = textAmount;
-  currency.m_sizer->Add( textAmount, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2 );
+  currency.m_sizer->Add( textAmount, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxTOP, 2 );
 
   if ( GetSizer() ) {
     GetSizer()->SetSizeHints(this);
