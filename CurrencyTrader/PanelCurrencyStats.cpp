@@ -76,7 +76,7 @@ PanelCurrencyStats::fUpdateCurrency_t PanelCurrencyStats::AddCurrency( const std
 
   fUpdateCurrency_t f =
     [this, textAmount]( double amount ){
-      auto text = boost::lexical_cast<std::string>( amount );
+      auto text = boost::lexical_cast<wxStdString>( amount );
       textAmount->SetLabel( text );
     };
   return std::move( f );
