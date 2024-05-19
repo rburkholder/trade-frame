@@ -226,12 +226,12 @@ void AppCurrencyTrader::PopulateTreeRoot() {
 
 void AppCurrencyTrader::ConstructStrategyList() {
 
-  assert( 0 == m_mapStrategy.size() );
+  assert( 0 == m_mapPair.size() );
 
   for ( config::Choices::PairSettings& ps: m_choices.m_vPairSettings ) {
     const ou::tf::Instrument::idInstrument_t& idInstrument( ps.m_sName );
-    mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( idInstrument );
-    if ( m_mapStrategy.end() == iterStrategy ) {
+    mapPair_t::iterator iterStrategy = m_mapPair.find( idInstrument );
+    if ( m_mapPair.end() == iterStrategy ) {
 
       assert( 0 < ps.m_nTradingAmount );
       pStrategy_t pStrategy = std::make_unique<Strategy>();
@@ -268,11 +268,11 @@ void AppCurrencyTrader::ConstructStrategyList() {
 
           }
       );
-      auto result = m_mapStrategy.emplace( idInstrument, std::move( pStrategy ) );
+      auto result = m_mapPair.emplace( idInstrument, std::move( pStrategy ) );
       assert( result.second );
 
       iterStrategy = result.first;
-      Strategy& strategy( *iterStrategy->second );
+      Strategy& strategy( *iterStrategy->second.pStrategy );
 
       boost::gregorian::date adjusted_date = Strategy::AdjustTimeFrame( m_startDateUTC, m_startTimeUTC );
       strategy.InitFor24HourMarkets( adjusted_date );
@@ -396,12 +396,12 @@ void AppCurrencyTrader::ConstructStrategyList() {
       TreeItem* pTreeItem = m_pTreeItemPortfolio->AppendChild(
         idInstrument,
         [this,idInstrument]( TreeItem* pTreeItem ){
-          mapStrategy_t::iterator iter = m_mapStrategy.find( idInstrument );
-          assert( m_mapStrategy.end() != iter );
+          mapPair_t::iterator iter = m_mapPair.find( idInstrument );
+          assert( m_mapPair.end() != iter );
           if ( 0 != m_choices.m_sHdf5SimSet.size() ) {
             m_pWinChartView->SetSim( true );
           }
-          m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
+          m_pWinChartView->SetChartDataView( &iter->second.pStrategy->GetChartDataView() );
         }
       );
 
@@ -616,7 +616,7 @@ void AppCurrencyTrader::HandleSimComplete() {
 
 void AppCurrencyTrader::HandleMenuActionCloseAndDone() {
   std::cout << "Closing & Done" << std::endl;
-  for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
+  for ( mapPair_t::value_type& vt: m_mapPair ) {
     //vt.second->CloseAndDone();
   }
 }
@@ -632,8 +632,8 @@ void AppCurrencyTrader::HandleMenuActionSaveValues() {
         m_sTSDataStreamStarted + "-" +
         boost::lexical_cast<std::string>( m_nTSDataStreamSequence ) // sequence number on each save
       );
-      for ( mapStrategy_t::value_type& vt: m_mapStrategy ) {
-        vt.second->SaveWatch( sPath );
+      for ( mapPair_t::value_type& vt: m_mapPair ) {
+        vt.second.pStrategy->SaveWatch( sPath );
       }
       std::cout << "  ... Done " << std::endl;
     }
@@ -713,8 +713,8 @@ void AppCurrencyTrader::PopulateStrategy( pInstrument_t pInstrument ) {
 
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName( ) );
 
-  mapStrategy_t::iterator iterStrategy = m_mapStrategy.find( idInstrument );
-  assert( m_mapStrategy.end() != iterStrategy );
+  mapPair_t::iterator iterStrategy = m_mapPair.find( idInstrument );
+  assert( m_mapPair.end() != iterStrategy );
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   pPortfolio_t pPortfolio;
@@ -733,7 +733,7 @@ void AppCurrencyTrader::PopulateStrategy( pInstrument_t pInstrument ) {
 
   pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_data );
 
-  iterStrategy->second->SetWatch(
+  iterStrategy->second.pStrategy->SetWatch(
     pWatch, pPortfolio,
     [this, pPortfolio]( pWatch_t pWatch, const std::string& sPositionPrefix )->pPosition_t{
       return ConstructPosition( pPortfolio, sPositionPrefix, pWatch );
@@ -957,7 +957,7 @@ void AppCurrencyTrader::OnClose( wxCloseEvent& event ) {
 
   SaveState();
 
-  m_mapStrategy.clear();
+  m_mapPair.clear();
 
   //m_pBuildInstrument.reset();
 

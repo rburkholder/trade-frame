@@ -148,8 +148,19 @@ private:
   //pPortfolio_t m_pPortfolioForex;
 
   using pStrategy_t = std::unique_ptr<Strategy>;
-  using mapStrategy_t = std::map<std::string,pStrategy_t>;
-  mapStrategy_t m_mapStrategy;
+  struct Pair {
+    pStrategy_t pStrategy;
+    PanelCurrencyStats::fUpdatePair_t fUpdatePair;
+
+    Pair(): fUpdatePair( nullptr ) {}
+    Pair( pStrategy_t pStrategy_ )
+    : pStrategy( std::move( pStrategy_ ) )
+    , fUpdatePair( nullptr )
+    {}
+  };
+
+  using mapPair_t = std::map<std::string,Pair>;
+  mapPair_t m_mapPair;
 
   boost::gregorian::date           m_startDateUTC;
   boost::posix_time::time_duration m_startTimeUTC;
