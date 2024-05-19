@@ -689,29 +689,16 @@ void AppCurrencyTrader::LoadPortfolioCurrency() {
   }
 }
 
-void AppCurrencyTrader::PopulateCurrencies( ou::tf::Currency::ECurrency currency1, ou::tf::Currency::ECurrency currency2 ) {
+void AppCurrencyTrader::PopulateCurrency( ou::tf::Currency::ECurrency id_currency ) {
   mapCurrency_t::iterator iterCurrency;
-
-  iterCurrency = m_mapCurrency.find( currency1 );
+  iterCurrency = m_mapCurrency.find( id_currency );
   if ( m_mapCurrency.end() == iterCurrency ) {
-    auto result = m_mapCurrency.emplace( currency1, Currency() );
+    auto result = m_mapCurrency.emplace( id_currency, Currency() );
     assert( result.second );
     Currency& currency( result.first->second );
     m_pFrameMain->CallAfter(
-      [this, &currency, currency1](){
-        currency.fUpdateCurrency = std::move( m_pPanelCurrencyStats->AddCurrency( ou::tf::Currency::Name[ currency1 ] ) );
-        m_pFrameMain->Layout();
-      } );
-  }
-
-  iterCurrency = m_mapCurrency.find( currency2 );
-  if ( m_mapCurrency.end() == iterCurrency ) {
-    auto result = m_mapCurrency.emplace( currency2, Currency() );
-    assert( result.second );
-    Currency& currency( result.first->second );
-    m_pFrameMain->CallAfter(
-      [this, &currency, currency2](){
-        currency.fUpdateCurrency = std::move( m_pPanelCurrencyStats->AddCurrency( ou::tf::Currency::Name[ currency2 ] ) );
+      [this, &currency, id_currency](){
+        currency.fUpdateCurrency = std::move( m_pPanelCurrencyStats->AddCurrency( ou::tf::Currency::Name[ id_currency ] ) );
         m_pFrameMain->Layout();
       } );
   }
@@ -721,7 +708,8 @@ void AppCurrencyTrader::PopulateStrategy( pInstrument_t pInstrument ) {
 
   assert( pInstrument );
 
-  PopulateCurrencies( pInstrument->GetCurrencyBase(), pInstrument->GetCurrencyCounter() );
+  PopulateCurrency( pInstrument->GetCurrencyBase() );
+  PopulateCurrency( pInstrument->GetCurrencyCounter() );
 
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName( ) );
 

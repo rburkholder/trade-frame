@@ -171,7 +171,7 @@ private:
   void EnhanceInstrument( pInstrument_t );
 
   pPosition_t ConstructPosition( pPortfolio_t pPortfolio, const std::string& sPositionPrefix, pWatch_t );
-  void PopulateCurrencies( ou::tf::Currency::ECurrency, ou::tf::Currency::ECurrency );
+  void PopulateCurrency( ou::tf::Currency::ECurrency );
   void PopulateStrategy( pInstrument_t );
 
   void HandleSimConnected( int );
