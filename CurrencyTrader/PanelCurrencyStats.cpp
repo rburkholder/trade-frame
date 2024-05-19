@@ -25,7 +25,6 @@
 #include <wx/stattext.h>
 
 #include "PanelCurrencyStats.hpp"
-#include "wx/gdicmn.h"
 
 PanelCurrencyStats::PanelCurrencyStats() {
   Init();
@@ -62,14 +61,14 @@ PanelCurrencyStats::fUpdateCurrency_t PanelCurrencyStats::AddCurrency( const std
   Currency& currency( iter->second );
 
   currency.m_sizer = new wxBoxSizer( wxHORIZONTAL );
-  m_sizerCurrencies->Add( currency.m_sizer, 0, wxEXPAND, 2 );
+  m_sizerCurrencies->Add( currency.m_sizer, 0, wxALIGN_LEFT|wxLEFT|wxRIGHT|wxTOP, 2 );
 
-  wxStaticText* name = new wxStaticText( this, wxID_ANY, sName );
-  currency.m_sizer->Add( name, 0, wxALIGN_CENTRE_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 2 );
+  wxStaticText* name = new wxStaticText( this, wxID_ANY, sName, wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT );
+  currency.m_sizer->Add( name, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2 );
 
   wxStaticText* textAmount = new wxStaticText( this, wxID_ANY, _("amount"), wxDefaultPosition, wxSize(60, -1), wxALIGN_RIGHT );
   currency.m_textAmount = textAmount;
-  currency.m_sizer->Add( textAmount, 0, wxALIGN_CENTRE_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 2 );
+  currency.m_sizer->Add( textAmount, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2 );
 
   if ( GetSizer() ) {
     GetSizer()->SetSizeHints(this);
@@ -96,16 +95,16 @@ PanelCurrencyStats::fUpdatePair_t PanelCurrencyStats::AddPair( const std::string
   pair.m_sizer = new wxBoxSizer( wxHORIZONTAL );
   m_sizerPairs->Add( pair.m_sizer, 1, wxEXPAND, 2 );
 
-  wxStaticText* textAsk = new wxStaticText( this, wxID_ANY, _("ask"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT );
+  wxStaticText* textAsk = new wxStaticText( this, wxID_ANY, _("ask"), wxDefaultPosition, wxSize(40, -1), wxALIGN_RIGHT );
   pair.m_textAsk = textAsk;
-  pair.m_sizer->Add( textAsk, 1, wxEXPAND, 2 );
+  pair.m_sizer->Add( textAsk, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
 
-  wxStaticText* name = new wxStaticText( this, wxID_ANY, sName );
-  pair.m_sizer->Add( name, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 2 );
+  wxStaticText* textName = new wxStaticText( this, wxID_ANY, sName, wxDefaultPosition, wxSize(40, -1), wxALIGN_CENTRE );
+  pair.m_sizer->Add( textName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
 
-  wxStaticText* textBid = new wxStaticText( this, wxID_ANY, _("bid"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT );
+  wxStaticText* textBid = new wxStaticText( this, wxID_ANY, _("bid"), wxDefaultPosition, wxSize(40, -1), wxALIGN_RIGHT );
   pair.m_textBid = textBid;
-  pair.m_sizer->Add( textBid, 1, wxEXPAND, 2 );
+  pair.m_sizer->Add( textBid, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
 
   if ( GetSizer() ) {
     GetSizer()->SetSizeHints(this);
@@ -127,9 +126,9 @@ void PanelCurrencyStats::CreateControls() {
   itemFrame1->SetSizer( m_sizerPanel );
 
   m_sizerCurrencies = new wxBoxSizer( wxVERTICAL );
-  m_sizerPanel->Add( m_sizerCurrencies, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 2 );
+  m_sizerPanel->Add( m_sizerCurrencies, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2 );
 
   m_sizerPairs = new wxBoxSizer( wxVERTICAL );
-  m_sizerPanel->Add( m_sizerPairs, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxTOP|wxBOTTOM, 2 );
+  m_sizerPanel->Add( m_sizerPairs, 0, wxALIGN_CENTER_VERTICAL|wxALL, 2 );
 
 }
