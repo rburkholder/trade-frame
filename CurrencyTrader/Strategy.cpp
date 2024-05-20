@@ -108,6 +108,7 @@ Strategy::~Strategy() {
 
 void Strategy::SetTransaction( ou::tf::Order::quantity_t quantity, fTransferFunds_t&& f ) {
 
+  m_quantityToOrder = quantity;
   m_to_up.Set( quantity, f ); // make a copy of f
   m_to_dn.Set( quantity, f ); // make a copy of f
 
@@ -183,8 +184,8 @@ void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_
     << ',' << "midprice=" << mid
     << ',' << "interval=" << tick
     << ',' << "pip_0=" << ( ( (double)m_quantityToOrder ) * tick )
-    << ',' << "pip_*=" << ( ( (double)m_quantityToOrder ) * tick ) * mid
-    << ',' << "pip_/=" << ( ( (double)m_quantityToOrder ) * tick ) / mid // this lines up best
+    << ',' << "pip_*=" << ( ( (double)m_quantityToOrder ) * tick ) * mid // will depend upon base currency
+    << ',' << "pip_/=" << ( ( (double)m_quantityToOrder ) * tick ) / mid // will depend upon base currency
     ;
 }
 
