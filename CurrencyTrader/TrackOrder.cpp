@@ -245,9 +245,10 @@ void TrackOrder::HandleOrderFilled( const ou::tf::Order& order ) {
     case ou::tf::OrderSide::Buy:
       // TODO: confirm against gui
       BOOST_LOG_TRIVIAL(info)
-        << "buy,debit,"
+        << "buy,de,"
+        << exchange_rate << ','
         << ou::tf::Currency::Name[ m_cur1 ] << ',' << quantity_converted << ','
-        << "credit,"
+        << "cr,"
         << ou::tf::Currency::Name[ m_cur2 ] << ',' << quantity_base << ','
         << commission
         ;
@@ -256,9 +257,10 @@ void TrackOrder::HandleOrderFilled( const ou::tf::Order& order ) {
     case ou::tf::OrderSide::Sell:
       // TODO: confirm against gui
       BOOST_LOG_TRIVIAL(info)
-        << "sell,debit,"
+        << "sell,de,"
+        << exchange_rate << ','
         << ou::tf::Currency::Name[ m_cur2 ] << ',' << quantity_base << ','
-        << "credit,"
+        << "cr,"
         << ou::tf::Currency::Name[ m_cur1 ] << ',' << quantity_converted << ','
         << commission
         ;

@@ -247,9 +247,9 @@ void AppCurrencyTrader::ConstructStrategyList() {
           assert( m_mapCurrency.end() != iterDst );
 
           BOOST_LOG_TRIVIAL(info)
-            << "acct,before,debit,"
+            << "acct,before,de,"
             << ou::tf::Currency::Name[ src ] << ',' << iterSrc->second.amount << ','
-            << "credit,"
+            << "cr,"
             << ou::tf::Currency::Name[ dst ] << ',' << iterDst->second.amount << ','
             << m_dblCommissionTotal
             ;
@@ -259,9 +259,9 @@ void AppCurrencyTrader::ConstructStrategyList() {
           m_dblCommissionTotal += commission;
 
           BOOST_LOG_TRIVIAL(info)
-            << "acct,after,debit,"
+            << "acct,after,de,"
             << ou::tf::Currency::Name[ src ] << ',' << iterSrc->second.amount << ','
-            << "credit,"
+            << "cr,"
             << ou::tf::Currency::Name[ dst ] << ',' << iterDst->second.amount << ','
             << m_dblCommissionTotal
             ;
