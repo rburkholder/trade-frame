@@ -19,7 +19,7 @@
  * Created: May 12, 2024 14:37:24
  */
 
-#include <boost/lexical_cast.hpp>
+#include <fmt/core.h>
 
 #include <wx/sizer.h>
 #include <wx/stattext.h>
@@ -76,7 +76,7 @@ PanelCurrencyStats::fUpdateCurrency_t PanelCurrencyStats::AddCurrency( const std
 
   fUpdateCurrency_t f =
     [this, textAmount]( double amount ){
-      auto text = boost::lexical_cast<wxStdString>( amount );
+      auto text = fmt::format( "{:.{}f}", amount, 2 );
       textAmount->SetLabel( text );
     };
   return std::move( f );
@@ -95,16 +95,16 @@ PanelCurrencyStats::fUpdatePair_t PanelCurrencyStats::AddPair( const std::string
   pair.m_sizer = new wxBoxSizer( wxHORIZONTAL );
   m_sizerPairs->Add( pair.m_sizer, 1, wxEXPAND, 2 );
 
-  wxStaticText* textAsk = new wxStaticText( this, wxID_ANY, _("ask"), wxDefaultPosition, wxSize(60, -1), wxALIGN_RIGHT );
-  pair.m_textAsk = textAsk;
-  pair.m_sizer->Add( textAsk, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
+  wxStaticText* textBid = new wxStaticText( this, wxID_ANY, _("bid"), wxDefaultPosition, wxSize(70, -1), wxALIGN_RIGHT );
+  pair.m_textBid = textBid;
+  pair.m_sizer->Add( textBid, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
 
   wxStaticText* textName = new wxStaticText( this, wxID_ANY, sName, wxDefaultPosition, wxSize(50, -1), wxALIGN_CENTRE );
   pair.m_sizer->Add( textName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
 
-  wxStaticText* textBid = new wxStaticText( this, wxID_ANY, _("bid"), wxDefaultPosition, wxSize(60, -1), wxALIGN_RIGHT );
-  pair.m_textBid = textBid;
-  pair.m_sizer->Add( textBid, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
+  wxStaticText* textAsk = new wxStaticText( this, wxID_ANY, _("ask"), wxDefaultPosition, wxSize(70, -1), wxALIGN_RIGHT );
+  pair.m_textAsk = textAsk;
+  pair.m_sizer->Add( textAsk, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
 
   if ( GetSizer() ) {
     GetSizer()->SetSizeHints(this);
@@ -112,8 +112,8 @@ PanelCurrencyStats::fUpdatePair_t PanelCurrencyStats::AddPair( const std::string
 
   fUpdatePair_t f =
     [this, textBid, textAsk]( double bid, double ask ){
-      textBid->SetLabel( boost::lexical_cast<wxStdString>( bid ) );
-      textAsk->SetLabel( boost::lexical_cast<wxStdString>( ask ) );
+      textBid->SetLabel( fmt::format( "{:.{}f}", bid, 5 ) );
+      textAsk->SetLabel( fmt::format( "{:.{}f}", ask, 5 ) );
     };
   return std::move( f );
 }
