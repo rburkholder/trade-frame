@@ -66,7 +66,7 @@ PanelCurrencyStats::fUpdateCurrency_t PanelCurrencyStats::AddCurrency( const std
   wxStaticText* name = new wxStaticText( this, wxID_ANY, sName, wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT );
   currency.m_sizer->Add( name, 1, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxTOP, 2 );
 
-  wxStaticText* textAmount = new wxStaticText( this, wxID_ANY, _("amount"), wxDefaultPosition, wxSize(60, -1), wxALIGN_RIGHT );
+  wxStaticText* textAmount = new wxStaticText( this, wxID_ANY, _("amount"), wxDefaultPosition, wxSize(80, -1), wxALIGN_RIGHT );
   currency.m_textAmount = textAmount;
   currency.m_sizer->Add( textAmount, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxTOP, 2 );
 
@@ -95,14 +95,14 @@ PanelCurrencyStats::fUpdatePair_t PanelCurrencyStats::AddPair( const std::string
   pair.m_sizer = new wxBoxSizer( wxHORIZONTAL );
   m_sizerPairs->Add( pair.m_sizer, 1, wxEXPAND, 2 );
 
-  wxStaticText* textAsk = new wxStaticText( this, wxID_ANY, _("ask"), wxDefaultPosition, wxSize(40, -1), wxALIGN_RIGHT );
+  wxStaticText* textAsk = new wxStaticText( this, wxID_ANY, _("ask"), wxDefaultPosition, wxSize(60, -1), wxALIGN_RIGHT );
   pair.m_textAsk = textAsk;
   pair.m_sizer->Add( textAsk, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
 
-  wxStaticText* textName = new wxStaticText( this, wxID_ANY, sName, wxDefaultPosition, wxSize(40, -1), wxALIGN_CENTRE );
+  wxStaticText* textName = new wxStaticText( this, wxID_ANY, sName, wxDefaultPosition, wxSize(50, -1), wxALIGN_CENTRE );
   pair.m_sizer->Add( textName, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
 
-  wxStaticText* textBid = new wxStaticText( this, wxID_ANY, _("bid"), wxDefaultPosition, wxSize(40, -1), wxALIGN_RIGHT );
+  wxStaticText* textBid = new wxStaticText( this, wxID_ANY, _("bid"), wxDefaultPosition, wxSize(60, -1), wxALIGN_RIGHT );
   pair.m_textBid = textBid;
   pair.m_sizer->Add( textBid, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
 
