@@ -275,7 +275,7 @@ private:
 
   fResetSoftware_t m_fResetSoftware;
 
-void Init();
+  void Init();
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

@@ -178,12 +178,13 @@ void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_
   const double mid( m_quote.Midpoint() );
   double tick = m_to_up.PriceInterval( mid );
   BOOST_LOG_TRIVIAL(info)
-          << m_pWatch->GetInstrumentName()
+           << m_pWatch->GetInstrumentName()
+    << ',' << "quan=" << m_quantityToOrder
     << ',' << "midprice=" << mid
-    << ',' << "interval="  << tick
-    << ',' << "pip_0=" << ( (double) m_quantityToOrder * tick )
-    << ',' << "pip_*=" << ( (double) m_quantityToOrder * tick ) * mid
-    << ',' << "pip_/=" << ( (double) m_quantityToOrder * tick ) / mid // this lines up best
+    << ',' << "interval=" << tick
+    << ',' << "pip_0=" << ( ( (double)m_quantityToOrder ) * tick )
+    << ',' << "pip_*=" << ( ( (double)m_quantityToOrder ) * tick ) * mid
+    << ',' << "pip_/=" << ( ( (double)m_quantityToOrder ) * tick ) / mid // this lines up best
     ;
 }
 
