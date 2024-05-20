@@ -69,6 +69,8 @@ public:
   void SaveWatch( const std::string& sPrefix );
   void SetResetSoftware( fResetSoftware_t&& f ) { m_fResetSoftware = std::move( f ); }
 
+  void Latest( double& bid, double& ask ) const;
+
   ou::ChartDataView& GetChartDataView() { return m_cdv; }
 
 protected:

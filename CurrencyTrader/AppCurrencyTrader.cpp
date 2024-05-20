@@ -230,8 +230,8 @@ void AppCurrencyTrader::ConstructStrategyList() {
 
   for ( config::Choices::PairSettings& ps: m_choices.m_vPairSettings ) {
     const ou::tf::Instrument::idInstrument_t& idInstrument( ps.m_sName );
-    mapPair_t::iterator iterStrategy = m_mapPair.find( idInstrument );
-    if ( m_mapPair.end() == iterStrategy ) {
+    mapPair_t::iterator iterPair = m_mapPair.find( idInstrument );
+    if ( m_mapPair.end() == iterPair ) {
 
       assert( 0 < ps.m_nTradingAmount );
       pStrategy_t pStrategy = std::make_unique<Strategy>();
@@ -268,11 +268,15 @@ void AppCurrencyTrader::ConstructStrategyList() {
 
           }
       );
+
       auto result = m_mapPair.emplace( idInstrument, std::move( pStrategy ) );
       assert( result.second );
 
-      iterStrategy = result.first;
-      Strategy& strategy( *iterStrategy->second.pStrategy );
+      iterPair = result.first;
+      assert( result.second );
+      Strategy& strategy( *iterPair->second.pStrategy );
+
+      iterPair->second.fUpdatePair = std::move( m_pPanelCurrencyStats->AddPair( idInstrument ) );
 
       boost::gregorian::date adjusted_date = Strategy::AdjustTimeFrame( m_startDateUTC, m_startTimeUTC );
       strategy.InitFor24HourMarkets( adjusted_date );
@@ -921,6 +925,13 @@ void AppCurrencyTrader::HandleOneSecondTimer( wxTimerEvent& event ) {
   for ( const mapCurrency_t::value_type& vt: m_mapCurrency ) {
     // TODO: convert to update only on change
     vt.second.fUpdateCurrency( vt.second.amount );
+  }
+
+  for ( const mapPair_t::value_type& vt: m_mapPair ) {
+    double bid {};
+    double ask {};
+    vt.second.pStrategy->Latest( bid, ask );
+    vt.second.fUpdatePair( bid, ask );
   }
 }
 

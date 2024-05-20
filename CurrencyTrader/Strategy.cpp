@@ -142,6 +142,11 @@ void Strategy::SetWatch( pWatch_t pWatch, pPortfolio_t pPortfolio, fConstructPos
 
 }
 
+void Strategy::Latest( double& bid, double& ask ) const {
+  bid = m_quote.Bid();
+  ask = m_quote.Ask();
+}
+
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
   m_quote = quote;

@@ -157,6 +157,10 @@ private:
     : pStrategy( std::move( pStrategy_ ) )
     , fUpdatePair( nullptr )
     {}
+    Pair( Pair&& rhs )
+    : pStrategy( std::move( rhs.pStrategy ) )
+    , fUpdatePair( std::move( rhs.fUpdatePair ) )
+    {}
   };
 
   using mapPair_t = std::map<std::string,Pair>;
