@@ -32330,7 +32330,7 @@ Stop"</string>
                 <long name="is-transient">0</long>
                 <long name="locked">0</long>
                 <long name="owns-file">1</long>
-                <string name="proxy-AlignH">"Left"</string>
+                <string name="proxy-AlignH">"Expand"</string>
                 <string name="proxy-AlignV">"Centre"</string>
                 <long name="proxy-Border">2</long>
                 <string name="proxy-Member variable name">"currency_sizer"</string>
@@ -32388,7 +32388,7 @@ Stop"</string>
                   <string name="proxy-Name">"name"</string>
                   <string name="proxy-Platform">"&lt;Any platform&gt;"</string>
                   <bool name="proxy-Separate files">0</bool>
-                  <long name="proxy-Stretch factor">0</long>
+                  <long name="proxy-Stretch factor">1</long>
                   <string name="proxy-Tooltip text">""</string>
                   <long name="proxy-Width">-1</long>
                   <long name="proxy-Wrapping width">-1</long>
@@ -32397,7 +32397,7 @@ Stop"</string>
                   <bool name="proxy-wxALIGN_LEFT">1</bool>
                   <bool name="proxy-wxALIGN_RIGHT">0</bool>
                   <bool name="proxy-wxBORDER_THEME">0</bool>
-                  <bool name="proxy-wxBOTTOM">1</bool>
+                  <bool name="proxy-wxBOTTOM">0</bool>
                   <bool name="proxy-wxDOUBLE_BORDER">0</bool>
                   <bool name="proxy-wxFIXED_MINSIZE">0</bool>
                   <bool name="proxy-wxFULL_REPAINT_ON_RESIZE">0</bool>
@@ -32469,7 +32469,7 @@ Stop"</string>
                   <bool name="proxy-wxALIGN_LEFT">0</bool>
                   <bool name="proxy-wxALIGN_RIGHT">1</bool>
                   <bool name="proxy-wxBORDER_THEME">0</bool>
-                  <bool name="proxy-wxBOTTOM">1</bool>
+                  <bool name="proxy-wxBOTTOM">0</bool>
                   <bool name="proxy-wxDOUBLE_BORDER">0</bool>
                   <bool name="proxy-wxFIXED_MINSIZE">0</bool>
                   <bool name="proxy-wxFULL_REPAINT_ON_RESIZE">0</bool>
@@ -32528,7 +32528,7 @@ Stop"</string>
                 <long name="is-transient">0</long>
                 <long name="locked">0</long>
                 <long name="owns-file">1</long>
-                <string name="proxy-AlignH">"Left"</string>
+                <string name="proxy-AlignH">"Expand"</string>
                 <string name="proxy-AlignV">"Centre"</string>
                 <long name="proxy-Border">2</long>
                 <string name="proxy-Member variable name">"pair_sizer"</string>
