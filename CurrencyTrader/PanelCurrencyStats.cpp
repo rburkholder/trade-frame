@@ -70,14 +70,20 @@ PanelCurrencyStats::fUpdateCurrency_t PanelCurrencyStats::AddCurrency( const std
   currency.m_textAmount = textAmount;
   currency.m_sizer->Add( textAmount, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxTOP, 2 );
 
+  wxStaticText* textExtended = new wxStaticText( this, wxID_ANY, _("extended"), wxDefaultPosition, wxSize(80, -1), wxALIGN_RIGHT );
+  currency.m_textExtended = textExtended;
+  currency.m_sizer->Add( textExtended, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT|wxTOP, 2 );
+
   if ( GetSizer() ) {
     GetSizer()->SetSizeHints(this);
   }
 
   fUpdateCurrency_t f =
-    [this, textAmount]( double amount ){
-      auto text = fmt::format( "{:.{}f}", amount, 2 );
-      textAmount->SetLabel( text );
+    [this, textAmount, textExtended]( double amount, double extended ){
+      auto sAmount = fmt::format( "{:.{}f}", amount, 2 );
+      textAmount->SetLabel( sAmount );
+      auto sExtended = fmt::format( "{:.{}f}", extended, 2 );
+      textExtended->SetLabel( sExtended );
     };
   return std::move( f );
 }

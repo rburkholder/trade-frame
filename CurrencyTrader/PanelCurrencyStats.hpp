@@ -53,7 +53,7 @@ public:
     const wxSize& size = SYMBOL_PANELCURRENCYSTATS_SIZE,
     long style = SYMBOL_PANELCURRENCYSTATS_STYLE );
 
-  using fUpdateCurrency_t = std::function<void(double amount)>;
+  using fUpdateCurrency_t = std::function<void(double amount, double extended)>;
   using fUpdatePair_t = std::function<void(double bid, double ask)>;
 
   fUpdateCurrency_t AddCurrency( const std::string& sName );
@@ -73,6 +73,7 @@ private:
   struct Currency {
     wxBoxSizer* m_sizer;
     wxStaticText* m_textAmount;
+    wxStaticText* m_textExtended;
     Currency(): m_sizer( nullptr ), m_textAmount( nullptr ) {}
   };
   using mapCurrency_t = std::map<std::string, Currency>;

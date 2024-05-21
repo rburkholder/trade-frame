@@ -924,7 +924,7 @@ void AppCurrencyTrader::HandleOneSecondTimer( wxTimerEvent& event ) {
 
   for ( const mapCurrency_t::value_type& vt: m_mapCurrency ) {
     // TODO: convert to update only on change
-    vt.second.fUpdateCurrency( vt.second.amount );
+    vt.second.fUpdateCurrency( vt.second.amount, 0.0 );
   }
 
   for ( const mapPair_t::value_type& vt: m_mapPair ) {
