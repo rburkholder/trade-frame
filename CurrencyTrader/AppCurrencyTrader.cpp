@@ -117,8 +117,8 @@ bool AppCurrencyTrader::OnInit() {
     std::string sName( m_choices.m_sBaseCurrency );
     std::transform(sName.begin(), sName.end(), sName.begin(), ::toupper);
 
-    ou::tf::Currency::ECurrency base_currency = ou::tf::Currency::ParseName( sName );
-    auto result = m_mapCurrency.emplace( base_currency, Currency( m_choices.m_dblBaseCurrencyTopUp ) );
+    m_currencyBase = ou::tf::Currency::ParseName( sName );
+    auto result = m_mapCurrency.emplace( m_currencyBase, Currency( m_choices.m_dblBaseCurrencyTopUp ) );
     assert( result.second );
     Currency& currency( result.first->second );
 
@@ -712,8 +712,13 @@ void AppCurrencyTrader::PopulateStrategy( pInstrument_t pInstrument ) {
 
   assert( pInstrument );
 
-  PopulateCurrency( pInstrument->GetCurrencyBase() );
-  PopulateCurrency( pInstrument->GetCurrencyCounter() );
+  const ou::tf::Currency::ECurrency currency1( pInstrument->GetCurrencyBase() );
+  const ou::tf::Currency::ECurrency currency2( pInstrument->GetCurrencyCounter() );
+
+  assert( ( m_currencyBase == currency1 ) || ( m_currencyBase == currency2 ) );
+
+  PopulateCurrency( currency1 );
+  PopulateCurrency( currency2 );
 
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName( ) );
 

@@ -123,6 +123,8 @@ private:
   ou::ChartEntryIndicator m_ceCommissionsPaid;
   ou::ChartEntryIndicator m_ceTotal;
 
+  ou::tf::Currency::ECurrency m_currencyBase;
+
   struct Currency {
     double amount;  // TODO: convert to decimal?
     PanelCurrencyStats::fUpdateCurrency_t fUpdateCurrency;
