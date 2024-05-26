@@ -204,6 +204,7 @@ private:
   void HandleSimComplete();
 
   void HandleOneSecondTimer( wxTimerEvent& event );
+  void UpdatePanelCurrencyStats();
 
   void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();

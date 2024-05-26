@@ -922,8 +922,7 @@ void AppCurrencyTrader::EnhanceInstrument( pInstrument_t pInstrument ) {
   }
 }
 
-void AppCurrencyTrader::HandleOneSecondTimer( wxTimerEvent& event ) {
-  // TODO: perform a timed update on the chart?
+void AppCurrencyTrader::UpdatePanelCurrencyStats() {
 
   double dblUnRealized;
   double dblRealized;
@@ -953,24 +952,28 @@ void AppCurrencyTrader::HandleOneSecondTimer( wxTimerEvent& event ) {
     pair.fUpdatePair( bid, ask );
 
     mapCurrency_t::const_iterator iter = m_mapCurrency.find( pair.currencyNonBase );
-    assert( m_mapCurrency.end() != iter );
-    const Currency& currency( iter->second );
+    if ( m_mapCurrency.end() != iter ) {
+      const Currency& currency( iter->second );
 
-    const double mid( 0.5 * ( bid + ask ) );
-    double dblConverted {};
+      const double mid( 0.5 * ( bid + ask ) );
+      double dblConverted {};
 
-    switch ( pair.eBase ) {
-      case Pair::EBase::First:
-        dblConverted = currency.amount / mid;
-        break;
-      case Pair::EBase::Second:
-        dblConverted = currency.amount * mid;
-        break;
-      default:
-        assert( false );
+      switch ( pair.eBase ) {
+        case Pair::EBase::First:
+          dblConverted = currency.amount / mid;
+          break;
+        case Pair::EBase::Second:
+          dblConverted = currency.amount * mid;
+          break;
+        default:
+          assert( false );
+      }
+      dblBaseTotal += dblConverted;
+      currency.fUpdateCurrency( currency.amount, dblConverted );
     }
-    dblBaseTotal += dblConverted;
-    currency.fUpdateCurrency( currency.amount, dblConverted );
+    else {
+      // log the problem or just wait for things to start?
+    }
   }
 
   mapCurrency_t::const_iterator iter = m_mapCurrency.find( m_currencyBase );
@@ -979,7 +982,12 @@ void AppCurrencyTrader::HandleOneSecondTimer( wxTimerEvent& event ) {
 
   dblBaseTotal += base.amount;
   base.fUpdateCurrency( base.amount, dblBaseTotal );
+}
 
+void AppCurrencyTrader::HandleOneSecondTimer( wxTimerEvent& event ) {
+  if ( m_bProvidersConfirmed ) {
+    UpdatePanelCurrencyStats();
+  }
 }
 
 void AppCurrencyTrader::SaveState() {
