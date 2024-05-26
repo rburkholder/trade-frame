@@ -1005,7 +1005,7 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
 
   uws.pUnderlying->FilterChains();
 
-  bool bConstructDefaultStrategy( true );
+  bool bConstructDefaultStrategy( false );  // 2024/05/26 disable building a default strategy, use manual trading for now
 
   // look for existing strategies, which means loading from the Strategy cache
   mapStrategyCache_iter iter = m_mapStrategyCache.find( idPortfolioUnderlying );
@@ -1065,7 +1065,7 @@ void MasterPortfolio::StartUnderlying( UnderlyingWithStrategies& uws ) {
     }
   }
 
-  if ( bConstructDefaultStrategy) { // create a new strategy by default
+  if ( bConstructDefaultStrategy) { // create a new strategy as required
     ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::Collar, ou::tf::option::ComboTraits::EMarketDirection::Select );
   }
 }
