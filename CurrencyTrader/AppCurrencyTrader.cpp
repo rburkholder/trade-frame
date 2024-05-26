@@ -732,6 +732,9 @@ void AppCurrencyTrader::PopulateStrategy( pInstrument_t pInstrument ) {
       pair.eBase = Pair::EBase::Second;
       pair.currencyNonBase = currency1;
     }
+    else {
+      assert( false ); // probably a redundant test to the next assert
+    }
   }
 
   assert( Pair::EBase::Unknown != pair.eBase );
@@ -957,19 +960,25 @@ void AppCurrencyTrader::UpdatePanelCurrencyStats() {
 
       const double mid( 0.5 * ( bid + ask ) );
       double dblConverted {};
+      bool bSuccess( false );
 
       switch ( pair.eBase ) {
         case Pair::EBase::First:
           dblConverted = currency.amount / mid;
+          bSuccess = true;
           break;
         case Pair::EBase::Second:
           dblConverted = currency.amount * mid;
+          bSuccess = true;
           break;
         default:
-          assert( false );
+          BOOST_LOG_TRIVIAL(warning) << vt.first << " has no conversion lookup yet";
       }
-      dblBaseTotal += dblConverted;
-      currency.fUpdateCurrency( currency.amount, dblConverted );
+
+      if ( bSuccess ) {
+        dblBaseTotal += dblConverted;
+        currency.fUpdateCurrency( currency.amount, dblConverted );
+      }
     }
     else {
       // log the problem or just wait for things to start?
