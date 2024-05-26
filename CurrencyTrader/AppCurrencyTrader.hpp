@@ -151,20 +151,26 @@ private:
 
   using pStrategy_t = std::unique_ptr<Strategy>;
   struct Pair {
+
+    enum class EBase { Unknown, First, Second } eBase;
+    ou::tf::Currency::ECurrency currencyNonBase;
     pStrategy_t pStrategy;
     PanelCurrencyStats::fUpdatePair_t fUpdatePair;
 
-    Pair(): fUpdatePair( nullptr ) {}
     Pair( pStrategy_t pStrategy_ )
     : pStrategy( std::move( pStrategy_ ) )
     , fUpdatePair( nullptr )
+    , eBase( EBase::Unknown )
     {}
+
     Pair( Pair&& rhs )
     : pStrategy( std::move( rhs.pStrategy ) )
     , fUpdatePair( std::move( rhs.fUpdatePair ) )
+    , eBase( rhs.eBase )
     {}
   };
 
+  // TODO: use a std::pair for the key?
   using mapPair_t = std::map<std::string,Pair>;
   mapPair_t m_mapPair;
 

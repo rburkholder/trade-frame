@@ -712,18 +712,32 @@ void AppCurrencyTrader::PopulateStrategy( pInstrument_t pInstrument ) {
 
   assert( pInstrument );
 
-  const ou::tf::Currency::ECurrency currency1( pInstrument->GetCurrencyBase() );
-  const ou::tf::Currency::ECurrency currency2( pInstrument->GetCurrencyCounter() );
-
-  assert( ( m_currencyBase == currency1 ) || ( m_currencyBase == currency2 ) );
-
-  PopulateCurrency( currency1 );
-  PopulateCurrency( currency2 );
-
   const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName( ) );
 
   mapPair_t::iterator iterStrategy = m_mapPair.find( idInstrument );
   assert( m_mapPair.end() != iterStrategy );
+  Pair& pair( iterStrategy->second );
+
+  const ou::tf::Currency::ECurrency currency1( pInstrument->GetCurrencyBase() );
+  const ou::tf::Currency::ECurrency currency2( pInstrument->GetCurrencyCounter() );
+
+  assert( currency1 != currency2 ); // superfulous as contract id was found
+
+  if ( m_currencyBase == currency1 ) {
+    pair.eBase = Pair::EBase::First;
+    pair.currencyNonBase = currency2;
+  }
+  else {
+    if ( m_currencyBase == currency2 ) {
+      pair.eBase = Pair::EBase::Second;
+      pair.currencyNonBase = currency1;
+    }
+  }
+
+  assert( Pair::EBase::Unknown != pair.eBase );
+
+  PopulateCurrency( currency1 );
+  PopulateCurrency( currency2 );
 
   ou::tf::PortfolioManager& pm( ou::tf::PortfolioManager::GlobalInstance() );
   pPortfolio_t pPortfolio;
@@ -927,17 +941,45 @@ void AppCurrencyTrader::HandleOneSecondTimer( wxTimerEvent& event ) {
     m_ceTotal.Append( dt, dblTotal );
   }
 
-  for ( const mapCurrency_t::value_type& vt: m_mapCurrency ) {
-    // TODO: convert to update only on change
-    vt.second.fUpdateCurrency( vt.second.amount, 0.0 );
-  }
+  double dblBaseTotal {};
 
   for ( const mapPair_t::value_type& vt: m_mapPair ) {
+
+    const Pair& pair( vt.second );
+
     double bid {};
     double ask {};
-    vt.second.pStrategy->Latest( bid, ask );
-    vt.second.fUpdatePair( bid, ask );
+    pair.pStrategy->Latest( bid, ask );
+    pair.fUpdatePair( bid, ask );
+
+    mapCurrency_t::const_iterator iter = m_mapCurrency.find( pair.currencyNonBase );
+    assert( m_mapCurrency.end() != iter );
+    const Currency& currency( iter->second );
+
+    const double mid( 0.5 * ( bid + ask ) );
+    double dblConverted {};
+
+    switch ( pair.eBase ) {
+      case Pair::EBase::First:
+        dblConverted = currency.amount / mid;
+        break;
+      case Pair::EBase::Second:
+        dblConverted = currency.amount * mid;
+        break;
+      default:
+        assert( false );
+    }
+    dblBaseTotal += dblConverted;
+    currency.fUpdateCurrency( currency.amount, dblConverted );
   }
+
+  mapCurrency_t::const_iterator iter = m_mapCurrency.find( m_currencyBase );
+  assert( m_mapCurrency.end() != iter );
+  const Currency& base( iter->second );
+
+  dblBaseTotal += base.amount;
+  base.fUpdateCurrency( base.amount, dblBaseTotal );
+
 }
 
 void AppCurrencyTrader::SaveState() {
