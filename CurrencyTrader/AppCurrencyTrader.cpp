@@ -228,7 +228,18 @@ void AppCurrencyTrader::ConstructStrategyList() {
 
   assert( 0 == m_mapPair.size() );
 
+  boost::gregorian::date adjusted_date = Strategy::AdjustTimeFrame( m_startDateUTC, m_startTimeUTC );
+
+  bool bLog( true );
+  if ( bLog ) {
+    BOOST_LOG_TRIVIAL(info)
+      << "start UTC=" << m_startDateUTC << ' ' << m_startTimeUTC
+      << " => adjusted_date=" << adjusted_date
+      ;
+  }
+
   for ( config::Choices::PairSettings& ps: m_choices.m_vPairSettings ) {
+
     const ou::tf::Instrument::idInstrument_t& idInstrument( ps.m_sName );
     mapPair_t::iterator iterPair = m_mapPair.find( idInstrument );
     if ( m_mapPair.end() == iterPair ) {
@@ -278,7 +289,6 @@ void AppCurrencyTrader::ConstructStrategyList() {
 
       iterPair->second.fUpdatePair = std::move( m_pPanelCurrencyStats->AddPair( idInstrument ) );
 
-      boost::gregorian::date adjusted_date = Strategy::AdjustTimeFrame( m_startDateUTC, m_startTimeUTC );
       strategy.InitFor24HourMarkets( adjusted_date );
 
       ou::TimeSource& ts( ou::TimeSource::GlobalInstance() );
@@ -289,8 +299,6 @@ void AppCurrencyTrader::ConstructStrategyList() {
 
       const auto MarketClose_UTC = strategy.GetRegularHoursClose();
       const boost::local_time::local_date_time MarketClose_Local( MarketClose_UTC, tz );
-
-      bool bLog( false );
 
       if ( bLog ) {
         BOOST_LOG_TRIVIAL(info)
