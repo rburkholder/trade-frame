@@ -17,7 +17,7 @@
 // timezone reference:
 // https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
-//#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/log/trivial.hpp>
 
 #include <OUCommon/TimeSource.h>
 
@@ -29,7 +29,7 @@ namespace tf { // TradeFrame
 
 // 20121223
 //  during one shots:  emit event for all DD types
-//  during periods:  simply call the crtp method
+//  during periods:    simply call the crtp method
 
 template<class T> // CRTP type call for the overrides
 class DailyTradeTimeFrame {
@@ -109,6 +109,7 @@ protected:
   void HandleSoftwareReset( boost::gregorian::date, boost::posix_time::time_duration ) {} // nay need time based if no data
 
 private:
+  // these have been normalized to UTC
   boost::posix_time::ptime m_dtMarketOpen;
   boost::posix_time::ptime m_dtRHOpen;
   boost::posix_time::ptime m_dtStartTrading;
@@ -168,31 +169,51 @@ boost::gregorian::date DailyTradeTimeFrame<T>::MarketOpenDate( boost::posix_time
   return date;
 }
 
+/*
+local_date_time(...) -- with ptime, given time is expected to be UTC
+  Parameters:
+    posix_time::ptime
+    time_zone_ptr
+
+local_date_time(...) -- with date:time, given time is expected to be in time zone
+  Parameters:
+    date
+    time_duration
+    time_zone_ptr
+    bool
+*/
+
 template<class T>
 boost::gregorian::date DailyTradeTimeFrame<T>::AdjustTimeFrame( boost::gregorian::date date_utc, boost::posix_time::time_duration time_utc ) {
-  //calculate a date suitable for calling InitFor24HourMarkets
+  //calculate a date suitable for calling InitFor24HourMarkets, which is "America/New_York"
 
   ou::TimeSource& ts( ou::TimeSource::GlobalInstance() );
-  auto tz = ts.LoadTimeZone( "America/New_York" );
+  const auto tz = ts.TimeZoneNewYork();
+
+  // determine utc date in et [eastern time]
+  const boost::posix_time::ptime dt_given_utc( date_utc, time_utc );
+  const boost::local_time::local_date_time dt_given_et( dt_given_utc, tz );
+  const auto date_given_et = dt_given_et.local_time().date();
 
   // determine UTC version of market session
-  static const auto dtStart( boost::posix_time::time_duration( 17, 30, 0 ) );
-  const boost::local_time::local_date_time ldt_start( date_utc, dtStart, tz, boost::local_time::local_date_time::EXCEPTION_ON_ERROR );
+  static const auto td_start_et( boost::posix_time::time_duration( 17, 30, 0 ) );
+  const boost::local_time::local_date_time ldt_start( date_given_et, td_start_et, tz, boost::local_time::local_date_time::EXCEPTION_ON_ERROR );
   const boost::posix_time::time_duration residual( ldt_start.utc_time().time_of_day() );
 
   // may need move date back a day for proper start of market
-  const auto temp_utc = ( residual <= time_utc ) ? date_utc : date_utc - boost::gregorian::date_duration( 1 );
+  const auto date_start_utc = ( residual <= time_utc ) ? date_utc : date_utc - boost::gregorian::date_duration( 1 );
 
   // convert the date to market time for use in InitFor24HourMarkets
-  const boost::local_time::local_date_time ldt_new( boost::posix_time::ptime( temp_utc, residual ), tz );
+  const boost::local_time::local_date_time ldt_new( boost::posix_time::ptime( date_start_utc, residual ), tz );
   const boost::gregorian::date date_new = ldt_new.local_time().date();
 
-  //BOOST_LOG_TRIVIAL(info)
-  //  << "original=" << date_utc << ' ' << time_utc
-  //  << ",start=" << ldt_start.utc_time() << "(utc)," << ldt_start.local_time() << "(local)"
-  //  << ",residual=" << residual << "(utc)"
-  //  << ",final=" << date_new
-  //  ;
+  BOOST_LOG_TRIVIAL(info)
+    << "original=" << date_utc << ' ' << time_utc
+    << ",et=" << dt_given_et.local_time()
+    << ",start=" << ldt_start.utc_time() << "(utc)," << ldt_start.local_time() << "(local)"
+    << ",residual=" << residual << "(utc)"
+    << ",final=" << date_new
+    ;
 
   return date_new;
 }
