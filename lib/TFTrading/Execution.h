@@ -22,6 +22,7 @@ using namespace boost::gregorian;
 #include <OUSQL/Functions.h>
 
 #include "KeyTypes.h"
+#include "TradingEnumerations.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

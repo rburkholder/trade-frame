@@ -18,6 +18,8 @@
 
 #include <OUCommon/TimeSource.h>
 
+#include <TFTrading/TradingEnumerations.h>
+
 #include "SimulateOrderExecution.h"
 
 namespace ou { // One Unified

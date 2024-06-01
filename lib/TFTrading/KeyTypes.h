@@ -15,8 +15,6 @@
 
 #include <string>
 
-#include "TradingEnumerations.h"
-
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace keytypes { // KeyTypes
