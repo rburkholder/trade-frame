@@ -43,13 +43,11 @@ void TrackOrder::Set( quantity_t quantity, fTransferFunds_t& f ) {
   m_fTransferFunds = f; // make a copy of the function
 }
 
-void TrackOrder::Set( EBase eBase, pPosition_t pPosition, ou::ChartDataView& cdv, int slot ) {
+void TrackOrder::Set( pPosition_t pPosition, ou::ChartDataView& cdv, int slot ) {
 
   assert( pPosition );
   assert( !m_pPosition );
-  assert( EBase::Unknown != eBase );
 
-  m_eBase = eBase;
   m_pPosition = pPosition;
 
   ou::tf::Instrument::pInstrument_t pInstrument( pPosition->GetInstrument() );

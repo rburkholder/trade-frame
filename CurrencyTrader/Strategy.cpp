@@ -131,13 +131,13 @@ void Strategy::SetWatch( EBase eBaseCurrency, pWatch_t pWatch, pPortfolio_t pPor
   {
     pPosition_t pPosition = f( pWatch, pWatch->GetInstrumentName() +":up" );
     assert( pPosition );
-    m_to_up.Set( m_eBaseCurrency, pPosition, m_cdv, EChartSlot::Price );
+    m_to_up.Set( pPosition, m_cdv, EChartSlot::Price );
   }
 
   {
     pPosition_t pPosition = f( pWatch, pWatch->GetInstrumentName() +":dn" );
     assert( pPosition );
-    m_to_dn.Set( m_eBaseCurrency, pPosition, m_cdv, EChartSlot::Price );
+    m_to_dn.Set( pPosition, m_cdv, EChartSlot::Price );
   }
 
   //m_pWatch->RecordSeries( false );
