@@ -39,6 +39,7 @@
 
 #include <TFBitsNPieces/FrameWork02.hpp>
 
+#include "Common.hpp"
 #include "Config.hpp"
 #include "PanelCurrencyStats.hpp"
 
@@ -152,7 +153,7 @@ private:
   using pStrategy_t = std::unique_ptr<Strategy>;
   struct Pair {
 
-    enum class EBase { Unknown, First, Second } eBase;
+    EBase eBase;
     ou::tf::Currency::ECurrency currencyNonBase;
     pStrategy_t pStrategy;
     PanelCurrencyStats::fUpdatePair_t fUpdatePair;

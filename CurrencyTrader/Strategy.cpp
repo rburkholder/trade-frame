@@ -32,6 +32,7 @@
 
 Strategy::Strategy()
 : DailyTradeTimeFrame<Strategy>()
+, m_eBaseCurrency( EBase::Unknown )
 , m_quantityToOrder {}
 , m_bfQuotes01Sec( 1 )
 , m_bfTrading( 60 )
@@ -114,10 +115,13 @@ void Strategy::SetTransaction( ou::tf::Order::quantity_t quantity, fTransferFund
 
 }
 
-void Strategy::SetWatch( pWatch_t pWatch, pPortfolio_t pPortfolio, fConstructPosition_t&& f ) {
+void Strategy::SetWatch( EBase eBaseCurrency, pWatch_t pWatch, pPortfolio_t pPortfolio, fConstructPosition_t&& f ) {
 
   assert( pWatch );
   assert( pPortfolio );
+  assert( EBase::Unknown != eBaseCurrency );
+
+  m_eBaseCurrency = eBaseCurrency;
 
   m_pWatch = pWatch;
   m_pPortfolio = pPortfolio; // TODO: update portfolio metrics to chart
@@ -182,15 +186,34 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration ) {
   // one time calc pip
   const double mid( m_quote.Midpoint() );
-  double tick = m_to_up.PriceInterval( mid );
+  const double tick = m_to_up.PriceInterval( mid );
+  const double usd_tick = (double)m_quantityToOrder * tick;
+
+  double first {};
+  double second {};
+
+  double other {};
+  switch ( m_eBaseCurrency ) {
+    case EBase::First:
+      other = usd_tick * mid;
+      first = usd_tick;
+      second = other;
+      break;
+    case EBase::Second:
+      other = usd_tick / mid;
+      first = other;
+      second = usd_tick;
+      break;
+    default:
+      assert( false );
+  }
   BOOST_LOG_TRIVIAL(info)
            << m_pWatch->GetInstrumentName()
     << ',' << "quan=" << m_quantityToOrder
     << ',' << "midprice=" << mid
     << ',' << "interval=" << tick
-    << ',' << "pip_0=" << ( ( (double)m_quantityToOrder ) * tick )
-    << ',' << "pip_*=" << ( ( (double)m_quantityToOrder ) * tick ) * mid // will depend upon base currency
-    << ',' << "pip_/=" << ( ( (double)m_quantityToOrder ) * tick ) / mid // will depend upon base currency
+    << '.' << "first=" << first
+    << ',' << "second=" << second
     ;
 }
 

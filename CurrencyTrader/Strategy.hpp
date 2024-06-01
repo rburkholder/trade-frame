@@ -37,6 +37,7 @@
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
+#include "Common.hpp"
 #include "TrackOrder.hpp"
 
 namespace ou {
@@ -65,7 +66,8 @@ public:
   ~Strategy();
 
   void SetTransaction( ou::tf::Order::quantity_t, fTransferFunds_t&& );
-  void SetWatch( pWatch_t, pPortfolio_t, fConstructPosition_t&& );
+  void SetWatch( EBase, pWatch_t, pPortfolio_t, fConstructPosition_t&& );
+
   void SaveWatch( const std::string& sPrefix );
   void SetResetSoftware( fResetSoftware_t&& f ) { m_fResetSoftware = std::move( f ); }
 
@@ -126,6 +128,7 @@ private:
   PL m_plTtl;
   PL m_plDn;
 
+  EBase m_eBaseCurrency;
   ou::tf::Order::quantity_t m_quantityToOrder;
 
   pWatch_t m_pWatch;

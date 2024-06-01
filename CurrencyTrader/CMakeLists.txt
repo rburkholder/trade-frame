@@ -24,6 +24,7 @@ find_package(Boost ${TF_BOOST_VERSION} REQUIRED COMPONENTS system date_time prog
 set(
   file_h
     AppCurrencyTrader.hpp
+    Common.hpp
     Config.hpp
     PanelCurrencyStats.hpp
     Strategy.hpp

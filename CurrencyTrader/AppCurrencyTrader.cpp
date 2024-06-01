@@ -732,12 +732,12 @@ void AppCurrencyTrader::PopulateStrategy( pInstrument_t pInstrument ) {
   assert( currency1 != currency2 ); // superfulous as contract id was found
 
   if ( m_currencyBase == currency1 ) {
-    pair.eBase = Pair::EBase::First;
+    pair.eBase = EBase::First;
     pair.currencyNonBase = currency2;
   }
   else {
     if ( m_currencyBase == currency2 ) {
-      pair.eBase = Pair::EBase::Second;
+      pair.eBase = EBase::Second;
       pair.currencyNonBase = currency1;
     }
     else {
@@ -745,7 +745,7 @@ void AppCurrencyTrader::PopulateStrategy( pInstrument_t pInstrument ) {
     }
   }
 
-  assert( Pair::EBase::Unknown != pair.eBase );
+  assert( EBase::Unknown != pair.eBase );
 
   PopulateCurrency( currency1 );
   PopulateCurrency( currency2 );
@@ -768,6 +768,7 @@ void AppCurrencyTrader::PopulateStrategy( pInstrument_t pInstrument ) {
   pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_data );
 
   iterStrategy->second.pStrategy->SetWatch(
+    pair.eBase,
     pWatch, pPortfolio,
     [this, pPortfolio]( pWatch_t pWatch, const std::string& sPositionPrefix )->pPosition_t{
       return ConstructPosition( pPortfolio, sPositionPrefix, pWatch );
@@ -971,11 +972,11 @@ void AppCurrencyTrader::UpdatePanelCurrencyStats() {
       bool bSuccess( false );
 
       switch ( pair.eBase ) {
-        case Pair::EBase::First:
+        case EBase::First:
           dblConverted = currency.amount / mid;
           bSuccess = true;
           break;
-        case Pair::EBase::Second:
+        case EBase::Second:
           dblConverted = currency.amount * mid;
           bSuccess = true;
           break;
