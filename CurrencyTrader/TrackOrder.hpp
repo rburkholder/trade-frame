@@ -28,6 +28,8 @@
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
 
+#include "Common.hpp"
+
 class TrackOrder {
 public:
 
@@ -81,7 +83,7 @@ public:
   ~TrackOrder();
 
   void Set( quantity_t, fTransferFunds_t& );
-  void Set( pPosition_t, ou::ChartDataView&, int slot );
+  void Set( EBase, pPosition_t, ou::ChartDataView&, int slot );
 
   double PriceInterval( double price ) const;
 
@@ -117,7 +119,8 @@ private:
   ou::ChartEntryShape m_ceExitSubmit;
   ou::ChartEntryShape m_ceExitFill;
 
-  ou::tf::Order::quantity_t m_quantityToOrder;
+  EBase m_eBase;
+  ou::tf::Order::quantity_t m_quantityBaseCurrency;
   fTransferFunds_t m_fTransferFunds;
 
   pOrder_t m_pOrderPending;

@@ -31,7 +31,7 @@
 
 TrackOrder::TrackOrder()
 : m_stateTrade( ETradeState::Init )
-, m_quantityToOrder {}
+, m_quantityBaseCurrency {}
 , m_fTransferFunds( nullptr )
 {}
 
@@ -39,14 +39,17 @@ TrackOrder::~TrackOrder() {}
 
 void TrackOrder::Set( quantity_t quantity, fTransferFunds_t& f ) {
   assert( 0 < quantity );
-  m_quantityToOrder = quantity;
+  m_quantityBaseCurrency = quantity;
   m_fTransferFunds = f; // make a copy of the function
 }
 
-void TrackOrder::Set( pPosition_t pPosition, ou::ChartDataView& cdv, int slot ) {
+void TrackOrder::Set( EBase eBase, pPosition_t pPosition, ou::ChartDataView& cdv, int slot ) {
 
   assert( pPosition );
   assert( !m_pPosition );
+  assert( EBase::Unknown != eBase );
+
+  m_eBase = eBase;
   m_pPosition = pPosition;
 
   ou::tf::Instrument::pInstrument_t pInstrument( pPosition->GetInstrument() );
@@ -119,8 +122,8 @@ void TrackOrder::EnterCommon( const OrderArgs& args, pOrder_t& pOrder ) {
 }
 
 void TrackOrder::EnterLongLmt( const OrderArgs& args ) {
-  assert( 0 < m_quantityToOrder );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityToOrder, Normalize( args.limit ) );
+  assert( 0 < m_quantityBaseCurrency );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityBaseCurrency, Normalize( args.limit ) );
   assert( pOrder );
   SetGoodTill( args, pOrder );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
@@ -128,16 +131,16 @@ void TrackOrder::EnterLongLmt( const OrderArgs& args ) {
 }
 
 void TrackOrder::EnterLongMkt( const OrderArgs& args ) {
-  assert( 0 < m_quantityToOrder );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityToOrder );
+  assert( 0 < m_quantityBaseCurrency );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityBaseCurrency );
   assert( pOrder );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   EnterCommon( args, pOrder );
 }
 
 void TrackOrder::EnterShortLmt( const OrderArgs& args ) {
-  assert( 0 < m_quantityToOrder );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityToOrder, Normalize( args.limit ) );
+  assert( 0 < m_quantityBaseCurrency );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityBaseCurrency, Normalize( args.limit ) );
   assert( pOrder );
   SetGoodTill( args, pOrder );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
@@ -145,8 +148,8 @@ void TrackOrder::EnterShortLmt( const OrderArgs& args ) {
 }
 
 void TrackOrder::EnterShortMkt( const OrderArgs& args ) {
-  assert( 0 < m_quantityToOrder );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityToOrder );
+  assert( 0 < m_quantityBaseCurrency );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityBaseCurrency );
   assert( pOrder );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   EnterCommon( args, pOrder );
@@ -158,8 +161,8 @@ void TrackOrder::ExitCommon( const OrderArgs& args, pOrder_t& pOrder ) {
 }
 
 void TrackOrder::ExitLongLmt( const OrderArgs& args ) {
-  assert( 0 < m_quantityToOrder );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityToOrder, Normalize( args.limit ) );
+  assert( 0 < m_quantityBaseCurrency );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityBaseCurrency, Normalize( args.limit ) );
   assert( pOrder );
   SetGoodTill( args, pOrder );
   m_ceExitSubmit.AddLabel( args.dt, args.signal, "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
@@ -167,16 +170,16 @@ void TrackOrder::ExitLongLmt( const OrderArgs& args ) {
 }
 
 void TrackOrder::ExitLongMkt( const OrderArgs& args ) {
-  assert( 0 < m_quantityToOrder );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityToOrder );
+  assert( 0 < m_quantityBaseCurrency );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityBaseCurrency );
   assert( pOrder );
   m_ceExitSubmit.AddLabel( args.dt, args.signal, "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   ExitCommon( args, pOrder );
 }
 
 void TrackOrder::ExitShortLmt( const OrderArgs& args ) {
-  assert( 0 < m_quantityToOrder );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityToOrder, Normalize( args.limit ) );
+  assert( 0 < m_quantityBaseCurrency );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityBaseCurrency, Normalize( args.limit ) );
   assert( pOrder );
   SetGoodTill( args, pOrder );
   m_ceExitSubmit.AddLabel( args.dt, args.signal, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
@@ -184,8 +187,8 @@ void TrackOrder::ExitShortLmt( const OrderArgs& args ) {
 }
 
 void TrackOrder::ExitShortMkt( const OrderArgs& args ) {
-  assert( 0 < m_quantityToOrder );
-  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityToOrder );
+  assert( 0 < m_quantityBaseCurrency );
+  pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityBaseCurrency );
   assert( pOrder );
   m_ceExitSubmit.AddLabel( args.dt, args.signal, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   ExitCommon( args, pOrder );
