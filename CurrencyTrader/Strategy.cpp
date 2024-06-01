@@ -184,6 +184,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 }
 
 void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration ) {
+
   // one time calc pip
   const double mid( m_quote.Midpoint() );
   const double tick = m_to_up.PriceInterval( mid );
@@ -191,29 +192,30 @@ void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_
 
   double first {};
   double second {};
+  double counter {};
 
-  double other {};
   switch ( m_eBaseCurrency ) {
     case EBase::First:
-      other = usd_tick * mid;
+      counter = usd_tick * mid;
       first = usd_tick;
-      second = other;
+      second = counter;
       break;
     case EBase::Second:
-      other = usd_tick / mid;
-      first = other;
+      counter = usd_tick / mid;
+      first = counter;
       second = usd_tick;
       break;
     default:
       assert( false );
   }
   BOOST_LOG_TRIVIAL(info)
-           << m_pWatch->GetInstrumentName()
-    << ',' << "quan=" << m_quantityToOrder
-    << ',' << "midprice=" << mid
+           << "pip"
+    << ',' << m_pWatch->GetInstrumentName()
     << ',' << "interval=" << tick
+    << ',' << "midprice=" << mid
     << '.' << "first=" << first
     << ',' << "second=" << second
+    << ',' << "quan=" << m_quantityToOrder
     ;
 }
 
