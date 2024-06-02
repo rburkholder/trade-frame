@@ -23,6 +23,7 @@
 
 #include <vector>
 #include <string>
+#include <cstdint>
 
 namespace boost {
 namespace json {
@@ -42,10 +43,10 @@ namespace trades {
 // == Trades ==
 
 struct trade {
-  uint64_t time_stamp;
+  std::uint64_t time_stamp;
   std::string side;
-  uint64_t price;
-  uint64_t quantity;
+  std::uint64_t price;
+  std::uint64_t quantity;
 };
 
 using v_trade_t = std::vector<trade>;
