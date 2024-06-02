@@ -224,15 +224,29 @@ private:
     double lo;
     boost::posix_time::ptime dt;
 
-    Swing(): hi {}, lo {} {}
+    enum ECross { Unknown, Above, Below, Straddle } eCross;
 
-    void Update( const ou::tf::Bar& bar ) {
+    Swing(): hi {}, lo {}, eCross( ECross::Unknown ) {}
+
+    void Update( const ou::tf::Bar& bar, double barrier ) {
       hi = bar.High();
       lo = bar.Low();
       dt = bar.DateTime(); // TODO: add bar width to set properly
+      if ( hi < barrier ) {
+        eCross = ECross::Below;
+      }
+      else {
+        if ( lo > barrier ) {
+          eCross = ECross::Below;
+        }
+        else {
+          eCross = ECross::Straddle;
+        }
+      }
     }
 
   };
+
   using rSwing_t = std::array<Swing, 5>;
   rSwing_t m_rSwing;
 

@@ -405,7 +405,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
   Swing& d( m_rSwing[ 3 ] );
   Swing& e( m_rSwing[ 4 ] );
 
-  a = b; b = c; c = d; d = e; e.Update( bar );
+  a = b; b = c; c = d; d = e; e.Update( bar, m_pEmaCurrency->dblEmaLatest );
 
   { // highest point
     const double x = a.hi > b.hi ? a.hi : b.hi;
