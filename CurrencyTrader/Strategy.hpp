@@ -229,8 +229,11 @@ private:
     Swing(): hi {}, lo {}, eCross( ECross::Unknown ) {}
 
     void Update( const ou::tf::Bar& bar, double barrier ) {
+
       hi = bar.High();
       lo = bar.Low();
+      assert( hi >= lo );
+
       dt = bar.DateTime(); // TODO: add bar width to set properly
       if ( hi < barrier ) {
         eCross = ECross::Below;
