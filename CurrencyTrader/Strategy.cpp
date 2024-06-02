@@ -24,7 +24,10 @@
 // TODO: change some of the screeners to use TR rather than bar ranges
 
 // TODO: how many swings are on the proper side of ema?
-// TODO: reverse the PIP calc to force order to $10USD / PIP
+
+// https://www.forex.com/en-us/forex-trading/how-to-trade-forex/ talks about the over-night roll-over fees
+
+// "Pip" is an acronym for Percentage in Point or Price Interest Point.
 
 #include <boost/log/trivial.hpp>
 
