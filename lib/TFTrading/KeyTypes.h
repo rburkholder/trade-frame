@@ -14,8 +14,7 @@
 #pragma once
 
 #include <string>
-
-#include "TradingEnumerations.h"
+#include <cstdint>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
