@@ -66,22 +66,22 @@ public:
 
     OrderArgs(): signal {}, limit {}, stop {}, duration {} {}
 
-    OrderArgs( boost::posix_time::ptime dt_, double signal_ )
+    explicit OrderArgs( boost::posix_time::ptime dt_, double signal_ )
     : dt( dt_ ), signal( signal_ ), limit {}, stop {}, duration {} {}
 
-    OrderArgs( boost::posix_time::ptime dt_, double signal_, double limit_ )
+    explicit OrderArgs( boost::posix_time::ptime dt_, double signal_, double limit_ )
     : dt( dt_ ), signal( signal_ ), limit( limit_ ), stop {}, duration {}
     {}
 
-    OrderArgs( boost::posix_time::ptime dt_, double signal_, double limit_, double stop_ )
+    explicit OrderArgs( boost::posix_time::ptime dt_, double signal_, double limit_, double stop_ )
     : dt( dt_ ), signal( signal_ ), limit( limit_ ), stop( stop_ ), duration {}
     {}
 
-    OrderArgs( boost::posix_time::ptime dt_, double signal_, double limit_, int duration_ )
+    explicit OrderArgs( boost::posix_time::ptime dt_, double signal_, double limit_, int duration_ )
     : dt( dt_ ), signal( signal_ ), limit( limit_ ), stop {}, duration( duration_ )
     {}
 
-    OrderArgs( boost::posix_time::ptime dt_, double signal_, double limit_, double stop_, int duration_ )
+    explicit OrderArgs( boost::posix_time::ptime dt_, double signal_, double limit_, double stop_, int duration_ )
     : dt( dt_ ), signal( signal_ ), limit( limit_ ), stop( stop_ ), duration( duration_ )
     {}
   };
