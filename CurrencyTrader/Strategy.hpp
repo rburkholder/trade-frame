@@ -224,9 +224,9 @@ private:
     double lo;
     boost::posix_time::ptime dt;
 
-    enum ECross { Unknown, Above, Below, Straddle } eCross;
+    enum class EBarState { Unknown, Above, Below, Straddle } eBarState;
 
-    Swing(): hi {}, lo {}, eCross( ECross::Unknown ) {}
+    Swing(): hi {}, lo {}, eBarState( EBarState::Unknown ) {}
 
     void Update( const ou::tf::Bar& bar, double barrier ) {
 
@@ -236,14 +236,14 @@ private:
 
       dt = bar.DateTime(); // TODO: add bar width to set properly
       if ( hi < barrier ) {
-        eCross = ECross::Below;
+        eBarState = EBarState::Below;
       }
       else {
         if ( lo > barrier ) {
-          eCross = ECross::Above;
+          eBarState = EBarState::Above;
         }
         else {
-          eCross = ECross::Straddle;
+          eBarState = EBarState::Straddle;
         }
       }
     }
@@ -253,7 +253,7 @@ private:
   using rSwing_t = std::array<Swing, 5>;
   rSwing_t m_rSwing;
 
-  bool SwingCross( const Swing::ECross ) const;
+  bool SwingBarState( const Swing::EBarState ) const;
 
   struct SwingTrack {
 
