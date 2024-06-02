@@ -69,6 +69,7 @@ public:
   void SetWatch( EBase, pWatch_t, pPortfolio_t, fConstructPosition_t&& );
 
   void SaveWatch( const std::string& sPrefix );
+  void CloseAndDone();
   void SetResetSoftware( fResetSoftware_t&& f ) { m_fResetSoftware = std::move( f ); }
 
   void Latest( double& bid, double& ask ) const;

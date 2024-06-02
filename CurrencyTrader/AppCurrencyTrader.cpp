@@ -629,7 +629,7 @@ void AppCurrencyTrader::HandleSimComplete() {
 void AppCurrencyTrader::HandleMenuActionCloseAndDone() {
   std::cout << "Closing & Done" << std::endl;
   for ( mapPair_t::value_type& vt: m_mapPair ) {
-    //vt.second->CloseAndDone();
+    vt.second.pStrategy->CloseAndDone();
   }
 }
 

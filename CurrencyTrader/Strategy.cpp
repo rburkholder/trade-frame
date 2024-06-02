@@ -488,6 +488,10 @@ void Strategy::SaveWatch( const std::string& sPrefix ) {
   }
 }
 
+void Strategy::CloseAndDone() {
+
+}
+
   // The ATR is commonly used as an exit method that can be applied
   // no matter how the entry decision is made. One popular technique
   // is known as the "chandelier exit" and was developed by Chuck LeBeau:
