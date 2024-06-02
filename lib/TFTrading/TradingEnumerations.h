@@ -15,6 +15,7 @@
 #pragma once
 
 #include <string>
+#include <cstdint>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
