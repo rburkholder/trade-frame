@@ -22,6 +22,7 @@
 #pragma once
 
 #include <string>
+#include <cstdint>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -73,9 +74,9 @@ struct PanelOrderButtons_Order {
   double PositionExitProfitValue() const;
   double PositionExitStopValue() const;
 
-  uint32_t QuanStock() const;
-  uint32_t QuanFuture() const;
-  uint32_t QuanOption() const;
+  std::uint32_t QuanStock() const;
+  std::uint32_t QuanFuture() const;
+  std::uint32_t QuanOption() const;
 };
 
 struct PanelOrderButtons_MarketData {
