@@ -237,7 +237,7 @@ private:
       }
       else {
         if ( lo > barrier ) {
-          eCross = ECross::Below;
+          eCross = ECross::Above;
         }
         else {
           eCross = ECross::Straddle;
