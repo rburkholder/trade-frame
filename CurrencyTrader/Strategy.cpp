@@ -267,6 +267,16 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   m_state.swing = State::Swing::none;
 }
 
+bool Strategy::SwingCross( const Swing::ECross eCross ) const {
+  return
+       ( eCross == m_rSwing[4].eCross )
+    && ( eCross == m_rSwing[3].eCross )
+    && ( eCross == m_rSwing[2].eCross )
+    && ( eCross == m_rSwing[1].eCross )
+    && ( eCross == m_rSwing[0].eCross )
+    ;
+}
+
 void Strategy::RunStateUp( TrackOrder& to ) {
   switch ( to.m_stateTrade ) {
     case TrackOrder::ETradeState::Init: // Strategy starts in this state
@@ -275,8 +285,10 @@ void Strategy::RunStateUp( TrackOrder& to ) {
     case TrackOrder::ETradeState::Search:
       switch ( m_state.swing ) {
         case State::Swing::up:
-          if ( m_pEmaCurrency->dblEmaLatest > m_quote.Midpoint() ) { // need to track if crossed or touched
-            to.EnterLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
+          if ( SwingCross( Swing::ECross::Below ) ) {
+            if ( m_pEmaCurrency->dblEmaLatest > m_quote.Midpoint() ) { // need to track if crossed or touched
+              to.EnterLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
+            }
           }
           break;
         case State::Swing::none:
@@ -327,8 +339,10 @@ void Strategy::RunStateDn( TrackOrder& to ) {
         case State::Swing::none:
           break;
         case State::Swing::down:
-          if ( m_pEmaCurrency->dblEmaLatest < m_quote.Midpoint() ) { // need to track if crossed or touched
-            to.EnterShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
+          if ( SwingCross( Swing::ECross::Above ) ) {
+            if ( m_pEmaCurrency->dblEmaLatest < m_quote.Midpoint() ) { // need to track if crossed or touched
+              to.EnterShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
+            }
           }
           break;
       }
