@@ -186,29 +186,29 @@ private:
 
   struct TR { // True Range
 
-    double close;
+    double previous_close;
 
-    TR(): close {} {}
+    TR(): previous_close {} {}
 
-    double Update( const ou::tf::Bar& bar ) {
+    double Update( const ou::tf::Bar& bar ) { // calculate true range
 
-      if ( 0.0 == close ) {
-        close = bar.Open(); // prime the value one time
+      if ( 0.0 == previous_close ) {
+        previous_close = bar.Open(); // prime the value one time
       }
 
-      const double hi( bar.High() );
-      const double lo( bar.Low() );
+      const double bar_hi( bar.High() );
+      const double bar_lo( bar.Low() );
 
-      const double upper( hi >= close ? hi - close : close - hi );
-      const double lower( lo >= close ? lo - close : close - lo );
+      const double upper_delta( bar_hi >= previous_close ? bar_hi - previous_close : previous_close - bar_hi );
+      const double lower_delta( bar_lo >= previous_close ? bar_lo - previous_close : previous_close - bar_lo );
 
-      double range( hi - lo );
-      if ( upper > range ) range = upper;
-      if ( lower > range ) range = lower;
+      double true_range( bar_hi - bar_lo ); // prime with bar height
+      if ( upper_delta > true_range ) true_range = upper_delta;
+      if ( lower_delta > true_range ) true_range = lower_delta;
 
-      close = bar.Close();
+      previous_close = bar.Close();
 
-      return range;
+      return true_range;
     }
   };
 
