@@ -202,7 +202,7 @@ protected:
   enum EProcessingState {
     Constructing, Quiescent, SymbolListBuilt, RetrievingWithMoreInQ, RetrievingWithQEmpty, InDestruction
     } m_stateBulkQuery;
-  enum EResultType {
+  enum class EResultType {
     Unknown, Bars, Ticks
   } m_ResultType;
 
