@@ -56,6 +56,8 @@ public:
     double commission
     )>;
 
+  using fFillPrice_t = std::function<void(double)>; // this will be associated with state change
+
   struct OrderArgs {
 
     boost::posix_time::ptime dt;
@@ -91,6 +93,7 @@ public:
 
   void Set( quantity_t, fTransferFunds_t& );
   void Set( pPosition_t, ou::ChartDataView&, int slot );
+  void Set( fFillPrice_t&& );
 
   double PriceInterval( double price ) const;
 
@@ -128,6 +131,8 @@ private:
 
   ou::tf::Order::quantity_t m_quantityBaseCurrency;
   fTransferFunds_t m_fTransferFunds;
+
+  fFillPrice_t m_fFillPrice;
 
   pOrder_t m_pOrderPending;
   pPosition_t m_pPosition;

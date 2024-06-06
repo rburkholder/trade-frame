@@ -33,6 +33,7 @@ TrackOrder::TrackOrder()
 : m_stateTrade( ETradeState::Init )
 , m_quantityBaseCurrency {}
 , m_fTransferFunds( nullptr )
+, m_fFillPrice( nullptr )
 {}
 
 TrackOrder::~TrackOrder() {}
@@ -60,6 +61,10 @@ void TrackOrder::Set( pPosition_t pPosition, ou::ChartDataView& cdv, int slot ) 
   cdv.Add( slot, &m_ceExitSubmit );
   cdv.Add( slot, &m_ceExitFill );
 
+}
+
+void TrackOrder::Set( fFillPrice_t&& f ) {
+  m_fFillPrice = std::move( f );
 }
 
 void TrackOrder::QueryStats( double& unrealized, double& realized, double& commission, double& total ) {
@@ -270,6 +275,8 @@ void TrackOrder::HandleOrderFilled( const ou::tf::Order& order ) {
     default:
       assert( false );
   }
+
+  if ( m_fFillPrice ) m_fFillPrice( exchange_rate );
 
   switch ( m_stateTrade ) {
     case ETradeState::EntrySubmitted:
