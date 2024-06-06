@@ -271,6 +271,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 }
 
 bool Strategy::SwingBarState( const Swing::EBarState eBarState ) const {
+  // unused, eliminated too many signals
   return
        ( eBarState == m_rSwing[4].eBarState )
     && ( eBarState == m_rSwing[3].eBarState )
@@ -288,10 +289,14 @@ void Strategy::RunStateUp( TrackOrder& to ) {
     case TrackOrder::ETradeState::Search:
       switch ( m_state.swing ) {
         case State::Swing::up:
-          if ( SwingBarState( Swing::EBarState::Below ) ) {
-            if ( m_pEmaCurrency->dblEmaLatest > m_quote.Midpoint() ) { // need to track if crossed or touched
-              to.EnterLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
-            }
+          if ( m_pEmaCurrency->dblEmaLatest > m_quote.Ask() ) { // need to track if crossed or touched
+            //to.EnterLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
+            to.Set( 
+              []( double fill_price ){
+                // submit a close
+              });
+            const double stop = m_rSwing[ 2 ].lo;
+            to.EnterLongLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Ask(), m_quote.Bid(), stop ) );
           }
           break;
         case State::Swing::none:
@@ -342,10 +347,14 @@ void Strategy::RunStateDn( TrackOrder& to ) {
         case State::Swing::none:
           break;
         case State::Swing::down:
-          if ( SwingBarState( Swing::EBarState::Above ) ) {
-            if ( m_pEmaCurrency->dblEmaLatest < m_quote.Midpoint() ) { // need to track if crossed or touched
-              to.EnterShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
-            }
+          if ( m_pEmaCurrency->dblEmaLatest < m_quote.Bid() ) { // need to track if crossed or touched
+            //to.EnterShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
+            to.Set( 
+              []( double fill_price ){
+                // submit a close
+              });
+            const double stop = m_rSwing[ 2 ].hi;
+            to.EnterShortLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Bid(), m_quote.Ask(), stop ) );
           }
           break;
       }
