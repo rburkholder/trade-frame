@@ -295,7 +295,7 @@ void Strategy::RunStateUp( TrackOrder& to ) {
               []( double fill_price ){
                 // submit a close
               });
-            const double stop = m_rSwing[ 2 ].lo;
+            const double stop = m_rSwing[ 2 ].lo; // run a parabolic stop?
             to.EnterLongLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Ask(), m_quote.Bid(), stop ) );
           }
           break;
@@ -353,7 +353,7 @@ void Strategy::RunStateDn( TrackOrder& to ) {
               []( double fill_price ){
                 // submit a close
               });
-            const double stop = m_rSwing[ 2 ].hi;
+            const double stop = m_rSwing[ 2 ].hi; // run a parabolic stop?
             to.EnterShortLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Bid(), m_quote.Ask(), stop ) );
           }
           break;
