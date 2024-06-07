@@ -116,6 +116,13 @@ void TrackOrder::Common( const OrderArgs& args, pOrder_t& pOrder ) {
   m_pOrderPending = pOrder;
   m_pPosition->PlaceOrder( pOrder );
   //ShowOrder( pOrder );
+  // handle stop, and on a fill callback there may an immediate exit order
+  // which ever gets hit, then cancel the other
+  // will need to watch the state machine
+  // the stop probably isn't part of any state, except the running state
+  // stop will be a market order?  or can we install a bracket order?
+  //   effectively one cancels the other (OCA)
+  // TWS:  PlaceOrder, PlaceComboOrder, PlaceBracketOrder
 }
 
 void TrackOrder::EnterCommon( const OrderArgs& args, pOrder_t& pOrder ) {
