@@ -291,7 +291,7 @@ void Strategy::RunStateUp( TrackOrder& to ) {
         case State::Swing::up:
           if ( m_pEmaCurrency->dblEmaLatest > m_quote.Ask() ) { // need to track if crossed or touched
             //to.EnterLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
-            to.Set( 
+            to.Set(
               []( double fill_price ){
                 // submit a close
               });
@@ -349,7 +349,7 @@ void Strategy::RunStateDn( TrackOrder& to ) {
         case State::Swing::down:
           if ( m_pEmaCurrency->dblEmaLatest < m_quote.Bid() ) { // need to track if crossed or touched
             //to.EnterShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
-            to.Set( 
+            to.Set(
               []( double fill_price ){
                 // submit a close
               });
@@ -477,23 +477,21 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
 
 }
 
-bool Strategy::HandleSoftwareReset( const ou::tf::Bar& ) {
-  // TO FIX: performed for each instrument.  perform only once per clock cycle
-  //   so needs a latch on the called side
-  /*
+bool Strategy::HandleSoftwareReset( const ou::tf::DatedDatum& ) {
+  // injected by external one second timer
+  // clean up, clear out
   if ( nullptr != m_fResetSoftware ) {
     return m_fResetSoftware();
   }
   else {
     return false;
   }
-  */
-  return false;
 }
 
 void Strategy::SaveWatch( const std::string& sPrefix ) {
   if ( m_pWatch ) {
     m_pWatch->SaveSeries( sPrefix );
+    m_pWatch->ClearSeries();
   }
 }
 

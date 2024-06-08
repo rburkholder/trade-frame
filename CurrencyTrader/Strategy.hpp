@@ -310,7 +310,9 @@ private:
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration );
-  bool HandleSoftwareReset( const ou::tf::Bar& );
+
+  void HandleRHTrading( const ou::tf::DatedDatum& ) {};
+  bool HandleSoftwareReset( const ou::tf::DatedDatum& );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& );
   void HandleMinuteBar( const ou::tf::Bar& );

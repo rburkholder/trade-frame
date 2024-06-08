@@ -76,6 +76,8 @@ bool AppCurrencyTrader::OnInit() {
   m_nTSDataStreamSequence = 0;
   m_dblCommissionTotal = 0.0;
 
+  m_stateSoftwareReset = ESoftwareReset::quiescent;
+
   if ( config::Load( c_sChoicesFilename, m_choices ) ) {
   }
   else {
@@ -388,20 +390,22 @@ void AppCurrencyTrader::ConstructStrategyList() {
 
       if ( 0 == m_choices.m_sHdf5SimSet.size() ) {
         strategy.SetResetSoftware( [this,&strategy]()->bool {
-          HandleMenuActionSaveValues();
-          SetStreamStartDateTime();
-          strategy.InitForNextDay();
-          if ( m_tws ) {
-            if ( m_tws->Connected() ) {
-              BOOST_LOG_TRIVIAL(info) << "tws connected";
-            }
-            else {
-              BOOST_LOG_TRIVIAL(info) << "reconnecting tws";
-              m_tws->Disconnect();
-              m_tws->Connect();
-            }
+          bool bReturn( false );
+          switch ( m_stateSoftwareReset ) {
+            case ESoftwareReset::looking:
+              m_stateSoftwareReset = ESoftwareReset::encountered;
+              //break; fall through instead
+            case ESoftwareReset::encountered:
+              // note that this goes re-entrant
+              BOOST_LOG_TRIVIAL(info) << "strategy reset, in encountered";
+              strategy.InitForNextDay(); // adjusts DailyTradeTimeFrames ahead by 1 day
+              bReturn = true;
+              break;
+            case ESoftwareReset::quiescent:
+              BOOST_LOG_TRIVIAL(warning) << "strategy reset, in quiescence";
+              break;
           }
-          return true;
+          return bReturn;
         } );
       }
 
@@ -492,8 +496,10 @@ bool AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
 
   // TODO: add to a clean up routine
   m_timerOneSecond.SetOwner( this );
-  Bind( wxEVT_TIMER, &AppCurrencyTrader::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
-  m_timerOneSecond.Start( 500 );
+  if ( 0 == m_choices.m_sHdf5SimSet.size() ) {
+    Bind( wxEVT_TIMER, &AppCurrencyTrader::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
+    m_timerOneSecond.Start( 500 );
+  }
 
   SetStreamStartDateTime();
 
@@ -1003,9 +1009,37 @@ void AppCurrencyTrader::UpdatePanelCurrencyStats() {
 }
 
 void AppCurrencyTrader::HandleOneSecondTimer( wxTimerEvent& event ) {
+
   if ( m_bProvidersConfirmed ) {
     UpdatePanelCurrencyStats();
   }
+
+  m_stateSoftwareReset = ESoftwareReset::looking;
+
+  const auto dt = ou::TimeSource::GlobalInstance().External();
+  const ou::tf::DatedDatum datum( dt );
+  for ( const mapPair_t::value_type& vt: m_mapPair ) {
+    vt.second.pStrategy->TimeTick<ou::tf::DatedDatum>( datum );
+  }
+
+  // what happens if we have laggards? might be ok, with timeseries cleared in Strategy
+  if ( ESoftwareReset::encountered == m_stateSoftwareReset ) {
+    HandleMenuActionSaveValues();
+    SetStreamStartDateTime(); // affects m_startDateUTC
+    if ( m_tws ) {
+      if ( m_tws->Connected() ) {
+        BOOST_LOG_TRIVIAL(info) << "strategy timer, tws connected";
+      }
+      else {
+        BOOST_LOG_TRIVIAL(info) << "strategy timer, tws reconnecting";
+        m_tws->Disconnect();
+        m_tws->Connect();
+      }
+    }
+  }
+
+  m_stateSoftwareReset = ESoftwareReset::quiescent;
+
 }
 
 void AppCurrencyTrader::SaveState() {

@@ -178,6 +178,9 @@ private:
   boost::gregorian::date           m_startDateUTC;
   boost::posix_time::time_duration m_startTimeUTC;
 
+  enum class ESoftwareReset { quiescent, looking, encountered };
+  ESoftwareReset m_stateSoftwareReset;
+
   ou::Delegate<int> m_OnSimulationComplete;
 
   bool BuildProviders_Live( wxBoxSizer* );
