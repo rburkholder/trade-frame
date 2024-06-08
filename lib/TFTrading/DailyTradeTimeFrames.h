@@ -275,8 +275,13 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
       static_cast<T*>(this)->HandleCancelling( dd );
     }
     else {
-      // need to disambiguate DD on each side of !=
-      //if ( &DailyTradeTimeFrame<T>::HandleRHTrading != &T::HandleRHTrading ) {
+      // need to disambiguate DD on rhs side of !=
+      //using LHS = decltype( &DailyTradeTimeFrame<T>::HandleRHTrading<DD> );
+      //LHS lhs( &DailyTradeTimeFrame<T>::HandleRHTrading<DD> );
+      //using RHS = decltype( static_cast<T*>(this)->HandleRHTrading( dd ) );
+      //using RHS = decltype( &T::HandleRHTrading<DD> );
+      //RHS rhs( static_cast<T*>(this)->HandleRHTrading( dd ) ); // <- error: variable or field ‘rhs’ declared void
+      //if ( &lhs != &rhs ) {
         static_cast<T*>(this)->HandleRHTrading( dd );
       //}
     }
