@@ -280,7 +280,7 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
       //LHS lhs( &DailyTradeTimeFrame<T>::HandleRHTrading<DD> );
       //using RHS = decltype( static_cast<T*>(this)->HandleRHTrading( dd ) );
       //using RHS = decltype( &T::HandleRHTrading<DD> );
-      //RHS rhs( static_cast<T*>(this)->HandleRHTrading( dd ) ); // <- error: variable or field ‘rhs’ declared void
+      //RHS rhs( static_cast<T*>(this)->HandleRHTrading( dd ) ); // <- error: variable or field ‘rhs’ declared void, need to forward declare somehow
       //if ( &lhs != &rhs ) {
         static_cast<T*>(this)->HandleRHTrading( dd );
       //}
