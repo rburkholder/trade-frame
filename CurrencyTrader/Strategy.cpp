@@ -547,6 +547,18 @@ void Strategy::SaveWatch( const std::string& sPrefix ) {
   if ( m_pWatch ) {
     m_pWatch->SaveSeries( sPrefix );
     m_pWatch->ClearSeries();
+
+    m_ceQuoteAsk.Clear();
+    m_ceQuoteBid.Clear();
+    m_ceTrade.Clear();
+    m_ceVolume.Clear();
+
+    m_plUp.Clear();
+    m_plTtl.Clear();
+    m_plDn.Clear();
+
+    m_ceSwingHi.Clear();
+    m_ceSwingLo.Clear();
   }
 }
 

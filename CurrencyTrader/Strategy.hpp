@@ -124,6 +124,13 @@ private:
       cdv.Add( slot, &m_ceRealized );
       cdv.Add( slot, &m_ceUnRealized );
     }
+
+    void Clear() {
+      m_ceUnRealized.Clear();
+      m_ceRealized.Clear();
+      m_ceProfitLoss.Clear();
+      m_ceCommission.Clear();
+    }
   };
 
   PL m_plUp;
