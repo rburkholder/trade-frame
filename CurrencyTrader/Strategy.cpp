@@ -425,7 +425,7 @@ void Strategy::RunStateDn( TrackOrder& to ) {
             const double ask = m_quote.Ask();
             if ( ask >= m_dblStopTrail ) {
               // exit with stop
-              to.ExitLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), ask ) );
+              to.ExitShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), ask ) );
             }
             else {
               // update trailing stop
