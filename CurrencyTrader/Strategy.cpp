@@ -149,9 +149,8 @@ void Strategy::SetWatch( EBase eBaseCurrency, pWatch_t pWatch, pPortfolio_t pPor
 
 }
 
-void Strategy::Latest( double& bid, double& ask ) const {
-  bid = m_quote.Bid();
-  ask = m_quote.Ask();
+Strategy::pairBidAsk_t Strategy::LatestQuote() const {
+  return pairBidAsk_t( m_quote.Bid(), m_quote.Ask() );
 }
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
@@ -479,7 +478,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
 
 bool Strategy::HandleSoftwareReset( const ou::tf::DatedDatum& ) {
   // injected by external one second timer
-  // clean up, clear out
+  // clean up, clear out, start new statistics?
   if ( nullptr != m_fResetSoftware ) {
     return m_fResetSoftware();
   }

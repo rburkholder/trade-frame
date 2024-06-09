@@ -966,8 +966,8 @@ void AppCurrencyTrader::UpdatePanelCurrencyStats() {
 
     double bid {};
     double ask {};
-    pair.pStrategy->Latest( bid, ask );
-    pair.fUpdatePair( bid, ask );
+    auto bid_ask = pair.pStrategy->LatestQuote();
+    pair.fUpdatePair( bid_ask.first, bid_ask.second );
 
     mapCurrency_t::const_iterator iter = m_mapCurrency.find( pair.currencyNonBase );
     if ( m_mapCurrency.end() != iter ) {

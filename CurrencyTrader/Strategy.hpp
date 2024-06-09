@@ -72,7 +72,8 @@ public:
   void CloseAndDone();
   void SetResetSoftware( fResetSoftware_t&& f ) { m_fResetSoftware = std::move( f ); }
 
-  void Latest( double& bid, double& ask ) const;
+  using pairBidAsk_t = std::pair<double,double>;
+  pairBidAsk_t LatestQuote() const;
 
   ou::ChartDataView& GetChartDataView() { return m_cdv; }
 
