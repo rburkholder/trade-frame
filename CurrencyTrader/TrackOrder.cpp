@@ -148,6 +148,42 @@ void TrackOrder::EnterLongMkt( const OrderArgs& args ) {
   EnterCommon( args, pOrder );
 }
 
+void TrackOrder::EnterLongBracket( const OrderArgs& args ) {
+  // unused, as Position has counters which don't support a set of orders with multiple directions and times
+  // will need to simulate equivalent of Bracket Order in the state machine
+  assert( 0 < m_quantityBaseCurrency );
+  m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
+  m_stateTrade = ETradeState::EntrySubmitted;
+
+  assert( 0.0 < args.limit );
+  pOrder_t pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityBaseCurrency, Normalize( args.limit ) );
+  assert( pOrderEntry );
+  SetGoodTill( args, pOrderEntry );
+  pOrderEntry->SetTransmit( false );
+  pOrderEntry->SetSignalPrice( args.signal );
+  pOrderEntry->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrder::HandleOrderCancelled ) );
+  pOrderEntry->OnOrderFilled.Add( MakeDelegate( this, &TrackOrder::HandleOrderFilled ) );
+  assert( !m_pOrderPending );
+  m_pOrderPending = pOrderEntry;
+  m_pPosition->PlaceOrder( pOrderEntry );
+
+  assert( 0.0 < args.profit );
+  pOrder_t pOrderProfit = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityBaseCurrency, Normalize( args.profit ) );
+  assert( pOrderProfit );
+  pOrderProfit->SetTransmit( false );
+  pOrderProfit->SetParentOrderId( pOrderEntry->GetOrderId() );
+  m_pPosition->PlaceOrder( pOrderProfit );
+
+  assert( 0.0 < args.stop );
+  pOrder_t pOrderStop = m_pPosition->ConstructOrder( ou::tf::OrderType::Trail, ou::tf::OrderSide::Sell, m_quantityBaseCurrency, Normalize( args.stop ) );
+  assert( pOrderStop );
+  pOrderStop->SetParentOrderId( pOrderEntry->GetOrderId() );
+  m_pPosition->PlaceOrder( pOrderStop );
+
+  // this won't track in the order manager or the position
+  //std::dynamic_pointer_cast<ou::tf::ib::TWS>( m_pPosition->GetExecutionProvider() )->PlaceBracketOrder( pOrderEntry, pOrderProfit, pOrderStop );
+}
+
 void TrackOrder::EnterShortLmt( const OrderArgs& args ) {
   assert( 0 < m_quantityBaseCurrency );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityBaseCurrency, Normalize( args.limit ) );

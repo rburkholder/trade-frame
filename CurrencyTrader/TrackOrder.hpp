@@ -63,28 +63,29 @@ public:
     boost::posix_time::ptime dt;
     double signal;
     double limit;
+    double profit;
     double stop;
     unsigned int duration; // limit order duration seconds
 
-    OrderArgs(): signal {}, limit {}, stop {}, duration {} {}
+    OrderArgs(): signal {}, limit {}, profit {}, stop {}, duration {} {}
 
     explicit OrderArgs( boost::posix_time::ptime dt_, double signal_ )
-    : dt( dt_ ), signal( signal_ ), limit {}, stop {}, duration {} {}
+    : dt( dt_ ), signal( signal_ ), limit {}, profit {}, stop {}, duration {} {}
 
     explicit OrderArgs( boost::posix_time::ptime dt_, double signal_, double limit_ )
-    : dt( dt_ ), signal( signal_ ), limit( limit_ ), stop {}, duration {}
+    : dt( dt_ ), signal( signal_ ), limit( limit_ ), profit {}, stop {}, duration {}
     {}
 
     explicit OrderArgs( boost::posix_time::ptime dt_, double signal_, double limit_, double stop_ )
-    : dt( dt_ ), signal( signal_ ), limit( limit_ ), stop( stop_ ), duration {}
+    : dt( dt_ ), signal( signal_ ), limit( limit_ ), profit {}, stop( stop_ ), duration {}
     {}
 
     explicit OrderArgs( boost::posix_time::ptime dt_, double signal_, double limit_, int duration_ )
-    : dt( dt_ ), signal( signal_ ), limit( limit_ ), stop {}, duration( duration_ )
+    : dt( dt_ ), signal( signal_ ), limit( limit_ ), profit {}, stop {}, duration( duration_ )
     {}
 
     explicit OrderArgs( boost::posix_time::ptime dt_, double signal_, double limit_, double stop_, int duration_ )
-    : dt( dt_ ), signal( signal_ ), limit( limit_ ), stop( stop_ ), duration( duration_ )
+    : dt( dt_ ), signal( signal_ ), limit( limit_ ), profit {}, stop( stop_ ), duration( duration_ )
     {}
   };
 
@@ -101,6 +102,7 @@ public:
 
   void EnterLongLmt( const OrderArgs& );
   void EnterLongMkt( const OrderArgs& );
+  void EnterLongBracket( const OrderArgs& );
 
   void EnterShortLmt( const OrderArgs& );
   void EnterShortMkt( const OrderArgs& );
