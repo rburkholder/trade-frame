@@ -224,7 +224,6 @@ void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   const auto dt( bar.DateTime() );
-  const double mid( m_quote.Midpoint() );
 
   double unrealized, realized, commission, total;
 
@@ -248,14 +247,14 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   switch ( m_state.swing ) {
     case State::Swing::up:
-      m_state.sum += ( m_state.last - mid );
-      m_state.last = mid;
+      m_state.sum += ( m_state.last - m_quote.Ask() );
+      m_state.last = m_quote.Ask();
       break;
     case State::Swing::none:
       break;
     case State::Swing::down:
-      m_state.sum += ( mid - m_state.last );
-      m_state.last = mid;
+      m_state.sum += ( m_quote.Bid() - m_state.last );
+      m_state.last = m_quote.Bid();
       break;
   }
 
