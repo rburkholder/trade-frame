@@ -964,8 +964,6 @@ void AppCurrencyTrader::UpdatePanelCurrencyStats() {
 
     const Pair& pair( vt.second );
 
-    double bid {};
-    double ask {};
     auto bid_ask = pair.pStrategy->LatestQuote();
     pair.fUpdatePair( bid_ask.first, bid_ask.second );
 
@@ -973,7 +971,7 @@ void AppCurrencyTrader::UpdatePanelCurrencyStats() {
     if ( m_mapCurrency.end() != iter ) {
       const Currency& currency( iter->second );
 
-      const double mid( 0.5 * ( bid + ask ) );
+      const double mid( 0.5 * ( bid_ask.first + bid_ask.second ) );
       double dblConverted {};
       bool bSuccess( false );
 
