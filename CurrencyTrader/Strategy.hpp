@@ -107,6 +107,7 @@ private:
   ou::ChartEntryShape m_ceSwingHi;
   ou::ChartEntryShape m_ceSwingLo;
 
+  // Should be able to detect a generally rising or falling market?
   ou::ChartEntryShape m_ceTradingRangeRising;
   ou::ChartEntryShape m_ceTradingRangeFalling;
 
