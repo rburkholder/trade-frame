@@ -307,6 +307,10 @@ private:
   };
   TradingRange m_trRising, m_trFalling;
 
+  double m_dblStopStart;
+  double m_dblStopDiff;
+  double m_dblStopTrail;
+
   fResetSoftware_t m_fResetSoftware;
 
   void Init();

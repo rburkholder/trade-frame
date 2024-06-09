@@ -311,13 +311,15 @@ void Strategy::RunStateUp( TrackOrder& to ) {
       switch ( m_state.swing ) {
         case State::Swing::up:
           if ( m_pEmaCurrency->dblEmaLatest > m_quote.Ask() ) { // need to track if crossed or touched
-            //to.EnterLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
             to.Set(
-              []( double fill_price ){
-                // submit a close
+              [this]( double fill_price ){
+                m_dblStopDiff = fill_price - m_dblStopStart;
+                assert( 0.0 < m_dblStopDiff );
               });
-            const double stop = m_rSwing[ 2 ].lo; // run a parabolic stop?
-            to.EnterLongLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Ask(), m_quote.Bid(), stop ) );
+            m_dblStopTrail = m_dblStopStart = m_rSwing[ 2 ].lo; // run a parabolic stop?
+            m_dblStopDiff = m_quote.Bid() - m_dblStopTrail; // preliminary initialization
+            assert( 0.0 < m_dblStopDiff );
+            to.EnterLongLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Ask(), m_quote.Bid() ) );
           }
           break;
         case State::Swing::none:
@@ -334,8 +336,23 @@ void Strategy::RunStateUp( TrackOrder& to ) {
         case State::Swing::up:
           break;
         case State::Swing::none:
+          {
+            const double bid = m_quote.Bid();
+            if ( bid <= m_dblStopTrail ) {
+              // exit with stop
+              to.ExitLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), bid ) );
+            }
+            else {
+              // update trailing stop
+              const double diff = bid - m_dblStopTrail;
+              if ( diff > m_dblStopDiff ) {
+                m_dblStopTrail = bid - m_dblStopDiff;
+              }
+            }
+          }
           break;
         case State::Swing::down:
+          // should be exiting earlier than this
           to.ExitLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
           break;
       }
@@ -369,13 +386,15 @@ void Strategy::RunStateDn( TrackOrder& to ) {
           break;
         case State::Swing::down:
           if ( m_pEmaCurrency->dblEmaLatest < m_quote.Bid() ) { // need to track if crossed or touched
-            //to.EnterShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
             to.Set(
-              []( double fill_price ){
-                // submit a close
+              [this]( double fill_price ){
+                m_dblStopDiff = m_dblStopStart - fill_price;
+                assert( 0.0 < m_dblStopDiff );
               });
-            const double stop = m_rSwing[ 2 ].hi; // run a parabolic stop?
-            to.EnterShortLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Bid(), m_quote.Ask(), stop ) );
+            m_dblStopTrail = m_dblStopStart = m_rSwing[ 2 ].hi; // run a parabolic stop?
+            m_dblStopDiff = m_dblStopTrail - m_quote.Ask();
+            assert( 0.0 < m_dblStopDiff );
+            to.EnterShortLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Bid(), m_quote.Ask() ) );
           }
           break;
       }
@@ -386,9 +405,24 @@ void Strategy::RunStateDn( TrackOrder& to ) {
     case TrackOrder::ETradeState::ExitSignal:
       switch ( m_state.swing ) {
         case State::Swing::up:
+          // should be exiting earlier than this
           to.ExitShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
           break;
         case State::Swing::none:
+          {
+            const double ask = m_quote.Ask();
+            if ( ask >= m_dblStopTrail ) {
+              // exit with stop
+              to.ExitLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), ask ) );
+            }
+            else {
+              // update trailing stop
+              const double diff = m_dblStopTrail - ask;
+              if ( diff > m_dblStopDiff ) {
+                m_dblStopTrail = m_dblStopDiff - ask;
+              }
+            }
+          }
           break;
         case State::Swing::down:
           break;
