@@ -80,7 +80,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, ATR, SD, MASlope, MA, Stoch, PL_Up, PL_Ttl, PL_Dn, Commission };
+  enum EChartSlot { Price, Volume, ATR, TR_EMA, SD, MASlope, MA, Stoch, PL_Up, PL_Ttl, PL_Dn, Commission };
 
   using pOrder_t = ou::tf::Order::pOrder_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
@@ -106,6 +106,9 @@ private:
 
   ou::ChartEntryShape m_ceSwingHi;
   ou::ChartEntryShape m_ceSwingLo;
+
+  ou::ChartEntryShape m_ceTradingRangeRising;
+  ou::ChartEntryShape m_ceTradingRangeFalling;
 
   struct PL {
 

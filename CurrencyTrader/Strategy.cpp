@@ -76,6 +76,14 @@ void Strategy::Init() {
   m_plTtl.Init( m_cdv, EChartSlot::PL_Ttl );
   m_plDn.Init( m_cdv, EChartSlot::PL_Dn );
 
+  m_ceTradingRangeRising.SetColour( ou::Colour::Green );
+  m_ceTradingRangeRising.SetName( "TR Rise" );
+  m_ceTradingRangeFalling.SetColour( ou::Colour::Red );
+  m_ceTradingRangeFalling.SetName( "TR Fall" );
+
+  m_cdv.Add( EChartSlot::TR_EMA, &m_ceTradingRangeRising );
+  m_cdv.Add( EChartSlot::TR_EMA, &m_ceTradingRangeFalling );
+
   // supplied by 1 second mid-quote
   m_pEmaCurrency = std::make_unique<EMA>( 3 * 60, m_cdv, EChartSlot::Price );
   m_pEmaCurrency->Set( ou::Colour::Purple, "Price EMA" );
@@ -266,6 +274,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
       m_trFalling.dblEma = exist * m_trFalling.dblEma + next * ( m_trFalling.dblStart - m_trFalling.dblExtension );
       m_trFalling.dblStart = m_trFalling.dblExtension = bid;
 
+      m_ceTradingRangeFalling.Append( dt, m_trFalling.dblEma );
+
       m_trRising.dblStart = m_trRising.dblExtension = ask;
       break;
     case State::Swing::none:
@@ -276,6 +286,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
       m_trRising.dblEma = exist * m_trRising.dblEma + next * ( m_trRising.dblExtension - m_trRising.dblStart );
       m_trRising.dblStart = m_trRising.dblExtension = ask;
+
+      m_ceTradingRangeRising.Append( dt, m_trRising.dblEma );
 
       m_trFalling.dblStart = m_trFalling.dblExtension = bid;
       break;
@@ -559,6 +571,9 @@ void Strategy::SaveWatch( const std::string& sPrefix ) {
 
     m_ceSwingHi.Clear();
     m_ceSwingLo.Clear();
+
+    m_ceTradingRangeRising.Clear();
+    m_ceTradingRangeFalling.Clear();
   }
 }
 
