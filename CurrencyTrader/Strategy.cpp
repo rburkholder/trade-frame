@@ -157,16 +157,21 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
   m_quote = quote;
 
-  const ptime dt( quote.DateTime() );
+  const ptime dt( m_quote.DateTime() );
+  const double ask( m_quote.Ask() );
+  const double bid( m_quote.Bid() );
 
-  m_ceQuoteAsk.Append( dt, quote.Ask() );
-  m_ceQuoteBid.Append( dt, quote.Bid() );
+  m_ceQuoteAsk.Append( dt, ask );
+  m_ceQuoteBid.Append( dt, bid );
+
+ if ( ask < m_trFalling.dblExtension ) m_trFalling.dblExtension = ask;
+ if ( bid > m_trRising.dblExtension ) m_trRising.dblExtension = bid;
 
   //m_quotes.Append( quote );
 
   //TimeTick( quote );
 
-  m_bfQuotes01Sec.Add( dt, quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
+  m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
 
 }
 
@@ -245,16 +250,34 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   m_plDn.m_ceProfitLoss.Append( dt, commission );
   m_plDn.m_ceCommission.Append( dt, total );
 
+  static const double count( 4.0 );
+  static const double count_base( count - 1.0 );
+  static const double exist( count_base/count );
+  static const double next( 1.0/count );
+
+  const double ask( m_quote.Ask() );
+  const double bid( m_quote.Bid() );
+
   switch ( m_state.swing ) {
     case State::Swing::up:
-      m_state.sum += ( m_state.last - m_quote.Ask() );
-      m_state.last = m_quote.Ask();
+      m_state.sum += ( m_state.last - ask );
+      m_state.last = ask;
+
+      m_trFalling.dblEma = exist * m_trFalling.dblEma + next * ( m_trFalling.dblStart - m_trFalling.dblExtension );
+      m_trFalling.dblStart = m_trFalling.dblExtension = bid;
+
+      m_trRising.dblStart = m_trRising.dblExtension = ask;
       break;
     case State::Swing::none:
       break;
     case State::Swing::down:
-      m_state.sum += ( m_quote.Bid() - m_state.last );
-      m_state.last = m_quote.Bid();
+      m_state.sum += ( bid - m_state.last );
+      m_state.last = bid;
+
+      m_trRising.dblEma = exist * m_trRising.dblEma + next * ( m_trRising.dblExtension - m_trRising.dblStart );
+      m_trRising.dblStart = m_trRising.dblExtension = ask;
+
+      m_trFalling.dblStart = m_trFalling.dblExtension = bid;
       break;
   }
 

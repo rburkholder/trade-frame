@@ -299,6 +299,14 @@ private:
   };
   State m_state;
 
+  struct TradingRange {
+    double dblStart; // starting point on Swing change
+    double dblExtension; // current new limit in range
+    double dblEma; // running ema of range
+    TradingRange(): dblStart {}, dblExtension {}, dblEma {} {}
+  };
+  TradingRange m_trRising, m_trFalling;
+
   fResetSoftware_t m_fResetSoftware;
 
   void Init();
