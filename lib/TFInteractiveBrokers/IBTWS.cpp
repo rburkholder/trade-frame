@@ -600,7 +600,7 @@ void TWS::StopQuoteTradeWatch( pSymbol_t pIBSymbol ) {
 const char *TWS::szSecurityType[] = {
   "NULL", "STK", "OPT", "FUT", "FOP", "CASH", "IND" };  // InsrumentType::EInstrumentType
 const char *TWS::szOrderType[] = {
-  "UNKN", "MKT", "LMT", "STP", "STPLMT", "NULL",     // OrderType::enumOrderType
+  "UNKN", "MKT", "LMT", "STP", "STPLMT", "NULL",        // OrderType::enumOrderType
   "TRAIL", "TRAILLIMIT", "MKTCLS", "LMTCLS", "SCALE" };
 
 void TWS::PlaceOrder( pOrder_t pOrder ) {
@@ -712,24 +712,18 @@ void TWS::PlaceOrder( pOrder_t pOrder ) {
 void TWS::PlaceComboOrder( pOrder_t pOrderEntry, pOrder_t pOrderStop ) {
   pOrderEntry->SetTransmit( false );
   PlaceOrder( pOrderEntry );
-  //PlaceOrder( pOrderEntry, 0, false );
-  //PlaceOrder( pOrderProfit, pOrderEntry->GetOrderId(), false );
   pOrderStop->SetParentOrderId( pOrderEntry->GetOrderId() );
-  //PlaceOrder( pOrderStop, pOrderEntry->GetOrderId(), true );
   PlaceOrder( pOrderStop );
 }
 
 void TWS::PlaceBracketOrder( pOrder_t pOrderEntry, pOrder_t pOrderProfit, pOrder_t pOrderStop ) {
   pOrderEntry->SetTransmit( false );
-  //PlaceOrder( pOrderEntry, 0, false );                           // limit or market
-  PlaceOrder( pOrderEntry );                           // limit or market
+  PlaceOrder( pOrderEntry );         // limit or market
   pOrderProfit->SetParentOrderId( pOrderEntry->GetOrderId() );
   pOrderProfit->SetTransmit( false );
-  //PlaceOrder( pOrderProfit, pOrderEntry->GetOrderId(), false );  // limit
-  PlaceOrder( pOrderProfit );  // limit
+  PlaceOrder( pOrderProfit );        // limit
   pOrderStop->SetParentOrderId( pOrderEntry->GetOrderId() );
-  //PlaceOrder( pOrderStop, pOrderEntry->GetOrderId(), true );     // stop or trail
-  PlaceOrder( pOrderStop );     // stop or trail
+  PlaceOrder( pOrderStop );          // stop or trail
 }
 
 void TWS::CancelOrder( pOrder_t pOrder ) {
@@ -1746,7 +1740,7 @@ void TWS::updateAccountValue(const std::string& key, const std::string& val,
 void TWS::marketRule( int marketRuleId, const vPriceIncrement_t& priceIncrements ) {
 
   for ( const vPriceIncrement_t::value_type& vt: priceIncrements ) {
-    BOOST_LOG_TRIVIAL(info) 
+    BOOST_LOG_TRIVIAL(info)
       << "IB::marketRule " << marketRuleId
       << " " << vt.lowEdge << "=" << vt.increment;
   }
@@ -1789,7 +1783,7 @@ double TWS::GetInterval( const double price, const int rule ) {
   double interval( 0.01 );
   mapMarketRule_t::const_iterator iter = m_mapMarketRule.find( rule );
   if ( m_mapMarketRule.end() == iter ) {
-    BOOST_LOG_TRIVIAL(info) 
+    BOOST_LOG_TRIVIAL(info)
       << "IB Price interval not found: " << rule
       << ", default to " << interval
       << " for price " << price
