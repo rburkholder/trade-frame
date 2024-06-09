@@ -300,6 +300,7 @@ void Position::PlaceOrder( pOrder_t pOrder ) {
 
   if ( 0 == m_row.nPositionPending ) m_row.eOrderSidePending = pOrder->GetOrderSide();  // first to set non-zero gives us our predominant side
 
+  // this is going to be problematic if we post a Combo or Bracket order set
   m_row.nPositionPending += pOrder->GetQuanOrdered();
   const auto id = pOrder->GetOrderId();
   if ( 0 == std::count_if(
