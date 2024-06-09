@@ -279,9 +279,11 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
       //using LHS = decltype( &DailyTradeTimeFrame<T>::HandleRHTrading<DD> );
       //LHS lhs( &DailyTradeTimeFrame<T>::HandleRHTrading<DD> );
       //using RHS = decltype( static_cast<T*>(this)->HandleRHTrading( dd ) );
-      //using RHS = decltype( &T::HandleRHTrading<DD> );
       //RHS rhs( static_cast<T*>(this)->HandleRHTrading( dd ) ); // <- error: variable or field ‘rhs’ declared void, need to forward declare somehow
+      //T& self = static_cast<T&>(*this); // https://www.fluentcpp.com/2017/05/19/crtp-helper/
+      //if ( &DailyTradeTimeFrame<T>::HandleRHTrading<DD> == self.HandleRHTrading ) {}
       //if ( &lhs != &rhs ) {
+        //self.HandleRHTrading( dd );
         static_cast<T*>(this)->HandleRHTrading( dd );
       //}
     }
