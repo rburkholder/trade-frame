@@ -776,8 +776,10 @@ void AppCurrencyTrader::PopulateStrategy( pInstrument_t pInstrument ) {
   iterStrategy->second.pStrategy->SetWatch(
     pair.eBase,
     pWatch, pPortfolio,
-    [this, pPortfolio]( pWatch_t pWatch, const std::string& sPositionPrefix )->pPosition_t{
-      return ConstructPosition( pPortfolio, sPositionPrefix, pWatch );
+    [this, pPortfolio, iterStrategy]( pWatch_t pWatch, const std::string& sPositionPrefix )->pPosition_t{
+      pPosition_t pPosition = ConstructPosition( pPortfolio, sPositionPrefix, pWatch );
+      //iterStrategy->second.bAllowTimer = true;
+      return pPosition;
     } );
 }
 
@@ -1017,7 +1019,9 @@ void AppCurrencyTrader::HandleOneSecondTimer( wxTimerEvent& event ) {
   const auto dt = ou::TimeSource::GlobalInstance().External();
   const ou::tf::DatedDatum datum( dt );
   for ( const mapPair_t::value_type& vt: m_mapPair ) {
-    vt.second.pStrategy->TimeTick<ou::tf::DatedDatum>( datum );
+    //if ( vt.second.bAllowTimer ) {
+    //  vt.second.pStrategy->TimeTick<ou::tf::DatedDatum>( datum );
+    //}
   }
 
   // what happens if we have laggards? might be ok, with timeseries cleared in Strategy

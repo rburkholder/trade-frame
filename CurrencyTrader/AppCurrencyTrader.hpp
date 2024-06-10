@@ -157,17 +157,20 @@ private:
     ou::tf::Currency::ECurrency currencyNonBase;
     pStrategy_t pStrategy;
     PanelCurrencyStats::fUpdatePair_t fUpdatePair;
+    //bool bAllowTimer;
 
     Pair( pStrategy_t pStrategy_ )
     : pStrategy( std::move( pStrategy_ ) )
     , fUpdatePair( nullptr )
     , eBase( EBase::Unknown )
+    //, bAllowTimer( false )
     {}
 
     Pair( Pair&& rhs )
     : pStrategy( std::move( rhs.pStrategy ) )
     , fUpdatePair( std::move( rhs.fUpdatePair ) )
     , eBase( rhs.eBase )
+    //, bAllowTimer( rhs.bAllowTimer )
     {}
   };
 
