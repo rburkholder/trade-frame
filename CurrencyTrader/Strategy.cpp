@@ -325,12 +325,21 @@ void Strategy::RunStateUp( TrackOrder& to ) {
           if ( m_pEmaCurrency->dblEmaLatest > m_quote.Ask() ) { // need to track if crossed or touched
             to.Set(
               [this]( double fill_price ){
-                m_dblStopDiff = fill_price - m_dblStopStart;
-                assert( 0.0 < m_dblStopDiff );
+                m_stopUp.diff = fill_price - m_stopUp.start;
+                assert( 0.0 < m_stopUp.diff );
               });
-            m_dblStopTrail = m_dblStopStart = m_rSwing[ 2 ].lo; // run a parabolic stop?
-            m_dblStopDiff = m_quote.Bid() - m_dblStopTrail; // preliminary initialization
-            assert( 0.0 < m_dblStopDiff );
+            m_stopUp.trail = m_stopUp.start = m_rSwing[ 2 ].lo; // run a parabolic stop?
+            m_stopUp.diff = m_quote.Bid() - m_stopUp.trail; // preliminary initialization
+            BOOST_LOG_TRIVIAL(info) 
+              << m_pWatch->GetInstrumentName() << ','
+              << "up" << ','
+              << m_quote.Bid() << ','
+              << m_quote.Ask() << ','
+              << m_stopUp.start << ','
+              << m_stopUp.diff << ','
+              << m_stopUp.trail
+              ;
+            assert( 0.0 < m_stopUp.diff );
             to.EnterLongLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Ask(), m_quote.Bid() ) );
           }
           break;
@@ -350,15 +359,15 @@ void Strategy::RunStateUp( TrackOrder& to ) {
         case State::Swing::none:
           {
             const double bid = m_quote.Bid();
-            if ( bid <= m_dblStopTrail ) {
+            if ( bid <= m_stopUp.trail ) {
               // exit with stop
               to.ExitLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), bid ) );
             }
             else {
               // update trailing stop
-              const double diff = bid - m_dblStopTrail;
-              if ( diff > m_dblStopDiff ) {
-                m_dblStopTrail = bid - m_dblStopDiff;
+              const double diff = bid - m_stopUp.trail;
+              if ( diff > m_stopUp.diff ) {
+                m_stopUp.trail = bid - m_stopUp.diff;
               }
             }
           }
@@ -400,12 +409,21 @@ void Strategy::RunStateDn( TrackOrder& to ) {
           if ( m_pEmaCurrency->dblEmaLatest < m_quote.Bid() ) { // need to track if crossed or touched
             to.Set(
               [this]( double fill_price ){
-                m_dblStopDiff = m_dblStopStart - fill_price;
-                assert( 0.0 < m_dblStopDiff );
+                m_stopDn.diff = m_stopDn.start - fill_price;
+                assert( 0.0 < m_stopDn.diff );
               });
-            m_dblStopTrail = m_dblStopStart = m_rSwing[ 2 ].hi; // run a parabolic stop?
-            m_dblStopDiff = m_dblStopTrail - m_quote.Ask();
-            assert( 0.0 < m_dblStopDiff );
+            m_stopDn.trail = m_stopDn.start = m_rSwing[ 2 ].hi; // run a parabolic stop?
+            m_stopDn.diff = m_stopDn.trail - m_quote.Ask();
+            BOOST_LOG_TRIVIAL(info) 
+              << m_pWatch->GetInstrumentName() << ','
+              << "dn" << ','
+              << m_quote.Bid() << ','
+              << m_quote.Ask() << ','
+              << m_stopDn.start << ','
+              << m_stopDn.diff << ','
+              << m_stopDn.trail
+              ;
+            assert( 0.0 < m_stopDn.diff );
             to.EnterShortLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Bid(), m_quote.Ask() ) );
           }
           break;
@@ -423,15 +441,15 @@ void Strategy::RunStateDn( TrackOrder& to ) {
         case State::Swing::none:
           {
             const double ask = m_quote.Ask();
-            if ( ask >= m_dblStopTrail ) {
+            if ( ask >= m_stopDn.trail ) {
               // exit with stop
               to.ExitShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), ask ) );
             }
             else {
               // update trailing stop
-              const double diff = m_dblStopTrail - ask;
-              if ( diff > m_dblStopDiff ) {
-                m_dblStopTrail = m_dblStopDiff - ask;
+              const double diff = m_stopDn.trail - ask;
+              if ( diff > m_stopDn.diff ) {
+                m_stopDn.trail = m_stopDn.diff - ask;
               }
             }
           }

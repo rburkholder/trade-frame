@@ -318,9 +318,13 @@ private:
   };
   TradingRange m_trRising, m_trFalling;
 
-  double m_dblStopStart;
-  double m_dblStopDiff;
-  double m_dblStopTrail;
+  struct Stop {
+    double start;
+    double diff;
+    double trail;
+    Stop(): start {}, diff {}, trail {} {}
+  };
+  Stop m_stopDn, m_stopUp;
 
   fResetSoftware_t m_fResetSoftware;
 
