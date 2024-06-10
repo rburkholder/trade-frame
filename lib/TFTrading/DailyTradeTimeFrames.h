@@ -101,12 +101,12 @@ protected:
   template<typename DD> void HandleMarketClosed( const DD& dd ) {}
   template<typename DD> bool HandleSoftwareReset( const DD& dd ) { return false; } // restart state machine
 
-  // event change one shots
+  // event change one shots, independent of DD
   void HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration ) {}
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) {}
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) {}
   void HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration ) {}
-  void HandleSoftwareReset( boost::gregorian::date, boost::posix_time::time_duration ) {} // nay need time based if no data
+  void HandleSoftwareReset( boost::gregorian::date, boost::posix_time::time_duration ) {}
 
 private:
   // these have been normalized to UTC
