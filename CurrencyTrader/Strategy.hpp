@@ -143,6 +143,7 @@ private:
 
   EBase m_eBaseCurrency;
   ou::tf::Order::quantity_t m_quantityToOrder;
+  double m_base_currency_pip;
 
   pWatch_t m_pWatch;
   pPortfolio_t m_pPortfolio;

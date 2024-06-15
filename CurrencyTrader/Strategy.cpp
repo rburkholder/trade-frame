@@ -37,6 +37,7 @@ Strategy::Strategy()
 : DailyTradeTimeFrame<Strategy>()
 , m_eBaseCurrency( EBase::Unknown )
 , m_quantityToOrder {}
+, m_base_currency_pip {}
 , m_bfQuotes01Sec( 1 )
 , m_bfTrading( 60 )
 , m_ceSwingHi( ou::ChartEntryShape::EShape::Long,  ou::Colour::Purple )
@@ -203,22 +204,18 @@ void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_
   // one time calc pip
   const double mid( m_quote.Midpoint() );
   const double tick = m_to_up.PriceInterval( mid );
-  const double usd_tick = (double)m_quantityToOrder * tick;
+  const double first = (double)m_quantityToOrder * tick;
 
-  double first {};
   double second {};
-  double counter {};
 
   switch ( m_eBaseCurrency ) {
     case EBase::First:
-      counter = usd_tick * mid;
-      first = usd_tick;
-      second = counter;
+      second = first * mid;
+      m_base_currency_pip = first;
       break;
     case EBase::Second:
-      counter = usd_tick / mid;
-      first = counter;
-      second = usd_tick;
+      second = first / mid;
+      m_base_currency_pip = second;
       break;
     default:
       assert( false );
@@ -226,8 +223,8 @@ void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_
   BOOST_LOG_TRIVIAL(info)
            << "pip"
     << ',' << m_pWatch->GetInstrumentName()
-    << ',' << "interval=" << tick
     << ',' << "midprice=" << mid
+    << ',' << "interval=" << tick
     << '.' << "first=" << first
     << ',' << "second=" << second
     << ',' << "quan=" << m_quantityToOrder
@@ -322,7 +319,7 @@ void Strategy::RunStateUp( TrackOrder& to ) {
     case TrackOrder::ETradeState::Search:
       switch ( m_state.swing ) {
         case State::Swing::up:
-          if ( m_pEmaCurrency->dblEmaLatest > m_quote.Ask() ) { // need to track if crossed or touched
+          if ( m_pEmaCurrency->dblEmaLatest > m_quote.Ask() ) {
             to.Set(
               [this]( double fill_price ){
                 m_stopUp.diff = fill_price - m_stopUp.start;
@@ -330,7 +327,7 @@ void Strategy::RunStateUp( TrackOrder& to ) {
               });
             m_stopUp.trail = m_stopUp.start = m_rSwing[ 2 ].lo; // run a parabolic stop?
             m_stopUp.diff = m_quote.Bid() - m_stopUp.trail; // preliminary initialization
-            BOOST_LOG_TRIVIAL(info) 
+            BOOST_LOG_TRIVIAL(info)
               << m_pWatch->GetInstrumentName() << ','
               << "up" << ','
               << m_quote.Bid() << ','
@@ -406,7 +403,7 @@ void Strategy::RunStateDn( TrackOrder& to ) {
         case State::Swing::none:
           break;
         case State::Swing::down:
-          if ( m_pEmaCurrency->dblEmaLatest < m_quote.Bid() ) { // need to track if crossed or touched
+          if ( m_pEmaCurrency->dblEmaLatest < m_quote.Bid() ) {
             to.Set(
               [this]( double fill_price ){
                 m_stopDn.diff = m_stopDn.start - fill_price;
@@ -414,7 +411,7 @@ void Strategy::RunStateDn( TrackOrder& to ) {
               });
             m_stopDn.trail = m_stopDn.start = m_rSwing[ 2 ].hi; // run a parabolic stop?
             m_stopDn.diff = m_stopDn.trail - m_quote.Ask();
-            BOOST_LOG_TRIVIAL(info) 
+            BOOST_LOG_TRIVIAL(info)
               << m_pWatch->GetInstrumentName() << ','
               << "dn" << ','
               << m_quote.Bid() << ','
