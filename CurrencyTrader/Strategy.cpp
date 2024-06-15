@@ -37,6 +37,7 @@ Strategy::Strategy()
 : DailyTradeTimeFrame<Strategy>()
 , m_eBaseCurrency( EBase::Unknown )
 , m_quantityToOrder {}
+, m_tick {}
 , m_base_currency_pip {}
 , m_bfQuotes01Sec( 1 )
 , m_bfTrading( 60 )
@@ -203,8 +204,8 @@ void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_
 
   // one time calc pip
   const double mid( m_quote.Midpoint() );
-  const double tick = m_to_up.PriceInterval( mid );
-  const double first = (double)m_quantityToOrder * tick;
+  m_tick = m_to_up.PriceInterval( mid );
+  const double first = (double)m_quantityToOrder * m_tick;
 
   double second {};
 
@@ -224,7 +225,7 @@ void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_
            << "pip"
     << ',' << m_pWatch->GetInstrumentName()
     << ',' << "midprice=" << mid
-    << ',' << "interval=" << tick
+    << ',' << "interval=" << m_tick
     << '.' << "first=" << first
     << ',' << "second=" << second
     << ',' << "quan=" << m_quantityToOrder
