@@ -43,11 +43,15 @@ struct Options {
   size_t nPeriodWidth;  // units:  seconds
   size_t nStochasticPeriods;
 
+  std::string sTelegramToken;
+  uint64_t idTelegramChat;
+
   Options()
   : nDaysFront( 1 ), nDaysBack( 7 )
   , ib_client_id( 1 )
   , nPeriodWidth( 7 )
   , nStochasticPeriods( 300 )
+  , idTelegramChat {}
    {}
 
 };

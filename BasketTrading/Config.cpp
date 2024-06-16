@@ -46,6 +46,8 @@ bool Load( Options& options ) {
     static const std::string sOption_DaysBack( "days_back" );
     static const std::string sOption_PeriodWidth( "period_width" );
     static const std::string sOption_StochasticPeriods( "stochastic_periods" );
+    static const std::string sOption_TelegramToken( "telegram_token" );
+    static const std::string sOption_TelegramChatId( "telegram_chat_id" );
 
     std::string sDateHistory;
     std::string sDateTrading;
@@ -62,6 +64,8 @@ bool Load( Options& options ) {
       ( sOption_DaysBack.c_str(), po::value<unsigned int>(&nDaysBack), "minimum back month days in future")
       ( sOption_PeriodWidth.c_str(), po::value<size_t>( &options.nPeriodWidth), "period width (sec)" )
       ( sOption_StochasticPeriods.c_str(), po::value<size_t>(&options.nStochasticPeriods), "stochastic (#periods)" )
+      ( sOption_TelegramToken.c_str(), po::value<std::string>(&options.sTelegramToken)->default_value( "" ), "telegram token" )
+      ( sOption_TelegramChatId.c_str(), po::value<uint64_t>(&options.idTelegramChat)->default_value( 0 ), "telegram chat id" )
       ;
     po::variables_map vm;
     //po::store( po::parse_command_line( argc, argv, config ), vm );
