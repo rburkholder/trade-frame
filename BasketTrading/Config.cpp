@@ -29,25 +29,44 @@ namespace po = boost::program_options;
 
 #include "Config.hpp"
 
+namespace {
+  static const std::string sFilename( "BasketTrading.cfg" );
+
+  static const std::string sOption_Symbol( "symbol" );
+  static const std::string sOption_IbClientId( "ib_client_id" );
+  static const std::string sOption_DateHistory( "date_history" );
+  static const std::string sOption_DateTrading( "date_trading" );
+  static const std::string sOption_DaysFront( "days_front" );
+  static const std::string sOption_DaysBack( "days_back" );
+  static const std::string sOption_PeriodWidth( "period_width" );
+  static const std::string sOption_StochasticPeriods( "stochastic_periods" );
+  static const std::string sOption_TelegramToken( "telegram_token" );
+  static const std::string sOption_TelegramChatId( "telegram_chat_id" );
+
+  template<typename T>
+  bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bRequired, T& dest ) {
+    bool bOk = true;
+    if ( 0 < vm.count( name ) ) {
+      dest = std::move( vm[name].as<T>() );
+      BOOST_LOG_TRIVIAL(info) << name << " = " << dest;
+    }
+    else {
+      if ( bRequired ) {
+        BOOST_LOG_TRIVIAL(error) << sFileName << " missing '" << name << "='";
+        bOk = false;
+      }
+    }
+  return bOk;
+  }
+}
+
 namespace config {
 
 bool Load( Options& options ) {
 
   bool bOk( true );
 
-  static const std::string sFilename( "BasketTrading.cfg" );
-
   try {
-    static const std::string sOption_Symbol( "symbol" );
-    static const std::string sOption_IbClientId( "ib_client_id" );
-    static const std::string sOption_DateHistory( "date_history" );
-    static const std::string sOption_DateTrading( "date_trading" );
-    static const std::string sOption_DaysFront( "days_front" );
-    static const std::string sOption_DaysBack( "days_back" );
-    static const std::string sOption_PeriodWidth( "period_width" );
-    static const std::string sOption_StochasticPeriods( "stochastic_periods" );
-    static const std::string sOption_TelegramToken( "telegram_token" );
-    static const std::string sOption_TelegramChatId( "telegram_chat_id" );
 
     std::string sDateHistory;
     std::string sDateTrading;
@@ -92,15 +111,7 @@ bool Load( Options& options ) {
       bOk = false;
     }
 
-    if ( 0 < vm.count( sOption_IbClientId ) ) {
-      options.ib_client_id = vm[sOption_IbClientId].as<size_t>();
-      BOOST_LOG_TRIVIAL(info) << "ib_client_id " << options.ib_client_id;
-
-    }
-    else {
-      BOOST_LOG_TRIVIAL(error) << sFilename << " missing '" << sOption_IbClientId << "='";
-      bOk = false;
-    }
+    bOk &= parse<typeof options.ib_client_id>( sFilename, vm, sOption_IbClientId, true, options.ib_client_id );
 
     if ( 0 < vm.count( sOption_DateHistory ) ) {
       options.dateHistory = boost::gregorian::from_string( vm[sOption_DateHistory].as<std::string>() );
@@ -136,23 +147,11 @@ bool Load( Options& options ) {
       BOOST_LOG_TRIVIAL(error) << sFilename << " missing '" << sOption_DaysBack << "='";
     }
 
-    if ( 0 < vm.count( sOption_PeriodWidth ) ) {
-      options.nPeriodWidth = vm[sOption_PeriodWidth].as<size_t>();
-      BOOST_LOG_TRIVIAL(info) << "period width (seconds) " << options.nPeriodWidth;
-    }
-    else {
-      BOOST_LOG_TRIVIAL(error) << sFilename << " missing '" << sOption_PeriodWidth << "='";
-      //bOk = false; // uses default otherwise
-    }
+    bOk &= parse<typeof options.nPeriodWidth>( sFilename, vm, sOption_PeriodWidth, true, options.nPeriodWidth );
+    bOk &= parse<typeof options.nStochasticPeriods>( sFilename, vm, sOption_StochasticPeriods, true, options.nStochasticPeriods );
 
-    if ( 0 < vm.count( sOption_StochasticPeriods ) ) {
-      options.nStochasticPeriods = vm[sOption_StochasticPeriods].as<size_t>();
-      BOOST_LOG_TRIVIAL(info) << "stochastic (#periods) " << options.nStochasticPeriods;
-    }
-    else {
-      BOOST_LOG_TRIVIAL(error) << sFilename << " missing '" << sOption_StochasticPeriods << "='";
-      //bOk = false; // uses default otherwise
-    }
+    bOk &= parse<typeof options.sTelegramToken>( sFilename, vm, sOption_TelegramToken, true, options.sTelegramToken );
+    bOk &= parse<typeof options.idTelegramChat>( sFilename, vm, sOption_TelegramChatId, true, options.idTelegramChat );
 
   }
   catch( std::exception& e ) {
