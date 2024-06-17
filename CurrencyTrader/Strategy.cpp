@@ -320,14 +320,20 @@ void Strategy::RunStateUp( TrackOrder& to ) {
     case TrackOrder::ETradeState::Search:
       switch ( m_state.swing ) {
         case State::Swing::up:
-          if ( m_pEmaCurrency->dblEmaLatest > m_quote.Ask() ) {
+          {
+            const double bid( m_quote.Bid() );
+            const double swing_lo = m_rSwing[ 2 ].lo;
+            const double diff1 = bid - swing_lo;
+            const double diff2 = 3.0 * m_tick;
+            m_stopUp.diff = diff1 > diff2 ? diff1 : diff2;
+            m_stopUp.trail = bid - m_stopUp.diff; // run a parabolic stop?
+            m_stopUp.start = m_stopUp.trail;
             to.Set(
-              [this]( double fill_price ){
-                m_stopUp.diff = fill_price - m_stopUp.start;
-                assert( 0.0 < m_stopUp.diff );
+              [this,bid]( double fill_price ){
+                if ( fill_price < bid ) {
+                  m_stopUp.trail = m_stopUp.start = ( fill_price - m_stopUp.diff );
+                }
               });
-            m_stopUp.trail = m_stopUp.start = m_rSwing[ 2 ].lo; // run a parabolic stop?
-            m_stopUp.diff = m_quote.Bid() - m_stopUp.trail; // preliminary initialization
             BOOST_LOG_TRIVIAL(info)
               << m_pWatch->GetInstrumentName() << ','
               << "up" << ','
@@ -415,14 +421,20 @@ void Strategy::RunStateDn( TrackOrder& to ) {
         case State::Swing::none:
           break;
         case State::Swing::down:
-          if ( m_pEmaCurrency->dblEmaLatest < m_quote.Bid() ) {
+          {
+            const double ask( m_quote.Ask() );
+            const double swing_hi = m_rSwing[ 2 ].hi;
+            const double diff1 = swing_hi - ask;
+            const double diff2 = 3.0 * m_tick;
+            m_stopDn.diff = diff1 > diff2 ? diff1 : diff2;
+            m_stopDn.trail = ask + m_stopDn.diff; // run a parabolic stop?
+            m_stopDn.start = m_stopDn.trail;
             to.Set(
-              [this]( double fill_price ){
-                m_stopDn.diff = m_stopDn.start - fill_price;
-                assert( 0.0 < m_stopDn.diff );
+              [this,ask]( double fill_price ){
+                if ( fill_price > ask ) {
+                  m_stopUp.trail = m_stopUp.start = ( fill_price + m_stopDn.diff );
+                }
               });
-            m_stopDn.trail = m_stopDn.start = m_rSwing[ 2 ].hi; // run a parabolic stop?
-            m_stopDn.diff = m_stopDn.trail - m_quote.Ask();
             BOOST_LOG_TRIVIAL(info)
               << m_pWatch->GetInstrumentName() << ','
               << "dn" << ','
