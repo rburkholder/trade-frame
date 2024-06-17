@@ -335,7 +335,7 @@ void Strategy::RunStateUp( TrackOrder& to ) {
               << "a=" << m_quote.Ask() << ','
               << "trf=" << m_TRFast.true_range << ','
               << "trs=" << m_TRSlow.true_range << ','
-              << "sw=" << m_rSwing[0].lo << ',' << m_rSwing[1].lo << ',' << m_rSwing[2].lo << ',' << m_rSwing[3].lo << m_rSwing[4].lo << ','
+              << "sw=" << m_rSwing[0].lo << ',' << m_rSwing[1].lo << ',' << m_rSwing[2].lo << ',' << m_rSwing[3].lo << ',' << m_rSwing[4].lo << ','
               << "st=" << m_stopUp.start << ','
               << "df=" << m_stopUp.diff << ','
               << "trl=" << m_stopUp.trail
@@ -362,6 +362,10 @@ void Strategy::RunStateUp( TrackOrder& to ) {
             const double bid = m_quote.Bid();
             if ( bid <= m_stopUp.trail ) {
               // exit with stop
+              BOOST_LOG_TRIVIAL(info)
+                << m_pWatch->GetInstrumentName() << ','
+                << "up exit on none"
+                ;
               to.ExitLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), bid ) );
             }
             else {
@@ -375,6 +379,10 @@ void Strategy::RunStateUp( TrackOrder& to ) {
           break;
         case State::Swing::down:
           // should be exiting earlier than this
+          BOOST_LOG_TRIVIAL(info)
+            << m_pWatch->GetInstrumentName() << ','
+            << "up exit on down"
+            ;
           to.ExitLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
           break;
       }
@@ -422,7 +430,7 @@ void Strategy::RunStateDn( TrackOrder& to ) {
               << "a=" << m_quote.Ask() << ','
               << "trf=" << m_TRFast.true_range << ','
               << "trs=" << m_TRSlow.true_range << ','
-              << "sw=" << m_rSwing[0].lo << ',' << m_rSwing[1].lo << ',' << m_rSwing[2].lo << ',' << m_rSwing[3].lo << m_rSwing[4].lo << ','
+              << "sw=" << m_rSwing[0].hi << ',' << m_rSwing[1].hi << ',' << m_rSwing[2].hi << ',' << m_rSwing[3].hi << ',' << m_rSwing[4].hi << ','
               << "st=" << m_stopDn.start << ','
               << "df=" << m_stopDn.diff << ','
               << "trl=" << m_stopDn.trail
@@ -440,6 +448,10 @@ void Strategy::RunStateDn( TrackOrder& to ) {
       switch ( m_state.swing ) {
         case State::Swing::up:
           // should be exiting earlier than this
+          BOOST_LOG_TRIVIAL(info)
+            << m_pWatch->GetInstrumentName() << ','
+            << "dn exit up"
+            ;
           to.ExitShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
           break;
         case State::Swing::none:
@@ -447,6 +459,10 @@ void Strategy::RunStateDn( TrackOrder& to ) {
             const double ask = m_quote.Ask();
             if ( ask >= m_stopDn.trail ) {
               // exit with stop
+              BOOST_LOG_TRIVIAL(info)
+                << m_pWatch->GetInstrumentName() << ','
+                << "dn exit none"
+                ;
               to.ExitShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), ask ) );
             }
             else {
