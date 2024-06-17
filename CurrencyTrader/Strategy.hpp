@@ -202,6 +202,7 @@ private:
   struct TR { // True Range
 
     double previous_close;
+    double true_range;
 
     TR(): previous_close {} {}
 
@@ -217,7 +218,7 @@ private:
       const double upper_delta( bar_hi >= previous_close ? bar_hi - previous_close : previous_close - bar_hi );
       const double lower_delta( bar_lo >= previous_close ? bar_lo - previous_close : previous_close - bar_lo );
 
-      double true_range( bar_hi - bar_lo ); // prime with bar height
+      true_range = bar_hi - bar_lo; // prime with bar height
       if ( upper_delta > true_range ) true_range = upper_delta;
       if ( lower_delta > true_range ) true_range = lower_delta;
 

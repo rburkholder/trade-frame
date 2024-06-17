@@ -331,11 +331,14 @@ void Strategy::RunStateUp( TrackOrder& to ) {
             BOOST_LOG_TRIVIAL(info)
               << m_pWatch->GetInstrumentName() << ','
               << "up" << ','
-              << m_quote.Bid() << ','
-              << m_quote.Ask() << ','
-              << m_stopUp.start << ','
-              << m_stopUp.diff << ','
-              << m_stopUp.trail
+              << "b=" << m_quote.Bid() << ','
+              << "a=" << m_quote.Ask() << ','
+              << "trf=" << m_TRFast.true_range << ','
+              << "trs=" << m_TRSlow.true_range << ','
+              << "sw=" << m_rSwing[0].lo << ',' << m_rSwing[1].lo << ',' << m_rSwing[2].lo << ',' << m_rSwing[3].lo << m_rSwing[4].lo << ','
+              << "st=" << m_stopUp.start << ','
+              << "df=" << m_stopUp.diff << ','
+              << "trl=" << m_stopUp.trail
               ;
             assert( 0.0 < m_stopUp.diff );
             to.EnterLongLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Ask(), m_quote.Bid() ) );
@@ -415,11 +418,14 @@ void Strategy::RunStateDn( TrackOrder& to ) {
             BOOST_LOG_TRIVIAL(info)
               << m_pWatch->GetInstrumentName() << ','
               << "dn" << ','
-              << m_quote.Bid() << ','
-              << m_quote.Ask() << ','
-              << m_stopDn.start << ','
-              << m_stopDn.diff << ','
-              << m_stopDn.trail
+              << "b=" << m_quote.Bid() << ','
+              << "a=" << m_quote.Ask() << ','
+              << "trf=" << m_TRFast.true_range << ','
+              << "trs=" << m_TRSlow.true_range << ','
+              << "sw=" << m_rSwing[0].lo << ',' << m_rSwing[1].lo << ',' << m_rSwing[2].lo << ',' << m_rSwing[3].lo << m_rSwing[4].lo << ','
+              << "st=" << m_stopDn.start << ','
+              << "df=" << m_stopDn.diff << ','
+              << "trl=" << m_stopDn.trail
               ;
             assert( 0.0 < m_stopDn.diff );
             to.EnterShortLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Bid(), m_quote.Ask() ) );
