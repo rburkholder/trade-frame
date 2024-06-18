@@ -347,7 +347,7 @@ void Strategy::RunStateUp( TrackOrder& to ) {
               << "trl=" << m_stopUp.trail
               ;
             assert( 0.0 < m_stopUp.diff );
-            to.EnterLongLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Ask(), m_quote.Bid() ) );
+            to.EnterLongLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Ask(), m_quote.Bid(), 57 ) );
           }
           break;
         case State::Swing::none:
@@ -448,7 +448,7 @@ void Strategy::RunStateDn( TrackOrder& to ) {
               << "trl=" << m_stopDn.trail
               ;
             assert( 0.0 < m_stopDn.diff );
-            to.EnterShortLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Bid(), m_quote.Ask() ) );
+            to.EnterShortLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Bid(), m_quote.Ask(), 57 ) );
           }
           break;
       }
