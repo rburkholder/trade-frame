@@ -994,6 +994,9 @@ void TWS::error(const int id, const int errorCode, const std::string& errorStrin
         // TODO something like:  OrderManager::GlobalInstance().ReportCancellation( orderId );
       std::cout << "IB error (2)" << id << ", " << errorCode << ", " << errorString << std::endl;
       break;
+    case 202:
+      std::cout << "IB order id " << id << ", " << errorString << std::endl;
+      break;
     case 478:  // IB error (3): 4, 478, Parameters in request conflicts with contract parameters received by contract id: requested currency NZD, in contract USD;
       std::cout << "IB error (478): order id " << id << ", " << errorString << std::endl;
       // TODO cancel the order
