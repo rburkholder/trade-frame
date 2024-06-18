@@ -867,7 +867,7 @@ void TWS::orderStatus( OrderId orderId, const std::string& status, Decimal fille
                          Decimal remaining, double avgFillPrice, int permId, int parentId,
                          double lastFillPrice, int clientId, const std::string& whyHeld, double mktCapPrice )
 {
-  if ( true ) {
+  if ( false ) {
     m_ss.str("");
     m_ss
       << "OrderStatus: ordid=" << orderId
@@ -891,6 +891,10 @@ void TWS::orderStatus( OrderId orderId, const std::string& status, Decimal fille
       break;
     case DecodeStatusWord::Submitted:
     case DecodeStatusWord::Filled:
+      break;
+    case DecodeStatusWord::PreSubmitted:
+      break;
+    case DecodeStatusWord::PendingCancel:
       break;
     default:
       std::cout << "TWS::orderStatus: " << orderId << "," << status << std::endl;
