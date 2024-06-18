@@ -1059,7 +1059,7 @@ void TWS::marketDataType( TickerId id , int i ) {
 }
 
 void TWS::commissionReport( const CommissionReport& cr ) {
-  std::cout << "commissionReport " << cr.execId << ", " << cr.commission << ", " << cr.currency << ", " << cr.realizedPNL << std::endl;
+  //std::cout << "commissionReport " << cr.execId << ", " << cr.commission << ", " << cr.currency << ", " << cr.realizedPNL << std::endl;
 }
 
 // convert to boost::spirit?
