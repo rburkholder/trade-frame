@@ -54,7 +54,7 @@ public:
     long style = SYMBOL_PANELCURRENCYSTATS_STYLE );
 
   using fUpdateCurrency_t = std::function<void(double amount, double extended)>;
-  using fUpdatePair_t = std::function<void(double bid, double ask)>;
+  using fUpdatePair_t = std::function<void(double bid, double ask, unsigned int count, double commission)>;
 
   fUpdateCurrency_t AddCurrency( const std::string& sName );
   fUpdatePair_t AddPair( const std::string& sName );
@@ -74,7 +74,10 @@ private:
     wxBoxSizer* m_sizer;
     wxStaticText* m_textAmount;
     wxStaticText* m_textExtended;
-    Currency(): m_sizer( nullptr ), m_textAmount( nullptr ), m_textExtended( nullptr ) {}
+    Currency()
+  : m_sizer( nullptr )
+  , m_textAmount( nullptr ), m_textExtended( nullptr ) 
+  {}
   };
   using mapCurrency_t = std::map<std::string, Currency>;
   mapCurrency_t m_mapCurrency;
@@ -83,7 +86,14 @@ private:
     wxBoxSizer* m_sizer;
     wxStaticText* m_textBid;
     wxStaticText* m_textAsk;
-    Pair(): m_sizer( nullptr ), m_textBid( nullptr ), m_textAsk( nullptr ) {}
+    wxStaticText* m_textTradeCount;
+    wxStaticText* m_textCommission;
+    Pair()
+  : m_sizer( nullptr )
+  , m_textBid( nullptr ), m_textAsk( nullptr ) 
+  , m_textTradeCount( nullptr )
+  , m_textCommission( nullptr )
+  {}
   };
   using mapPair_t = std::map<std::string, Pair>;
   mapPair_t m_mapPair;

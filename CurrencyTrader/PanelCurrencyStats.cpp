@@ -112,14 +112,24 @@ PanelCurrencyStats::fUpdatePair_t PanelCurrencyStats::AddPair( const std::string
   pair.m_textAsk = textAsk;
   pair.m_sizer->Add( textAsk, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
 
+  wxStaticText* textTradeCount = new wxStaticText( this, wxID_ANY, _("trades"), wxDefaultPosition, wxSize(30, -1 ), wxALIGN_RIGHT );
+  pair.m_textTradeCount = textTradeCount;
+  pair.m_sizer->Add( textTradeCount, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
+
+  wxStaticText* textCommission = new wxStaticText( this, wxID_ANY, _("commission"), wxDefaultPosition, wxSize(30, -1 ), wxALIGN_RIGHT );
+  pair.m_textCommission = textCommission;
+  pair.m_sizer->Add( textCommission, 0, wxALIGN_CENTER_VERTICAL|wxALL, 3 );
+
   if ( GetSizer() ) {
     GetSizer()->SetSizeHints(this);
   }
 
   fUpdatePair_t f =
-    [this, textBid, textAsk]( double bid, double ask ){
+    [this, textBid, textAsk, textTradeCount, textCommission]( double bid, double ask, unsigned int count, double commission ){
       textBid->SetLabel( fmt::format( "{:.{}f}", bid, 5 ) );
       textAsk->SetLabel( fmt::format( "{:.{}f}", ask, 5 ) );
+      textTradeCount->SetLabel( fmt::format( "{}", count ) );
+      textCommission->SetLabel( fmt::format( "{:.{}f}", commission, 2 ) );
     };
   return std::move( f );
 }
