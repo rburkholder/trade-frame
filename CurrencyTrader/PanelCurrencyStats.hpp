@@ -74,7 +74,7 @@ private:
     wxBoxSizer* m_sizer;
     wxStaticText* m_textAmount;
     wxStaticText* m_textExtended;
-    Currency(): m_sizer( nullptr ), m_textAmount( nullptr ) {}
+    Currency(): m_sizer( nullptr ), m_textAmount( nullptr ), m_textExtended( nullptr ) {}
   };
   using mapCurrency_t = std::map<std::string, Currency>;
   mapCurrency_t m_mapCurrency;
