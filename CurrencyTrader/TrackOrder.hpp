@@ -139,8 +139,8 @@ private:
   pOrder_t m_pOrderPending;
   pPosition_t m_pPosition;
 
-  ou::tf::Currency::ECurrency m_cur1;
-  ou::tf::Currency::ECurrency m_cur2;
+  ou::tf::Currency::ECurrency m_curBase;
+  ou::tf::Currency::ECurrency m_curQuote;
 
   double Normalize( double price ) const;
 
