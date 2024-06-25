@@ -72,8 +72,16 @@ public:
   void CloseAndDone();
   void SetResetSoftware( fResetSoftware_t&& f ) { m_fResetSoftware = std::move( f ); }
 
-  using pairBidAsk_t = std::pair<double,double>;
-  pairBidAsk_t LatestQuote() const;
+  struct latest_t {
+    const double bid;
+    const double ask;
+    const size_t count;
+    const double commission;
+    latest_t( double bid_, double ask_, size_t count_, double commission_ )
+    : bid( bid_ ), ask( ask_ ), count( count_ ), commission( commission_ ) {}
+  };
+
+  latest_t Latest() const;
 
   ou::ChartDataView& GetChartDataView() { return m_cdv; }
 
@@ -329,6 +337,7 @@ private:
   };
   Stop m_stopDn, m_stopUp;
 
+  size_t m_nCount;
   double m_dblCommission;
 
   fResetSoftware_t m_fResetSoftware;

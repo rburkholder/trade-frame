@@ -966,14 +966,14 @@ void AppCurrencyTrader::UpdatePanelCurrencyStats() {
 
     const Pair& pair( vt.second );
 
-    auto bid_ask = pair.pStrategy->LatestQuote();
-    pair.fUpdatePair( bid_ask.first, bid_ask.second, 0, 0.0 );
+    auto latest = pair.pStrategy->Latest();
+    pair.fUpdatePair( latest.bid, latest.ask, latest.count, latest.commission );
 
     mapCurrency_t::const_iterator iter = m_mapCurrency.find( pair.currencyNonBase );
     if ( m_mapCurrency.end() != iter ) {
       const Currency& currency( iter->second );
 
-      const double mid( 0.5 * ( bid_ask.first + bid_ask.second ) );
+      const double mid( 0.5 * ( latest.bid + latest.ask ) );
       double dblConverted {};
       bool bSuccess( false );
 

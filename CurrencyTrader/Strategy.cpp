@@ -44,6 +44,7 @@ Strategy::Strategy()
 , m_ceSwingHi( ou::ChartEntryShape::EShape::Long,  ou::Colour::Purple )
 , m_ceSwingLo( ou::ChartEntryShape::EShape::Short, ou::Colour::HotPink )
 , m_nLo {}, m_nNet {}, m_nHi {}
+, m_nCount {}
 , m_dblCommission {}
 , m_fResetSoftware( nullptr )
 {
@@ -160,8 +161,8 @@ void Strategy::SetWatch( EBase eBaseCurrency, pWatch_t pWatch, pPortfolio_t pPor
 
 }
 
-Strategy::pairBidAsk_t Strategy::LatestQuote() const {
-  return pairBidAsk_t( m_quote.Bid(), m_quote.Ask() );
+Strategy::latest_t Strategy::Latest() const {
+  return latest_t( m_quote.Bid(), m_quote.Ask(), m_nCount, m_dblCommission );
 }
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
@@ -331,6 +332,7 @@ void Strategy::RunStateUp( TrackOrder& to ) {
             m_stopUp.start = m_stopUp.trail;
             to.Set(
               [this,bid]( double fill_price, double commission ){
+                m_nCount++;
                 m_dblCommission += commission;
                 if ( fill_price < bid ) {
                   m_stopUp.trail = m_stopUp.start = ( fill_price - m_stopUp.diff );
@@ -433,6 +435,7 @@ void Strategy::RunStateDn( TrackOrder& to ) {
             m_stopDn.start = m_stopDn.trail;
             to.Set(
               [this,ask]( double fill_price, double commission ){
+                m_nCount++;
                 m_dblCommission += commission;
                 if ( fill_price > ask ) {
                   m_stopUp.trail = m_stopUp.start = ( fill_price + m_stopDn.diff );
