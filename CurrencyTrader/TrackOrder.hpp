@@ -56,7 +56,7 @@ public:
     double commission
     )>;
 
-  using fFillPrice_t = std::function<void(double)>; // this will be associated with state change
+  using fFillPrice_t = std::function<void(double,double)>; // exchange rate, commission
 
   struct OrderArgs {
 

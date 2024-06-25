@@ -329,6 +329,8 @@ private:
   };
   Stop m_stopDn, m_stopUp;
 
+  double m_dblCommission;
+
   fResetSoftware_t m_fResetSoftware;
 
   void Init();

@@ -326,7 +326,7 @@ void TrackOrder::HandleOrderFilled( const ou::tf::Order& order ) {
       assert( false );
   }
 
-  if ( m_fFillPrice ) m_fFillPrice( exchange_rate );
+  if ( m_fFillPrice ) m_fFillPrice( exchange_rate, commission );
 
   switch ( m_stateTrade ) {
     case ETradeState::EntrySubmitted:

@@ -44,6 +44,7 @@ Strategy::Strategy()
 , m_ceSwingHi( ou::ChartEntryShape::EShape::Long,  ou::Colour::Purple )
 , m_ceSwingLo( ou::ChartEntryShape::EShape::Short, ou::Colour::HotPink )
 , m_nLo {}, m_nNet {}, m_nHi {}
+, m_dblCommission {}
 , m_fResetSoftware( nullptr )
 {
   Init();
@@ -329,7 +330,8 @@ void Strategy::RunStateUp( TrackOrder& to ) {
             m_stopUp.trail = bid - m_stopUp.diff; // run a parabolic stop?
             m_stopUp.start = m_stopUp.trail;
             to.Set(
-              [this,bid]( double fill_price ){
+              [this,bid]( double fill_price, double commission ){
+                m_dblCommission += commission;
                 if ( fill_price < bid ) {
                   m_stopUp.trail = m_stopUp.start = ( fill_price - m_stopUp.diff );
                 }
@@ -430,7 +432,8 @@ void Strategy::RunStateDn( TrackOrder& to ) {
             m_stopDn.trail = ask + m_stopDn.diff; // run a parabolic stop?
             m_stopDn.start = m_stopDn.trail;
             to.Set(
-              [this,ask]( double fill_price ){
+              [this,ask]( double fill_price, double commission ){
+                m_dblCommission += commission;
                 if ( fill_price > ask ) {
                   m_stopUp.trail = m_stopUp.start = ( fill_price + m_stopDn.diff );
                 }
