@@ -125,7 +125,7 @@ PanelCurrencyStats::fUpdatePair_t PanelCurrencyStats::AddPair( const std::string
   }
 
   fUpdatePair_t f =
-    [this, textBid, textAsk, textTradeCount, textCommission]( double bid, double ask, unsigned int count, double commission ){
+    [this, textBid, textAsk, textTradeCount, textCommission]( double bid, double ask, size_t count, double commission ){
       textBid->SetLabel( fmt::format( "{:.{}f}", bid, 5 ) );
       textAsk->SetLabel( fmt::format( "{:.{}f}", ask, 5 ) );
       textTradeCount->SetLabel( fmt::format( "{}", count ) );

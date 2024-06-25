@@ -54,7 +54,7 @@ public:
     long style = SYMBOL_PANELCURRENCYSTATS_STYLE );
 
   using fUpdateCurrency_t = std::function<void(double amount, double extended)>;
-  using fUpdatePair_t = std::function<void(double bid, double ask, unsigned int count, double commission)>;
+  using fUpdatePair_t = std::function<void(double bid, double ask, size_t count, double commission)>;
 
   fUpdateCurrency_t AddCurrency( const std::string& sName );
   fUpdatePair_t AddPair( const std::string& sName );
