@@ -93,7 +93,7 @@ void Strategy::Init() {
   m_pEmaCurrency1->Set( ou::Colour::Purple, "Price EMA1" );
 
   m_pEmaCurrency2 = std::make_unique<EMA>( 5 * 60, m_cdv, EChartSlot::Price );
-  m_pEmaCurrency2->Set( ou::Colour::DarkBlue, "Price EMA2" );
+  m_pEmaCurrency2->Set( ou::Colour::HotPink, "Price EMA2" );
 
   // supplied by 1 minute trade bar
   m_pATRFast = std::make_unique<EMA>( 3, m_cdv, EChartSlot::ATR );
@@ -228,7 +228,7 @@ void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_
   BOOST_LOG_TRIVIAL(info)
            << "pip"
     << ',' << m_pWatch->GetInstrumentName()
-    << ',' << "exch rate=" << exch_rate
+    << ',' << "exch_rate=" << exch_rate
     << ',' << "quan=" << m_quantityToOrder
     << ',' << "interval=" << m_tick
     << '.' << "quan*tick=" << quan_x_tick
