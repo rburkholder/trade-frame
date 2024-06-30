@@ -290,7 +290,8 @@ void AppCurrencyTrader::ConstructStrategyList() {
 
       iterPair = result.first;
       assert( result.second );
-      Strategy& strategy( *iterPair->second.pStrategy );
+      Pair& pair( iterPair->second );
+      Strategy& strategy( *pair.pStrategy );
 
       iterPair->second.fUpdatePair = std::move( m_pPanelCurrencyStats->AddPair( idInstrument ) );
 
@@ -392,6 +393,17 @@ void AppCurrencyTrader::ConstructStrategyList() {
         ;
 
       if ( 0 == m_choices.m_sHdf5SimSet.size() ) {
+
+        pair.ptimerSoftwareReset = std::make_unique<boost::asio::deadline_timer>(
+          m_io,
+          strategy.GetSoftwareReset() + boost::posix_time::time_duration( 0, 5, 0 )
+          );
+        pair.ptimerSoftwareReset->async_wait(
+          [name=ps.m_sName]( const boost::system::error_code& error ){
+            BOOST_LOG_TRIVIAL(info) << name << " timed out, " << error; // replace with appropriate action when confirmed accuracy
+            // can the pointer be reset here?
+          } );
+
         strategy.SetResetSoftware( [this,&strategy]()->bool {
           bool bReturn( false );
           switch ( m_stateSoftwareReset ) {

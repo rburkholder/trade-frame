@@ -29,6 +29,8 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/executor_work_guard.hpp>
 
+#include <boost/asio/deadline_timer.hpp>
+
 #include <wx/app.h>
 #include <wx/timer.h>
 #include <wx/splitter.h>
@@ -164,6 +166,7 @@ private:
     ou::tf::Currency::ECurrency currencyNonBase;
     pStrategy_t pStrategy;
     PanelCurrencyStats::fUpdatePair_t fUpdatePair;
+    std::unique_ptr<boost::asio::deadline_timer> ptimerSoftwareReset;
     //bool bAllowTimer;
 
     Pair( pStrategy_t pStrategy_ )
