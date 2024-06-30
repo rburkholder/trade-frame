@@ -150,8 +150,9 @@ void DailyTradeTimeFrame<T>::InitForUSEquityExchanges( boost::gregorian::date da
   m_dtGoNeutral           = Normalize( date, boost::posix_time::time_duration( 15, 58, 15 ), "America/New_York" );
   m_dtWaitForRHClose      = Normalize( date, boost::posix_time::time_duration( 15, 59,  0 ), "America/New_York" );
   m_dtRHClose             = Normalize( date, boost::posix_time::time_duration( 16,  0,  0 ), "America/New_York" );
-  m_dtMarketClose         = Normalize( date, boost::posix_time::time_duration( 17, 30,  0 ), "America/New_York" );
-  m_dtSoftwareReset       = Normalize( date, boost::posix_time::time_duration( 17, 45,  0 ), "America/New_York" );
+  m_dtMarketClose         = Normalize( date, boost::posix_time::time_duration( 17, 25,  0 ), "America/New_York" );
+  m_dtSoftwareReset       = Normalize( date, boost::posix_time::time_duration( 17, 30,  0 ), "America/New_York" );
+  //                                           exterior reset should happen at 17, 35,  0 to force exit from 'done'
 }
 
 template<class T>
@@ -236,7 +237,8 @@ void DailyTradeTimeFrame<T>::InitFor24HourMarkets( boost::gregorian::date date )
   // will need to generify this:  ES till 15:15, GC till 17:00
   m_dtRHClose             = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17,  0,  0 ), "America/New_York" );
   m_dtMarketClose         = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17, 15,  0 ), "America/New_York" );
-  m_dtSoftwareReset       = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17, 35,  0 ), "America/New_York" );
+  m_dtSoftwareReset       = Normalize( date + boost::gregorian::date_duration(1), boost::posix_time::time_duration( 17, 30,  0 ), "America/New_York" );
+  //                                                                                exterior reset should happen at 17, 35,  0 to force exit from 'done'
 }
 
 template<typename T>
