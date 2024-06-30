@@ -1103,16 +1103,16 @@ void AppCurrencyTrader::OnClose( wxCloseEvent& event ) {
     Unbind( wxEVT_TIMER, &AppCurrencyTrader::HandleTimer, this, m_timerOneSecond.GetId() );
   }
 
-  m_pWorkGuard.reset();
-  if ( m_thread.joinable() ) {
-    m_thread.join();
-  }
-
   m_pWinChartView->SetChartDataView( nullptr, false );
 
   SaveState();
 
   m_mapPair.clear();
+
+  m_pWorkGuard.reset();
+  if ( m_thread.joinable() ) {
+    m_thread.join();
+  }
 
   //m_pBuildInstrument.reset();
 
