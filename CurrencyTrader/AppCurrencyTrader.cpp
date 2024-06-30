@@ -297,6 +297,20 @@ void AppCurrencyTrader::ConstructStrategyList() {
 
       strategy.InitFor24HourMarkets( adjusted_date );
 
+      boost::posix_time::ptime dt;
+
+      dt = strategy.GetMarketClose();
+      dt = boost::posix_time::ptime( dt.date(), boost::posix_time::time_duration( 17, 10, 0 ) );
+      strategy.SetMarketClose( dt );
+
+      dt = strategy.GetSoftwareReset();
+      dt = boost::posix_time::ptime( dt.date(), boost::posix_time::time_duration( 17, 12, 0 ) );
+      strategy.SetSoftwareReset( dt );
+
+      dt = strategy.GetMarketOpen();
+      dt = boost::posix_time::ptime( dt.date(), boost::posix_time::time_duration( 17, 15, 0 ) );
+      strategy.SetMarketOpen( dt );
+
       ou::TimeSource& ts( ou::TimeSource::GlobalInstance() );
       auto tz = ts.LoadTimeZone( ps.m_sTimeZone );
 
@@ -318,6 +332,7 @@ void AppCurrencyTrader::ConstructStrategyList() {
           ;
       }
 
+      // over-ride starting time from instrument's config
       boost::posix_time::ptime dtStart_Local( MarketOpen_Local.local_time().date(), ps.m_tdStartTime );
       if ( dtStart_Local < MarketOpen_Local.local_time() ) {
         dtStart_Local = boost::posix_time::ptime(
@@ -396,7 +411,7 @@ void AppCurrencyTrader::ConstructStrategyList() {
 
         pair.ptimerSoftwareReset = std::make_unique<boost::asio::deadline_timer>(
           m_io,
-          strategy.GetSoftwareReset() + boost::posix_time::time_duration( 0, 5, 0 )
+          strategy.GetSoftwareReset() + boost::posix_time::time_duration( 0, 1, 0 )
           );
         pair.ptimerSoftwareReset->async_wait(
           [name=ps.m_sName]( const boost::system::error_code& error ){
