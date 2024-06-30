@@ -204,20 +204,18 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
 void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration ) {
 
-  // one time calc pip
-  const double mid( m_quote.Midpoint() );
-  m_tick = m_to_up.PriceInterval( mid );
-  const double first = (double)m_quantityToOrder * m_tick;
-
-  double second {};
+  // one time calc pip, https://www.benzinga.com/money/how-to-calculate-pips
+  const double exch_rate( m_quote.Midpoint() );
+  m_tick = m_to_up.PriceInterval( exch_rate );
+  const double quan_x_tick = (double)m_quantityToOrder * m_tick;
+  const double first( quan_x_tick / exch_rate );
+  const double second( quan_x_tick );
 
   switch ( m_eBaseCurrency ) {
     case EBase::First:
-      second = first * mid;
       m_base_currency_pip = first;
       break;
     case EBase::Second:
-      second = first / mid;
       m_base_currency_pip = second;
       break;
     default:
@@ -226,11 +224,13 @@ void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_
   BOOST_LOG_TRIVIAL(info)
            << "pip"
     << ',' << m_pWatch->GetInstrumentName()
-    << ',' << "midprice=" << mid
-    << ',' << "interval=" << m_tick
-    << '.' << "first=" << first
-    << ',' << "second=" << second
+    << ',' << "exch rate=" << exch_rate
     << ',' << "quan=" << m_quantityToOrder
+    << ',' << "interval=" << m_tick
+    << '.' << "quan*tick=" << quan_x_tick
+    << ',' << "first=" << first
+    << ',' << "second=" << second // redundant?
+    << ',' << "usd=" << m_base_currency_pip
     ;
 }
 
