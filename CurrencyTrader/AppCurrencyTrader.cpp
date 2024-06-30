@@ -371,17 +371,17 @@ void AppCurrencyTrader::ConstructStrategyList() {
           ;
 
         BOOST_LOG_TRIVIAL(info)
-          << ps.m_sName << ' '
-          << strategy.GetMarketOpen() << ','
-          << strategy.GetRegularHoursOpen() << ','
-          << strategy.GetStartTrading() << ','
-          << strategy.GetNoon() << ','
-          << strategy.GetCancellation() << ','
-          << strategy.GetGoNeutral() << ','
-          << strategy.GetWaitForRegularHoursClose() << ','
-          << strategy.GetRegularHoursClose() << ','
-          << strategy.GetMarketClose() << ','
-          << strategy.GetSoftwareReset()
+          << ps.m_sName << ','
+          << "mo=" << strategy.GetMarketOpen() << ','
+          << "rh=" << strategy.GetRegularHoursOpen() << ','
+          << "st=" << strategy.GetStartTrading() << ','
+          << "nn=" << strategy.GetNoon() << ','
+          << "cc=" << strategy.GetCancellation() << ','
+          << "gn=" << strategy.GetGoNeutral() << ','
+          << "rw=" << strategy.GetWaitForRegularHoursClose() << ','
+          << "rc=" << strategy.GetRegularHoursClose() << ','
+          << "mc=" << strategy.GetMarketClose() << ','
+          << "sr=" << strategy.GetSoftwareReset()
           ;
       }
 
