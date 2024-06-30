@@ -205,7 +205,8 @@ private:
   };
 
   using pEMA_t = std::unique_ptr<EMA>;
-  pEMA_t m_pEmaCurrency;
+  pEMA_t m_pEmaCurrency1;
+  pEMA_t m_pEmaCurrency2;
 
   struct TR { // True Range
 

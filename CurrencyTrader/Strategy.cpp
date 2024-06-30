@@ -89,8 +89,11 @@ void Strategy::Init() {
   m_cdv.Add( EChartSlot::TR_EMA, &m_ceTradingRangeFalling );
 
   // supplied by 1 second mid-quote
-  m_pEmaCurrency = std::make_unique<EMA>( 3 * 60, m_cdv, EChartSlot::Price );
-  m_pEmaCurrency->Set( ou::Colour::Purple, "Price EMA" );
+  m_pEmaCurrency1 = std::make_unique<EMA>( 90, m_cdv, EChartSlot::Price );
+  m_pEmaCurrency1->Set( ou::Colour::Purple, "Price EMA1" );
+
+  m_pEmaCurrency2 = std::make_unique<EMA>( 5 * 60, m_cdv, EChartSlot::Price );
+  m_pEmaCurrency2->Set( ou::Colour::DarkBlue, "Price EMA2" );
 
   // supplied by 1 minute trade bar
   m_pATRFast = std::make_unique<EMA>( 3, m_cdv, EChartSlot::ATR );
@@ -117,7 +120,8 @@ Strategy::~Strategy() {
 
   m_pATRFast.reset();
   m_pATRSlow.reset();
-  m_pEmaCurrency.reset();
+  m_pEmaCurrency1.reset();
+  m_pEmaCurrency2.reset();
 
   m_cdv.Clear();
 }
@@ -532,8 +536,10 @@ void Strategy::HandleAtRHClose( boost::gregorian::date date, boost::posix_time::
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
-  assert( m_pEmaCurrency );
-  m_pEmaCurrency->Update( bar.DateTime(), bar.Close() );
+  assert( m_pEmaCurrency1 );
+  assert( m_pEmaCurrency2 );
+  m_pEmaCurrency1->Update( bar.DateTime(), bar.Close() );
+  m_pEmaCurrency2->Update( bar.DateTime(), bar.Close() );
   TimeTick( bar );
 }
 
@@ -554,7 +560,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
   Swing& d( m_rSwing[ 3 ] );
   Swing& e( m_rSwing[ 4 ] );
 
-  a = b; b = c; c = d; d = e; e.Update( bar, m_pEmaCurrency->dblEmaLatest );
+  a = b; b = c; c = d; d = e; e.Update( bar, m_pEmaCurrency1->dblEmaLatest );
 
   { // highest point
     const double x = a.hi > b.hi ? a.hi : b.hi;
