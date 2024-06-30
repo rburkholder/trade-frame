@@ -132,7 +132,6 @@ struct Choices {
   unsigned int m_nPipProfit;
   unsigned int m_nPipStopLoss;
   unsigned int m_nPipTrailingStop;
-  unsigned int m_nLotSize;
 
   unsigned int m_nBarSeconds;
 
