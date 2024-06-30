@@ -497,7 +497,7 @@ bool AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
   // TODO: add to a clean up routine
   m_timerOneSecond.SetOwner( this );
   if ( 0 == m_choices.m_sHdf5SimSet.size() ) {
-    Bind( wxEVT_TIMER, &AppCurrencyTrader::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
+    Bind( wxEVT_TIMER, &AppCurrencyTrader::HandleTimer, this, m_timerOneSecond.GetId() );
     m_timerOneSecond.Start( 500 );
   }
 
@@ -1008,7 +1008,7 @@ void AppCurrencyTrader::UpdatePanelCurrencyStats() {
   base.fUpdateCurrency( base.amount, dblBaseTotal );
 }
 
-void AppCurrencyTrader::HandleOneSecondTimer( wxTimerEvent& event ) {
+void AppCurrencyTrader::HandleTimer( wxTimerEvent& event ) {
 
   if ( m_bProvidersConfirmed ) {
     UpdatePanelCurrencyStats();
@@ -1070,7 +1070,7 @@ void AppCurrencyTrader::OnClose( wxCloseEvent& event ) {
 
   if ( m_timerOneSecond.IsRunning() ) {
     m_timerOneSecond.Stop();
-    Unbind( wxEVT_TIMER, &AppCurrencyTrader::HandleOneSecondTimer, this, m_timerOneSecond.GetId() );
+    Unbind( wxEVT_TIMER, &AppCurrencyTrader::HandleTimer, this, m_timerOneSecond.GetId() );
   }
 
   m_pWinChartView->SetChartDataView( nullptr, false );

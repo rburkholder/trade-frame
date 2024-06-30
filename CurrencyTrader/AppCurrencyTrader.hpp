@@ -210,7 +210,7 @@ private:
   void HandleMenuActionSimEmitStats();
   void HandleSimComplete();
 
-  void HandleOneSecondTimer( wxTimerEvent& event );
+  void HandleTimer( wxTimerEvent& event );
   void UpdatePanelCurrencyStats();
 
   void HandleMenuActionCloseAndDone();
