@@ -99,14 +99,13 @@ protected:
   template<typename DD> void HandleAfterRH( const DD& dd ) {}
   template<typename DD> void HandleEndOfMarket( const DD& dd ) {}
   template<typename DD> void HandleMarketClosed( const DD& dd ) {}
-  template<typename DD> bool HandleSoftwareReset( const DD& dd ) { return false; } // restart state machine
 
   // event change one shots, independent of DD
   void HandleBellHeard( boost::gregorian::date, boost::posix_time::time_duration ) {}
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) {}
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) {}
   void HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration ) {}
-  void HandleSoftwareReset( boost::gregorian::date, boost::posix_time::time_duration ) {}
+  bool HandleSoftwareReset( boost::gregorian::date, boost::posix_time::time_duration ) { return false; }
 
 private:
   // these have been normalized to UTC
@@ -363,7 +362,9 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
     //ss << dt << "," << m_dtMarketOpen;
     if ( dt >= m_dtSoftwareReset ) {
       m_stateTimeFrame = TimeFrame::SoftwareReset;
-      if ( static_cast<T*>(this)->HandleSoftwareReset( dd ) ) {
+      boost::gregorian::date date( dt.date() );
+      boost::posix_time::time_duration time( dt.time_of_day() );
+      if ( static_cast<T*>(this)->HandleSoftwareReset( date, time ) ) {
         m_stateTimeFrame = TimeFrame::PreRH;
       }
       else {

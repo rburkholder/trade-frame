@@ -608,8 +608,8 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
 
 }
 
-bool Strategy::HandleSoftwareReset( const ou::tf::DatedDatum& ) {
-  // injected by external one second timer
+bool Strategy::HandleSoftwareReset( boost::gregorian::date, boost::posix_time::time_duration ) {
+  // validated by external call when available
   // clean up, clear out, start new statistics?
   if ( nullptr != m_fResetSoftware ) {
     return m_fResetSoftware();

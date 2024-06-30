@@ -355,7 +355,7 @@ private:
   void HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration );
 
   void HandleRHTrading( const ou::tf::DatedDatum& ) {};
-  bool HandleSoftwareReset( const ou::tf::DatedDatum& );
+  bool HandleSoftwareReset( boost::gregorian::date, boost::posix_time::time_duration );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& );
   void HandleMinuteBar( const ou::tf::Bar& );
