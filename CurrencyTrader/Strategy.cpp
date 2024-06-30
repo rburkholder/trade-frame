@@ -300,6 +300,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   // things to check:
   //   track ATR at swingup/swingdn
   //   check distance from ema, if large correction, don't trade, if a few ATRs away, then consider trading
+  //   check distance between swing points, small swings would require counter-trading
+  //     use m_vSwingTrack for back-tracking
 
   RunStateUp( m_to_up );
   RunStateDn( m_to_dn );
@@ -640,7 +642,7 @@ void Strategy::SaveWatch( const std::string& sPrefix ) {
 }
 
 void Strategy::CloseAndDone() {
-
+  // fake out the state machine, by dynamically adjusting the trigger times?
 }
 
   // The ATR is commonly used as an exit method that can be applied
