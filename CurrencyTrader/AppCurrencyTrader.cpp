@@ -164,6 +164,9 @@ bool AppCurrencyTrader::OnInit() {
   m_splitterData->SplitVertically(m_treeSymbols, m_pWinChartView, 50);
   sizerLower->Add(m_splitterData, 1, wxGROW, 2);
 
+  m_pWorkGuard = std::make_unique<work_guard_t>( asio::make_work_guard( m_io ) );
+  m_thread = std::move( std::thread( [this](){ m_io.run(); } ) );
+
   PopulatePortfolioChart();
   PopulateTreeRoot();
   LoadPortfolioCurrency();
@@ -1071,6 +1074,11 @@ void AppCurrencyTrader::OnClose( wxCloseEvent& event ) {
   if ( m_timerOneSecond.IsRunning() ) {
     m_timerOneSecond.Stop();
     Unbind( wxEVT_TIMER, &AppCurrencyTrader::HandleTimer, this, m_timerOneSecond.GetId() );
+  }
+
+  m_pWorkGuard.reset();
+  if ( m_thread.joinable() ) {
+    m_thread.join();
   }
 
   m_pWinChartView->SetChartDataView( nullptr, false );

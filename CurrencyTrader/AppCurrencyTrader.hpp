@@ -21,8 +21,13 @@
 
 #pragma once
 
+#include <thread>
+
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
+
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 
 #include <wx/app.h>
 #include <wx/timer.h>
@@ -42,6 +47,8 @@
 #include "Common.hpp"
 #include "Config.hpp"
 #include "PanelCurrencyStats.hpp"
+
+namespace asio = boost::asio; // from <boost/asio/context.hpp>
 
 class Strategy;
 class FrameMain;
@@ -180,6 +187,13 @@ private:
 
   boost::gregorian::date           m_startDateUTC;
   boost::posix_time::time_duration m_startTimeUTC;
+
+  std::thread m_thread;
+  boost::asio::io_context m_io;
+
+  using work_guard_t = asio::executor_work_guard<boost::asio::io_context::executor_type>;
+  using pWorkGuard_t = std::unique_ptr<work_guard_t>;
+  pWorkGuard_t m_pWorkGuard;
 
   enum class ESoftwareReset { quiescent, looking, encountered };
   ESoftwareReset m_stateSoftwareReset;
