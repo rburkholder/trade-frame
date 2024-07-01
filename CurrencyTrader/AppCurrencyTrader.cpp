@@ -375,7 +375,7 @@ void AppCurrencyTrader::ConstructStrategyList() {
       assert( lt_close_utc <= MarketClose_UTC );
 
       strategy.SetCancellation( lt_close_utc - boost::posix_time::time_duration( 0, 3, 0 ) );
-      strategy.SetGoNeutral( lt_close_utc - boost::posix_time::time_duration( 0, 2, 55 ) );
+      strategy.SetGoNeutral( lt_close_utc - boost::posix_time::time_duration( 0, 2, 30 ) );
       strategy.SetWaitForRegularHoursClose( lt_close_utc - boost::posix_time::time_duration( 0, 2, 0 ) );
       strategy.SetRegularHoursClose( lt_close_utc );
 
@@ -409,13 +409,11 @@ void AppCurrencyTrader::ConstructStrategyList() {
 
       if ( 0 == m_choices.m_sHdf5SimSet.size() ) {
 
-        pair.ptimerSoftwareReset = std::make_unique<boost::asio::deadline_timer>(
-          m_io,
-          strategy.GetSoftwareReset() + boost::posix_time::time_duration( 0, 1, 0 )
-          );
+        auto dtReset = strategy.GetSoftwareReset() + boost::posix_time::time_duration( 0, 1, 0 );
+        pair.ptimerSoftwareReset = std::make_unique<boost::asio::deadline_timer>( m_io, dtReset );
         pair.ptimerSoftwareReset->async_wait(
-          [name=ps.m_sName]( const boost::system::error_code& error ){
-            BOOST_LOG_TRIVIAL(info) << name << " timed out, " << error; // replace with appropriate action when confirmed accuracy
+          [name=ps.m_sName,dtReset]( const boost::system::error_code& error ){
+            BOOST_LOG_TRIVIAL(info) << name << " sw reset trial timed out " << dtReset << ' ' << error.to_string(); // replace with appropriate action when confirmed accuracy
             // can the pointer be reset here?
           } );
 
