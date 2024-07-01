@@ -336,7 +336,7 @@ private:
     double trail;
     Stop(): start {}, diff {}, trail {} {}
   };
-  Stop m_stopDn, m_stopUp;
+  Stop m_stop;
 
   size_t m_nCount;
   double m_dblCommission;
@@ -360,7 +360,6 @@ private:
   void HandleBarQuotes01Sec( const ou::tf::Bar& );
   void HandleMinuteBar( const ou::tf::Bar& );
 
-  void RunStateUp( TrackOrder& );
-  void RunStateDn( TrackOrder& );
+  void RunState( TrackOrder& );
 
 };

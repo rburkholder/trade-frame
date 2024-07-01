@@ -34,8 +34,10 @@ public:
   enum class ETradeState {
     Init,  // initiaize state in current market
     Search,  // looking for long or short enter
-    EntrySubmitted, // order has been submitted, waiting for confirmation
-    ExitSignal,  // position exists, looking for exit
+    EntrySubmittedUp, // order has been submitted, waiting for confirmation
+    EntrySubmittedDn, // order has been submitted, waiting for confirmation
+    ExitSignalUp,  // position exists, looking for exit
+    ExitSignalDn,  // position exists, looking for exit
     ExitSubmitted, // wait for exit to complete
     Cancelling,
     Cancelled,
@@ -57,6 +59,7 @@ public:
     )>;
 
   using fFillPrice_t = std::function<void(double,double)>; // exchange rate, commission
+  using fCancel_t = std::function<void()>;
 
   struct OrderArgs {
 
@@ -113,6 +116,8 @@ public:
   void ExitShortLmt( const OrderArgs& );
   void ExitShortMkt( const OrderArgs& );
 
+  void Cancel( fCancel_t&& ); // perform with call back?  to allow next order to be placed?
+
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
 
@@ -135,6 +140,7 @@ private:
   fTransferFunds_t m_fTransferFunds;
 
   fFillPrice_t m_fFillPrice;
+  fCancel_t m_fCancelled;
 
   pOrder_t m_pOrderPending;
   pPosition_t m_pPosition;

@@ -34,6 +34,7 @@ TrackOrder::TrackOrder()
 , m_quantityBaseCurrency {}
 , m_fTransferFunds( nullptr )
 , m_fFillPrice( nullptr )
+, m_fCancelled( nullptr )
 {}
 
 TrackOrder::~TrackOrder() {}
@@ -64,6 +65,7 @@ void TrackOrder::Set( pPosition_t pPosition, ou::ChartDataView& cdv, int slot ) 
 }
 
 void TrackOrder::Set( fFillPrice_t&& f ) {
+  assert( nullptr == m_fFillPrice );
   m_fFillPrice = std::move( f );
 }
 
@@ -127,7 +129,6 @@ void TrackOrder::Common( const OrderArgs& args, pOrder_t& pOrder ) {
 
 void TrackOrder::EnterCommon( const OrderArgs& args, pOrder_t& pOrder ) {
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  m_stateTrade = ETradeState::EntrySubmitted;
   Common( args, pOrder );
 }
 
@@ -137,6 +138,7 @@ void TrackOrder::EnterLongLmt( const OrderArgs& args ) {
   assert( pOrder );
   SetGoodTill( args, pOrder );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  m_stateTrade = ETradeState::EntrySubmittedUp;
   EnterCommon( args, pOrder );
 }
 
@@ -145,6 +147,7 @@ void TrackOrder::EnterLongMkt( const OrderArgs& args ) {
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityBaseCurrency );
   assert( pOrder );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  m_stateTrade = ETradeState::EntrySubmittedUp;
   EnterCommon( args, pOrder );
 }
 
@@ -153,7 +156,7 @@ void TrackOrder::EnterLongBracket( const OrderArgs& args ) {
   // will need to simulate equivalent of Bracket Order in the state machine
   assert( 0 < m_quantityBaseCurrency );
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  m_stateTrade = ETradeState::EntrySubmitted;
+  m_stateTrade = ETradeState::EntrySubmittedUp;
 
   assert( 0.0 < args.limit );
   pOrder_t pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityBaseCurrency, Normalize( args.limit ) );
@@ -190,6 +193,7 @@ void TrackOrder::EnterShortLmt( const OrderArgs& args ) {
   assert( pOrder );
   SetGoodTill( args, pOrder );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  m_stateTrade = ETradeState::EntrySubmittedDn;
   EnterCommon( args, pOrder );
 }
 
@@ -198,6 +202,7 @@ void TrackOrder::EnterShortMkt( const OrderArgs& args ) {
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityBaseCurrency );
   assert( pOrder );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  m_stateTrade = ETradeState::EntrySubmittedDn;
   EnterCommon( args, pOrder );
 }
 
@@ -257,12 +262,20 @@ void TrackOrder::HandleOrderCancelled( const ou::tf::Order& order ) {
         << m_pPosition->GetInstrument()->GetInstrumentName()
         << " order " << order.GetOrderId() << " cancelled - end of day";
       break;
-    case ETradeState::EntrySubmitted:
+    case ETradeState::EntrySubmittedUp:
+    case ETradeState::EntrySubmittedDn:
       // cancels will happen due to limit time out
       BOOST_LOG_TRIVIAL(info)
         << m_pPosition->GetInstrument()->GetInstrumentName()
         << " order " << order.GetOrderId() << " entry cancelled";
       m_stateTrade = ETradeState::Search;
+      break;
+    case ETradeState::Cancelling:
+      if ( m_fCancelled ) {
+        m_fCancelled();
+        m_fCancelled = nullptr;
+      }
+      m_stateTrade = ETradeState::Cancelled;
       break;
     case ETradeState::ExitSubmitted:
       //assert( false );  // TODO: need to figure out a plan to retry exit
@@ -288,9 +301,9 @@ void TrackOrder::HandleOrderFilled( const ou::tf::Order& order ) {
   const auto quantity_base = order.GetQuanFilled();
   //double quantity_converted = quantity_base / exchange_rate; // is this correct?
 
-  // Forex quotes show two currencies, 
-  //   the base currency, which appears first and 
-  //   the quote currency or variable currency, which appears last. 
+  // Forex quotes show two currencies,
+  //   the base currency, which appears first and
+  //   the quote currency or variable currency, which appears last.
   // The price of the first currency is always reflected in units of the second currency.
   // An order is for a 'buy' or a 'sell' of the first currency (base currency)
 
@@ -330,12 +343,14 @@ void TrackOrder::HandleOrderFilled( const ou::tf::Order& order ) {
       assert( false );
   }
 
-  if ( m_fFillPrice ) m_fFillPrice( exchange_rate, commission );
-
   switch ( m_stateTrade ) {
-    case ETradeState::EntrySubmitted:
+    case ETradeState::EntrySubmittedUp:
       m_ceEntryFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Entry Fill" );
-      m_stateTrade = ETradeState::ExitSignal;
+      m_stateTrade = ETradeState::ExitSignalUp;
+      break;
+    case ETradeState::EntrySubmittedDn:
+      m_ceEntryFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Entry Fill" );
+      m_stateTrade = ETradeState::ExitSignalDn;
       break;
     case ETradeState::ExitSubmitted:
       m_ceExitFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Exit Fill" );
@@ -351,6 +366,25 @@ void TrackOrder::HandleOrderFilled( const ou::tf::Order& order ) {
        assert( false ); // TODO: unravel the state mess if we get here
   }
   m_pOrderPending.reset();
+
+  if ( m_fFillPrice ) {
+    fFillPrice_t fFillPrice( std::move ( m_fFillPrice ) );
+    m_fFillPrice = nullptr;
+    fFillPrice( exchange_rate, commission );
+  }
+
+}
+
+void TrackOrder::Cancel( fCancel_t&& fCancelled ) { // may need something if nothing to cancel
+  assert( nullptr == m_fCancelled );
+  if ( m_pPosition ) {
+    m_stateTrade = TrackOrder::ETradeState::Cancelling;
+    m_fCancelled = std::move( fCancelled );
+    m_pPosition->CancelOrders();
+  }
+  else {
+    m_stateTrade = TrackOrder::ETradeState::Cancelled; // might need to be ::Search
+  }
 }
 
 void TrackOrder::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot

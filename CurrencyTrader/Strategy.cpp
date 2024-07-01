@@ -303,8 +303,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   //   check distance between swing points, small swings would require counter-trading
   //     use m_vSwingTrack for back-tracking
 
-  RunStateUp( m_to_up );
-  RunStateDn( m_to_dn );
+  RunState( m_to_up );
 
   m_state.swing = State::Swing::none;
 }
@@ -320,7 +319,7 @@ bool Strategy::SwingBarState( const Swing::EBarState eBarState ) const {
     ;
 }
 
-void Strategy::RunStateUp( TrackOrder& to ) {
+void Strategy::RunState( TrackOrder& to ) {
   switch ( to.m_stateTrade ) {
     case TrackOrder::ETradeState::Init: // Strategy starts in this state
       to.m_stateTrade = TrackOrder::ETradeState::Search;
@@ -333,16 +332,25 @@ void Strategy::RunStateUp( TrackOrder& to ) {
             const double swing_lo = m_rSwing[ 2 ].lo;
             const double diff1 = bid - swing_lo;
             const double diff2 = 3.0 * m_tick;
-            m_stopUp.diff = diff1 > diff2 ? diff1 : diff2;
-            m_stopUp.trail = bid - m_stopUp.diff; // run a parabolic stop?
-            m_stopUp.start = m_stopUp.trail;
+            m_stop.diff = diff1 > diff2 ? diff1 : diff2;
+            m_stop.trail = bid - m_stop.diff; // run a parabolic stop?
+            m_stop.start = m_stop.trail;
             to.Set(
-              [this,bid]( double fill_price, double commission ){
+              [&to,this,bid]( double fill_price, double commission ){
                 m_nCount++;
                 m_dblCommission += commission;
                 if ( fill_price < bid ) {
-                  m_stopUp.trail = m_stopUp.start = ( fill_price - m_stopUp.diff );
+                  m_stop.trail = m_stop.start = ( fill_price - m_stop.diff );
                 }
+                to.Set(
+                  []( double fill_price, double commission ){
+                    // cancel other stuff
+                  } );
+                const double limit( fill_price + 2.0 * m_tick );
+                to.EnterShortLmt( TrackOrder::OrderArgs( m_quote.DateTime(), fill_price, limit ) );
+                BOOST_LOG_TRIVIAL(info)
+                  << m_pWatch->GetInstrumentName() << ','
+                  << "up,fill=" << fill_price << ",short_limit=" << limit << ",stop.trail=" << m_stop.trail;
               });
             BOOST_LOG_TRIVIAL(info)
               << m_pWatch->GetInstrumentName() << ','
@@ -352,81 +360,14 @@ void Strategy::RunStateUp( TrackOrder& to ) {
               << "trf=" << m_TRFast.true_range << ','
               << "trs=" << m_TRSlow.true_range << ','
               << "sw=" << m_rSwing[0].lo << ',' << m_rSwing[1].lo << ',' << m_rSwing[2].lo << ',' << m_rSwing[3].lo << ',' << m_rSwing[4].lo << ','
-              << "st=" << m_stopUp.start << ','
-              << "df=" << m_stopUp.diff << ','
-              << "trl=" << m_stopUp.trail
+              << "st=" << m_stop.start << ','
+              << "df=" << m_stop.diff << ','
+              << "trl=" << m_stop.trail
               ;
-            assert( 0.0 < m_stopUp.diff );
-            to.EnterLongLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Ask(), m_quote.Bid(), 57 ) );
+            assert( 0.0 < m_stop.diff );
+            //to.EnterLongLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Ask(), m_quote.Bid(), 57 ) );
+            to.EnterLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Ask() ) );
           }
-          break;
-        case State::Swing::none:
-          break;
-        case State::Swing::down:
-          break;
-      }
-      break;
-    case TrackOrder::ETradeState::EntrySubmitted:
-      // wait for exectuion
-      break;
-    case TrackOrder::ETradeState::ExitSignal:
-      switch ( m_state.swing ) {
-        case State::Swing::up:
-          break;
-        case State::Swing::none:
-          {
-            const double bid = m_quote.Bid();
-            if ( bid <= m_stopUp.trail ) {
-              // exit with stop
-              BOOST_LOG_TRIVIAL(info)
-                << m_pWatch->GetInstrumentName() << ','
-                << "up exit on none"
-                ;
-              to.ExitLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), bid ) );
-            }
-            else {
-              // update trailing stop
-              const double diff = bid - m_stopUp.trail;
-              if ( diff > m_stopUp.diff ) {
-                m_stopUp.trail = bid - m_stopUp.diff;
-              }
-            }
-          }
-          break;
-        case State::Swing::down:
-          // should be exiting earlier than this
-          BOOST_LOG_TRIVIAL(info)
-            << m_pWatch->GetInstrumentName() << ','
-            << "up exit on down"
-            ;
-          to.ExitLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
-          break;
-      }
-      break;
-    case TrackOrder::ETradeState::ExitSubmitted:
-      // wait for execution
-      break;
-    case TrackOrder::ETradeState::NoTrade:
-      break;
-    case TrackOrder::ETradeState::EndOfDayCancel:
-      break;
-    case TrackOrder::ETradeState::EndOfDayNeutral:
-      break;
-    case TrackOrder::ETradeState::Done:
-      break;
-    default:
-      assert( false );
-  }
-}
-
-void Strategy::RunStateDn( TrackOrder& to ) {
-  switch ( to.m_stateTrade ) {
-    case TrackOrder::ETradeState::Init: // Strategy starts in this state
-      to.m_stateTrade = TrackOrder::ETradeState::Search;
-      break;
-    case TrackOrder::ETradeState::Search:
-      switch ( m_state.swing ) {
-        case State::Swing::up:
           break;
         case State::Swing::none:
           break;
@@ -436,16 +377,25 @@ void Strategy::RunStateDn( TrackOrder& to ) {
             const double swing_hi = m_rSwing[ 2 ].hi;
             const double diff1 = swing_hi - ask;
             const double diff2 = 3.0 * m_tick;
-            m_stopDn.diff = diff1 > diff2 ? diff1 : diff2;
-            m_stopDn.trail = ask + m_stopDn.diff; // run a parabolic stop?
-            m_stopDn.start = m_stopDn.trail;
+            m_stop.diff = diff1 > diff2 ? diff1 : diff2;
+            m_stop.trail = ask + m_stop.diff; // run a parabolic stop?
+            m_stop.start = m_stop.trail;
             to.Set(
-              [this,ask]( double fill_price, double commission ){
+              [&to,this,ask]( double fill_price, double commission ){
                 m_nCount++;
                 m_dblCommission += commission;
                 if ( fill_price > ask ) {
-                  m_stopUp.trail = m_stopUp.start = ( fill_price + m_stopDn.diff );
+                  m_stop.trail = m_stop.start = ( fill_price + m_stop.diff );
                 }
+                to.Set(
+                  []( double fill_price, double commission ){
+                    // cancel other stuff
+                  } );
+                const double limit( fill_price - 2.0 * m_tick );
+                to.EnterLongLmt( TrackOrder::OrderArgs( m_quote.DateTime(), fill_price, limit ) );
+                BOOST_LOG_TRIVIAL(info)
+                  << m_pWatch->GetInstrumentName() << ','
+                  << "dn,fill=" << fill_price << ",long_limit=" << limit << ",stop.trail=" << m_stop.trail;
               });
             BOOST_LOG_TRIVIAL(info)
               << m_pWatch->GetInstrumentName() << ','
@@ -455,51 +405,63 @@ void Strategy::RunStateDn( TrackOrder& to ) {
               << "trf=" << m_TRFast.true_range << ','
               << "trs=" << m_TRSlow.true_range << ','
               << "sw=" << m_rSwing[0].hi << ',' << m_rSwing[1].hi << ',' << m_rSwing[2].hi << ',' << m_rSwing[3].hi << ',' << m_rSwing[4].hi << ','
-              << "st=" << m_stopDn.start << ','
-              << "df=" << m_stopDn.diff << ','
-              << "trl=" << m_stopDn.trail
+              << "st=" << m_stop.start << ','
+              << "df=" << m_stop.diff << ','
+              << "trl=" << m_stop.trail
               ;
-            assert( 0.0 < m_stopDn.diff );
-            to.EnterShortLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Bid(), m_quote.Ask(), 57 ) );
+            assert( 0.0 < m_stop.diff );
+            //to.EnterShortLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Bid(), m_quote.Ask(), 57 ) );
+            to.EnterShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Bid() ) );
           }
           break;
       }
       break;
-    case TrackOrder::ETradeState::EntrySubmitted:
+    case TrackOrder::ETradeState::EntrySubmittedUp:
+    case TrackOrder::ETradeState::EntrySubmittedDn:
       // wait for exectuion
       break;
-    case TrackOrder::ETradeState::ExitSignal:
-      switch ( m_state.swing ) {
-        case State::Swing::up:
-          // should be exiting earlier than this
-          BOOST_LOG_TRIVIAL(info)
-            << m_pWatch->GetInstrumentName() << ','
-            << "dn exit up"
-            ;
-          to.ExitShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Midpoint() ) );
-          break;
-        case State::Swing::none:
-          {
-            const double ask = m_quote.Ask();
-            if ( ask >= m_stopDn.trail ) {
-              // exit with stop
+    case TrackOrder::ETradeState::ExitSignalUp: // need to move to quote
+      {
+        const double bid = m_quote.Bid();
+        if ( bid <= m_stop.trail ) {
+          to.Cancel(
+            [&to,this, bid](){
               BOOST_LOG_TRIVIAL(info)
                 << m_pWatch->GetInstrumentName() << ','
-                << "dn exit none"
+                << "up mkt stop on lmt cancel"
+                ;
+              to.ExitLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), bid ) );
+            } );
+        }
+        else {
+          // update trailing stop
+          const double diff = bid - m_stop.trail;
+          if ( diff > m_stop.diff ) {
+            m_stop.trail = bid - m_stop.diff;
+          }
+        }
+      }
+      break;
+    case TrackOrder::ETradeState::ExitSignalDn: // need to move to quote
+      {
+        const double ask = m_quote.Ask();
+        if ( ask >= m_stop.trail ) {
+          to.Cancel(
+            [&to,this, ask](){
+              BOOST_LOG_TRIVIAL(info)
+                << m_pWatch->GetInstrumentName() << ','
+                << "dn mkt stop on lmt cancel"
                 ;
               to.ExitShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), ask ) );
-            }
-            else {
-              // update trailing stop
-              const double diff = m_stopDn.trail - ask;
-              if ( diff > m_stopDn.diff ) {
-                m_stopDn.trail = m_stopDn.diff - ask;
-              }
-            }
+            } );
+        }
+        else {
+          // update trailing stop
+          const double diff = m_stop.trail - ask;
+          if ( diff > m_stop.diff ) {
+            m_stop.trail = m_stop.diff - ask;
           }
-          break;
-        case State::Swing::down:
-          break;
+        }
       }
       break;
     case TrackOrder::ETradeState::ExitSubmitted:
