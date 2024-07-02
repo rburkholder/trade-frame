@@ -1,16 +1,17 @@
 {
-  "clangd.path": "/home/rpb/.config/Code/User/globalStorage/llvm-vs-code-extensions.vscode-clangd/install/17.0.3/clangd_17.0.3/bin/clangd",
+  "clangd.path": "/home/rpb/.config/Code/User/globalStorage/llvm-vs-code-extensions.vscode-clangd/install/18.1.3/clangd_18.1.3/bin/clangd",
   "clangd.arguments": [
     ],
-  "C_Cpp.autocomplete": "Disabled",
-  "C_Cpp.formatting": "Disabled",
-  "C_Cpp.errorSquiggles": "Disabled",
-  "C_Cpp.intelliSenseEngine": "Disabled",
+  "C_Cpp.autocomplete": "disabled",
+  "C_Cpp.formatting": "disabled",
+  "C_Cpp.errorSquiggles": "disabled",
+  "C_Cpp.intelliSenseEngine": "disabled",
   "C_Cpp.default.intelliSenseMode": "clang-x64",
-  "C_Cpp.codeAnalysis.runAutomatically": "false",
+  "C_Cpp.codeAnalysis.runAutomatically": false,
   "editor.tabSize": 2,
   "files.associations": {
     "*.ipp": "cpp"
   },
-  "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json"
+  "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
+  "clangd.checkUpdates": true
 }
