@@ -80,8 +80,8 @@ void ChooseLegs( // throw Chain exceptions
   const double strikeShort( chainVertical.Call_Atm( priceUnderlying ) ); // ATM
   const double strikeLong(  chainVertical.Call_Otm( strikeShort ) );     // ATM + 1
 
-  fLegSelected( strikeShort, citerChainVertical->first, chainVertical.GetIQFeedNameCall( strikeShort ) );
   fLegSelected( strikeLong,  citerChainVertical->first, chainVertical.GetIQFeedNameCall( strikeLong ) );
+  fLegSelected( strikeShort, citerChainVertical->first, chainVertical.GetIQFeedNameCall( strikeShort ) );
 }
 
 void FillLegNote( size_t ix, ComboTraits::EMarketDirection direction, LegNote::values_t& values ) {
@@ -204,15 +204,15 @@ namespace { // anonymous
   // TOOD: update leg types to reflect adjustements suggested in book Profiting from Weekly Options
 
   static const rLegDef_t c_rLegDef = { // rising momentum - bull put - buy side
-    LegDef( 1, LegNote::Type::Long,  LegNote::Side::Long,  LegNote::Option::Put )
-  , LegDef( 1, LegNote::Type::Short, LegNote::Side::Short, LegNote::Option::Put )
+    LegDef( 1, LegNote::Type::Short, LegNote::Side::Short, LegNote::Option::Put )
+  , LegDef( 1, LegNote::Type::Long,  LegNote::Side::Long,  LegNote::Option::Put )
   };
 
   using mapLegDev_t = std::map<LegNote::Type, size_t>; // lookup into array
 
   static const mapLegDev_t mapLegDef = {
-    { LegNote::Type::Long,  0 }
-  , { LegNote::Type::Short, 1 }
+    { LegNote::Type::Short, 0 }
+  , { LegNote::Type::Long,  1 }
   };
 
 } // namespace anon
