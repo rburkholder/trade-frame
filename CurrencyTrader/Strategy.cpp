@@ -467,6 +467,12 @@ void Strategy::RunState( TrackOrder& to ) {
     case TrackOrder::ETradeState::ExitSubmitted:
       // wait for execution
       break;
+    case TrackOrder::ETradeState::Cancelling:
+      assert( false ); // 
+      break;
+    case TrackOrder::ETradeState::Cancelled:
+      assert( false );
+      break;
     case TrackOrder::ETradeState::NoTrade:
       break;
     case TrackOrder::ETradeState::EndOfDayCancel:
