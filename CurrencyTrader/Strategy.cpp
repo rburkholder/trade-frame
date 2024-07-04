@@ -468,16 +468,16 @@ void Strategy::RunState( TrackOrder& to ) {
       // wait for execution
       break;
     case TrackOrder::ETradeState::Cancelling:
-      assert( false ); // 
+      //assert( false ); wait for state to clear, will it clear?
       break;
     case TrackOrder::ETradeState::Cancelled:
-      assert( false );
-      break;
-    case TrackOrder::ETradeState::NoTrade:
+      assert( false ); // is it legal to arrive here?
       break;
     case TrackOrder::ETradeState::EndOfDayCancel:
       break;
     case TrackOrder::ETradeState::EndOfDayNeutral:
+      break;
+    case TrackOrder::ETradeState::NoTrade:
       break;
     case TrackOrder::ETradeState::Done:
       break;
