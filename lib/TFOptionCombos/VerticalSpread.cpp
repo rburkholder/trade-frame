@@ -246,6 +246,7 @@ void FillLegNote( size_t ix, ComboTraits::EMarketDirection direction, LegNote::v
 
   assert( ix < c_nLegs );
 
+  values.m_algo = LegNote::Algo::Unknown;
   values.m_state = LegNote::State::Open;
   values.m_lock = false;
 
