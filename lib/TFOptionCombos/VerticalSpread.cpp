@@ -90,7 +90,7 @@ void FillLegNote( size_t ix, ComboTraits::EMarketDirection direction, LegNote::v
 
   values.m_algo = LegNote::Algo::Unknown;
   values.m_state = LegNote::State::Open;
-  values.m_lock = false;
+  values.m_lock = true;
 
   values.m_algo = LegNote::Algo::BearCall;
   values.m_momentum = LegNote::Momentum::Fall;
@@ -248,7 +248,7 @@ void FillLegNote( size_t ix, ComboTraits::EMarketDirection direction, LegNote::v
 
   values.m_algo = LegNote::Algo::Unknown;
   values.m_state = LegNote::State::Open;
-  values.m_lock = false;
+  values.m_lock = true;
 
   values.m_algo = LegNote::Algo::BullPut;
   values.m_momentum = LegNote::Momentum::Rise;
