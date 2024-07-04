@@ -580,12 +580,6 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
                 std::cout << "Add Put Collar (flex) for: " << sUnderlying << std::endl;
                 ConstructDefaultStrategy( uws, ou::tf::option::LegNote::Algo::Collar, ou::tf::option::ComboTraits::EMarketDirection::Falling );
               });
-            //pti->AppendMenuItem(
-            //  "Add Collar (locked)",
-            //  [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
-            //    std::cout << "Add Collar (locked) for: " << sUnderlying << std::endl;
-            //    ConstructDefaultStrategy( uws, ManageStrategy::ECombo::locked );
-            //  });
             pti->AppendMenuItem(
               "Add Bullish Credit Spread",
               [this,sUnderlying,&uws]( ou::tf::TreeItem* pti ){
