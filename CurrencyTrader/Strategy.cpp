@@ -31,6 +31,8 @@
 
 #include <boost/log/trivial.hpp>
 
+#include <fmt/core.h>
+
 #include "Strategy.hpp"
 
 Strategy::Strategy()
@@ -230,8 +232,8 @@ void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_
     << ',' << m_pWatch->GetInstrumentName()
     << ',' << "exch_rate=" << exch_rate
     << ',' << "quan=" << m_quantityToOrder
-    << ',' << "interval=" << m_tick
-    << '.' << "quan*tick=" << quan_x_tick
+    << ',' << "interval=" << fmt::format( "{:f}", m_tick )
+    << ',' << "quan*tick=" << quan_x_tick
     << ',' << "first=" << first
     << ',' << "second=" << second // redundant?
     << ',' << "usd=" << m_base_currency_pip
