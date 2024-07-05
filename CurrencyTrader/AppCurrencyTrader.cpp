@@ -27,6 +27,8 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
+#include <fmt/core.h>
+
 #include <wx/menu.h>
 #include <wx/sizer.h>
 #include <wx/splitter.h>
@@ -942,7 +944,7 @@ void AppCurrencyTrader::EnhanceInstrument( pInstrument_t pInstrument ) {
           << ',' << details.contract.conId
           << ',' << details.contract.secType
           << ',' << details.mdSizeMultiplier
-          << ',' << details.minTick
+          << ',' << fmt::format( "{:f}", details.minTick ) 
           << ',' << details.contract.exchange
           << ',' << details.validExchanges
           << ',' << details.timeZoneId
