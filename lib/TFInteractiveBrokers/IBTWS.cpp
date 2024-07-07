@@ -434,13 +434,13 @@ void TWS::RequestContractDetails(
                 std::chrono::time_point<std::chrono::system_clock> finished
                   = std::chrono::system_clock::now();
                 std::chrono::duration<double, std::milli> elapsed = finished - pRequest->dtSubmitted;
-                std::cout
+                BOOST_LOG_TRIVIAL(error)
                   << "IB details failed (timed) id "
                   <<        pRequest->id
                   << "," << pRequest->cntEvictionByTimer
                   << "," << pRequest->pInstrument->GetInstrumentName()
                   << "," << elapsed.count() << "ms"
-                  << std::endl;
+                  ;
                 //m_mapActiveRequests.erase( pRequest->id );
                 vRequestsForEvictionNotify.push_back( pRequest );
               }
@@ -991,18 +991,18 @@ void TWS::error(const int id, const int errorCode, const std::string& errorStrin
   switch ( errorCode ) {
     case 103: // Duplicate order id
         // id is the order number
-      std::cout << "IB error (1) " << id << ", " << errorCode << ", " << errorString << std::endl;
+      BOOST_LOG_TRIVIAL(error) << "IB error (1) " << id << ", " << errorCode << ", " << errorString;
       break;
     case 110: // The price does not conform to the minimum price variation for this contract.
         // id is the order number
         // TODO something like:  OrderManager::GlobalInstance().ReportCancellation( orderId );
-      std::cout << "IB error (2)" << id << ", " << errorCode << ", " << errorString << std::endl;
+      BOOST_LOG_TRIVIAL(error) << "IB error (2)" << id << ", " << errorCode << ", " << errorString;
       break;
     case 202:
-      std::cout << "IB order id " << id << ", " << errorString << std::endl;
+      BOOST_LOG_TRIVIAL(info) << "IB order id " << id << ", " << errorString;
       break;
     case 478:  // IB error (3): 4, 478, Parameters in request conflicts with contract parameters received by contract id: requested currency NZD, in contract USD;
-      std::cout << "IB error (478): order id " << id << ", " << errorString << std::endl;
+      BOOST_LOG_TRIVIAL(info) << "IB error (478): order id " << id << ", " << errorString;
       // TODO cancel the order
       break;
     case 1102: // Connectivity has been restored
@@ -1015,10 +1015,10 @@ void TWS::error(const int id, const int errorCode, const std::string& errorStrin
       break;
     case 2106: //
     case 2158: //
-      std::cout << "IB status " << errorCode << ", " << errorString << std::endl;
+      BOOST_LOG_TRIVIAL(warning) << "IB status " << errorCode << ", " << errorString;
       break;
     default:
-      std::cout << "IB error (3): " << id << ", " << errorCode << ", " << errorString << std::endl;
+      BOOST_LOG_TRIVIAL(error) << "IB error (3): " << id << ", " << errorCode << ", " << errorString;
       break;
   }
 }
@@ -1027,7 +1027,7 @@ void TWS::winError( const std::string& str, int lastError) {
   //m_ss.str("");
   //m_ss << "winerror " << str << ", " << lastError << std::endl;
 //  OutputDebugString( m_ss.str().c_str() );
-  std::cout << "winerror " << str << ", " << lastError << std::endl;
+  BOOST_LOG_TRIVIAL(error) << "winerror " << str << ", " << lastError;
 }
 
 void TWS::updateNewsBulletin(int msgId, int msgType, const std::string& newsMessage, const std::string& originExch) {
@@ -1326,9 +1326,9 @@ void TWS::contractDetailsEnd( const reqId_t reqId ) {
 
     mapActiveRequests_t::iterator iterActiveRequests = m_mapActiveRequests.find( reqId );
     if ( m_mapActiveRequests.end() ==  iterActiveRequests ) {
-      std::cout
+      BOOST_LOG_TRIVIAL(error)
         << "IB request " << reqId << " early eviction **"
-        << std::endl;
+        ;
     }
     else {
 
@@ -1364,7 +1364,7 @@ void TWS::contractDetailsEnd( const reqId_t reqId ) {
       std::chrono::time_point<std::chrono::system_clock> finished
         = std::chrono::system_clock::now();
       std::chrono::duration<double, std::milli> elapsed = finished - dtSubmitted;
-      std::cout << "IB request roundtrip for " << reqId << ": " << elapsed.count() << std::endl;  // 250 - 650 ms (2022/05/24)
+      BOOST_LOG_TRIVIAL(error) << "IB request roundtrip for " << reqId << ": " << elapsed.count();  // 250 - 650 ms (2022/05/24)
     }
   }
 
