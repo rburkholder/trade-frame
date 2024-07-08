@@ -1085,10 +1085,10 @@ void TWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtClos
     // "20111119:CLOSED;20111120:0015-2355,0015-2355"
         // 2018/08/23: now looks like:
         //      20180823:0400-20180823:2000;20180824:0400-20180824:2000;20180825:CLOSED;20180826:CLOSED;...
-    std::string a( what[1].first, what[1].second ); // year
-    std::string b( what[2].first, what[2].second ); // month
-    std::string c( what[3].first, what[3].second ); // day
-    std::string d( what[4].first, what[4].second ); // after :
+    const std::string a( what[1].first, what[1].second ); // year
+    const std::string b( what[2].first, what[2].second ); // month
+    const std::string c( what[3].first, what[3].second ); // day
+    const std::string d( what[4].first, what[4].second ); // after :
     //std::string e( what[5].first, what[5].second );
     //std::string f( what[6].first, what[6].second );
     //std::string g( what[7].first, what[7].second );
@@ -1103,13 +1103,13 @@ void TWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtClos
         throw std::runtime_error( "no time range found" );
       }
       else {
-        std::string i( what[ 1].first, what[ 1].second ); // hour
-        std::string j( what[ 2].first, what[ 2].second ); // minute
-        std::string k( what[ 3].first, what[ 3].second ); // year
-        std::string l( what[ 4].first, what[ 4].second ); // month
-        std::string m( what[ 5].first, what[ 5].second ); // day
-        std::string n( what[ 6].first, what[ 6].second ); // hour
-        std::string o( what[ 7].first, what[ 7].second ); // minute
+        const std::string i( what[ 1].first, what[ 1].second ); // hour
+        const std::string j( what[ 2].first, what[ 2].second ); // minute
+        const std::string k( what[ 3].first, what[ 3].second ); // year
+        const std::string l( what[ 4].first, what[ 4].second ); // month
+        const std::string m( what[ 5].first, what[ 5].second ); // day
+        const std::string n( what[ 6].first, what[ 6].second ); // hour
+        const std::string o( what[ 7].first, what[ 7].second ); // minute
         //std::string p( what[ 8].first, what[ 8].second );
         //std::string q( what[ 9].first, what[ 9].second );
         //std::string r( what[10].first, what[10].second );
@@ -1121,7 +1121,7 @@ void TWS::DecodeMarketHours( const std::string& mh, ptime& dtOpen, ptime& dtClos
           }
         }
         catch (...) {
-          std::cout << "DecodeMarketHours error: " << i << "-" << j << "-" << k << "-" << l << "-" << m << "-" << n << "-" << o << std::endl;
+          BOOST_LOG_TRIVIAL(error) << "DecodeMarketHours error: " << i << "-" << j << "-" << k << "-" << l << "-" << m << "-" << n << "-" << o;
         }
       }
     }
