@@ -38,11 +38,13 @@ ChartEntryShape::ChartEntryShape( EShape eShape, ou::Colour::EColour colour )
 
 // destructor needs to clear out queue first
 ChartEntryShape::~ChartEntryShape() {
+  // run ClearQueue() instead?
   if ( !m_vpChar.empty() ) {
     for ( vpChar_t::iterator iter = m_vpChar.begin(); m_vpChar.end() != iter; ++iter ) {
       delete [] *iter;
     }
   }
+  //ClearQueue(); // redundant?
 }
 
 // in background thread
@@ -102,12 +104,13 @@ bool ChartEntryShape::AddEntryToChart( XYChart* pXY, structChartAttributes* pAtt
 }
 
 void ChartEntryShape::Clear() {
+  // run ClearQueue() instead?
   if ( !m_vpChar.empty() ) {
     for ( vpChar_t::iterator iter = m_vpChar.begin(); m_vpChar.end() != iter; ++iter ) {
       delete [] *iter;
     }
   }
-  ChartEntryPrice::Clear();
+  //ChartEntryPrice::Clear();
 }
 
 } // namespace ou

@@ -243,10 +243,10 @@ void ChartEntryTime::ClearQueue( void ) {
 }
 
 void ChartEntryTime::Clear( void ) {
-  ChartEntryBase::Clear();
+  //ChartEntryBase::Clear();
   m_vDateTime.clear();
   m_vChartTime.clear();
-  ChartEntryBase::Clear();
+  //ChartEntryBase::Clear();
 }
 
 } // namespace ou

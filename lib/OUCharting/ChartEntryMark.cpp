@@ -24,6 +24,7 @@ ChartEntryMark::ChartEntryMark()
 }
 
 ChartEntryMark::~ChartEntryMark() {
+  Clear();
 }
 
 // used in background thread
@@ -72,7 +73,7 @@ bool ChartEntryMark::AddEntryToChart( XYChart* pXY, structChartAttributes* pAttr
 }
 
 void ChartEntryMark::Clear() {
-  ChartEntryBase::Clear();
+  //ChartEntryBase::Clear();
   m_vPrice.clear();
   m_vColour.clear();
   m_vName.clear();

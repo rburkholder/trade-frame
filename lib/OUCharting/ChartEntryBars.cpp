@@ -35,10 +35,7 @@ ChartEntryBars::ChartEntryBars()
 //}
 
 ChartEntryBars::~ChartEntryBars() {
-  m_vOpen.clear();
-  m_vHigh.clear();
-  m_vLow.clear();
-  m_vClose.clear();
+  Clear();
 }
 
 void ChartEntryBars::Reserve( size_type nSize ) {
@@ -121,7 +118,6 @@ void ChartEntryBars::Clear() {
   m_vHigh.clear();
   m_vLow.clear();
   m_vClose.clear();
-  ChartEntryTime::Clear();
 }
 
 } // namespace ou

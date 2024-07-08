@@ -36,6 +36,7 @@ ChartEntryPrice::ChartEntryPrice( ChartEntryPrice&& rhs )
 {}
 
 ChartEntryPrice::~ChartEntryPrice() {
+  ClearQueue();  // clear out prior to m_vDouble disappears.
 }
 
 void ChartEntryPrice::Reserve( size_type nSize ) {
