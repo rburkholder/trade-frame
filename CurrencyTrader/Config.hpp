@@ -43,7 +43,7 @@ struct Choices {
     boost::posix_time::time_duration m_tdStartTime;
     boost::posix_time::time_duration m_tdStopTime;
     std::string m_sTimeZone; // reference: Europe/London is GMT
-    std::uint32_t m_nTradingAmount;
+    uint32_t m_nTradingAmount;
 
     PairSettings()
     : m_tdStartTime( boost::posix_time::not_a_date_time )
@@ -55,7 +55,7 @@ struct Choices {
                 , boost::posix_time::time_duration tdStartTime
                 , boost::posix_time::time_duration tdStopTime
                 , std::string&& sTimeZone
-                , std::uint32_t dblTradingAmount
+                , uint32_t dblTradingAmount
                   )
     : m_sName( std::move( sName ) )
     , m_tdStartTime( tdStartTime ), m_tdStopTime( tdStopTime )
@@ -67,7 +67,7 @@ struct Choices {
                 , const boost::posix_time::time_duration tdStartTime
                 , const boost::posix_time::time_duration tdStopTime
                 , const std::string& sTimeZone
-                , const std::uint32_t m_nTradingAmount
+                , const uint32_t m_nTradingAmount
                   )
     : m_sName( sName )
     , m_tdStartTime( tdStartTime ), m_tdStopTime( tdStopTime )
