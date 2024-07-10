@@ -22,6 +22,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <ostream>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -134,6 +135,9 @@ struct Choices {
   unsigned int m_nPipTrailingStop;
 
   unsigned int m_nBarSeconds;
+
+  using vEmaSeconds_t = std::vector<unsigned int>;
+  vEmaSeconds_t m_vEmaSeconds;
 
 };
 

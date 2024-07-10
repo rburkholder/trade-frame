@@ -48,6 +48,7 @@ namespace {
   static const std::string sChoice_PipStopLoss(     "pip_stop_loss" );
   static const std::string sChoice_PipTrailingStop( "pip_trailing_stop" );
   static const std::string sChoice_BarSeconds(      "bar_seconds" );
+  static const std::string sChoice_EmaSeconds(      "ema_seconds" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bRequired, T& dest ) {
@@ -175,6 +176,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       ( sChoice_PipTrailingStop.c_str(), po::value<unsigned int>( &choices.m_nPipTrailingStop )->default_value( 0 ), "pip trailing stop" )
 
       ( sChoice_BarSeconds.c_str(), po::value<unsigned int>( &choices.m_nBarSeconds )->default_value( 15 * 60 ), "trading bar width (seconds)" )
+
+      ( sChoice_EmaSeconds.c_str(), po::value<Choices::vEmaSeconds_t>()->required(), "ema (seconds)" )
       ;
     po::variables_map vm;
 
@@ -225,6 +228,14 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       bOk &= parse<typeof choices.m_nPipTrailingStop>( sFileName, vm, sChoice_PipTrailingStop, true, choices.m_nPipTrailingStop );
 
       bOk &= parse<typeof choices.m_nBarSeconds>( sFileName, vm, sChoice_BarSeconds, true, choices.m_nBarSeconds );
+      //bOk &= parse<typeof choices.m_vEmaSeconds>( sFileName, vm, sChoice_EmaSeconds, false, choices.m_vEmaSeconds );
+
+      if ( 0 < vm.count( sChoice_BarSeconds.c_str() ) ) {
+        choices.m_vEmaSeconds = vm[sChoice_EmaSeconds.c_str()].as<Choices::vEmaSeconds_t>();
+        for ( const Choices::vEmaSeconds_t::value_type& value: choices.m_vEmaSeconds ) {
+          BOOST_LOG_TRIVIAL(info) << sChoice_EmaSeconds << " = " << value;
+        }
+      }
     }
 
   }
