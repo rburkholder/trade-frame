@@ -164,8 +164,9 @@ private:
 
     bool bBootStrapped;
 
-    double dblCoef1; // smaller - used on arriving value
-    double dblCoef2; // 1 - dblCoef1 (larger), used on prior ema
+    const double dblCoef1; // smaller - used on arriving value
+    const double dblCoef2; // 1 - dblCoef1 (larger), used on prior ema
+
     double dblEmaLatest;
     unsigned int ixSlot;
 
@@ -174,9 +175,9 @@ private:
 
     EMA( unsigned int nIntervals, ou::ChartDataView& cdv, unsigned int ixSlot_ )
     : bBootStrapped( false ), dblEmaLatest {}, m_cdv( cdv ), ixSlot( ixSlot_ )
+    , dblCoef1( 2.0 / ( nIntervals + 1 ) )
+    , dblCoef2( 1.0 - dblCoef1 )
     {
-      dblCoef1 = 2.0 / ( nIntervals + 1 );
-      dblCoef2 = 1.0 - dblCoef1;
       m_cdv.Add( ixSlot, &m_ceEma );
     }
 
