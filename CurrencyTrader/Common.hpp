@@ -21,5 +21,30 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 // is base currency the first or second part of a pair, eg, usd.cad
 enum class EBase { Unknown, First, Second };
+
+namespace config { // matches Config.hpp
+
+struct Strategy {
+
+  std::string m_sMaxTradeLifeTime; // minutes
+  boost::posix_time::time_duration m_tdMaxTradeLifeTime;
+
+  unsigned int m_nPipProfit;
+  unsigned int m_nPipStopLoss;
+  unsigned int m_nPipTrailingStop;
+
+  unsigned int m_nBarSeconds;
+
+  using vEmaSeconds_t = std::vector<unsigned int>;
+  vEmaSeconds_t m_vEmaSeconds;
+
+};
+
+}

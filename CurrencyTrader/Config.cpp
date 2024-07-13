@@ -169,15 +169,15 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
       ( sOption_IbInstance.c_str(), po::value<int>( &choices.m_nIbInstance )->default_value( 1 ), "IB instance" )
 
-      ( sChoice_MaxLifeTime.c_str(),   po::value<std::string>( &choices.m_sMaxTradeLifeTime ), "max life time HH:mm:ss" )
+      ( sChoice_MaxLifeTime.c_str(),   po::value<std::string>( &choices.m_strategy.m_sMaxTradeLifeTime ), "max life time HH:mm:ss" )
 
-      ( sChoice_PipProfit.c_str(), po::value<unsigned int>( &choices.m_nPipProfit ), "pip profit taking" )
-      ( sChoice_PipStopLoss.c_str(), po::value<unsigned int>( &choices.m_nPipStopLoss ), "pip stop loss" )
-      ( sChoice_PipTrailingStop.c_str(), po::value<unsigned int>( &choices.m_nPipTrailingStop )->default_value( 0 ), "pip trailing stop" )
+      ( sChoice_PipProfit.c_str(), po::value<unsigned int>( &choices.m_strategy.m_nPipProfit ), "pip profit taking" )
+      ( sChoice_PipStopLoss.c_str(), po::value<unsigned int>( &choices.m_strategy.m_nPipStopLoss ), "pip stop loss" )
+      ( sChoice_PipTrailingStop.c_str(), po::value<unsigned int>( &choices.m_strategy.m_nPipTrailingStop )->default_value( 0 ), "pip trailing stop" )
 
-      ( sChoice_BarSeconds.c_str(), po::value<unsigned int>( &choices.m_nBarSeconds )->default_value( 15 * 60 ), "trading bar width (seconds)" )
+      ( sChoice_BarSeconds.c_str(), po::value<unsigned int>( &choices.m_strategy.m_nBarSeconds )->default_value( 15 * 60 ), "trading bar width (seconds)" )
 
-      ( sChoice_EmaSeconds.c_str(), po::value<Choices::vEmaSeconds_t>()->required(), "ema (seconds)" )
+      ( sChoice_EmaSeconds.c_str(), po::value<Strategy::vEmaSeconds_t>()->required(), "ema (seconds)" )
       ;
     po::variables_map vm;
 
@@ -220,19 +220,19 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
       bOk &= parse<typeof choices.m_nIbInstance>( sFileName, vm, sOption_IbInstance, true, choices.m_nIbInstance );
 
-      bOk &= parse<typeof choices.m_sMaxTradeLifeTime>( sFileName, vm, sChoice_MaxLifeTime, true, choices.m_sMaxTradeLifeTime );
-      choices.m_tdMaxTradeLifeTime = boost::posix_time::duration_from_string( choices.m_sMaxTradeLifeTime );
+      bOk &= parse<typeof choices.m_strategy.m_sMaxTradeLifeTime>( sFileName, vm, sChoice_MaxLifeTime, true, choices.m_strategy.m_sMaxTradeLifeTime );
+      choices.m_strategy.m_tdMaxTradeLifeTime = boost::posix_time::duration_from_string( choices.m_strategy.m_sMaxTradeLifeTime );
 
-      bOk &= parse<typeof choices.m_nPipProfit>( sFileName, vm, sChoice_PipProfit, true, choices.m_nPipProfit );
-      bOk &= parse<typeof choices.m_nPipStopLoss>( sFileName, vm, sChoice_PipStopLoss, true, choices.m_nPipStopLoss );
-      bOk &= parse<typeof choices.m_nPipTrailingStop>( sFileName, vm, sChoice_PipTrailingStop, true, choices.m_nPipTrailingStop );
+      bOk &= parse<typeof choices.m_strategy.m_nPipProfit>( sFileName, vm, sChoice_PipProfit, true, choices.m_strategy.m_nPipProfit );
+      bOk &= parse<typeof choices.m_strategy.m_nPipStopLoss>( sFileName, vm, sChoice_PipStopLoss, true, choices.m_strategy.m_nPipStopLoss );
+      bOk &= parse<typeof choices.m_strategy.m_nPipTrailingStop>( sFileName, vm, sChoice_PipTrailingStop, true, choices.m_strategy.m_nPipTrailingStop );
 
-      bOk &= parse<typeof choices.m_nBarSeconds>( sFileName, vm, sChoice_BarSeconds, true, choices.m_nBarSeconds );
+      bOk &= parse<typeof choices.m_strategy.m_nBarSeconds>( sFileName, vm, sChoice_BarSeconds, true, choices.m_strategy.m_nBarSeconds );
       //bOk &= parse<typeof choices.m_vEmaSeconds>( sFileName, vm, sChoice_EmaSeconds, false, choices.m_vEmaSeconds );
 
       if ( 0 < vm.count( sChoice_EmaSeconds.c_str() ) ) {
-        choices.m_vEmaSeconds = std::move( vm[ sChoice_EmaSeconds.c_str() ].as<Choices::vEmaSeconds_t>() );
-        for ( const Choices::vEmaSeconds_t::value_type& value: choices.m_vEmaSeconds ) {
+        choices.m_strategy.m_vEmaSeconds = std::move( vm[ sChoice_EmaSeconds.c_str() ].as<Strategy::vEmaSeconds_t>() );
+        for ( const Strategy::vEmaSeconds_t::value_type& value: choices.m_strategy.m_vEmaSeconds ) {
           BOOST_LOG_TRIVIAL(info) << sChoice_EmaSeconds << " = " << value;
         }
       }

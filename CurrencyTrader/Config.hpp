@@ -27,6 +27,8 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#include "Common.hpp"
+
 namespace config {
 
 struct CurrencyPair {
@@ -123,20 +125,10 @@ struct Choices {
   std::string m_sExchange;
   int m_nIbInstance; // Interactive Brokers api instance
 
-  std::string m_sMaxTradeLifeTime; // minutes
-  boost::posix_time::time_duration m_tdMaxTradeLifeTime;
-
-  unsigned int m_nPipProfit;
-  unsigned int m_nPipStopLoss;
-  unsigned int m_nPipTrailingStop;
-
   std::string m_sHdf5File; // optional
   std::string m_sHdf5SimSet; // run simulation if present
 
-  unsigned int m_nBarSeconds;
-
-  using vEmaSeconds_t = std::vector<unsigned int>;
-  vEmaSeconds_t m_vEmaSeconds;
+  Strategy m_strategy;
 
   using vCurrencyPair_t = std::vector<CurrencyPair>;
   vCurrencyPair_t m_vCurrencyPair;
