@@ -588,6 +588,13 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
 
 }
 
+void Strategy::EmitSwingTrack() {
+  BOOST_LOG_TRIVIAL(info)
+    << m_pWatch->GetInstrumentName()
+    << " swing bar state (tbd)"
+  ;
+}
+
 bool Strategy::HandleSoftwareReset( boost::gregorian::date, boost::posix_time::time_duration ) {
   // validated by external call when available
   // clean up, clear out, start new statistics?

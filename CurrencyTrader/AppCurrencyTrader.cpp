@@ -538,6 +538,7 @@ bool AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
 
   vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionCloseAndDone ) ) );
   vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSaveValues ) ) );
+  vItems.push_back( new mi( "Emit Swing Track", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionEmitSwingTrack ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   return true;
@@ -664,9 +665,12 @@ void AppCurrencyTrader::HandleSimComplete() {
 
 void AppCurrencyTrader::HandleMenuActionCloseAndDone() {
   std::cout << "Closing & Done" << std::endl;
-  for ( mapPair_t::value_type& vt: m_mapPair ) {
-    vt.second.pStrategy->CloseAndDone();
-  }
+  CallAfter(
+    [this](){
+      for ( mapPair_t::value_type& vt: m_mapPair ) {
+        vt.second.pStrategy->CloseAndDone();
+      }
+    } );
 }
 
 void AppCurrencyTrader::HandleMenuActionSaveValues() {
@@ -686,6 +690,16 @@ void AppCurrencyTrader::HandleMenuActionSaveValues() {
       std::cout << "  ... Done " << std::endl;
     }
   );
+}
+
+void AppCurrencyTrader::HandleMenuActionEmitSwingTrack() {
+  std::cout << "Emit Swing Track" << std::endl;
+  CallAfter(
+    [this](){
+      for ( mapPair_t::value_type& vt: m_mapPair ) {
+        vt.second.pStrategy->EmitSwingTrack();
+      }
+    } );
 }
 
 void AppCurrencyTrader::ConfirmProviders() {

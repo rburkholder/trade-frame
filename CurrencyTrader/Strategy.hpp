@@ -72,6 +72,8 @@ public:
   void CloseAndDone();
   void SetResetSoftware( fResetSoftware_t&& f ) { m_fResetSoftware = std::move( f ); }
 
+  void EmitSwingTrack();
+
   struct latest_t {
     const double bid;
     const double ask;
@@ -278,6 +280,8 @@ private:
 
   using rSwing_t = std::array<Swing, 5>;
   rSwing_t m_rSwing;
+
+  // TODO: need to track volume to enhance the signal change
 
   bool SwingBarState( const Swing::EBarState ) const;
 

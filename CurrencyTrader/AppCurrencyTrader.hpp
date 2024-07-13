@@ -232,6 +232,7 @@ private:
 
   void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();
+  void HandleMenuActionEmitSwingTrack();
 
   void SaveState();
   void LoadState();
