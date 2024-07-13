@@ -283,8 +283,6 @@ private:
 
   // TODO: need to track volume to enhance the signal change
 
-  bool SwingBarState( const Swing::EBarState ) const;
-
   struct SwingTrack {
 
     boost::posix_time::ptime dtComputed;

@@ -320,17 +320,6 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   m_state.swing = State::Swing::none;
 }
 
-bool Strategy::SwingBarState( const Swing::EBarState eBarState ) const {
-  // unused, eliminated too many signals
-  return
-       ( eBarState == m_rSwing[4].eBarState )
-    && ( eBarState == m_rSwing[3].eBarState )
-    && ( eBarState == m_rSwing[2].eBarState )
-    && ( eBarState == m_rSwing[1].eBarState )
-    && ( eBarState == m_rSwing[0].eBarState )
-    ;
-}
-
 void Strategy::RunState( TrackOrder& to ) {
   switch ( to.m_stateTrade ) {
     case TrackOrder::ETradeState::Init: // Strategy starts in this state
