@@ -35,7 +35,7 @@
 
 #include "Strategy.hpp"
 
-Strategy::Strategy()
+Strategy::Strategy( const config::Strategy& )
 : DailyTradeTimeFrame<Strategy>()
 , m_eBaseCurrency( EBase::Unknown )
 , m_quantityToOrder {}

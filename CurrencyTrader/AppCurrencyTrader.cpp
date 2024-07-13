@@ -252,7 +252,7 @@ void AppCurrencyTrader::ConstructStrategyList() {
     if ( m_mapPair.end() == iterPair ) {
 
       assert( 0 < ps.m_nTradingAmount );
-      pStrategy_t pStrategy = std::make_unique<Strategy>();
+      pStrategy_t pStrategy = std::make_unique<Strategy>( m_choices.m_strategy );
       pStrategy->SetTransaction(
         ps.m_nTradingAmount,
         [this](ou::tf::Currency::ECurrency src, double debit,

@@ -62,7 +62,7 @@ public:
 
   using fTransferFunds_t = TrackOrder::fTransferFunds_t;
 
-  Strategy();
+  Strategy( const config::Strategy& );
   ~Strategy();
 
   void SetTransaction( ou::tf::Order::quantity_t, fTransferFunds_t&& );
