@@ -99,7 +99,7 @@ void Strategy::Init( const config::Strategy& config ) {
 
   // supplied by 1 second mid-quote
   size_t ix {};
-  for ( const auto seconds: config.m_vEmaSeconds ) {
+  for ( const auto seconds: config.m_vSmootherSeconds ) {
     pSmoother_t p = std::make_unique<Smoother>( seconds, m_cdv, EChartSlot::Price );
     assert( ix < sizeof( colour ) );
     p->Set( colour[ ix ], "Smoother" + fmt::format( "{}", ix ) );

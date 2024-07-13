@@ -48,7 +48,7 @@ namespace {
   static const std::string sChoice_PipStopLoss(     "pip_stop_loss" );
   static const std::string sChoice_PipTrailingStop( "pip_trailing_stop" );
   static const std::string sChoice_BarSeconds(      "bar_seconds" );
-  static const std::string sChoice_EmaSeconds(      "ema_seconds" );
+  static const std::string sChoice_SmootherSeconds( "smoother_seconds" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bRequired, T& dest ) {
@@ -177,7 +177,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
       ( sChoice_BarSeconds.c_str(), po::value<unsigned int>( &choices.m_strategy.m_nBarSeconds )->default_value( 15 * 60 ), "trading bar width (seconds)" )
 
-      ( sChoice_EmaSeconds.c_str(), po::value<Strategy::vEmaSeconds_t>()->required(), "ema (seconds)" )
+      ( sChoice_SmootherSeconds.c_str(), po::value<Strategy::vSmootherSeconds_t>()->required(), "smoother (seconds)" )
       ;
     po::variables_map vm;
 
@@ -230,10 +230,10 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       bOk &= parse<typeof choices.m_strategy.m_nBarSeconds>( sFileName, vm, sChoice_BarSeconds, true, choices.m_strategy.m_nBarSeconds );
       //bOk &= parse<typeof choices.m_vEmaSeconds>( sFileName, vm, sChoice_EmaSeconds, false, choices.m_vEmaSeconds );
 
-      if ( 0 < vm.count( sChoice_EmaSeconds.c_str() ) ) {
-        choices.m_strategy.m_vEmaSeconds = std::move( vm[ sChoice_EmaSeconds.c_str() ].as<Strategy::vEmaSeconds_t>() );
-        for ( const Strategy::vEmaSeconds_t::value_type& value: choices.m_strategy.m_vEmaSeconds ) {
-          BOOST_LOG_TRIVIAL(info) << sChoice_EmaSeconds << " = " << value;
+      if ( 0 < vm.count( sChoice_SmootherSeconds.c_str() ) ) {
+        choices.m_strategy.m_vSmootherSeconds = std::move( vm[ sChoice_SmootherSeconds.c_str() ].as<Strategy::vSmootherSeconds_t>() );
+        for ( const Strategy::vSmootherSeconds_t::value_type& value: choices.m_strategy.m_vSmootherSeconds ) {
+          BOOST_LOG_TRIVIAL(info) << sChoice_SmootherSeconds << " = " << value;
         }
       }
     }

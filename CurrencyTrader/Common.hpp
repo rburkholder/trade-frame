@@ -42,8 +42,8 @@ struct Strategy {
 
   unsigned int m_nBarSeconds;
 
-  using vEmaSeconds_t = std::vector<unsigned int>;
-  vEmaSeconds_t m_vEmaSeconds;
+  using vSmootherSeconds_t = std::vector<unsigned int>;
+  vSmootherSeconds_t m_vSmootherSeconds;
 
 };
 
