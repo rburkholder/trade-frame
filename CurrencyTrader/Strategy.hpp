@@ -206,8 +206,8 @@ private:
   };
 
   using pSmoother_t = std::unique_ptr<Smoother>;
-  pSmoother_t m_pSmootherCurrency1;
-  pSmoother_t m_pSmootherCurrency2;
+  using vSmoother_t = std::vector<pSmoother_t>;
+  vSmoother_t m_vSmootherCurrency;
 
   struct TR { // True Range
 
@@ -344,7 +344,7 @@ private:
 
   fResetSoftware_t m_fResetSoftware;
 
-  void Init();
+  void Init( const config::Strategy& );
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

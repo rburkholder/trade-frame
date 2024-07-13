@@ -35,7 +35,7 @@
 
 #include "Strategy.hpp"
 
-Strategy::Strategy( const config::Strategy& )
+Strategy::Strategy( const config::Strategy& config )
 : DailyTradeTimeFrame<Strategy>()
 , m_eBaseCurrency( EBase::Unknown )
 , m_quantityToOrder {}
@@ -50,10 +50,10 @@ Strategy::Strategy( const config::Strategy& )
 , m_dblCommission {}
 , m_fResetSoftware( nullptr )
 {
-  Init();
+  Init( config );
 }
 
-void Strategy::Init() {
+void Strategy::Init( const config::Strategy& config ) {
 
   m_ceQuoteAsk.SetName( "Ask" );
   m_ceTrade.SetName(    "Tick" );
@@ -90,12 +90,22 @@ void Strategy::Init() {
   m_cdv.Add( EChartSlot::TR_EMA, &m_ceTradingRangeRising );
   m_cdv.Add( EChartSlot::TR_EMA, &m_ceTradingRangeFalling );
 
-  // supplied by 1 second mid-quote
-  m_pSmootherCurrency1 = std::make_unique<Smoother>( 90, m_cdv, EChartSlot::Price );
-  m_pSmootherCurrency1->Set( ou::Colour::Purple, "Price Smoother1" );
+  static const ou::Colour::EColour colour[] = {
+    ou::Colour::Purple
+  , ou::Colour::HotPink
+  , ou::Colour::DarkOrange
+  , ou::Colour::DarkCyan
+  };
 
-  m_pSmootherCurrency2 = std::make_unique<Smoother>( 5 * 60, m_cdv, EChartSlot::Price );
-  m_pSmootherCurrency2->Set( ou::Colour::HotPink, "Price Smoother2" );
+  // supplied by 1 second mid-quote
+  size_t ix {};
+  for ( const auto seconds: config.m_vEmaSeconds ) {
+    pSmoother_t p = std::make_unique<Smoother>( seconds, m_cdv, EChartSlot::Price );
+    assert( ix < sizeof( colour ) );
+    p->Set( colour[ ix ], "Smoother" + fmt::format( "{}", ix ) );
+    m_vSmootherCurrency.emplace_back( std::move( p ) );
+    ix++;
+  }
 
   // supplied by 1 minute trade bar
   m_pATRFast = std::make_unique<Smoother>( 3, m_cdv, EChartSlot::ATR );
@@ -122,8 +132,8 @@ Strategy::~Strategy() {
 
   m_pATRFast.reset();
   m_pATRSlow.reset();
-  m_pSmootherCurrency1.reset();
-  m_pSmootherCurrency2.reset();
+
+  m_vSmootherCurrency.clear();
 
   m_cdv.Clear();
 }
@@ -508,10 +518,10 @@ void Strategy::HandleAtRHClose( boost::gregorian::date date, boost::posix_time::
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
-  assert( m_pSmootherCurrency1 );
-  assert( m_pSmootherCurrency2 );
-  m_pSmootherCurrency1->Update( bar.DateTime(), bar.Close() );
-  m_pSmootherCurrency2->Update( bar.DateTime(), bar.Close() );
+  for ( pSmoother_t& p: m_vSmootherCurrency ) {
+    p->Update( bar.DateTime(), bar.Close() );
+  }
+
   TimeTick( bar );
 }
 
@@ -532,7 +542,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
   Swing& d( m_rSwing[ 3 ] );
   Swing& e( m_rSwing[ 4 ] );
 
-  a = b; b = c; c = d; d = e; e.Update( bar, m_pSmootherCurrency1->dblLatest );
+  a = b; b = c; c = d; d = e; e.Update( bar, m_vSmootherCurrency.front()->dblLatest );
 
   { // highest point
     const double x = a.hi > b.hi ? a.hi : b.hi;
