@@ -230,8 +230,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       bOk &= parse<typeof choices.m_nBarSeconds>( sFileName, vm, sChoice_BarSeconds, true, choices.m_nBarSeconds );
       //bOk &= parse<typeof choices.m_vEmaSeconds>( sFileName, vm, sChoice_EmaSeconds, false, choices.m_vEmaSeconds );
 
-      if ( 0 < vm.count( sChoice_BarSeconds.c_str() ) ) {
-        choices.m_vEmaSeconds = vm[sChoice_EmaSeconds.c_str()].as<Choices::vEmaSeconds_t>();
+      if ( 0 < vm.count( sChoice_EmaSeconds.c_str() ) ) {
+        choices.m_vEmaSeconds = std::move( vm[ sChoice_EmaSeconds.c_str() ].as<Choices::vEmaSeconds_t>() );
         for ( const Choices::vEmaSeconds_t::value_type& value: choices.m_vEmaSeconds ) {
           BOOST_LOG_TRIVIAL(info) << sChoice_EmaSeconds << " = " << value;
         }
