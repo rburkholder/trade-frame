@@ -91,18 +91,18 @@ void Strategy::Init() {
   m_cdv.Add( EChartSlot::TR_EMA, &m_ceTradingRangeFalling );
 
   // supplied by 1 second mid-quote
-  m_pEmaCurrency1 = std::make_unique<EMA>( 90, m_cdv, EChartSlot::Price );
-  m_pEmaCurrency1->Set( ou::Colour::Purple, "Price EMA1" );
+  m_pSmootherCurrency1 = std::make_unique<Smoother>( 90, m_cdv, EChartSlot::Price );
+  m_pSmootherCurrency1->Set( ou::Colour::Purple, "Price Smoother1" );
 
-  m_pEmaCurrency2 = std::make_unique<EMA>( 5 * 60, m_cdv, EChartSlot::Price );
-  m_pEmaCurrency2->Set( ou::Colour::HotPink, "Price EMA2" );
+  m_pSmootherCurrency2 = std::make_unique<Smoother>( 5 * 60, m_cdv, EChartSlot::Price );
+  m_pSmootherCurrency2->Set( ou::Colour::HotPink, "Price Smoother2" );
 
   // supplied by 1 minute trade bar
-  m_pATRFast = std::make_unique<EMA>( 3, m_cdv, EChartSlot::ATR );
+  m_pATRFast = std::make_unique<Smoother>( 3, m_cdv, EChartSlot::ATR );
   m_pATRFast->Set( ou::Colour::Blue, "ATR Fast" );
 
   // supplied by 1 minute trade bar
-  m_pATRSlow = std::make_unique<EMA>( 14, m_cdv, EChartSlot::ATR );
+  m_pATRSlow = std::make_unique<Smoother>( 14, m_cdv, EChartSlot::ATR );
   m_pATRSlow->Set( ou::Colour::Crimson, "ATR Slow" );
 
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
@@ -122,8 +122,8 @@ Strategy::~Strategy() {
 
   m_pATRFast.reset();
   m_pATRSlow.reset();
-  m_pEmaCurrency1.reset();
-  m_pEmaCurrency2.reset();
+  m_pSmootherCurrency1.reset();
+  m_pSmootherCurrency2.reset();
 
   m_cdv.Clear();
 }
@@ -508,10 +508,10 @@ void Strategy::HandleAtRHClose( boost::gregorian::date date, boost::posix_time::
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
-  assert( m_pEmaCurrency1 );
-  assert( m_pEmaCurrency2 );
-  m_pEmaCurrency1->Update( bar.DateTime(), bar.Close() );
-  m_pEmaCurrency2->Update( bar.DateTime(), bar.Close() );
+  assert( m_pSmootherCurrency1 );
+  assert( m_pSmootherCurrency2 );
+  m_pSmootherCurrency1->Update( bar.DateTime(), bar.Close() );
+  m_pSmootherCurrency2->Update( bar.DateTime(), bar.Close() );
   TimeTick( bar );
 }
 
@@ -532,7 +532,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
   Swing& d( m_rSwing[ 3 ] );
   Swing& e( m_rSwing[ 4 ] );
 
-  a = b; b = c; c = d; d = e; e.Update( bar, m_pEmaCurrency1->dblEmaLatest );
+  a = b; b = c; c = d; d = e; e.Update( bar, m_pSmootherCurrency1->dblLatest );
 
   { // highest point
     const double x = a.hi > b.hi ? a.hi : b.hi;

@@ -160,54 +160,54 @@ private:
   TrackOrder m_to_up;
   TrackOrder m_to_dn;
 
-  struct EMA { // Exponential Moving Average
+  struct Smoother { // Exponential Moving Average
 
     bool bBootStrapped;
 
     const double dblCoef1; // smaller - used on arriving value
     const double dblCoef2; // 1 - dblCoef1 (larger), used on prior ema
 
-    double dblEmaLatest;
+    double dblLatest;
     unsigned int ixSlot;
 
-    ou::ChartEntryIndicator m_ceEma;
+    ou::ChartEntryIndicator m_ce;
     ou::ChartDataView& m_cdv;
 
-    EMA( unsigned int nIntervals, ou::ChartDataView& cdv, unsigned int ixSlot_ )
-    : bBootStrapped( false ), dblEmaLatest {}, m_cdv( cdv ), ixSlot( ixSlot_ )
+    Smoother( unsigned int nIntervals, ou::ChartDataView& cdv, unsigned int ixSlot_ )
+    : bBootStrapped( false ), dblLatest {}, m_cdv( cdv ), ixSlot( ixSlot_ )
     , dblCoef1( 2.0 / ( nIntervals + 1 ) )
     , dblCoef2( 1.0 - dblCoef1 )
     {
-      m_cdv.Add( ixSlot, &m_ceEma );
+      m_cdv.Add( ixSlot, &m_ce );
     }
 
-    ~EMA() {
-      m_cdv.Remove( ixSlot, &m_ceEma );
+    ~Smoother() {
+      m_cdv.Remove( ixSlot, &m_ce );
     }
 
     void Set( ou::Colour::EColour colour, const std::string& sName ) {
-      m_ceEma.SetName( sName );
-      m_ceEma.SetColour( colour );
+      m_ce.SetName( sName );
+      m_ce.SetColour( colour );
     }
 
     double Update( boost::posix_time::ptime dt, double value ) {
 
       if ( bBootStrapped ) {
-        dblEmaLatest = ( dblCoef1 * value ) + ( dblCoef2 * dblEmaLatest );
+        dblLatest = ( dblCoef1 * value ) + ( dblCoef2 * dblLatest );
       }
       else {
         bBootStrapped = true;
-        dblEmaLatest = value;
+        dblLatest = value;
       }
 
-      m_ceEma.Append( dt, dblEmaLatest );
-      return dblEmaLatest;
+      m_ce.Append( dt, dblLatest );
+      return dblLatest;
     }
   };
 
-  using pEMA_t = std::unique_ptr<EMA>;
-  pEMA_t m_pEmaCurrency1;
-  pEMA_t m_pEmaCurrency2;
+  using pSmoother_t = std::unique_ptr<Smoother>;
+  pSmoother_t m_pSmootherCurrency1;
+  pSmoother_t m_pSmootherCurrency2;
 
   struct TR { // True Range
 
@@ -239,10 +239,10 @@ private:
   };
 
   TR m_TRFast;
-  pEMA_t m_pATRFast;
+  pSmoother_t m_pATRFast;
 
   TR m_TRSlow;
-  pEMA_t m_pATRSlow;
+  pSmoother_t m_pATRSlow;
 
   struct Swing {
 
