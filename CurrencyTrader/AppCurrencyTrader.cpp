@@ -245,7 +245,7 @@ void AppCurrencyTrader::ConstructStrategyList() {
       ;
   }
 
-  for ( config::Choices::PairSettings& ps: m_choices.m_vPairSettings ) {
+  for ( config::CurrencyPair& ps: m_choices.m_vCurrencyPair ) {
 
     const ou::tf::Instrument::idInstrument_t& idInstrument( ps.m_sName );
     mapPair_t::iterator iterPair = m_mapPair.find( idInstrument );
@@ -704,7 +704,7 @@ void AppCurrencyTrader::ConfirmProviders() {
 
         ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
 
-        for ( const config::Choices::vPairSettings_t::value_type& ps: m_choices.m_vPairSettings ) {
+        for ( const config::Choices::vCurrencyPair_t::value_type& ps: m_choices.m_vCurrencyPair ) {
           pInstrument_t pInstrument;
           pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderUserBase, ps.m_sName );
           if ( pInstrument ) { // skip the build
@@ -944,7 +944,7 @@ void AppCurrencyTrader::EnhanceInstrument( pInstrument_t pInstrument ) {
           << ',' << details.contract.conId
           << ',' << details.contract.secType
           << ',' << details.mdSizeMultiplier
-          << ',' << fmt::format( "{:f}", details.minTick ) 
+          << ',' << fmt::format( "{:f}", details.minTick )
           << ',' << details.contract.exchange
           << ',' << details.validExchanges
           << ',' << details.timeZoneId

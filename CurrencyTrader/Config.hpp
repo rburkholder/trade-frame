@@ -29,102 +29,98 @@
 
 namespace config {
 
+struct CurrencyPair {
+
+  std::string m_sName;
+  boost::posix_time::time_duration m_tdStartTime;
+  boost::posix_time::time_duration m_tdStopTime;
+  std::string m_sTimeZone; // reference: Europe/London is GMT
+  uint32_t m_nTradingAmount;
+
+  CurrencyPair()
+  : m_tdStartTime( boost::posix_time::not_a_date_time )
+  , m_tdStopTime( boost::posix_time::not_a_date_time )
+  , m_nTradingAmount {}
+  {}
+
+  CurrencyPair( std::string&& sName
+              , boost::posix_time::time_duration tdStartTime
+              , boost::posix_time::time_duration tdStopTime
+              , std::string&& sTimeZone
+              , uint32_t dblTradingAmount
+                )
+  : m_sName( std::move( sName ) )
+  , m_tdStartTime( tdStartTime ), m_tdStopTime( tdStopTime )
+  , m_sTimeZone( std::move( sTimeZone ) )
+  , m_nTradingAmount( dblTradingAmount )
+  {}
+
+  CurrencyPair( const std::string& sName
+              , const boost::posix_time::time_duration tdStartTime
+              , const boost::posix_time::time_duration tdStopTime
+              , const std::string& sTimeZone
+              , const uint32_t m_nTradingAmount
+                )
+  : m_sName( sName )
+  , m_tdStartTime( tdStartTime ), m_tdStopTime( tdStopTime )
+  , m_sTimeZone( sTimeZone )
+  , m_nTradingAmount( m_nTradingAmount )
+  {}
+
+  CurrencyPair( CurrencyPair&& ps )
+  : m_sName( std::move( ps.m_sName ) )
+  , m_tdStartTime( ps.m_tdStartTime )
+  , m_tdStopTime( ps.m_tdStopTime )
+  , m_sTimeZone( std::move( ps.m_sTimeZone ) )
+  , m_nTradingAmount( ps.m_nTradingAmount )
+  {}
+
+  CurrencyPair( const CurrencyPair& ps )
+  : m_sName( ps.m_sName )
+  , m_tdStartTime( ps.m_tdStartTime )
+  , m_tdStopTime( ps.m_tdStopTime )
+  , m_sTimeZone( ps.m_sTimeZone )
+  , m_nTradingAmount( ps.m_nTradingAmount )
+  {}
+
+  const CurrencyPair& operator=( const CurrencyPair& ps ) {
+    if ( this != &ps ) {
+      m_sName = ps.m_sName;
+      m_tdStartTime = ps.m_tdStartTime;
+      m_tdStopTime = ps.m_tdStopTime;
+      m_sTimeZone = ps.m_sTimeZone;
+      m_nTradingAmount = ps.m_nTradingAmount;
+    }
+    return *this;
+  }
+
+  void Parse( const std::string& ); // perform the parser here?
+
+  // non member function - output - not used
+  friend std::ostream& operator<<( std::ostream& os, CurrencyPair const& ps ) {
+    //return os << ps._i;
+    return os;
+  }
+
+  // non member function - input
+  friend std::istream& operator>>( std::istream& is, CurrencyPair& ps ){
+    //return os >> ps._i;
+    std::string input;
+    is >> input;
+    ps.Parse( input );
+    return is;
+  }
+
+};
+
+// ===
+
 struct Choices {
 
   std::string m_sBaseCurrency;
   double m_dblBaseCurrencyTopUp;
 
   std::string m_sExchange;
-  std::string m_sHdf5File; // optional
-  std::string m_sHdf5SimSet; // run simulation if present
-
-  struct PairSettings {
-
-    std::string m_sName;
-    boost::posix_time::time_duration m_tdStartTime;
-    boost::posix_time::time_duration m_tdStopTime;
-    std::string m_sTimeZone; // reference: Europe/London is GMT
-    uint32_t m_nTradingAmount;
-
-    PairSettings()
-    : m_tdStartTime( boost::posix_time::not_a_date_time )
-    , m_tdStopTime( boost::posix_time::not_a_date_time )
-    , m_nTradingAmount {}
-    {}
-
-    PairSettings( std::string&& sName
-                , boost::posix_time::time_duration tdStartTime
-                , boost::posix_time::time_duration tdStopTime
-                , std::string&& sTimeZone
-                , uint32_t dblTradingAmount
-                  )
-    : m_sName( std::move( sName ) )
-    , m_tdStartTime( tdStartTime ), m_tdStopTime( tdStopTime )
-    , m_sTimeZone( std::move( sTimeZone ) )
-    , m_nTradingAmount( dblTradingAmount )
-    {}
-
-    PairSettings( const std::string& sName
-                , const boost::posix_time::time_duration tdStartTime
-                , const boost::posix_time::time_duration tdStopTime
-                , const std::string& sTimeZone
-                , const uint32_t m_nTradingAmount
-                  )
-    : m_sName( sName )
-    , m_tdStartTime( tdStartTime ), m_tdStopTime( tdStopTime )
-    , m_sTimeZone( sTimeZone )
-    , m_nTradingAmount( m_nTradingAmount )
-    {}
-
-    PairSettings( PairSettings&& ps )
-    : m_sName( std::move( ps.m_sName ) )
-    , m_tdStartTime( ps.m_tdStartTime )
-    , m_tdStopTime( ps.m_tdStopTime )
-    , m_sTimeZone( std::move( ps.m_sTimeZone ) )
-    , m_nTradingAmount( ps.m_nTradingAmount )
-    {}
-
-    PairSettings( const PairSettings& ps )
-    : m_sName( ps.m_sName )
-    , m_tdStartTime( ps.m_tdStartTime )
-    , m_tdStopTime( ps.m_tdStopTime )
-    , m_sTimeZone( ps.m_sTimeZone )
-    , m_nTradingAmount( ps.m_nTradingAmount )
-    {}
-
-    const PairSettings& operator=( const PairSettings& ps ) {
-      if ( this != &ps ) {
-        m_sName = ps.m_sName;
-        m_tdStartTime = ps.m_tdStartTime;
-        m_tdStopTime = ps.m_tdStopTime;
-        m_sTimeZone = ps.m_sTimeZone;
-        m_nTradingAmount = ps.m_nTradingAmount;
-      }
-      return *this;
-    }
-
-    void Parse( const std::string& ); // perform the parser here?
-
-    // non member function - output - not used
-    friend std::ostream& operator<<( std::ostream& os, PairSettings const& ps ) {
-      //return os << ps._i;
-      return os;
-    }
-
-    // non member function - input
-    friend std::istream& operator>>( std::istream& is, PairSettings& ps ){
-      //return os >> ps._i;
-      std::string input;
-      is >> input;
-      ps.Parse( input );
-      return is;
-    }
-
-  };
-
-  using vPairSettings_t = std::vector<PairSettings>;
-  vPairSettings_t m_vPairSettings;
-
   int m_nIbInstance; // Interactive Brokers api instance
 
   std::string m_sMaxTradeLifeTime; // minutes
@@ -134,10 +130,16 @@ struct Choices {
   unsigned int m_nPipStopLoss;
   unsigned int m_nPipTrailingStop;
 
+  std::string m_sHdf5File; // optional
+  std::string m_sHdf5SimSet; // run simulation if present
+
   unsigned int m_nBarSeconds;
 
   using vEmaSeconds_t = std::vector<unsigned int>;
   vEmaSeconds_t m_vEmaSeconds;
+
+  using vCurrencyPair_t = std::vector<CurrencyPair>;
+  vCurrencyPair_t m_vCurrencyPair;
 
 };
 
