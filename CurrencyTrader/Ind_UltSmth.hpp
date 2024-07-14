@@ -32,6 +32,7 @@ namespace indicator {
 
 // ultimate smoother, 2024/04, technical analysis of stocks & commodities, page 12
 //   recommend period to be >8
+//   https://easylanguagemastery.com/indicators/predictive-indicators/ (why 8)
 
 class UltimateSmoother {
 public:

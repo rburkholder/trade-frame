@@ -35,7 +35,8 @@ UltimateSmoother::UltimateSmoother( unsigned int period, ou::ChartDataView& cdv,
 , pi( M_PI )
 , root_2( std::sqrt( 2.0 ) )
 , a1( std::exp( ( -root_2 * pi ) / period ) )
-, b1( 2.0 * a1 * std::cos( root_2 * 180.0 / period ) )
+//, b1( 2.0 * a1 * std::cos( root_2 * 180.0 / period ) ) // degree
+, b1( 2.0 * a1 * std::cos( root_2 * pi / period ) ) // radians
 , c2( b1 )
 , c3( -a1 * a1 )
 , c1( ( 1.0 + c2 - c3 ) / 4.0 )
