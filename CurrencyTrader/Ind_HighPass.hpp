@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    Ind_HighPass.cpp
+ * File:    Ind_HighPass.hpp
  * Author:  raymond@burkholder.net
  * Project: CurrencyTrader
  * Created: July 14, 2024 13:19:59
