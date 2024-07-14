@@ -162,12 +162,12 @@ private:
   TrackOrder m_to_up;
   TrackOrder m_to_dn;
 
-  struct Smoother { // Exponential Moving Average
+  struct Smoother {
 
     bool bBootStrapped;
 
-    const double dblCoef1; // smaller - used on arriving value
-    const double dblCoef2; // 1 - dblCoef1 (larger), used on prior ema
+    const double c1;
+    const double c2;
 
     double dblLatest;
     unsigned int ixSlot;
@@ -175,10 +175,10 @@ private:
     ou::ChartEntryIndicator m_ce;
     ou::ChartDataView& m_cdv;
 
-    Smoother( unsigned int nIntervals, ou::ChartDataView& cdv, unsigned int ixSlot_ )
+    Smoother( unsigned int n, ou::ChartDataView& cdv, unsigned int ixSlot_ )
     : bBootStrapped( false ), dblLatest {}, m_cdv( cdv ), ixSlot( ixSlot_ )
-    , dblCoef1( 2.0 / ( nIntervals + 1 ) )
-    , dblCoef2( 1.0 - dblCoef1 )
+    , c1( 2.0 / ( n + 1 ) )  // ema: smaller - used on arriving value
+    , c2( 1.0 - c1 )         // ema: 1 - c1 (larger), used on prior ema
     {
       m_cdv.Add( ixSlot, &m_ce );
     }
@@ -195,7 +195,7 @@ private:
     double Update( boost::posix_time::ptime dt, double value ) {
 
       if ( bBootStrapped ) {
-        dblLatest = ( dblCoef1 * value ) + ( dblCoef2 * dblLatest );
+        dblLatest = ( c1 * value ) + ( c2 * dblLatest );
       }
       else {
         bBootStrapped = true;
