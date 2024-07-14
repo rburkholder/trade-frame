@@ -28,6 +28,7 @@ set(
     Config.hpp
     Ind_Ema.hpp
     Ind_HighPass.hpp
+    Ind_SuprSmth.hpp
     Ind_UltSmth.hpp
     PanelCurrencyStats.hpp
     Strategy.hpp
@@ -40,6 +41,7 @@ set(
     Config.cpp
     Ind_Ema.cpp
     Ind_HighPass.cpp
+    Ind_SuprSmth.cpp
     Ind_UltSmth.cpp
     PanelCurrencyStats.cpp
     Strategy.cpp
