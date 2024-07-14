@@ -27,6 +27,7 @@ set(
     Common.hpp
     Config.hpp
     Ind_Ema.hpp
+    Ind_UltSmth.hpp
     PanelCurrencyStats.hpp
     Strategy.hpp
     TrackOrder.hpp
@@ -37,6 +38,7 @@ set(
     AppCurrencyTrader.cpp
     Config.cpp
     Ind_Ema.cpp
+    Ind_UltSmth.cpp
     PanelCurrencyStats.cpp
     Strategy.cpp
     TrackOrder.cpp

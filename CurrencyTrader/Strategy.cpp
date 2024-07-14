@@ -100,7 +100,7 @@ void Strategy::Init( const config::Strategy& config ) {
   // supplied by 1 second mid-quote
   size_t ix {};
   for ( const auto seconds: config.m_vSmootherSeconds ) {
-    pSmoother_t p = std::make_unique<Smoother>( seconds, m_cdv, EChartSlot::Price );
+    pSmoother_t p = std::make_unique<ou::tf::indicator::UltimateSmoother>( seconds, m_cdv, EChartSlot::Price );
     assert( ix < sizeof( colour ) );
     p->Set( colour[ ix ], "Smoother" + fmt::format( "{}", ix ) );
     m_vSmootherCurrency.emplace_back( std::move( p ) );
@@ -108,11 +108,11 @@ void Strategy::Init( const config::Strategy& config ) {
   }
 
   // supplied by 1 minute trade bar
-  m_pATRFast = std::make_unique<Smoother>( 3, m_cdv, EChartSlot::ATR );
+  m_pATRFast = std::make_unique<ou::tf::indicator::Ema>( 3, m_cdv, EChartSlot::ATR );
   m_pATRFast->Set( ou::Colour::Blue, "ATR Fast" );
 
   // supplied by 1 minute trade bar
-  m_pATRSlow = std::make_unique<Smoother>( 14, m_cdv, EChartSlot::ATR );
+  m_pATRSlow = std::make_unique<ou::tf::indicator::Ema>( 14, m_cdv, EChartSlot::ATR );
   m_pATRSlow->Set( ou::Colour::Crimson, "ATR Slow" );
 
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
@@ -531,7 +531,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
   Swing& d( m_rSwing[ 3 ] );
   Swing& e( m_rSwing[ 4 ] );
 
-  a = b; b = c; c = d; d = e; e.Update( bar, m_vSmootherCurrency.front()->us0 );
+  a = b; b = c; c = d; d = e; e.Update( bar, m_vSmootherCurrency.front()->US() );
 
   { // highest point
     const double x = a.hi > b.hi ? a.hi : b.hi;
