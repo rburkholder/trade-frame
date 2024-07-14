@@ -27,10 +27,6 @@ namespace indicator {
 
 UltimateSmoother::UltimateSmoother( unsigned int period, ou::ChartDataView& cdv, unsigned int ixSlot_ )
 : m_cdv( cdv ), ixSlot( ixSlot_ )
-//, bBootStrapped( false )
-//, dblLatest {}
-//, c1( 2.0 / ( period + 1 ) )  // ema: smaller - used on arriving value
-//, c2( 1.0 - c1 )              // ema: 1 - c1 (larger), used on prior ema
 , n0( 3 )
 , pi( M_PI )
 , root_2( std::sqrt( 2.0 ) )
@@ -71,7 +67,6 @@ double UltimateSmoother::Update( boost::posix_time::ptime dt, double value ) {
     ;
   }
   else {
-    //bBootStrapped = true;
     assert( n0 > 0 );
     n0--;
     switch ( n0 ) {
@@ -85,7 +80,6 @@ double UltimateSmoother::Update( boost::posix_time::ptime dt, double value ) {
         val0 = us0 = value;
         break;
     }
-    //us0 = value;
   }
 
   m_ce.Append( dt, us0 );

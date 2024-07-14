@@ -47,7 +47,7 @@ public:
 protected:
 private:
 
-  bool bBootStrapped;
+  unsigned int n0;
 
   const double pi;
   const double root_2;
@@ -59,8 +59,6 @@ private:
 
   double val0, val1, val2;
   double us0, us1, us2;
-
-  unsigned int n0;
 
   unsigned int ixSlot;
 
