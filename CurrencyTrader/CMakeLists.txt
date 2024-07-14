@@ -27,6 +27,7 @@ set(
     Common.hpp
     Config.hpp
     Ind_Ema.hpp
+    Ind_HighPass.hpp
     Ind_UltSmth.hpp
     PanelCurrencyStats.hpp
     Strategy.hpp
@@ -38,6 +39,7 @@ set(
     AppCurrencyTrader.cpp
     Config.cpp
     Ind_Ema.cpp
+    Ind_HighPass.cpp
     Ind_UltSmth.cpp
     PanelCurrencyStats.cpp
     Strategy.cpp
