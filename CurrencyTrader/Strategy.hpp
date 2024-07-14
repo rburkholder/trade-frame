@@ -22,6 +22,8 @@
 #pragma once
 
 #include <array>
+#include <cmath>
+#include <cstdlib>
 
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryBars.h>
@@ -166,19 +168,43 @@ private:
 
     bool bBootStrapped;
 
-    const double c1;
+    const double pi;
+    const double root_2;
+    const double a1, b1;
     const double c2;
+    const double c3;
+    const double c1;
+    const double d1, d2, d3;
 
-    double dblLatest;
+    double val0, val1, val2;
+    double us0, us1, us2;
+
+    unsigned int n0;
+
+    //double dblLatest;
     unsigned int ixSlot;
 
     ou::ChartEntryIndicator m_ce;
     ou::ChartDataView& m_cdv;
 
-    Smoother( unsigned int n, ou::ChartDataView& cdv, unsigned int ixSlot_ )
-    : bBootStrapped( false ), dblLatest {}, m_cdv( cdv ), ixSlot( ixSlot_ )
-    , c1( 2.0 / ( n + 1 ) )  // ema: smaller - used on arriving value
-    , c2( 1.0 - c1 )         // ema: 1 - c1 (larger), used on prior ema
+    // ultimate smoother, 2024/04, technical analysis of stocks & commodities, page 12
+    Smoother( unsigned int period, ou::ChartDataView& cdv, unsigned int ixSlot_ )
+    : m_cdv( cdv ), ixSlot( ixSlot_ )
+    //, bBootStrapped( false )
+    //, dblLatest {}
+    //, c1( 2.0 / ( period + 1 ) )  // ema: smaller - used on arriving value
+    //, c2( 1.0 - c1 )              // ema: 1 - c1 (larger), used on prior ema
+    , n0( 3 )
+    , pi( M_PI )
+    , root_2( std::sqrt( 2.0 ) )
+    , a1( std::exp( ( -root_2 * pi ) / period ) )
+    , b1( 2.0 * a1 * std::cos( root_2 * 180.0 / period ) )
+    , c2( b1 )
+    , c3( -a1 * a1 )
+    , c1( ( 1.0 + c2 - c3 ) / 4.0 )
+    , d1( 1.0 - c1 )
+    , d2( 2.0 * c1 - c2 )
+    , d3( c1 + c3 )
     {
       m_cdv.Add( ixSlot, &m_ce );
     }
@@ -194,16 +220,38 @@ private:
 
     double Update( boost::posix_time::ptime dt, double value ) {
 
-      if ( bBootStrapped ) {
-        dblLatest = ( c1 * value ) + ( c2 * dblLatest );
+      if ( 0 == n0 ) {
+        //us0 = ( c1 * value ) + ( c2 * dblLatest ); // ema
+        val2 = val1; val1 = val0; val0 = value;
+        us2  = us1;  us1  = us0;
+        us0 =
+          d1 * val0
+        + d2 * val1
+        - d3 * val2
+        + c2 * us1
+        + c3 * us2
+        ;
       }
       else {
-        bBootStrapped = true;
-        dblLatest = value;
+        //bBootStrapped = true;
+        assert( n0 > 0 );
+        n0--;
+        switch ( n0 ) {
+          case 2:
+            val2 = us2 = us0 = value;
+            break;
+          case 1:
+            val1 = us1 = us0 = value;
+            break;
+          case 0:
+            val0 = us0 = value;
+            break;
+        }
+        //us0 = value;
       }
 
-      m_ce.Append( dt, dblLatest );
-      return dblLatest;
+      m_ce.Append( dt, us0 );
+      return us0;
     }
   };
 
