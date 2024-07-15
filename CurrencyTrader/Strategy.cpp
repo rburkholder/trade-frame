@@ -605,7 +605,29 @@ void Strategy::SaveWatch( const std::string& sPrefix ) {
 }
 
 void Strategy::CloseAndDone() {
-  //if ( TrackOrder::ETradeState::Search != m_)
+  switch ( m_to.m_stateTrade ) {
+    case TrackOrder::ETradeState::Search:
+      // nothing
+      break;
+    case TrackOrder::ETradeState::EntrySubmittedUp:
+    case TrackOrder::ETradeState::EntrySubmittedDn:
+    case TrackOrder::ETradeState::ExitSubmitted:
+      m_to.Cancel(
+        [this](){
+          m_to.Close(
+            [](){
+              // TrackOrder: to be implemented
+            } );
+        } );
+      break;
+    case TrackOrder::ETradeState::ExitSignalUp:
+    case TrackOrder::ETradeState::ExitSignalDn:
+      // waiting, so nothing to cancel
+      break;
+    default:
+      // define other stuff
+      break;
+  }
 }
 
   // The ATR is commonly used as an exit method that can be applied

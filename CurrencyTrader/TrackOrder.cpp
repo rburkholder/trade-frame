@@ -381,9 +381,22 @@ void TrackOrder::Cancel( fCancel_t&& fCancelled ) { // may need something if not
     m_stateTrade = TrackOrder::ETradeState::Cancelling;
     m_fCancelled = std::move( fCancelled );
     m_pPosition->CancelOrders();
+    // what happens if no orders to cancel?
   }
   else {
     m_stateTrade = TrackOrder::ETradeState::Cancelled; // might need to be ::Search
+  }
+}
+
+void TrackOrder::Close( fClose_t&& fClosed ) {
+  assert( nullptr == m_fClosed );
+  if ( m_pPosition ) {
+    m_stateTrade = TrackOrder::ETradeState::EndOfDayNeutral;
+    m_fClosed = std::move( fClosed );
+    m_pPosition->ClosePosition();
+  }
+  else {
+    m_stateTrade = TrackOrder::ETradeState::Done;
   }
 }
 

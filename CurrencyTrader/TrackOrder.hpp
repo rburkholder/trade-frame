@@ -60,6 +60,7 @@ public:
 
   using fFillPrice_t = std::function<void(double,double)>; // exchange rate, commission
   using fCancel_t = std::function<void()>;
+  using fClose_t = std::function<void()>;
 
   struct OrderArgs {
 
@@ -116,7 +117,8 @@ public:
   void ExitShortLmt( const OrderArgs& );
   void ExitShortMkt( const OrderArgs& );
 
-  void Cancel( fCancel_t&& ); // perform with call back?  to allow next order to be placed?
+  void Cancel( fCancel_t&& );
+  void Close( fClose_t&& );
 
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
@@ -141,6 +143,7 @@ private:
 
   fFillPrice_t m_fFillPrice;
   fCancel_t m_fCancelled;
+  fClose_t m_fClosed;
 
   pOrder_t m_pOrderPending;
   pPosition_t m_pPosition;
