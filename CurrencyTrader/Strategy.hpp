@@ -165,7 +165,7 @@ private:
 
   TrackOrder m_to;
 
-  using pSmoother_t = std::unique_ptr<ou::tf::indicator::UltimateSmoother>;
+  using pSmoother_t = std::unique_ptr<ou::tf::indicator::Ema>;
   using vSmoother_t = std::vector<pSmoother_t>;
   vSmoother_t m_vSmootherCurrency;
 

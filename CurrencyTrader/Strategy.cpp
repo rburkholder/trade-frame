@@ -99,7 +99,7 @@ void Strategy::Init( const config::Strategy& config ) {
   // supplied by 1 second mid-quote
   size_t ix {};
   for ( const auto seconds: config.m_vSmootherSeconds ) {
-    pSmoother_t p = std::make_unique<ou::tf::indicator::UltimateSmoother>( seconds, m_cdv, EChartSlot::Price );
+    pSmoother_t p = std::make_unique<ou::tf::indicator::Ema>( seconds, m_cdv, EChartSlot::Price );
     assert( ix < sizeof( colour ) );
     p->Set( colour[ ix ], "Smoother" + fmt::format( "{}", ix ) );
     m_vSmootherCurrency.emplace_back( std::move( p ) );
@@ -519,7 +519,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
   Swing& d( m_rSwing[ 3 ] );
   Swing& e( m_rSwing[ 4 ] );
 
-  a = b; b = c; c = d; d = e; e.Update( bar, m_vSmootherCurrency.front()->US() );
+  a = b; b = c; c = d; d = e; e.Update( bar, m_vSmootherCurrency.front()->Value() );
 
   { // highest point
     const double x = a.hi > b.hi ? a.hi : b.hi;
