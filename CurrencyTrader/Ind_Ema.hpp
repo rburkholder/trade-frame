@@ -39,6 +39,8 @@ public:
   void Set( ou::Colour::EColour colour, const std::string& sName );
   double Update( boost::posix_time::ptime dt, double value );
 
+  double Value() const { return dblLatest; }
+
 protected:
 private:
 
