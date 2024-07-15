@@ -95,7 +95,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, ATR, TR_EMA, SD, MASlope, MA, Stoch, PL_Up, PL_Ttl, PL_Dn, Commission };
+  enum EChartSlot { Price, Volume, ATR, TR_EMA, SD, MASlope, MA, Stoch, PL_To, PL_Ttl, Commission };
 
   using pOrder_t = ou::tf::Order::pOrder_t;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
@@ -152,9 +152,8 @@ private:
     }
   };
 
-  PL m_plUp;
+  PL m_plTo;
   PL m_plTtl;
-  PL m_plDn;
 
   EBase m_eBaseCurrency;
   ou::tf::Order::quantity_t m_quantityToOrder;
@@ -164,8 +163,7 @@ private:
   pWatch_t m_pWatch;
   pPortfolio_t m_pPortfolio;
 
-  TrackOrder m_to_up;
-  TrackOrder m_to_dn;
+  TrackOrder m_to;
 
   using pSmoother_t = std::unique_ptr<ou::tf::indicator::UltimateSmoother>;
   using vSmoother_t = std::vector<pSmoother_t>;

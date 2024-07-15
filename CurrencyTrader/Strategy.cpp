@@ -78,9 +78,8 @@ void Strategy::Init( const config::Strategy& config ) {
 
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
-  m_plUp.Init( m_cdv, EChartSlot::PL_Up );
+  m_plTo.Init( m_cdv, EChartSlot::PL_To );
   m_plTtl.Init( m_cdv, EChartSlot::PL_Ttl );
-  m_plDn.Init( m_cdv, EChartSlot::PL_Dn );
 
   m_ceTradingRangeRising.SetColour( ou::Colour::Green );
   m_ceTradingRangeRising.SetName( "TR Rise" );
@@ -141,8 +140,7 @@ Strategy::~Strategy() {
 void Strategy::SetTransaction( ou::tf::Order::quantity_t quantity, fTransferFunds_t&& f ) {
 
   m_quantityToOrder = quantity;
-  m_to_up.Set( quantity, f ); // make a copy of f
-  m_to_dn.Set( quantity, f ); // make a copy of f
+  m_to.Set( quantity, f ); // make a copy of f
 
 }
 
@@ -160,15 +158,9 @@ void Strategy::SetWatch( EBase eBaseCurrency, pWatch_t pWatch, pPortfolio_t pPor
   m_cdv.SetNames( "Currency Trader", m_pWatch->GetInstrumentName() );
 
   {
-    pPosition_t pPosition = f( pWatch, pWatch->GetInstrumentName() +":up" );
+    pPosition_t pPosition = f( pWatch, pWatch->GetInstrumentName() );
     assert( pPosition );
-    m_to_up.Set( pPosition, m_cdv, EChartSlot::Price );
-  }
-
-  {
-    pPosition_t pPosition = f( pWatch, pWatch->GetInstrumentName() +":dn" );
-    assert( pPosition );
-    m_to_dn.Set( pPosition, m_cdv, EChartSlot::Price );
+    m_to.Set( pPosition, m_cdv, EChartSlot::Price );
   }
 
   //m_pWatch->RecordSeries( false );
@@ -222,7 +214,7 @@ void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_
 
   // one time calc pip, https://www.benzinga.com/money/how-to-calculate-pips
   const double exch_rate( m_quote.Midpoint() );
-  m_tick = m_to_up.PriceInterval( exch_rate );
+  m_tick = m_to.PriceInterval( exch_rate );
   const double quan_x_tick = (double)m_quantityToOrder * m_tick;
   const double first( quan_x_tick / exch_rate );
   const double second( quan_x_tick );
@@ -256,23 +248,17 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   double unrealized, realized, commission, total;
 
-  m_to_up.QueryStats( unrealized, realized, commission, total );
-  m_plUp.m_ceUnRealized.Append( dt, unrealized );
-  m_plUp.m_ceRealized.Append( dt, realized );
-  m_plUp.m_ceProfitLoss.Append( dt, commission );
-  m_plUp.m_ceCommission.Append( dt, total );
+  m_to.QueryStats( unrealized, realized, commission, total );
+  m_plTo.m_ceUnRealized.Append( dt, unrealized );
+  m_plTo.m_ceRealized.Append( dt, realized );
+  m_plTo.m_ceProfitLoss.Append( dt, commission );
+  m_plTo.m_ceCommission.Append( dt, total );
 
   m_pPortfolio->QueryStats( unrealized, realized, commission, total );
   m_plTtl.m_ceUnRealized.Append( dt, unrealized );
   m_plTtl.m_ceRealized.Append( dt, realized );
   m_plTtl.m_ceProfitLoss.Append( dt, commission );
   m_plTtl.m_ceCommission.Append( dt, total );
-
-  m_to_dn.QueryStats( unrealized, realized, commission, total );
-  m_plDn.m_ceUnRealized.Append( dt, unrealized );
-  m_plDn.m_ceRealized.Append( dt, realized );
-  m_plDn.m_ceProfitLoss.Append( dt, commission );
-  m_plDn.m_ceCommission.Append( dt, total );
 
   static const double count( 4.0 );
   static const double count_base( count - 1.0 );
@@ -315,7 +301,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   //   check distance between swing points, small swings would require counter-trading
   //     use m_vSwingTrack for back-tracking
 
-  RunState( m_to_up );
+  RunState( m_to );
 
   m_state.swing = State::Swing::none;
 }
@@ -492,13 +478,11 @@ void Strategy::RunState( TrackOrder& to ) {
 }
 
 void Strategy::HandleCancel( boost::gregorian::date date, boost::posix_time::time_duration td ) { // one shot
-  m_to_up.HandleCancel( date, td );
-  m_to_dn.HandleCancel( date, td );
+  m_to.HandleCancel( date, td );
 }
 
 void Strategy::HandleGoNeutral( boost::gregorian::date date, boost::posix_time::time_duration td ) { // one shot
-  m_to_up.HandleGoNeutral( date, td );
-  m_to_dn.HandleGoNeutral( date, td );
+  m_to.HandleGoNeutral( date, td );
 }
 
 void Strategy::HandleAtRHClose( boost::gregorian::date date, boost::posix_time::time_duration time ) { // one shot
@@ -609,9 +593,8 @@ void Strategy::SaveWatch( const std::string& sPrefix ) {
     m_ceTrade.Clear();
     m_ceVolume.Clear();
 
-    m_plUp.Clear();
+    m_plTo.Clear();
     m_plTtl.Clear();
-    m_plDn.Clear();
 
     m_ceSwingHi.Clear();
     m_ceSwingLo.Clear();
@@ -622,7 +605,7 @@ void Strategy::SaveWatch( const std::string& sPrefix ) {
 }
 
 void Strategy::CloseAndDone() {
-  // fake out the state machine, by dynamically adjusting the trigger times?
+  //if ( TrackOrder::ETradeState::Search != m_)
 }
 
   // The ATR is commonly used as an exit method that can be applied
