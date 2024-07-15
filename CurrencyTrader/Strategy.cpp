@@ -336,15 +336,17 @@ void Strategy::RunState( TrackOrder& to ) {
             m_stop.diff = diff1 > diff2 ? diff1 : diff2;
             m_stop.trail = bid - m_stop.diff; // run a parabolic stop?
             m_stop.start = m_stop.trail;
-            to.Set(
+            to.Set( // fFillPrice_t
               [&to,this,bid]( double fill_price, double commission ){
                 m_nCount++;
                 m_dblCommission += commission;
                 if ( fill_price < bid ) {
                   m_stop.trail = m_stop.start = ( fill_price - m_stop.diff );
                 }
-                to.Set(
-                  []( double fill_price, double commission ){
+                to.Set( // fFillPrice_t
+                  [this]( double fill_price, double commission ){
+                    m_nCount++;
+                    m_dblCommission += commission;
                     // cancel other stuff
                   } );
                 const double limit( fill_price + 2.0 * m_tick );
@@ -381,15 +383,17 @@ void Strategy::RunState( TrackOrder& to ) {
             m_stop.diff = diff1 > diff2 ? diff1 : diff2;
             m_stop.trail = ask + m_stop.diff; // run a parabolic stop?
             m_stop.start = m_stop.trail;
-            to.Set(
+            to.Set( // fFillPrice_t
               [&to,this,ask]( double fill_price, double commission ){
                 m_nCount++;
                 m_dblCommission += commission;
                 if ( fill_price > ask ) {
                   m_stop.trail = m_stop.start = ( fill_price + m_stop.diff );
                 }
-                to.Set(
-                  []( double fill_price, double commission ){
+                to.Set( // fFillPrice_t
+                  [this]( double fill_price, double commission ){
+                    m_nCount++;
+                    m_dblCommission += commission;
                     // cancel other stuff
                   } );
                 const double limit( fill_price - 2.0 * m_tick );
