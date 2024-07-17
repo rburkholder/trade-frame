@@ -301,18 +301,6 @@ void AppCurrencyTrader::ConstructStrategyList() {
 
       boost::posix_time::ptime dt;
 
-      dt = strategy.GetMarketClose();
-      dt = boost::posix_time::ptime( dt.date(), boost::posix_time::time_duration( 17, 10, 0 ) );
-      strategy.SetMarketClose( dt );
-
-      dt = strategy.GetSoftwareReset();
-      dt = boost::posix_time::ptime( dt.date(), boost::posix_time::time_duration( 17, 12, 0 ) );
-      strategy.SetSoftwareReset( dt );
-
-      dt = strategy.GetMarketOpen();
-      dt = boost::posix_time::ptime( dt.date(), boost::posix_time::time_duration( 17, 15, 0 ) );
-      strategy.SetMarketOpen( dt );
-
       ou::TimeSource& ts( ou::TimeSource::GlobalInstance() );
       auto tz = ts.LoadTimeZone( ps.m_sTimeZone );
 
