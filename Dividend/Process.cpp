@@ -110,6 +110,7 @@ void Process::Lookup() {
         const Summary& summary( pWatch->GetSummary() );
         dividend.trade = summary.dblTrade;
         const Fundamentals& fundamentals( pWatch->GetFundamentals() );
+        dividend.sCompanyName = fundamentals.sCompanyName;
         dividend.sExchange = fundamentals.sExchange;
         dividend.rate = fundamentals.dblDividendRate;
         dividend.yield = fundamentals.dblDividendYield;
@@ -117,6 +118,7 @@ void Process::Lookup() {
         dividend.nAverageVolume = fundamentals.nAverageVolume;
         dividend.datePayed = fundamentals.datePayed;
         dividend.dateExDividend = fundamentals.dateExDividend;
+        dividend.nSharesOutstanding = fundamentals.dblCommonSharesOutstanding;
         dividend.sOptionRoots = fundamentals.sOptionRoots;
         //if ( 10.0 < fundamentals.dblDividendYield ) {
         //  std::cout

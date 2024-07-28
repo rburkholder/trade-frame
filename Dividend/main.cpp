@@ -44,13 +44,14 @@ int main( int argc, char* argv[] ) {
   process.Wait();
 
   std::cout
-    << "symbol,exchange,last($),yield(%),rate,amount,vol,exdiv,payed,option"
+    << "symbol,name,exchange,last($),yield(%),rate,amount,vol,exdiv,payed,shares,option"
     << std::endl;
 
   for ( vSymbols_t::value_type& vt: vSymbols ) {
     if ( ( choices.m_dblMinimumYield < vt.yield ) && ( choices.m_nMinimumVolume <= vt.nAverageVolume ) ) {
       std::cout
                << vt.sSymbol
+        << ',' << vt.sCompanyName
         << "," << vt.sExchange
         << "," << vt.trade
         << "," << vt.yield
@@ -59,6 +60,7 @@ int main( int argc, char* argv[] ) {
         << "," << vt.nAverageVolume
         << "," << vt.dateExDividend
         << "," << vt.datePayed
+        << "," << vt.nSharesOutstanding
         << "," << vt.sOptionRoots
         << std::endl;
     }

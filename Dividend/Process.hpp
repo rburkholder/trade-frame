@@ -39,12 +39,14 @@ public:
 
   struct dividend_t {
     const std::string sSymbol;
+    std::string sCompanyName;
     std::string sExchange;
     double yield;
     double rate;
     double amount;
     double trade; // last trade
     int nAverageVolume;
+    double nSharesOutstanding;
     boost::gregorian::date datePayed;
     boost::gregorian::date dateExDividend;
     std::string sOptionRoots;
