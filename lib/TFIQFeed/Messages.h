@@ -233,7 +233,6 @@ public:
     FDivRate = 12,
     FDivPayDate = 13,
     FDivExDate = 14,
-    //FShortInterest = 18,
     FCurYrEPS = 15,
     FNxtYrEPS = 16,
     FFiveYearGrowth = 17,
@@ -247,8 +246,7 @@ public:
     FCurLiab = 25,
     FBalShtDate = 26,
     FLongTermDebt = 27,
-    FCommonShares = 28,
-//    FMarketCenter = 39,
+    FCommonShares = 28,  // 1000's of shares
     FFormatCode = 31,
     FPrecision = 32,
     FSIC = 33,
@@ -266,15 +264,15 @@ public:
     FStrikePrice = 45,
     FNAICS = 46,
     FExchangeRoot = 47,
-    FOptionsPremiumMult = 48,
-    FOptionsMultipleDeliver = 49,
-    FSessionOpenTime = 50,
-    FSessionCloseTime = 51,
-    FBaseCurrency = 52,
-    FContractSize = 53,
+    FOptionsPremiumMult = 48,     // options
+    FOptionsMultipleDeliver = 49, // options
+    FSessionOpenTime = 50,  // futures & futures options
+    FSessionCloseTime = 51, // futures & futures options
+    FBaseCurrency = 52,     // futures & futures options
+    FContractSize = 53,     // Deliverable quantitiy of a future or option contract.
     FContractMonths = 54,
     FMinimumTickSize = 55,
-    FFirstDeliveryDate = 56,
+    FFirstDeliveryDate = 56,// futures & futures options
     FFinancialInstrumentGlobalIdentifier = 57,
     FSecuritySubType = 58,
     _FLastEntry
