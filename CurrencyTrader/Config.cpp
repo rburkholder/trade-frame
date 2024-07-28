@@ -72,7 +72,9 @@ namespace {
 namespace boost { namespace spirit { namespace traits {
   template<>
   struct transform_attribute<
-      boost::posix_time::time_duration, fusion::vector<unsigned short, unsigned short, unsigned short>, qi::domain>
+      boost::posix_time::time_duration, fusion::vector<unsigned short, unsigned short, unsigned short>
+    , qi::domain
+    >
   {
       typedef fusion::vector<unsigned short, unsigned short, unsigned short> time_parts;
 
