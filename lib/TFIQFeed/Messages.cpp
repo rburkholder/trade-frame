@@ -14,11 +14,123 @@
 
 #include <sstream>
 
+#include <boost/phoenix/core.hpp>
+
+#include <boost/fusion/include/vector.hpp>
+
+#include <boost/spirit/include/qi.hpp>
+
 #include "Messages.h"
 
 // News Message: This does appear to be an error in the documentation.
 // "SNT:AAPL::1:20070901:;"
 // Enter the date with a range, such as "20070901-20070910" to get the data you are looking for.
+
+// https://www.boost.org/doc/libs/master/libs/spirit/example/qi/parse_date.cpp
+// define custom transformation
+namespace boost { namespace spirit { namespace traits {
+  template<>
+  struct transform_attribute<
+      boost::gregorian::date, fusion::vector<unsigned short, unsigned short, unsigned short>
+    , qi::domain
+    >
+  {
+      typedef fusion::vector<unsigned short, unsigned short, unsigned short> date_parts;
+
+      typedef date_parts type;
+
+      static date_parts pre( boost::gregorian::date ) {
+        return date_parts();
+      }
+
+      static void post( boost::gregorian::date& date, date_parts const& v )
+      {
+        date = boost::gregorian::date( // mm/dd/yyyy
+              fusion::at_c<2>(v)  // year
+            , fusion::at_c<0>(v)  // month
+            , fusion::at_c<1>(v)) // day
+            ;
+      }
+
+      static void fail( boost::gregorian::date& ) {}
+  };
+}}}
+
+// https://www.boost.org/doc/libs/master/libs/spirit/example/qi/parse_date.cpp
+// define custom transformation
+namespace boost { namespace spirit { namespace traits {
+  template<>
+  struct transform_attribute<
+      boost::posix_time::time_duration, fusion::vector<unsigned short, unsigned short, unsigned short>
+    , qi::domain
+    >
+  {
+      typedef fusion::vector<unsigned short, unsigned short, unsigned short> time_parts;
+
+      typedef time_parts type;
+
+      static time_parts pre( boost::posix_time::time_duration ) {
+        return time_parts();
+      }
+
+      static void post( boost::posix_time::time_duration& td, time_parts const& v )
+      {
+        td = boost::posix_time::time_duration(
+              fusion::at_c<0>(v)
+            , fusion::at_c<1>(v)
+            , fusion::at_c<2>(v))
+            ;
+      }
+
+      static void fail( boost::posix_time::time_duration& ) {}
+  };
+}}}
+
+namespace {
+
+namespace qi = boost::spirit::qi;
+
+struct date_time {
+  boost::gregorian::date date;
+  boost::posix_time::time_duration time;
+};
+
+template<typename Iterator>
+struct ParserDate: qi::grammar<Iterator, boost::gregorian::date()> {
+  ParserDate(): ParserDate::base_type( ruleDate ) {
+
+    ruleValue %= qi::ushort_;
+    ruleDate %= ruleValue >> qi::lit( '/' )
+             >> ruleValue >> qi::lit( '/' )
+             >> ruleValue
+             ;
+  }
+
+  typedef boost::fusion::vector<unsigned short, unsigned short, unsigned short> date_parts;
+
+  qi::rule<Iterator, unsigned short()> ruleValue;
+  qi::rule<Iterator, date_parts()> ruleDate;
+};
+
+template<typename Iterator>
+struct ParserTime: qi::grammar<Iterator, boost::posix_time::time_duration()> {
+  ParserTime(): ParserTime::base_type( ruleTime ) {
+
+    ruleValue %= qi::ushort_;
+    ruleTime %= ruleValue >> qi::lit( ':' )
+             >> ruleValue >> qi::lit( ':' )
+             >> ruleValue
+             ;
+
+  }
+
+  typedef boost::fusion::vector<unsigned short, unsigned short, unsigned short> time_parts;
+
+  qi::rule<Iterator, unsigned short()> ruleValue;
+  qi::rule<Iterator, time_parts()> ruleTime;
+};
+
+} // namespace
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

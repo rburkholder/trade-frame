@@ -772,6 +772,8 @@ IQFPricingMessage<T, charT>::~IQFPricingMessage() {
 template <class T, class charT>
 ptime IQFPricingMessage<T, charT>::LastTradeTime( void ) const {
 
+  // use CurrencyTrader/Config.cpp as Boost::Spirit mechanism to build ptime
+
   // TODO: test that the delimiters are available (ie message might be truncated?)
   fielddelimiter_t date = this->m_vFieldDelimiters[ QPLastTradeDate ];
   fielddelimiter_t time = this->m_vFieldDelimiters[ QPLastTradeTime ];
