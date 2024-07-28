@@ -31,3 +31,16 @@ minimum_yield=8.0
 minimum_volume=5000
 max_in_transit=40
 ```
+
+Something to consider for calculations:
+* highest-yielding monthly dividend stocks with market capitalizations of at least $1 billion and payout ratios below 100%, meaning they are paying out less in dividends per share than they are bringing in in earnings per share (EPS)
+* order by forward dividend yield, which is calculated by dividing the sum of a company’s projected dividend payouts over the next year by its current share price.
+
+Source of ideas:
+* [Best Monthly Dividend Stocks and ETFs](https://www.marketbeat.com/dividends/monthly-dividend-stocks/)
+* [Stocks That Pay Monthly Dividends`](https://stockanalysis.com/list/monthly-dividend-stocks/)
+
+Key Calculations:
+* Market Capitalization = Outstanding Shares x Stock Price
+* Earnings per Share = (Net Income - Preferred Dividends) ÷ Average Oustanding Common Shares
+* Cash Flow per Share = (Operating Cash Flow – Preferred Dividends) ÷ Common Shares Outstanding
