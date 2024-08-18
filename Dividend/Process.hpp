@@ -22,7 +22,6 @@
 #include <map>
 #include <vector>
 #include <memory>
-#include <thread>
 
 #include <TFIQFeed/Provider.h>
 
