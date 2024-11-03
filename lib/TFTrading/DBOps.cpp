@@ -11,15 +11,9 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include "DBOps.h"
 
-#include <stdexcept>
-
 #include <TFTrading/Managers.h>
-
-#include "Database.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
