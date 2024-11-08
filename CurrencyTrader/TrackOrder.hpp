@@ -22,11 +22,12 @@
 #pragma once
 
 #include <OUCharting/ChartDataView.h>
-
 #include <OUCharting/ChartEntryShape.h>
 
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
+
+#include "TradeState.hpp"
 
 class TrackOrder {
 public:
@@ -150,6 +151,8 @@ private:
 
   ou::tf::Currency::ECurrency m_curBase;
   ou::tf::Currency::ECurrency m_curQuote;
+
+  TradeState m_TradeState;
 
   double Normalize( double price ) const;
 

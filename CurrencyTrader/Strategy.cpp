@@ -29,6 +29,8 @@
 
 // "Pip" is an acronym for Percentage in Point or Price Interest Point.
 
+// 2024/07/15 try spline or polynomial envelope on swings for contrarian trades
+
 #include <boost/log/trivial.hpp>
 
 #include <fmt/core.h>
@@ -369,6 +371,8 @@ void Strategy::RunState( TrackOrder& to ) {
             m_stop.diff = diff1 > diff2 ? diff1 : diff2;
             m_stop.trail = ask + m_stop.diff; // run a parabolic stop?
             m_stop.start = m_stop.trail;
+            // TODO: if diff is less than expected, don't trade?
+            //   need to track what typical range is?
             to.Set( // fFillPrice_t
               [&to,this,ask]( double fill_price, double commission ){
                 m_nCount++;
