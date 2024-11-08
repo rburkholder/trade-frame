@@ -208,7 +208,7 @@ boost::gregorian::date DailyTradeTimeFrame<T>::AdjustTimeFrame( boost::gregorian
   const boost::gregorian::date date_new = ldt_new.local_time().date();
 
   BOOST_LOG_TRIVIAL(info)
-    << "original=" << date_utc << ' ' << time_utc
+    << "original=" << date_utc << '-' << time_utc
     << ",et=" << dt_given_et.local_time()
     << ",start=" << ldt_start.utc_time() << "(utc)," << ldt_start.local_time() << "(local)"
     << ",residual=" << residual << "(utc)"
