@@ -27,6 +27,7 @@ listed_market=NGM
 listed_market=NGSM
 ignore_name=LYPHF
 security_type=EQUITY
+security_state=XFLT,portfolio
 minimum_yield=8.0
 minimum_volume=5000
 max_in_transit=40
@@ -44,3 +45,11 @@ Key Calculations:
 * Market Capitalization = Outstanding Shares x Stock Price
 * Earnings per Share = (Net Income - Preferred Dividends) ÷ Average Oustanding Common Shares
 * Cash Flow per Share = (Operating Cash Flow – Preferred Dividends) ÷ Common Shares Outstanding
+
+Concepts:
+* Announcement date: The date a company declares a dividend.
+* Ex-dividend date: The first trading day on which buyers of a stock no longer qualify for a previously declared dividend is called the ex-dividend date, or simply the ex-date. For instance, if a dividend has an ex-date of Tuesday, June 5, only the shareholders who purchased the stock prior to June 5 are eligible for the payment.
+* Record date: The record date is the cut-off date set by the company to determine the roster of shareholders eligible to receive a dividend. Since it currently takes two days to settle a share purchase, the record date is typically the next business day after the ex-date (and two trading days after the last day on which share buyers qualify for a previously declared dividend).
+* Payment date: The company pays the dividend on the payment date, also known as the payable date, which is when the money gets credited to investors' accounts.
+* Short Stock: The borrower of the stock is responsible for paying any dividends to the lenders.
+* https://www.investopedia.com/ask/answers/042215/if-investor-short-dividendpaying-stock-record-date-are-they-entitled-dividend.asp
