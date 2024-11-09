@@ -34,11 +34,11 @@ struct Choices {
   vName_t m_vListedMarket;
   vName_t m_vSecurityType;
   vName_t m_vIgnoreNames;
+  vName_t m_vSecurityState; // symbol,{decline,good,ignore,portfolio}
 
   double m_dblMinimumYield;
   uint32_t m_nMinimumVolume;
 
-  //unsigned int m_nSimultaneousRetrievals;
   uint32_t m_nMaxInTransit;
 
 };

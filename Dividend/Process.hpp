@@ -48,6 +48,7 @@ public:
     double nSharesOutstanding;
     boost::gregorian::date datePayed;
     boost::gregorian::date dateExDividend;
+    std::string sState;
     std::string sOptionRoots;
 
     dividend_t( const std::string& sSymbol_ )
@@ -81,6 +82,9 @@ private:
 
   using mapInProgress_t = std::map<std::string,InProgress>;
   mapInProgress_t m_mapInProgress;
+
+  using mapSecurityState_t = std::map<std::string, std::string>;
+  mapSecurityState_t m_mapSecurityState;
 
   // assumes single thread
   pAcquireFundamentals_t m_pAcquireFundamentals_burial;

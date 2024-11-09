@@ -34,10 +34,10 @@ namespace {
   static const std::string sChoice_ListedMarket( "listed_market" );
   static const std::string sChoice_SecurityType( "security_type" );
   static const std::string sChoice_IgnoreName( "ignore_name" );
+  static const std::string sChoice_SecurityState( "security_state" );
   static const std::string sChoice_MinimumYield( "minimum_yield" );
   static const std::string sChoice_MinimumVolume( "minimum_volume" );
   static const std::string sChoice_MaxInTransit( "max_in_transit" );
-  //static const std::string sChoice_NumberOfRetrievals( "number_of_retrievals" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bOptional, T& dest ) {
@@ -64,15 +64,15 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
   try {
 
-    po::options_description config( "rdaf/dl config" );
+    po::options_description config( "dividend config" );
     config.add_options()
       ( sChoice_ListedMarket.c_str(), po::value<vName_t>( &choices.m_vListedMarket ), "listed market" )
       ( sChoice_SecurityType.c_str(), po::value<vName_t>( &choices.m_vSecurityType ), "security type" )
       ( sChoice_IgnoreName.c_str(), po::value<vName_t>( &choices.m_vIgnoreNames ) , "ignore names" )
+      ( sChoice_SecurityState.c_str(), po::value<vName_t>( &choices.m_vSecurityState ) , "state - symbol,{decline,good,ignore,portfolio}" )
       ( sChoice_MinimumYield.c_str(), po::value<double>( &choices.m_dblMinimumYield ), "minimum yield" )
       ( sChoice_MinimumVolume.c_str(), po::value<uint32_t>( &choices.m_nMinimumVolume ), "minimum volume" )
       ( sChoice_MaxInTransit.c_str(), po::value<uint32_t>( &choices.m_nMaxInTransit ), "maximum in transit" )
-      //( sChoice_NumberOfRetrievals.c_str(), po::value<unsigned int>( &choices.m_nSimultaneousRetrievals ), "number of simultaneous retrievals" );
       ;
     po::variables_map vm;
 
@@ -88,15 +88,10 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       bOk &= parse<vName_t>( sFileName, vm, sChoice_ListedMarket, false, choices.m_vListedMarket );
       bOk &= parse<vName_t>( sFileName, vm, sChoice_SecurityType, false, choices.m_vSecurityType );
       bOk &= parse<vName_t>( sFileName, vm, sChoice_IgnoreName, true, choices.m_vIgnoreNames );
+      bOk &= parse<vName_t>( sFileName, vm, sChoice_SecurityState, true, choices.m_vSecurityState );
       bOk &= parse<double>( sFileName, vm, sChoice_MinimumYield, false, choices.m_dblMinimumYield );
       bOk &= parse<uint32_t>( sFileName, vm, sChoice_MinimumVolume, false, choices.m_nMinimumVolume );
       bOk &= parse<uint32_t>( sFileName, vm, sChoice_MaxInTransit, false, choices.m_nMaxInTransit );
-      //bOk &= parse<unsigned int>( sFileName, vm, sChoice_NumberOfRetrievals, false, choices.m_nSimultaneousRetrievals );
-
-      //if ( 10 < choices.m_nSimultaneousRetrievals ) {
-      //  bOk = false;
-      //  BOOST_LOG_TRIVIAL(error) << sChoice_NumberOfRetrievals << " max 10" << std::endl;
-      //}
 
     }
 

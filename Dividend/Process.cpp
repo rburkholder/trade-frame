@@ -59,6 +59,17 @@ void Process::HandleConnected( int ) {
     setIgnoreName.emplace( name );
   }
 
+  for ( const vName_t::value_type security_state: m_choices.m_vSecurityState ) {
+    std::string::size_type pos = security_state.find( ',' );
+    assert( std::string::npos != pos );
+    assert( 0 < pos );
+    assert( pos < security_state.size() );
+    const std::string security( security_state.substr( 0, pos ) );
+    const std::string state( security_state.substr( pos + 1 ) );
+    std::cout << "security state " << security << '=' << state << std::endl;
+    m_mapSecurityState.emplace( std::move( security ), std::move( state ) );
+  }
+
   std::cout << "symbol retrieval started ..." << std::endl;
 
   m_piqfeed->SymbolList(
@@ -120,6 +131,12 @@ void Process::Lookup() {
         dividend.dateExDividend = fundamentals.dateExDividend;
         dividend.nSharesOutstanding = fundamentals.dblCommonSharesOutstanding;
         dividend.sOptionRoots = fundamentals.sOptionRoots;
+
+        mapSecurityState_t::const_iterator iterSecurity = m_mapSecurityState.find( dividend.sSymbol );
+        if ( m_mapSecurityState.end() != iterSecurity ) {
+          dividend.sState = iterSecurity->second;
+        }
+
         //if ( 10.0 < fundamentals.dblDividendYield ) {
         //  std::cout
         //    << fundamentals.sExchange
