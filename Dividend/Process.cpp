@@ -66,7 +66,7 @@ void Process::HandleConnected( int ) {
     assert( pos < security_state.size() );
     const std::string security( security_state.substr( 0, pos ) );
     const std::string state( security_state.substr( pos + 1 ) );
-    std::cout << "security state " << security << '=' << state << std::endl;
+    //std::cout << "security state " << security << '=' << state << std::endl;
     m_mapSecurityState.emplace( std::move( security ), std::move( state ) );
   }
 
