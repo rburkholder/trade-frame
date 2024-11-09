@@ -19,20 +19,41 @@
  * Created: November 5, 2024 21:37
  */
 
+
+#include <boost/log/trivial.hpp>
+#include <boost/describe.hpp>
+//#include <boost/describe/enumerators.hpp>
+
 #include "TradeState.hpp"
 
-TradeState::ETradeState TradeState::Set( ETradeState state ) {
+ETradeState::E ETradeState::Set( E state ) {
 
-  const ETradeState oldState( m_stateTrade );
-  m_stateTrade = state;
+  const E oldState( m_state );
+  m_state = state;
+
+  BOOST_LOG_TRIVIAL(trace)
+    << "TradeState "
+    << boost::describe::enum_to_string( oldState, "unknown" )
+    << '>'
+    << boost::describe::enum_to_string( m_state, "unknown" )
+    ;
 
   return oldState;
 }
 
-TradeState::ETradeState TradeState::Set( ETradeState state, const std::string& func, const std::string& line ) {
+ETradeState::E ETradeState::Set( E state, const std::string& func, const std::string& line ) {
 
-  const ETradeState oldState( m_stateTrade );
-  m_stateTrade = state;
+  const E oldState( m_state );
+  m_state = state;
+
+  BOOST_LOG_TRIVIAL(trace)
+    << "TradeState "
+    << boost::describe::enum_to_string( oldState, "unknown" )
+    << '>'
+    << boost::describe::enum_to_string( m_state, "unknown" )
+    << ' ' << func
+    << ' ' << line
+    ;
 
   return oldState;
 }

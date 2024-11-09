@@ -30,8 +30,7 @@
 #include "TrackOrder.hpp"
 
 TrackOrder::TrackOrder()
-: m_stateTrade( ETradeState::Init )
-, m_quantityBaseCurrency {}
+: m_quantityBaseCurrency {}
 , m_fTransferFunds( nullptr )
 , m_fFillPrice( nullptr )
 , m_fCancelled( nullptr )
@@ -255,7 +254,7 @@ void TrackOrder::ShowOrder( pOrder_t& pOrder ) {
 void TrackOrder::HandleOrderCancelled( const ou::tf::Order& order ) {
   m_pOrderPending->OnOrderCancelled.Remove( MakeDelegate( this, &TrackOrder::HandleOrderCancelled ) );
   m_pOrderPending->OnOrderFilled.Remove( MakeDelegate( this, &TrackOrder::HandleOrderFilled ) );
-  switch ( m_stateTrade ) {
+  switch ( m_stateTrade() ) {
     case ETradeState::EndOfDayCancel:
     case ETradeState::EndOfDayNeutral:
       BOOST_LOG_TRIVIAL(info)
@@ -343,7 +342,7 @@ void TrackOrder::HandleOrderFilled( const ou::tf::Order& order ) {
       assert( false );
   }
 
-  switch ( m_stateTrade ) {
+  switch ( m_stateTrade() ) {
     case ETradeState::EntrySubmittedUp:
       m_ceEntryFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Entry Fill" );
       m_stateTrade = ETradeState::ExitSignalUp;
@@ -378,42 +377,42 @@ void TrackOrder::HandleOrderFilled( const ou::tf::Order& order ) {
 void TrackOrder::Cancel( fCancel_t&& fCancelled ) { // may need something if nothing to cancel
   assert( nullptr == m_fCancelled );
   if ( m_pPosition ) {
-    m_stateTrade = TrackOrder::ETradeState::Cancelling;
+    m_stateTrade = ETradeState::Cancelling;
     m_fCancelled = std::move( fCancelled );
     m_pPosition->CancelOrders();
     // what happens if no orders to cancel?
   }
   else {
-    m_stateTrade = TrackOrder::ETradeState::Cancelled; // might need to be ::Search
+    m_stateTrade = ETradeState::Cancelled; // might need to be ::Search
   }
 }
 
 void TrackOrder::Close( fClose_t&& fClosed ) {
   assert( nullptr == m_fClosed );
   if ( m_pPosition ) {
-    m_stateTrade = TrackOrder::ETradeState::EndOfDayNeutral;
+    m_stateTrade = ETradeState::EndOfDayNeutral;
     m_fClosed = std::move( fClosed );
     m_pPosition->ClosePosition();
   }
   else {
-    m_stateTrade = TrackOrder::ETradeState::Done;
+    m_stateTrade = ETradeState::Done;
   }
 }
 
 void TrackOrder::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
-  m_stateTrade = TrackOrder::ETradeState::EndOfDayCancel;
+  m_stateTrade = ETradeState::EndOfDayCancel;
   if ( m_pPosition ) {
     m_pPosition->CancelOrders();
   }
 }
 
 void TrackOrder::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
-  switch ( m_stateTrade ) {
+  switch ( m_stateTrade() ) {
     case ETradeState::NoTrade:
       // do nothing
       break;
     default:
-      m_stateTrade = TrackOrder::ETradeState::EndOfDayNeutral;
+      m_stateTrade = ETradeState::EndOfDayNeutral;
       if ( m_pPosition ) {
         m_pPosition->ClosePosition();
       }
@@ -450,7 +449,7 @@ void TrackOrder::HandleExitOrderFilled( const ou::tf::Order& order ) {
   switch ( order.GetOrderSide() ) {
     case ou::tf::OrderSide::EOrderSide::Buy:
       //m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "LxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
-      switch( m_stateTrade ) {
+      switch( m_stateTrade() ) {
         case ETradeState::ExitSubmitted:
           m_stateTrade = ETradeState::Search;
           break;
@@ -458,7 +457,7 @@ void TrackOrder::HandleExitOrderFilled( const ou::tf::Order& order ) {
       break;
     case ou::tf::OrderSide::EOrderSide::Sell:
       //m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "SxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
-      switch( m_stateTrade ) {
+      switch( m_stateTrade() ) {
         case ETradeState::ExitSubmitted:
           m_stateTrade = ETradeState::Search;
           break;

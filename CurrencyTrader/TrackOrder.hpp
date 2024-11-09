@@ -32,24 +32,6 @@
 class TrackOrder {
 public:
 
-  enum class ETradeState {
-    Init,  // initiaize state in current market
-    Search,  // looking for long or short enter
-    EntrySubmittedUp, // order has been submitted, waiting for confirmation
-    EntrySubmittedDn, // order has been submitted, waiting for confirmation
-    ExitSignalUp,  // position exists, looking for exit
-    ExitSignalDn,  // position exists, looking for exit
-    ExitSubmitted, // wait for exit to complete
-    Cancelling,
-    Cancelled,
-    NoTrade, // from the config file, no trading, might be a future
-    EndOfDayCancel,
-    EndOfDayNeutral,
-    Done // no more action
-    };
-
-  ETradeState m_stateTrade;
-
   using pPosition_t = ou::tf::Position::pPosition_t;
   using quantity_t = ou::tf::Order::quantity_t;
 
@@ -93,6 +75,8 @@ public:
     : dt( dt_ ), signal( signal_ ), limit( limit_ ), profit {}, stop( stop_ ), duration( duration_ )
     {}
   };
+
+  ETradeState m_stateTrade;
 
   TrackOrder();
   ~TrackOrder();
@@ -151,8 +135,6 @@ private:
 
   ou::tf::Currency::ECurrency m_curBase;
   ou::tf::Currency::ECurrency m_curQuote;
-
-  TradeState m_TradeState;
 
   double Normalize( double price ) const;
 

@@ -309,11 +309,11 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 }
 
 void Strategy::RunState( TrackOrder& to ) {
-  switch ( to.m_stateTrade ) {
-    case TrackOrder::ETradeState::Init: // Strategy starts in this state
-      to.m_stateTrade = TrackOrder::ETradeState::Search;
+  switch ( to.m_stateTrade() ) {
+    case ETradeState::Init: // Strategy starts in this state
+      to.m_stateTrade = ETradeState::Search;
       break;
-    case TrackOrder::ETradeState::Search:
+    case ETradeState::Search:
       switch ( m_state.swing ) {
         case State::Swing::up:
           {
@@ -411,11 +411,11 @@ void Strategy::RunState( TrackOrder& to ) {
           break;
       }
       break;
-    case TrackOrder::ETradeState::EntrySubmittedUp:
-    case TrackOrder::ETradeState::EntrySubmittedDn:
+    case ETradeState::EntrySubmittedUp:
+    case ETradeState::EntrySubmittedDn:
       // wait for exectuion
       break;
-    case TrackOrder::ETradeState::ExitSignalUp: // need to move to quote
+    case ETradeState::ExitSignalUp: // need to move to quote
       {
         const double bid = m_quote.Bid();
         if ( bid <= m_stop.trail ) {
@@ -437,7 +437,7 @@ void Strategy::RunState( TrackOrder& to ) {
         }
       }
       break;
-    case TrackOrder::ETradeState::ExitSignalDn: // need to move to quote
+    case ETradeState::ExitSignalDn: // need to move to quote
       {
         const double ask = m_quote.Ask();
         if ( ask >= m_stop.trail ) {
@@ -459,22 +459,22 @@ void Strategy::RunState( TrackOrder& to ) {
         }
       }
       break;
-    case TrackOrder::ETradeState::ExitSubmitted:
+    case ETradeState::ExitSubmitted:
       // wait for execution
       break;
-    case TrackOrder::ETradeState::Cancelling:
+    case ETradeState::Cancelling:
       //assert( false ); wait for state to clear, will it clear?
       break;
-    case TrackOrder::ETradeState::Cancelled:
+    case ETradeState::Cancelled:
       assert( false ); // is it legal to arrive here?
       break;
-    case TrackOrder::ETradeState::EndOfDayCancel:
+    case ETradeState::EndOfDayCancel:
       break;
-    case TrackOrder::ETradeState::EndOfDayNeutral:
+    case ETradeState::EndOfDayNeutral:
       break;
-    case TrackOrder::ETradeState::NoTrade:
+    case ETradeState::NoTrade:
       break;
-    case TrackOrder::ETradeState::Done:
+    case ETradeState::Done:
       break;
     default:
       assert( false );
@@ -609,13 +609,13 @@ void Strategy::SaveWatch( const std::string& sPrefix ) {
 }
 
 void Strategy::CloseAndDone() {
-  switch ( m_to.m_stateTrade ) {
-    case TrackOrder::ETradeState::Search:
+  switch ( m_to.m_stateTrade() ) {
+    case ETradeState::Search:
       // nothing
       break;
-    case TrackOrder::ETradeState::EntrySubmittedUp:
-    case TrackOrder::ETradeState::EntrySubmittedDn:
-    case TrackOrder::ETradeState::ExitSubmitted:
+    case ETradeState::EntrySubmittedUp:
+    case ETradeState::EntrySubmittedDn:
+    case ETradeState::ExitSubmitted:
       m_to.Cancel(
         [this](){
           m_to.Close(
@@ -624,8 +624,8 @@ void Strategy::CloseAndDone() {
             } );
         } );
       break;
-    case TrackOrder::ETradeState::ExitSignalUp:
-    case TrackOrder::ETradeState::ExitSignalDn:
+    case ETradeState::ExitSignalUp:
+    case ETradeState::ExitSignalDn:
       // waiting, so nothing to cancel
       break;
     default:
