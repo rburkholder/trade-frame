@@ -65,7 +65,7 @@ public:
 
    // __PRETTY_FUNCTION__ __LINE__
   E Set( E state );
-  E operator=( E state ) { return Set( state ); }
+  E operator=( E state ) { Set( state ); return m_state; }
 
   E Set( E state, const std::string& func, const std::string& line );
 
