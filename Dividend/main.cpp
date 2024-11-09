@@ -52,17 +52,17 @@ int main( int argc, char* argv[] ) {
       std::cout
                << vt.sSymbol
         << ',' << vt.sCompanyName
-        << "," << vt.sExchange
-        << "," << vt.trade
-        << "," << vt.yield
-        << "," << vt.rate
-        << "," << vt.amount
-        << "," << vt.nAverageVolume
-        << "," << vt.dateExDividend
-        << "," << vt.datePayed
-        << "," << vt.nSharesOutstanding
+        << ',' << vt.sExchange
+        << ',' << vt.trade
+        << ',' << vt.yield
+        << ',' << vt.rate
+        << ',' << vt.amount
+        << ',' << vt.nAverageVolume
+        << ',' << vt.dateExDividend
+        << ',' << vt.datePayed
+        << ',' << vt.nSharesOutstanding
         << ',' << vt.sState
-        << "," << vt.sOptionRoots
+        << ',' << vt.sOptionRoots
         << std::endl;
     }
   }
