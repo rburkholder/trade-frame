@@ -57,6 +57,7 @@ public:
   using vSymbols_t = std::vector<dividend_t>;
 
   Process( const config::Choices& choices, vSymbols_t& );
+  ~Process();
 
   void Wait();
 
@@ -82,6 +83,9 @@ private:
 
   using mapInProgress_t = std::map<std::string,InProgress>;
   mapInProgress_t m_mapInProgress;
+
+  using mapIgnoreName_t = std::map<std::string, bool>;
+  mapIgnoreName_t m_mapIgnoreName; // bool, true when found in a match
 
   using mapSecurityState_t = std::map<std::string, std::string>;
   mapSecurityState_t m_mapSecurityState;

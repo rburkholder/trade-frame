@@ -34,6 +34,15 @@ Process::Process( const config::Choices& choices, vSymbols_t& vSymbols )
 
 }
 
+Process::~Process() {
+  for ( mapIgnoreName_t::value_type& vt: m_mapIgnoreName ) {
+    if ( !vt.second ) {
+      std::cout << "ignore name " << vt.first << " not used" << std::endl;
+    }
+  }
+  m_mapIgnoreName.clear();
+}
+
 void Process::HandleConnected( int ) {
 
   using vName_t = config::vName_t;
@@ -53,10 +62,14 @@ void Process::HandleConnected( int ) {
     setSecurityType.emplace( type );
   }
 
-  setNames_t setIgnoreName;
-
   for ( const vName_t::value_type name: m_choices.m_vIgnoreNames ) {
-    setIgnoreName.emplace( name );
+    mapIgnoreName_t::const_iterator iter = m_mapIgnoreName.find( name );
+    if ( m_mapIgnoreName.end() == iter ) {
+      m_mapIgnoreName.emplace( std::move( name ), false );
+    }
+    else {
+      std::cout << "ignore name " << name << " exists" << std::endl;
+    }
   }
 
   for ( const vName_t::value_type security_state: m_choices.m_vSecurityState ) {
@@ -74,8 +87,10 @@ void Process::HandleConnected( int ) {
 
   m_piqfeed->SymbolList(
     setListedMarket, setSecurityType,
-    [this, setIgnoreName_=std::move(setIgnoreName)](const std::string& sSymbol, key_t keyListedMarket){
-      if ( setIgnoreName_.end() != setIgnoreName_.find( sSymbol ) ) {
+    [this](const std::string& sSymbol, key_t keyListedMarket){
+      mapIgnoreName_t::iterator iter = m_mapIgnoreName.find( sSymbol );
+      if ( m_mapIgnoreName.end() != iter ) {
+        iter->second = true;
       }
       else {
         m_vSymbols.push_back( dividend_t( sSymbol ) );
