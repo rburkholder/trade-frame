@@ -36,12 +36,13 @@ int main( int argc, char* argv[] ) {
     return EXIT_FAILURE;
   }
 
-  using dividend_t = Process::dividend_t;
   using vSymbols_t = Process::vSymbols_t;
   vSymbols_t vSymbols;
 
-  Process process( choices, vSymbols );
-  process.Wait();
+  {
+    Process process( choices, vSymbols );
+    process.Wait();
+  }
 
   std::cout
     << "symbol,name,exchange,last($),yield(%),rate,amount,vol,exdiv,payed,shares,state,option"

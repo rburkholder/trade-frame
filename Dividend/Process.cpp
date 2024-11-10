@@ -35,12 +35,22 @@ Process::Process( const config::Choices& choices, vSymbols_t& vSymbols )
 }
 
 Process::~Process() {
+
+  assert( m_mapInProgress.empty() );
+  m_pAcquireFundamentals_burial.reset();
+
   for ( mapIgnoreName_t::value_type& vt: m_mapIgnoreName ) {
     if ( !vt.second ) {
       std::cout << "ignore name " << vt.first << " not used" << std::endl;
     }
   }
+
+  m_piqfeed->Disconnect();
+  m_piqfeed.reset();
+
   m_mapIgnoreName.clear();
+  m_mapSecurityState.clear();
+
 }
 
 void Process::HandleConnected( int ) {
