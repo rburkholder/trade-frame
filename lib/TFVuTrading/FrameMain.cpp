@@ -14,8 +14,6 @@
 
 // Generic frame for wx based applications
 
-#include <iostream>
-
 #include <wx/menu.h>
 #include <wx/statusbr.h>
 
@@ -31,7 +29,6 @@ FrameMain::FrameMain( wxWindow* parent, wxWindowID id, const wxString& caption, 
 }
 
 FrameMain::~FrameMain() {
-  //std::cout << "FrameMain::~FrameMain: " << this->GetName() << std::endl;
 }
 
 bool FrameMain::Create( wxWindow* parent, wxWindowID id, const wxString& caption, const wxPoint& pos, const wxSize& size, long style ) {
@@ -39,7 +36,6 @@ bool FrameMain::Create( wxWindow* parent, wxWindowID id, const wxString& caption
   wxFrame::Create( parent, id, caption, pos, size, style );
 
   CreateControls();
-  Centre();
   return true;
 }
 

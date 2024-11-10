@@ -79,9 +79,6 @@ public:
 
   wxMenu* AddDynamicMenu( const std::string& root, const vpItems_t& vItems );
 
-  wxBitmap GetBitmapResource( const wxString& name );
-  wxIcon GetIconResource( const wxString& name );
-
 protected:
 private:
 
@@ -95,16 +92,18 @@ private:
   wxMenuBar* m_menuBar;
   wxStatusBar* m_statusBar;
 
-//  typedef std::vector<structMenuItem*> vPtrItems_t;  // wxWidgets take ownership of object
   vpItems_t m_vPtrItems;
 
   void Init();
   void CreateControls();
 
-  void OnMenuExitClick( wxCommandEvent& event );
-  void OnDynamicActionClick( wxCommandEvent& event );
-  void OnDestroy( wxWindowDestroyEvent& event );
-  void OnClose( wxCloseEvent& event );
+  wxBitmap GetBitmapResource( const wxString& name );
+  wxIcon GetIconResource( const wxString& name );
+
+  void OnMenuExitClick( wxCommandEvent& );
+  void OnDynamicActionClick( wxCommandEvent& );
+  void OnDestroy( wxWindowDestroyEvent& );
+  void OnClose( wxCloseEvent& );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
@@ -131,7 +130,6 @@ private:
       wxPoint point( x, y );
       CallAfter(
         [this,point](){
-          //usleep( 1000000 ); // seems to be some sort of magic delay
           SetPosition( point );
         } );
 
@@ -147,16 +145,12 @@ private:
       ar & y;
       wxSize size( x, y );
       SetSize( size );
-      Layout();
+      //Layout(); // needs to be in caller
 
       ar & x;
       ar & y;
-      wxPoint point( x, y );
-      CallAfter(
-        [this,point](){
-          //usleep( 1000000 ); // seems to be some sort of magic delay
-          SetPosition( point );
-        } );
+      wxPoint position( x, y );
+      Move( position );
     }
   }
 
