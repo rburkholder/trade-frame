@@ -234,6 +234,8 @@ private:
   void HandleMenuActionSaveValues();
   void HandleMenuActionEmitSwingTrack();
 
+  void OnFrameMainAutoMove( wxMoveEvent& );
+
   void SaveState();
   void LoadState();
 
