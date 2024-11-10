@@ -68,9 +68,6 @@ bool AppMarketTrader::OnInit() {
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
 
-  //m_pFrameMain->SetSize( 800, 500 );
-  //m_pFrameMain->SetAutoLayout( true );
-
   SetTopWindow( m_pFrameMain );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppMarketTrader::OnClose, this );  // start close of windows and controls
@@ -86,8 +83,8 @@ void AppMarketTrader::OnFrameMainAutoMove( wxMoveEvent& event ) {
   CallAfter(
     [this](){
       LoadState();
+      //m_pFrameMain->SetAutoLayout( true );
       m_pFrameMain->Layout();
-      m_pFrameMain->Show( true );
     }
   );
 
