@@ -15,14 +15,57 @@
 /*
  * File:    AppMarketTrader.hpp
  * Author:  raymond@burkholder.net
- * Project: Trader
+ * Project: MarketTrader
  * Created: 2024/11/10 12:18:19
  */
 
 #pragma once
 
-class AppTrader {
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
+#include <wx/app.h>
+
+#include <TFBitsNPieces/FrameWork02.hpp>
+
+class FrameMain;
+
+class AppMarketTrader:
+  public wxApp,
+  public ou::tf::FrameWork02<AppMarketTrader>
+{
+  friend ou::tf::FrameWork02<AppMarketTrader>;
+  friend class boost::serialization::access;
 public:
 protected:
 private:
+
+  FrameMain* m_pFrameMain;
+
+  virtual bool OnInit() override;
+  void OnClose( wxCloseEvent& event );
+  virtual int OnExit();
+
+  void OnFrameMainAutoMove( wxMoveEvent& );
+
+  void SaveState();
+  void LoadState();
+
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    ar & *m_pFrameMain;
+    //ar & m_splitterData->GetSashPosition();
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    ar & *m_pFrameMain;
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 };
+
+BOOST_CLASS_VERSION(AppMarketTrader, 1)
+
+//DECLARE_APP(AppMarketTrader)
