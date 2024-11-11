@@ -19,10 +19,9 @@
  * Created: November 5, 2024 21:37
  */
 
+#include <boost/describe.hpp>
 
 #include <boost/log/trivial.hpp>
-#include <boost/describe.hpp>
-//#include <boost/describe/enumerators.hpp>
 
 #include "TradeState.hpp"
 
@@ -34,7 +33,7 @@ ETradeState::E ETradeState::Set( E state ) {
   BOOST_LOG_TRIVIAL(trace)
     << "TradeState "
     << boost::describe::enum_to_string( oldState, "unknown" )
-    << '>'
+    << " > "
     << boost::describe::enum_to_string( m_state, "unknown" )
     ;
 
@@ -49,7 +48,7 @@ ETradeState::E ETradeState::Set( E state, const std::string& func, const std::st
   BOOST_LOG_TRIVIAL(trace)
     << "TradeState "
     << boost::describe::enum_to_string( oldState, "unknown" )
-    << '>'
+    << " > "
     << boost::describe::enum_to_string( m_state, "unknown" )
     << ' ' << func
     << ' ' << line
