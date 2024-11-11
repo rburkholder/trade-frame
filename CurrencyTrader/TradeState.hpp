@@ -25,40 +25,31 @@
 
 #include <boost/describe/enum.hpp>
 
+#define ETRADESTATE \
+    Init,  /* initiaize state in current market */                             \
+    Search,  /* looking for long or short enter */                             \
+    EntrySubmittedUp, /* order has been submitted, waiting for confirmation */ \
+    EntrySubmittedDn, /* order has been submitted, waiting for confirmation */ \
+    ExitSignalUp,  /* position exists, looking for exit */                     \
+    ExitSignalDn,  /* position exists, looking for exit */                     \
+    ExitSubmitted, /* wait for exit to complete */                             \
+    Cancelling,                                                                \
+    Cancelled,                                                                 \
+    NoTrade, /* from the config file, no trading, might be a future */         \
+    EndOfDayCancel,                                                            \
+    EndOfDayNeutral,                                                           \
+    Done /* no more action */
+
 class ETradeState {
 public:
 
   enum E {
-    Init,  // initiaize state in current market
-    Search,  // looking for long or short enter
-    EntrySubmittedUp, // order has been submitted, waiting for confirmation
-    EntrySubmittedDn, // order has been submitted, waiting for confirmation
-    ExitSignalUp,  // position exists, looking for exit
-    ExitSignalDn,  // position exists, looking for exit
-    ExitSubmitted, // wait for exit to complete
-    Cancelling,
-    Cancelled,
-    NoTrade, // from the config file, no trading, might be a future
-    EndOfDayCancel,
-    EndOfDayNeutral,
-    Done // no more action
+    ETRADESTATE
     };
 
   BOOST_DESCRIBE_NESTED_ENUM(
     E,
-      Init,  // initiaize state in current market
-      Search,  // looking for long or short enter
-      EntrySubmittedUp, // order has been submitted, waiting for confirmation
-      EntrySubmittedDn, // order has been submitted, waiting for confirmation
-      ExitSignalUp,  // position exists, looking for exit
-      ExitSignalDn,  // position exists, looking for exit
-      ExitSubmitted, // wait for exit to complete
-      Cancelling,
-      Cancelled,
-      NoTrade, // from the config file, no trading, might be a future
-      EndOfDayCancel,
-      EndOfDayNeutral,
-      Done // no more action
+      ETRADESTATE
     )
 
   ETradeState(): m_state( E::Init ) {}
@@ -70,7 +61,7 @@ public:
   E Set( E state, const std::string& func, const std::string& line );
 
   E Get() const { return m_state; }
-  E operator()() { return m_state; };
+  E operator()() const { return m_state; };
 
 protected:
 private:
