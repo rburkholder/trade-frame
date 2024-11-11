@@ -1,0 +1,52 @@
+2024/11/11
+https://www.omnicalculator.com/statistics/cubic-regression
+
+2024/07/07
+* could use the simulator to issue time based events
+
+2024/07/01
+* emit swing info
+* show stop level
+* stops with quotes
+* test exit limit order
+* minimum ATR prior to entry
+* usd.cad has a flat time, not at normal hours
+
+2024/06/18
+* quotes need to update stop
+* query software reset time and install a time into timer
+  * time pulse call back for reset
+* stop & done works?
+* outside of hours -> contrary trading
+  * track trading ranges and set closing limit order accordingly
+
+2024/06/08
+https://volatility.red/Forex_Brokers_and_Regulatory_Info_for_Canadian_Residents
+https://www.interactivebrokers.com/en/trading/forexOrderSize.php?cid=7f0d9bee-e3a0-45d7-8248-42ae9886f7f2
+https://interactivebrokers.github.io/tws-api/classIBApi_1_1Order.html
+
+2024/06/07
+run statistics from turning point to maximum prior to next turning point
+chart with stddev
+then use that info creating proper bracket order set
+
+2024/05/20
+need an id to track into position and out
+fix close & done
+see if closing transaction is using correct quantity
+use limit orders
+
+2024/05/19
+format currency & pair with proper number of decimals for display
+
+2024/05/03
+* all week data collector
+* use the 'once-a-second' signal for calculation
+
+2024/04/25
+
+* add currency accounts for tracking and for bookkeeping
+* ATR trading trailing stop
+* calc/emit PIP
+* record bid/ask with order to verify trading range
+
