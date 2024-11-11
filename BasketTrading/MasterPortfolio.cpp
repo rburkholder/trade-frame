@@ -975,12 +975,15 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy(
       );
 
   // TODO: will need this generic for equities and futures
+  const std::string& sName( uws.pUnderlying->GetWatch()->GetInstrumentName() );
   switch ( uws.pUnderlying->GetWatch()->GetInstrument()->GetInstrumentType() ) {
     case ou::tf::InstrumentType::Future:
       pManageStrategy->InitFor24HourMarkets( m_dateTrading );
+      std::cout << sName << " market open " << pManageStrategy->GetMarketOpen() << std::endl;
       break;
     case ou::tf::InstrumentType::Stock:
       pManageStrategy->InitForUSEquityExchanges( m_dateTrading );
+      std::cout << sName << " market open " << pManageStrategy->GetMarketOpen() << std::endl;
       break;
     default:
       assert( false );
