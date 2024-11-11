@@ -112,8 +112,6 @@ void AppBasketTrading::Init() {
   wxBoxSizer* sizerControls = new wxBoxSizer( wxHORIZONTAL );
   sizerLeft->Add( sizerControls, 0, wxLEFT|wxTOP|wxRIGHT, 2 );
 
-  m_pFrameMain->Show( true );
-
   // populate variable in FrameWork01
   m_pPanelProviderControl = new ou::tf::PanelProviderControl( m_pFrameMain, wxID_ANY );
   sizerControls->Add( m_pPanelProviderControl, 0, wxEXPAND|wxRIGHT, 5);
@@ -184,11 +182,8 @@ void AppBasketTrading::Init() {
   vItems.push_back( new mi( "a7 Add combo - forced", MakeDelegate( this, &AppBasketTrading::HandleAddComboForced ) ) );
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
 
-  CallAfter(
-    [this](){
-      LoadState();
-    }
-  );
+  m_pFrameMain->Bind( wxEVT_MOVE, &AppBasketTrading::OnFrameMainAutoMove, this );
+  m_pFrameMain->Show( true ); // triggers the auto move
 
 }
 
@@ -379,6 +374,22 @@ void AppBasketTrading::OnConnected() {
       }
     }
   }
+}
+
+void AppBasketTrading::OnFrameMainAutoMove( wxMoveEvent& event ) {
+
+  CallAfter(
+    [this](){
+      LoadState();
+      //m_pFrameMain->SetAutoLayout( true );
+      m_pFrameMain->Layout();
+    }
+  );
+
+  m_pFrameMain->Unbind( wxEVT_MOVE, &AppBasketTrading::OnFrameMainAutoMove, this );
+
+  event.Skip(); // set to false if we want to ignore auto move
+
 }
 
 void AppBasketTrading::SaveState() {
