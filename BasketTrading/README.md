@@ -41,7 +41,7 @@ A BasketTrading.cfg is required with content similar to:
 
 ```
 date_history = 2022-04-07  # last day of daily history bars
-date_trading = 2022-04-07  # start of trading day
+date_trading = 2022-04-07  # start of trading day - date the market opens
 days_front = 3             # minimum number of days to front month chain
 days_back = 30             # minimum number of days to back month chain
 symbol = @ESM22            # underlying symbol
