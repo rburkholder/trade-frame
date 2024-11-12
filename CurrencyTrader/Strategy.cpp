@@ -311,7 +311,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 void Strategy::RunState( TrackOrder& to ) {
   switch ( to.m_stateTrade() ) {
     case ETradeState::Init: // Strategy starts in this state
-      to.m_stateTrade = ETradeState::Search;
+      to.m_stateTrade.Set( ETradeState::Search, m_pWatch->GetInstrumentName(), __FUNCTION__, __LINE__ );
       break;
     case ETradeState::Search:
       switch ( m_state.swing ) {

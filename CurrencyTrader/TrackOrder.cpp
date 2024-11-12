@@ -137,7 +137,7 @@ void TrackOrder::EnterLongLmt( const OrderArgs& args ) {
   assert( pOrder );
   SetGoodTill( args, pOrder );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  m_stateTrade = ETradeState::EntrySubmittedUp;
+  m_stateTrade.Set( ETradeState::EntrySubmittedUp, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   EnterCommon( args, pOrder );
 }
 
@@ -146,7 +146,7 @@ void TrackOrder::EnterLongMkt( const OrderArgs& args ) {
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityBaseCurrency );
   assert( pOrder );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "LeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  m_stateTrade = ETradeState::EntrySubmittedUp;
+  m_stateTrade.Set( ETradeState::EntrySubmittedUp, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   EnterCommon( args, pOrder );
 }
 
@@ -155,7 +155,7 @@ void TrackOrder::EnterLongBracket( const OrderArgs& args ) {
   // will need to simulate equivalent of Bracket Order in the state machine
   assert( 0 < m_quantityBaseCurrency );
   m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  m_stateTrade = ETradeState::EntrySubmittedUp;
+  m_stateTrade.Set( ETradeState::EntrySubmittedUp, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
 
   assert( 0.0 < args.limit );
   pOrder_t pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityBaseCurrency, Normalize( args.limit ) );
@@ -192,7 +192,7 @@ void TrackOrder::EnterShortLmt( const OrderArgs& args ) {
   assert( pOrder );
   SetGoodTill( args, pOrder );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  m_stateTrade = ETradeState::EntrySubmittedDn;
+  m_stateTrade.Set( ETradeState::EntrySubmittedDn, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   EnterCommon( args, pOrder );
 }
 
@@ -201,12 +201,12 @@ void TrackOrder::EnterShortMkt( const OrderArgs& args ) {
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityBaseCurrency );
   assert( pOrder );
   m_ceEntrySubmit.AddLabel( args.dt, args.signal, "SeS-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-  m_stateTrade = ETradeState::EntrySubmittedDn;
+  m_stateTrade.Set( ETradeState::EntrySubmittedDn, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   EnterCommon( args, pOrder );
 }
 
 void TrackOrder::ExitCommon( const OrderArgs& args, pOrder_t& pOrder ) {
-  m_stateTrade = ETradeState::ExitSubmitted;
+  m_stateTrade.Set( ETradeState::ExitSubmitted, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   Common( args, pOrder );
 }
 
@@ -267,24 +267,24 @@ void TrackOrder::HandleOrderCancelled( const ou::tf::Order& order ) {
       BOOST_LOG_TRIVIAL(info)
         << m_pPosition->GetInstrument()->GetInstrumentName()
         << " order " << order.GetOrderId() << " entry cancelled";
-      m_stateTrade = ETradeState::Search;
+      m_stateTrade.Set( ETradeState::Search, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
       break;
     case ETradeState::Cancelling:
       if ( m_fCancelled ) {
         m_fCancelled();
         m_fCancelled = nullptr;
       }
-      m_stateTrade = ETradeState::Cancelled;
+      m_stateTrade.Set( ETradeState::Cancelled, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
       break;
     case ETradeState::ExitSubmitted:
       //assert( false );  // TODO: need to figure out a plan to retry exit
       BOOST_LOG_TRIVIAL(error)
         << m_pPosition->GetInstrument()->GetInstrumentName()
         << " order " << order.GetOrderId() << " exit cancelled - state machine needs fixes";
-      m_stateTrade = ETradeState::Done;
+      m_stateTrade.Set( ETradeState::Done, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
       break;
     default:
-      m_stateTrade = ETradeState::Search;
+      m_stateTrade.Set( ETradeState::Search, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   }
   m_pOrderPending.reset();
 }
@@ -345,15 +345,15 @@ void TrackOrder::HandleOrderFilled( const ou::tf::Order& order ) {
   switch ( m_stateTrade() ) {
     case ETradeState::EntrySubmittedUp:
       m_ceEntryFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Entry Fill" );
-      m_stateTrade = ETradeState::ExitSignalUp;
+      m_stateTrade.Set( ETradeState::ExitSignalUp, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
       break;
     case ETradeState::EntrySubmittedDn:
       m_ceEntryFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Entry Fill" );
-      m_stateTrade = ETradeState::ExitSignalDn;
+      m_stateTrade.Set( ETradeState::ExitSignalDn, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
       break;
     case ETradeState::ExitSubmitted:
       m_ceExitFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Exit Fill" );
-      m_stateTrade = ETradeState::Search;
+      m_stateTrade.Set( ETradeState::Search, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
       break;
     case ETradeState::EndOfDayCancel:
     case ETradeState::EndOfDayNeutral:
@@ -377,30 +377,30 @@ void TrackOrder::HandleOrderFilled( const ou::tf::Order& order ) {
 void TrackOrder::Cancel( fCancel_t&& fCancelled ) { // may need something if nothing to cancel
   assert( nullptr == m_fCancelled );
   if ( m_pPosition ) {
-    m_stateTrade = ETradeState::Cancelling;
+    m_stateTrade.Set( ETradeState::Cancelling, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
     m_fCancelled = std::move( fCancelled );
     m_pPosition->CancelOrders();
     // what happens if no orders to cancel?
   }
   else {
-    m_stateTrade = ETradeState::Cancelled; // might need to be ::Search
+    m_stateTrade.Set( ETradeState::Cancelled, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ ); // might need to be ::Search
   }
 }
 
 void TrackOrder::Close( fClose_t&& fClosed ) {
   assert( nullptr == m_fClosed );
   if ( m_pPosition ) {
-    m_stateTrade = ETradeState::EndOfDayNeutral;
+    m_stateTrade.Set( ETradeState::EndOfDayNeutral, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
     m_fClosed = std::move( fClosed );
     m_pPosition->ClosePosition();
   }
   else {
-    m_stateTrade = ETradeState::Done;
+    m_stateTrade.Set( ETradeState::Done, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   }
 }
 
 void TrackOrder::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
-  m_stateTrade = ETradeState::EndOfDayCancel;
+  m_stateTrade.Set( ETradeState::EndOfDayCancel, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   if ( m_pPosition ) {
     m_pPosition->CancelOrders();
   }
@@ -412,7 +412,7 @@ void TrackOrder::HandleGoNeutral( boost::gregorian::date, boost::posix_time::tim
       // do nothing
       break;
     default:
-      m_stateTrade = ETradeState::EndOfDayNeutral;
+      m_stateTrade.Set( ETradeState::EndOfDayNeutral, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
       if ( m_pPosition ) {
         m_pPosition->ClosePosition();
       }
@@ -429,11 +429,11 @@ void TrackOrder::HandleExitOrderCancelled( const ou::tf::Order& order ) {
   switch ( order.GetOrderSide() ) {
     case ou::tf::OrderSide::EOrderSide::Buy: // is dt filled at 'internal' time?
       //m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetSignalPrice(), "LxC-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
-      m_stateTrade = ETradeState::Cancelled;  // or use cancelled for custom processing
+      m_stateTrade.Set( ETradeState::Cancelled, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );  // or use cancelled for custom processing
       break;
     case ou::tf::OrderSide::EOrderSide::Sell: // is dt filled at 'internal' time?
       //m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetSignalPrice(), "SxC-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
-      m_stateTrade = ETradeState::Cancelled;  // or use cancelled for custom processing
+      m_stateTrade.Set( ETradeState::Cancelled, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );  // or use cancelled for custom processing
       break;
     default:
       assert( false );
@@ -451,7 +451,7 @@ void TrackOrder::HandleExitOrderFilled( const ou::tf::Order& order ) {
       //m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "LxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
       switch( m_stateTrade() ) {
         case ETradeState::ExitSubmitted:
-          m_stateTrade = ETradeState::Search;
+          m_stateTrade.Set( ETradeState::Search, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
           break;
       }
       break;
@@ -459,7 +459,7 @@ void TrackOrder::HandleExitOrderFilled( const ou::tf::Order& order ) {
       //m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "SxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
       switch( m_stateTrade() ) {
         case ETradeState::ExitSubmitted:
-          m_stateTrade = ETradeState::Search;
+          m_stateTrade.Set( ETradeState::Search, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
           break;
       }
       break;
@@ -490,7 +490,7 @@ void TrackOrder::ExitPosition( const ou::tf::Quote& quote ) {
         pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrder::HandleExitOrderCancelled ) );
         pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackOrder::HandleExitOrderFilled ) );
         m_ceExitSubmit.AddLabel( quote.DateTime(), dblMidPoint, "LxS2-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-        m_stateTrade = ETradeState::ExitSubmitted;
+        m_stateTrade.Set( ETradeState::ExitSubmitted, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
         m_pPosition->PlaceOrder( pOrder );
         ShowOrder( pOrder );
         break;
@@ -507,7 +507,7 @@ void TrackOrder::ExitPosition( const ou::tf::Quote& quote ) {
         pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrder::HandleExitOrderCancelled ) );
         pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackOrder::HandleExitOrderFilled ) );
         m_ceExitSubmit.AddLabel( quote.DateTime(), dblMidPoint, "SxS2-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-        m_stateTrade = ETradeState::ExitSubmitted;
+        m_stateTrade.Set( ETradeState::ExitSubmitted, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
         m_pPosition->PlaceOrder( pOrder );
         ShowOrder( pOrder );
         break;
@@ -516,7 +516,7 @@ void TrackOrder::ExitPosition( const ou::tf::Quote& quote ) {
     }
   }
   else {
-    m_stateTrade = ETradeState::Search;
+    m_stateTrade.Set( ETradeState::Search, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   }
 }
 

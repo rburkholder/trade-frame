@@ -58,7 +58,8 @@ public:
   E Set( E state );
   E operator=( E state ) { Set( state ); return m_state; }
 
-  E Set( E state, const std::string& func, const std::string& line );
+  E Set( E state, const char* func, const int line );
+  E Set( E state, const std::string&, const char* func, const int line );
 
   E Get() const { return m_state; }
   E operator()() const { return m_state; };

@@ -31,7 +31,7 @@ ETradeState::E ETradeState::Set( E state ) {
   m_state = state;
 
   BOOST_LOG_TRIVIAL(trace)
-    << "TradeState "
+    << "state "
     << boost::describe::enum_to_string( oldState, "unknown" )
     << " > "
     << boost::describe::enum_to_string( m_state, "unknown" )
@@ -40,18 +40,36 @@ ETradeState::E ETradeState::Set( E state ) {
   return oldState;
 }
 
-ETradeState::E ETradeState::Set( E state, const std::string& func, const std::string& line ) {
+ETradeState::E ETradeState::Set( E state, const char* func, const int line ) {
 
   const E oldState( m_state );
   m_state = state;
 
   BOOST_LOG_TRIVIAL(trace)
-    << "TradeState "
+    << "state "
     << boost::describe::enum_to_string( oldState, "unknown" )
     << " > "
     << boost::describe::enum_to_string( m_state, "unknown" )
-    << ' ' << func
-    << ' ' << line
+    << ", " << func
+    << ", " << line
+    ;
+
+  return oldState;
+}
+
+ETradeState::E ETradeState::Set( E state, const std::string& name, const char* func, const int line ) {
+
+  const E oldState( m_state );
+  m_state = state;
+
+  BOOST_LOG_TRIVIAL(trace)
+    << name
+    << " state "
+    << boost::describe::enum_to_string( oldState, "unknown" )
+    << " > "
+    << boost::describe::enum_to_string( m_state, "unknown" )
+    << ", " << func
+    << ", " << line
     ;
 
   return oldState;
