@@ -232,8 +232,8 @@ void Strategy::HandleBellHeard( boost::gregorian::date, boost::posix_time::time_
       assert( false );
   }
   BOOST_LOG_TRIVIAL(info)
-           << "pip"
-    << ',' << m_pWatch->GetInstrumentName()
+           << m_pWatch->GetInstrumentName()
+    << ',' << "pip"
     << ',' << "exch_rate=" << exch_rate
     << ',' << "quan=" << m_quantityToOrder
     << ',' << "interval=" << fmt::format( "{:f}", m_tick )
