@@ -70,7 +70,7 @@ pushd libs-build
 ./build.sh tradeframe
 # rdaf is required for the projects in the rdaf subdirectory - optional
 # this is a large install, so recommended only for those interested in the CERN toolset
-# will require manual installation of [libtorch](https://pytorch.org/cppdocs/installing.html)
+# will require manual installation of (libtorch)[https://pytorch.org/cppdocs/installing.html]
 ./build.sh rdaf
 # one example uses Wt web library as an interface - optional
 # not a recommended install, but provided here as a reference web based app
