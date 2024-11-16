@@ -69,8 +69,10 @@ git clone https://github.com/rburkholder/libs-build.git
 pushd libs-build
 ./build.sh tradeframe
 # rdaf is required for the projects in the rdaf subdirectory - optional
+# this is a large install, so recommended only for those interested in the CERN toolset
 ./build.sh rdaf
 # one example uses Wt web library as an interface - optional
+# not a recommended install, but provided here as a reference web based app
 ./build.sh wt
 popd
 
@@ -106,8 +108,8 @@ I have notes for this combination at
 
 * Start the IQFeed daemon by starting Apps -> Wine -> Programs -> IQFeed -> Watchlist [or from the command line: wine ~/.wine/drive_c/Program\ Files/DTN/IQFeed/iqconnect.exe -autoconnect & ] Login with your credentials and checkbox the Save Username/Password and Autoconnect the first time
 * Start Interactive Brokers TWS and connect to a paper trading account
-.* Do Not use an active account for testing
-.* when connecting via an application, you will need to go into the settings to enable the API, and to activate the port
+  * Do Not use an active account for testing
+  * when connecting via an application, you will need to go into the settings to enable the API, and to activate the port
 * IQFeedMarketSymbols project:
   * run the app:
     * Actions -> New Symbol List Remote
@@ -156,10 +158,10 @@ Libraries used (use my lib-build respository to download and build the various d
 * hdf5
 * sqlite (included in source)
 * exelformat (included in source)
-* rdaf aka ROOT - library from CERN providing the cling C++ interpreter - optional
+* rdaf aka ROOT - library from CERN providing the clang C++ interpreter - optional
 
 NOTE: The code started out on Windows using Visual Studio, and is now predominately tested on Linux Debian.  Some work is required
-to port back to Windows.  There are various Windows based artifacts in various directories.  They are not fully functional at the moment.
+to port back to Windows.  There are various Windows based artifacts in various directories.  They are not fully functional at this time.
 
 The lib directory has a series of libraries I use throughout the various projects/applications.  Primary libraries include:
 
@@ -177,7 +179,8 @@ The lib directory has a series of libraries I use throughout the various project
 
 These are some of the currently supported applications:
 
-* ![AutoTrade](AutoTrade/README.md) - code as template for automated trading
+* ![AutoTrade](AutoTrade/README.md) - code as template for automated trading - start of some ML based work
+* ![CurrencyTrader](CurrencyTrader/README.md) - exploratory code for understanding currency trading concepts
 * ![ComboTrading](ComboTrading/README.md) - basics of trading multiple securities, such as various options strategies
 * ![BasketTrading](BasketTrading/README.md) - a work in progress for trading futures based options combinations
 * ![IndicatorTrading](IndicatorTrading/README.md) - view and trade with futures level II data
