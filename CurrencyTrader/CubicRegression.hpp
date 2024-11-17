@@ -21,8 +21,17 @@
 
 #pragma once
 
+#include <array>
+
 namespace Regression {
 namespace Cubic {
-  void Calc();
+
+  static const std::size_t nRows = 10;
+  static const std::size_t nCoef =  4;
+
+  using rInput_t = std::array<double,nRows>;
+  using rOutput_t = std::array<double,nCoef>;
+
+  void Calc( const rInput_t& X, const rInput_t& Y, rOutput_t& b );
 }
 }

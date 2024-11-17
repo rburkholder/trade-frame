@@ -19,8 +19,6 @@
  * Created: November 15, 2024 22:58:52
  */
 
-#include <iostream>
-
 #include <eigen3/Eigen/Eigen>
 
 #include "CubicRegression.hpp"
@@ -28,57 +26,25 @@
 // example:
 // https://www.omnicalculator.com/statistics/cubic-regression
 
-
 namespace Regression {
 namespace Cubic {
 
-void Calc() {
+void Calc( const rInput_t& inX, const rInput_t& inY, rOutput_t& b ) {
 
-  //static const size_t rows= 10;
-  static const size_t rows= 5;
-
-  using matData_t = Eigen::Matrix<double, rows, 2>;
-/*
-  const matData_t data(
-    { //  X    Y
-      {  1.0, 2.0 },
-      {  3.0, 3.0 },
-      {  7.0, 4.0 },
-      { 13.0, 3.0 },
-      { 18.0, 2.0 },
-      { 23.0, 1.0 },
-      { 24.0, 2.0 },
-      { 27.0, 3.0 },
-      { 29.0, 4.0 },
-      { 31.0, 5.0 }
-    }
-  );
-*/
-
-  const matData_t data
-    { //  X    Y
-      {  0.0, 1.0 },
-      {  2.0, 0.0 },
-      {  3.0, 3.0 },
-      {  4.0, 5.0 },
-      {  5.0, 4.0 },
-    }
-  ;
-
-  using matX_t = Eigen::Matrix<double, rows, 4>;
+  using matX_t = Eigen::Matrix<double, nRows, 4>;
   matX_t X;
 
-  using vecY_t = Eigen::Matrix<double, rows, 1>;
+  using vecY_t = Eigen::Matrix<double, nRows, 1>;
   vecY_t Y;
 
   using vecCoef_t = Eigen::Matrix<double, 4, 1>;
   vecCoef_t coef;
 
-  for ( size_t ix_row = 0; ix_row < rows; ix_row++ ) {
+  for ( size_t ix_row = 0; ix_row < nRows; ix_row++ ) {
 
     X( ix_row, 0 ) = 1;
 
-    const double x = data( ix_row, 0 );
+    const double x = inX[ ix_row ];
     X( ix_row, 1 ) = x;
 
     const double xx = x * x;
@@ -87,12 +53,15 @@ void Calc() {
     const double xxx = xx * x;
     X( ix_row, 3 ) = xxx;
 
-    Y( ix_row ) = data( ix_row, 1 );
+    Y( ix_row ) = inY[ ix_row ];
   }
 
   coef = ( X.transpose() * X ).inverse() * X.transpose() * Y;
 
-  std::cout << coef << std::endl;
+  for ( size_t ix = 0; ix < nCoef; ix++ ) {
+    b[ ix ] = coef[ ix ];
+  }
+
 }
 
 }
