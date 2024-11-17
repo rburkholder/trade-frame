@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Eigen>
 
 class NeuralNet {
 public:
