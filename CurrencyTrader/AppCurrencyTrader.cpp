@@ -45,7 +45,6 @@
 #include <TFVuTrading/PanelProviderControlv2.hpp>
 
 #include "Strategy.hpp"
-#include "CubicRegression.hpp"
 #include "AppCurrencyTrader.hpp"
 
 namespace {
@@ -179,14 +178,6 @@ bool AppCurrencyTrader::OnInit() {
 
   m_pFrameMain->Bind( wxEVT_MOVE, &AppCurrencyTrader::OnFrameMainAutoMove, this );
   m_pFrameMain->Show( true ); // triggers the auto move
-
-  const Regression::Cubic::rInput_t X = { 1.0, 3.0, 7.0, 13.0, 18.0, 23.0, 24.0, 27.0, 39.0, 31.0 };
-  const Regression::Cubic::rInput_t Y = { 2.0, 3.0, 4.0,  3.0,  2.0,  1.0,  2.0,  3.0,  4.0,  5.0 };
-
-  Regression::Cubic::rOutput_t coef;
-  Regression::Cubic::Calc( X, Y, coef );
-
-  std::cout << coef[0] <<',' << coef[1] << ',' << coef[2] << ',' << coef[3] << std::endl;
 
   return true;
 }
