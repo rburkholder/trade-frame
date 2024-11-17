@@ -45,6 +45,7 @@
 #include <TFVuTrading/PanelProviderControlv2.hpp>
 
 #include "Strategy.hpp"
+#include "CubicRegression.hpp"
 #include "AppCurrencyTrader.hpp"
 
 namespace {
@@ -178,6 +179,8 @@ bool AppCurrencyTrader::OnInit() {
 
   m_pFrameMain->Bind( wxEVT_MOVE, &AppCurrencyTrader::OnFrameMainAutoMove, this );
   m_pFrameMain->Show( true ); // triggers the auto move
+
+  Regression::Cubic::Calc();
 
   return true;
 }

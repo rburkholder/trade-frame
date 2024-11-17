@@ -26,6 +26,7 @@ set(
     AppCurrencyTrader.hpp
     Common.hpp
     Config.hpp
+    CubicRegression.hpp
     Ind_Ema.hpp
     Ind_HighPass.hpp
     Ind_SuprSmth.hpp
@@ -40,6 +41,7 @@ set(
   file_cpp
     AppCurrencyTrader.cpp
     Config.cpp
+    CubicRegression.cpp
     Ind_Ema.cpp
     Ind_HighPass.cpp
     Ind_SuprSmth.cpp
