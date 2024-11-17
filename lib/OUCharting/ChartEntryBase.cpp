@@ -11,7 +11,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include <memory>
 #include <algorithm>
 
 #include <boost/log/trivial.hpp>
