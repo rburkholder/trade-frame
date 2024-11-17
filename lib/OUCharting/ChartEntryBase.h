@@ -146,6 +146,8 @@ public:
   boost::posix_time::ptime GetExtentBegin() const;
   boost::posix_time::ptime GetExtentEnd() const;
 
+  static double Convert( boost::posix_time::ptime ); // convert to chart datetime format
+
 protected:
 
   range_t m_rangeViewPort;

@@ -91,6 +91,22 @@ void ChartEntryTime::Append( boost::posix_time::ptime dt ) {
   m_queue.Append( dt );
 }
 
+double ChartEntryTime::Convert( boost::posix_time::ptime dt ) {
+
+  const boost::gregorian::date date = dt.date();
+  const boost::posix_time::time_duration time = dt.time_of_day();
+
+  static const double divisor( time.ticks_per_second() );
+  double dfrac = time.fractional_seconds();
+  dfrac /= divisor;
+  const double converted = Chart::chartTime(
+      date.year(), date.month(), date.day(),
+      time.hours(), time.minutes(), time.seconds() )
+      + dfrac
+    ;
+  return converted;
+}
+
 // runs in thread of main?  What does this do?
 void ChartEntryTime::AppendFg( boost::posix_time::ptime dt ) {
 
@@ -134,17 +150,7 @@ void ChartEntryTime::AppendFg( boost::posix_time::ptime dt ) {
     if ( bOk ) {
       //BOOST_LOG_TRIVIAL(debug) << m_sName << dt;
 
-      boost::gregorian::date date = dt.date();
-      boost::posix_time::time_duration time = dt.time_of_day();
-
-      static const double divisor( time.ticks_per_second() );
-      double dfrac = time.fractional_seconds();
-      dfrac /= divisor;
-      double converted = Chart::chartTime(
-          date.year(), date.month(), date.day(),
-          time.hours(), time.minutes(), time.seconds() )
-          + dfrac
-        ;
+      const double converted( Convert( dt ) );
 
       // do these go in with IncCntElements instead?
       assert( boost::posix_time::not_a_date_time!= dt );  // validate for TODO below
