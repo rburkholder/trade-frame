@@ -78,6 +78,11 @@ void Strategy::Init( const config::Strategy& config ) {
 
   m_cdv.Add( EChartSlot::Price, &m_ceBarsTrade );
 
+  m_cdv.Add( EChartSlot::Price, &m_ceCubicSwingDn );
+  m_ceCubicSwingDn.SetColour( ou::Colour::Orange );
+  m_cdv.Add( EChartSlot::Price, &m_ceCubicSwingUp );
+  m_ceCubicSwingUp.SetColour( ou::Colour::Orange );
+
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
   m_plTo.Init( m_cdv, EChartSlot::PL_To );
@@ -531,6 +536,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
     const double z = x > y ? x : y;
     if ( c.hi > z ) {
       m_ceSwingLo.AddLabel( c.dt, c.hi, "Swing Dn" );
+      m_cubicSwingDn.Append( ou::ChartEntryTime::Convert( c.dt ), c.hi );
       m_vSwingTrack.emplace_back( SwingTrack(
         bar.DateTime(),
         c.dt, c.hi,
@@ -552,6 +558,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
     const double z = x < y ? x : y;
     if ( c.lo < z ) {
       m_ceSwingHi.AddLabel( c.dt, c.lo, "Swing Up" );
+      m_cubicSwingUp.Append( ou::ChartEntryTime::Convert( c.dt ), c.lo );
       m_vSwingTrack.emplace_back( SwingTrack(
         bar.DateTime(),
         c.dt, c.lo,
@@ -565,6 +572,18 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
       //  << ',' << c.lo << ',' << e.lo
       //  << std::endl;
     }
+  }
+
+  {
+    m_cubicSwingDn.CalcCoef();
+    const double dblCubicSwing = m_cubicSwingDn.Terpolate( ou::ChartEntryTime::Convert( dt ) );
+    m_ceCubicSwingDn.Append( dt, dblCubicSwing );
+  }
+
+  {
+    m_cubicSwingUp.CalcCoef();
+    const double dblCubicSwing = m_cubicSwingUp.Terpolate( ou::ChartEntryTime::Convert( dt ) );
+    m_ceCubicSwingUp.Append( dt, dblCubicSwing );
   }
 
 }

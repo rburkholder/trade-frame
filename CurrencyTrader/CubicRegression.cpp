@@ -19,6 +19,8 @@
  * Created: November 15, 2024 22:58:52
  */
 
+#include <algorithm>
+
 #include <eigen3/Eigen/Eigen>
 
 #include "CubicRegression.hpp"
@@ -26,25 +28,61 @@
 // example:
 // https://www.omnicalculator.com/statistics/cubic-regression
 
+namespace ou {
+namespace tf {
 namespace Regression {
-namespace Cubic {
 
-void Calc( const rInput_t& inX, const rInput_t& inY, rOutput_t& b ) {
+Cubic::Cubic()
+: m_cnt {}
+{
+  assert( 4 <= nRows );
+  assert( 4 == nCoef );
+  m_coef[ 0 ] = m_coef[ 1 ] = m_coef[ 2 ] = m_coef[ 3 ] = 0.0;
+}
 
-  using matX_t = Eigen::Matrix<double, nRows, 4>;
+void Cubic::Append( double x, double y ) {
+
+  {
+    rInput_t::iterator x1( m_X.begin() );
+    x1++;
+    std::move( x1, m_X.end(), m_X.begin() );
+  }
+
+  {
+    rInput_t::iterator y1( m_Y.begin() );
+    y1++;
+    std::move( y1, m_Y.end(), m_Y.begin() );
+  }
+
+  *m_X.rbegin() = x;
+  *m_Y.rbegin() = y;
+
+  m_cnt++;
+
+}
+
+double Cubic::Terpolate( double x ) const {
+  return m_coef[ 0 ] + x * ( m_coef[ 1 ] + x * ( m_coef[ 2 ] + m_coef[ 3 ] * x ) );
+}
+
+void Cubic::CalcCoef() {
+
+  assert( m_cnt >= nRows );
+
+  using matX_t = Eigen::Matrix<double, nRows, nCoef>;
   matX_t X;
 
   using vecY_t = Eigen::Matrix<double, nRows, 1>;
   vecY_t Y;
 
-  using vecCoef_t = Eigen::Matrix<double, 4, 1>;
+  using vecCoef_t = Eigen::Matrix<double, nCoef, 1>;
   vecCoef_t coef;
 
   for ( size_t ix_row = 0; ix_row < nRows; ix_row++ ) {
 
     X( ix_row, 0 ) = 1;
 
-    const double x = inX[ ix_row ];
+    const double x = m_X[ ix_row ];
     X( ix_row, 1 ) = x;
 
     const double xx = x * x;
@@ -53,17 +91,17 @@ void Calc( const rInput_t& inX, const rInput_t& inY, rOutput_t& b ) {
     const double xxx = xx * x;
     X( ix_row, 3 ) = xxx;
 
-    Y( ix_row ) = inY[ ix_row ];
+    Y( ix_row ) = m_Y[ ix_row ];
   }
 
   coef = ( X.transpose() * X ).inverse() * X.transpose() * Y;
 
   for ( size_t ix = 0; ix < nCoef; ix++ ) {
-    b[ ix ] = coef[ ix ];
+    m_coef[ ix ] = coef[ ix ];
   }
 
 }
 
-}
-}
-
+} // namespace Regression
+} // namespace tf
+} // namespace ou

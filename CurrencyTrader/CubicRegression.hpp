@@ -23,15 +23,40 @@
 
 #include <array>
 
+namespace ou {
+namespace tf {
 namespace Regression {
-namespace Cubic {
 
-  static const std::size_t nRows = 10;
+class Cubic {
+public:
+
   static const std::size_t nCoef =  4;
-
-  using rInput_t = std::array<double,nRows>;
   using rOutput_t = std::array<double,nCoef>;
 
-  void Calc( const rInput_t& X, const rInput_t& Y, rOutput_t& b );
-}
-}
+  Cubic();
+
+  void Append( double x, double y );
+  rOutput_t::size_type Size() const { return m_cnt; }
+  void CalcCoef();
+
+  double Terpolate( double x ) const; // interpolate/extrapolate y
+
+protected:
+private:
+
+  static const std::size_t nRows = 10;
+
+  std::size_t m_cnt;
+
+  using rInput_t = std::array<double,nRows>;
+
+  rInput_t m_X;
+  rInput_t m_Y;
+
+  rOutput_t m_coef;
+
+};
+
+} // namespace Regression
+} // namespace tf
+} // namespace ou

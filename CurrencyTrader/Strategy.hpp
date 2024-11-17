@@ -40,7 +40,9 @@
 #include <TFTrading/DailyTradeTimeFrames.h>
 
 #include "Ind_Ema.hpp"
-#include "Ind_UltSmth.hpp"
+//#include "Ind_UltSmth.hpp"
+
+#include "CubicRegression.hpp"
 
 #include "Common.hpp"
 #include "TrackOrder.hpp"
@@ -118,6 +120,9 @@ private:
 
   ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryVolume m_ceVolume;
+
+  ou::ChartEntryIndicator m_ceCubicSwingDn;
+  ou::ChartEntryIndicator m_ceCubicSwingUp;
 
   ou::ChartEntryShape m_ceSwingHi;
   ou::ChartEntryShape m_ceSwingLo;
@@ -303,6 +308,9 @@ private:
 
   size_t m_nCount;
   double m_dblCommission;
+
+  ou::tf::Regression::Cubic m_cubicSwingDn;
+  ou::tf::Regression::Cubic m_cubicSwingUp;
 
   fResetSoftware_t m_fResetSoftware;
 
