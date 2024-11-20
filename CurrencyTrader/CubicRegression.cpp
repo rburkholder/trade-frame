@@ -23,6 +23,8 @@
 
 #include <eigen3/Eigen/Eigen>
 
+#include <OUCharting/ChartEntryBase.cpp>
+
 #include "CubicRegression.hpp"
 
 // example:
@@ -38,6 +40,10 @@ Cubic::Cubic()
   assert( 4 <= nRows );
   assert( 4 == nCoef );
   m_coef[ 0 ] = m_coef[ 1 ] = m_coef[ 2 ] = m_coef[ 3 ] = 0.0;
+}
+
+void Cubic::Append( boost::posix_time::ptime dt, double y ) {
+  Append( ou::ChartEntryTime::Convert( dt ), y );
 }
 
 void Cubic::Append( double x, double y ) {

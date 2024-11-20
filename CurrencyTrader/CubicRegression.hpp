@@ -23,6 +23,8 @@
 
 #include <array>
 
+#include <boost/date_time/posix_time/ptime.hpp>
+
 namespace ou {
 namespace tf {
 namespace Regression {
@@ -36,6 +38,7 @@ public:
   Cubic();
 
   void Append( double x, double y );
+  void Append( boost::posix_time::ptime dt, double y );
   rOutput_t::size_type Size() const { return m_cnt; }
   bool Filled() const { return m_cnt >= nRows; }
   void CalcCoef();
