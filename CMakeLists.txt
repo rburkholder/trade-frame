@@ -1,5 +1,7 @@
 # trade-frame (solution root)
 cmake_minimum_required (VERSION 3.13)
+# cmake_policy(CMP0167) need 3.30 at some point for boost
+# cmake --help-policy CMP0167
 
 project(trade-frame)
 

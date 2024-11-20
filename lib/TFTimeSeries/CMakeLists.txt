@@ -17,7 +17,7 @@ set(BOOST_USE_STATIC_RUNTIME OFF)
 #set(Boost_DETAILED_FAILURE_MSG ON)
 set(BOOST_INCLUDEDIR "/usr/local/include/boost")
 
-find_package(Boost ${TF_BOOST_VERSION} COMPONENTS system REQUIRED)
+#find_package(Boost ${TF_BOOST_VERSION} CONFIG COMPONENTS system REQUIRED)
 
 set(
   file_h

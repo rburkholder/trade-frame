@@ -37,6 +37,7 @@ public:
 
   void Append( double x, double y );
   rOutput_t::size_type Size() const { return m_cnt; }
+  bool Filled() const { return m_cnt >= nRows; }
   void CalcCoef();
 
   double Terpolate( double x ) const; // interpolate/extrapolate y

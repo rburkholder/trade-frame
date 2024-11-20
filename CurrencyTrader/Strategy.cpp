@@ -574,13 +574,13 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
     }
   }
 
-  {
+  if ( m_cubicSwingDn.Filled() ) {
     m_cubicSwingDn.CalcCoef();
     const double dblCubicSwing = m_cubicSwingDn.Terpolate( ou::ChartEntryTime::Convert( dt ) );
     m_ceCubicSwingDn.Append( dt, dblCubicSwing );
   }
 
-  {
+  if ( m_cubicSwingUp.Filled() ) {
     m_cubicSwingUp.CalcCoef();
     const double dblCubicSwing = m_cubicSwingUp.Terpolate( ou::ChartEntryTime::Convert( dt ) );
     m_ceCubicSwingUp.Append( dt, dblCubicSwing );
