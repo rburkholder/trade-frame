@@ -32,32 +32,31 @@ namespace Regression {
 class Cubic {
 public:
 
-  static const std::size_t nCoef =  4;
-  using rOutput_t = std::array<double,nCoef>;
-
   Cubic();
 
-  void Append( double x, double y );
   void Append( boost::posix_time::ptime dt, double y );
-  rOutput_t::size_type Size() const { return m_cnt; }
   bool Filled() const { return m_cnt >= nRows; }
-  void CalcCoef();
+  void CalcCoef(); // perform automatically with each Append?
 
   double Terpolate( double x ) const; // interpolate/extrapolate y
 
 protected:
 private:
 
-  static const std::size_t nRows = 10;
-
   std::size_t m_cnt;
 
+  static const std::size_t nRows = 10;
   using rInput_t = std::array<double,nRows>;
 
   rInput_t m_X;
   rInput_t m_Y;
 
+  static const std::size_t nCoef =  4;
+  using rOutput_t = std::array<double,nCoef>;
+
   rOutput_t m_coef;
+
+  void Append( double x, double y );
 
 };
 
