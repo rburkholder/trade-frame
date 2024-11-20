@@ -43,25 +43,12 @@ Cubic::Cubic()
 }
 
 void Cubic::Append( boost::posix_time::ptime dt, double y ) {
-  Append( ou::ChartEntryTime::Convert( dt ), y );
-}
 
-void Cubic::Append( double x, double y ) {
+  rInput_t::iterator p1( m_P.begin() );
+  p1++;
+  std::move( p1, m_P.end(), m_P.begin() );
 
-  {
-    rInput_t::iterator x1( m_X.begin() );
-    x1++;
-    std::move( x1, m_X.end(), m_X.begin() );
-  }
-
-  {
-    rInput_t::iterator y1( m_Y.begin() );
-    y1++;
-    std::move( y1, m_Y.end(), m_Y.begin() );
-  }
-
-  *m_X.rbegin() = x;
-  *m_Y.rbegin() = y;
+  *m_P.rbegin() = Point( dt, ou::ChartEntryTime::Convert( dt ), y );
 
   m_cnt++;
 
@@ -88,7 +75,7 @@ void Cubic::CalcCoef() {
 
     X( ix_row, 0 ) = 1;
 
-    const double x = m_X[ ix_row ];
+    const double x = m_P[ ix_row ].x;
     X( ix_row, 1 ) = x;
 
     const double xx = x * x;
@@ -97,7 +84,7 @@ void Cubic::CalcCoef() {
     const double xxx = xx * x;
     X( ix_row, 3 ) = xxx;
 
-    Y( ix_row ) = m_Y[ ix_row ];
+    Y( ix_row ) = m_P[ ix_row ].y;
   }
 
   coef = ( X.transpose() * X ).inverse() * X.transpose() * Y;

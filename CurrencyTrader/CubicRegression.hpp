@@ -45,18 +45,22 @@ private:
 
   std::size_t m_cnt;
 
-  static const std::size_t nRows = 10;
-  using rInput_t = std::array<double,nRows>;
+  struct Point {
+    boost::posix_time::ptime ptime;
+    double x;
+    double y;
+    Point(): x{}, y{} {}
+    Point( boost::posix_time::ptime ptime_, double x_, double y_ )
+    : ptime( ptime_ ), x( x_), y( y_ ) {}
+  };
 
-  rInput_t m_X;
-  rInput_t m_Y;
+  static const std::size_t nRows = 10;
+  using rInput_t = std::array<Point,nRows>;
+  rInput_t m_P;
 
   static const std::size_t nCoef =  4;
   using rOutput_t = std::array<double,nCoef>;
-
   rOutput_t m_coef;
-
-  void Append( double x, double y );
 
 };
 
