@@ -536,7 +536,6 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
     const double z = x > y ? x : y;
     if ( c.hi > z ) {
       m_ceSwingLo.AddLabel( c.dt, c.hi, "Swing Dn" );
-      m_cubicSwingDn.Append( ou::ChartEntryTime::Convert( c.dt ), c.hi );
       m_vSwingTrack.emplace_back( SwingTrack(
         bar.DateTime(),
         c.dt, c.hi,
@@ -549,6 +548,8 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
       //  << ',' << "hi"
       //  << ',' << c.hi << ',' << e.hi
       //  << std::endl;
+      m_cubicSwingDn.Append( ou::ChartEntryTime::Convert( c.dt ), c.hi );
+      if ( m_cubicSwingDn.Filled() ) m_cubicSwingDn.CalcCoef();
     }
   }
 
@@ -558,7 +559,6 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
     const double z = x < y ? x : y;
     if ( c.lo < z ) {
       m_ceSwingHi.AddLabel( c.dt, c.lo, "Swing Up" );
-      m_cubicSwingUp.Append( ou::ChartEntryTime::Convert( c.dt ), c.lo );
       m_vSwingTrack.emplace_back( SwingTrack(
         bar.DateTime(),
         c.dt, c.lo,
@@ -571,17 +571,17 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
       //  << ',' << "lo"
       //  << ',' << c.lo << ',' << e.lo
       //  << std::endl;
+      m_cubicSwingUp.Append( ou::ChartEntryTime::Convert( c.dt ), c.lo );
+      if ( m_cubicSwingUp.Filled() ) m_cubicSwingUp.CalcCoef();
     }
   }
 
   if ( m_cubicSwingDn.Filled() ) {
-    m_cubicSwingDn.CalcCoef();
     const double dblCubicSwing = m_cubicSwingDn.Terpolate( ou::ChartEntryTime::Convert( dt ) );
     m_ceCubicSwingDn.Append( dt, dblCubicSwing );
   }
 
   if ( m_cubicSwingUp.Filled() ) {
-    m_cubicSwingUp.CalcCoef();
     const double dblCubicSwing = m_cubicSwingUp.Terpolate( ou::ChartEntryTime::Convert( dt ) );
     m_ceCubicSwingUp.Append( dt, dblCubicSwing );
   }
