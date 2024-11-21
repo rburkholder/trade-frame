@@ -83,6 +83,11 @@ void Strategy::Init( const config::Strategy& config ) {
   m_cdv.Add( EChartSlot::Price, &m_ceCubicSwingUp );
   m_ceCubicSwingUp.SetColour( ou::Colour::Orange );
 
+  m_cdv.Add( EChartSlot::Price, &m_cubicSwingDn.ChartEntry() );
+  m_cubicSwingDn.ChartEntry().SetColour( ou::Colour::DarkTurquoise );
+  m_cdv.Add( EChartSlot::Price, &m_cubicSwingUp.ChartEntry() );
+  m_cubicSwingUp.ChartEntry().SetColour( ou::Colour::DarkSeaGreen );
+
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
   m_plTo.Init( m_cdv, EChartSlot::PL_To );
@@ -578,14 +583,20 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
 
   if ( m_cubicSwingDn.Filled() ) {
     const double dblCubicSwing = m_cubicSwingDn.Terpolate( ou::ChartEntryTime::Convert( dt ) );
-    m_ceCubicSwingDn.Append( dt, dblCubicSwing );
+    //m_ceCubicSwingDn.Append( dt, dblCubicSwing );
   }
 
   if ( m_cubicSwingUp.Filled() ) {
     const double dblCubicSwing = m_cubicSwingUp.Terpolate( ou::ChartEntryTime::Convert( dt ) );
-    m_ceCubicSwingUp.Append( dt, dblCubicSwing );
+    //m_ceCubicSwingUp.Append( dt, dblCubicSwing );
   }
 
+}
+
+void Strategy::EmitCubicCoef() {
+  BOOST_LOG_TRIVIAL(info) << "Emit " << m_pWatch->GetInstrumentName();
+  m_cubicSwingDn.EmitCubicCoef();
+  m_cubicSwingUp.EmitCubicCoef();
 }
 
 void Strategy::EmitSwingTrack() {

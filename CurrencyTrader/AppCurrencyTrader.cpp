@@ -522,6 +522,7 @@ bool AppCurrencyTrader::BuildProviders_Live( wxBoxSizer* sizer ) {
   vItems.push_back( new mi( "Close, Done", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionCloseAndDone ) ) );
   vItems.push_back( new mi( "Save Values", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionSaveValues ) ) );
   vItems.push_back( new mi( "Emit Swing Track", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionEmitSwingTrack ) ) );
+  vItems.push_back( new mi( "Emit Cubic Coef", MakeDelegate( this, &AppCurrencyTrader::HandleMenuActionEmitCubiCoef ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   return true;
@@ -681,6 +682,16 @@ void AppCurrencyTrader::HandleMenuActionEmitSwingTrack() {
     [this](){
       for ( mapPair_t::value_type& vt: m_mapPair ) {
         vt.second.pStrategy->EmitSwingTrack();
+      }
+    } );
+}
+
+void AppCurrencyTrader::HandleMenuActionEmitCubiCoef() {
+  std::cout << "Emit Cubic Coef" << std::endl;
+  CallAfter(
+    [this](){
+      for ( mapPair_t::value_type& vt: m_mapPair ) {
+        vt.second.pStrategy->EmitCubicCoef();
       }
     } );
 }

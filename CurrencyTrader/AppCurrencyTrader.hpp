@@ -233,6 +233,7 @@ private:
   void HandleMenuActionCloseAndDone();
   void HandleMenuActionSaveValues();
   void HandleMenuActionEmitSwingTrack();
+  void HandleMenuActionEmitCubiCoef();
 
   void OnFrameMainAutoMove( wxMoveEvent& );
 

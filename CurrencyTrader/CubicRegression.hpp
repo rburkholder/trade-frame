@@ -25,6 +25,8 @@
 
 #include <boost/date_time/posix_time/ptime.hpp>
 
+#include <OUCharting/ChartEntryIndicator.h>
+
 namespace ou {
 namespace tf {
 namespace Regression {
@@ -40,18 +42,27 @@ public:
 
   double Terpolate( double x ) const; // interpolate/extrapolate y
 
+  ou::ChartEntryIndicator& ChartEntry() { return m_ceCurrent; };
+
+  void EmitCubicCoef();
+
 protected:
 private:
 
   std::size_t m_cnt;
 
   struct Point {
+
     boost::posix_time::ptime ptime;
     double x;
     double y;
+
     Point(): x{}, y{} {}
     Point( boost::posix_time::ptime ptime_, double x_, double y_ )
     : ptime( ptime_ ), x( x_), y( y_ ) {}
+    Point( Point&& p ): ptime( p.ptime), x( p.x ), y( p.y ) {}
+    Point( const Point& p ): ptime( p.ptime), x( p.x ), y( p.y ) {}
+    const Point& operator=( const Point& p ){ ptime = p.ptime; x = p.x; y = p.y; return *this; }
   };
 
   static const std::size_t nRows = 10;
@@ -62,6 +73,7 @@ private:
   using rOutput_t = std::array<double,nCoef>;
   rOutput_t m_coef;
 
+  ou::ChartEntryIndicator m_ceCurrent;
 };
 
 } // namespace Regression

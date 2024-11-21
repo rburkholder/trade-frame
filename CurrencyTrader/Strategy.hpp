@@ -80,6 +80,7 @@ public:
   void SetResetSoftware( fResetSoftware_t&& f ) { m_fResetSoftware = std::move( f ); }
 
   void EmitSwingTrack();
+  void EmitCubicCoef();
 
   struct latest_t {
     const double bid;

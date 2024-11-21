@@ -21,6 +21,8 @@
 
 #include <algorithm>
 
+#include <boost/log/trivial.hpp>
+
 #include <eigen3/Eigen/Eigen>
 
 #include <OUCharting/ChartEntryBase.cpp>
@@ -93,6 +95,17 @@ void Cubic::CalcCoef() {
     m_coef[ ix ] = coef[ ix ];
   }
 
+  m_ceCurrent.Clear();
+  for ( const auto& point: m_P ) {
+    m_ceCurrent.Append( point.ptime, Terpolate( point.x ) );
+  }
+
+}
+
+void Cubic::EmitCubicCoef() {
+  BOOST_LOG_TRIVIAL(info)
+    << "  " << m_coef[ 0 ] << ',' << m_coef[ 1 ] << ',' << m_coef[ 2 ] << ',' << m_coef[ 3 ]
+    ;
 }
 
 } // namespace Regression
