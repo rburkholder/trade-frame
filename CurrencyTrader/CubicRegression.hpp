@@ -65,6 +65,8 @@ private:
     const Point& operator=( const Point& p ){ ptime = p.ptime; x = p.x; y = p.y; return *this; }
   };
 
+  double m_x_offset;
+
   static const std::size_t nRows = 10;
   using rInput_t = std::array<Point,nRows>;
   rInput_t m_P;

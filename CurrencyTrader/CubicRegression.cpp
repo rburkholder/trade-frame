@@ -37,7 +37,7 @@ namespace tf {
 namespace Regression {
 
 Cubic::Cubic()
-: m_cnt {}
+: m_cnt {}, m_x_offset {}
 {
   assert( 4 <= nRows );
   assert( 4 == nCoef );
@@ -56,7 +56,8 @@ void Cubic::Append( boost::posix_time::ptime dt, double y ) {
 
 }
 
-double Cubic::Terpolate( double x ) const {
+double Cubic::Terpolate( double x_ ) const {
+  const double x( x_ - m_x_offset );
   return m_coef[ 0 ] + x * ( m_coef[ 1 ] + x * ( m_coef[ 2 ] + m_coef[ 3 ] * x ) );
 }
 
@@ -73,11 +74,13 @@ void Cubic::CalcCoef() {
   using vecCoef_t = Eigen::Matrix<double, nCoef, 1>;
   vecCoef_t coef;
 
+  m_x_offset = m_P[ 0 ].x;
+
   for ( size_t ix_row = 0; ix_row < nRows; ix_row++ ) {
 
     X( ix_row, 0 ) = 1;
 
-    const double x = m_P[ ix_row ].x;
+    const double x = m_P[ ix_row ].x - m_x_offset;;
     X( ix_row, 1 ) = x;
 
     const double xx = x * x;
