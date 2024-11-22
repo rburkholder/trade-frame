@@ -107,7 +107,7 @@ void Cubic::CalcCoef() {
 
 void Cubic::EmitCubicCoef() {
   BOOST_LOG_TRIVIAL(info)
-    << "  " << m_coef[ 0 ] << ',' << m_coef[ 1 ] << ',' << m_coef[ 2 ] << ',' << m_coef[ 3 ]
+    << "  " << m_cnt << ',' << m_coef[ 0 ] << ',' << m_coef[ 1 ] << ',' << m_coef[ 2 ] << ',' << m_coef[ 3 ]
     ;
 }
 
