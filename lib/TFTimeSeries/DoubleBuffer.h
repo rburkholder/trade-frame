@@ -167,6 +167,10 @@ public:
     }
   }
 
+  void Clear() {
+    Sync( []( const datum_t& ){} );
+  }
+
   typename qDatum_t::size_type Size() const { return m_qDatum.size(); }
 
 protected:
