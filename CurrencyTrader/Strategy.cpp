@@ -554,7 +554,7 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
       //  << ',' << c.hi << ',' << e.hi
       //  << std::endl;
       m_cubicSwingDn.Append( c.dt, c.hi );
-      if ( m_cubicSwingDn.Filled() ) m_cubicSwingDn.CalcCoef();
+      if ( m_cubicSwingDn.Full() ) m_cubicSwingDn.CalcCoef();
     }
   }
 
@@ -577,18 +577,18 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
       //  << ',' << c.lo << ',' << e.lo
       //  << std::endl;
       m_cubicSwingUp.Append( c.dt, c.lo );
-      if ( m_cubicSwingUp.Filled() ) m_cubicSwingUp.CalcCoef();
+      if ( m_cubicSwingUp.Full() ) m_cubicSwingUp.CalcCoef();
     }
   }
 
-  if ( m_cubicSwingDn.Filled() ) {
+  if ( m_cubicSwingDn.Full() ) {
     const double dblCubicSwing = m_cubicSwingDn.Terpolate( ou::ChartEntryTime::Convert( dt ) );
-    //m_ceCubicSwingDn.Append( dt, dblCubicSwing );
+    m_ceCubicSwingDn.Append( dt, dblCubicSwing );
   }
 
-  if ( m_cubicSwingUp.Filled() ) {
+  if ( m_cubicSwingUp.Full() ) {
     const double dblCubicSwing = m_cubicSwingUp.Terpolate( ou::ChartEntryTime::Convert( dt ) );
-    //m_ceCubicSwingUp.Append( dt, dblCubicSwing );
+    m_ceCubicSwingUp.Append( dt, dblCubicSwing );
   }
 
 }

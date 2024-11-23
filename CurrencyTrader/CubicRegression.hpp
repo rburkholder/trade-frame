@@ -37,7 +37,7 @@ public:
   Cubic();
 
   void Append( boost::posix_time::ptime dt, double y );
-  bool Filled() const { return m_cnt >= nRows; }
+  bool Full() const { return m_cnt >= nRows; }
   void CalcCoef(); // perform automatically with each Append?
 
   double Terpolate( double x ) const; // interpolate/extrapolate y

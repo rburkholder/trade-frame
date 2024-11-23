@@ -687,7 +687,6 @@ void AppCurrencyTrader::HandleMenuActionEmitSwingTrack() {
 }
 
 void AppCurrencyTrader::HandleMenuActionEmitCubiCoef() {
-  std::cout << "Emit Cubic Coef" << std::endl;
   CallAfter(
     [this](){
       for ( mapPair_t::value_type& vt: m_mapPair ) {
