@@ -547,14 +547,16 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
         e.dt, e.hi ) );
       m_nHi++;
       m_nNet++;
-      m_state.swing = State::Swing::down;
       //std::cout
       //         << m_pWatch->GetInstrumentName()
       //  << ',' << "hi"
       //  << ',' << c.hi << ',' << e.hi
       //  << std::endl;
       m_cubicSwingDn.Append( c.dt, c.hi );
-      if ( m_cubicSwingDn.Full() ) m_cubicSwingDn.CalcCoef();
+      if ( m_cubicSwingDn.Full() ) {
+        m_cubicSwingDn.CalcCoef();
+        m_state.swing = State::Swing::down;
+      }
     }
   }
 
@@ -570,22 +572,26 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
         e.dt, e.lo ) );
       m_nLo++;
       m_nNet--;
-      m_state.swing = State::Swing::up;
       //std::cout
       //         << m_pWatch->GetInstrumentName()
       //  << ',' << "lo"
       //  << ',' << c.lo << ',' << e.lo
       //  << std::endl;
       m_cubicSwingUp.Append( c.dt, c.lo );
-      if ( m_cubicSwingUp.Full() ) m_cubicSwingUp.CalcCoef();
+      if ( m_cubicSwingUp.Full() ) {
+        m_cubicSwingUp.CalcCoef();
+        m_state.swing = State::Swing::up;
+      }
     }
   }
 
+  // once a minute predictor
   if ( m_cubicSwingDn.Full() ) {
     const double dblCubicSwing = m_cubicSwingDn.Terpolate( ou::ChartEntryTime::Convert( dt ) );
     m_ceCubicSwingDn.Append( dt, dblCubicSwing );
   }
 
+  // once a minute predictor
   if ( m_cubicSwingUp.Full() ) {
     const double dblCubicSwing = m_cubicSwingUp.Terpolate( ou::ChartEntryTime::Convert( dt ) );
     m_ceCubicSwingUp.Append( dt, dblCubicSwing );
