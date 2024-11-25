@@ -89,18 +89,18 @@ public:
 
   void QueryStats( double& unrealized, double& realized, double& commission, double& total );
 
-  void EnterLongLmt( const OrderArgs& );
-  void EnterLongMkt( const OrderArgs& );
+  void EnterLongLmt( const OrderArgs& ); // enter with Long limit
+  void EnterLongMkt( const OrderArgs& ); // enter with long market
   void EnterLongBracket( const OrderArgs& );
 
-  void EnterShortLmt( const OrderArgs& );
-  void EnterShortMkt( const OrderArgs& );
+  void EnterShortLmt( const OrderArgs& ); // enter with short limit
+  void EnterShortMkt( const OrderArgs& ); // enter with short market
 
-  void ExitLongLmt( const OrderArgs& );
-  void ExitLongMkt( const OrderArgs& );
+  void ExitLongLmt( const OrderArgs& ); // exit short with long limit
+  void ExitLongMkt( const OrderArgs& ); // exit short with long market
 
-  void ExitShortLmt( const OrderArgs& );
-  void ExitShortMkt( const OrderArgs& );
+  void ExitShortLmt( const OrderArgs& ); // exit long with short limit
+  void ExitShortMkt( const OrderArgs& ); // exit long with short market
 
   void Cancel( fCancel_t&& );
   void Close( fClose_t&& );

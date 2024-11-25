@@ -131,7 +131,7 @@ void TrackOrder::EnterCommon( const OrderArgs& args, pOrder_t& pOrder ) {
   Common( args, pOrder );
 }
 
-void TrackOrder::EnterLongLmt( const OrderArgs& args ) {
+void TrackOrder::EnterLongLmt( const OrderArgs& args ) { // enter with long limit
   assert( 0 < m_quantityBaseCurrency );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityBaseCurrency, Normalize( args.limit ) );
   assert( pOrder );
@@ -141,7 +141,7 @@ void TrackOrder::EnterLongLmt( const OrderArgs& args ) {
   EnterCommon( args, pOrder );
 }
 
-void TrackOrder::EnterLongMkt( const OrderArgs& args ) {
+void TrackOrder::EnterLongMkt( const OrderArgs& args ) { // enter with long market
   assert( 0 < m_quantityBaseCurrency );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityBaseCurrency );
   assert( pOrder );
@@ -186,7 +186,7 @@ void TrackOrder::EnterLongBracket( const OrderArgs& args ) {
   //std::dynamic_pointer_cast<ou::tf::ib::TWS>( m_pPosition->GetExecutionProvider() )->PlaceBracketOrder( pOrderEntry, pOrderProfit, pOrderStop );
 }
 
-void TrackOrder::EnterShortLmt( const OrderArgs& args ) {
+void TrackOrder::EnterShortLmt( const OrderArgs& args ) { // enter with short limit
   assert( 0 < m_quantityBaseCurrency );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityBaseCurrency, Normalize( args.limit ) );
   assert( pOrder );
@@ -196,7 +196,7 @@ void TrackOrder::EnterShortLmt( const OrderArgs& args ) {
   EnterCommon( args, pOrder );
 }
 
-void TrackOrder::EnterShortMkt( const OrderArgs& args ) {
+void TrackOrder::EnterShortMkt( const OrderArgs& args ) { // enter with short market
   assert( 0 < m_quantityBaseCurrency );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityBaseCurrency );
   assert( pOrder );
@@ -210,7 +210,7 @@ void TrackOrder::ExitCommon( const OrderArgs& args, pOrder_t& pOrder ) {
   Common( args, pOrder );
 }
 
-void TrackOrder::ExitLongLmt( const OrderArgs& args ) {
+void TrackOrder::ExitLongLmt( const OrderArgs& args ) { // exit short with long limit
   assert( 0 < m_quantityBaseCurrency );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, m_quantityBaseCurrency, Normalize( args.limit ) );
   assert( pOrder );
@@ -219,7 +219,7 @@ void TrackOrder::ExitLongLmt( const OrderArgs& args ) {
   ExitCommon( args, pOrder );
 }
 
-void TrackOrder::ExitLongMkt( const OrderArgs& args ) {
+void TrackOrder::ExitLongMkt( const OrderArgs& args ) { // exit short with long market
   assert( 0 < m_quantityBaseCurrency );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, m_quantityBaseCurrency );
   assert( pOrder );
@@ -227,7 +227,7 @@ void TrackOrder::ExitLongMkt( const OrderArgs& args ) {
   ExitCommon( args, pOrder );
 }
 
-void TrackOrder::ExitShortLmt( const OrderArgs& args ) {
+void TrackOrder::ExitShortLmt( const OrderArgs& args ) { // exit long with short limit
   assert( 0 < m_quantityBaseCurrency );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, m_quantityBaseCurrency, Normalize( args.limit ) );
   assert( pOrder );
@@ -236,7 +236,7 @@ void TrackOrder::ExitShortLmt( const OrderArgs& args ) {
   ExitCommon( args, pOrder );
 }
 
-void TrackOrder::ExitShortMkt( const OrderArgs& args ) {
+void TrackOrder::ExitShortMkt( const OrderArgs& args ) { // exit long with short market
   assert( 0 < m_quantityBaseCurrency );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, m_quantityBaseCurrency );
   assert( pOrder );
