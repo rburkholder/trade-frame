@@ -54,10 +54,10 @@ public:
 
   ETradeState(): m_state( E::Init ) {}
 
-   // __PRETTY_FUNCTION__ __LINE__
   E Set( E state );
   E operator=( E state ) { Set( state ); return m_state; }
 
+   // __PRETTY_FUNCTION__ __LINE__
   E Set( E state, const char* func, const int line );
   E Set( E state, const std::string&, const char* func, const int line );
 
