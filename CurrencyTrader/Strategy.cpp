@@ -348,7 +348,7 @@ void Strategy::RunState( TrackOrder& to ) {
                     // cancel other stuff
                   } );
                 const double limit( fill_price + 2.0 * m_tick );
-                to.EnterShortLmt( TrackOrder::OrderArgs( m_quote.DateTime(), fill_price, limit ) );
+                to.ExitShortLmt( TrackOrder::OrderArgs( m_quote.DateTime(), fill_price, limit ) );
                 BOOST_LOG_TRIVIAL(info)
                   << m_pWatch->GetInstrumentName() << ','
                   << "up,fill=" << fill_price << ",short_limit=" << limit << ",stop.trail=" << m_stop.trail;
@@ -397,7 +397,7 @@ void Strategy::RunState( TrackOrder& to ) {
                     // cancel other stuff
                   } );
                 const double limit( fill_price - 2.0 * m_tick );
-                to.EnterLongLmt( TrackOrder::OrderArgs( m_quote.DateTime(), fill_price, limit ) );
+                to.ExitLongLmt( TrackOrder::OrderArgs( m_quote.DateTime(), fill_price, limit ) );
                 BOOST_LOG_TRIVIAL(info)
                   << m_pWatch->GetInstrumentName() << ','
                   << "dn,fill=" << fill_price << ",long_limit=" << limit << ",stop.trail=" << m_stop.trail;
@@ -423,7 +423,7 @@ void Strategy::RunState( TrackOrder& to ) {
       break;
     case ETradeState::EntrySubmittedUp:
     case ETradeState::EntrySubmittedDn:
-      // wait for exectuion
+      // wait for execution
       break;
     case ETradeState::ExitSignalUp: // need to move to quote
       {
