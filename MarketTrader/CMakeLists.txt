@@ -24,11 +24,15 @@ find_package(Boost ${TF_BOOST_VERSION} CONFIG REQUIRED COMPONENTS system date_ti
 set(
   file_h
     AppMarketTrader.hpp
+    FileNotify.hpp
+    LuaControl.hpp
   )
 
 set(
   file_cpp
     AppMarketTrader.cpp
+    FileNotify.cpp
+    LuaControl.cpp
   )
 
 add_executable(

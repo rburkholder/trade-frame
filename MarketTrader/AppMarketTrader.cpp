@@ -19,7 +19,6 @@
  * Created: 2024/11/10 12:18:19
  */
 
-// TODO: convert to wswidgets
 // TODO: add telegram, lua,
 // TODO: live charts, charts from history
 // TODO: futures, equities, option combos
@@ -39,20 +38,21 @@
 #include "wx/event.h"
 
 namespace {
-  static const std::string c_sAppName( "MarketTrader" );
+  static const std::string c_sAppName( "Market Trader" );
   static const std::string c_sVendorName( "One Unified Net Limited" );
+  static const std::string c_sVendorCopyright( "(c)2024 " + c_sVendorName );
 
-  static const std::string c_sDirectory( "." );
+  static const std::string c_sDirectory( "MarketTrader" );
   static const std::string c_sDbName(          c_sDirectory + '/' + c_sAppName + ".db" );
   static const std::string c_sStateFileName(   c_sDirectory + '/' + c_sAppName + ".state" );
   static const std::string c_sChoicesFilename( c_sDirectory + '/' + c_sAppName + ".cfg" );
+  static const std::string c_sDirectoryLua(    c_sDirectory + '/' + "lua" + '/' );  // scripts
 
   static const std::string c_sMenuItemPortfolio( "_USD" );
 
   static const std::string c_sPortfolioCurrencyName( "USD" ); // pre-created, needs to be uppercase
   static const std::string c_sPortfolioSimulationName( "sim" );
   static const std::string c_sPortfolioRealTimeName( "live" );
-  static const std::string c_sAlgorithmName( "forex_swing" );
 }
 
 IMPLEMENT_APP(AppMarketTrader)
@@ -61,7 +61,7 @@ bool AppMarketTrader::OnInit() {
 
   wxApp::SetVendorName( c_sVendorName );
   wxApp::SetAppDisplayName( c_sAppName );
-  wxApp::SetVendorDisplayName( "(c)2024 " + c_sVendorName );
+  wxApp::SetVendorDisplayName( c_sVendorCopyright );
 
   wxApp::OnInit();
 
@@ -74,6 +74,8 @@ bool AppMarketTrader::OnInit() {
 
   m_pFrameMain->Bind( wxEVT_MOVE, &AppMarketTrader::OnFrameMainAutoMove, this );
   m_pFrameMain->Show( true ); // triggers the auto move
+
+  m_LuaControl.AddPath( c_sDirectoryLua );
 
   return true;
 }
@@ -124,6 +126,8 @@ void AppMarketTrader::OnClose( wxCloseEvent& event ) {
   //}
 
   //m_pWinChartView->SetChartDataView( nullptr, false );
+
+  m_LuaControl.DelPath( c_sDirectoryLua );
 
   SaveState();
 

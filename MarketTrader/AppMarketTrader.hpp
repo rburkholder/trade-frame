@@ -28,6 +28,8 @@
 
 #include <TFBitsNPieces/FrameWork02.hpp>
 
+#include "LuaControl.hpp"
+
 class FrameMain;
 
 class AppMarketTrader:
@@ -41,6 +43,8 @@ protected:
 private:
 
   FrameMain* m_pFrameMain;
+
+  lua::Control m_LuaControl;
 
   virtual bool OnInit() override;
   void OnClose( wxCloseEvent& event );
