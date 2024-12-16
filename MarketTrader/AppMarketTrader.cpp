@@ -48,11 +48,11 @@ namespace {
   static const std::string c_sChoicesFilename( c_sDirectory + '/' + c_sAppName + ".cfg" );
   static const std::string c_sDirectoryLua(    c_sDirectory + '/' + "lua" + '/' );  // scripts
 
-  static const std::string c_sMenuItemPortfolio( "_USD" );
+  //static const std::string c_sMenuItemPortfolio( "_USD" );
 
-  static const std::string c_sPortfolioCurrencyName( "USD" ); // pre-created, needs to be uppercase
-  static const std::string c_sPortfolioSimulationName( "sim" );
-  static const std::string c_sPortfolioRealTimeName( "live" );
+  //static const std::string c_sPortfolioCurrencyName( "USD" ); // pre-created, needs to be uppercase
+  //static const std::string c_sPortfolioSimulationName( "sim" );
+  //static const std::string c_sPortfolioRealTimeName( "live" );
 }
 
 IMPLEMENT_APP(AppMarketTrader)
@@ -85,7 +85,6 @@ void AppMarketTrader::OnFrameMainAutoMove( wxMoveEvent& event ) {
   CallAfter(
     [this](){
       LoadState();
-      //m_pFrameMain->SetAutoLayout( true );
       m_pFrameMain->Layout();
     }
   );
