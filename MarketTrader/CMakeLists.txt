@@ -25,6 +25,7 @@ set(
   file_h
     AppMarketTrader.hpp
     FileNotify.hpp
+    Lua.hpp
     LuaControl.hpp
   )
 
@@ -32,6 +33,7 @@ set(
   file_cpp
     AppMarketTrader.cpp
     FileNotify.cpp
+    Lua.cpp
     LuaControl.cpp
   )
 
@@ -78,6 +80,7 @@ target_link_libraries(
       OUCharting
       TFIndicators
       TFTimeSeries
+      luajit-5.1
       fmt
       dl
       z

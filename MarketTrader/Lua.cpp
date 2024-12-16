@@ -13,54 +13,40 @@
  ************************************************************************/
 
 /*
- * File:    LuaControl.hpp
+ * File:    Lua.cpp
  * Author:  raymond@burkholder.net
- * Project: MarketTrader
- * Created: 2024/12/15 11:58:12
+ * Project: TradeFrame/MarketTrader
+ * Created: 2024/12/15 18:46:28
  */
 
-#pragma once
+#include <cassert>
 
-#include <string>
-#include <filesystem>
-#include <unordered_map>
+extern "C" {
+#include <luajit-2.1/lua.h>
+#include <luajit-2.1/lualib.h>
+#include <luajit-2.1/lauxlib.h>
+}
 
 #include "Lua.hpp"
-#include "FileNotify.hpp"
 
 namespace lua {
 
-class Control {
-public:
+Lua::Lua() {
 
-  Control();
-  ~Control();
+  // http://lua-users.org/wiki/SimpleLuaApiExample
 
-  void AddPath( const std::string& sPath );
-  void DelPath( const std::string& sPath );
+  m_pLua = luaL_newstate();
+  assert( m_pLua );
 
-protected:
-private:
+  luaL_openlibs( m_pLua ); /* Load Lua libraries */ // TODO: skip if reduced time/space footprint desirable
 
-  Lua lua;
+}
 
-  using mapScript_t = std::unordered_map<std::string, Lua>;
-  mapScript_t m_mapScript;
-
-  ou::FileNotify m_fn;
-
-  void Load( const std::string& sPath );
-  bool TestExtension( const std::filesystem::path& path );
-  mapScript_t::iterator  Parse( const std::string& );
-
-  void Load( const std::filesystem::path& );
-  void Modify( const std::filesystem::path& );
-  void Delete( const std::filesystem::path& );
-
-  void Attach( mapScript_t::iterator );
-  void Detach( mapScript_t::iterator );
-
-
-};
+Lua::~Lua() {
+  if ( m_pLua ) {
+    lua_close( m_pLua );
+    m_pLua = nullptr;
+  }
+}
 
 } // namespace lua
