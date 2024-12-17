@@ -552,10 +552,11 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
       //  << ',' << "hi"
       //  << ',' << c.hi << ',' << e.hi
       //  << std::endl;
+      m_state.swing = State::Swing::down;
       m_cubicSwingDn.Append( c.dt, c.hi );
       if ( m_cubicSwingDn.Full() ) {
         m_cubicSwingDn.CalcCoef();
-        m_state.swing = State::Swing::down;
+        //m_state.swing = State::Swing::down;
       }
     }
   }
@@ -577,10 +578,11 @@ void Strategy::HandleMinuteBar( const ou::tf::Bar& bar ) {
       //  << ',' << "lo"
       //  << ',' << c.lo << ',' << e.lo
       //  << std::endl;
+      m_state.swing = State::Swing::up;
       m_cubicSwingUp.Append( c.dt, c.lo );
       if ( m_cubicSwingUp.Full() ) {
         m_cubicSwingUp.CalcCoef();
-        m_state.swing = State::Swing::up;
+        //m_state.swing = State::Swing::up;
       }
     }
   }
