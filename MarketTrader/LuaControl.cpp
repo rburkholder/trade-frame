@@ -41,9 +41,9 @@ Control::Control() {
 
 Control::~Control() {}
 
-void Control::AddPath( const std::string& sPath ) {
+void Control::AddPath( const std::string& sPath, ou::FileNotify::fNotify_t&& f ) {
   Load( sPath );
-  m_fn.AddWatch( sPath, []( ou::FileNotify::EType, const std::string& sFileName ){} );
+  m_fn.AddWatch( sPath, std::move( f ) );
 }
 
 void Control::DelPath( const std::string& sPath ) {

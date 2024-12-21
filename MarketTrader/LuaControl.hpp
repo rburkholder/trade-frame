@@ -36,7 +36,7 @@ public:
   Control();
   ~Control();
 
-  void AddPath( const std::string& sPath );
+  void AddPath( const std::string& sPath, ou::FileNotify::fNotify_t&& );
   void DelPath( const std::string& sPath );
 
 protected:
