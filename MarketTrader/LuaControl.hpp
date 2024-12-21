@@ -42,8 +42,6 @@ public:
 protected:
 private:
 
-  Lua lua;
-
   using mapScript_t = std::unordered_map<std::string, Lua>;
   mapScript_t m_mapScript;
 

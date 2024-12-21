@@ -79,14 +79,6 @@ Control::mapScript_t::iterator Control::Parse( const std::string& sPath ) {
 
   mapScript_t::iterator iterScript( m_mapScript.end() );
 
-  // TODO: put these functions into a named table: mqtt
-  //   2016 programming in lua page 251
-  //   thus: mqtt.start_topic, mqtt.stop_topic
-  // TODO: need a discovery channel for info which shouldn't be emitted as gui updates
-  // TODO: send locations as a series of tags:  outside, inside, bedroom, top floor, ...
-  //   keep current location hierarchy, but migrate once tags are in place
-  // TODO: send category tags for sensors: thermostat, humidity, rssi, ...
-
   Lua lua;
 
   /* Load the file containing the script to be run */
@@ -104,7 +96,8 @@ Control::mapScript_t::iterator Control::Parse( const std::string& sPath ) {
   else {
     /* If something went wrong, error message is at the top of the stack */
     BOOST_LOG_TRIVIAL(error)
-      << "ScriptLua::Parse Couldn't load file: "
+      << "lua::control::Parse error with loading file "
+      << sPath << ": "
       << '(' << status << ')' << ' '
       << lua_tostring( lua(), -1 )
       ;
