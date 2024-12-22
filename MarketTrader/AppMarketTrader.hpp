@@ -61,7 +61,7 @@ private:
 
   lua::Control m_LuaControl;
 
-  bool m_bProvidersConfirmed;
+  bool m_bProvidersConnected;
 
   pProvider_t       m_data;
   pProvider_t       m_exec;
@@ -70,7 +70,8 @@ private:
   pProviderIQFeed_t m_iqf;    // live - [ data ], simulation - [ execution ]
 
   void EnableProviders();
-  void ProvidersConnected( int );
+  void ProviderConnected( int );
+  void ProviderDisconnected( int );
 
   virtual bool OnInit() override;
   void OnClose( wxCloseEvent& event );

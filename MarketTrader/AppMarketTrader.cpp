@@ -64,7 +64,7 @@ bool AppMarketTrader::OnInit() {
 
   wxApp::OnInit();
 
-  m_bProvidersConfirmed = false;
+  m_bProvidersConnected = false;
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -102,24 +102,33 @@ void AppMarketTrader::EnableProviders() {
   //m_iqf->SetThreadCount( m_choices.nThreads );
   m_iqf->SetName( "iq01" );
   m_data = m_iqf;
-  m_iqf->OnConnected.Add( MakeDelegate( this, &AppMarketTrader::ProvidersConnected ) );
+  m_iqf->OnConnected.Add( MakeDelegate( this, &AppMarketTrader::ProviderConnected ) );
+  m_iqf->OnDisconnected.Add( MakeDelegate( this, &AppMarketTrader::ProviderDisconnected ) );
   m_iqf->Connect();
 
   m_tws = ou::tf::ib::TWS::Factory();
   //m_tws->SetClientId( m_choices.m_nIbInstance );
   m_tws->SetName( "ib01" );
   m_exec = m_tws;
-  m_tws->OnConnected.Add( MakeDelegate( this, &AppMarketTrader::ProvidersConnected ) );
+  m_tws->OnConnected.Add( MakeDelegate( this, &AppMarketTrader::ProviderConnected ) );
+  m_tws->OnDisconnected.Add( MakeDelegate( this, &AppMarketTrader::ProviderDisconnected ) );
   m_tws->Connect();
 
 }
 
-void AppMarketTrader::ProvidersConnected( int ) {
+void AppMarketTrader::ProviderConnected( int ) {
   if ( m_iqf->Connected() && m_tws->Connected() ) {
-    if ( !m_bProvidersConfirmed ) {
-      m_bProvidersConfirmed = true;
+    if ( !m_bProvidersConnected ) {
+      m_bProvidersConnected = true;
       BOOST_LOG_TRIVIAL(info) << "providers connected";
     }
+  }
+}
+
+void AppMarketTrader::ProviderDisconnected( int ) {
+  if ( !m_iqf->Connected() || !m_tws->Connected() ) {
+    m_bProvidersConnected = false;
+    BOOST_LOG_TRIVIAL(info) << "providers dis-connected";
   }
 }
 
