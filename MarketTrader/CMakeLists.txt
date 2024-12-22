@@ -21,6 +21,9 @@ find_package(Boost ${TF_BOOST_VERSION} CONFIG REQUIRED COMPONENTS system date_ti
 
 #message("boost lib: ${Boost_LIBRARIES}")
 
+# lua/sol2 define:
+set(SOL_ALL_SAFETIES_ON 1)
+
 set(
   file_h
     AppMarketTrader.hpp
@@ -54,6 +57,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC -D__WXGTK__ )
 target_include_directories(
   ${PROJECT_NAME} PUBLIC
     "../lib"
+    "/usr/local/include/luajit-2.1"
     "/usr/local/lib/wx/include/gtk3-unicode-${WX_VERSION_MAJOR}"
     "/usr/local/include/wx-${WX_VERSION_MAJOR}"
   )

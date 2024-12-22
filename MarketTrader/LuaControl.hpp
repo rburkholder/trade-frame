@@ -58,7 +58,6 @@ private:
   void Attach( mapScript_t::iterator );
   void Detach( mapScript_t::iterator );
 
-
 };
 
 } // namespace lua

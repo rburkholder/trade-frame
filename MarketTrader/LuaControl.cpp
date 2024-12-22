@@ -22,10 +22,13 @@
 #include <boost/log/trivial.hpp>
 
 extern "C" {
-#include <luajit-2.1/lua.h>
-#include <luajit-2.1/lualib.h>
-#include <luajit-2.1/lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 }
+
+// needs to be after luajit
+#include <sol/sol.hpp>
 
 #include "LuaControl.hpp"
 
@@ -36,7 +39,9 @@ namespace {
 namespace lua {
 
 Control::Control() {
-
+  sol::state sol;
+  sol.open_libraries( sol::lib::base, sol::lib::package );
+  sol.script("print('bark bark bark!')");
 }
 
 Control::~Control() {}
