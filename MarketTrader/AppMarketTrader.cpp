@@ -37,7 +37,7 @@
 #include "AppMarketTrader.hpp"
 
 namespace {
-  static const std::string c_sAppName( "Market Trader" );
+  static const std::string c_sAppName( "MarketTrader" );
   static const std::string c_sVendorName( "One Unified Net Limited" );
   static const std::string c_sVendorCopyright( "(c)2024 " + c_sVendorName );
 
@@ -146,23 +146,26 @@ void AppMarketTrader::ProviderDisconnected( int ) {
 }
 
 void AppMarketTrader::SaveState() {
-  BOOST_LOG_TRIVIAL(info) << "Saving Config ...";
+  BOOST_LOG_TRIVIAL(info) << "Saving state ...";
   std::ofstream ofs( c_sStateFileName );
   boost::archive::text_oarchive oa(ofs);
   oa & *this;
-  BOOST_LOG_TRIVIAL(info) << "Saving done.";
+  BOOST_LOG_TRIVIAL(info) << "Saving state done.";
 }
 
 void AppMarketTrader::LoadState() {
   try {
-    BOOST_LOG_TRIVIAL(info) << "Loading Config ...";
+    BOOST_LOG_TRIVIAL(info) << "Loading state ...";
     std::ifstream ifs( c_sStateFileName );
     boost::archive::text_iarchive ia(ifs);
     ia & *this;
-    BOOST_LOG_TRIVIAL(info) << "Loading config done.";
+    BOOST_LOG_TRIVIAL(info) << "Loading state done.";
   }
-  catch(...) {
-    BOOST_LOG_TRIVIAL(info) << "load exception";
+  catch( const boost::archive::archive_exception& e ) {
+    BOOST_LOG_TRIVIAL(error) << "Exception (archive): state load " << e.what();
+  }
+  catch( const std::exception& e ) {
+    BOOST_LOG_TRIVIAL(error) << "Exception (std): state load " << e.what();
   }
 }
 
