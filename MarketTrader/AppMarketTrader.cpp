@@ -133,23 +133,23 @@ void AppMarketTrader::ProviderDisconnected( int ) {
 }
 
 void AppMarketTrader::SaveState() {
-  BOOST_LOG_TRIVIAL(info) << "Saving Config ..." << std::endl;
+  BOOST_LOG_TRIVIAL(info) << "Saving Config ...";
   std::ofstream ofs( c_sStateFileName );
   boost::archive::text_oarchive oa(ofs);
   oa & *this;
-  BOOST_LOG_TRIVIAL(info) << "Saving done." << std::endl;
+  BOOST_LOG_TRIVIAL(info) << "Saving done.";
 }
 
 void AppMarketTrader::LoadState() {
   try {
-    BOOST_LOG_TRIVIAL(info) << "Loading Config ..." << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "Loading Config ...";
     std::ifstream ifs( c_sStateFileName );
     boost::archive::text_iarchive ia(ifs);
     ia & *this;
-    BOOST_LOG_TRIVIAL(info) << "Loading config done." << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "Loading config done.";
   }
   catch(...) {
-    BOOST_LOG_TRIVIAL(info) << "load exception" << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "load exception";
   }
 }
 
