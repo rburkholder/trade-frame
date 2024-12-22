@@ -102,7 +102,7 @@ FileNotify::FileNotify()
                     inotify_event *event;
                     event = (inotify_event*) &bufINotify[ ix ];
 
-                    EType type = EType::unknown_;
+                    EType type( EType::unknown_ );
 
                     if ( 0 < ( IN_CREATE & event->mask ) ) {
                       type = EType::create_;
@@ -121,6 +121,9 @@ FileNotify::FileNotify()
                     }
                     if ( 0 < ( IN_MOVED_TO & event->mask ) ) {
                       type = EType::move_to_;
+                    }
+                    if ( 0 < ( IN_IGNORED & event->mask ) ) {
+                      type = EType::ignored_; // nothing in directory
                     }
                     assert( EType::unknown_ != type );
 
