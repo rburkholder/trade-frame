@@ -163,6 +163,14 @@ void AppMarketTrader::OnClose( wxCloseEvent& event ) {
 
   //m_pWinChartView->SetChartDataView( nullptr, false );
 
+  m_iqf->Disconnect();
+  m_iqf->OnConnected.Remove( MakeDelegate( this, &AppMarketTrader::ProviderConnected ) );
+  m_iqf->OnDisconnected.Remove( MakeDelegate( this, &AppMarketTrader::ProviderDisconnected ) );
+
+  m_tws->Disconnect();
+  m_tws->OnConnected.Remove( MakeDelegate( this, &AppMarketTrader::ProviderConnected ) );
+  m_tws->OnDisconnected.Remove( MakeDelegate( this, &AppMarketTrader::ProviderDisconnected ) );
+
   m_LuaControl.DelPath( c_sDirectoryLua );
 
   SaveState();
