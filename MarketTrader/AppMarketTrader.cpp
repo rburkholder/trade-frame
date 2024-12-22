@@ -162,6 +162,7 @@ void AppMarketTrader::LoadState() {
     BOOST_LOG_TRIVIAL(info) << "Loading state done.";
   }
   catch( const boost::archive::archive_exception& e ) {
+    // https://www.boost.org/doc/libs/1_87_0/libs/serialization/doc/index.html
     BOOST_LOG_TRIVIAL(error) << "Exception (archive): state load " << e.what();
   }
   catch( const std::exception& e ) {
