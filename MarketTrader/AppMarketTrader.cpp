@@ -27,7 +27,7 @@
 
 #include <string>
 
-//#include <boost/log/trivial.hpp>
+#include <boost/log/trivial.hpp>
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
@@ -35,7 +35,6 @@
 #include <TFVuTrading/FrameMain.h>
 
 #include "AppMarketTrader.hpp"
-#include "wx/event.h"
 
 namespace {
   static const std::string c_sAppName( "Market Trader" );
@@ -64,6 +63,8 @@ bool AppMarketTrader::OnInit() {
   wxApp::SetVendorDisplayName( c_sVendorCopyright );
 
   wxApp::OnInit();
+
+  m_bProvidersConfirmed = false;
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -95,24 +96,51 @@ void AppMarketTrader::OnFrameMainAutoMove( wxMoveEvent& event ) {
 
 }
 
+void AppMarketTrader::EnableProviders() {
+
+  m_iqf = ou::tf::iqfeed::Provider::Factory();
+  //m_iqf->SetThreadCount( m_choices.nThreads );
+  m_iqf->SetName( "iq01" );
+  m_data = m_iqf;
+  m_iqf->OnConnected.Add( MakeDelegate( this, &AppMarketTrader::ProvidersConnected ) );
+  m_iqf->Connect();
+
+  m_tws = ou::tf::ib::TWS::Factory();
+  //m_tws->SetClientId( m_choices.m_nIbInstance );
+  m_tws->SetName( "ib01" );
+  m_exec = m_tws;
+  m_tws->OnConnected.Add( MakeDelegate( this, &AppMarketTrader::ProvidersConnected ) );
+  m_tws->Connect();
+
+}
+
+void AppMarketTrader::ProvidersConnected( int ) {
+  if ( m_iqf->Connected() && m_tws->Connected() ) {
+    if ( !m_bProvidersConfirmed ) {
+      m_bProvidersConfirmed = true;
+      BOOST_LOG_TRIVIAL(info) << "providers connected";
+    }
+  }
+}
+
 void AppMarketTrader::SaveState() {
-  std::cout << "Saving Config ..." << std::endl;
+  BOOST_LOG_TRIVIAL(info) << "Saving Config ..." << std::endl;
   std::ofstream ofs( c_sStateFileName );
   boost::archive::text_oarchive oa(ofs);
   oa & *this;
-  std::cout << "  done." << std::endl;
+  BOOST_LOG_TRIVIAL(info) << "Saving done." << std::endl;
 }
 
 void AppMarketTrader::LoadState() {
   try {
-    std::cout << "Loading Config ..." << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "Loading Config ..." << std::endl;
     std::ifstream ifs( c_sStateFileName );
     boost::archive::text_iarchive ia(ifs);
     ia & *this;
-    std::cout << "  done." << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "Loading config done." << std::endl;
   }
   catch(...) {
-    std::cout << "load exception" << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "load exception" << std::endl;
   }
 }
 

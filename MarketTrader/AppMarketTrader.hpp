@@ -26,6 +26,9 @@
 
 #include <wx/app.h>
 
+#include <TFIQFeed/Provider.h>
+#include <TFInteractiveBrokers/IBTWS.h>
+
 #include <TFBitsNPieces/FrameWork02.hpp>
 
 #include "LuaControl.hpp"
@@ -39,12 +42,35 @@ class AppMarketTrader:
   friend ou::tf::FrameWork02<AppMarketTrader>;
   friend class boost::serialization::access;
 public:
+
 protected:
 private:
+
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  //using pWatch_t = ou::tf::Watch::pWatch_t;
+  //using pPosition_t = ou::tf::Position::pPosition_t;
+  //using pPortfolio_t = ou::tf::Portfolio::pPortfolio_t;
+
+  using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
+  using pProviderIB_t = ou::tf::ib::TWS::pProvider_t;
+  using pProviderIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
+
+  using fInstrumentConstructed_t = std::function<void(const std::string&)>;
 
   FrameMain* m_pFrameMain;
 
   lua::Control m_LuaControl;
+
+  bool m_bProvidersConfirmed;
+
+  pProvider_t       m_data;
+  pProvider_t       m_exec;
+
+  pProviderIB_t     m_tws;    // live - [ execution ]
+  pProviderIQFeed_t m_iqf;    // live - [ data ], simulation - [ execution ]
+
+  void EnableProviders();
+  void ProvidersConnected( int );
 
   virtual bool OnInit() override;
   void OnClose( wxCloseEvent& event );
