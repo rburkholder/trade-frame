@@ -65,6 +65,7 @@ bool AppMarketTrader::OnInit() {
   wxApp::OnInit();
 
   m_bProvidersConnected = false;
+  EnableProviders();
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -116,6 +117,18 @@ void AppMarketTrader::EnableProviders() {
 
 }
 
+void AppMarketTrader::DisableProviders() {
+  m_iqf->Disconnect();
+  m_iqf->OnConnected.Remove( MakeDelegate( this, &AppMarketTrader::ProviderConnected ) );
+  m_iqf->OnDisconnected.Remove( MakeDelegate( this, &AppMarketTrader::ProviderDisconnected ) );
+
+  m_tws->Disconnect();
+  m_tws->OnConnected.Remove( MakeDelegate( this, &AppMarketTrader::ProviderConnected ) );
+  m_tws->OnDisconnected.Remove( MakeDelegate( this, &AppMarketTrader::ProviderDisconnected ) );
+}
+
+
+
 void AppMarketTrader::ProviderConnected( int ) {
   if ( m_iqf->Connected() && m_tws->Connected() ) {
     if ( !m_bProvidersConnected ) {
@@ -163,17 +176,11 @@ void AppMarketTrader::OnClose( wxCloseEvent& event ) {
 
   //m_pWinChartView->SetChartDataView( nullptr, false );
 
-  m_iqf->Disconnect();
-  m_iqf->OnConnected.Remove( MakeDelegate( this, &AppMarketTrader::ProviderConnected ) );
-  m_iqf->OnDisconnected.Remove( MakeDelegate( this, &AppMarketTrader::ProviderDisconnected ) );
-
-  m_tws->Disconnect();
-  m_tws->OnConnected.Remove( MakeDelegate( this, &AppMarketTrader::ProviderConnected ) );
-  m_tws->OnDisconnected.Remove( MakeDelegate( this, &AppMarketTrader::ProviderDisconnected ) );
+  SaveState();
 
   m_LuaControl.DelPath( c_sDirectoryLua );
 
-  SaveState();
+  DisableProviders();
 
   //if ( m_pdb ) m_pdb.reset();
 

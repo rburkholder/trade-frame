@@ -72,6 +72,8 @@ private:
   void EnableProviders();
   void ProviderConnected( int );
   void ProviderDisconnected( int );
+  void DisableProviders();
+
 
   virtual bool OnInit() override;
   void OnClose( wxCloseEvent& event );
