@@ -291,7 +291,7 @@ void TWS::Disconnect( bool bFinal, bool bIBInitiated, bool bUserInitiated ) {
 
   }
   else {
-    BOOST_LOG_TRIVIAL(error) << "IB quiesced";
+    BOOST_LOG_TRIVIAL(warning) << "IB already disconnected";
   }
 }
 
