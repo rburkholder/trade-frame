@@ -55,8 +55,10 @@ private:
 
   ou::FileNotify m_fn;
 
-  void Load( const std::string& sPath );  // initial directory load
+  void InitialLoad( const std::string& sPath );  // initial directory load
   bool TestExtension( const std::filesystem::path& path );
+
+  mapScript_t::iterator Load( const std::string& sPath );
 
   void Load( const std::filesystem::path& );
   void Modify( const std::filesystem::path& );

@@ -34,15 +34,57 @@ Sol::~Sol() {
   // TODO: empty m_setPath, m_mapScript
 }
 
+// one sequence was: move from, create, modify (keep th emodify)
+
 void Sol::AddPath( const std::string& sPath ) {
   setPath_t::iterator iterPath( m_setPath.find( sPath ) );
   if ( m_setPath.end() == iterPath ) {
     m_fn.AddWatch(
       sPath,
-      []( ou::FileNotify::EType, const std::string& sFileName ){
-        BOOST_LOG_TRIVIAL(info) << "Sol - file notify cb " << sFileName;
+      [this,sPath]( ou::FileNotify::EType type, const std::string& sFileName ){
+
+        //BOOST_LOG_TRIVIAL(info) << "Sol - file notify cb1 " << sFileName;
+        std::filesystem::path fsPath( sPath );
+        fsPath.append( sFileName );
+
+        if ( TestExtension( fsPath ) ) {
+
+          switch ( type ) {
+            case ou::FileNotify::EType::create_:
+              BOOST_LOG_TRIVIAL(info) << "Sol - file create " << sFileName;
+              //Load( fsPath );
+              break;
+            case ou::FileNotify::EType::modify_:
+              BOOST_LOG_TRIVIAL(info) << "Sol - file modify " << sFileName;
+              Modify( fsPath );
+              break;
+            case ou::FileNotify::EType::delete_:
+              BOOST_LOG_TRIVIAL(info) << "Sol - file delete " << sFileName;
+              Delete( fsPath );
+              break;
+            case ou::FileNotify::EType::move_from_:
+              BOOST_LOG_TRIVIAL(info) << "Sol - file move from " << sFileName;
+              //Delete( fsPath );
+              break;
+            case ou::FileNotify::EType::move_to_:
+              BOOST_LOG_TRIVIAL(info) << "Sol - file move to " << sFileName;
+              Load( fsPath );
+              break;
+            case ou::FileNotify::EType::ignored_:
+              BOOST_LOG_TRIVIAL(info) << "Sol - file ignore " << sFileName;
+              //m_lua.Load( path );
+              break;
+            default:
+              assert( false );
+              break;
+          }
+        }
+        else {
+          //std::cout << "noop: " << path << std::endl;
+        }
+        //std::cout << s << std::endl;
       } );
-    Load( sPath ); // redundant?
+    InitialLoad( sPath );
     m_setPath.emplace( sPath );
   }
   else {
@@ -62,7 +104,7 @@ void Sol::DelPath( const std::string& sPath ) {
 
 }
 
-void Sol::Load( const std::string& sPath ) {
+void Sol::InitialLoad( const std::string& sPath ) {
   static const std::filesystem::path pathScript( sPath );
   // TODO: check that path is a directory
   for ( auto const& dir_entry: std::filesystem::recursive_directory_iterator{ pathScript } ) {
@@ -71,11 +113,7 @@ void Sol::Load( const std::string& sPath ) {
         try {
           mapScript_t::iterator iterScript( m_mapScript.find( dir_entry.path().string() ) );
           if ( m_mapScript.end() == iterScript ) {
-            sol::state sol;
-            //sol.open_libraries( sol::lib::base, sol::lib::package );
-            auto result = m_mapScript.emplace( dir_entry.path().string(), std::move( sol ) );
-            assert( result.second );
-            iterScript = result.first;
+            iterScript = Load( dir_entry.path().string() );
             Attach( iterScript );
           }
           else {
@@ -88,7 +126,13 @@ void Sol::Load( const std::string& sPath ) {
       }
     }
   }
+}
 
+Sol::mapScript_t::iterator Sol::Load( const std::string& sPath ) {
+  sol::state sol;
+  auto result = m_mapScript.emplace( sPath, std::move( sol ) );
+  assert( result.second );
+  return result.first;
 }
 
 bool Sol::TestExtension( const std::filesystem::path& fsPath ) {
@@ -102,7 +146,6 @@ bool Sol::TestExtension( const std::filesystem::path& fsPath ) {
 }
 
 void Sol::Modify( const std::filesystem::path& fsPath ) {
-
   const std::string sPath( fsPath );
   mapScript_t::iterator iterScript = m_mapScript.find( sPath );
   if ( m_mapScript.end() == iterScript ) {
@@ -116,21 +159,22 @@ void Sol::Modify( const std::filesystem::path& fsPath ) {
 }
 
 void Sol::Load( const std::filesystem::path& fsPath ) {
-
   const std::string sPath( fsPath );
   mapScript_t::iterator iterScript = m_mapScript.find( sPath );
-  if ( m_mapScript.end() != iterScript ) {
-    Modify( fsPath );
-  }
-  else {
+  //if ( m_mapScript.end() != iterScript ) {
+  //  Modify( fsPath );
+  //}
+  //else {
     //mapScript_t::iterator iterScript = Parse( sPath );
-    BOOST_LOG_TRIVIAL(info) << "Sol::Load - loaded " << sPath;
+    assert( m_mapScript.end() == iterScript );
+    BOOST_LOG_TRIVIAL(info) << "Sol::Load - loading " << sPath;
+    iterScript = Load( sPath );
     Attach( iterScript );
-  }
+  //}
 }
 
 void Sol::Delete( const std::filesystem::path& fsPath ) {
-  const std::string sPath( fsPath );
+  const std::string sPath( fsPath.string() );
   mapScript_t::iterator iterScript = m_mapScript.find( sPath );
   if ( m_mapScript.end() == iterScript ) {
     BOOST_LOG_TRIVIAL(warning) << "Sol::Delete - no script to delete - " << sPath;
@@ -152,5 +196,6 @@ void Sol::Attach( mapScript_t::iterator iterScript ) {
 }
 
 void Sol::Detach( mapScript_t::iterator iterScript ) {
+  assert( m_mapScript.end() != iterScript );
   // step 1: call the detachment function
 }
