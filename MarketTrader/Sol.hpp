@@ -26,7 +26,7 @@
 #include <filesystem>
 #include <unordered_map>
 
-#include <sol/sol.hpp>
+#include <sol/state.hpp>
 
 #include "FileNotify.hpp"
 
@@ -50,6 +50,7 @@ private:
   // note: may use same script for multiple states if multiple symbols use same script?
   //   key may be object & path, or just object
   //   maybe use CRTP for class specific instance for a series of interfaces
+  // use a thread tied to asio message passing?
   using mapScript_t = std::unordered_map<std::string, sol::state>;
   mapScript_t m_mapScript;
 

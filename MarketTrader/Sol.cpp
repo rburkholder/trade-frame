@@ -21,6 +21,9 @@
 
 #include <boost/log/trivial.hpp>
 
+#include <sol/load_result.hpp>
+
+//#include <sol/sol.hpp>
 #include "Sol.hpp"
 
 namespace {
@@ -152,7 +155,6 @@ void Sol::Modify( const std::filesystem::path& fsPath ) {
     Load( fsPath );
   }
   else {
-    // TODO: undo existing config first
     Delete( fsPath );
     Load( fsPath );
   }
@@ -161,16 +163,10 @@ void Sol::Modify( const std::filesystem::path& fsPath ) {
 void Sol::Load( const std::filesystem::path& fsPath ) {
   const std::string sPath( fsPath );
   mapScript_t::iterator iterScript = m_mapScript.find( sPath );
-  //if ( m_mapScript.end() != iterScript ) {
-  //  Modify( fsPath );
-  //}
-  //else {
-    //mapScript_t::iterator iterScript = Parse( sPath );
-    assert( m_mapScript.end() == iterScript );
-    BOOST_LOG_TRIVIAL(info) << "Sol::Load - loading " << sPath;
-    iterScript = Load( sPath );
-    Attach( iterScript );
-  //}
+  assert( m_mapScript.end() == iterScript );
+  BOOST_LOG_TRIVIAL(info) << "Sol::Load - loading " << sPath;
+  iterScript = Load( sPath );
+  Attach( iterScript );
 }
 
 void Sol::Delete( const std::filesystem::path& fsPath ) {
@@ -191,7 +187,8 @@ void Sol::Attach( mapScript_t::iterator iterScript ) {
   // step 1: register endpoints, initialize variables
   sol::state& sol( iterScript->second );
   sol.open_libraries( sol::lib::base );
-  sol.script_file( iterScript->first );
+  sol::load_result script = sol.load_file( iterScript->first );
+  script();
   // step 2: call the attachment function
 }
 
@@ -199,3 +196,9 @@ void Sol::Detach( mapScript_t::iterator iterScript ) {
   assert( m_mapScript.end() != iterScript );
   // step 1: call the detachment function
 }
+
+// Embedding LuaJIT in 30 minutes (or so):
+// https://en.blog.nic.cz/2015/08/12/embedding-luajit-in-30-minutes-or-so/
+
+// references Programming in Lua:
+// https://www.lua.org/pil/25.html
