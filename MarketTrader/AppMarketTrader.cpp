@@ -77,7 +77,7 @@ bool AppMarketTrader::OnInit() {
   m_pFrameMain->Bind( wxEVT_MOVE, &AppMarketTrader::OnFrameMainAutoMove, this );
   m_pFrameMain->Show( true ); // triggers the auto move
 
-  m_LuaControl.AddPath( c_sDirectoryLua, []( ou::FileNotify::EType, const std::string& sFileName ){} );
+  m_sol.AddPath( c_sDirectoryLua );
 
   return true;
 }
@@ -182,7 +182,7 @@ void AppMarketTrader::OnClose( wxCloseEvent& event ) {
 
   SaveState();
 
-  m_LuaControl.DelPath( c_sDirectoryLua );
+  m_sol.DelPath( c_sDirectoryLua );
 
   DisableProviders();
 

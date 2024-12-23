@@ -28,16 +28,18 @@ set(
   file_h
     AppMarketTrader.hpp
     FileNotify.hpp
-    Lua.hpp
-    LuaControl.hpp
+    #Lua.hpp
+    #LuaControl.hpp
+    Sol.hpp
   )
 
 set(
   file_cpp
     AppMarketTrader.cpp
     FileNotify.cpp
-    Lua.cpp
-    LuaControl.cpp
+    #Lua.cpp
+    #LuaControl.cpp
+    Sol.cpp
   )
 
 add_executable(

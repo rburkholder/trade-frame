@@ -31,7 +31,7 @@
 
 #include <TFBitsNPieces/FrameWork02.hpp>
 
-#include "LuaControl.hpp"
+#include "Sol.hpp"
 
 class FrameMain;
 
@@ -59,7 +59,7 @@ private:
 
   FrameMain* m_pFrameMain;
 
-  lua::Control m_LuaControl;
+  Sol m_sol;
 
   bool m_bProvidersConnected;
 
