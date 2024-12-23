@@ -27,9 +27,6 @@ extern "C" {
 #include <lauxlib.h>
 }
 
-// needs to be after luajit
-#include <sol/sol.hpp>
-
 #include "LuaControl.hpp"
 
 namespace {
@@ -39,9 +36,6 @@ namespace {
 namespace lua {
 
 Control::Control() {
-  sol::state sol;
-  sol.open_libraries( sol::lib::base, sol::lib::package );
-  sol.script("print('bark bark bark!')");
 }
 
 Control::~Control() {}
