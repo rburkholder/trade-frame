@@ -114,12 +114,12 @@ void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, fInstrument_t
           boost::gregorian::date expiry( pInstrument->GetExpiry() ); // will be matching expiry of this continous future
 
           m_pOptionChainQuery->QueryFuturesChain(  // obtain a list of futures
-            sBase, "", "345" /* 2023, 2024, 2025 */ , "4" /* 4 months */,
+            sBase, "", "4567" /* 2024, 2025, 2026, 2027 */ , "4" /* 4 months */,
             [this,expiry,iterQuery]( const iqfeed::OptionChainQuery::FuturesList& list ) mutable {
 
               if ( 0 == list.vSymbol.size() ) {
                 assert( false );  // no likely symbols found
-                // clean up and return something
+                // TODO: clean up and return something
               }
               else {
                 Query& query( iterQuery->second );
@@ -176,8 +176,10 @@ void ComposeInstrument::Finish( pMapQuery_t::iterator iterQuery ) {
     query.fInstrument( query.pInstrument, query.bConstructed );
   }
 
-  std::lock_guard<std::mutex> lock( m_mutexMap );
-  m_pMapQuery.erase( iterQuery );
+  {
+    std::lock_guard<std::mutex> lock( m_mutexMap );
+    m_pMapQuery.erase( iterQuery );
+  }
 }
 
 } // namespace tf
