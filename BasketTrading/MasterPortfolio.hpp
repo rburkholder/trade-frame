@@ -134,7 +134,7 @@ private:
   using pProviderIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
   //using pProviderSim_t =  ou::tf::SimulationProvider::pProvider_t;
 
-  using pInstrument_t = ou::tf::ib::TWS::pInstrument_t;
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
   std::string m_sTSDataStreamStarted;
 
