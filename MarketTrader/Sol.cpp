@@ -23,7 +23,6 @@
 
 #include <sol/load_result.hpp>
 
-//#include <sol/sol.hpp>
 #include "Sol.hpp"
 
 namespace {
@@ -184,12 +183,14 @@ void Sol::Delete( const std::filesystem::path& fsPath ) {
 
 void Sol::Attach( mapScript_t::iterator iterScript ) {
   assert( m_mapScript.end() != iterScript );
-  // step 1: register endpoints, initialize variables
+  // step 1: load the script
   sol::state& sol( iterScript->second );
   sol.open_libraries( sol::lib::base );
   sol::load_result script = sol.load_file( iterScript->first );
+  // step 2: load up functions & classes
+  // step 3: initialize
   script();
-  // step 2: call the attachment function
+  // step 4: call the attachment function
 }
 
 void Sol::Detach( mapScript_t::iterator iterScript ) {

@@ -30,6 +30,8 @@
 
 #include "FileNotify.hpp"
 
+// TODO: convert to CRTP?
+
 class Sol {
 public:
 
@@ -42,7 +44,7 @@ public:
 protected:
 private:
 
-  // set of paths running file notifications
+  // set of paths running path notifications
   using setPath_t = std::set<std::string>;
   setPath_t m_setPath;
 
