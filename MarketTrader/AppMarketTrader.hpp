@@ -31,9 +31,8 @@
 
 #include <TFBitsNPieces/FrameWork02.hpp>
 
-#include "Sol.hpp"
-
 class FrameMain;
+class LuaInterface;
 
 class AppMarketTrader:
   public wxApp,
@@ -55,11 +54,11 @@ private:
   using pProviderIB_t = ou::tf::ib::TWS::pProvider_t;
   using pProviderIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
 
+  using pLuaInterface_t = std::unique_ptr<LuaInterface>;
+
   using fInstrumentConstructed_t = std::function<void(const std::string&)>;
 
   FrameMain* m_pFrameMain;
-
-  Sol m_sol;
 
   bool m_bProvidersConnected;
 
@@ -68,6 +67,8 @@ private:
 
   pProviderIB_t     m_tws;    // live - [ execution ]
   pProviderIQFeed_t m_iqf;    // live - [ data ], simulation - [ execution ]
+
+  pLuaInterface_t m_pLuaInterface;
 
   void EnableProviders();
   void ProviderConnected( int );

@@ -27,18 +27,26 @@ set(SOL_ALL_SAFETIES_ON 1)
 set(
   file_h
     AppMarketTrader.hpp
+    DataEngine.hpp
+    ExecEngine.hpp
     FileNotify.hpp
+    InstrumentEngine.hpp
     #Lua.hpp
     #LuaControl.hpp
+    LuaInterface.hpp
     Sol.hpp
   )
 
 set(
   file_cpp
     AppMarketTrader.cpp
+    DataEngine.cpp
+    ExecEngine.cpp
     FileNotify.cpp
+    InstrumentEngine.cpp
     #Lua.cpp
     #LuaControl.cpp
+    LuaInterface.cpp
     Sol.cpp
   )
 
@@ -73,10 +81,10 @@ target_link_libraries(
   ${PROJECT_NAME}
       TFBitsNPieces
       TFInteractiveBrokers
-      TFSimulation
+#      TFSimulation
       TFVuTrading
       TFTrading
-      TFOptions
+#      TFOptions
       TFTrading
       TFIQFeed
       TFHDF5TimeSeries

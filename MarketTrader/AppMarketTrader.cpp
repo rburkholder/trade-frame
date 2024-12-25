@@ -34,6 +34,7 @@
 
 #include <TFVuTrading/FrameMain.h>
 
+#include "LuaInterface.hpp"
 #include "AppMarketTrader.hpp"
 
 namespace {
@@ -76,8 +77,6 @@ bool AppMarketTrader::OnInit() {
 
   m_pFrameMain->Bind( wxEVT_MOVE, &AppMarketTrader::OnFrameMainAutoMove, this );
   m_pFrameMain->Show( true ); // triggers the auto move
-
-  m_sol.AddPath( c_sDirectoryLua );
 
   return true;
 }
@@ -134,6 +133,9 @@ void AppMarketTrader::ProviderConnected( int ) {
     if ( !m_bProvidersConnected ) {
       m_bProvidersConnected = true;
       BOOST_LOG_TRIVIAL(info) << "providers connected";
+      if ( !m_pLuaInterface ) {
+        m_pLuaInterface = std::make_unique<LuaInterface>( c_sDirectoryLua, m_tws, m_iqf );
+      }
     }
   }
 }
@@ -182,7 +184,7 @@ void AppMarketTrader::OnClose( wxCloseEvent& event ) {
 
   SaveState();
 
-  m_sol.DelPath( c_sDirectoryLua );
+  m_pLuaInterface.reset();
 
   DisableProviders();
 
