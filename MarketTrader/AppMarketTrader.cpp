@@ -126,8 +126,6 @@ void AppMarketTrader::DisableProviders() {
   m_tws->OnDisconnected.Remove( MakeDelegate( this, &AppMarketTrader::ProviderDisconnected ) );
 }
 
-
-
 void AppMarketTrader::ProviderConnected( int ) {
   if ( m_iqf->Connected() && m_tws->Connected() ) {
     if ( !m_bProvidersConnected ) {

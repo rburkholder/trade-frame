@@ -23,6 +23,20 @@
 
 #include "LuaMarketTie.hpp"
 
+LuaStateTie::LuaStateTie() {
+  BOOST_LOG_TRIVIAL(trace) << "LuaStateTie::LuaStateTie()";
+}
+
+LuaStateTie::~LuaStateTie() {
+  BOOST_LOG_TRIVIAL(trace) << "LuaStateTie::~LuaStateTie()";
+}
+
+void LuaStateTie::Watch(  const std::string_view& sIQFeedSymbolName ) {
+  BOOST_LOG_TRIVIAL(trace) << "LuaStateTie::Watch " << sIQFeedSymbolName;
+}
+
+// ======
+
 LuaMarketTie::LuaMarketTie( pProvider_t pExec, pProvider_t pData )
 : m_engineInstrument( pExec, pData )
 {
@@ -42,6 +56,7 @@ void LuaMarketTie::Watch( const std::string& sName ) { // track which script is 
 }
 
 void LuaMarketTie::Initialize( sol::state& sol ) {
-
+  sol::usertype<LuaStateTie> lua_state_tie = sol.new_usertype<LuaStateTie>( "tie", sol::constructors<LuaStateTie()>() );
+  lua_state_tie[ "watch" ] = &LuaStateTie::Watch;
 }
 

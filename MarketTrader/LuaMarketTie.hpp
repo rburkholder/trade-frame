@@ -21,8 +21,22 @@
 
 #pragma once
 
+#include "string_view"
+
 #include "Sol.hpp"
 #include "InstrumentEngine.hpp"
+
+class LuaStateTie {
+public:
+
+  LuaStateTie();
+  ~LuaStateTie();
+
+  void Watch( const std::string_view& );
+
+protected:
+private:
+};
 
 class LuaMarketTie: public Sol {
 public:
