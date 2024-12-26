@@ -13,30 +13,29 @@
  ************************************************************************/
 
 /*
- * File:    LuaInterface.hpp
+ * File:    LuaMarketTie.cpp
  * Author:  raymond@burkholder.net
  * Project: MarketTrader
- * Created: 2024/12/25 14:28:13
+ * Created: 2024/12/26 11:30:07
  */
 
-#pragma once
+#include <boost/log/trivial.hpp>
 
-#include "Sol.hpp"
+#include "LuaMarketTie.hpp"
 
-class LuaInterface {
-public:
+LuaMarketTie::LuaMarketTie( pProvider_t pExec, pProvider_t pData )
+: m_engineInstrument( pExec, pData )
+{
+  assert( pExec->Connected() );
+  assert( pData->Connected() );
+  m_engineInstrument.Compose(
+    "SPY",
+    []( ou::tf::Instrument::pInstrument_t p, bool bConstructed ){
+      BOOST_LOG_TRIVIAL(trace) << p->GetInstrumentName() << ',' << p->GetContract();
+    } );
+}
 
-  LuaInterface();
-  virtual ~LuaInterface();
+LuaMarketTie::~LuaMarketTie() {
 
-  void SetPath( const std::string& sScriptPath ); // after classes have been setup
+}
 
-protected:
-
-  Sol m_sol;
-
-private:
-
-  const std::string m_sScriptPath;
-
-};

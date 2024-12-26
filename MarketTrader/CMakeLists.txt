@@ -34,6 +34,7 @@ set(
     #Lua.hpp
     #LuaControl.hpp
     LuaInterface.hpp
+    LuaMarketTie.hpp
     Sol.hpp
   )
 
@@ -47,6 +48,7 @@ set(
     #Lua.cpp
     #LuaControl.cpp
     LuaInterface.cpp
+    LuaMarketTie.cpp
     Sol.cpp
   )
 

@@ -19,17 +19,19 @@
  * Created: 2024/12/25 14:28:13
  */
 
+#include <boost/log/trivial.hpp>
+
 #include "LuaInterface.hpp"
 
-LuaInterface::LuaInterface(  const std::string& sScripts, pProvider_t pExec, pProvider_t pData )
-: m_engineInstrument( pExec, pData )
-, m_sPathScripts( sScripts )
-{
-  m_sol.AddPath( m_sPathScripts );
-  assert( pExec->Connected() );
-  assert( pData->Connected() );
-}
+LuaInterface::LuaInterface()
+{}
 
 LuaInterface::~LuaInterface() {
-  m_sol.DelPath( m_sPathScripts );
+  if ( 0 < m_sScriptPath.size() ) {
+    m_sol.DelPath( m_sScriptPath );
+  }
+}
+
+void LuaInterface::SetPath( const std::string& sScriptPath ) {
+  m_sol.AddPath( sScriptPath );
 }

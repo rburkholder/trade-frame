@@ -34,7 +34,7 @@
 
 #include <TFVuTrading/FrameMain.h>
 
-#include "LuaInterface.hpp"
+#include "LuaMarketTie.hpp"
 #include "AppMarketTrader.hpp"
 
 namespace {
@@ -133,8 +133,9 @@ void AppMarketTrader::ProviderConnected( int ) {
     if ( !m_bProvidersConnected ) {
       m_bProvidersConnected = true;
       BOOST_LOG_TRIVIAL(info) << "providers connected";
-      if ( !m_pLuaInterface ) {
-        m_pLuaInterface = std::make_unique<LuaInterface>( c_sDirectoryLua, m_tws, m_iqf );
+      if ( !m_pLuaMarketTie ) {
+        m_pLuaMarketTie = std::make_unique<LuaMarketTie>( m_tws, m_iqf );
+        m_pLuaMarketTie->SetPath( c_sDirectoryLua );
       }
     }
   }
@@ -184,7 +185,7 @@ void AppMarketTrader::OnClose( wxCloseEvent& event ) {
 
   SaveState();
 
-  m_pLuaInterface.reset();
+  m_pLuaMarketTie.reset();
 
   DisableProviders();
 

@@ -13,30 +13,28 @@
  ************************************************************************/
 
 /*
- * File:    LuaInterface.hpp
+ * File:    LuaMarketTie.hpp
  * Author:  raymond@burkholder.net
  * Project: MarketTrader
- * Created: 2024/12/25 14:28:13
+ * Created: 2024/12/26 11:30:07
  */
 
 #pragma once
 
-#include "Sol.hpp"
+#include "LuaInterface.hpp"
+#include "InstrumentEngine.hpp"
 
-class LuaInterface {
+class LuaMarketTie: public LuaInterface {
 public:
 
-  LuaInterface();
-  virtual ~LuaInterface();
+  using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
 
-  void SetPath( const std::string& sScriptPath ); // after classes have been setup
+  LuaMarketTie( pProvider_t pExec, pProvider_t pData );
+  ~LuaMarketTie();
 
 protected:
-
-  Sol m_sol;
-
 private:
 
-  const std::string m_sScriptPath;
+  ou::tf::engine::Instrument m_engineInstrument;
 
 };
