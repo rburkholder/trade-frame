@@ -135,7 +135,7 @@ void AppMarketTrader::ProviderConnected( int ) {
       BOOST_LOG_TRIVIAL(info) << "providers connected";
       if ( !m_pLuaMarketTie ) {
         m_pLuaMarketTie = std::make_unique<LuaMarketTie>( m_tws, m_iqf );
-        m_pLuaMarketTie->SetPath( c_sDirectoryLua );
+        m_pLuaMarketTie->AddPath( c_sDirectoryLua );
       }
     }
   }
@@ -185,6 +185,7 @@ void AppMarketTrader::OnClose( wxCloseEvent& event ) {
 
   SaveState();
 
+  m_pLuaMarketTie->DelPath( c_sDirectoryLua );
   m_pLuaMarketTie.reset();
 
   DisableProviders();

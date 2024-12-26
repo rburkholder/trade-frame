@@ -181,21 +181,30 @@ void Sol::Delete( const std::filesystem::path& fsPath ) {
   }
 }
 
+void Sol::Initialize( sol::state& ) {
+
+}
+
 void Sol::Attach( mapScript_t::iterator iterScript ) {
   assert( m_mapScript.end() != iterScript );
-  // step 1: load the script
   sol::state& sol( iterScript->second );
+  // step 1: initialize state
   sol.open_libraries( sol::lib::base );
-  sol::load_result script = sol.load_file( iterScript->first );
   // step 2: load up functions & classes
-  // step 3: initialize
+  Initialize( sol );
+  // step 3: load script
+  sol::load_result script = sol.load_file( iterScript->first );
+  // step 3: initialize script
   script();
   // step 4: call the attachment function
+  // if exists, do
 }
 
 void Sol::Detach( mapScript_t::iterator iterScript ) {
   assert( m_mapScript.end() != iterScript );
+  sol::state& sol( iterScript->second );
   // step 1: call the detachment function
+  // if exists, do
 }
 
 // Embedding LuaJIT in 30 minutes (or so):

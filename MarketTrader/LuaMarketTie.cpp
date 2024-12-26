@@ -28,6 +28,12 @@ LuaMarketTie::LuaMarketTie( pProvider_t pExec, pProvider_t pData )
 {
   assert( pExec->Connected() );
   assert( pData->Connected() );
+}
+
+LuaMarketTie::~LuaMarketTie() {
+}
+
+void LuaMarketTie::Watch( const std::string& sName ) { // track which script is sending this, one objec per script?
   m_engineInstrument.Compose(
     "SPY",
     []( ou::tf::Instrument::pInstrument_t p, bool bConstructed ){
@@ -35,7 +41,7 @@ LuaMarketTie::LuaMarketTie( pProvider_t pExec, pProvider_t pData )
     } );
 }
 
-LuaMarketTie::~LuaMarketTie() {
+void LuaMarketTie::Initialize( sol::state& sol ) {
 
 }
 

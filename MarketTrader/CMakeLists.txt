@@ -33,7 +33,6 @@ set(
     InstrumentEngine.hpp
     #Lua.hpp
     #LuaControl.hpp
-    LuaInterface.hpp
     LuaMarketTie.hpp
     Sol.hpp
   )
@@ -47,7 +46,6 @@ set(
     InstrumentEngine.cpp
     #Lua.cpp
     #LuaControl.cpp
-    LuaInterface.cpp
     LuaMarketTie.cpp
     Sol.cpp
   )

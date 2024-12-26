@@ -21,20 +21,25 @@
 
 #pragma once
 
-#include "LuaInterface.hpp"
+#include "Sol.hpp"
 #include "InstrumentEngine.hpp"
 
-class LuaMarketTie: public LuaInterface {
+class LuaMarketTie: public Sol {
 public:
 
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
 
   LuaMarketTie( pProvider_t pExec, pProvider_t pData );
-  ~LuaMarketTie();
+  virtual ~LuaMarketTie();
 
 protected:
+
+  virtual void Initialize( sol::state& ) override;
+
 private:
 
-  ou::tf::engine::Instrument m_engineInstrument;
+  ou::tf::engine::Instrument m_engineInstrument; // this needs to be factored out to be used by multiple scripts
+
+  void Watch( const std::string& sName );
 
 };
