@@ -31,8 +31,6 @@ set(
     ExecEngine.hpp
     FileNotify.hpp
     InstrumentEngine.hpp
-    #Lua.hpp
-    #LuaControl.hpp
     LuaMarketTie.hpp
     Sol.hpp
   )
@@ -44,8 +42,6 @@ set(
     ExecEngine.cpp
     FileNotify.cpp
     InstrumentEngine.cpp
-    #Lua.cpp
-    #LuaControl.cpp
     LuaMarketTie.cpp
     Sol.cpp
   )
