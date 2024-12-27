@@ -23,11 +23,13 @@
 
 #include "LuaMarketTie.hpp"
 
-LuaStateTie::LuaStateTie( ou::tf::engine::Instrument& engine, fHandleTrade_t&& f )
-: m_engineInstrument( engine )
-, m_ffHandleTrade( std::move( f ) )
+LuaStateTie::LuaStateTie( fConstructWatch_t&& fConstructWatch, fHandleTrade_t&& fHandleTrade )
+: m_fConstructWatch( std::move( fConstructWatch ) )
+, m_ffHandleTrade( std::move( fHandleTrade ) )
 {
   BOOST_LOG_TRIVIAL(trace) << "LuaStateTie::LuaStateTie()";
+  assert( m_fConstructWatch );
+  assert( m_ffHandleTrade );
 }
 
 LuaStateTie::~LuaStateTie() {
@@ -41,16 +43,16 @@ LuaStateTie::~LuaStateTie() {
 
 void LuaStateTie::Watch(  const std::string_view& sIQFeedSymbolName ) {
   BOOST_LOG_TRIVIAL(trace) << "LuaStateTie::Watch " << sIQFeedSymbolName;
-  m_engineInstrument.Compose(
+  assert( !m_pWatch );
+  m_fConstructWatch(
     std::string( sIQFeedSymbolName ),
-    [ this ]( ou::tf::Instrument::pInstrument_t p, bool bConstructed ){
+    [ this ]( pWatch_t pWatch ){
       BOOST_LOG_TRIVIAL(trace)
         << "LuaStateTie::Watch "
-        << p->GetInstrumentName() << ','
-        << p->GetContract() << ','
-        << bConstructed
+        << pWatch->GetInstrumentName() << ','
+        << pWatch->GetInstrument()->GetContract()
         ;
-      m_pWatch = m_engineInstrument.MakeWatch( p );
+      m_pWatch = std::move( pWatch );
       m_pWatch->OnTrade.Add( MakeDelegate( this, &LuaStateTie::HandleOnTrade ) );
       m_pWatch->StartWatch();
     } );
@@ -76,10 +78,36 @@ LuaMarketTie::~LuaMarketTie() {
 void LuaMarketTie::Initialize( sol::state& sol ) {
   auto factory = sol::factories(
     [this,&sol]() {
-      using pLuaStateTie_t = std::unique_ptr<LuaStateTie>;
       sol::function handle_trade = sol[ "handle_trade" ];
-      LuaStateTie::fHandleTrade_t f = handle_trade;
-      pLuaStateTie_t pTie = std::make_unique<LuaStateTie>( m_engineInstrument, std::move( f ) );
+      LuaStateTie::fConstructWatch_t fConstructWatch =
+        [this]( const std::string_view& svIQFSymbolName, LuaStateTie::fConstructedWatch_t fConstructedWatch ){
+          const std::string sIQFSymbolName( svIQFSymbolName );
+
+          mapRequestedInstrument_t::iterator iterRequest = m_mapRequestedInstrument.find( sIQFSymbolName );
+          if ( m_mapRequestedInstrument.end() == iterRequest ) {
+            m_engineInstrument.Compose(
+              sIQFSymbolName,
+              [this,sIQFSymbolName,f_=std::move( fConstructedWatch )]( pInstrument_t pInstrument, bool bConstructed ){
+                assert( bConstructed ); // what does this do?
+                m_mapRequestedInstrument.emplace( sIQFSymbolName, pInstrument );
+                m_mapActualInstrument.emplace( pInstrument->GetInstrumentName(), pInstrument );
+                pWatch_t pWatch = m_engineInstrument.MakeWatch( pInstrument );
+                m_mapWatch.emplace( pInstrument->GetContract(), pWatch );
+                f_( pWatch );
+              } );
+          }
+          else {
+            uint64_t contract = iterRequest->second->GetContract();
+            mapWatch_t::iterator iterWatch = m_mapWatch.find( contract );
+            assert( m_mapWatch.end() != iterWatch );
+            fConstructedWatch( iterWatch->second );
+          }
+        };
+
+      LuaStateTie::fHandleTrade_t fHandleTrade = handle_trade;
+
+      using pLuaStateTie_t = std::unique_ptr<LuaStateTie>;
+      pLuaStateTie_t pTie = std::make_unique<LuaStateTie>( std::move( fConstructWatch ), std::move( fHandleTrade ) );
       return pTie;
     } );
   sol::usertype<LuaStateTie> lua_state_tie = sol.new_usertype<LuaStateTie>( "tie", factory );
