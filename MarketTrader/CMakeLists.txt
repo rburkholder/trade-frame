@@ -17,7 +17,7 @@ set(BOOST_USE_STATIC_RUNTIME OFF)
 #set(Boost_DETAILED_FAILURE_MSG ON)
 #set(BOOST_INCLUDEDIR "/usr/local/include/boost")
 
-find_package(Boost ${TF_BOOST_VERSION} CONFIG REQUIRED COMPONENTS system date_time program_options thread filesystem serialization regex log log_setup)
+find_package(Boost ${TF_BOOST_VERSION} CONFIG REQUIRED COMPONENTS system date_time program_options thread filesystem serialization regex log log_setup json)
 
 #message("boost lib: ${Boost_LIBRARIES}")
 
@@ -27,6 +27,7 @@ set(SOL_ALL_SAFETIES_ON 1)
 set(
   file_h
     AppMarketTrader.hpp
+    Config.hpp
     DataEngine.hpp
     ExecEngine.hpp
     FileNotify.hpp
@@ -38,6 +39,7 @@ set(
 set(
   file_cpp
     AppMarketTrader.cpp
+    Config.cpp
     DataEngine.cpp
     ExecEngine.cpp
     FileNotify.cpp
@@ -90,12 +92,15 @@ target_link_libraries(
       OUCharting
       TFIndicators
       TFTimeSeries
+      libou_telegram.a
       luajit-5.1
       fmt
       dl
       z
       curl
       ${Boost_LIBRARIES}
+      crypto
+      ssl
 #      wx_gtk3u_adv-3.1
       wx_gtk3u_core-${WX_VERSION_MAJOR}
       wx_baseu-${WX_VERSION_MAJOR}

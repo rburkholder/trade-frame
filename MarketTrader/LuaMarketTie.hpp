@@ -57,12 +57,21 @@ private:
 
 // ======
 
+namespace ou {
+namespace telegram {
+  class Bot;
+} // telegram
+} // ou
+
+// ======
+
 class LuaMarketTie: public Sol {
 public:
 
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
+  using pTelegramBot_t = std::shared_ptr<ou::telegram::Bot>;
 
-  LuaMarketTie( pProvider_t pExec, pProvider_t pData );
+  LuaMarketTie( pProvider_t pExec, pProvider_t pData, pTelegramBot_t );
   virtual ~LuaMarketTie();
 
 protected:
@@ -83,6 +92,10 @@ private:
   using mapWatch_t = std::unordered_map<uint64_t,pWatch_t>; // ib contract as lookup
   mapWatch_t m_mapWatch;
 
+  pTelegramBot_t m_pTelegramBot;
+
   ou::tf::engine::Instrument m_engineInstrument; // this needs to be factored out to be used by multiple scripts
+
+  void SendMessage( const std::string_view& );
 
 };

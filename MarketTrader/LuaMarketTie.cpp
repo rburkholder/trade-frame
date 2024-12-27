@@ -21,6 +21,8 @@
 
 #include <boost/log/trivial.hpp>
 
+#include <ou/telegram/Bot.hpp>
+
 #include "LuaMarketTie.hpp"
 
 LuaStateTie::LuaStateTie( fConstructWatch_t&& fConstructWatch, fHandleTrade_t&& fHandleTrade )
@@ -65,8 +67,9 @@ void LuaStateTie::HandleOnTrade( const ou::tf::Trade& trade ) {
 
 // ======
 
-LuaMarketTie::LuaMarketTie( pProvider_t pExec, pProvider_t pData )
+LuaMarketTie::LuaMarketTie( pProvider_t pExec, pProvider_t pData, pTelegramBot_t pTelegramBot )
 : m_engineInstrument( pExec, pData )
+, m_pTelegramBot( pTelegramBot )
 {
   assert( pExec->Connected() );
   assert( pData->Connected() );
@@ -113,5 +116,12 @@ void LuaMarketTie::Initialize( sol::state& sol ) {
   sol::usertype<LuaStateTie> lua_state_tie = sol.new_usertype<LuaStateTie>( "tie", factory );
   lua_state_tie[ "watch" ] = &LuaStateTie::Watch;
 
+  sol.set_function( "telegram_message", &LuaMarketTie::SendMessage, this );
+
 }
 
+void LuaMarketTie::SendMessage( const std::string_view& message ) {
+  if ( m_pTelegramBot ) {
+    m_pTelegramBot->SendMessage( std::string( message ) ); // TODO: create a string_view SendMessage
+  }
+}

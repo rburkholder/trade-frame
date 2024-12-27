@@ -32,8 +32,11 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
+#include <ou/telegram/Bot.hpp>
+
 #include <TFVuTrading/FrameMain.h>
 
+#include "Config.hpp"
 #include "LuaMarketTie.hpp"
 #include "AppMarketTrader.hpp"
 
@@ -43,6 +46,7 @@ namespace {
   static const std::string c_sVendorCopyright( "(c)2024 " + c_sVendorName );
 
   static const std::string c_sDirectory( "MarketTrader" );
+  static const std::string c_sConfigFileName(  c_sDirectory + '/' + c_sAppName + ".cfg" );
   static const std::string c_sDbName(          c_sDirectory + '/' + c_sAppName + ".db" );
   static const std::string c_sStateFileName(   c_sDirectory + '/' + c_sAppName + ".state" );
   static const std::string c_sChoicesFilename( c_sDirectory + '/' + c_sAppName + ".cfg" );
@@ -64,6 +68,11 @@ bool AppMarketTrader::OnInit() {
   wxApp::SetVendorDisplayName( c_sVendorCopyright );
 
   wxApp::OnInit();
+
+  if ( Load( c_sConfigFileName, m_settings ) ) {}
+  else return false;
+
+  EnableTelegram();
 
   m_bProvidersConnected = false;
   EnableProviders();
@@ -132,7 +141,8 @@ void AppMarketTrader::ProviderConnected( int ) {
       m_bProvidersConnected = true;
       BOOST_LOG_TRIVIAL(info) << "providers connected";
       if ( !m_pLuaMarketTie ) {
-        m_pLuaMarketTie = std::make_unique<LuaMarketTie>( m_tws, m_iqf );
+        assert( m_pTelegramBot );
+        m_pLuaMarketTie = std::make_unique<LuaMarketTie>( m_tws, m_iqf, m_pTelegramBot );
         m_pLuaMarketTie->AddPath( c_sDirectoryLua );
       }
     }
@@ -143,6 +153,54 @@ void AppMarketTrader::ProviderDisconnected( int ) {
   if ( !m_iqf->Connected() || !m_tws->Connected() ) {
     m_bProvidersConnected = false;
     BOOST_LOG_TRIVIAL(info) << "providers dis-connected";
+  }
+}
+
+void AppMarketTrader::EnableTelegram() {
+  try {
+    if ( m_settings.telegram.sToken.empty() ) {
+      BOOST_LOG_TRIVIAL(warning) << "telegram: no token available" << std::endl;
+    }
+    else {
+      m_pTelegramBot = std::make_shared<ou::telegram::Bot>( m_settings.telegram.sToken );
+
+      auto id = m_pTelegramBot->GetChatId();
+      BOOST_LOG_TRIVIAL(info) << "telegram chat id " << id;
+      m_pTelegramBot->SetChatId( m_settings.telegram.idChat );
+
+      //m_telegram_bot->SetCommand(
+      //  "start", "initialization", false,
+      //  [this]( const std::string& sCmd ){
+      //    m_telegram_bot->SendMessage( "start (to be implemented)" );
+      //  }
+      //);
+
+      //m_telegram_bot->SetCommand(
+      //  "help", "command list", false,
+      //  [this]( const std::string& sCmd ){
+      //    m_telegram_bot->SendMessage( "commands: /help, /status" );
+      //  }
+      //);
+
+      m_pTelegramBot->SetCommand(
+        "events", "list latest events", true,
+        [this]( const std::string& sCmd ){
+          if ( sCmd == "events" ) { // need to be aware of parameters
+            time_point tp = std::chrono::system_clock::now();
+            //std::string sCurrent( "ups state:\n" );
+            //for ( const umapStatus_t::value_type& v: m_umapStatus ) {
+            //  auto duration = std::chrono::duration_cast<std::chrono::seconds>( tp - v.second.tpLastSeen );
+            //  const std::string sDuration( boost::lexical_cast<std::string>( duration.count() ) );
+            //  sCurrent += ' ' + v.first + ":" + v.second.sStatus_full + ',' + v.second.sRunTime + "s," + sDuration + "s ago" + '\n';
+            //}
+            //m_telegram_bot->SendMessage( sCurrent );
+          }
+        } );
+
+    }
+  }
+  catch (...) {
+    BOOST_LOG_TRIVIAL(error) << "telegram open failure";
   }
 }
 
@@ -185,6 +243,7 @@ void AppMarketTrader::OnClose( wxCloseEvent& event ) {
 
   m_pLuaMarketTie->DelPath( c_sDirectoryLua );
   m_pLuaMarketTie.reset();
+  m_pTelegramBot.reset();
 
   DisableProviders();
 

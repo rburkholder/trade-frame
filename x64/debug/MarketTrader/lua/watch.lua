@@ -1,4 +1,4 @@
--- file:    test1.lua
+-- file:    watch.lua
 -- author:  raymond@burkholder.net
 -- created: 2024/12/22 16:28:31
 
@@ -15,6 +15,7 @@ end
 attach = function()
   instrument = tie.new();
   instrument:watch( symbol )
+  --telegram_message( 'watching ' .. symbol )
 end
 
 detach = function()

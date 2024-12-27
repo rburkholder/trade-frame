@@ -31,8 +31,16 @@
 
 #include <TFBitsNPieces/FrameWork02.hpp>
 
+#include "Config.hpp"
+
 class FrameMain;
 class LuaMarketTie;
+
+namespace ou {
+namespace telegram {
+  class Bot;
+} // telegram
+} // ou
 
 class AppMarketTrader:
   public wxApp,
@@ -44,6 +52,8 @@ public:
 
 protected:
 private:
+
+  using time_point = std::chrono::time_point<std::chrono::system_clock>;
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   //using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -57,6 +67,10 @@ private:
   using pLuaMarketTie_t = std::unique_ptr<LuaMarketTie>;
 
   using fInstrumentConstructed_t = std::function<void(const std::string&)>;
+
+  config::Values m_settings;
+
+  std::shared_ptr<ou::telegram::Bot> m_pTelegramBot;
 
   FrameMain* m_pFrameMain;
 
@@ -75,10 +89,11 @@ private:
   void ProviderDisconnected( int );
   void DisableProviders();
 
+  void EnableTelegram();
 
   virtual bool OnInit() override;
   void OnClose( wxCloseEvent& event );
-  virtual int OnExit();
+  virtual int OnExit() override;
 
   void OnFrameMainAutoMove( wxMoveEvent& );
 
