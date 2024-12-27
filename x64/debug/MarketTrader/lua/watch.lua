@@ -4,20 +4,19 @@
 
 description = 'watch a symbol and react'
 
-print( "watch.lua" )
-
-local watch = nil
-local symbol = '@ES#'
 --local symbol = 'SPY'
+local symbol = '@ES#'
+local instrument = nil
 
-handle_trade = function( price, volume )
+handle_trade = function( price, volume ) -- called from c++
   print( symbol .. ': ' .. volume .. '@' .. price )
 end
 
 attach = function()
-  watch = tie.new();
-  watch:watch( symbol )
+  instrument = tie.new();
+  instrument:watch( symbol )
 end
 
 detach = function()
+  instrument = nil;
 end
