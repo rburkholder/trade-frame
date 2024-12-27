@@ -203,8 +203,8 @@ void Sol::Attach( mapScript_t::iterator iterScript ) {
 void Sol::Detach( mapScript_t::iterator iterScript ) {
   assert( m_mapScript.end() != iterScript );
   sol::state& sol( iterScript->second );
-  // step 1: call the detachment function
-  // if exists, do
+  sol::function detach = sol[ "detach" ];
+  detach();
 }
 
 // Embedding LuaJIT in 30 minutes (or so):
