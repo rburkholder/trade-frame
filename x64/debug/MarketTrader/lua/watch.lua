@@ -6,10 +6,17 @@ description = 'watch a symbol and react'
 
 print( "watch.lua" )
 
-watch = tie.new();
-watch:watch( "SPY" )
+local watch = nil
+local symbol = '@ES#'
+--local symbol = 'SPY'
+
+handle_trade = function( price, volume )
+  print( symbol .. ': ' .. volume .. '@' .. price )
+end
 
 attach = function()
+  watch = tie.new();
+  watch:watch( symbol )
 end
 
 detach = function()

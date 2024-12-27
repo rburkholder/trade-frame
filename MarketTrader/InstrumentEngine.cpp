@@ -76,6 +76,10 @@ void Instrument::Compose( const std::string& s, fInstrument_t&& f ) {
   m_pComposeInstrument->Compose( s, std::move( f ) );
 }
 
+Instrument::pWatch_t Instrument::MakeWatch( pInstrument_t p ) {
+  return std::make_shared<ou::tf::Watch>( p, m_pIQ );
+}
+
 } // namespace engine
 } // namespace tf
 } // namespace ou

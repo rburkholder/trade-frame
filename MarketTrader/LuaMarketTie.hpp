@@ -21,22 +21,38 @@
 
 #pragma once
 
-#include "string_view"
+#include <memory>
+#include <string_view>
 
 #include "Sol.hpp"
 #include "InstrumentEngine.hpp"
+#include "TFTrading/Watch.h"
 
 class LuaStateTie {
 public:
 
-  LuaStateTie();
+  using fHandleTrade_t = std::function<void(double,std::int64_t)>;
+
+  LuaStateTie() = delete;
+  LuaStateTie( ou::tf::engine::Instrument&, fHandleTrade_t&& );
   ~LuaStateTie();
 
   void Watch( const std::string_view& );
 
 protected:
 private:
+
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+
+  fHandleTrade_t m_ffHandleTrade;
+
+  ou::tf::engine::Instrument& m_engineInstrument;
+  pWatch_t m_pWatch;
+
+  void HandleOnTrade( const ou::tf::Trade& );
 };
+
+// ======
 
 class LuaMarketTie: public Sol {
 public:
@@ -53,7 +69,5 @@ protected:
 private:
 
   ou::tf::engine::Instrument m_engineInstrument; // this needs to be factored out to be used by multiple scripts
-
-  void Watch( const std::string& sName );
 
 };

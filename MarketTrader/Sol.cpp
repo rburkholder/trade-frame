@@ -33,7 +33,11 @@ Sol::Sol() {
 }
 
 Sol::~Sol() {
-  // TODO: empty m_setPath, m_mapScript
+  m_mapScript.clear();
+  for ( const setPath_t::value_type& vt: m_setPath ) {
+    m_fn.DelWatch( vt );
+  }
+  m_setPath.clear();
 }
 
 // one sequence was: move from, create, modify (keep th emodify)
@@ -188,16 +192,12 @@ void Sol::Initialize( sol::state& ) {
 void Sol::Attach( mapScript_t::iterator iterScript ) {
   assert( m_mapScript.end() != iterScript );
   sol::state& sol( iterScript->second );
-  // step 1: initialize state
   sol.open_libraries( sol::lib::base );
-  // step 2: load up functions & classes
-  Initialize( sol );
-  // step 3: load script
   sol::load_result script = sol.load_file( iterScript->first );
-  // step 3: initialize script
   script();
-  // step 4: call the attachment function
-  // if exists, do
+  Initialize( sol );
+  sol::function attach = sol[ "attach" ];
+  attach();
 }
 
 void Sol::Detach( mapScript_t::iterator iterScript ) {

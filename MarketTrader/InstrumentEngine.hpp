@@ -34,6 +34,7 @@ class Instrument {
 public:
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using pWatch_t = ou::tf::Watch::pWatch_t;
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
   using fInstrument_t = ou::tf::ComposeInstrument::fInstrument_t;
 
@@ -41,6 +42,7 @@ public:
   ~Instrument();
 
   void Compose( const std::string&, fInstrument_t&& );
+  pWatch_t MakeWatch( pInstrument_t ); // TODO: track constructions
 
 protected:
 private:
