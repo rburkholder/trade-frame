@@ -23,9 +23,6 @@
 
 #include <TFTrading/ComposeInstrument.hpp>
 
-#include <TFIQFeed/Provider.h>
-#include <TFInteractiveBrokers/IBTWS.h>
-
 namespace ou {
 namespace tf {
 namespace engine {
@@ -42,7 +39,7 @@ public:
   ~Instrument();
 
   void Compose( const std::string&, fInstrument_t&& );
-  pWatch_t MakeWatch( pInstrument_t ); // TODO: track constructions
+  pWatch_t MakeWatch( pInstrument_t );
 
 protected:
 private:
