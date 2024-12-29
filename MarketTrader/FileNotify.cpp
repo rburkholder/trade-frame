@@ -28,6 +28,8 @@
 
 #include <assert.h>
 
+#include <fmt/core.h>
+
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -51,7 +53,7 @@ FileNotify::FileNotify()
   m_fdINotify = inotify_init();
   if ( 0 > m_fdINotify ) {
     m_fdINotify = 0;
-    throw std::runtime_error( "inotify_init error " + boost::lexical_cast<std::string>( m_fdINotify ) );
+    throw std::runtime_error( "fn inotify_init error " + boost::lexical_cast<std::string>( m_fdINotify ) );
   }
 
   m_bActive = true;
@@ -74,7 +76,7 @@ FileNotify::FileNotify()
         // TODO: convert to poll or epoll
         int result = select( m_fdINotify + 1, &rfds, NULL, NULL, &time );
         if ( 0 > result ) {
-          BOOST_LOG_TRIVIAL(error) << "select error " << result;
+          BOOST_LOG_TRIVIAL(error) << "fn select error " << result;
         }
         else {
           if ( 0 == result ) {
@@ -85,15 +87,15 @@ FileNotify::FileNotify()
               const int length = read( m_fdINotify, bufINotify, c_size_inotify_buffer );
               if ( 0 > length ) {
                 if ( EINTR == errno ) {
-                  BOOST_LOG_TRIVIAL(info) << "EINTR == errno " << result;  // probably not an error, just start loop again
+                  BOOST_LOG_TRIVIAL(info) << "fn EINTR == errno " << result;  // probably not an error, just start loop again
                 }
                 else {
-                  BOOST_LOG_TRIVIAL(error) << "read length error " << length << "," << errno;
+                  BOOST_LOG_TRIVIAL(error) << "fn read length error " << length << "," << errno;
                 }
               }
               else {
                 if ( 0 == length ) {
-                  BOOST_LOG_TRIVIAL(error) << "read length is zero";
+                  BOOST_LOG_TRIVIAL(error) << "fn read length is zero";
                 }
                 else {
                   int ix {};
@@ -101,6 +103,8 @@ FileNotify::FileNotify()
 
                     inotify_event *event;
                     event = (inotify_event*) &bufINotify[ ix ];
+
+                    BOOST_LOG_TRIVIAL(trace) << "fn event mask: " << fmt::format( "{:#x}", event->mask );
 
                     EType type( EType::unknown_ );
 
@@ -143,7 +147,7 @@ FileNotify::FileNotify()
 
             }
             else {
-              BOOST_LOG_TRIVIAL(warning) << "select has nothing set";
+              BOOST_LOG_TRIVIAL(warning) << "fn select has nothing set";
             }
           }
         }
@@ -178,7 +182,7 @@ void FileNotify::AddWatch( const std::string& sPath, fNotify_t&& fNotify ) {
 
     if ( 0 > wdFile ) {
       m_mapPathWatch.erase( iterPathWatch );
-      throw std::runtime_error( "inotify_add_watch error for " + sPath + ' ' + boost::lexical_cast<std::string>( m_fdINotify ) );
+      throw std::runtime_error( "fn inotify_add_watch error for " + sPath + ' ' + boost::lexical_cast<std::string>( m_fdINotify ) );
     }
 
     iterPathWatch->second = wdFile;
@@ -191,7 +195,7 @@ void FileNotify::AddWatch( const std::string& sPath, fNotify_t&& fNotify ) {
     }
   }
   else {
-    throw std::runtime_error( "inotify_add_watch error, watch exists " + sPath );
+    throw std::runtime_error( "fn inotify_add_watch error, watch exists " + sPath );
   }
 }
 
