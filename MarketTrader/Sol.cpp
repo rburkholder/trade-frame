@@ -94,14 +94,14 @@ void Sol::AddPath( const std::string& sPath ) {
     m_setPath.emplace( sPath );
   }
   else {
-    BOOST_LOG_TRIVIAL(warning) << "Sol - add notify path " << sPath << " already added";
+    BOOST_LOG_TRIVIAL(warning) << "Sol::SetPath - " << sPath << " already added";
   }
 }
 
 void Sol::DelPath( const std::string& sPath ) {
   setPath_t::iterator iterPath( m_setPath.find( sPath ) );
   if ( m_setPath.end() == iterPath ) {
-    BOOST_LOG_TRIVIAL(warning) << "Sol - del notify path " << sPath << " no available";
+    BOOST_LOG_TRIVIAL(warning) << "Sol::DelPath - " << sPath << " no available";
   }
   else {
     m_setPath.erase( iterPath );
@@ -123,11 +123,11 @@ void Sol::InitialLoad( const std::string& sPath ) {
             Attach( iterScript );
           }
           else {
-            BOOST_LOG_TRIVIAL(error) << "Sol::Load - script loaded - " << dir_entry.path().string();
+            BOOST_LOG_TRIVIAL(error) << "Sol::InitialLoad exists - " << dir_entry.path().string();
           }
         }
         catch( ... ) {
-          BOOST_LOG_TRIVIAL(error) << "Sol - script_file error on " << dir_entry.path().string();
+          BOOST_LOG_TRIVIAL(error) << "Sol::InitialLoad error - " << dir_entry.path().string();
         }
       }
     }
@@ -167,7 +167,7 @@ void Sol::Load( const std::filesystem::path& fsPath ) {
   const std::string sPath( fsPath );
   mapScript_t::iterator iterScript = m_mapScript.find( sPath );
   assert( m_mapScript.end() == iterScript );
-  BOOST_LOG_TRIVIAL(info) << "Sol::Load - loading " << sPath;
+  BOOST_LOG_TRIVIAL(info) << "Sol::Load - " << sPath;
   iterScript = Load( sPath );
   Attach( iterScript );
 }
@@ -181,7 +181,7 @@ void Sol::Delete( const std::filesystem::path& fsPath ) {
   else {
     Detach( iterScript );
     m_mapScript.erase( iterScript );
-    BOOST_LOG_TRIVIAL(info) << "Sol::Delete - deleted " << sPath;
+    BOOST_LOG_TRIVIAL(info) << "Sol::Delete - " << sPath;
   }
 }
 
