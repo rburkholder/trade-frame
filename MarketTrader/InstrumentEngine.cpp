@@ -35,7 +35,7 @@ Instrument::Instrument( pProvider_t pExec, pProvider_t pData )
       m_pIB = ou::tf::ib::TWS::Cast( m_pExec );
       break;
     case ou::tf::keytypes::EProviderIQF:
-       m_pIQ = ou::tf::iqfeed::Provider::Cast( m_pExec );
+      m_pIQ = ou::tf::iqfeed::Provider::Cast( m_pExec );
       break;
     default:
       assert( false ); // need one of IB or IQF
