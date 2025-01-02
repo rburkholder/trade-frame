@@ -1,7 +1,7 @@
-# trade-frame/Collector
+# trade-frame/CollectFuL2
 cmake_minimum_required (VERSION 3.13)
 
-PROJECT(Collector)
+PROJECT(CollectFuL2)
 
 #set(CMAKE_EXE_LINKER_FLAGS "--trace --verbose")
 #set(CMAKE_VERBOSE_MAKEFILE ON)

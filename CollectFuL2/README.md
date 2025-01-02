@@ -1,4 +1,4 @@
-# Collector
+# CollectFuL2 - Collect Futures L2 Data
 
 A tool to capture level I and level II data for a future to the tradeframe.hdf5 datafile. 
 
