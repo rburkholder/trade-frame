@@ -85,7 +85,9 @@ void Process::ConstructUnderlying() {
   m_pComposeInstrumentIQFeed = std::make_unique<ou::tf::ComposeInstrument>(
     m_piqfeed,
     [this](){ // callback once started
-      const std::string& sName( m_choices.m_sSymbolName );
+      // TODO: will need to expand on this, but keep the same for now
+      assert( 1 == m_choices.m_vSymbolName.size() );
+      const std::string& sName( *m_choices.m_vSymbolName.begin() );
       m_pComposeInstrumentIQFeed->Compose(
         sName,
         [this]( pInstrument_t pInstrument, bool bConstructed ){

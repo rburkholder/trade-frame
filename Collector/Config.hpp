@@ -22,13 +22,16 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace config {
 
 struct Choices {
-  std::string m_sSymbolName;
+
+  using vSymbolName_t = std::vector<std::string>;
+  vSymbolName_t m_vSymbolName;
 
   std::string m_sStopTime;
   boost::posix_time::time_duration m_tdStopTime;

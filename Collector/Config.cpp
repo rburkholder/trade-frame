@@ -21,6 +21,7 @@
 
 #include <fstream>
 #include <exception>
+#include <type_traits>
 
 #include <boost/log/trivial.hpp>
 
@@ -34,11 +35,26 @@ namespace {
   static const std::string sChoice_StopTime(   "stop_time" );
 
   template<typename T>
+  void log( const std::string& name, typename std::enable_if<std::is_pod<T>::value>::type& dest ) {
+    BOOST_LOG_TRIVIAL(info) << name << " = " << dest;
+  }
+
+  void log( const std::string& name, const std::string& dest ) {
+    BOOST_LOG_TRIVIAL(info) << name << " = " << dest;
+  }
+
+  void log( const std::string& name, config::Choices::vSymbolName_t& dest ) {
+    for ( config::Choices::vSymbolName_t::value_type& value: dest ) {
+      BOOST_LOG_TRIVIAL(info) << name << " = " << value;
+    }
+  }
+
+  template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bRequired, T& dest ) {
     bool bOk = true;
     if ( 0 < vm.count( name ) ) {
       dest = std::move( vm[name].as<T>() );
-      BOOST_LOG_TRIVIAL(info) << name << " = " << dest;
+      log( name, dest );
     }
     else {
       if ( bRequired ) {
@@ -60,7 +76,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
     po::options_description config( "collector config" );
     config.add_options()
-      ( sChoice_SymbolName.c_str(), po::value<std::string>( &choices.m_sSymbolName ), "symbol name" )
+      ( sChoice_SymbolName.c_str(), po::value<Choices::vSymbolName_t>( &choices.m_vSymbolName ), "symbol name" )
       ( sChoice_StopTime.c_str(),   po::value<std::string>( &choices.m_sStopTime ), "stop time HH:mm:ss UTC" )
       ;
     po::variables_map vm;
@@ -74,11 +90,17 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     else {
       po::store( po::parse_config_file( ifs, config), vm );
 
-      bOk &= parse<std::string>( sFileName, vm, sChoice_SymbolName, true, choices.m_sSymbolName );
-      std::replace_if( choices.m_sSymbolName.begin(), choices.m_sSymbolName.end(), [](char ch)->bool{return '~' == ch;}, '#' );
+      bOk &= parse<Choices::vSymbolName_t>( sFileName, vm, sChoice_SymbolName, true, choices.m_vSymbolName );
+      if ( bOk ) {
+        for ( Choices::vSymbolName_t::value_type& sn: choices.m_vSymbolName ) {
+          std::replace_if( sn.begin(), sn.end(), [](char ch)->bool{return '~' == ch;}, '#' );
+        }
+      }
 
       bOk &= parse<std::string>( sFileName, vm, sChoice_StopTime, true, choices.m_sStopTime );
-      choices.m_tdStopTime = boost::posix_time::duration_from_string( choices.m_sStopTime );
+      if ( bOk ) {
+        choices.m_tdStopTime = boost::posix_time::duration_from_string( choices.m_sStopTime );
+      }
 
     }
 
