@@ -23,13 +23,10 @@
 
 #pragma once
 
-#include <TFIQFeed/Provider.h>
-
-#include <TFIQFeed/Level2/Symbols.hpp>
-
-#include <TFTimeSeries/DatedDatum.h>
 #include <TFTrading/Watch.h>
 #include <TFTrading/Instrument.h>
+
+#include <TFIQFeed/Provider.h>
 
 #include "Config.hpp"
 #include "FillWrite.hpp"
@@ -37,6 +34,7 @@
 namespace ou {
 namespace tf {
   class ComposeInstrument;
+  class HDF5Attributes;
 } // namespace tf
 } // namespace ou
 
@@ -82,6 +80,7 @@ private:
   void ConstructUnderlying();
   void HandleWatchTrade( const ou::tf::Trade& );
   void HandleWatchQuote( const ou::tf::Quote& );
+  void SetAttributes( ou::tf::HDF5Attributes& );
   void StartWatch( pInstrument_t );
   void StopWatch();
 };

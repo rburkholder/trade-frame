@@ -22,7 +22,11 @@
 // start watch on l1
 // write out at regular intervals
 
+#include <boost/log/trivial.hpp>
+
 #include <TFTrading/ComposeInstrument.hpp>
+
+#include <TFHDF5TimeSeries/HDF5Attribute.h>
 
 #include "Process.hpp"
 
@@ -84,6 +88,37 @@ void Process::ConstructUnderlying() {
 
 }
 
+void Process::SetAttributes( ou::tf::HDF5Attributes& attr ) {
+  pInstrument_t pInstrument( m_pWatch->GetInstrument() );
+  const ou::tf::InstrumentType::EInstrumentType type( pInstrument->GetInstrumentType() );
+  attr.SetInstrumentType( type );
+  switch ( type ) {
+    case ou::tf::InstrumentType::Future: {
+        const ou::tf::HDF5Attributes::structFuture attributes(
+          pInstrument->GetExpiryYear(),
+          pInstrument->GetExpiryMonth(),
+          pInstrument->GetExpiryDay()
+        );
+        attr.SetFutureAttributes( attributes );
+      }
+      break;
+    case ou::tf::InstrumentType::Option: {
+        const ou::tf::HDF5Attributes::structOption attributes(
+          pInstrument->GetStrike(),
+          pInstrument->GetExpiryYear(),
+          pInstrument->GetExpiryMonth(),
+          pInstrument->GetExpiryDay(),
+          pInstrument->GetOptionSide()
+        );
+        attr.SetOptionAttributes( attributes );
+      }
+      break;
+  }
+  attr.SetProviderType( m_pWatch->GetProvider()->ID() );
+  attr.SetMultiplier( pInstrument->GetMultiplier() );
+  attr.SetSignificantDigits( pInstrument->GetSignificantDigits() );
+}
+
 void Process::StartWatch( pInstrument_t pInstrument ) {
 
   // TODO: watch built elsewhere, needs to be restartable for a new day?
@@ -109,11 +144,7 @@ void Process::StartWatch( pInstrument_t pInstrument ) {
     m_pfwQuotes = std::make_unique<fwQuotes_t>(
       sPathName,
       [this]( ou::tf::HDF5Attributes& attr ){
-        pInstrument_t pInstrument( m_pWatch->GetInstrument() );
-        attr.SetProviderType( m_pWatch->GetProvider()->ID() );
-        attr.SetMultiplier( pInstrument->GetMultiplier() );
-        attr.SetSignificantDigits( pInstrument->GetSignificantDigits() );
-        // TODO: other specialized attributes based upon instrument type
+        SetAttributes( attr );
       } );
     m_pWatch->OnQuote.Add( MakeDelegate( this, &Process::HandleWatchQuote ) );
   }
@@ -126,11 +157,7 @@ void Process::StartWatch( pInstrument_t pInstrument ) {
     m_pfwTrades = std::make_unique<fwTrades_t>(
       sPathName,
       [this]( ou::tf::HDF5Attributes& attr ){
-        pInstrument_t pInstrument( m_pWatch->GetInstrument() );
-        attr.SetProviderType( m_pWatch->GetProvider()->ID() );
-        attr.SetMultiplier( pInstrument->GetMultiplier() );
-        attr.SetSignificantDigits( pInstrument->GetSignificantDigits() );
-        // TODO: other specialized attributes based upon instrument type
+         SetAttributes( attr );
       } );
     m_pWatch->OnTrade.Add( MakeDelegate( this, &Process::HandleWatchTrade ) );
   }
