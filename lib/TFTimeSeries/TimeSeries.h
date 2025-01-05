@@ -488,7 +488,7 @@ public:
   using datum_t = Trade;
   Trades() {};
   Trades( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~Trades() {};
+  virtual ~Trades() {};
   Trades* Subset( dt_t time ) { return (Trades*) TimeSeries<datum_t>::Subset( time ); }
   Trades* Subset( dt_t time, unsigned int n ) { return (Trades*) TimeSeries<datum_t>::Subset( time, n ); }
   static std::string Directory() { return "/trades/"; }
@@ -503,7 +503,7 @@ public:
   using datum_t = Quote;
   Quotes() {};
   Quotes( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~Quotes() {};
+  virtual ~Quotes() {};
   Quotes* Subset( dt_t time ) { return (Quotes*) TimeSeries<datum_t>::Subset( time ); }
   Quotes* Subset( dt_t time, unsigned int n ) { return (Quotes*) TimeSeries<datum_t>::Subset( time, n ); }
   static std::string Directory() { return "/quotes/"; }
@@ -518,7 +518,7 @@ public:
   using datum_t = DepthByMM;
   DepthsByMM() {};
   DepthsByMM( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~DepthsByMM() {};
+  virtual ~DepthsByMM() {};
   DepthsByMM* Subset( dt_t time ) { return (DepthsByMM*) TimeSeries<datum_t>::Subset( time ); }
   DepthsByMM* Subset( dt_t time, unsigned int n ) { return (DepthsByMM*) TimeSeries<datum_t>::Subset( time, n ); }
   static std::string Directory() { return "/depths_mm/"; }
@@ -533,7 +533,7 @@ public:
   using datum_t = DepthByOrder;
   DepthsByOrder() {};
   DepthsByOrder( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~DepthsByOrder() {};
+  virtual ~DepthsByOrder() {};
   DepthsByOrder* Subset( dt_t time ) { return (DepthsByOrder*) TimeSeries<datum_t>::Subset( time ); }
   DepthsByOrder* Subset( dt_t time, unsigned int n ) { return (DepthsByOrder*) TimeSeries<datum_t>::Subset( time, n ); }
   static std::string Directory() { return "/depths_o/"; }
@@ -548,7 +548,7 @@ public:
   using datum_t = Greek;
   Greeks() {};
   Greeks( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~Greeks() {};
+  virtual ~Greeks() {};
   Greeks* Subset( dt_t time ) { return (Greeks*) TimeSeries<datum_t>::Subset( time ); }
   Greeks* Subset( dt_t time, unsigned int n ) { return (Greeks*) TimeSeries<datum_t>::Subset( time, n ); }
   static std::string Directory() { return "/greeks/"; }
@@ -564,7 +564,7 @@ public:
   using datum_t = Price ;
   Prices() {};
   Prices( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~Prices() {};
+  virtual ~Prices() {};
   Prices* Subset( dt_t time ) { return (Prices*) TimeSeries<datum_t>::Subset( time ); }
   Prices* Subset( dt_t time, unsigned int n ) { return (Prices*) TimeSeries<datum_t>::Subset( time, n ); }
 protected:
@@ -578,7 +578,7 @@ public:
   using datum_t = PriceIV ;
   PriceIVs() {};
   PriceIVs( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~PriceIVs() {};
+  virtual ~PriceIVs() {};
   PriceIVs* Subset( dt_t time ) { return (PriceIVs*) TimeSeries<datum_t>::Subset( time ); }
   PriceIVs* Subset( dt_t time, unsigned int n ) { return (PriceIVs*) TimeSeries<datum_t>::Subset( time, n ); }
 protected:
@@ -592,7 +592,7 @@ public:
   using datum_t = PriceIVExpiry ;
   PriceIVExpirys() {};
   PriceIVExpirys( size_type size ): TimeSeries<datum_t>( size ) {};
-  ~PriceIVExpirys() {};
+  virtual ~PriceIVExpirys() {};
   PriceIVExpirys* Subset( dt_t time ) { return (PriceIVExpirys*) TimeSeries<datum_t>::Subset( time ); }
   PriceIVExpirys* Subset( dt_t time, unsigned int n ) { return (PriceIVExpirys*) TimeSeries<datum_t>::Subset( time, n ); }
 protected:
