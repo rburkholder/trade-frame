@@ -15,7 +15,7 @@
 /*
  * File:    Process.hpp
  * Author:  raymond@burkholder.net
- * Project: Collector
+ * Project: CollectFuL2
  * Created: October 20, 2022 21:07:40
  */
 

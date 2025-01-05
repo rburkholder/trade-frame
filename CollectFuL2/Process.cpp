@@ -15,12 +15,14 @@
 /*
  * File:    Process.cpp
  * Author:  raymond@burkholder.net
- * Project: Collector
+ * Project: CollectFuL2
  * Created: October 20, 2022 21:07:40
  */
 
 // start watch on l1, l2
 // write on regular intervals
+
+// 2025/01/05 TODO: rewrite using FillWrite.hpp from project Collector
 
 #include <TFTrading/ComposeInstrument.hpp>
 
@@ -31,7 +33,7 @@
 #include "Process.hpp"
 
 namespace {
-  static const std::string sSaveValuesRoot( "/app/collector" );
+  static const std::string sSaveValuesRoot( "/app/collectful2" );
 }
 
 Process::Process(

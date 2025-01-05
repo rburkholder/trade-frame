@@ -15,7 +15,7 @@
 /*
  * File:    Main.cpp
  * Author:  raymond@burkholder.net
- * Project: Collector
+ * Project: CollectFuL2
  * Created: October 20, 2022 17:48:11
  */
 
