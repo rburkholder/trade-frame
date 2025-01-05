@@ -183,6 +183,17 @@ pInstrument_t BuildInstrument( const Fundamentals& fundamentals ) {
       pInstrument->SetCurrency( ou::tf::Currency::ECurrency::USD );  // by default, but some are alternate
       }
       break;
+    case ESecurityType::Forex:
+      {
+        const ou::tf::Currency::pair_t pairCurrency( ou::tf::Currency::Split( sGenericName ) ); // XXX.YYY
+        pInstrument
+          = std::make_shared<ou::tf::Instrument>(
+              sGenericName,
+              ou::tf::InstrumentType::Currency, sExchange,
+              pairCurrency.first, pairCurrency.second
+              );
+      }
+      break;
     case ESecurityType::Index:
     case ESecurityType::MktStats:
       pInstrument = std::make_shared<Instrument>( sGenericName, ou::tf::InstrumentType::Index, sExchange );

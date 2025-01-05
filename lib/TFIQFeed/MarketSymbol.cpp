@@ -114,6 +114,13 @@ const std::string MarketSymbol::BuildGenericName( const Fundamentals& fundamenta
     case ESecurityType::MktStats:
       // uses base name
       break;
+    case ESecurityType::Forex:
+      // example: "USDCAD.FXCM"
+      assert( 11 == fundamentals.sSymbolName.size() );
+      assert( 16 == fundamentals.sCompanyName.size() );
+      assert( "FXCM" == fundamentals.sExchange );
+      sName = fundamentals.sSymbolName.substr( 0, 3 ) + '.' + fundamentals.sSymbolName.substr( 3, 3 );
+      break;
     default:
       assert( false );
       break;
