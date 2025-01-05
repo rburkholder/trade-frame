@@ -899,7 +899,7 @@ AppCurrencyTrader::pInstrument_t AppCurrencyTrader::ConstructInstrumentBase( con
 
   std::string sSymbolName( sName );
   std::transform(sSymbolName.begin(), sSymbolName.end(), sSymbolName.begin(), ::toupper);
-  ou::tf::Currency::pair_t pairCurrency( ou::tf::Currency::Split( sSymbolName ) );
+  const ou::tf::Currency::pair_t pairCurrency( ou::tf::Currency::Split( sSymbolName ) );
 
   // TODO: use ConstructInstrument like for PortfolioManager for position/portfolio?
   //   will need an updated registration with alternate names?
