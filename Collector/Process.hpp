@@ -54,7 +54,6 @@ protected:
 private:
 
   const std::string m_sPathName;
-  //std::string m_sPathName_Depth;
 
   const config::Choices& m_choices;
 
@@ -64,8 +63,6 @@ private:
   std::unique_ptr<ou::tf::ComposeInstrument> m_pComposeInstrumentIQFeed;
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-  //pInstrument_t m_pInstrument;
-
   using pWatch_t = ou::tf::Watch::pWatch_t;
   pWatch_t m_pWatch;
 
