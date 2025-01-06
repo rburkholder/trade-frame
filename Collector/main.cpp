@@ -112,8 +112,7 @@ int main( int argc, char* argv[] ) {
   //signals.add( SIGQUIT );
   //signals.add( SIGABRT );
 
-  // unique ptr?  for daily start/stop?
-  // one process per instrument? or aggregate instrument/watch
+  // todo:  unique ptr - for daily start/stop?
   Process process( choices, sTSDataStreamStarted );
 
   signals.async_wait(
