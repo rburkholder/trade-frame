@@ -48,7 +48,6 @@ public:
   ~Process();
 
   void Write(); // incremental write
-  void Finish(); // write and stop
 
 protected:
 private:

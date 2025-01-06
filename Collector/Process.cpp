@@ -46,6 +46,10 @@ Process::Process(
 
 Process::~Process() {
 
+  while( 0 < m_mapCollect.size() ) {
+    m_mapCollect.erase( m_mapCollect.begin( ) );
+  }
+
   m_pComposeInstrumentIQFeed.reset();
 
   m_piqfeed->Disconnect();
@@ -104,11 +108,5 @@ void Process::ConstructCollector( pInstrument_t pInstrument ) {
 void Process::Write() {
   for ( mapCollect_t::value_type& vt: m_mapCollect ) {
     vt.second->Write();
-  }
-}
-
-void Process::Finish() {
-  while( 0 < m_mapCollect.size() ) {
-    m_mapCollect.erase( m_mapCollect.begin( ) );
   }
 }

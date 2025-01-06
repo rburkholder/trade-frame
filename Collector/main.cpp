@@ -19,6 +19,7 @@
  * Created: January 5, 2025 18:04:09
  */
 
+#include <memory>
 #include <string>
 #include <sstream>
 
@@ -112,11 +113,11 @@ int main( int argc, char* argv[] ) {
   //signals.add( SIGQUIT );
   //signals.add( SIGABRT );
 
-  // todo:  unique ptr - for daily start/stop?
-  Process process( choices, sTSDataStreamStarted );
+  using pProcess_t = std::unique_ptr<Process>;
+  pProcess_t pProcess = std::make_unique<Process>( choices, sTSDataStreamStarted );
 
   signals.async_wait(
-    [&process,&timerStop,&timerWrite,&m_pWork](const boost::system::error_code& error_code, int signal_number){
+    [&pProcess,&timerStop,&timerWrite,&m_pWork](const boost::system::error_code& error_code, int signal_number){
       BOOST_LOG_TRIVIAL(error)
         << "signal"
         << "(" << error_code.category().name()
@@ -129,29 +130,29 @@ int main( int argc, char* argv[] ) {
       if ( SIGINT == signal_number) {
         timerWrite.cancel();
         m_pWork->reset();
-        process.Finish();
+        pProcess.reset();
         timerStop.cancel();
       }
     } );
 
   using fWrite_t = std::function<void(const boost::system::error_code&)>;
 
-  fWrite_t fWrite = [&process,&timerWrite,&fWrite]( const boost::system::error_code& error_code ){
+  fWrite_t fWrite = [&pProcess,&timerWrite,&fWrite]( const boost::system::error_code& error_code ){
     if ( 0 == error_code.value() ) {
-      process.Write();
+      pProcess->Write();
       timerWrite.expires_from_now( boost::posix_time::seconds( 60 ) );
       timerWrite.async_wait( fWrite );
     }
   };
 
   timerWrite.async_wait(
-    [&process,&timerWrite,&fWrite]( const boost::system::error_code& error_code ){
+    [&timerWrite,&fWrite]( const boost::system::error_code& error_code ){
       fWrite( error_code );
     }
   );
 
   timerStop.async_wait(
-    [&process,&signals,&timerWrite,&m_pWork]( const boost::system::error_code& error_code ){
+    [&pProcess,&signals,&timerWrite,&m_pWork]( const boost::system::error_code& error_code ){
       BOOST_LOG_TRIVIAL(error)
         << "timer "
         << "(" << error_code.category().name()
@@ -162,7 +163,7 @@ int main( int argc, char* argv[] ) {
       if ( 0 == error_code.value() ) { // 125 is op canceled
         timerWrite.cancel();
         m_pWork->reset();
-        process.Finish();
+        pProcess.reset();
         signals.cancel();
       }
     });
