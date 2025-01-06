@@ -9,8 +9,8 @@ Equities, Futures, and Options are eligible instruments.
 It is designed to collect a complete 23 hour trading session.
 
 $ cat x64/debug/collector.cfg
-symbol_name=GLD
-symbol_name=SPY
+symbol_name_l1=GLD
+symbol_name_l1=SPY
 stop_time=17:30:00
 
 For continuous futures based upon the IQFeed naming scheme, the '~' in the file is converted to a corresponding '#'.  The continuous form is automatically converted to the appropriate front month's symbol.

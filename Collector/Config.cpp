@@ -31,7 +31,10 @@ namespace po = boost::program_options;
 #include "Config.hpp"
 
 namespace {
-  static const std::string sChoice_SymbolName( "symbol_name" );
+  static const std::string sChoice_SymbolName_L1( "symbol_name_l1" );
+  static const std::string sChoice_SymbolName_L2( "symbol_name_l2" );
+  static const std::string sChoice_SymbolName_Greek( "symbol_name_greek" );
+  static const std::string sChoice_SymbolName_AtmIV( "symbol_name_atmiv" );
   static const std::string sChoice_StopTime(   "stop_time" );
 
   template<typename T>
@@ -43,8 +46,8 @@ namespace {
     BOOST_LOG_TRIVIAL(info) << name << " = " << dest;
   }
 
-  void log( const std::string& name, config::Choices::vSymbolName_t& dest ) {
-    for ( config::Choices::vSymbolName_t::value_type& value: dest ) {
+  void log( const std::string& name, config::Choices::vName_t& dest ) {
+    for ( config::Choices::vName_t::value_type& value: dest ) {
       BOOST_LOG_TRIVIAL(info) << name << " = " << value;
     }
   }
@@ -76,7 +79,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
     po::options_description config( "collector config" );
     config.add_options()
-      ( sChoice_SymbolName.c_str(), po::value<Choices::vSymbolName_t>( &choices.m_vSymbolName ), "symbol name" )
+      ( sChoice_SymbolName_L1.c_str(), po::value<Choices::vName_t>( &choices.m_vSymbolName_L1 ), "symbol name for level 1 data" )
       ( sChoice_StopTime.c_str(),   po::value<std::string>( &choices.m_sStopTime ), "stop time HH:mm:ss UTC" )
       ;
     po::variables_map vm;
@@ -90,9 +93,9 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     else {
       po::store( po::parse_config_file( ifs, config), vm );
 
-      bOk &= parse<Choices::vSymbolName_t>( sFileName, vm, sChoice_SymbolName, true, choices.m_vSymbolName );
+      bOk &= parse<Choices::vName_t>( sFileName, vm, sChoice_SymbolName_L1, true, choices.m_vSymbolName_L1 );
       if ( bOk ) {
-        for ( Choices::vSymbolName_t::value_type& sn: choices.m_vSymbolName ) {
+        for ( Choices::vName_t::value_type& sn: choices.m_vSymbolName_L1 ) {
           std::replace_if( sn.begin(), sn.end(), [](char ch)->bool{return '~' == ch;}, '#' );
         }
       }

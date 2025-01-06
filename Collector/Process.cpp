@@ -73,8 +73,8 @@ void Process::ConstructUnderlying() {
     m_piqfeed,
     [this](){ // callback once started
       // TODO: will need to expand on this, but keep the same for now
-      assert( 1 == m_choices.m_vSymbolName.size() ); // remove with multi-instrument methodology
-      const std::string& sName( *m_choices.m_vSymbolName.begin() );
+      assert( 1 == m_choices.m_vSymbolName_L1.size() ); // remove with multi-instrument methodology
+      const std::string& sName( *m_choices.m_vSymbolName_L1.begin() );
       m_pComposeInstrumentIQFeed->Compose(
         sName,
         [this]( pInstrument_t pInstrument, bool bConstructed ){
@@ -172,7 +172,6 @@ void Process::HandleWatchTrade( const ou::tf::Trade& trade ) {
 void Process::HandleWatchQuote( const ou::tf::Quote& quote ) {
   m_pfwQuotes->Append( quote );
 }
-
 
 void Process::StopWatch() {
 
