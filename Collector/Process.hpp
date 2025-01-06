@@ -23,18 +23,18 @@
 
 #pragma once
 
-#include <TFTrading/Watch.h>
+#include <unordered_map> // might use unordered_set instead
+
 #include <TFTrading/Instrument.h>
 
 #include <TFIQFeed/Provider.h>
 
 #include "Config.hpp"
-#include "FillWrite.hpp"
+#include "Collect.hpp"
 
 namespace ou {
 namespace tf {
   class ComposeInstrument;
-  class HDF5Attributes;
 } // namespace tf
 } // namespace ou
 
@@ -53,6 +53,8 @@ public:
 protected:
 private:
 
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
   const std::string m_sPathName;
 
   const config::Choices& m_choices;
@@ -62,22 +64,13 @@ private:
 
   std::unique_ptr<ou::tf::ComposeInstrument> m_pComposeInstrumentIQFeed;
 
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-  using pWatch_t = ou::tf::Watch::pWatch_t;
-  pWatch_t m_pWatch;
-
-  using fwQuotes_t = ou::tf::FillWrite<ou::tf::Quotes>;
-  std::unique_ptr<fwQuotes_t> m_pfwQuotes;
-
-  using fwTrades_t = ou::tf::FillWrite<ou::tf::Trades>;
-  std::unique_ptr<fwTrades_t> m_pfwTrades;
+  using pCollect_t = std::unique_ptr<Collect>;
+  using mapCollect_t = std::unordered_map<std::string, pCollect_t>;
+  mapCollect_t m_mapCollect;
 
   void StartIQFeed();
   void HandleIQFeedConnected( int );
-  void ConstructUnderlying();
-  void HandleWatchTrade( const ou::tf::Trade& );
-  void HandleWatchQuote( const ou::tf::Quote& );
-  void SetAttributes( ou::tf::HDF5Attributes& );
-  void StartWatch( pInstrument_t );
-  void StopWatch();
+  void InitializeComposeInstrument();
+  void ConstructCollectors();
+  void ConstructCollector( pInstrument_t );
 };

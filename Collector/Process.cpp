@@ -24,9 +24,9 @@
 
 #include <boost/log/trivial.hpp>
 
-#include <TFTrading/ComposeInstrument.hpp>
+#include <TFTrading/Watch.h>
 
-#include <TFHDF5TimeSeries/HDF5Attribute.h>
+#include <TFTrading/ComposeInstrument.hpp>
 
 #include "Process.hpp"
 
@@ -46,10 +46,6 @@ Process::Process(
 
 Process::~Process() {
 
-  if ( m_pWatch ) {
-    StopWatch();
-  }
-
   m_pComposeInstrumentIQFeed.reset();
 
   m_piqfeed->Disconnect();
@@ -64,66 +60,32 @@ void Process::StartIQFeed() {
 }
 
 void Process::HandleIQFeedConnected( int ) {
-  ConstructUnderlying();
+  InitializeComposeInstrument();
 }
 
-void Process::ConstructUnderlying() {
-
+void Process::InitializeComposeInstrument() {
   m_pComposeInstrumentIQFeed = std::make_unique<ou::tf::ComposeInstrument>(
     m_piqfeed,
     [this](){ // callback once started
-      // TODO: will need to expand on this, but keep the same for now
-      assert( 1 == m_choices.m_vSymbolName_L1.size() ); // remove with multi-instrument methodology
-      const std::string& sName( *m_choices.m_vSymbolName_L1.begin() );
-      m_pComposeInstrumentIQFeed->Compose(
-        sName,
-        [this]( pInstrument_t pInstrument, bool bConstructed ){
-          //m_pInstrument = std::move( pInstrument );
-          StartWatch( pInstrument );
-        }
-      );
+      ConstructCollectors();
     }
     );
   assert( m_pComposeInstrumentIQFeed );
-
 }
 
-void Process::SetAttributes( ou::tf::HDF5Attributes& attr ) {
-  pInstrument_t pInstrument( m_pWatch->GetInstrument() );
-  const ou::tf::InstrumentType::EInstrumentType type( pInstrument->GetInstrumentType() );
-  attr.SetInstrumentType( type );
-  switch ( type ) {
-    case ou::tf::InstrumentType::Future: {
-        const ou::tf::HDF5Attributes::structFuture attributes(
-          pInstrument->GetExpiryYear(),
-          pInstrument->GetExpiryMonth(),
-          pInstrument->GetExpiryDay()
-        );
-        attr.SetFutureAttributes( attributes );
+void Process::ConstructCollectors() {
+  assert( m_pComposeInstrumentIQFeed );
+  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_L1 ) {
+    m_pComposeInstrumentIQFeed->Compose(
+      sIQFeedSymbolName,
+      [this]( pInstrument_t pInstrument, bool bConstructed ){
+        ConstructCollector( pInstrument );
       }
-      break;
-    case ou::tf::InstrumentType::Option: {
-        const ou::tf::HDF5Attributes::structOption attributes(
-          pInstrument->GetStrike(),
-          pInstrument->GetExpiryYear(),
-          pInstrument->GetExpiryMonth(),
-          pInstrument->GetExpiryDay(),
-          pInstrument->GetOptionSide()
-        );
-        attr.SetOptionAttributes( attributes );
-      }
-      break;
+    );
   }
-  attr.SetProviderType( m_pWatch->GetProvider()->ID() );
-  attr.SetMultiplier( pInstrument->GetMultiplier() );
-  attr.SetSignificantDigits( pInstrument->GetSignificantDigits() );
 }
 
-void Process::StartWatch( pInstrument_t pInstrument ) {
-
-  // TODO: watch built elsewhere, needs to be restartable for a new day?
-  //       or, delete and rebuild for a new day?
-  //             this, so that can handle when new front month started
+void Process::ConstructCollector( pInstrument_t pInstrument ) {
 
   const std::string& sSymbolName( pInstrument->GetInstrumentName() );
   const std::string& sIQFeedSymbolName( pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
@@ -133,75 +95,20 @@ void Process::StartWatch( pInstrument_t pInstrument ) {
     << ", " << sIQFeedSymbolName  // resolved name
     ;
 
-  m_pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
-  m_pWatch->RecordSeries( false ); // record manually in Write()
-
-  {
-    const std::string sPathName(
-      m_sPathName + ou::tf::Quotes::Directory()
-      + pInstrument->GetInstrumentName()
-      );
-    m_pfwQuotes = std::make_unique<fwQuotes_t>(
-      sPathName,
-      [this]( ou::tf::HDF5Attributes& attr ){
-        SetAttributes( attr );
-      } );
-    m_pWatch->OnQuote.Add( MakeDelegate( this, &Process::HandleWatchQuote ) );
-  }
-
-  {
-    const std::string sPathName(
-      m_sPathName + ou::tf::Trades::Directory()
-      + pInstrument->GetInstrumentName()
-      );
-    m_pfwTrades = std::make_unique<fwTrades_t>(
-      sPathName,
-      [this]( ou::tf::HDF5Attributes& attr ){
-         SetAttributes( attr );
-      } );
-    m_pWatch->OnTrade.Add( MakeDelegate( this, &Process::HandleWatchTrade ) );
-  }
-
-  m_pWatch->StartWatch();
-}
-
-void Process::HandleWatchTrade( const ou::tf::Trade& trade ) {
-  m_pfwTrades->Append( trade );
-}
-
-void Process::HandleWatchQuote( const ou::tf::Quote& quote ) {
-  m_pfwQuotes->Append( quote );
-}
-
-void Process::StopWatch() {
-
-  assert( m_pWatch );
-  m_pWatch->StopWatch();
-
-  m_pfwQuotes->Write();
-  m_pWatch->OnTrade.Remove( MakeDelegate( this, &Process::HandleWatchTrade ) );
-  m_pfwQuotes.reset();
-
-  m_pfwTrades->Write();
-  m_pWatch->OnQuote.Remove( MakeDelegate( this, &Process::HandleWatchQuote ) );
-  m_pfwTrades.reset();
-
-  m_pWatch.reset();
-  //m_pWatch->SaveSeries( m_sPathName );
-
-  BOOST_LOG_TRIVIAL(info) << "  ... Done ";
-
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
+  auto result = m_mapCollect.emplace( sSymbolName, std::make_unique<Collect>( m_sPathName, pWatch ) );
+  assert( result.second );
 }
 
 void Process::Write() {
-  m_pfwQuotes->Write();
-  m_pfwTrades->Write();
+  for ( mapCollect_t::value_type& vt: m_mapCollect ) {
+    vt.second->Write();
+  }
 }
 
 void Process::Finish() {
-
-  if ( m_pWatch ) {
-    StopWatch();
+  while( 0 < m_mapCollect.size() ) {
+    m_mapCollect.erase( m_mapCollect.begin( ) );
   }
-
 }

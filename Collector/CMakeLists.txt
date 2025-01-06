@@ -26,6 +26,7 @@ set(
     Config.hpp
     FillWrite.hpp
     Process.hpp
+    Collect.hpp
   )
 
 set(
@@ -33,6 +34,7 @@ set(
     main.cpp
     Config.cpp
     Process.cpp
+    Collect.cpp
   )
 
 add_executable(
