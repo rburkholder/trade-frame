@@ -42,7 +42,7 @@ private:
   hsize_t m_nChunkSize;
 };
 
-template<class TS> HDF5WriteTimeSeries<TS>::HDF5WriteTimeSeries( HDF5DataManager& dm ) 
+template<class TS> HDF5WriteTimeSeries<TS>::HDF5WriteTimeSeries( HDF5DataManager& dm )
 : m_dm( dm ), m_bDeflatable( false ), m_bExpandable( false ), m_nDeflate( 0 ), m_nChunkSize( 0 )
 {
 }
@@ -92,7 +92,7 @@ template<class TS> void HDF5WriteTimeSeries<TS>::Write(const std::string &sPathN
       H5::DataSpace *pds = new H5::DataSpace( 1, &curSize, &maxSize );
       //H5::DataSpace *pds = new H5::DataSpace( H5S_SIMPLE );
 //      hsize_t maxSize = 4000000000;  // probably will get us into trouble, but good enough till we get a good number for above.
-//      pds->setExtentSimple( 1, &curSize, &maxSize ); 
+//      pds->setExtentSimple( 1, &curSize, &maxSize );
 
       H5::DSetCreatPropList pl;
       //hsize_t sizeChunk = HDF5DataManager::H5ChunkSize();
@@ -133,7 +133,7 @@ template<class TS> void HDF5WriteTimeSeries<TS>::Write(const std::string &sPathN
     e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &HDF5DataManager::PrintH5ErrorStackItem, this );
   }
   catch ( ... ) {
-    std::cout << "CHistoryCollectorDaily::WriteData:  unknown error 2" << std::endl;
+    std::cout << "HDF5WriteTimeSeries::Write:  unknown error 2" << std::endl;
   }
 }
 
