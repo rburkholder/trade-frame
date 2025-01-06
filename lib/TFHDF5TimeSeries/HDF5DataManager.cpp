@@ -145,7 +145,7 @@ void HDF5DataManager::AddGroup( const std::string &sGroupPath ) { // needs to ha
       }
     }
     catch (...) {
-      throw std::runtime_error( "CDataManager::AddGroup has creation problems" );
+      throw std::runtime_error( "HDF5DataManager::AddGroup has creation problems" );
     }
     ixSlash = sGroupPath.find( '/', ixSlash ); // use incremented ixSlash here as new start index
   }
