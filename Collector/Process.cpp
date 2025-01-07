@@ -46,8 +46,8 @@ Process::Process(
 
 Process::~Process() {
 
-  while( 0 < m_mapCollect.size() ) {
-    m_mapCollect.erase( m_mapCollect.begin( ) );
+  while( 0 < m_mapCollectL1.size() ) {
+    m_mapCollectL1.erase( m_mapCollectL1.begin( ) );
   }
 
   m_pComposeInstrumentIQFeed.reset();
@@ -101,12 +101,12 @@ void Process::ConstructCollector( pInstrument_t pInstrument ) {
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
   pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
-  auto result = m_mapCollect.emplace( sSymbolName, std::make_unique<Collect>( m_sPathName, pWatch ) );
+  auto result = m_mapCollectL1.emplace( sSymbolName, std::make_unique<collect::L1>( m_sPathName, pWatch ) );
   assert( result.second );
 }
 
 void Process::Write() {
-  for ( mapCollect_t::value_type& vt: m_mapCollect ) {
+  for ( mapCollectL1_t::value_type& vt: m_mapCollectL1 ) {
     vt.second->Write();
   }
 }

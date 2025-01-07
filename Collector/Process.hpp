@@ -63,9 +63,9 @@ private:
 
   std::unique_ptr<ou::tf::ComposeInstrument> m_pComposeInstrumentIQFeed;
 
-  using pCollect_t = std::unique_ptr<Collect>;
-  using mapCollect_t = std::unordered_map<std::string, pCollect_t>;
-  mapCollect_t m_mapCollect;
+  using pCollectL1_t = std::unique_ptr<collect::L1>;
+  using mapCollectL1_t = std::unordered_map<std::string, pCollectL1_t>;
+  mapCollectL1_t m_mapCollectL1;
 
   void StartIQFeed();
   void HandleIQFeedConnected( int );

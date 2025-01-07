@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    Collect.hpp
+ * File:    CollectL1.hpp
  * Author:  raymond@burkholder.net
  * Project: Collector
  * Created: January 5, 2025 17:11:37
@@ -31,13 +31,15 @@ namespace tf {
 } // namespace tf
 } // namespace ou
 
-class Collect {
+namespace collect {
+
+class L1 {
 public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
 
-  Collect( const std::string& sPathPrefix, pWatch_t );
-  ~Collect();
+  L1( const std::string& sPathPrefix, pWatch_t );
+  ~L1();
 
   void Write(); // incremental write
 
@@ -56,3 +58,5 @@ private:
   void HandleWatchQuote( const ou::tf::Quote& );
   void SetAttributes( ou::tf::HDF5Attributes& );
 };
+
+} // namespace collect

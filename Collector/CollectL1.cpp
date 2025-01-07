@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    Collect.cpp
+ * File:    CollectL1.cpp
  * Author:  raymond@burkholder.net
  * Project: Collector
  * Created: January 5, 2025 17:11:37
@@ -25,7 +25,9 @@
 
 #include "CollectL1.hpp"
 
-Collect::Collect( const std::string& sPathPrefix, pWatch_t pWatch )
+namespace collect {
+
+L1::L1( const std::string& sPathPrefix, pWatch_t pWatch )
 {
 
   // TODO: watch built elsewhere, needs to be restartable for a new day?
@@ -45,7 +47,7 @@ Collect::Collect( const std::string& sPathPrefix, pWatch_t pWatch )
       [this]( ou::tf::HDF5Attributes& attr ){
         SetAttributes( attr );
       } );
-    m_pWatch->OnQuote.Add( MakeDelegate( this, &Collect::HandleWatchQuote ) );
+    m_pWatch->OnQuote.Add( MakeDelegate( this, &L1::HandleWatchQuote ) );
   }
 
   {
@@ -55,23 +57,23 @@ Collect::Collect( const std::string& sPathPrefix, pWatch_t pWatch )
       [this]( ou::tf::HDF5Attributes& attr ){
          SetAttributes( attr );
       } );
-    m_pWatch->OnTrade.Add( MakeDelegate( this, &Collect::HandleWatchTrade ) );
+    m_pWatch->OnTrade.Add( MakeDelegate( this, &L1::HandleWatchTrade ) );
   }
 
   m_pWatch->StartWatch();
 }
 
-Collect::~Collect() {
+L1::~L1() {
 
   assert( m_pWatch );
   m_pWatch->StopWatch();
 
   m_pfwQuotes->Write();
-  m_pWatch->OnTrade.Remove( MakeDelegate( this, &Collect::HandleWatchTrade ) );
+  m_pWatch->OnTrade.Remove( MakeDelegate( this, &L1::HandleWatchTrade ) );
   m_pfwQuotes.reset();
 
   m_pfwTrades->Write();
-  m_pWatch->OnQuote.Remove( MakeDelegate( this, &Collect::HandleWatchQuote ) );
+  m_pWatch->OnQuote.Remove( MakeDelegate( this, &L1::HandleWatchQuote ) );
   m_pfwTrades.reset();
 
   m_pWatch.reset();
@@ -81,15 +83,15 @@ Collect::~Collect() {
 
 }
 
-void Collect::HandleWatchTrade( const ou::tf::Trade& trade ) {
+void L1::HandleWatchTrade( const ou::tf::Trade& trade ) {
   m_pfwTrades->Append( trade );
 }
 
-void Collect::HandleWatchQuote( const ou::tf::Quote& quote ) {
+void L1::HandleWatchQuote( const ou::tf::Quote& quote ) {
   m_pfwQuotes->Append( quote );
 }
 
-void Collect::SetAttributes( ou::tf::HDF5Attributes& attr ) {
+void L1::SetAttributes( ou::tf::HDF5Attributes& attr ) {
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   pInstrument_t pInstrument( m_pWatch->GetInstrument() );
   const ou::tf::InstrumentType::EInstrumentType type( pInstrument->GetInstrumentType() );
@@ -121,7 +123,9 @@ void Collect::SetAttributes( ou::tf::HDF5Attributes& attr ) {
   attr.SetSignificantDigits( pInstrument->GetSignificantDigits() );
 }
 
-void Collect::Write() {
+void L1::Write() {
   m_pfwQuotes->Write();
   m_pfwTrades->Write();
 }
+
+} // namespace collect
