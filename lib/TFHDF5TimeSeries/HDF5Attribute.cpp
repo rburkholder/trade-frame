@@ -31,7 +31,7 @@ const char szMultiplier[] = "Multiplier";
 const char szSignificantDigits[] = "SignificantDigits";
 const char szSignature[] = "Signature";
 
- HDF5Attributes::HDF5Attributes( HDF5DataManager& dm ) 
+ HDF5Attributes::HDF5Attributes( HDF5DataManager& dm )
  : m_pDataSet( NULL ), m_dm( dm )
 {
 }
@@ -147,7 +147,7 @@ unsigned short HDF5Attributes::GetMultiplier( void ) {
 
 void HDF5Attributes::SetOptionAttributes( const structOption& option ) {
 
-  SetInstrumentType( InstrumentType::Option );
+  //SetInstrumentType( InstrumentType::Option );
 
   H5::DataSpace dspace;
 
@@ -198,7 +198,7 @@ void HDF5Attributes::GetOptionAttributes( structOption* option ) {
 
 void HDF5Attributes::SetFutureAttributes( const structFuture& future ) {
 
-  SetInstrumentType( InstrumentType::Future );
+  //SetInstrumentType( InstrumentType::Future );
 
   H5::DataSpace dspace;
 
