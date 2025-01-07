@@ -30,7 +30,7 @@
 #include <TFIQFeed/Provider.h>
 
 #include "Config.hpp"
-#include "Collect.hpp"
+#include "CollectL1.hpp"
 
 namespace ou {
 namespace tf {

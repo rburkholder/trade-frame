@@ -23,7 +23,7 @@
 
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 
-#include "Collect.hpp"
+#include "CollectL1.hpp"
 
 Collect::Collect( const std::string& sPathPrefix, pWatch_t pWatch )
 {
