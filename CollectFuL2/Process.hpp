@@ -82,7 +82,6 @@ private:
   ixDepthsByOrder_t m_ixDepthsByOrder_Filling;
   ixDepthsByOrder_t m_ixDepthsByOrder_Writing;
 
-  //ou::tf::DepthsByOrder m_depths_byorder; // time series for persistence
   ou::tf::iqfeed::l2::OrderBased m_OrderBased; // direct access
   std::unique_ptr<ou::tf::iqfeed::l2::Symbols> m_pDispatch;
 
