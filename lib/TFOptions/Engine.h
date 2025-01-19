@@ -118,9 +118,6 @@ public:
   using pOption_t = Option::pOption_t;
   using fCallbackWithGreek_t = OptionEntry::fCallbackWithGreek_t;
 
-  using fBuildWatch_t = std::function<pWatch_t(pInstrument_t)>;  // constructed elsewhere as it needs provider
-  using fBuildOption_t = std::function<pOption_t(pInstrument_t)>;  // constructed elsewhere as it needs provider
-
   //Engine( const ou::tf::LiborFromIQFeed& );
   //Engine( const ou::tf::FedRateFromIQFeed& );
   Engine( const ou::tf::NoRiskInterestRateSeries& );
@@ -135,12 +132,13 @@ public:
   void Remove( pOption_t pOption, pWatch_t pUnderlying ); // part of the reference counting, will change reference count on associated underlying and auto remove
 
   // these effectively handle registration of underlying and option, using a callback - deprecated, use Register... above
+  using fBuildWatch_t = std::function<pWatch_t(pInstrument_t)>;  // constructed elsewhere as it needs provider
   fBuildWatch_t m_fBuildWatch;
   pWatch_t FindWatch( const pInstrument_t pInstrument );  // if Watch not found, construct one.  Then provide the watch.
 
+  using fBuildOption_t = std::function<pOption_t(pInstrument_t)>;  // constructed elsewhere as it needs provider
   fBuildOption_t m_fBuildOption;
   pOption_t FindOption( const pInstrument_t pInstrument );  // if Option not found, construct one.  Then provide the option.
-
 
 private:
 
