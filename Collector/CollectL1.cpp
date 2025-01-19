@@ -21,8 +21,6 @@
 
 //#include <boost/log/trivial.hpp>
 
-#include <TFHDF5TimeSeries/HDF5Attribute.h>
-
 #include "CollectL1.hpp"
 
 namespace collect {
