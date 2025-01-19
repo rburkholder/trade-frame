@@ -33,7 +33,7 @@ struct Choices {
   // todo: convert to set to enforce uniqueness
   using vName_t = std::vector<std::string>;
   vName_t m_vSymbolName_L1;     // symbols with level 1 data
-  vName_t m_vSymbolName_L2;     // symbols with level 2 data - match to L1 - to be implemented - see CollectFuL2
+  vName_t m_vSymbolName_L2;     // symbols with level 2 data - match to L1
   vName_t m_vSymbolName_Greek;  // greeks for options - match to L1 - to be implemented
   vName_t m_vSymbolName_AtmIV;  // at the money implied volatility - match to L1 - to be implemented
 

@@ -24,8 +24,6 @@
 
 #include <boost/log/trivial.hpp>
 
-#include <TFTrading/Watch.h>
-
 #include <TFTrading/ComposeInstrument.hpp>
 
 #include "Process.hpp"
@@ -46,8 +44,16 @@ Process::Process(
 
 Process::~Process() {
 
+  while( 0 < m_mapCollectL2.size() ) {
+    m_mapCollectL2.erase( m_mapCollectL2.begin( ) );
+  }
+
   while( 0 < m_mapCollectL1.size() ) {
     m_mapCollectL1.erase( m_mapCollectL1.begin( ) );
+  }
+
+  while ( 0 < m_mapWatch.size() ) {
+    m_mapWatch.erase( m_mapWatch.begin() );
   }
 
   m_pComposeInstrumentIQFeed.reset();
@@ -77,32 +83,87 @@ void Process::InitializeComposeInstrument() {
   assert( m_pComposeInstrumentIQFeed );
 }
 
-void Process::ConstructCollectors() {
-  assert( m_pComposeInstrumentIQFeed );
-  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_L1 ) {
+void Process::ConstructWatch( const std::string& sIQFeedSymbolName, fWatch_t&& fWatch ) {
+
+  mapWatch_t::iterator iterWatch = m_mapWatch.find( sIQFeedSymbolName );
+
+  if ( m_mapWatch.end() == iterWatch ) {
+    assert( m_pComposeInstrumentIQFeed );
     m_pComposeInstrumentIQFeed->Compose(
       sIQFeedSymbolName,
-      [this]( pInstrument_t pInstrument, bool bConstructed ){
-        ConstructCollector( pInstrument );
+      [this, fWatch_=std::move( fWatch ), sIQFeedSymbolName]( pInstrument_t pInstrument, bool bConstructed ){
+        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
+        m_mapWatch.emplace( sIQFeedSymbolName, pWatch );
+        fWatch_( pWatch );
       }
     );
   }
+  else {
+    fWatch( iterWatch->second );
+  }
 }
 
-void Process::ConstructCollector( pInstrument_t pInstrument ) {
+void Process::ConstructCollectors() {
+  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_L1 ) {
+    ConstructWatch(
+      sIQFeedSymbolName,
+      [this]( pWatch_t pWatch ){
+        ConstructCollectorL1( pWatch );
+      } );
+  }
+  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_L2 ) {
+    ConstructWatch(
+      sIQFeedSymbolName,
+      [this]( pWatch_t pWatch ){
+        ConstructCollectorL2( pWatch );
+      } );
+  }
+}
 
-  const std::string& sSymbolName( pInstrument->GetInstrumentName() );
-  const std::string& sIQFeedSymbolName( pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+void Process::ConstructCollectorL1( pWatch_t pWatch ) {
 
-  BOOST_LOG_TRIVIAL(info) << "symbol: " // should be able to identify type once composed
+  const std::string& sSymbolName( pWatch->GetInstrumentName() );
+  const std::string& sIQFeedSymbolName( pWatch->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+
+  BOOST_LOG_TRIVIAL(info) << "symbol l1: " // should be able to identify type once composed
     << sSymbolName // from config file?
     << ", " << sIQFeedSymbolName  // resolved name
     ;
 
-  using pWatch_t = ou::tf::Watch::pWatch_t;
-  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
-  auto result = m_mapCollectL1.emplace( sSymbolName, std::make_unique<collect::L1>( m_sPathName, pWatch ) );
-  assert( result.second );
+  mapCollectL1_t::iterator iterCollectL1 = m_mapCollectL1.find( sSymbolName );
+  if ( m_mapCollectL1.end() == iterCollectL1 ) {
+    auto result = m_mapCollectL1.emplace( sSymbolName, std::make_unique<collect::L1>( m_sPathName, pWatch ) );
+    assert( result.second );
+  }
+  else {
+    BOOST_LOG_TRIVIAL(info) << "symbol l1: " // should be able to identify type once composed
+      << sSymbolName
+      << " already collecting"
+      ;
+  }
+}
+
+void Process::ConstructCollectorL2( pWatch_t pWatch ) {
+
+  const std::string& sSymbolName( pWatch->GetInstrumentName() );
+  const std::string& sIQFeedSymbolName( pWatch->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+
+  BOOST_LOG_TRIVIAL(info) << "symbol l2: " // should be able to identify type once composed
+    << sSymbolName // from config file?
+    << ", " << sIQFeedSymbolName  // resolved name
+    ;
+
+  mapCollectL2_t::iterator iterCollectL2 = m_mapCollectL2.find( sSymbolName );
+  if ( m_mapCollectL2.end() == iterCollectL2 ) {
+    auto result = m_mapCollectL2.emplace( sSymbolName, std::make_unique<collect::L2>( m_sPathName, pWatch ) );
+    assert( result.second );
+  }
+  else {
+    BOOST_LOG_TRIVIAL(info) << "symbol l2: " // should be able to identify type once composed
+      << sSymbolName
+      << " already collecting"
+      ;
+  }
 }
 
 void Process::Write() {

@@ -23,14 +23,16 @@
 
 #pragma once
 
-#include <unordered_map> // might use unordered_set instead
+#include <functional>
+#include <unordered_map>
 
-#include <TFTrading/Instrument.h>
+#include <TFTrading/Watch.h>
 
 #include <TFIQFeed/Provider.h>
 
 #include "Config.hpp"
 #include "CollectL1.hpp"
+#include "CollectL2.hpp"
 
 namespace ou {
 namespace tf {
@@ -52,7 +54,10 @@ public:
 protected:
 private:
 
+  using pWatch_t = ou::tf::Watch::pWatch_t;
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
+  using fWatch_t = std::function<void(pWatch_t)>;
 
   const std::string m_sPathName;
 
@@ -63,13 +68,22 @@ private:
 
   std::unique_ptr<ou::tf::ComposeInstrument> m_pComposeInstrumentIQFeed;
 
+  using mapWatch_t = std::unordered_map<std::string, pWatch_t>;
+  mapWatch_t m_mapWatch;
+
   using pCollectL1_t = std::unique_ptr<collect::L1>;
   using mapCollectL1_t = std::unordered_map<std::string, pCollectL1_t>;
   mapCollectL1_t m_mapCollectL1;
 
+  using pCollectL2_t = std::unique_ptr<collect::L2>;
+  using mapCollectL2_t = std::unordered_map<std::string, pCollectL2_t>;
+  mapCollectL2_t m_mapCollectL2;
+
   void StartIQFeed();
   void HandleIQFeedConnected( int );
   void InitializeComposeInstrument();
+  void ConstructWatch( const std::string&, fWatch_t&& );
   void ConstructCollectors();
-  void ConstructCollector( pInstrument_t );
+  void ConstructCollectorL1( pWatch_t );
+  void ConstructCollectorL2( pWatch_t );
 };

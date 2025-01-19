@@ -27,6 +27,7 @@ set(
     FillWrite.hpp
     Process.hpp
     CollectL1.hpp
+    CollectL2.hpp
   )
 
 set(
@@ -35,6 +36,7 @@ set(
     Config.cpp
     Process.cpp
     CollectL1.cpp
+    CollectL2.cpp
   )
 
 add_executable(
