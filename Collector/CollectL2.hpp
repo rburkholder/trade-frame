@@ -38,7 +38,7 @@ public:
   L2( const std::string& sPathPrefix, pWatch_t );
   ~L2();
 
-  void Write(); // incremental write
+  void Write() override; // incremental write
   size_t Count() const { return m_cntDepthsByOrder; }
 
 protected:

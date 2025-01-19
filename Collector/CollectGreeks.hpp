@@ -36,7 +36,7 @@ public:
   Greeks( const std::string& sPathPrefix, pOption_t );
   ~Greeks();
 
-  void Write(); // incremental write
+  void Write() override; // incremental write
 
 protected:
 private:

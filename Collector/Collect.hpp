@@ -35,6 +35,7 @@ namespace collect {
 
 class Base {
 public:
+  virtual void Write() = 0; // incremental write
 protected:
   using pWatch_t = ou::tf::Watch::pWatch_t;
   void SetAttributes( ou::tf::HDF5Attributes&, pWatch_t );

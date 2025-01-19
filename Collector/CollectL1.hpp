@@ -36,7 +36,7 @@ public:
   L1( const std::string& sPathPrefix, pWatch_t );
   ~L1();
 
-  void Write(); // incremental write
+  void Write() override; // incremental write
 
 protected:
 private:
