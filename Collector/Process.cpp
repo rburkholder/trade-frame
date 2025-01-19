@@ -170,4 +170,7 @@ void Process::Write() {
   for ( mapCollectL1_t::value_type& vt: m_mapCollectL1 ) {
     vt.second->Write();
   }
+  for ( mapCollectL2_t::value_type& vt: m_mapCollectL2 ) {
+    vt.second->Write();
+  }
 }
