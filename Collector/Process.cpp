@@ -92,9 +92,26 @@ void Process::ConstructWatch( const std::string& sIQFeedSymbolName, fWatch_t&& f
     m_pComposeInstrumentIQFeed->Compose(
       sIQFeedSymbolName,
       [this, fWatch_=std::move( fWatch ), sIQFeedSymbolName]( pInstrument_t pInstrument, bool bConstructed ){
-        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
-        m_mapWatch.emplace( sIQFeedSymbolName, pWatch );
-        fWatch_( pWatch );
+        switch ( pInstrument->GetInstrumentType() ) {
+          case ou::tf::InstrumentType::EInstrumentType::Future:
+          case ou::tf::InstrumentType::EInstrumentType::Currency:
+          case ou::tf::InstrumentType::EInstrumentType::Stock: {
+            pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
+            m_mapWatch.emplace( sIQFeedSymbolName, pWatch );
+            fWatch_( pWatch );
+            }
+            break;
+          case ou::tf::InstrumentType::EInstrumentType::FuturesOption:
+          case ou::tf::InstrumentType::EInstrumentType::Option: {
+            pOption_t pOption = std::make_shared<ou::tf::option::Option>( pInstrument, m_piqfeed );
+            m_mapWatch.emplace( sIQFeedSymbolName, pOption );
+            fWatch_( pOption );
+            }
+            break;
+          default:
+            assert( false );
+            break;
+        }
       }
     );
   }
@@ -118,6 +135,20 @@ void Process::ConstructCollectors() {
         ConstructCollectorL2( pWatch );
       } );
   }
+  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_Greek ) {
+    ConstructWatch(
+      sIQFeedSymbolName,
+      [this]( pWatch_t pWatch ){
+
+        ou::tf::InstrumentType::EInstrumentType type( pWatch->GetInstrument()->GetInstrumentType() );
+        assert( ou::tf::InstrumentType::Option == type
+             || ou::tf::InstrumentType::FuturesOption == type
+        );
+
+        pOption_t pOption( std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch) );
+        ConstructCollectorGreeks( pOption );
+      } );
+  }
 }
 
 void Process::ConstructCollectorL1( pWatch_t pWatch ) {
@@ -126,7 +157,7 @@ void Process::ConstructCollectorL1( pWatch_t pWatch ) {
   const std::string& sIQFeedSymbolName( pWatch->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
 
   BOOST_LOG_TRIVIAL(info) << "symbol l1: " // should be able to identify type once composed
-    << sSymbolName // from config file?
+    << sSymbolName // generic name
     << ", " << sIQFeedSymbolName  // resolved name
     ;
 
@@ -149,7 +180,7 @@ void Process::ConstructCollectorL2( pWatch_t pWatch ) {
   const std::string& sIQFeedSymbolName( pWatch->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
 
   BOOST_LOG_TRIVIAL(info) << "symbol l2: " // should be able to identify type once composed
-    << sSymbolName // from config file?
+    << sSymbolName // generic name
     << ", " << sIQFeedSymbolName  // resolved name
     ;
 
@@ -166,11 +197,37 @@ void Process::ConstructCollectorL2( pWatch_t pWatch ) {
   }
 }
 
+void Process::ConstructCollectorGreeks( pOption_t pOption ) {
+
+  const std::string& sSymbolName( pOption->GetInstrumentName() );
+  const std::string& sIQFeedSymbolName( pOption->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+
+  BOOST_LOG_TRIVIAL(info) << "symbol greeks: " // should be able to identify type once composed
+    << sSymbolName // generic name
+    << ", " << sIQFeedSymbolName  // resolved name
+    ;
+
+  mapCollectGreeks_t::iterator iterCollectGreeks = m_mapCollectGreeks.find( sSymbolName );
+  if ( m_mapCollectGreeks.end() == iterCollectGreeks ) {
+    auto result = m_mapCollectGreeks.emplace( sSymbolName, std::make_unique<collect::Greeks>( m_sPathName, pOption ) );
+    assert( result.second );
+  }
+  else {
+    BOOST_LOG_TRIVIAL(info) << "symbol greeks: " // should be able to identify type once composed
+      << sSymbolName
+      << " already collecting"
+      ;
+  }
+}
+
 void Process::Write() {
   for ( mapCollectL1_t::value_type& vt: m_mapCollectL1 ) {
     vt.second->Write();
   }
   for ( mapCollectL2_t::value_type& vt: m_mapCollectL2 ) {
+    vt.second->Write();
+  }
+  for ( mapCollectGreeks_t::value_type& vt: m_mapCollectGreeks ) {
     vt.second->Write();
   }
 }

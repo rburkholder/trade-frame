@@ -28,11 +28,14 @@
 
 #include <TFTrading/Watch.h>
 
+#include <TFOptions/Option.h>
+
 #include <TFIQFeed/Provider.h>
 
 #include "Config.hpp"
 #include "CollectL1.hpp"
 #include "CollectL2.hpp"
+#include "CollectGreeks.hpp"
 
 namespace ou {
 namespace tf {
@@ -54,8 +57,9 @@ public:
 protected:
 private:
 
-  using pWatch_t = ou::tf::Watch::pWatch_t;
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pOption_t = ou::tf::option::Option::pOption_t;
 
   using fWatch_t = std::function<void(pWatch_t)>;
 
@@ -79,6 +83,10 @@ private:
   using mapCollectL2_t = std::unordered_map<std::string, pCollectL2_t>;
   mapCollectL2_t m_mapCollectL2;
 
+  using pCollectGreeks_t = std::unique_ptr<collect::Greeks>;
+  using mapCollectGreeks_t = std::unordered_map<std::string, pCollectGreeks_t>;
+  mapCollectGreeks_t m_mapCollectGreeks;
+
   void StartIQFeed();
   void HandleIQFeedConnected( int );
   void InitializeComposeInstrument();
@@ -86,4 +94,5 @@ private:
   void ConstructCollectors();
   void ConstructCollectorL1( pWatch_t );
   void ConstructCollectorL2( pWatch_t );
+  void ConstructCollectorGreeks( pOption_t );
 };
