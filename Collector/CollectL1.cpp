@@ -45,7 +45,7 @@ L1::L1( const std::string& sPathPrefix, pWatch_t pWatch )
     m_pfwQuotes = std::make_unique<fwQuotes_t>(
       sFullPath,
       [this]( ou::tf::HDF5Attributes& attr ){
-        SetAttributes( attr );
+        SetAttributes( attr, m_pWatch );
       } );
     m_pWatch->OnQuote.Add( MakeDelegate( this, &L1::HandleWatchQuote ) );
   }
@@ -55,7 +55,7 @@ L1::L1( const std::string& sPathPrefix, pWatch_t pWatch )
     m_pfwTrades = std::make_unique<fwTrades_t>(
       sFullPath,
       [this]( ou::tf::HDF5Attributes& attr ){
-         SetAttributes( attr );
+         SetAttributes( attr, m_pWatch );
       } );
     m_pWatch->OnTrade.Add( MakeDelegate( this, &L1::HandleWatchTrade ) );
   }
@@ -89,38 +89,6 @@ void L1::HandleWatchTrade( const ou::tf::Trade& trade ) {
 
 void L1::HandleWatchQuote( const ou::tf::Quote& quote ) {
   m_pfwQuotes->Append( quote );
-}
-
-void L1::SetAttributes( ou::tf::HDF5Attributes& attr ) {
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-  pInstrument_t pInstrument( m_pWatch->GetInstrument() );
-  const ou::tf::InstrumentType::EInstrumentType type( pInstrument->GetInstrumentType() );
-  attr.SetInstrumentType( type );
-  switch ( type ) {
-    case ou::tf::InstrumentType::Future: {
-        const ou::tf::HDF5Attributes::structFuture attributes(
-          pInstrument->GetExpiryYear(),
-          pInstrument->GetExpiryMonth(),
-          pInstrument->GetExpiryDay()
-        );
-        attr.SetFutureAttributes( attributes );
-      }
-      break;
-    case ou::tf::InstrumentType::Option: {
-        const ou::tf::HDF5Attributes::structOption attributes(
-          pInstrument->GetStrike(),
-          pInstrument->GetExpiryYear(),
-          pInstrument->GetExpiryMonth(),
-          pInstrument->GetExpiryDay(),
-          pInstrument->GetOptionSide()
-        );
-        attr.SetOptionAttributes( attributes );
-      }
-      break;
-  }
-  attr.SetProviderType( m_pWatch->GetProvider()->ID() );
-  attr.SetMultiplier( pInstrument->GetMultiplier() );
-  attr.SetSignificantDigits( pInstrument->GetSignificantDigits() );
 }
 
 void L1::Write() {

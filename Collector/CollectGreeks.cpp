@@ -21,8 +21,6 @@
 
 //#include <boost/log/trivial.hpp>
 
-#include <TFHDF5TimeSeries/HDF5Attribute.h>
-
 #include "CollectGreeks.hpp"
 
 namespace collect {
@@ -45,7 +43,7 @@ Greeks::Greeks( const std::string& sPathPrefix, pOption_t pOption )
     m_pfwGreeks = std::make_unique<fwGreeks_t>(
       sFullPath,
       [this]( ou::tf::HDF5Attributes& attr ){
-        SetAttributes( attr );
+        SetAttributes( attr, m_pOption );
       } );
     m_pOption->OnGreek.Add( MakeDelegate( this, &Greeks::HandleWatchGreeks ) );
   }
@@ -68,38 +66,6 @@ Greeks::~Greeks() {
 
 void Greeks::HandleWatchGreeks( const ou::tf::Greek& greek ) {
   m_pfwGreeks->Append( greek );
-}
-
-void Greeks::SetAttributes( ou::tf::HDF5Attributes& attr ) {
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-  pInstrument_t pInstrument( m_pOption->GetInstrument() );
-  const ou::tf::InstrumentType::EInstrumentType type( pInstrument->GetInstrumentType() );
-  attr.SetInstrumentType( type );
-  switch ( type ) {
-    case ou::tf::InstrumentType::Future: {
-        const ou::tf::HDF5Attributes::structFuture attributes(
-          pInstrument->GetExpiryYear(),
-          pInstrument->GetExpiryMonth(),
-          pInstrument->GetExpiryDay()
-        );
-        attr.SetFutureAttributes( attributes );
-      }
-      break;
-    case ou::tf::InstrumentType::Option: {
-        const ou::tf::HDF5Attributes::structOption attributes(
-          pInstrument->GetStrike(),
-          pInstrument->GetExpiryYear(),
-          pInstrument->GetExpiryMonth(),
-          pInstrument->GetExpiryDay(),
-          pInstrument->GetOptionSide()
-        );
-        attr.SetOptionAttributes( attributes );
-      }
-      break;
-  }
-  attr.SetProviderType( m_pOption->GetProvider()->ID() );
-  attr.SetMultiplier( pInstrument->GetMultiplier() );
-  attr.SetSignificantDigits( pInstrument->GetSignificantDigits() );
 }
 
 void Greeks::Write() {

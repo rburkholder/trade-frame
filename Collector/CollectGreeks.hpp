@@ -23,17 +23,12 @@
 
 #include <TFOptions/Option.h>
 
+#include "Collect.hpp"
 #include "FillWrite.hpp"
-
-namespace ou {
-namespace tf {
-  class HDF5Attributes;
-} // namespace tf
-} // namespace ou
 
 namespace collect {
 
-class Greeks {
+class Greeks: public Base {
 public:
 
   using pOption_t = ou::tf::option::Option::pOption_t;
@@ -52,7 +47,6 @@ private:
   std::unique_ptr<fwGreeks_t> m_pfwGreeks;
 
   void HandleWatchGreeks( const ou::tf::Greek& );
-  void SetAttributes( ou::tf::HDF5Attributes& );
 };
 
 } // namespace collect

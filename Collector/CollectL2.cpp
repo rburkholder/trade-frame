@@ -46,7 +46,7 @@ L2::L2( const std::string& sPathPrefix, pWatch_t pWatch )
     m_pfwDepthsByOrder = std::make_unique<fwDepthsByOrder_t>(
       sFullPath,
       [this]( ou::tf::HDF5Attributes& attr ){
-        SetAttributes( attr );
+        SetAttributes( attr, m_pWatch );
       } );
     m_pWatch->OnDepthByOrder.Add( MakeDelegate( this, &L2::HandleWatchDepthByOrder ) );
   }
@@ -93,27 +93,6 @@ L2::~L2() {
 
 void L2::HandleWatchDepthByOrder( const ou::tf::DepthByOrder& dbo ) {
   m_pfwDepthsByOrder->Append( dbo );
-}
-
-void L2::SetAttributes( ou::tf::HDF5Attributes& attr ) {
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-  pInstrument_t pInstrument( m_pWatch->GetInstrument() );
-  const ou::tf::InstrumentType::EInstrumentType type( pInstrument->GetInstrumentType() );
-  attr.SetInstrumentType( type );
-  switch ( type ) {
-    case ou::tf::InstrumentType::Future: {
-        const ou::tf::HDF5Attributes::structFuture attributes(
-          pInstrument->GetExpiryYear(),
-          pInstrument->GetExpiryMonth(),
-          pInstrument->GetExpiryDay()
-        );
-        attr.SetFutureAttributes( attributes );
-      }
-      break;
-  }
-  attr.SetProviderType( m_pWatch->GetProvider()->ID() );
-  attr.SetMultiplier( pInstrument->GetMultiplier() );
-  attr.SetSignificantDigits( pInstrument->GetSignificantDigits() );
 }
 
 void L2::Write() {

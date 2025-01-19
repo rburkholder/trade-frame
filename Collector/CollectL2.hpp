@@ -25,17 +25,12 @@
 
 #include <TFIQFeed/Level2/Symbols.hpp>
 
+#include "Collect.hpp"
 #include "FillWrite.hpp"
-
-namespace ou {
-namespace tf {
-  class HDF5Attributes;
-} // namespace tf
-} // namespace ou
 
 namespace collect {
 
-class L2 {
+class L2: public Base {
 public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
@@ -60,7 +55,6 @@ private:
   std::unique_ptr<fwDepthsByOrder_t> m_pfwDepthsByOrder;
 
   void HandleWatchDepthByOrder( const ou::tf::DepthByOrder& );
-  void SetAttributes( ou::tf::HDF5Attributes& );
 };
 
 } // namespace collect
