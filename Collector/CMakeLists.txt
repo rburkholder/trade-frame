@@ -26,6 +26,7 @@ set(
     Config.hpp
     FillWrite.hpp
     Process.hpp
+    CollectGreeks.hpp
     CollectL1.hpp
     CollectL2.hpp
   )
@@ -35,6 +36,7 @@ set(
     main.cpp
     Config.cpp
     Process.cpp
+    CollectGreeks.cpp
     CollectL1.cpp
     CollectL2.cpp
   )
