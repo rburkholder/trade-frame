@@ -44,6 +44,10 @@ Process::Process(
 
 Process::~Process() {
 
+  while( 0 < m_mapCollectGreeks.size() ) {
+    m_mapCollectGreeks.erase( m_mapCollectGreeks.begin( ) );
+  }
+
   while( 0 < m_mapCollectL2.size() ) {
     m_mapCollectL2.erase( m_mapCollectL2.begin( ) );
   }
@@ -135,7 +139,7 @@ void Process::ConstructCollectors() {
         ConstructCollectorL2( pWatch );
       } );
   }
-  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_Greek ) {
+  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_Greeks ) {
     ConstructWatch(
       sIQFeedSymbolName,
       [this]( pWatch_t pWatch ){

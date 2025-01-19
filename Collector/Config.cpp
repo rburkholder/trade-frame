@@ -33,7 +33,7 @@ namespace po = boost::program_options;
 namespace {
   static const std::string sChoice_SymbolName_L1( "symbol_name_l1" );
   static const std::string sChoice_SymbolName_L2( "symbol_name_l2" );
-  static const std::string sChoice_SymbolName_Greek( "symbol_name_greek" );
+  static const std::string sChoice_SymbolName_Greeks( "symbol_name_greeks" );
   static const std::string sChoice_SymbolName_AtmIV( "symbol_name_atmiv" );
   static const std::string sChoice_StopTime(   "stop_time" );
 
@@ -80,6 +80,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     po::options_description config( "collector config" );
     config.add_options()
       ( sChoice_SymbolName_L1.c_str(), po::value<Choices::vName_t>( &choices.m_vSymbolName_L1 ), "symbol name for level 1 data" )
+      ( sChoice_SymbolName_L2.c_str(), po::value<Choices::vName_t>( &choices.m_vSymbolName_L2 ), "symbol name for level 1 data" )
+      ( sChoice_SymbolName_Greeks.c_str(), po::value<Choices::vName_t>( &choices.m_vSymbolName_Greeks ), "symbol name for greeks data" )
       ( sChoice_StopTime.c_str(),   po::value<std::string>( &choices.m_sStopTime ), "stop time HH:mm:ss UTC" )
       ;
     po::variables_map vm;
@@ -99,6 +101,15 @@ bool Load( const std::string& sFileName, Choices& choices ) {
           std::replace_if( sn.begin(), sn.end(), [](char ch)->bool{return '~' == ch;}, '#' );
         }
       }
+
+      bOk &= parse<Choices::vName_t>( sFileName, vm, sChoice_SymbolName_L2, false, choices.m_vSymbolName_L2 );
+      if ( bOk ) {
+        for ( Choices::vName_t::value_type& sn: choices.m_vSymbolName_L2 ) {
+          std::replace_if( sn.begin(), sn.end(), [](char ch)->bool{return '~' == ch;}, '#' );
+        }
+      }
+
+      bOk &= parse<Choices::vName_t>( sFileName, vm, sChoice_SymbolName_Greeks, false, choices.m_vSymbolName_Greeks );
 
       bOk &= parse<std::string>( sFileName, vm, sChoice_StopTime, true, choices.m_sStopTime );
       if ( bOk ) {
