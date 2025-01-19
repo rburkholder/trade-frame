@@ -166,9 +166,10 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
 
           BOOST_LOG_TRIVIAL(info)
             << "BuildInstrument start: "
-            << pInstrument->GetInstrumentName() << ","
-            << fundamentals.sExchangeRoot << ","
-            << m_mapInProgress.size() << ","
+            << pInstrument->GetInstrumentName() << ','
+            << fundamentals.sOptionRoots << ','
+            << fundamentals.sExchangeRoot << ','
+            << m_mapInProgress.size() << ','
             << m_mapSymbol.size()
             //<< "," << iterInProgress->first
             //<< "," << sWaiting
