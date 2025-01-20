@@ -37,6 +37,7 @@ namespace option { // options
 // for reference:
 //    using fGatherOptions_t = std::function<void(const std::string& sUnderlying, fOption_t&&)>;
 
+// TODO: redo or add another entry for pInstrument_t
 template<typename mapChains_t>
 typename mapChains_t::iterator GetChain( mapChains_t& map, pOption_t pOption ) { // find existing expiry, or create new one
 
@@ -64,6 +65,7 @@ typename mapChains_t::iterator GetChain( mapChains_t& map, pOption_t pOption ) {
   return iterChains;
 }
 
+// TODO: redo or add another entry for pInstrument_t
 template<typename chain_t, typename OptionEntry>
 OptionEntry* UpdateOption( chain_t& chain, pOption_t pOption ) {
 
@@ -109,7 +111,8 @@ void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptio
         using OptionEntry = typename chain_t::option_t;
 
         iterator_t iterChains = GetChain( map, pOption );
-        UpdateOption<chain_t,OptionEntry>( iterChains->second, pOption );
+        chain_t& chain( iterChains->second );
+        UpdateOption<chain_t,OptionEntry>( chain, pOption );
 
   });
 }
