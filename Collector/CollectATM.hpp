@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2022, One Unified. All rights reserved.                 *
+ * Copyright(c) 2025, One Unified. All rights reserved.                 *
  * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
@@ -13,36 +13,42 @@
  ************************************************************************/
 
 /*
- * File:    Config.hpp
+ * File:    CollectATM.hpp
  * Author:  raymond@burkholder.net
  * Project: Collector
- * Created: October 20, 2022 20:37:22
-  */
+ * Created: January 19, 2025 14:06:45
+ */
 
 #pragma once
 
-#include <string>
-#include <vector>
+//#include <TFOptions/Option.h>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include "Collect.hpp"
+#include "FillWrite.hpp"
 
-namespace config {
+namespace collect {
 
-struct Choices {
+class ATM: public Base {
+public:
 
-  // todo: convert to set to enforce uniqueness
-  using vName_t = std::vector<std::string>;
-  vName_t m_vSymbolName_L1;     // symbols with level 1 data
-  vName_t m_vSymbolName_L2;     // symbols with level 2 data
-  vName_t m_vSymbolName_Greeks; // greeks for options - add symbol to L1 for L1 data
-  vName_t m_vSymbolName_Atm;    // at the money greeks P+C - TODO need days to expiry (default to 2)
+  //using pOption_t = ou::tf::option::Option::pOption_t;
+  using pWatch_t = ou::tf::Watch::pWatch_t;
 
-  std::string m_sStopTime;
-  boost::posix_time::time_duration m_tdStopTime;
+  ATM( const std::string& sPathPrefix, pWatch_t );  // underlying
+  ~ATM();
 
-  std::string m_sHDF5FileName; // to be implemented
+  void Write() override; // incremental write
+
+protected:
+private:
+
+  pWatch_t m_pUnderlying;
+
+  using fwATM_t = ou::tf::FillWrite<ou::tf::Greeks>;
+  std::unique_ptr<fwATM_t> m_pfwATM;
+
+  void HandleWatchGreeksPut( const ou::tf::Greek& );
+  void HandleWatchGreeksCall( const ou::tf::Greek& );
 };
 
-bool Load( const std::string& sFileName, Choices& );
-
-} // namespace config
+} // namespace collect

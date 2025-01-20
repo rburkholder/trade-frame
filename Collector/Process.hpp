@@ -23,19 +23,25 @@
 
 #pragma once
 
+#include <set>
+//#include <mutex>
 #include <functional>
 #include <unordered_map>
 
 #include <TFTrading/Watch.h>
 
 #include <TFOptions/Option.h>
+#include <TFOptions/Engine.h>
+#include <TFOptions/NoRiskInterestRateSeries.h>
 
 #include <TFIQFeed/Provider.h>
+#include <TFIQFeed/OptionChainQuery.h>
 
 #include "Config.hpp"
 #include "CollectL1.hpp"
 #include "CollectL2.hpp"
 #include "CollectGreeks.hpp"
+#include "CollectATM.hpp"
 
 namespace ou {
 namespace tf {
@@ -63,17 +69,31 @@ private:
 
   using fWatch_t = std::function<void(pWatch_t)>;
 
+  enum class EToCollect { L1, L2, Greeks, ATM };
+  using setToCollect_t = std::set<EToCollect>;
+
   const std::string m_sPathName;
 
   const config::Choices& m_choices;
+
+  //std::mutex m_mutexScope_ConstructWatch;
 
   using pIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
   pIQFeed_t m_piqfeed;
 
   std::unique_ptr<ou::tf::ComposeInstrument> m_pComposeInstrumentIQFeed;
 
-  using mapWatch_t = std::unordered_map<std::string, pWatch_t>;
-  mapWatch_t m_mapWatch;
+  struct ToCollect {
+    setToCollect_t setToCollect;
+    pWatch_t pWatch;
+
+    ToCollect( EToCollect e ) {
+      setToCollect.emplace( e );
+      }
+  };
+
+  using mapToCollect_t = std::unordered_map<std::string, ToCollect>;
+  mapToCollect_t m_mapToCollect;
 
   using pCollectL1_t = std::unique_ptr<collect::L1>;
   using mapCollectL1_t = std::unordered_map<std::string, pCollectL1_t>;
@@ -87,12 +107,23 @@ private:
   using mapCollectGreeks_t = std::unordered_map<std::string, pCollectGreeks_t>;
   mapCollectGreeks_t m_mapCollectGreeks;
 
+  using pCollectATM_t = std::unique_ptr<collect::ATM>;
+  using mapCollectATM_t = std::unordered_map<std::string, pCollectATM_t>;
+  mapCollectATM_t m_mapCollectATM;
+
+  ou::tf::FedRateFromIQFeed m_fedrate;
+  std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
+  std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery; // need to disconnect
+
+  void QueryChains( pInstrument_t ); // underlying
+
   void StartIQFeed();
   void HandleIQFeedConnected( int );
   void InitializeComposeInstrument();
-  void ConstructWatch( const std::string&, fWatch_t&& );
-  void ConstructCollectors();
+  void ConstructWatches();
+  void ConstructCollectors( const setToCollect_t&, pWatch_t );
   void ConstructCollectorL1( pWatch_t );
   void ConstructCollectorL2( pWatch_t );
   void ConstructCollectorGreeks( pOption_t );
+  void ConstructCollectorATM( pWatch_t );
 };

@@ -19,9 +19,6 @@
  * Created: October 20, 2022 21:07:40
  */
 
-// start watch on l1
-// write out at regular intervals
-
 #include <boost/log/trivial.hpp>
 
 #include <TFTrading/ComposeInstrument.hpp>
@@ -39,10 +36,39 @@ Process::Process(
 : m_choices( choices )
 , m_sPathName( sSaveValuesRoot + "/" + sTimeStamp )
 {
+
+  auto f =
+    [this]( const std::string& s, EToCollect e ){
+      mapToCollect_t::iterator iter = m_mapToCollect.find( s );
+      if ( m_mapToCollect.end() == iter ) {
+        m_mapToCollect.emplace( s, ToCollect( e ) );
+      }
+      else {
+        auto result = iter->second.setToCollect.insert( e );
+      }
+    };
+
+  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_L1 ) {
+    f( sIQFeedSymbolName, EToCollect::L1 );
+  }
+  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_L2 ) {
+    f( sIQFeedSymbolName, EToCollect::L2 );
+  }
+  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_Greeks ) {
+    f( sIQFeedSymbolName, EToCollect::Greeks );
+  }
+  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_Atm ) {
+    f( sIQFeedSymbolName, EToCollect::ATM );
+  }
+
   StartIQFeed();
 }
 
 Process::~Process() {
+
+  while( 0 < m_mapCollectATM.size() ) {
+    m_mapCollectATM.erase( m_mapCollectATM.begin( ) );
+  }
 
   while( 0 < m_mapCollectGreeks.size() ) {
     m_mapCollectGreeks.erase( m_mapCollectGreeks.begin( ) );
@@ -56,11 +82,20 @@ Process::~Process() {
     m_mapCollectL1.erase( m_mapCollectL1.begin( ) );
   }
 
-  while ( 0 < m_mapWatch.size() ) {
-    m_mapWatch.erase( m_mapWatch.begin() );
+  while ( 0 < m_mapToCollect.size() ) {
+    m_mapToCollect.erase( m_mapToCollect.begin() );
   }
 
   m_pComposeInstrumentIQFeed.reset();
+
+  m_pOptionEngine.reset();
+  m_fedrate.SetWatchOff();
+  m_fedrate.SaveSeries( m_sPathName );
+
+  if ( m_pOptionChainQuery ) {
+    m_pOptionChainQuery->Disconnect();
+    m_pOptionChainQuery.reset();
+  }
 
   m_piqfeed->Disconnect();
   m_piqfeed.reset();
@@ -74,42 +109,55 @@ void Process::StartIQFeed() {
 }
 
 void Process::HandleIQFeedConnected( int ) {
-  InitializeComposeInstrument();
+  m_fedrate.SetWatchOn( m_piqfeed );
+  m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
+  if ( 0 < m_choices.m_vSymbolName_Atm.size() ) {
+    m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
+      [this](){ // once query engine is started up
+        InitializeComposeInstrument();
+      }
+    );
+    m_pOptionChainQuery->Connect();
+  }
+  else {
+    InitializeComposeInstrument();
+  }
+
 }
 
 void Process::InitializeComposeInstrument() {
   m_pComposeInstrumentIQFeed = std::make_unique<ou::tf::ComposeInstrument>(
     m_piqfeed,
     [this](){ // callback once started
-      ConstructCollectors();
+      ConstructWatches();
     }
     );
-  assert( m_pComposeInstrumentIQFeed );
 }
 
-void Process::ConstructWatch( const std::string& sIQFeedSymbolName, fWatch_t&& fWatch ) {
+void Process::ConstructWatches() {
 
-  mapWatch_t::iterator iterWatch = m_mapWatch.find( sIQFeedSymbolName );
+  assert( m_pComposeInstrumentIQFeed );
 
-  if ( m_mapWatch.end() == iterWatch ) {
-    assert( m_pComposeInstrumentIQFeed );
+
+
+  for ( auto& [key, value]: m_mapToCollect ) {
     m_pComposeInstrumentIQFeed->Compose(
-      sIQFeedSymbolName,
-      [this, fWatch_=std::move( fWatch ), sIQFeedSymbolName]( pInstrument_t pInstrument, bool bConstructed ){
+      key,
+      [ this, &value ]( pInstrument_t pInstrument, bool bConstructed ){
         switch ( pInstrument->GetInstrumentType() ) {
           case ou::tf::InstrumentType::EInstrumentType::Future:
           case ou::tf::InstrumentType::EInstrumentType::Currency:
           case ou::tf::InstrumentType::EInstrumentType::Stock: {
             pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
-            m_mapWatch.emplace( sIQFeedSymbolName, pWatch );
-            fWatch_( pWatch );
+            value.pWatch = pWatch;
+            ConstructCollectors( value.setToCollect, pWatch );
             }
             break;
           case ou::tf::InstrumentType::EInstrumentType::FuturesOption:
           case ou::tf::InstrumentType::EInstrumentType::Option: {
             pOption_t pOption = std::make_shared<ou::tf::option::Option>( pInstrument, m_piqfeed );
-            m_mapWatch.emplace( sIQFeedSymbolName, pOption );
-            fWatch_( pOption );
+            value.pWatch = pOption;
+            ConstructCollectors( value.setToCollect, pOption );
             }
             break;
           default:
@@ -119,39 +167,32 @@ void Process::ConstructWatch( const std::string& sIQFeedSymbolName, fWatch_t&& f
       }
     );
   }
-  else {
-    fWatch( iterWatch->second );
-  }
+
 }
 
-void Process::ConstructCollectors() {
-  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_L1 ) {
-    ConstructWatch(
-      sIQFeedSymbolName,
-      [this]( pWatch_t pWatch ){
-        ConstructCollectorL1( pWatch );
-      } );
-  }
-  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_L2 ) {
-    ConstructWatch(
-      sIQFeedSymbolName,
-      [this]( pWatch_t pWatch ){
-        ConstructCollectorL2( pWatch );
-      } );
-  }
-  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_Greeks ) {
-    ConstructWatch(
-      sIQFeedSymbolName,
-      [this]( pWatch_t pWatch ){
+void Process::ConstructCollectors( const setToCollect_t& set, pWatch_t pWatch ) {
 
+  for ( const setToCollect_t::value_type e: set ) {
+    switch ( e ) {
+      case EToCollect::L1:
+        ConstructCollectorL1( pWatch );
+        break;
+      case EToCollect::L2:
+        ConstructCollectorL2( pWatch );
+        break;
+      case EToCollect::Greeks: {
         ou::tf::InstrumentType::EInstrumentType type( pWatch->GetInstrument()->GetInstrumentType() );
         assert( ou::tf::InstrumentType::Option == type
              || ou::tf::InstrumentType::FuturesOption == type
         );
-
         pOption_t pOption( std::dynamic_pointer_cast<ou::tf::option::Option>( pWatch) );
         ConstructCollectorGreeks( pOption );
-      } );
+        }
+        break;
+      case EToCollect::ATM:
+        ConstructCollectorATM( pWatch );
+        break;
+    }
   }
 }
 
@@ -224,6 +265,32 @@ void Process::ConstructCollectorGreeks( pOption_t pOption ) {
   }
 }
 
+void Process::ConstructCollectorATM( pWatch_t pWatch ) {
+
+  const std::string& sSymbolName( pWatch->GetInstrumentName() );
+  const std::string& sIQFeedSymbolName( pWatch->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+
+  BOOST_LOG_TRIVIAL(info) << "symbol atm: " // should be able to identify type once composed
+    << sSymbolName // generic name
+    << ", " << sIQFeedSymbolName  // resolved name
+    ;
+
+  assert( m_pOptionChainQuery );
+
+  mapCollectATM_t::iterator iterCollectATM = m_mapCollectATM.find( sSymbolName );
+  if ( m_mapCollectATM.end() == iterCollectATM ) {
+    auto result = m_mapCollectATM.emplace( sSymbolName, std::make_unique<collect::ATM>( m_sPathName, pWatch ) );
+    assert( result.second );
+    QueryChains( pWatch->GetInstrument() );
+  }
+  else {
+    BOOST_LOG_TRIVIAL(info) << "symbol atm: " // should be able to identify type once composed
+      << sSymbolName
+      << " already collecting"
+      ;
+  }
+}
+
 void Process::Write() {
   for ( mapCollectL1_t::value_type& vt: m_mapCollectL1 ) {
     vt.second->Write();
@@ -234,4 +301,46 @@ void Process::Write() {
   for ( mapCollectGreeks_t::value_type& vt: m_mapCollectGreeks ) {
     vt.second->Write();
   }
+  for ( mapCollectATM_t::value_type& vt: m_mapCollectATM ) {
+    vt.second->Write();
+  }
 }
+
+// m_pOptionEngine->RegisterUnderlying( uws.pUnderlying->GetWatch() );
+// m_pOptionEngine->RegisterOption( )
+// m_pOptionEngine->Add( pOption, pUnderlying );
+// m_pOptionEngine->Remove( pOption, pUnderlying );
+
+void Process::QueryChains( pInstrument_t pUnderlying ) {
+
+  using query_t = ou::tf::iqfeed::OptionChainQuery;
+  auto f =
+    [this]( const query_t::OptionList& list ){
+      BOOST_LOG_TRIVIAL(info) << "chain length: " << list.vSymbol.size();
+      for ( const query_t::vSymbol_t::value_type& value: list.vSymbol ) {
+        //BOOST_LOG_TRIVIAL(info) << "chain " << value;
+      }
+    };
+
+  const std::string& sIQFeedUnderlying( pUnderlying->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+  switch ( pUnderlying->GetInstrumentType() ) {
+    case ou::tf::InstrumentType::Future:
+      m_pOptionChainQuery->QueryFuturesOptionChain(
+        sIQFeedUnderlying,
+        "pc", "", "", "0", // 1 near month
+        std::move( f )
+      );
+      break;
+    case ou::tf::InstrumentType::Stock:
+      m_pOptionChainQuery->QueryEquityOptionChain(
+        sIQFeedUnderlying,
+        "pc", "", "1", "0","0","0",  // 1 near month
+        std::move( f )
+      );
+      break;
+    default:
+      assert( false );
+      break;
+  }
+}
+

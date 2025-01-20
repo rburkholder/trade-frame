@@ -34,7 +34,7 @@ namespace {
   static const std::string sChoice_SymbolName_L1( "symbol_name_l1" );
   static const std::string sChoice_SymbolName_L2( "symbol_name_l2" );
   static const std::string sChoice_SymbolName_Greeks( "symbol_name_greeks" );
-  static const std::string sChoice_SymbolName_AtmIV( "symbol_name_atmiv" );
+  static const std::string sChoice_SymbolName_Atm( "symbol_name_atm" );
   static const std::string sChoice_StopTime(   "stop_time" );
 
   template<typename T>
@@ -81,7 +81,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     config.add_options()
       ( sChoice_SymbolName_L1.c_str(), po::value<Choices::vName_t>( &choices.m_vSymbolName_L1 ), "symbol name for level 1 data" )
       ( sChoice_SymbolName_L2.c_str(), po::value<Choices::vName_t>( &choices.m_vSymbolName_L2 ), "symbol name for level 1 data" )
-      ( sChoice_SymbolName_Greeks.c_str(), po::value<Choices::vName_t>( &choices.m_vSymbolName_Greeks ), "symbol name for greeks data" )
+      ( sChoice_SymbolName_Greeks.c_str(), po::value<Choices::vName_t>( &choices.m_vSymbolName_Greeks ), "iqfeed option name from mktsymbols file" )
+      ( sChoice_SymbolName_Atm.c_str(), po::value<Choices::vName_t>( &choices.m_vSymbolName_Atm ), "underlying symbol name for atm IV etc" )
       ( sChoice_StopTime.c_str(),   po::value<std::string>( &choices.m_sStopTime ), "stop time HH:mm:ss UTC" )
       ;
     po::variables_map vm;
@@ -110,6 +111,13 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       }
 
       bOk &= parse<Choices::vName_t>( sFileName, vm, sChoice_SymbolName_Greeks, false, choices.m_vSymbolName_Greeks );
+
+      bOk &= parse<Choices::vName_t>( sFileName, vm, sChoice_SymbolName_Atm, false, choices.m_vSymbolName_Atm );
+      if ( bOk ) {
+        for ( Choices::vName_t::value_type& sn: choices.m_vSymbolName_Atm ) {
+          std::replace_if( sn.begin(), sn.end(), [](char ch)->bool{return '~' == ch;}, '#' );
+        }
+      }
 
       bOk &= parse<std::string>( sFileName, vm, sChoice_StopTime, true, choices.m_sStopTime );
       if ( bOk ) {
