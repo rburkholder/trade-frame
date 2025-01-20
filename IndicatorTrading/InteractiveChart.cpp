@@ -319,7 +319,7 @@ void InteractiveChart::OptionChainQuery( const std::string& sIQFeedUnderlying ) 
     case ou::tf::InstrumentType::Future:
       m_pOptionChainQuery->QueryFuturesOptionChain(
         sIQFeedUnderlying,
-        "cp", "", "345", "1",
+        "cp", "", "", "1",
         std::bind( &InteractiveChart::PopulateChains, this, ph::_1 )
         );
       break;
