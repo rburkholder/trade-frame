@@ -318,6 +318,25 @@ void Process::QueryChains( pInstrument_t pUnderlying ) {
         << "chain request " << list.sUnderlying << " has "
         << list.vSymbol.size() << " options"
         ;
+
+      // TODO:  atomic counter up/down to determine when complete
+      // TODO:  cache entries for each start?
+      for ( const query_t::vSymbol_t::value_type& sSymbol: list.vSymbol ) {
+        m_pComposeInstrumentIQFeed->Compose(
+          sSymbol,
+          [ this ]( pInstrument_t pInstrument, bool bConstructed ){ // what is bConstructed?
+            // find existing expiry, or create new one
+            mapChains_t::iterator iterChains;
+            iterChains = ou::tf::option::GetChain( m_mapChains, pInstrument );
+            assert( m_mapChains.end() != iterChains );
+
+            // update put/call@strike with option
+            chain_t& chain( iterChains->second );
+            OptionInfo* pEntry
+              = ou::tf::option::UpdateOption<chain_t,OptionInfo>( chain, pInstrument );
+            pEntry->pInstrument = pInstrument; // put / call as appropriate
+          } );
+      }
     };
 
   const std::string& sIQFeedUnderlying( pUnderlying->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );

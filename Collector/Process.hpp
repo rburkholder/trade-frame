@@ -30,6 +30,7 @@
 
 #include <TFTrading/Watch.h>
 
+#include <TFOptions/Chains.h>
 #include <TFOptions/Option.h>
 #include <TFOptions/Engine.h>
 #include <TFOptions/NoRiskInterestRateSeries.h>
@@ -114,6 +115,14 @@ private:
   ou::tf::FedRateFromIQFeed m_fedrate;
   std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
   std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery; // need to disconnect
+
+  struct OptionInfo: public ou::tf::option::chain::OptionName {
+    pInstrument_t pInstrument;
+  };
+
+  using chain_t = ou::tf::option::Chain<OptionInfo>;
+  using mapChains_t = std::map<boost::gregorian::date, chain_t>;
+  mapChains_t m_mapChains;
 
   void QueryChains( pInstrument_t ); // underlying
 
