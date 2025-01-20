@@ -45,22 +45,21 @@ typename mapChains_t::iterator GetChain( mapChains_t& map, pOption_t pOption ) {
 
   chain_t chain; // default chain for insertion into new entry
 
-  const boost::gregorian::date date( pOption->GetExpiry() );
+  const boost::gregorian::date expiry( pOption->GetExpiry() );
 
-  iterator_t iterChains = map.find( date ); // see if expiry date exists
+  iterator_t iterChains = map.find( expiry ); // see if expiry date exists
   if ( map.end() == iterChains ) { // insert new expiry set if not
+    const std::string& sInstrumentName( pOption->GetInstrumentName() );
+    const std::string& sIQFeedSymbolName( pOption->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
     BOOST_LOG_TRIVIAL(info)
       << "GetChain created: "
-      << date.year() << "/"
-      << date.month().as_number() << "/"
-      << date.day()
-      << " with "
-      << pOption->GetInstrumentName()
+      << ou::tf::Instrument::BuildDate( expiry )
+      << ',' << sIQFeedSymbolName
+      << ',' << sInstrumentName
       ;
-    iterChains = map.insert(
-      map.begin(),
-      typename mapChains_t::value_type( date, std::move( chain ) )
-      );
+    auto result = map.emplace( expiry, std::move( chain ) );
+    assert( result.second );
+    iterChains = result.first;
   }
   return iterChains;
 }
@@ -71,19 +70,20 @@ OptionEntry* UpdateOption( chain_t& chain, pOption_t pOption ) {
   // populate new call or put, no test for pre-existance
   //std::cout << "  option: " << row.sSymbol << std::endl;
 
-  OptionEntry* pOptionEntry {};
+  OptionEntry* pOptionEntry( nullptr );  // the put/call object at the strike
+  const std::string& sIQFeedSymbolName( pOption->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
 
   try {
     switch ( pOption->GetOptionSide() ) {
       case ou::tf::OptionSide::Call:
         {
-          OptionEntry& entry( chain.SetIQFeedNameCall( pOption->GetStrike(), pOption->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) ) );
+          OptionEntry& entry( chain.SetIQFeedNameCall( pOption->GetStrike(), sIQFeedSymbolName ) );
           pOptionEntry = &entry;
         }
         break;
       case ou::tf::OptionSide::Put:
         {
-          OptionEntry& entry( chain.SetIQFeedNamePut( pOption->GetStrike(), pOption->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) ) );
+          OptionEntry& entry( chain.SetIQFeedNamePut( pOption->GetStrike(), sIQFeedSymbolName ) );
           pOptionEntry = &entry;
         }
         break;
