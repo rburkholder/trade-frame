@@ -21,6 +21,8 @@
 
 #include <stdexcept>
 
+#include <TFOptions/Chains.h>
+
 #include "Aggregate.h"
 
 namespace ou { // One Unified
@@ -40,65 +42,16 @@ void Aggregate::LoadChains( fGatherOptions_t&& fGatherOptions ) {
     m_pWatchUnderlying->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ),
     [this]( pOption_t pOption ){
 
+      // find existing expiry, or create new one
       mapChains_iterator_t iterChains;
+      iterChains = ou::tf::option::GetChain( m_mapChains, pOption );
 
-      const std::string& sInstrumentName( pOption->GetInstrumentName() );
-      const std::string& sIQFeedSymbolName( pOption->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+      // update put/call@strike with option
+      chain_t& chain( iterChains->second );
+      OptionWithStats* pEntry
+        = ou::tf::option::UpdateOption<chain_t,OptionWithStats>( chain, pOption );
+      pEntry->pOption = pOption; // put / call as appropriate
 
-      { // find existing expiry, or create new one
-
-        chain_t chain;
-
-        const boost::gregorian::date expiry( pOption->GetExpiry() );
-
-        iterChains = m_mapChains.find( expiry ); // see if expiry date exists
-        if ( m_mapChains.end() == iterChains ) { // insert new expiry set if not
-          std::cout
-            << "Aggregate chain: "
-            << ou::tf::Instrument::BuildDate( expiry )
-            << "," << sIQFeedSymbolName
-            << "," << sInstrumentName
-            << std::endl;
-          iterChains = m_mapChains.insert(
-            m_mapChains.begin(),
-             mapChains_t::value_type( expiry, std::move( chain ) )
-            );
-        }
-      }
-
-      { // populate new call or put, no test for pre-existance
-
-        //std::cout << "  option: " << row.sSymbol << std::endl;
-
-        chain_t& chain( iterChains->second );
-        chain_t::strike_t& strike( chain.GetStrike( pOption->GetStrike() ) );
-
-        try {
-          switch ( pOption->GetOptionSide() ) {
-            case ou::tf::OptionSide::Call:
-              try {
-                chain.SetIQFeedNameCall( pOption->GetStrike(), sIQFeedSymbolName );
-                strike.call.pOption = pOption;
-              }
-              catch ( std::runtime_error& e ) {
-                // don't do anything with the duplicate
-              }
-              break;
-            case ou::tf::OptionSide::Put:
-              try {
-                chain.SetIQFeedNamePut( pOption->GetStrike(), sIQFeedSymbolName );
-                strike.put.pOption = pOption;
-              }
-              catch( std::runtime_error& e ) {
-                // don't do anything with the duplicate
-              }
-              break;
-          }
-        }
-        catch ( std::runtime_error& e ) {
-          std::cout << "LoadChains::fGatherOptions error" << std::endl;
-        }
-      }
     }
   );
 }
