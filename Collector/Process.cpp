@@ -138,8 +138,6 @@ void Process::ConstructWatches() {
 
   assert( m_pComposeInstrumentIQFeed );
 
-
-
   for ( auto& [key, value]: m_mapToCollect ) {
     m_pComposeInstrumentIQFeed->Compose(
       key,
@@ -316,10 +314,10 @@ void Process::QueryChains( pInstrument_t pUnderlying ) {
   using query_t = ou::tf::iqfeed::OptionChainQuery;
   auto f =
     [this]( const query_t::OptionList& list ){
-      BOOST_LOG_TRIVIAL(info) << "chain length: " << list.vSymbol.size();
-      for ( const query_t::vSymbol_t::value_type& value: list.vSymbol ) {
-        //BOOST_LOG_TRIVIAL(info) << "chain " << value;
-      }
+      BOOST_LOG_TRIVIAL(info)
+        << "chain request " << list.sUnderlying << " has "
+        << list.vSymbol.size() << " options"
+        ;
     };
 
   const std::string& sIQFeedUnderlying( pUnderlying->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
@@ -327,7 +325,7 @@ void Process::QueryChains( pInstrument_t pUnderlying ) {
     case ou::tf::InstrumentType::Future:
       m_pOptionChainQuery->QueryFuturesOptionChain(
         sIQFeedUnderlying,
-        "pc", "", "", "0", // 1 near month
+        "pc", "", "", "1", // 1 near month
         std::move( f )
       );
       break;
