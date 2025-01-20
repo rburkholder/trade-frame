@@ -42,14 +42,16 @@ void Aggregate::LoadChains( fGatherOptions_t&& fGatherOptions ) {
     m_pWatchUnderlying->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ),
     [this]( pOption_t pOption ){
 
+      pInstrument_t pInstrument( pOption->GetInstrument() );
+
       // find existing expiry, or create new one
       mapChains_iterator_t iterChains;
-      iterChains = ou::tf::option::GetChain( m_mapChains, pOption );
+      iterChains = ou::tf::option::GetChain( m_mapChains, pInstrument );
 
       // update put/call@strike with option
       chain_t& chain( iterChains->second );
       OptionWithStats* pEntry
-        = ou::tf::option::UpdateOption<chain_t,OptionWithStats>( chain, pOption );
+        = ou::tf::option::UpdateOption<chain_t,OptionWithStats>( chain, pInstrument );
       pEntry->pOption = pOption; // put / call as appropriate
 
     }

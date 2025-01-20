@@ -336,8 +336,9 @@ void Server_impl::InstrumentToOption( pInstrument_t pInstrument ) {
   {
     std::scoped_lock<std::mutex> lock( m_mutexChainPopulate );
     m_nOptionsLoaded++;
-    mapChains_t::iterator iterChain = ou::tf::option::GetChain( m_mapChains, pOption );
-    pBuiltOption = ou::tf::option::UpdateOption<chain_t,BuiltOption>( iterChain->second, pOption );
+    pInstrument_t pInstrument( pOption->GetInstrument() );
+    mapChains_t::iterator iterChain = ou::tf::option::GetChain( m_mapChains, pInstrument );
+    pBuiltOption = ou::tf::option::UpdateOption<chain_t,BuiltOption>( iterChain->second, pInstrument );
   }
 
   assert( pBuiltOption );

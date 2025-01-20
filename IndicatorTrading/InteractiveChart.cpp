@@ -347,8 +347,9 @@ void InteractiveChart::PopulateChains( const query_t::OptionList& list ) {
       sSymbol,
       [this]( pOption_t pOption ){
 
-        mapChains_t::iterator iterChain = ou::tf::option::GetChain( m_mapChains, pOption );
-        BuiltOption* pBuiltOption = ou::tf::option::UpdateOption<chain_t,BuiltOption>( iterChain->second, pOption );
+        pInstrument_t pInstrument( pOption->GetInstrument() );
+        mapChains_t::iterator iterChain = ou::tf::option::GetChain( m_mapChains, pInstrument );
+        BuiltOption* pBuiltOption = ou::tf::option::UpdateOption<chain_t,BuiltOption>( iterChain->second, pInstrument );
         assert( pBuiltOption );
 
         pBuiltOption->pOption = pOption;

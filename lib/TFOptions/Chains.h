@@ -37,21 +37,22 @@ namespace option { // options
 // for reference:
 //    using fGatherOptions_t = std::function<void(const std::string& sUnderlying, fOption_t&&)>;
 
-// TODO: redo or add another entry for pInstrument_t
+using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
 template<typename mapChains_t>
-typename mapChains_t::iterator GetChain( mapChains_t& map, pOption_t pOption ) { // find existing expiry, or create new one
+typename mapChains_t::iterator GetChain( mapChains_t& map, pInstrument_t pOptionInstrument ) { // find existing expiry, or create new one
 
   using chain_t = typename mapChains_t::mapped_type;
   using iterator_t = typename mapChains_t::iterator;
 
   chain_t chain; // default chain for insertion into new entry
 
-  const boost::gregorian::date expiry( pOption->GetExpiry() );
+  const boost::gregorian::date expiry( pOptionInstrument->GetExpiry() );
 
   iterator_t iterChains = map.find( expiry ); // see if expiry date exists
   if ( map.end() == iterChains ) { // insert new expiry set if not
-    const std::string& sInstrumentName( pOption->GetInstrumentName() );
-    const std::string& sIQFeedSymbolName( pOption->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+    const std::string& sInstrumentName( pOptionInstrument->GetInstrumentName() );
+    const std::string& sIQFeedSymbolName( pOptionInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
     BOOST_LOG_TRIVIAL(info)
       << "GetChain created: "
       << ou::tf::Instrument::BuildDate( expiry )
@@ -65,27 +66,26 @@ typename mapChains_t::iterator GetChain( mapChains_t& map, pOption_t pOption ) {
   return iterChains;
 }
 
-// TODO: redo or add another entry for pInstrument_t
 template<typename chain_t, typename OptionEntry>
-OptionEntry* UpdateOption( chain_t& chain, pOption_t pOption ) {
+OptionEntry* UpdateOption( chain_t& chain, pInstrument_t pOptionInstrument ) {
 
   // populate new call or put, no test for pre-existance
   //std::cout << "  option: " << row.sSymbol << std::endl;
 
   OptionEntry* pOptionEntry( nullptr );  // the put/call object at the strike
-  const std::string& sIQFeedSymbolName( pOption->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+  const std::string& sIQFeedSymbolName( pOptionInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
 
   try {
-    switch ( pOption->GetOptionSide() ) {
+    switch ( pOptionInstrument->GetOptionSide() ) {
       case ou::tf::OptionSide::Call:
         {
-          OptionEntry& entry( chain.SetIQFeedNameCall( pOption->GetStrike(), sIQFeedSymbolName ) );
+          OptionEntry& entry( chain.SetIQFeedNameCall( pOptionInstrument->GetStrike(), sIQFeedSymbolName ) );
           pOptionEntry = &entry;
         }
         break;
       case ou::tf::OptionSide::Put:
         {
-          OptionEntry& entry( chain.SetIQFeedNamePut( pOption->GetStrike(), sIQFeedSymbolName ) );
+          OptionEntry& entry( chain.SetIQFeedNamePut( pOptionInstrument->GetStrike(), sIQFeedSymbolName ) );
           pOptionEntry = &entry;
         }
         break;
@@ -110,9 +110,11 @@ void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptio
         using iterator_t = typename mapChains_t::iterator;
         using OptionEntry = typename chain_t::option_t;
 
-        iterator_t iterChains = GetChain( map, pOption );
+        pInstrument_t pInstrument( pOption->GetInstrument() );
+
+        iterator_t iterChains = GetChain( map, pInstrument );
         chain_t& chain( iterChains->second );
-        UpdateOption<chain_t,OptionEntry>( chain, pOption );
+        UpdateOption<chain_t,OptionEntry>( chain, pInstrument );
 
   });
 }

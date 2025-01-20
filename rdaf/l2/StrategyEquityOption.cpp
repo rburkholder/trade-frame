@@ -98,9 +98,10 @@ void EquityOption::SetPosition( pPosition_t pPosition ) {
                 m_fConstructOption(
                   pInstrument,
                   [this]( pOption_t pOption ){
-                    mapChains_t::iterator iterChain = ou::tf::option::GetChain( m_mapChains, pOption );
+                    pInstrument_t pInstrument( pOption->GetInstrument() );
+                    mapChains_t::iterator iterChain = ou::tf::option::GetChain( m_mapChains, pInstrument );
                     assert( m_mapChains.end() != iterChain );
-                    BuiltOption* pBuiltOption = ou::tf::option::UpdateOption<chain_t,BuiltOption>( iterChain->second, pOption );
+                    BuiltOption* pBuiltOption = ou::tf::option::UpdateOption<chain_t,BuiltOption>( iterChain->second, pInstrument );
                     assert( pBuiltOption );
 
                     pBuiltOption->pOption = pOption;
