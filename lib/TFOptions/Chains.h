@@ -40,7 +40,7 @@ namespace option { // options
 using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
 template<typename mapChains_t>
-typename mapChains_t::iterator GetChain( mapChains_t& map, pInstrument_t pOptionInstrument ) { // find existing expiry, or create new one
+typename mapChains_t::iterator GetChain( mapChains_t& map, pInstrument_t& pOptionInstrument ) { // find existing expiry, or create new one
 
   using chain_t = typename mapChains_t::mapped_type;
   using iterator_t = typename mapChains_t::iterator;
@@ -67,7 +67,7 @@ typename mapChains_t::iterator GetChain( mapChains_t& map, pInstrument_t pOption
 }
 
 template<typename chain_t, typename OptionEntry>
-OptionEntry* UpdateOption( chain_t& chain, pInstrument_t pOptionInstrument ) {
+OptionEntry* UpdateOption( chain_t& chain, pInstrument_t& pOptionInstrument ) {
 
   // populate new call or put, no test for pre-existance
   //std::cout << "  option: " << row.sSymbol << std::endl;
