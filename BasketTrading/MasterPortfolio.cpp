@@ -686,14 +686,14 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
 
             switch ( uws.pUnderlying->GetWatch()->GetInstrument()->GetInstrumentType() ) {
               case ou::tf::InstrumentType::Future:
-                m_pOptionChainQuery->QueryFuturesOptionChain( //  TODO: need selection of equity vs futures
+                m_pOptionChainQuery->QueryFuturesOptionChain(
                   sIQFeedUnderlying,
                   "pc", "", "", "",
                   std::move( f )
                 );
                 break;
               case ou::tf::InstrumentType::Stock:
-                m_pOptionChainQuery->QueryEquityOptionChain( //  TODO: need selection of equity vs futures
+                m_pOptionChainQuery->QueryEquityOptionChain(
                   sIQFeedUnderlying,
                   "pc", "", "4", "0","0","0",
                   std::move( f )
