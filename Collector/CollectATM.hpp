@@ -21,6 +21,11 @@
 
 #pragma once
 
+#include <map>
+
+#include <TFTrading/Instrument.h>
+
+#include <TFOptions/Chain.h>
 //#include <TFOptions/Option.h>
 
 #include "Collect.hpp"
@@ -31,7 +36,6 @@ namespace collect {
 class ATM: public Base {
 public:
 
-  //using pOption_t = ou::tf::option::Option::pOption_t;
   using pWatch_t = ou::tf::Watch::pWatch_t;
 
   ATM( const std::string& sPathPrefix, pWatch_t );  // underlying
@@ -46,6 +50,15 @@ private:
 
   using fwATM_t = ou::tf::FillWrite<ou::tf::Greeks>;
   std::unique_ptr<fwATM_t> m_pfwATM;
+
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  struct Instance: public ou::tf::option::chain::OptionName {
+    pInstrument_t Instrument;
+  };
+
+  using chain_t = ou::tf::option::Chain<Instance>;
+  using mapChains_t = std::map<boost::gregorian::date, chain_t>;
+  mapChains_t m_mapChains;
 
   void HandleWatchGreeksPut( const ou::tf::Greek& );
   void HandleWatchGreeksCall( const ou::tf::Greek& );
