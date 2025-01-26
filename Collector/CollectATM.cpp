@@ -25,21 +25,22 @@
 
 namespace collect {
 
-ATM::ATM( const std::string& sPathPrefix, pWatch_t pWatchUnderlying )
+ATM::ATM( const std::string& sPathPrefix, pWatch_t pWatchUnderlying, fBuildOption_t&& fBuildOption )
 {
 
   // TODO: watch built elsewhere, needs to be restartable for a new day?
   //       or, delete and rebuild for a new day?
   //             this, so that can handle when new front month started
 
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-  pInstrument_t pInstrumentUnderlying( pWatchUnderlying->GetInstrument() );
+  assert( fBuildOption );
+  m_fBuildOption = std::move( fBuildOption );
 
+  assert( pWatchUnderlying );
   m_pWatchUnderlying = std::move( pWatchUnderlying );
   m_pWatchUnderlying->RecordSeries( false ); // record manually in Write()
 
   {
-    const std::string sFullPath( sPathPrefix + ou::tf::Quotes::Directory() + pInstrumentUnderlying->GetInstrumentName() );
+    const std::string sFullPath( sPathPrefix + ou::tf::Quotes::Directory() + m_pWatchUnderlying->GetInstrumentName() );
     m_pfwATM = std::make_unique<fwATM_t>(
       sFullPath,
       [this]( ou::tf::HDF5Attributes& attr ){
@@ -48,13 +49,14 @@ ATM::ATM( const std::string& sPathPrefix, pWatch_t pWatchUnderlying )
     //m_pOption->OnGreek.Add( MakeDelegate( this, &Greeks::HandleWatchGreeks ) );
   }
 
-  //m_pUnderlying->StartWatch(); // maybe use ticks or quotes to trigger recording atm?
+  m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ATM::HandleWatchUnderlyingTrade ) );
+  m_pWatchUnderlying->StartWatch(); // maybe use ticks or quotes to trigger recording atm?
 }
 
 ATM::~ATM() {
 
-  assert( m_pWatchUnderlying );
-  //m_pUnderlying->StopWatch();
+  m_pWatchUnderlying->StopWatch();
+  m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &ATM::HandleWatchUnderlyingTrade ) );
 
   m_pfwATM->Write();
   //m_pUnderlying->OnGreek.Remove( MakeDelegate( this, &ATM::HandleWatchGreeks ) );
@@ -62,6 +64,10 @@ ATM::~ATM() {
 
   m_pWatchUnderlying.reset();
 
+}
+
+void ATM::HandleWatchUnderlyingTrade( const ou::tf::Trade& ) { // TODO: use Quote instead
+  // TODO: update the Chain ATM with new price
 }
 
 void ATM::HandleWatchGreeksPut( const ou::tf::Greek& greek ) {

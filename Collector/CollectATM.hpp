@@ -26,10 +26,12 @@
 #include <TFTrading/Instrument.h>
 
 #include <TFOptions/Chain.h>
-//#include <TFOptions/Option.h>
+#include <TFOptions/Option.h>
 
 #include "Collect.hpp"
 #include "FillWrite.hpp"
+
+// TODO: requires option engine
 
 namespace collect {
 
@@ -37,8 +39,11 @@ class ATM: public Base {
 public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pOption_t = ou::tf::option::Option::pOption_t;
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using fBuildOption_t = std::function<pOption_t(pInstrument_t)>;
 
-  ATM( const std::string& sPathPrefix, pWatch_t );  // underlying
+  ATM( const std::string& sPathPrefix, pWatch_t /* underlying */, fBuildOption_t&& );
   ~ATM();
 
   void Write() override; // incremental write
@@ -48,18 +53,21 @@ private:
 
   pWatch_t m_pWatchUnderlying;
 
+  fBuildOption_t m_fBuildOption;
+
   using fwATM_t = ou::tf::FillWrite<ou::tf::Greeks>;
   std::unique_ptr<fwATM_t> m_pfwATM;
 
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   struct Instance: public ou::tf::option::chain::OptionName {
     pInstrument_t pInstrument; // resident in all Options
-    pWatch_t pWatch; // resident only for just-in-time Watch construction
+    pOption_t pOption;  // includes Watch, just-in-time Watch construction
   };
 
   using chain_t = ou::tf::option::Chain<Instance>;
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
   mapChains_t m_mapChains;
+
+  void HandleWatchUnderlyingTrade( const ou::tf::Trade& );
 
   void HandleWatchGreeksPut( const ou::tf::Greek& );
   void HandleWatchGreeksCall( const ou::tf::Greek& );

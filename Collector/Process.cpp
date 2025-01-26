@@ -23,6 +23,11 @@
 
 #include <TFTrading/ComposeInstrument.hpp>
 
+#include "CollectL1.hpp"
+#include "CollectL2.hpp"
+#include "CollectGreeks.hpp"
+#include "CollectATM.hpp"
+
 #include "Process.hpp"
 
 namespace {
@@ -275,9 +280,20 @@ void Process::ConstructCollectorATM( pWatch_t pWatch ) {
 
   assert( m_pOptionChainQuery );
 
+  using pOption_t = collect::ATM::pOption_t;
+
   mapCollectATM_t::iterator iterCollectATM = m_mapCollectATM.find( sSymbolName );
   if ( m_mapCollectATM.end() == iterCollectATM ) {
-    auto result = m_mapCollectATM.emplace( sSymbolName, std::make_unique<collect::ATM>( m_sPathName, pWatch ) );
+    auto result = m_mapCollectATM.emplace(
+      sSymbolName,
+      std::make_unique<collect::ATM>(
+        m_sPathName,
+        pWatch,
+        [this]( collect::ATM::pInstrument_t pInstrument )->collect::ATM::pOption_t {
+          pOption_t pOption = std::make_shared<ou::tf::option::Option>( pInstrument, m_piqfeed );
+          return pOption;
+        }
+        ) );
     assert( result.second );
     QueryChains( pWatch->GetInstrument() );
   }
@@ -326,15 +342,15 @@ void Process::QueryChains( pInstrument_t pUnderlying ) {
           sSymbol,
           [ this ]( pInstrument_t pInstrument, bool bConstructed ){ // what is bConstructed?
             // find existing expiry, or create new one
-            mapChains_t::iterator iterChains;
-            iterChains = ou::tf::option::GetChain( m_mapChains, pInstrument );
-            assert( m_mapChains.end() != iterChains );
+//            mapChains_t::iterator iterChains;
+//            iterChains = ou::tf::option::GetChain( m_mapChains, pInstrument );
+//            assert( m_mapChains.end() != iterChains );
 
             // update put/call@strike with option
-            chain_t& chain( iterChains->second );
-            OptionInfo* pEntry
-              = ou::tf::option::UpdateOption<chain_t,OptionInfo>( chain, pInstrument );
-            pEntry->pInstrument = pInstrument; // put / call as appropriate
+//            chain_t& chain( iterChains->second );
+//            OptionInfo* pEntry
+//              = ou::tf::option::UpdateOption<chain_t,OptionInfo>( chain, pInstrument );
+//            pEntry->pInstrument = pInstrument; // put / call as appropriate
           } );
       }
     };

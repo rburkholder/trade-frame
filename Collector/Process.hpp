@@ -39,16 +39,19 @@
 #include <TFIQFeed/OptionChainQuery.h>
 
 #include "Config.hpp"
-#include "CollectL1.hpp"
-#include "CollectL2.hpp"
-#include "CollectGreeks.hpp"
-#include "CollectATM.hpp"
 
 namespace ou {
 namespace tf {
   class ComposeInstrument;
 } // namespace tf
 } // namespace ou
+
+namespace collect {
+  class L1;
+  class L2;
+  class Greeks;
+  class ATM;
+}
 
 class Process {
 public:
@@ -115,14 +118,6 @@ private:
   ou::tf::FedRateFromIQFeed m_fedrate;
   std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
   std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery; // need to disconnect
-
-  struct OptionInfo: public ou::tf::option::chain::OptionName {
-    pInstrument_t pInstrument;
-  };
-
-  using chain_t = ou::tf::option::Chain<OptionInfo>;
-  using mapChains_t = std::map<boost::gregorian::date, chain_t>;
-  mapChains_t m_mapChains;
 
   void QueryChains( pInstrument_t ); // underlying
 
