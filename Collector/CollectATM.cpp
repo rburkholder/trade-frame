@@ -27,8 +27,11 @@
 
 namespace collect {
 
-ATM::ATM( const std::string& sPathPrefix, pWatch_t pWatchUnderlying,
-          fBuildOption_t&& fBuildOption, fGatherOptions_t&& fGatherOptions )
+ATM::ATM(
+  const std::string& sPathPrefix, pWatch_t pWatchUnderlying,
+  fBuildOption_t&& fBuildOption, fGatherOptions_t&& fGatherOptions,
+  fEngine_t&& fEngineOptionStart, fEngine_t&& fEngineOptionStop
+)
 {
 
   // TODO: watch built elsewhere, needs to be restartable for a new day?
@@ -52,13 +55,19 @@ ATM::ATM( const std::string& sPathPrefix, pWatch_t pWatchUnderlying,
     //m_pOption->OnGreek.Add( MakeDelegate( this, &Greeks::HandleWatchGreeks ) );
   }
 
+  assert( fEngineOptionStart );
+  m_fEngineOptionStart = std::move( fEngineOptionStart );
+
+  assert( fEngineOptionStop );
+  m_fEngineOptionStop = std::move( fEngineOptionStop );
+
   m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ATM::HandleWatchUnderlyingTrade ) );
   m_pWatchUnderlying->StartWatch(); // maybe use ticks or quotes to trigger recording atm?
 
   assert( fGatherOptions );
-  fGatherOptions(
+  fGatherOptions( // when is it done?
     m_pWatchUnderlying->GetInstrument(),
-    [this]( pInstrument_t pInstrumentOption ){
+    [this]( pInstrument_t pInstrumentOption ){ // see ou::tf::option::PopulateMap for framework
       // find existing expiry, or create new one
       mapChains_t::iterator iterChains = ou::tf::option::GetChain( m_mapChains, pInstrumentOption );
       assert( m_mapChains.end() != iterChains );

@@ -31,8 +31,6 @@
 #include "Collect.hpp"
 #include "FillWrite.hpp"
 
-// TODO: requires option engine
-
 namespace collect {
 
 class ATM: public Base {
@@ -44,8 +42,13 @@ public:
   using fBuildOption_t = std::function<pOption_t(pInstrument_t)>;
   using fInstrumentOption_t = std::function<void(pInstrument_t /* option */)>;
   using fGatherOptions_t = std::function<void(pInstrument_t /* underlying */, fInstrumentOption_t&&)>;
+  using fEngine_t = std::function<void( pOption_t, pWatch_t )>;  // start / stop watch in option engine
 
-  ATM( const std::string& sPathPrefix, pWatch_t /* underlying */, fBuildOption_t&&, fGatherOptions_t&& );
+  ATM(
+    const std::string& sPathPrefix, pWatch_t /* underlying */,
+    fBuildOption_t&&, fGatherOptions_t&&,
+    fEngine_t&& start, fEngine_t&& stop
+    );
   ~ATM();
 
   void Write() override; // incremental write
@@ -71,6 +74,9 @@ private:
   using chain_t = ou::tf::option::Chain<Instance>;
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
   mapChains_t m_mapChains;
+
+  fEngine_t m_fEngineOptionStart;
+  fEngine_t m_fEngineOptionStop;
 
   void HandleWatchUnderlyingTrade( const ou::tf::Trade& );
 
