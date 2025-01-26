@@ -322,9 +322,9 @@ double Chain<Option>::Atm( double value ) const { // closest strike (use itm vs 
   // https://en.cppreference.com/w/cpp/algorithm/lower_bound std::map::lower_bound preferred
   //typename mapChain_t::const_iterator iter1 = std::lower_bound(
   //  [](const typename mapChain_t::value_type& vt, double value)->bool{ return vt.first < value; } );
-  //if ( m_mapChain.end() == iter1 ) throw exception_strike_not_found( "Call_Atm not found" );
   double atm( 0.0 );
   typename mapChain_t::const_iterator iterStrikeCandidate = m_mapChain.lower_bound( value );
+  if ( m_mapChain.end() == iterStrikeCandidate ) throw exception_strike_not_found( "Atm not found" );
   if ( value == iterStrikeCandidate->first ) {
     atm = value;
   }
