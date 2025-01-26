@@ -65,6 +65,7 @@ ATM::ATM(
   m_pWatchUnderlying->StartWatch(); // maybe use ticks or quotes to trigger recording atm?
 
   assert( fGatherOptions );
+  // TODO: convert the lambda to bind so can pass a reference and copies are not made in QueryChains
   fGatherOptions( // when is it done?
     m_pWatchUnderlying->GetInstrument(),
     [this]( std::size_t zero, pInstrument_t pInstrumentOption ){ // see ou::tf::option::PopulateMap for framework
@@ -79,8 +80,11 @@ ATM::ATM(
       pEntry->pInstrument = pInstrumentOption; // put / call as appropriate
 
       if ( 0 == zero ) {
-        // start processing options
         BOOST_LOG_TRIVIAL(info) << "last option entry found";
+        // start processing options
+        // choose chain
+        // start up ATM watch
+        // connect up with option construction
       }
     } );
 }
