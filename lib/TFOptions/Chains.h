@@ -45,8 +45,6 @@ typename mapChains_t::iterator GetChain( mapChains_t& map, pInstrument_t& pOptio
   using chain_t = typename mapChains_t::mapped_type;
   using iterator_t = typename mapChains_t::iterator;
 
-  chain_t chain; // default chain for insertion into new entry
-
   const boost::gregorian::date expiry( pOptionInstrument->GetExpiry() );
 
   iterator_t iterChains = map.find( expiry ); // see if expiry date exists
@@ -59,6 +57,7 @@ typename mapChains_t::iterator GetChain( mapChains_t& map, pInstrument_t& pOptio
       << ',' << sIQFeedSymbolName
       << ',' << sInstrumentName
       ;
+    chain_t chain; // default chain for insertion into new entry
     auto result = map.emplace( expiry, std::move( chain ) );
     assert( result.second );
     iterChains = result.first;
