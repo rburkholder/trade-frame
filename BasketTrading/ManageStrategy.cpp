@@ -292,7 +292,7 @@ ManageStrategy::ManageStrategy(
     auto fGatherOptions_ = fGatherOptions;
     ou::tf::option::PopulateMap<mapChains_t>(
       m_mapChains,
-      pWatchUnderlying->GetInstrument()->GetInstrumentName(),
+      pWatchUnderlying->GetInstrument(),
       std::move( fGatherOptions_ )
       );
 

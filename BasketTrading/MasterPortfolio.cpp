@@ -641,7 +641,7 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
         // TODO: run this in a thread, takes a while to process large option lists
         uws.m_nQuery = 1; // initial lock of the loop, process each option, sync or async depending if cached
         uws.pUnderlying->PopulateChains(
-          [this,&uws,multiplier](const std::string& sIQFeedUnderlying, ou::tf::option::fOption_t&& fOption ){ // fGatherOptions_t
+          [this,&uws,multiplier](pInstrument_t pInstrument, ou::tf::option::fOption_t&& fOption ){ // fGatherOptions_t
             using query_t = ou::tf::iqfeed::OptionChainQuery;
 
             auto f =
@@ -684,6 +684,7 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
                 }
               };
 
+            const std::string& sIQFeedUnderlying( pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
             switch ( uws.pUnderlying->GetWatch()->GetInstrument()->GetInstrumentType() ) {
               case ou::tf::InstrumentType::Future:
                 m_pOptionChainQuery->QueryFuturesOptionChain(
@@ -740,7 +741,8 @@ MasterPortfolio::pManageStrategy_t MasterPortfolio::ConstructStrategy(
         uws.pUnderlying->GetPortfolio(),
         m_spread_specs,
     // ManageStrategy::fGatherOptions_t
-        [this]( const std::string& sIQFeedUnderlyingName, ou::tf::option::fOption_t&& fOption ){
+        [this]( pInstrument_t pInstrument, ou::tf::option::fOption_t&& fOption ){
+          const std::string& sIQFeedUnderlyingName( pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
           mapUnderlyingWithStrategies_t::const_iterator iter = m_mapUnderlyingWithStrategies.find( sIQFeedUnderlyingName );
           if ( m_mapUnderlyingWithStrategies.end() == iter ) {
             std::cout << "** can't find Underlying: " << sIQFeedUnderlyingName << std::endl;

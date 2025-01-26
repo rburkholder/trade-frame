@@ -39,7 +39,7 @@ Aggregate::Aggregate(
 void Aggregate::LoadChains( fGatherOptions_t&& fGatherOptions ) {
   std::cout << "Aggregate::LoadChains" << std::endl;
   fGatherOptions(
-    m_pWatchUnderlying->GetInstrument()->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ),
+    m_pWatchUnderlying->GetInstrument(),
     [this]( pOption_t pOption ){
 
       pInstrument_t pInstrument( pOption->GetInstrument() );

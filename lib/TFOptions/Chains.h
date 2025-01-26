@@ -102,9 +102,9 @@ OptionEntry* UpdateOption( chain_t& chain, pInstrument_t& pOptionInstrument ) {
 }
 
 template<typename mapChains_t> // used for populating option names into a default chain
-void PopulateMap( mapChains_t& map, const std::string& sUnderlying, fGatherOptions_t&& fGatherOptions ) {
+void PopulateMap( mapChains_t& map, pInstrument_t pUnderlying, fGatherOptions_t&& fGatherOptions ) {
   fGatherOptions(
-    sUnderlying,
+    pUnderlying,
     [&map](pOption_t pOption){  // these are iqfeed based symbol names
 
         using chain_t = typename mapChains_t::mapped_type;

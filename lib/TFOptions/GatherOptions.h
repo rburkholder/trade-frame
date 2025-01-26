@@ -23,18 +23,18 @@
 
 #include <functional>
 
+#include <TFTrading/Instrument.h>
+
 #include <TFOptions/Option.h>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 namespace option { // options
 
-  //template<typename Option>
-  //using FOptionExtras_t = std::function<void(Option&)>;
-
   using pOption_t = Option::pOption_t;
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using fOption_t = std::function<void(pOption_t)>; // incrementally obtain built options
-  using fGatherOptions_t = std::function<void(const std::string&, fOption_t&&)>; // request by underlying IQFeed Symbol Name
+  using fGatherOptions_t = std::function<void( pInstrument_t, fOption_t&& )>;
 
 } // namespace option
 } // namespace tf
