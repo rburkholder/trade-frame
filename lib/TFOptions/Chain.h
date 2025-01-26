@@ -319,26 +319,27 @@ double Chain<Option>::Call_Otm( double value ) const { // price < strike
 
 template<typename Option>
 double Chain<Option>::Atm( double value ) const { // closest strike (use itm vs otm)
-  double atm {};
-  typename mapChain_t::const_iterator iter1 = std::lower_bound(
-    m_mapChain.begin(), m_mapChain.end(), value,
-    [](const typename mapChain_t::value_type& vt, double value)->bool{ return vt.first < value; } );
-  if ( m_mapChain.end() == iter1 ) throw exception_strike_not_found( "Call_Atm not found" );
-  if ( value == iter1->first ) {
+  // https://en.cppreference.com/w/cpp/algorithm/lower_bound std::map::lower_bound preferred
+  //typename mapChain_t::const_iterator iter1 = std::lower_bound(
+  //  [](const typename mapChain_t::value_type& vt, double value)->bool{ return vt.first < value; } );
+  //if ( m_mapChain.end() == iter1 ) throw exception_strike_not_found( "Call_Atm not found" );
+  double atm( 0.0 );
+  typename mapChain_t::const_iterator iterStrikeCandidate = m_mapChain.lower_bound( value );
+  if ( value == iterStrikeCandidate->first ) {
     atm = value;
   }
   else {
-    if ( m_mapChain.begin() == iter1 ) {
+    if ( m_mapChain.begin() == iterStrikeCandidate ) {
       atm = value;
     }
     else {
-      typename mapChain_t::const_iterator iter2 = iter1;
-      iter2--;
-      if ( ( iter1->first - value ) < ( value - iter2->first ) ) {
-        atm = iter1->first;
+      typename mapChain_t::const_iterator iterStrikeLower( iterStrikeCandidate );
+      iterStrikeLower--;
+      if ( ( iterStrikeCandidate->first - value ) < ( value - iterStrikeLower->first ) ) {
+        atm = iterStrikeCandidate->first;
       }
       else {
-        atm = iter2->first;
+        atm = iterStrikeLower->first;
       }
     }
   }
