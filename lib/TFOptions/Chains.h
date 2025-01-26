@@ -101,22 +101,21 @@ OptionEntry* UpdateOption( chain_t& chain, pInstrument_t& pOptionInstrument ) {
   return pOptionEntry;
 }
 
-template<typename mapChains_t> // used for populating option names into a default chain
+template<typename mapChains_t> // populate option constructs into a chain
 void PopulateMap( mapChains_t& map, pInstrument_t pUnderlying, fGatherOptions_t&& fGatherOptions ) {
   fGatherOptions(
     pUnderlying,
-    [&map](pOption_t pOption){  // these are iqfeed based symbol names
+    [&map](pOption_t pOption){
 
-        using chain_t = typename mapChains_t::mapped_type;
-        using iterator_t = typename mapChains_t::iterator;
-        using OptionEntry = typename chain_t::option_t;
+      using chain_t = typename mapChains_t::mapped_type;
+      using iterator_t = typename mapChains_t::iterator;
+      using OptionEntry = typename chain_t::option_t;
 
-        pInstrument_t pInstrument( pOption->GetInstrument() );
+      pInstrument_t pInstrument( pOption->GetInstrument() );
 
-        iterator_t iterChains = GetChain( map, pInstrument );
-        chain_t& chain( iterChains->second );
-        UpdateOption<chain_t,OptionEntry>( chain, pInstrument );
-
+      iterator_t iterChains = GetChain( map, pInstrument );
+      chain_t& chain( iterChains->second );
+      UpdateOption<chain_t,OptionEntry>( chain, pInstrument );
   });
 }
 
