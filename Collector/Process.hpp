@@ -119,7 +119,7 @@ private:
   std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
   std::unique_ptr<ou::tf::iqfeed::OptionChainQuery> m_pOptionChainQuery; // need to disconnect
 
-  using fInstrumentOption_t = std::function<void(pInstrument_t /* option */)>;
+  using fInstrumentOption_t = std::function<void(size_t, pInstrument_t /* option */)>; // needs to match CollectATM
   void QueryChains( pInstrument_t, fInstrumentOption_t&& ); // underlying
 
   void StartIQFeed();

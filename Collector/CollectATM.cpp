@@ -19,7 +19,7 @@
  * Created: January 19, 2025 14:06:45
  */
 
-//#include <boost/log/trivial.hpp>
+#include <boost/log/trivial.hpp>
 
 #include <TFOptions/Chains.h>
 
@@ -67,7 +67,7 @@ ATM::ATM(
   assert( fGatherOptions );
   fGatherOptions( // when is it done?
     m_pWatchUnderlying->GetInstrument(),
-    [this]( pInstrument_t pInstrumentOption ){ // see ou::tf::option::PopulateMap for framework
+    [this]( std::size_t zero, pInstrument_t pInstrumentOption ){ // see ou::tf::option::PopulateMap for framework
       // find existing expiry, or create new one
       mapChains_t::iterator iterChains = ou::tf::option::GetChain( m_mapChains, pInstrumentOption );
       assert( m_mapChains.end() != iterChains );
@@ -77,6 +77,11 @@ ATM::ATM(
       Instance* pEntry
         = ou::tf::option::UpdateOption<chain_t,Instance>( chain, pInstrumentOption );
       pEntry->pInstrument = pInstrumentOption; // put / call as appropriate
+
+      if ( 0 == zero ) {
+        // start processing options
+        BOOST_LOG_TRIVIAL(info) << "last option entry found";
+      }
     } );
 }
 

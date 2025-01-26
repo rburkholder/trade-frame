@@ -300,10 +300,10 @@ void Process::ConstructCollectorATM( pWatch_t pWatch ) {
         [this]( pInstrument_t pInstrumentUnderlying, collect::ATM::fInstrumentOption_t&& fIO ){ // fGatherOptions_t
           QueryChains( pInstrumentUnderlying, std::move( fIO ) );
         },
-        [this]( pOption_t pOption, pWatch_t pUnderlying ){
+        [this]( pOption_t& pOption, pWatch_t& pUnderlying ){
           m_pOptionEngine->Add( pOption, pUnderlying );
         },
-        [this]( pOption_t pOption, pWatch_t pUnderlying ){
+        [this]( pOption_t& pOption, pWatch_t& pUnderlying ){
           m_pOptionEngine->Remove( pOption, pUnderlying );
         }
         ) );
@@ -342,13 +342,15 @@ void Process::QueryChains( pInstrument_t pUnderlying, collect::ATM::fInstrumentO
         << list.vSymbol.size() << " options"
         ;
 
-      // TODO:  atomic counter up/down to determine when complete
       // TODO:  cache entries for each start?
+
+      size_t zero = list.vSymbol.size(); // signal when done
       for ( const query_t::vSymbol_t::value_type& sSymbol: list.vSymbol ) {
+        zero--;
         m_pComposeInstrumentIQFeed->Compose(
           sSymbol,
-          [ &fIO_ ]( pInstrument_t pInstrument, bool bConstructed ){ // what is bConstructed?
-            fIO_( pInstrument );
+          [ zero, fIO_ /* make a copy */]( pInstrument_t pInstrument, bool bConstructed ){ // what is bConstructed?
+            fIO_( zero, pInstrument );
           } );
       }
     };

@@ -40,9 +40,9 @@ public:
   using pOption_t = ou::tf::option::Option::pOption_t;
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using fBuildOption_t = std::function<pOption_t(pInstrument_t)>;
-  using fInstrumentOption_t = std::function<void(pInstrument_t /* option */)>;
+  using fInstrumentOption_t = std::function<void(std::size_t, pInstrument_t /* option */)>;
   using fGatherOptions_t = std::function<void(pInstrument_t /* underlying */, fInstrumentOption_t&&)>;
-  using fEngine_t = std::function<void( pOption_t, pWatch_t )>;  // start / stop watch in option engine
+  using fEngine_t = std::function<void( pOption_t&, pWatch_t& )>;  // start / stop watch in option engine
 
   ATM(
     const std::string& sPathPrefix, pWatch_t /* underlying */,
@@ -66,9 +66,6 @@ private:
   struct Instance: public ou::tf::option::chain::OptionName {
     pInstrument_t pInstrument; // resident in all Options
     pOption_t pOption;  // includes Watch, just-in-time Watch construction
-    //Instance( pInstrument_t pInstrument_ )
-    //: pInstrument( pInstrument_ )
-    //{}
   };
 
   using chain_t = ou::tf::option::Chain<Instance>;
