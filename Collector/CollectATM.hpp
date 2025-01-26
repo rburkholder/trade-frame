@@ -42,8 +42,10 @@ public:
   using pOption_t = ou::tf::option::Option::pOption_t;
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using fBuildOption_t = std::function<pOption_t(pInstrument_t)>;
+  using fInstrumentOption_t = std::function<void(pInstrument_t /* option */)>;
+  using fGatherOptions_t = std::function<void(pInstrument_t /* underlying */, fInstrumentOption_t&&)>;
 
-  ATM( const std::string& sPathPrefix, pWatch_t /* underlying */, fBuildOption_t&& );
+  ATM( const std::string& sPathPrefix, pWatch_t /* underlying */, fBuildOption_t&&, fGatherOptions_t&& );
   ~ATM();
 
   void Write() override; // incremental write
@@ -61,6 +63,9 @@ private:
   struct Instance: public ou::tf::option::chain::OptionName {
     pInstrument_t pInstrument; // resident in all Options
     pOption_t pOption;  // includes Watch, just-in-time Watch construction
+    //Instance( pInstrument_t pInstrument_ )
+    //: pInstrument( pInstrument_ )
+    //{}
   };
 
   using chain_t = ou::tf::option::Chain<Instance>;

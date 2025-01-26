@@ -292,10 +292,12 @@ void Process::ConstructCollectorATM( pWatch_t pWatch ) {
         [this]( collect::ATM::pInstrument_t pInstrument )->collect::ATM::pOption_t {
           pOption_t pOption = std::make_shared<ou::tf::option::Option>( pInstrument, m_piqfeed );
           return pOption;
+        },
+        [this]( pInstrument_t pInstrumentUnderlying, collect::ATM::fInstrumentOption_t&& fIO ){
+          QueryChains( pInstrumentUnderlying, std::move( fIO ) );
         }
         ) );
     assert( result.second );
-    QueryChains( pWatch->GetInstrument() );
   }
   else {
     BOOST_LOG_TRIVIAL(info) << "symbol atm: " // should be able to identify type once composed
@@ -325,11 +327,11 @@ void Process::Write() {
 // m_pOptionEngine->Add( pOption, pUnderlying );
 // m_pOptionEngine->Remove( pOption, pUnderlying );
 
-void Process::QueryChains( pInstrument_t pUnderlying ) {
+void Process::QueryChains( pInstrument_t pUnderlying, collect::ATM::fInstrumentOption_t&& fIO ) {
 
   using query_t = ou::tf::iqfeed::OptionChainQuery;
   auto f =
-    [this]( const query_t::OptionList& list ){
+    [this,fIO_ = std::move( fIO )]( const query_t::OptionList& list ){
       BOOST_LOG_TRIVIAL(info)
         << "chain request " << list.sUnderlying << " has "
         << list.vSymbol.size() << " options"
@@ -340,17 +342,8 @@ void Process::QueryChains( pInstrument_t pUnderlying ) {
       for ( const query_t::vSymbol_t::value_type& sSymbol: list.vSymbol ) {
         m_pComposeInstrumentIQFeed->Compose(
           sSymbol,
-          [ this ]( pInstrument_t pInstrument, bool bConstructed ){ // what is bConstructed?
-            // find existing expiry, or create new one
-//            mapChains_t::iterator iterChains;
-//            iterChains = ou::tf::option::GetChain( m_mapChains, pInstrument );
-//            assert( m_mapChains.end() != iterChains );
-
-            // update put/call@strike with option
-//            chain_t& chain( iterChains->second );
-//            OptionInfo* pEntry
-//              = ou::tf::option::UpdateOption<chain_t,OptionInfo>( chain, pInstrument );
-//            pEntry->pInstrument = pInstrument; // put / call as appropriate
+          [ &fIO_ ]( pInstrument_t pInstrument, bool bConstructed ){ // what is bConstructed?
+            fIO_( pInstrument );
           } );
       }
     };

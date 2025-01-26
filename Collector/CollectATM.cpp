@@ -21,11 +21,14 @@
 
 //#include <boost/log/trivial.hpp>
 
+#include <TFOptions/Chains.h>
+
 #include "CollectATM.hpp"
 
 namespace collect {
 
-ATM::ATM( const std::string& sPathPrefix, pWatch_t pWatchUnderlying, fBuildOption_t&& fBuildOption )
+ATM::ATM( const std::string& sPathPrefix, pWatch_t pWatchUnderlying,
+          fBuildOption_t&& fBuildOption, fGatherOptions_t&& fGatherOptions )
 {
 
   // TODO: watch built elsewhere, needs to be restartable for a new day?
@@ -51,6 +54,21 @@ ATM::ATM( const std::string& sPathPrefix, pWatch_t pWatchUnderlying, fBuildOptio
 
   m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ATM::HandleWatchUnderlyingTrade ) );
   m_pWatchUnderlying->StartWatch(); // maybe use ticks or quotes to trigger recording atm?
+
+  assert( fGatherOptions );
+  fGatherOptions(
+    m_pWatchUnderlying->GetInstrument(),
+    [this]( pInstrument_t pInstrumentOption ){
+      // find existing expiry, or create new one
+      mapChains_t::iterator iterChains = ou::tf::option::GetChain( m_mapChains, pInstrumentOption );
+      assert( m_mapChains.end() != iterChains );
+
+      // update put/call@strike with option
+      chain_t& chain( iterChains->second );
+      Instance* pEntry
+        = ou::tf::option::UpdateOption<chain_t,Instance>( chain, pInstrumentOption );
+      pEntry->pInstrument = pInstrumentOption; // put / call as appropriate
+    } );
 }
 
 ATM::~ATM() {
