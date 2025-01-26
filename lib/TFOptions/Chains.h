@@ -102,10 +102,10 @@ OptionEntry* UpdateOption( chain_t& chain, pInstrument_t& pOptionInstrument ) {
 }
 
 template<typename mapChains_t> // populate option constructs into a chain
-void PopulateMap( mapChains_t& map, pInstrument_t pUnderlying, fGatherOptions_t&& fGatherOptions ) {
+void PopulateMap( mapChains_t& mapChains, pInstrument_t pUnderlying, fGatherOptions_t&& fGatherOptions ) {
   fGatherOptions(
     pUnderlying,
-    [&map](pOption_t pOption){
+    [&mapChains](pOption_t pOption){
 
       using chain_t = typename mapChains_t::mapped_type;
       using iterator_t = typename mapChains_t::iterator;
@@ -113,7 +113,8 @@ void PopulateMap( mapChains_t& map, pInstrument_t pUnderlying, fGatherOptions_t&
 
       pInstrument_t pInstrument( pOption->GetInstrument() );
 
-      iterator_t iterChains = GetChain( map, pInstrument );
+      iterator_t iterChains = GetChain( mapChains, pInstrument );
+      assert( mapChains.end() != iterChains );
       chain_t& chain( iterChains->second );
       UpdateOption<chain_t,OptionEntry>( chain, pInstrument );
   });
