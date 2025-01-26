@@ -25,7 +25,7 @@
 
 namespace collect {
 
-ATM::ATM( const std::string& sPathPrefix, pWatch_t pUnderlying )
+ATM::ATM( const std::string& sPathPrefix, pWatch_t pWatchUnderlying )
 {
 
   // TODO: watch built elsewhere, needs to be restartable for a new day?
@@ -33,17 +33,17 @@ ATM::ATM( const std::string& sPathPrefix, pWatch_t pUnderlying )
   //             this, so that can handle when new front month started
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-  pInstrument_t pInstrument( pUnderlying->GetInstrument() );
+  pInstrument_t pInstrumentUnderlying( pWatchUnderlying->GetInstrument() );
 
-  m_pUnderlying = std::move( pUnderlying );
-  m_pUnderlying->RecordSeries( false ); // record manually in Write()
+  m_pWatchUnderlying = std::move( pWatchUnderlying );
+  m_pWatchUnderlying->RecordSeries( false ); // record manually in Write()
 
   {
-    const std::string sFullPath( sPathPrefix + ou::tf::Quotes::Directory() + pInstrument->GetInstrumentName() );
+    const std::string sFullPath( sPathPrefix + ou::tf::Quotes::Directory() + pInstrumentUnderlying->GetInstrumentName() );
     m_pfwATM = std::make_unique<fwATM_t>(
       sFullPath,
       [this]( ou::tf::HDF5Attributes& attr ){
-        SetAttributes( attr, m_pUnderlying );
+        SetAttributes( attr, m_pWatchUnderlying );
       } );
     //m_pOption->OnGreek.Add( MakeDelegate( this, &Greeks::HandleWatchGreeks ) );
   }
@@ -53,14 +53,14 @@ ATM::ATM( const std::string& sPathPrefix, pWatch_t pUnderlying )
 
 ATM::~ATM() {
 
-  assert( m_pUnderlying );
+  assert( m_pWatchUnderlying );
   //m_pUnderlying->StopWatch();
 
   m_pfwATM->Write();
   //m_pUnderlying->OnGreek.Remove( MakeDelegate( this, &ATM::HandleWatchGreeks ) );
   m_pfwATM.reset();
 
-  m_pUnderlying.reset();
+  m_pWatchUnderlying.reset();
 
 }
 

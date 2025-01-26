@@ -46,14 +46,15 @@ public:
 protected:
 private:
 
-  pWatch_t m_pUnderlying;
+  pWatch_t m_pWatchUnderlying;
 
   using fwATM_t = ou::tf::FillWrite<ou::tf::Greeks>;
   std::unique_ptr<fwATM_t> m_pfwATM;
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   struct Instance: public ou::tf::option::chain::OptionName {
-    pInstrument_t Instrument;
+    pInstrument_t pInstrument; // resident in all Options
+    pWatch_t pWatch; // resident only for just-in-time Watch construction
   };
 
   using chain_t = ou::tf::option::Chain<Instance>;
