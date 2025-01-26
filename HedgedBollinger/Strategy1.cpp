@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <boost/lexical_cast.hpp>
 
 #include <TFTrading/PortfolioManager.h>
