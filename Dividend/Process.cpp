@@ -84,7 +84,10 @@ void Process::HandleConnected( int ) {
 
   for ( const vName_t::value_type security_state: m_choices.m_vSecurityState ) {
     std::string::size_type pos = security_state.find( ',' );
-    assert( std::string::npos != pos );
+    if ( std::string::npos == pos ) {
+      std::cout << "malformed line: " << security_state << std::endl;
+      assert( false );
+    }
     assert( 0 < pos );
     assert( pos < security_state.size() );
     const std::string security( security_state.substr( 0, pos ) );
