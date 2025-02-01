@@ -11,10 +11,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-/* 
+/*
  * File:   AtmIv.cpp
  * Author: raymond@burkholder.net
- * 
+ *
  * Created on September 10, 2018, 10:43 PM
  */
 
@@ -40,7 +40,7 @@ IvAtm::IvAtm( pWatch_t pWatchUnderlying, fConstructOption_t fConstructOption, fS
   m_fConstructOption( fConstructOption ),
   m_fStartCalc( fStartCalc ),
   m_fStopCalc( fStopCalc )
-{ 
+{
   //assert( 0 != m_pWatchUnderlying.use_count() );
   //assert( nullptr != m_pWatchUnderlying.get() );
   assert( m_pWatchUnderlying );
@@ -55,25 +55,26 @@ IvAtm::IvAtm( IvAtm&& rhs  )
   m_pWatchUnderlying( rhs.m_pWatchUnderlying ),
   m_fConstructOption( std::move( rhs.m_fConstructOption ) ),
   m_fStartCalc( std::move( rhs.m_fStartCalc ) ),
-  m_fStopCalc( std::move( rhs.m_fStopCalc ) ) 
+  m_fStopCalc( std::move( rhs.m_fStopCalc ) )
 {}
 
 IvAtm::~IvAtm() {}
 
 // lower_bound: key value eq or gt than query
 // upper_bound: key value gt than query
+// not used in this file, possibly migrated to chain.h
 IvAtm::tupleAdjacentStrikes_t IvAtm::FindAdjacentStrikes() const {
-  
+
   tupleAdjacentStrikes_t strikes;
   auto& dblStrikeUpper( std::get<StrikeUpper>( strikes ) );
   auto& dblStrikeLower( std::get<StrikeLower>( strikes ) );
-  
+
   dblStrikeUpper = 0.0;
   dblStrikeLower = 0.0;
-  
+
   double dblUnderlying = CurrentUnderlying();
 
-  mapChain_t::const_iterator iter = m_mapChain.lower_bound( dblUnderlying ); 
+  mapChain_t::const_iterator iter = m_mapChain.lower_bound( dblUnderlying );
   if ( m_mapChain.end() == iter ) {
     throw exception_at_end_of_chain( "IvAtm::FindAdjacentStrikes: no upper strike available" );
   }
@@ -88,24 +89,25 @@ IvAtm::tupleAdjacentStrikes_t IvAtm::FindAdjacentStrikes() const {
     --iter;
     dblStrikeLower = iter->first;
   }
-  
+
   return strikes;
 }
 
 // called by UpdateATMWatch
+// implemented in chain.h
 void IvAtm::RecalcATMWatch( double dblUnderlying ) { // keeps underlying consistent with caller
-  // uses a 25% edge hysterisis level to force recalc of three containing options 
+  // uses a 25% edge hysterisis level to force recalc of three containing options
   //   ie when underlying is within 25% of upper strike or within 25% of lower strike
   // uses a 50% hysterisis level to select new set of three containing options
   //   ie underlying has to be within +/- 50% of mid strike to choose midstrike and corresponding upper/lower strikes
-  
+
   mapChain_t::iterator iterUpper;
   mapChain_t::iterator iterLower;
-  
+
   auto& sUnderlying( m_pWatchUnderlying->GetInstrument()->GetInstrumentName() );
-  
-  iterUpper = m_mapChain.lower_bound( dblUnderlying ); 
-  
+
+  iterUpper = m_mapChain.lower_bound( dblUnderlying );
+
   if ( m_mapChain.end() == iterUpper ) {
     std::cout << sUnderlying << ": IvAtm::RecalcATMWatch - no upper strike available" << std::endl; // stay in no watch state
     m_stateOptionWatch = EOWSNoWatch;
@@ -156,11 +158,12 @@ void IvAtm::RecalcATMWatch( double dblUnderlying ) { // keeps underlying consist
 
 // 2018/09/12 care is needed with UpdateATMWatch/CalcAtmIv combo, as no values may be available on that transition
 //   more complicated:  make transition when data is available
+// implemented in chain.h
 void IvAtm::UpdateATMWatch( double dblUnderlying ) {
-  
+
   EOptionWatchState stateBefore( m_stateOptionWatch );
   EOptionWatchState stateAfter;
-  
+
   switch ( stateBefore ) {
   case EOWSNoWatch:
     RecalcATMWatch( dblUnderlying );
@@ -183,7 +186,7 @@ void IvAtm::UpdateATMWatch( double dblUnderlying ) {
       RecalcATMWatch( dblUnderlying );
       stateAfter = m_stateOptionWatch;
       switch ( stateAfter ) {
-        case EOWSNoWatch: 
+        case EOWSNoWatch:
           break;
         case EOWSWatching:
           m_iterUpper->second.Start( m_fStartCalc, m_pWatchUnderlying, m_fConstructOption );
@@ -199,13 +202,14 @@ void IvAtm::UpdateATMWatch( double dblUnderlying ) {
   }
 }
 
+// implemented in chain.h
 void IvAtm::CalcIvAtm( ptime dtNow, fOnPriceIV_t& fOnPriceIV ) {
-  
+
   double dblIvCall = 0.0;
   double dblIvPut = 0.0;
-  
+
   double dblUnderlying = CurrentUnderlying();
-  
+
   UpdateATMWatch( dblUnderlying );
 
   switch ( m_stateOptionWatch ) {
@@ -221,11 +225,11 @@ void IvAtm::CalcIvAtm( ptime dtNow, fOnPriceIV_t& fOnPriceIV ) {
           double iv1, iv2;
           iv1 = m_iterMid->second.pCall->ImpliedVolatility();
           iv2 = m_iterUpper->second.pCall->ImpliedVolatility();
-          dblIvCall = iv1 + ( iv2 - iv1 ) * ratio; 
+          dblIvCall = iv1 + ( iv2 - iv1 ) * ratio;
 
           iv1 = m_iterMid->second.pPut->ImpliedVolatility();
           iv2 = m_iterUpper->second.pPut->ImpliedVolatility();
-          dblIvPut = iv1 + ( iv2 - iv1 ) * ratio; 
+          dblIvPut = iv1 + ( iv2 - iv1 ) * ratio;
         }
         else { // linear interpolation
           double ratio = ( dblUnderlying - m_iterLower->first ) / ( m_iterMid->first - m_iterLower->first );
@@ -233,11 +237,11 @@ void IvAtm::CalcIvAtm( ptime dtNow, fOnPriceIV_t& fOnPriceIV ) {
           double iv1, iv2;
           iv1 = m_iterLower->second.pCall->ImpliedVolatility();
           iv2 = m_iterMid->second.pCall->ImpliedVolatility();
-          dblIvCall = iv1 + ( iv2 - iv1 ) * ratio; 
+          dblIvCall = iv1 + ( iv2 - iv1 ) * ratio;
 
           iv1 = m_iterLower->second.pPut->ImpliedVolatility();
           iv2 = m_iterMid->second.pPut->ImpliedVolatility();
-          dblIvPut = iv1 + ( iv2 - iv1 ) * ratio; 
+          dblIvPut = iv1 + ( iv2 - iv1 ) * ratio;
         }
       }
       PriceIV ivATM( dtNow, dblUnderlying, dblIvCall, dblIvPut);
@@ -245,7 +249,7 @@ void IvAtm::CalcIvAtm( ptime dtNow, fOnPriceIV_t& fOnPriceIV ) {
       //m_bfIVUnderlyingCall.Add( now, dblIvCall, 0 );
       //m_bfIVUnderlyingPut.Add( now, dblIvPut, 0 );
       //OnIvAtmCalc( ivATM );
-      
+
       if ( nullptr != fOnPriceIV ) fOnPriceIV( ivATM );
 
       //  std::cout << "AtmIV " << now << "" << m_dtExpiry << " " << dblUnderlying << "," << dblIvCall << "," << dblIvPut << std::endl;
@@ -282,7 +286,7 @@ void IvAtm::SaveIvAtm( const std::string& sPrefix, const std::string& sPrefix864
     //boost::gregorian::date_facet* pFacet( new boost::gregorian::date_facet( "%Y-%m-%d" ) );
     //ss.imbue( std::locale( ss.getloc(), pFacet ) );
     //ss << m_dtExpiry.date();
-  
+
     sPathName = sPrefix + "/atmiv/";
     HDF5WriteTimeSeries<ou::tf::PriceIVs> wtsAtmIv( dm, true, true, 5, 256 );
     wtsAtmIv.Write( sPathName, &m_tsIvAtm );
@@ -302,7 +306,7 @@ void IvAtm::SaveIvAtm( const std::string& sPrefix, const std::string& sPrefix864
 //        catch (...) {  // may already exist
 //      }
 //    }
-  
+
 //    {
 //      sPathName = sPrefix86400sec + "/" + ss.str() + "/put";
 //      ou::tf::Bars bars( 1 );
@@ -317,15 +321,15 @@ void IvAtm::SaveIvAtm( const std::string& sPrefix, const std::string& sPrefix864
 //      }
 //    }
   }
-  
+
 }
 
 void IvAtm::SaveSeries( const std::string& sPrefix, const std::string& sPrefix86400sec ) {
-  
+
   std::for_each( m_mapChain.begin(), m_mapChain.end(), [&sPrefix](mapChain_t::value_type& vt){
     vt.second.SaveSeries( sPrefix );
   } );
-  
+
   SaveIvAtm( sPrefix, sPrefix86400sec );
 }
 
