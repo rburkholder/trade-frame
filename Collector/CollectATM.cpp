@@ -52,7 +52,6 @@ ATM::ATM(
       [this]( ou::tf::HDF5Attributes& attr ){
         SetAttributes( attr, m_pWatchUnderlying );
       } );
-    //m_pOption->OnGreek.Add( MakeDelegate( this, &Greeks::HandleWatchGreeks ) );
   }
 
   assert( fEngineOptionStart );
@@ -95,10 +94,16 @@ ATM::~ATM() {
   m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &ATM::HandleWatchUnderlyingTrade ) );
 
   m_pfwATM->Write();
-  //m_pUnderlying->OnGreek.Remove( MakeDelegate( this, &ATM::HandleWatchGreeks ) );
   m_pfwATM.reset();
 
+  m_fEngineOptionStart = nullptr;
+  m_fEngineOptionStop = nullptr;
+
+  m_fBuildOption = nullptr;
+
   m_pWatchUnderlying.reset();
+
+  m_mapChains.clear();
 
 }
 
