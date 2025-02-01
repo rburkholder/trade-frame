@@ -74,7 +74,7 @@ int main( int argc, char* argv[] ) {
   }
 
   {
-    const auto dt = ou::TimeSource::GlobalInstance().External();
+    const auto dt = ou::TimeSource::GlobalInstance().External(); // UTC
 
     std::stringstream ss;
     ss
@@ -114,7 +114,7 @@ int main( int argc, char* argv[] ) {
   //signals.add( SIGABRT );
 
   using pProcess_t = std::unique_ptr<Process>;
-  pProcess_t pProcess = std::make_unique<Process>( choices, sTSDataStreamStarted );
+  pProcess_t pProcess = std::make_unique<Process>( choices, sTSDataStreamStarted, dtStop );
 
   signals.async_wait(
     [&pProcess,&timerStop,&timerWrite,&m_pWork](const boost::system::error_code& error_code, int signal_number){

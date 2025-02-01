@@ -59,6 +59,7 @@ public:
   Process(
     const config::Choices&
   , const std::string& sTimeStamp
+  , boost::posix_time::ptime dtStop
   );
   ~Process();
 
@@ -79,6 +80,7 @@ private:
   const std::string m_sPathName;
 
   const config::Choices& m_choices;
+  boost::posix_time::ptime m_dtStop;
 
   //std::mutex m_mutexScope_ConstructWatch;
 

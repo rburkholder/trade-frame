@@ -47,7 +47,8 @@ public:
   ATM(
     const std::string& sPathPrefix, pWatch_t /* underlying */,
     fBuildOption_t&&, fGatherOptions_t&&,
-    fEngine_t&& start, fEngine_t&& stop
+    fEngine_t&& start, fEngine_t&& stop,
+    boost::gregorian::date dateStop // use for expiry calculation
     );
   ~ATM();
 
@@ -71,6 +72,9 @@ private:
   using chain_t = ou::tf::option::Chain<Instance>;
   using mapChains_t = std::map<boost::gregorian::date, chain_t>;
   mapChains_t m_mapChains;
+
+  using pTrackATM_t = std::unique_ptr<chain_t::TrackATM>;
+  pTrackATM_t m_pTrackATM;
 
   fEngine_t m_fEngineOptionStart;
   fEngine_t m_fEngineOptionStop;

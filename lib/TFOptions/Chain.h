@@ -143,7 +143,7 @@ public:
     using fIvATM_t = std::function<void( const PriceIV& )>;
 
     using iterStrikes_t = typename mapChain_t::const_iterator;
-    using fWatch_t = std::function<void( typename mapChain_t::value_type& )>;
+    using fWatch_t = std::function<void( strike_t& )>;
 
     const mapChain_t& m_mapStrikes;
 
@@ -321,7 +321,15 @@ public:
   }; // struct TrackATM
 
   using pTrackATM_t = std::unique_ptr<TrackATM>;
-  pTrackATM_t Factory_TrackATM() const { return std::make_unique<TrackATM>( m_mapChain ); }
+  pTrackATM_t Factory_TrackATM(
+    typename TrackATM::fWatch_t&& fWatchOn,
+    typename TrackATM::fWatch_t&& fWatchOff,
+    typename TrackATM::fIvATM_t&& fIvATM
+  ) const {
+    return std::make_unique<TrackATM>(
+      m_mapChain, std::move( fWatchOn ), std::move( fWatchOff ), std::move( fIvATM )
+      );
+  }
 
   typename mapChain_t::size_type Size() const { return m_mapChain.size(); }
   size_t EmitValues() const;

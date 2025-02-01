@@ -30,7 +30,8 @@ namespace collect {
 ATM::ATM(
   const std::string& sPathPrefix, pWatch_t pWatchUnderlying,
   fBuildOption_t&& fBuildOption, fGatherOptions_t&& fGatherOptions,
-  fEngine_t&& fEngineOptionStart, fEngine_t&& fEngineOptionStop
+  fEngine_t&& fEngineOptionStart, fEngine_t&& fEngineOptionStop,
+  boost::gregorian::date dateStop // use for expiry calculation
 )
 {
 
@@ -67,7 +68,7 @@ ATM::ATM(
   // TODO: convert the lambda to bind so can pass a reference and copies are not made in QueryChains
   fGatherOptions( // when is it done?
     m_pWatchUnderlying->GetInstrument(),
-    [this]( std::size_t zero, pInstrument_t pInstrumentOption ){ // see ou::tf::option::PopulateMap for framework
+    [this, dateStop]( std::size_t zero, pInstrument_t pInstrumentOption ){ // see ou::tf::option::PopulateMap for framework
       // find existing expiry, or create new one
       mapChains_t::iterator iterChains = ou::tf::option::GetChain( m_mapChains, pInstrumentOption );
       assert( m_mapChains.end() != iterChains );
@@ -80,10 +81,24 @@ ATM::ATM(
 
       if ( 0 == zero ) {
         BOOST_LOG_TRIVIAL(info) << "last option entry found";
-        // start processing options
-        // choose chain
-        // start up ATM watch
-        // connect up with option construction
+        // select, at minimum, one day beyond to ensure non-expiry
+        mapChains_t::const_iterator iter = ou::tf::option::SelectChain( m_mapChains, dateStop, boost::gregorian::days( 1 ) );
+        assert( m_mapChains.end() != iter );
+        m_pTrackATM = iter->second.Factory_TrackATM(
+          []( chain_t::strike_t& ){ // fWatch_t&& fWatchOn
+
+          },
+          []( chain_t::strike_t& ){ // fWatch_t&& fWatchOff
+
+          },
+          []( const ou::tf::PriceIV& ){ // fIvATM_t&& fIvATM
+
+          }
+        );
+        // TODO: clean up strikes to ensure complete call/put pairs
+        // TODO: start processing options
+        // TODO: start up ATM watch
+        // TODO: connect up with option construction
       }
     } );
 }

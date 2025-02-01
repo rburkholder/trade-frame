@@ -37,9 +37,10 @@ namespace {
 Process::Process(
   const config::Choices& choices
 , const std::string& sTimeStamp
-)
+, boost::posix_time::ptime dtStop)
 : m_choices( choices )
 , m_sPathName( sSaveValuesRoot + "/" + sTimeStamp )
+, m_dtStop( dtStop )
 {
 
   auto f =
@@ -300,12 +301,13 @@ void Process::ConstructCollectorATM( pWatch_t pWatch ) {
         [this]( pInstrument_t pInstrumentUnderlying, collect::ATM::fInstrumentOption_t&& fIO ){ // fGatherOptions_t
           QueryChains( pInstrumentUnderlying, std::move( fIO ) );
         },
-        [this]( pOption_t& pOption, pWatch_t& pUnderlying ){
+        [this]( pOption_t& pOption, pWatch_t& pUnderlying ){ // fEngine_t&& start
           m_pOptionEngine->Add( pOption, pUnderlying );
         },
-        [this]( pOption_t& pOption, pWatch_t& pUnderlying ){
+        [this]( pOption_t& pOption, pWatch_t& pUnderlying ){ // fEngine_t&& stop
           m_pOptionEngine->Remove( pOption, pUnderlying );
-        }
+        },
+        m_dtStop.date()
         ) );
     assert( result.second );
   }
