@@ -32,6 +32,8 @@
 #include <string>
 #include <stdexcept>
 
+#include <TFTimeSeries/DatedDatum.h>
+
 // use this for light weight strike calculations and name lookups
 
 namespace ou { // One Unified
@@ -137,6 +139,9 @@ public:
 
   struct TrackATM { // inspired by TFOptions/Bundle.cpp
 
+    using PriceIV = ou::tf::PriceIV;
+    using fIvATM_t = std::function<void( const PriceIV& )>;
+
     using iterStrikes_t = typename mapChain_t::const_iterator;
     using fWatch_t = std::function<void( typename mapChain_t::value_type& )>;
 
@@ -152,12 +157,15 @@ public:
     fWatch_t m_fWatchOn;
     fWatch_t m_fWatchOff;
 
+    fIvATM_t m_fIvATM;
+
     enum EOptionWatchState { EOWSNoWatch, EOWSWatching } m_stateOptionWatch;
 
-    TrackATM( const mapChain_t& mapChain, fWatch_t&& fWatchOn, fWatch_t&& fWatchOff )
+    TrackATM( const mapChain_t& mapChain, fWatch_t&& fWatchOn, fWatch_t&& fWatchOff, fIvATM_t&& fIvATM )
     : m_mapStrikes( mapChain )
     , m_fWatchOn( std::move( fWatchOn ) )
     , m_fWatchOff( std::move( fWatchOff ) )
+    , m_fIvATM( std::move( fIvATM ) )
     , m_dblhysteresisUpper {}, m_dblhysteresisLower {}
     , m_iterUpper( m_mapStrikes.end() )
     , m_iterMid(   m_mapStrikes.end() )
@@ -166,65 +174,72 @@ public:
     {
       assert( m_fWatchOn );
       assert( m_fWatchOff );
+      assert( m_fIvATM );
+    }
+
+    ~TrackATM() {
+      m_fIvATM = nullptr;
+      m_fWatchOn = nullptr;
+      m_fWatchOff = nullptr;
     }
 
     void Shift( const double price ) { // called by Track( price )
       // uses a 25% edge hysterisis level to force recalc of three containing options
-        //   ie when underlying is within 25% of upper strike or within 25% of lower strike
-        // uses a 50% hysterisis level to select new set of three containing options
-        //   ie underlying has to be within +/- 50% of mid strike to choose midstrike and corresponding upper/lower strikes
-        iterStrikes_t iterUpper;
-        iterStrikes_t iterLower;
-        iterUpper = m_mapStrikes.lower_bound( price );
-        if ( m_mapStrikes.end() == iterUpper ) {
-          //std::cout << "TrackATM::Shift: no upper strike available" << std::endl; // stay in no watch state
+      //   ie when underlying is within 25% of upper strike or within 25% of lower strike
+      // uses a 50% hysterisis level to select new set of three containing options
+      //   ie underlying has to be within +/- 50% of mid strike to choose midstrike and corresponding upper/lower strikes
+      iterStrikes_t iterUpper;
+      iterStrikes_t iterLower;
+      iterUpper = m_mapStrikes.lower_bound( price );
+      if ( m_mapStrikes.end() == iterUpper ) {
+        //std::cout << "TrackATM::Shift: no upper strike available" << std::endl; // stay in no watch state
+        m_stateOptionWatch = EOWSNoWatch;
+      }
+      else {
+        iterLower = iterUpper;
+        if ( m_mapStrikes.begin() == iterLower ) {
+          //std::cout << "TrackATM::Shift: no lower strike available" << std::endl;  // stay in no watch state
           m_stateOptionWatch = EOWSNoWatch;
         }
         else {
-          iterLower = iterUpper;
-          if ( m_mapStrikes.begin() == iterLower ) {
-            //std::cout << "TrackATM::Shift: no lower strike available" << std::endl;  // stay in no watch state
-            m_stateOptionWatch = EOWSNoWatch;
-          }
-          else {
-            --iterLower;
-            double dblMidPoint = ( iterUpper->first + iterLower->first ) * 0.5;
-            if ( price >= dblMidPoint ) { // third strike is above
-              m_iterUpper = iterUpper;
-              ++m_iterUpper;
-              if ( m_mapStrikes.end() == m_iterUpper ) {
-                //std::cout << "TrackATM::Shift: no upper upper strike available" << std::endl;  // stay in no watch state
-                m_stateOptionWatch = EOWSNoWatch;
-              }
-              else {
-                m_iterMid = iterUpper;
-                m_iterLower = iterLower;
-                m_stateOptionWatch = EOWSWatching;
-              }
-            }
-            else { // third strike is below
-              m_iterLower = iterLower;
-              if ( m_mapStrikes.begin() == m_iterLower ) {
-                //std::cout << "TrackATM::Shift: no lower lower strike available" << std::endl;  // stay in no watch state
-                m_stateOptionWatch = EOWSNoWatch;
-              }
-              else {
-                --m_iterLower;
-                m_iterMid = iterLower;
-                m_iterUpper = iterUpper;
-                m_stateOptionWatch = EOWSWatching;
-              }
-            }
-            if ( EOWSWatching == m_stateOptionWatch ) {
-              m_dblhysteresisUpper = m_iterUpper->first - ( m_iterUpper->first - m_iterMid->first ) * 0.25;
-              m_dblhysteresisLower = m_iterLower->first + ( m_iterMid->first - m_iterLower->first ) * 0.25;
-              //std::cout << m_dblhysteresisLower << " < " << price << " < " << m_dblhysteresisUpper << std::endl;
+          --iterLower;
+          double dblMidPoint = ( iterUpper->first + iterLower->first ) * 0.5;
+          if ( price >= dblMidPoint ) { // third strike is above
+            m_iterUpper = iterUpper;
+            ++m_iterUpper;
+            if ( m_mapStrikes.end() == m_iterUpper ) {
+              //std::cout << "TrackATM::Shift: no upper upper strike available" << std::endl;  // stay in no watch state
+              m_stateOptionWatch = EOWSNoWatch;
             }
             else {
-              // reset values?
+              m_iterMid = iterUpper;
+              m_iterLower = iterLower;
+              m_stateOptionWatch = EOWSWatching;
             }
           }
+          else { // third strike is below
+            m_iterLower = iterLower;
+            if ( m_mapStrikes.begin() == m_iterLower ) {
+              //std::cout << "TrackATM::Shift: no lower lower strike available" << std::endl;  // stay in no watch state
+              m_stateOptionWatch = EOWSNoWatch;
+            }
+            else {
+              --m_iterLower;
+              m_iterMid = iterLower;
+              m_iterUpper = iterUpper;
+              m_stateOptionWatch = EOWSWatching;
+            }
+          }
+          if ( EOWSWatching == m_stateOptionWatch ) {
+            m_dblhysteresisUpper = m_iterUpper->first - ( m_iterUpper->first - m_iterMid->first ) * 0.25;
+            m_dblhysteresisLower = m_iterLower->first + ( m_iterMid->first - m_iterLower->first ) * 0.25;
+            //std::cout << m_dblhysteresisLower << " < " << price << " < " << m_dblhysteresisUpper << std::endl;
+          }
+          else {
+            // reset values?
+          }
         }
+      }
     } // Shift( price )
 
     void Track( const double price ) {
@@ -255,6 +270,54 @@ public:
           break;
         }
     } // Track( price )
+
+    void IV( ptime dtNow, const double dblUnderlying ) { // was CalcIvAtm in "IvAtm.h"
+
+      double dblIvCall {};
+      double dblIvPut {};
+
+      Track( dblUnderlying );
+
+      switch ( m_stateOptionWatch ) {
+        case EOWSWatching:
+          if ( dblUnderlying == m_iterMid->first ) {
+            dblIvCall = m_iterMid->second.pCall->ImpliedVolatility();
+            dblIvPut = m_iterMid->second.pPut->ImpliedVolatility();
+          }
+          else {
+            if ( dblUnderlying > m_iterMid->first ) { // linear interpolation
+              double ratio = ( dblUnderlying - m_iterMid->first ) / ( m_iterUpper->first - m_iterMid->first );
+
+              double iv1, iv2;
+              iv1 = m_iterMid->second.pCall->ImpliedVolatility();
+              iv2 = m_iterUpper->second.pCall->ImpliedVolatility();
+              dblIvCall = iv1 + ( iv2 - iv1 ) * ratio;
+
+              iv1 = m_iterMid->second.pPut->ImpliedVolatility();
+              iv2 = m_iterUpper->second.pPut->ImpliedVolatility();
+              dblIvPut = iv1 + ( iv2 - iv1 ) * ratio;
+            }
+            else { // linear interpolation
+              double ratio = ( dblUnderlying - m_iterLower->first ) / ( m_iterMid->first - m_iterLower->first );
+
+              double iv1, iv2;
+              iv1 = m_iterLower->second.pCall->ImpliedVolatility();
+              iv2 = m_iterMid->second.pCall->ImpliedVolatility();
+              dblIvCall = iv1 + ( iv2 - iv1 ) * ratio;
+
+              iv1 = m_iterLower->second.pPut->ImpliedVolatility();
+              iv2 = m_iterMid->second.pPut->ImpliedVolatility();
+              dblIvPut = iv1 + ( iv2 - iv1 ) * ratio;
+            }
+          }
+          PriceIV ivATM( dtNow, dblUnderlying, dblIvCall, dblIvPut);
+          m_fIvATM( ivATM );
+          break;
+        default:
+          break;
+
+      }
+    }
   }; // struct TrackATM
 
   using pTrackATM_t = std::unique_ptr<TrackATM>;
