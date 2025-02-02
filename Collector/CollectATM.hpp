@@ -22,6 +22,7 @@
 #pragma once
 
 #include <map>
+#include <unordered_map>
 
 #include <TFTrading/Instrument.h>
 
@@ -78,6 +79,13 @@ private:
 
   fEngine_t m_fEngineOptionStart;
   fEngine_t m_fEngineOptionStop;
+
+  // track options used in engine for destructor cleanup
+  using mapOption_t = std::unordered_map<std::string,pOption_t>;
+  mapOption_t m_mapOption;
+
+  void MapAddOption( pOption_t );
+  void MapDelOption( pOption_t );
 
   void HandleWatchUnderlyingTrade( const ou::tf::Trade& );
 

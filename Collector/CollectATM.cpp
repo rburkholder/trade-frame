@@ -89,15 +89,13 @@ ATM::ATM(
         m_pTrackATM = iter->second.Factory_TrackATM(
           // TODO: track active options & deactiviate on destruction
           [this]( chain_t::strike_t& strike ){ // fWatch_t&& fWatchOn
-            strike.call.pOption->RecordSeries( false );
-            m_fEngineOptionStart( strike.call.pOption, m_pWatchUnderlying );
-            strike.put.pOption->RecordSeries( false );
-            m_fEngineOptionStart( strike.put.pOption, m_pWatchUnderlying );
+            MapAddOption( strike.call.pOption );
+            MapAddOption( strike.put.pOption );
             // TODO: enable watches & recording?
           },
           [this]( chain_t::strike_t& strike  ){ // fWatch_t&& fWatchOff
-            m_fEngineOptionStop( strike.call.pOption, m_pWatchUnderlying );
-            m_fEngineOptionStop( strike.put.pOption, m_pWatchUnderlying );
+            MapDelOption( strike.call.pOption );
+            MapDelOption( strike.put.pOption );
             // TODO: disable watches & recording?
           },
           [this]( const ou::tf::PriceIV& iv ){ // fIvATM_t&& fIvATM
@@ -116,6 +114,11 @@ ATM::~ATM() {
   m_pfwATM->Write();
   m_pfwATM.reset();
 
+  for ( mapOption_t::value_type& vt: m_mapOption ) {
+    m_fEngineOptionStop( vt.second, m_pWatchUnderlying );
+  }
+  m_mapOption.clear();
+
   m_fEngineOptionStart = nullptr;
   m_fEngineOptionStop = nullptr;
 
@@ -125,6 +128,28 @@ ATM::~ATM() {
 
   m_mapChains.clear();
 
+}
+
+void ATM::MapAddOption( pOption_t pOption ) {
+  pOption->RecordSeries( false );
+  m_fEngineOptionStart( pOption, m_pWatchUnderlying );
+  const std::string& sName( pOption->GetInstrumentName() );
+  mapOption_t::iterator iter = m_mapOption.find( sName );
+  if ( m_mapOption.end() == iter ) {
+    m_mapOption.emplace( sName, pOption );
+  }
+}
+
+void ATM::MapDelOption( pOption_t pOption ) {
+  m_fEngineOptionStop( pOption, m_pWatchUnderlying );
+  const std::string& sName( pOption->GetInstrumentName() );
+  mapOption_t::iterator iter = m_mapOption.find( sName );
+  if ( m_mapOption.end() != iter ) {
+    m_mapOption.erase( iter );
+  }
+  else {
+    assert( false );
+  }
 }
 
 void ATM::HandleWatchUnderlyingTrade( const ou::tf::Trade& trade ) { // TODO: use Quote instead
