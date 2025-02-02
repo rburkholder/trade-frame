@@ -247,9 +247,9 @@ public:
         case EOWSNoWatch:
           Shift( price );
           if ( EOWSWatching == m_stateOptionWatch ) { // m_stateOptionWatch updated in Shift
-            m_fWatchOn( *m_iterUpper );
-            m_fWatchOn( *m_iterMid );
-            m_fWatchOn( *m_iterLower );
+            m_fWatchOn( m_iterUpper->second );
+            m_fWatchOn( m_iterMid->second );
+            m_fWatchOn( m_iterLower->second );
           }
           break;
         case EOWSWatching:
@@ -259,13 +259,13 @@ public:
             iterStrikes_t iterLower( m_iterLower );
             Shift( price );
             if ( EOWSWatching == m_stateOptionWatch ) { // by setting on before off allows continuity of capture
-              m_fWatchOn( *m_iterUpper );
-              m_fWatchOn( *m_iterMid );
-              m_fWatchOn( *m_iterLower );
+              m_fWatchOn( m_iterUpper->second );
+              m_fWatchOn( m_iterMid->second );
+              m_fWatchOn( m_iterLower->second );
             }
-            m_fWatchOff( *iterUpper );
-            m_fWatchOff( *iterMid );
-            m_fWatchOff( *iterLower );
+            m_fWatchOff( iterUpper->second );
+            m_fWatchOff( iterMid->second );
+            m_fWatchOff( iterLower->second );
           }
           break;
         }
