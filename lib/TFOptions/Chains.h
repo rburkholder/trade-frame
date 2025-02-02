@@ -132,6 +132,18 @@ static typename mapChains_t::const_iterator SelectChain( const mapChains_t& mapC
   return citerChain;
 }
 
+template<typename mapChains_t>
+static typename mapChains_t::iterator SelectChain( mapChains_t& mapChains, boost::gregorian::date date, boost::gregorian::days daysToExpiry ) {
+  typename mapChains_t::iterator citerChain = std::find_if( mapChains.begin(), mapChains.end(),
+    [date,daysToExpiry](const typename mapChains_t::value_type& vt)->bool{
+      return daysToExpiry <= ( vt.first - date );  // first chain where trading date less than expiry date
+  } );
+  if ( mapChains.end() == citerChain ) {
+    throw ou::tf::option::exception_chain_not_found( "option::SelectChain" );
+  }
+  return citerChain;
+}
+
 } // namespace option
 } // namespace tf
 } // namespace ou
