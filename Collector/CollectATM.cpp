@@ -64,9 +64,10 @@ ATM::ATM(
   m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ATM::HandleWatchUnderlyingTrade ) );
   m_pWatchUnderlying->StartWatch(); // maybe use ticks or quotes to trigger recording atm?
 
-  assert( fGatherOptions );
+  m_fGatherOptions = std::move( fGatherOptions ); // keep it local & in scope
+  assert( m_fGatherOptions );
   // TODO: convert the lambda to bind so can pass a reference and copies are not made in QueryChains
-  fGatherOptions( // when is it done?
+  m_fGatherOptions( // when is it done?
     m_pWatchUnderlying->GetInstrument(),
     [this, dateStop]( std::size_t zero, pInstrument_t pInstrumentOption ){ // see ou::tf::option::PopulateMap for framework
       // find existing expiry, or create new one

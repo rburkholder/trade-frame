@@ -60,6 +60,7 @@ private:
 
   pWatch_t m_pWatchUnderlying;
 
+  fGatherOptions_t m_fGatherOptions;
   fBuildOption_t m_fBuildOption;
 
   using fwATM_t = ou::tf::FillWrite<ou::tf::PriceIVs>;
