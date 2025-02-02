@@ -82,23 +82,28 @@ ATM::ATM(
       if ( 0 == zero ) {
         BOOST_LOG_TRIVIAL(info) << "last option entry found";
         // select, at minimum, one day beyond to ensure non-expiry
-        mapChains_t::const_iterator iter = ou::tf::option::SelectChain( m_mapChains, dateStop, boost::gregorian::days( 1 ) );
+        mapChains_t::iterator iter = ou::tf::option::SelectChain( m_mapChains, dateStop, boost::gregorian::days( 1 ) );
         assert( m_mapChains.end() != iter );
+        // TODO: clean up strikes to ensure complete call/put pairs
+
         m_pTrackATM = iter->second.Factory_TrackATM(
-          []( chain_t::strike_t& ){ // fWatch_t&& fWatchOn
-
+          // TODO: track active options & deactiviate on destruction
+          [this]( chain_t::strike_t& strike ){ // fWatch_t&& fWatchOn
+            strike.call.pOption->RecordSeries( false );
+            m_fEngineOptionStart( strike.call.pOption, m_pWatchUnderlying );
+            strike.put.pOption->RecordSeries( false );
+            m_fEngineOptionStart( strike.put.pOption, m_pWatchUnderlying );
+            // TODO: enable watches & recording?
           },
-          []( chain_t::strike_t& ){ // fWatch_t&& fWatchOff
-
+          [this]( chain_t::strike_t& strike  ){ // fWatch_t&& fWatchOff
+            m_fEngineOptionStop( strike.call.pOption, m_pWatchUnderlying );
+            m_fEngineOptionStop( strike.put.pOption, m_pWatchUnderlying );
+            // TODO: disable watches & recording?
           },
-          []( const ou::tf::PriceIV& ){ // fIvATM_t&& fIvATM
-
+          [this]( const ou::tf::PriceIV& iv ){ // fIvATM_t&& fIvATM
+            m_pfwATM->Append( iv );
           }
         );
-        // TODO: clean up strikes to ensure complete call/put pairs
-        // TODO: start processing options
-        // TODO: start up ATM watch
-        // TODO: connect up with option construction
       }
     } );
 }
@@ -122,16 +127,10 @@ ATM::~ATM() {
 
 }
 
-void ATM::HandleWatchUnderlyingTrade( const ou::tf::Trade& ) { // TODO: use Quote instead
-  // TODO: update the Chain ATM with new price
-}
-
-void ATM::HandleWatchGreeksPut( const ou::tf::Greek& greek ) {
-  //m_pfwATM->Append( greek );
-}
-
-void ATM::HandleWatchGreeksCall( const ou::tf::Greek& greek ) {
-  //m_pfwATM->Append( greek );
+void ATM::HandleWatchUnderlyingTrade( const ou::tf::Trade& trade ) { // TODO: use Quote instead
+  if ( m_pTrackATM ) {
+    m_pTrackATM->IV( trade.DateTime(), trade.Price() ); // will call back for IvATM timeseries update
+  }
 }
 
 void ATM::Write() {

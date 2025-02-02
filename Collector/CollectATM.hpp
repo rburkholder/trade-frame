@@ -61,7 +61,7 @@ private:
 
   fBuildOption_t m_fBuildOption;
 
-  using fwATM_t = ou::tf::FillWrite<ou::tf::Greeks>;
+  using fwATM_t = ou::tf::FillWrite<ou::tf::PriceIVs>;
   std::unique_ptr<fwATM_t> m_pfwATM;
 
   struct Instance: public ou::tf::option::chain::OptionName {
@@ -81,8 +81,6 @@ private:
 
   void HandleWatchUnderlyingTrade( const ou::tf::Trade& );
 
-  void HandleWatchGreeksPut( const ou::tf::Greek& );
-  void HandleWatchGreeksCall( const ou::tf::Greek& );
 };
 
 } // namespace collect
