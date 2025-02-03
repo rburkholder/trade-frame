@@ -567,6 +567,7 @@ public:
   virtual ~Prices() {};
   Prices* Subset( dt_t time ) { return (Prices*) TimeSeries<datum_t>::Subset( time ); }
   Prices* Subset( dt_t time, unsigned int n ) { return (Prices*) TimeSeries<datum_t>::Subset( time, n ); }
+  static std::string Directory() { return "/prices/"; }
 protected:
 private:
 };
@@ -581,6 +582,7 @@ public:
   virtual ~PriceIVs() {};
   PriceIVs* Subset( dt_t time ) { return (PriceIVs*) TimeSeries<datum_t>::Subset( time ); }
   PriceIVs* Subset( dt_t time, unsigned int n ) { return (PriceIVs*) TimeSeries<datum_t>::Subset( time, n ); }
+  static std::string Directory() { return "/priceiv/"; }
 protected:
 private:
 };
@@ -595,6 +597,7 @@ public:
   virtual ~PriceIVExpirys() {};
   PriceIVExpirys* Subset( dt_t time ) { return (PriceIVExpirys*) TimeSeries<datum_t>::Subset( time ); }
   PriceIVExpirys* Subset( dt_t time, unsigned int n ) { return (PriceIVExpirys*) TimeSeries<datum_t>::Subset( time, n ); }
+  static std::string Directory() { return "/priceivexpiry/"; }
 protected:
 private:
 };
