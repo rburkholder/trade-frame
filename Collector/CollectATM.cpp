@@ -47,7 +47,7 @@ ATM::ATM(
   m_pWatchUnderlying->RecordSeries( false ); // record manually in Write()
 
   {
-    const std::string sFullPath( sPathPrefix + ou::tf::Quotes::Directory() + m_pWatchUnderlying->GetInstrumentName() );
+    const std::string sFullPath( sPathPrefix + ou::tf::PriceIVs::Directory() + m_pWatchUnderlying->GetInstrumentName() );
     m_pfwATM = std::make_unique<fwATM_t>(
       sFullPath,
       [this]( ou::tf::HDF5Attributes& attr ){
