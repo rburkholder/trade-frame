@@ -82,8 +82,15 @@ private:
   fEngine_t m_fEngineOptionStop;
 
   // track options used in engine for destructor cleanup
-  using mapOption_t = std::unordered_map<std::string,pOption_t>;
-  mapOption_t m_mapOption;
+  struct LifeTime {
+    size_t count;
+    pOption_t pOption;
+    LifeTime( pOption_t pOption_ )
+    : count( 1 ), pOption( pOption_ )
+    {}
+  };
+  using mapOptionLifeTime_t = std::unordered_map<std::string,LifeTime>;
+  mapOptionLifeTime_t m_mapOptionLifeTime;
 
   void MapAddOption( pOption_t );
   void MapDelOption( pOption_t );

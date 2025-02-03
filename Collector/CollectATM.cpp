@@ -129,10 +129,10 @@ ATM::~ATM() {
   m_pfwATM->Write();
   m_pfwATM.reset();
 
-  for ( mapOption_t::value_type& vt: m_mapOption ) {
-    m_fEngineOptionStop( vt.second, m_pWatchUnderlying );
+  for ( mapOptionLifeTime_t::value_type& vt: m_mapOptionLifeTime ) {
+    m_fEngineOptionStop( vt.second.pOption, m_pWatchUnderlying );
   }
-  m_mapOption.clear();
+  m_mapOptionLifeTime.clear();
 
   m_fEngineOptionStart = nullptr;
   m_fEngineOptionStop = nullptr;
@@ -149,21 +149,28 @@ void ATM::MapAddOption( pOption_t pOption ) {
   pOption->RecordSeries( false );
   m_fEngineOptionStart( pOption, m_pWatchUnderlying );
   const std::string& sName( pOption->GetInstrumentName() );
-  mapOption_t::iterator iter = m_mapOption.find( sName );
-  if ( m_mapOption.end() == iter ) {
-    m_mapOption.emplace( sName, pOption );
+  mapOptionLifeTime_t::iterator iter = m_mapOptionLifeTime.find( sName );
+  if ( m_mapOptionLifeTime.end() == iter ) {
+    m_mapOptionLifeTime.emplace( sName, pOption );
+  }
+  else {
+    ++iter->second.count;
   }
 }
 
 void ATM::MapDelOption( pOption_t pOption ) {
   m_fEngineOptionStop( pOption, m_pWatchUnderlying );
   const std::string& sName( pOption->GetInstrumentName() );
-  mapOption_t::iterator iter = m_mapOption.find( sName );
-  if ( m_mapOption.end() != iter ) {
-    m_mapOption.erase( iter );
+  mapOptionLifeTime_t::iterator iter = m_mapOptionLifeTime.find( sName );
+  if ( m_mapOptionLifeTime.end() == iter ) {
+    assert( false );
   }
   else {
-    assert( false );
+    assert( iter->second.count > 0 );
+    --iter->second.count;
+    if ( 0 == iter->second.count ) {
+      m_mapOptionLifeTime.erase( iter );
+    }
   }
 }
 
