@@ -411,7 +411,7 @@ PriceIV::PriceIV( const ptime dt )
 {}
 
 PriceIV::PriceIV( const PriceIV& rhs )
-  : Price( rhs.m_dt, rhs.Value() ), m_dblIVCall( rhs.m_dblIVCall ), m_dblIVPut( rhs.m_dblIVPut )
+: Price( rhs.m_dt, rhs.Value() ), m_dblIVCall( rhs.m_dblIVCall ), m_dblIVPut( rhs.m_dblIVPut )
 {}
 
 PriceIV::PriceIV( const ptime dtSampled, price_t dblPrice, double dblIVCall, double dblIVPut )
