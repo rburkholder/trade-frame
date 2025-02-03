@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <stdexcept>
 #include <string>
 
 #include <TFTimeSeries/DatedDatum.h>
@@ -71,21 +72,30 @@ template<class DD> HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor( HDF5DataM
     H5::CompType *pMemCompType = DD::DefineDataType( NULL );
     if ( ( pMemCompType->getNmembers() != m_pDiskCompType->getNmembers() ) ) { // can't do size as drive datatypes are packed, need instead to check member names
       //|| ( pMemCompType->getSize()     != m_pDiskCompType->getSize() ) ) { // works as Quote, Trade, Bar  have different member count (but MarketDepth has same count as Quote
-      throw std::runtime_error( "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor CompType doesn't match" );
+      throw std::runtime_error( "CompType doesn't match" );
     }
     pMemCompType->close();
     delete pMemCompType;
 
     UpdateElementCount();
   }
-  catch ( H5::Exception e ) {
+  catch ( H5::AttributeIException& e ) {
+    std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor AttributeIException " << e.getDetailMsg() << std::endl;
+    e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &HDF5DataManager::PrintH5ErrorStackItem, this );
+    throw std::runtime_error( "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor error 0" );
+  }
+  catch ( H5::Exception& e ) {
     std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor " << e.getDetailMsg() << std::endl;
     e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &HDF5DataManager::PrintH5ErrorStackItem, this );
     throw std::runtime_error( "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor error 1" );
   }
+  catch ( std::runtime_error& e ) {
+    std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor " << e.what() << std::endl;
+    throw std::runtime_error( "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor error 2" );
+  }
   catch (...) {
     std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor unknown error" << std::endl;
-    throw std::runtime_error( "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor error 2" );
+    throw std::runtime_error( "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor error 3" );
   }
 }
 
