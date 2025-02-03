@@ -94,7 +94,7 @@ void FillWrite<T>::Write() {
     wts.Write( m_sPathName, &m_rFillWrite[ m_ixWriting ] );
 
     if ( !m_bHdf5AttributesSet ) {
-      m_bHdf5AttributesSet= true;
+      m_bHdf5AttributesSet = true;
       ou::tf::HDF5Attributes attrT( dm, m_sPathName );
       attrT.SetSignature( T::datum_t::Signature() );
       m_fFillWrite_Hdf5Attribute( attrT ); // set typename T specific attributes
