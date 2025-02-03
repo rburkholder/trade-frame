@@ -90,12 +90,26 @@ ATM::ATM(
         m_pTrackATM = iter->second.Factory_TrackATM(
           // TODO: track active options & deactiviate on destruction
           [this]( chain_t::strike_t& strike ){ // fWatch_t&& fWatchOn
+
+            assert( strike.call.pInstrument );
+            if ( !strike.call.pOption ) {
+              strike.call.pOption = m_fBuildOption( strike.call.pInstrument );
+            };
             MapAddOption( strike.call.pOption );
+
+            assert( strike.put.pInstrument );
+            if ( !strike.put.pOption ) {
+              strike.put.pOption = m_fBuildOption( strike.put.pInstrument );
+            };
             MapAddOption( strike.put.pOption );
             // TODO: enable watches & recording?
           },
           [this]( chain_t::strike_t& strike  ){ // fWatch_t&& fWatchOff
+
+            assert( strike.call.pOption );
             MapDelOption( strike.call.pOption );
+
+            assert( strike.put.pOption );
             MapDelOption( strike.put.pOption );
             // TODO: disable watches & recording?
           },
