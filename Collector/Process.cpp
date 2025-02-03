@@ -351,7 +351,7 @@ void Process::QueryChains( pInstrument_t pUnderlying, collect::ATM::fInstrumentO
         zero--;
         m_pComposeInstrumentIQFeed->Compose(
           sSymbol,
-          [ zero, fIO_ /* make a copy */]( pInstrument_t pInstrument, bool bConstructed ){ // what is bConstructed?
+          [ zero, fIO_ /* make a copy */]( pInstrument_t pInstrument, bool bConstructed ){ // bConstructed - false for error or loaded from db, true when newly constructed
             fIO_( zero, pInstrument );
           } );
       }
