@@ -383,6 +383,7 @@ public:
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
   static uint64_t Signature() { return DatedDatum::Signature() * 10 + 1; } // DatedDatum > Price
+  // Signature() left to right reading: 9=datetime, 8=char, 1=double, 2=16 3=32, 4=64
 
 protected:
 private:
@@ -406,6 +407,7 @@ public:
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
   static uint64_t Signature() { return Price::Signature() * 100 + 11; }; // Price -> PriceIV
+  // Signature() left to right reading: 9=datetime, 8=char, 1=double, 2=16 3=32, 4=64
 
 protected:
 private:
@@ -432,6 +434,7 @@ public:
 
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
   static uint64_t Signature() { return Price::Signature() * 1000 + 411; } // Price -> PriceIVExpiry
+  // Signature() left to right reading: 9=datetime, 8=char, 1=double, 2=16 3=32, 4=64
 
 protected:
 private:
