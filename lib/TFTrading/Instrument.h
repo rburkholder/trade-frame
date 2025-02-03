@@ -61,7 +61,8 @@ public:
   //   => is a work-in-progress for expiry
 
   struct TableRowDef {
-    template<class A>
+
+    template<typename A>
     void Fields( A& a ) {
       ou::db::Field( a, "instrumentid", idInstrument );
       ou::db::Field( a, "type", eType );
@@ -191,7 +192,7 @@ public:
   };
 
   struct TableCreateDef: TableRowDef {
-    template<class A>
+    template<typename A>
     void Fields( A& a ) {
       TableRowDef::Fields( a );
       ou::db::Key( a, "instrumentid" );
