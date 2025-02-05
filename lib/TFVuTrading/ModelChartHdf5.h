@@ -113,6 +113,7 @@ private:
   void DefineChartQuotes( ou::ChartDataView* );
   void DefineChartTrades( ou::ChartDataView* );
   void DefineChartPriceIVs( ou::ChartDataView* );
+  void DefineChartPriceIVExpirys( ou::ChartDataView* );
   void DefineChartGreeks( ou::ChartDataView* );
   void DefineChartEquities( ou::ChartDataView* );
   void DefineChartOptions( ou::ChartDataView* );
@@ -122,6 +123,7 @@ private:
   void AddChartEntries( ou::ChartDataView*, const ou::tf::Bars& );
   void AddChartEntries( ou::ChartDataView*, const ou::tf::Quotes& );
   void AddChartEntries( ou::ChartDataView*, const ou::tf::Trades& );
+  void AddChartEntries( ou::ChartDataView*, const ou::tf::PriceIVs& );
   void AddChartEntries( ou::ChartDataView*, const ou::tf::PriceIVExpirys& );
   void AddChartEntries( ou::ChartDataView*, const ou::tf::Greeks& );
   void AddChartEntries( ou::ChartDataView*, const Equities& );

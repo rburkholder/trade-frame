@@ -144,10 +144,12 @@ void PanelChartHdf5::OnDestroy( wxWindowDestroyEvent& event ) {
 }
 
 void PanelChartHdf5::HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 ) {
+  m_eLatestDatumType = CustomItemData::NoDatum;
   if ( "quotes" == s2 ) m_eLatestDatumType = CustomItemData::Quotes;
   if ( "trades" == s2 ) m_eLatestDatumType = CustomItemData::Trades;
   if ( "bar" == s2 ) m_eLatestDatumType = CustomItemData::Bars;
   if ( "atmiv" == s2 ) m_eLatestDatumType = CustomItemData::AtmIV;
+  if ( "priceiv" == s2 ) m_eLatestDatumType = CustomItemData::PriceIVs;
   if ( "greeks" == s2 ) m_eLatestDatumType = CustomItemData::Greeks;
   if ( "depths" == s2 ) m_eLatestDatumType = CustomItemData::DepthsByMM; // deprecated style 2022/04/30
   if ( "depths_mm" == s2 ) m_eLatestDatumType = CustomItemData::DepthsByMM;
@@ -244,7 +246,10 @@ size_t PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::EDatumType edt,
       cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Trades>( m_pdm, m_pChartDataView, "Trades", sPath );
       break;
     case CustomItemData::AtmIV:
-      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<PriceIVExpirys>( m_pdm, m_pChartDataView, "Price IV", sPath );
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<PriceIVExpirys>( m_pdm, m_pChartDataView, "Price IV Expiry", sPath );
+      break;
+    case CustomItemData::PriceIVs:
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<PriceIVs>( m_pdm, m_pChartDataView, "Price IV", sPath );
       break;
     case CustomItemData::Greeks:
       cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Greeks>( m_pdm, m_pChartDataView, "Greeks", sPath );

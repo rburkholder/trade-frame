@@ -128,6 +128,30 @@ void ModelChartHdf5::DefineChartPriceIVs( ou::ChartDataView* pChartDataView ) {
   pChartDataView->Add( 1, &m_cePutIV );
 }
 
+void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::PriceIVs& ivs ) {
+  DefineChartPriceIVs( pChartDataView );
+
+  size_t skip = 1 + ( ivs.Size() / c_nMaxElements );
+
+  for ( ou::tf::PriceIVs::const_iterator iter = ivs.begin(); iter < ivs.end(); iter = iter += skip ) {
+    m_ceTrade.Append( iter->DateTime(), iter->Value() );
+    m_ceCallIV.Append( iter->DateTime(), iter->IVCall() );
+    m_cePutIV.Append( iter->DateTime(), iter->IVPut() );
+  }
+}
+
+// ChartPriceIVExpirys
+
+void ModelChartHdf5::DefineChartPriceIVExpirys( ou::ChartDataView* pChartDataView ) {
+  Clear();
+  m_ceTrade.SetColour( ou::Colour::Green );
+  m_cePutIV.SetColour( ou::Colour::Red );
+  m_ceCallIV.SetColour( ou::Colour::Blue );
+  pChartDataView->Add( 0, &m_ceTrade );
+  pChartDataView->Add( 1, &m_ceCallIV );
+  pChartDataView->Add( 1, &m_cePutIV );
+}
+
 void ModelChartHdf5::AddChartEntries( ou::ChartDataView* pChartDataView, const ou::tf::PriceIVExpirys& ivs ) {
   DefineChartPriceIVs( pChartDataView );
 
