@@ -31,7 +31,7 @@
 #include "Process.hpp"
 
 namespace {
-  static const std::string sSaveValuesRoot( "/app/collector" );
+  static const std::string c_sSaveValuesRoot( "/app/collector" );
 }
 
 Process::Process(
@@ -39,7 +39,7 @@ Process::Process(
 , const std::string& sTimeStamp
 , boost::posix_time::ptime dtStop)
 : m_choices( choices )
-, m_sPathName( sSaveValuesRoot + "/" + sTimeStamp )
+, m_sPathName( c_sSaveValuesRoot + "/" + sTimeStamp )
 , m_dtStop( dtStop )
 {
 
