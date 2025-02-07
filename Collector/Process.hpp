@@ -28,6 +28,7 @@
 #include <functional>
 #include <unordered_map>
 
+#include <TFTrading/DBOps.h>
 #include <TFTrading/Watch.h>
 
 #include <TFOptions/Chains.h>
@@ -82,6 +83,8 @@ private:
   const config::Choices& m_choices;
   boost::posix_time::ptime m_dtStop;
 
+  ou::tf::DBOps m_db;
+
   //std::mutex m_mutexScope_ConstructWatch;
 
   using pIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
@@ -123,6 +126,16 @@ private:
 
   using fInstrumentOption_t = std::function<void(size_t, pInstrument_t /* option */)>; // needs to match CollectATM
   void QueryChains( pInstrument_t, fInstrumentOption_t&& ); // underlying
+
+  void OpenDB();
+  void CloseDB();
+
+  void HandleDbOnLoad( ou::db::Session& session );
+  void HandleDbOnPopulate( ou::db::Session& session );
+  void HandleRegisterTables( ou::db::Session& session );
+  void HandleRegisterRows( ou::db::Session& session );
+  void HandlePopulateDatabase();
+  void HandleLoadDatabase();
 
   void StartIQFeed();
   void HandleIQFeedConnected( int );

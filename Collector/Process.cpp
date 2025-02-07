@@ -31,6 +31,7 @@
 #include "Process.hpp"
 
 namespace {
+  static const std::string c_sDBName( "collector.db" );
   static const std::string c_sSaveValuesRoot( "/app/collector" );
 }
 
@@ -42,6 +43,8 @@ Process::Process(
 , m_sPathName( c_sSaveValuesRoot + "/" + sTimeStamp )
 , m_dtStop( dtStop )
 {
+
+  OpenDB();
 
   auto f =
     [this]( const std::string& s, EToCollect e ){
@@ -105,6 +108,8 @@ Process::~Process() {
 
   m_piqfeed->Disconnect();
   m_piqfeed.reset();
+
+  CloseDB();
 }
 
 // need control c handler to terminate, as this is an ongoing process
@@ -377,5 +382,56 @@ void Process::QueryChains( pInstrument_t pUnderlying, collect::ATM::fInstrumentO
       assert( false );
       break;
   }
+}
+
+void Process::OpenDB() {
+  try {
+    //if ( boost::filesystem::exists( m_sDbName ) ) {
+    //  boost::filesystem::remove( m_sDbName );
+    //}
+
+    m_db.OnLoad.Add( MakeDelegate( this, &Process::HandleDbOnLoad ) );
+    m_db.OnPopulate.Add( MakeDelegate( this, &Process::HandleDbOnPopulate ) );
+    m_db.OnRegisterTables.Add( MakeDelegate( this, &Process::HandleRegisterTables ) );
+    m_db.OnRegisterRows.Add( MakeDelegate( this, &Process::HandleRegisterRows ) );
+    m_db.SetOnPopulateDatabaseHandler( MakeDelegate( this, &Process::HandlePopulateDatabase ) );
+    m_db.SetOnLoadDatabaseHandler( MakeDelegate( this, &Process::HandleLoadDatabase ) );
+
+    m_db.Open( c_sDBName );
+  }
+  catch(...) {
+    std::cout << "database open fault on " << c_sDBName << std::endl;
+  }
+}
+
+void Process::CloseDB() {
+  if ( m_db.IsOpen() ) m_db.Close();
+}
+
+void Process::HandleDbOnLoad( ou::db::Session& session ) {
+  // called when db exists, after HandleLoadDatabase
+   std::cout << "collector::HandleDbOnLoad placeholder" << std::endl;
+}
+
+void Process::HandleDbOnPopulate( ou::db::Session& session ) {
+  // called when db created, after HandlePopulateDatabase
+  std::cout << "collector::HandleDbOnPopulate placeholder" << std::endl;
+}
+
+void Process::HandleRegisterTables( ou::db::Session& session ) {
+  // called when db created
+  std::cout << "collector::HandleRegisterTables placeholder" << std::endl;
+}
+
+void Process::HandleRegisterRows( ou::db::Session& session ) {
+  // called when db created and when exists
+  std::cout << "collector::HandleRegisterRows placeholder" << std::endl;
+}
+void Process::HandlePopulateDatabase() {
+  std::cout << "collector::HandlePopulateDatabase" << std::endl;
+}
+
+void Process::HandleLoadDatabase() {
+  std::cout << "collector::HandleLoadDatabase ..." << std::endl;
 }
 
