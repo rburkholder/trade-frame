@@ -4,14 +4,23 @@ A tool to capture quote and trade data for symbols to the tradeframe.hdf5 datafi
 
 Useful for data acquisition for back-testing and for machine learning.
 
-Equities, Futures, and Options are eligible instruments.
+Currencies, Equities, Futures, and Options are eligible instruments.  At-The-Money Implied Volatility tracking has been added.
 
 It is designed to collect a complete 23 hour trading session.
 
+```
 $ cat x64/debug/collector.cfg
+symbol_name_l1=USDCAD.FXCM
+symbol_name_l1=EURUSD.FXCM
+symbol_name_l1=GBPUSD.FXCM
+symbol_name_l1=SLV
 symbol_name_l1=GLD
 symbol_name_l1=SPY
+symbol_name_l1=@ES~
+symbol_name_atm=@ES~
+#symbol_name_greeks=@E2BF25C600000
 stop_time=17:30:00
+```
 
 For continuous futures based upon the IQFeed naming scheme, the '~' in the file is converted to a corresponding '#'.  The continuous form is automatically converted to the appropriate front month's symbol.
 
