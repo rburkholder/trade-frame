@@ -101,6 +101,7 @@ private:
       }
   };
 
+  // aggregate of symbols to collect
   using mapToCollect_t = std::unordered_map<std::string, ToCollect>;
   mapToCollect_t m_mapToCollect;
 
@@ -140,6 +141,7 @@ private:
   void StartIQFeed();
   void HandleIQFeedConnected( int );
   void InitializeComposeInstrument();
+  void ConstructWatch( mapToCollect_t::value_type::second_type&, pInstrument_t& );
   void ConstructWatches();
   void ConstructCollectors( const setToCollect_t&, pWatch_t );
   void ConstructCollectorL1( pWatch_t );

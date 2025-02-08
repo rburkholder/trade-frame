@@ -148,35 +148,55 @@ void Process::InitializeComposeInstrument() {
 void Process::ConstructWatches() {
 
   assert( m_pComposeInstrumentIQFeed );
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
 
   for ( auto& [key, value]: m_mapToCollect ) {
-    m_pComposeInstrumentIQFeed->Compose(
-      key,
-      [ this, &value ]( pInstrument_t pInstrument, bool bConstructed ){
-        switch ( pInstrument->GetInstrumentType() ) {
-          case ou::tf::InstrumentType::EInstrumentType::Future:
-          case ou::tf::InstrumentType::EInstrumentType::Currency:
-          case ou::tf::InstrumentType::EInstrumentType::Stock: {
-            pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
-            value.pWatch = pWatch;
-            ConstructCollectors( value.setToCollect, pWatch );
-            }
-            break;
-          case ou::tf::InstrumentType::EInstrumentType::FuturesOption:
-          case ou::tf::InstrumentType::EInstrumentType::Option: {
-            pOption_t pOption = std::make_shared<ou::tf::option::Option>( pInstrument, m_piqfeed );
-            value.pWatch = pOption;
-            ConstructCollectors( value.setToCollect, pOption );
-            }
-            break;
-          default:
-            assert( false );
-            break;
+    pInstrument_t pInstrument;
+    pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, key );
+    if ( pInstrument ) { // skip the build
+      ConstructWatch( value, pInstrument );
+    }
+    else {
+      m_pComposeInstrumentIQFeed->Compose(
+        key, // might be a continuous futures front month
+        [ this, &value ]( pInstrument_t pInstrument, bool bConstructed ){
+          ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+          const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+          if ( im.Exists( idInstrument ) ) {
+            pInstrument_t pInstrumentLoaded = im.Get( idInstrument );
+            ConstructWatch( value, pInstrumentLoaded );
+          }
+          else {
+            im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+            ConstructWatch( value, pInstrument );
+          }
         }
-      }
-    );
+      );
+    }
   }
+}
 
+void Process::ConstructWatch( mapToCollect_t::value_type::second_type& value, pInstrument_t& pInstrument ) {
+  switch ( pInstrument->GetInstrumentType() ) {
+    case ou::tf::InstrumentType::EInstrumentType::Future:
+    case ou::tf::InstrumentType::EInstrumentType::Currency:
+    case ou::tf::InstrumentType::EInstrumentType::Stock: {
+      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
+      value.pWatch = pWatch;
+      ConstructCollectors( value.setToCollect, pWatch );
+      }
+      break;
+    case ou::tf::InstrumentType::EInstrumentType::FuturesOption:
+    case ou::tf::InstrumentType::EInstrumentType::Option: {
+      pOption_t pOption = std::make_shared<ou::tf::option::Option>( pInstrument, m_piqfeed );
+      value.pWatch = pOption;
+      ConstructCollectors( value.setToCollect, pOption );
+      }
+      break;
+    default:
+      assert( false );
+      break;
+  }
 }
 
 void Process::ConstructCollectors( const setToCollect_t& set, pWatch_t pWatch ) {
@@ -349,16 +369,25 @@ void Process::QueryChains( pInstrument_t pUnderlying, collect::ATM::fInstrumentO
         << list.vSymbol.size() << " options"
         ;
 
-      // TODO:  cache entries for each start?
+      ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
 
       size_t zero = list.vSymbol.size(); // signal when done
       for ( const query_t::vSymbol_t::value_type& sSymbol: list.vSymbol ) {
         zero--;
-        m_pComposeInstrumentIQFeed->Compose(
-          sSymbol,
-          [ zero, fIO_ /* make a copy */]( pInstrument_t pInstrument, bool bConstructed ){ // bConstructed - false for error or loaded from db, true when newly constructed
-            fIO_( zero, pInstrument );
-          } );
+        pInstrument_t pInstrument;
+        pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, sSymbol );
+        if ( pInstrument ) { // skip the build
+          fIO_( zero, pInstrument );
+        }
+        else {
+          m_pComposeInstrumentIQFeed->Compose(
+            sSymbol,
+            [ zero, fIO_ /* make a copy */]( pInstrument_t pInstrument, bool bConstructed ){ // bConstructed - false for error or loaded from db, true when newly constructed
+              ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+              im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+              fIO_( zero, pInstrument );
+            } );
+        }
       }
     };
 
