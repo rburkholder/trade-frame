@@ -501,7 +501,13 @@ void Network<ownerT,charT>::OnReadDone( const boost::system::error_code& error, 
           }
         }
         catch( const std::logic_error& e ) {
-          std::cerr << "Network<>::OnReadDone caught: " << e.what() << std::endl;
+          std::cerr << "Network<>::OnReadDone logic error: " << e.what() << std::endl;
+        }
+        catch( const std::runtime_error& e ) {
+          std::cerr << "Network<>::OnReadDone runtime error: " << e.what() << std::endl;
+        }
+        catch( const std::exception& e ) {
+          std::cerr << "Network<>::OnReadDone exception: " << e.what() << std::endl;
         }
         catch(...) {
           std::cerr << "Network<>::OnReadDone default exception handler" << std::endl;
