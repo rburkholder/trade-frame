@@ -128,6 +128,8 @@ Instrument::Instrument( const TableRowDef& row )
       break;
     case InstrumentType::Future:
       break;
+    case InstrumentType::Currency:
+      break;
     default:
       assert( false );
   }
