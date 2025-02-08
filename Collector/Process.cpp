@@ -408,30 +408,31 @@ void Process::CloseDB() {
   if ( m_db.IsOpen() ) m_db.Close();
 }
 
-void Process::HandleDbOnLoad( ou::db::Session& session ) {
-  // called when db exists, after HandleLoadDatabase
-   std::cout << "collector::HandleDbOnLoad placeholder" << std::endl;
+void Process::HandleLoadDatabase() {
+  //std::cout << "collector::HandleLoadDatabase ..." << std::endl;
 }
 
-void Process::HandleDbOnPopulate( ou::db::Session& session ) {
-  // called when db created, after HandlePopulateDatabase
-  std::cout << "collector::HandleDbOnPopulate placeholder" << std::endl;
+void Process::HandleDbOnLoad( ou::db::Session& session ) {
+  // called when db exists, after HandleLoadDatabase
+   //std::cout << "collector::HandleDbOnLoad placeholder" << std::endl;
 }
 
 void Process::HandleRegisterTables( ou::db::Session& session ) {
-  // called when db created
-  std::cout << "collector::HandleRegisterTables placeholder" << std::endl;
+  // #1 called when db created
+  //std::cout << "collector::HandleRegisterTables placeholder" << std::endl;
 }
 
 void Process::HandleRegisterRows( ou::db::Session& session ) {
-  // called when db created and when exists
-  std::cout << "collector::HandleRegisterRows placeholder" << std::endl;
+  // #2 called when db created and when exists
+  //std::cout << "collector::HandleRegisterRows placeholder" << std::endl;
 }
 void Process::HandlePopulateDatabase() {
-  std::cout << "collector::HandlePopulateDatabase" << std::endl;
+  // #3
+  //std::cout << "collector::HandlePopulateDatabase" << std::endl;
 }
 
-void Process::HandleLoadDatabase() {
-  std::cout << "collector::HandleLoadDatabase ..." << std::endl;
+void Process::HandleDbOnPopulate( ou::db::Session& session ) {
+  // #4 called when db created, after HandlePopulateDatabase
+  //std::cout << "collector::HandleDbOnPopulate placeholder" << std::endl;
 }
 
