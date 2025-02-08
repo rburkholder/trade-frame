@@ -1,8 +1,8 @@
-# Collector - Stream Equity quote/tick to disk
+# Collector - Stream Instrument Data to Disk
 
-A tool to capture quote and trade data for symbols to the tradeframe.hdf5 datafile.
+A tool to capture instrument statistics to the tradeframe.hdf5 datafile.
 
-Useful for data acquisition for back-testing and for machine learning.
+Useful batch oriented data acquisition for use in back-testing and for machine learning.
 
 Currencies, Equities, Futures, and Options are eligible instruments.  At-The-Money Implied Volatility tracking has been added.
 
