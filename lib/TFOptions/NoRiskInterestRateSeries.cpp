@@ -15,6 +15,7 @@
 #include <set>
 #include <algorithm>
 
+#include <boost/log/trivial.hpp>
 #include <boost/assign/std/vector.hpp>
 
 #include <TFTrading/InstrumentManager.h>
@@ -72,14 +73,18 @@ void NoRiskInterestRateSeries::SetWatchOff() {
 }
 
 void NoRiskInterestRateSeries::SaveSeries( const std::string& sPrefix ) {
+
+  //const std::string sPath( sPrefix + '/' + m_sDescription );
+  const std::string& sPath( sPrefix );
+
   using setName_t = std::set<std::string>;
   setName_t setName; // ignore duplicates
   for ( vInterestRate_t::iterator iter = m_vInterestRate.begin(); m_vInterestRate.end() != iter; ++iter ) {
     const std::string& sName( iter->pWatch->GetInstrumentName() );
     if ( setName.end() == setName.find( sName ) ) {
       setName.emplace( sName );
-      std::cout << "  saving rate for " << sName << std::endl;
-      iter->pWatch->SaveSeries( sPrefix + "/" + m_sDescription );
+      BOOST_LOG_TRIVIAL(info) << "NoRiskInterestRate saving " << sName << " to " << sPath;
+      iter->pWatch->SaveSeries( sPath );
     }
   }
 }
