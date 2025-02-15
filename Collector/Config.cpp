@@ -19,6 +19,7 @@
  * Created: October 20, 2022 20:37:22
  */
 
+#include <vector>
 #include <fstream>
 #include <exception>
 #include <type_traits>
@@ -29,6 +30,8 @@
 namespace po = boost::program_options;
 
 #include "Config.hpp"
+
+using vName_t = std::vector<std::string>;
 
 namespace {
   static const std::string sChoice_SymbolName_L1( "symbol_name_l1" );
@@ -46,11 +49,16 @@ namespace {
     BOOST_LOG_TRIVIAL(info) << name << " = " << dest;
   }
 
-  void log( const std::string& name, config::Choices::vName_t& dest ) {
-    for ( config::Choices::vName_t::value_type& value: dest ) {
+  void log( const std::string& name, const vName_t& dest ) {
+    for ( const vName_t::value_type& value: dest ) {
       BOOST_LOG_TRIVIAL(info) << name << " = " << value;
     }
   }
+  //void log( const std::string& name, const config::Choices::setName_t& dest ) {
+  //  for ( const std::string& value: dest ) {
+  //    BOOST_LOG_TRIVIAL(info) << name << " = " << value;
+  //  }
+  //}
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bRequired, T& dest ) {
@@ -74,15 +82,19 @@ namespace config {
 bool Load( const std::string& sFileName, Choices& choices ) {
 
   bool bOk( true );
+  vName_t vSymbolName_L1;   // symbols with level 1 data
+  vName_t vSymbolName_L2;   // symbols with level 2 data
+  vName_t vSymbolName_Atm;  // at the money greeks P+C - TODO need days to expiry (default to 2)
+  vName_t vSymbolName_Greeks;
 
   try {
 
     po::options_description config( "collector config" );
     config.add_options()
-      ( sChoice_SymbolName_L1.c_str(), po::value<Choices::vName_t>( &choices.m_vSymbolName_L1 ), "symbol name for level 1 data" )
-      ( sChoice_SymbolName_L2.c_str(), po::value<Choices::vName_t>( &choices.m_vSymbolName_L2 ), "symbol name for level 1 data" )
-      ( sChoice_SymbolName_Greeks.c_str(), po::value<Choices::vName_t>( &choices.m_vSymbolName_Greeks ), "iqfeed option name from mktsymbols file" )
-      ( sChoice_SymbolName_Atm.c_str(), po::value<Choices::vName_t>( &choices.m_vSymbolName_Atm ), "underlying symbol name for atm IV etc" )
+      ( sChoice_SymbolName_L1.c_str(), po::value<vName_t>( &vSymbolName_L1 ), "symbol name for level 1 data" )
+      ( sChoice_SymbolName_L2.c_str(), po::value<vName_t>( &vSymbolName_L2 ), "symbol name for level 1 data" )
+      ( sChoice_SymbolName_Atm.c_str(), po::value<vName_t>( &vSymbolName_Atm ), "underlying symbol name for atm IV etc" )
+      ( sChoice_SymbolName_Greeks.c_str(), po::value<vName_t>( &vSymbolName_Greeks ), "iqfeed option name from mktsymbols file" )
       ( sChoice_StopTime.c_str(),   po::value<std::string>( &choices.m_sStopTime ), "stop time HH:mm:ss UTC" )
       ;
     po::variables_map vm;
@@ -96,26 +108,34 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     else {
       po::store( po::parse_config_file( ifs, config), vm );
 
-      bOk &= parse<Choices::vName_t>( sFileName, vm, sChoice_SymbolName_L1, true, choices.m_vSymbolName_L1 );
+      bOk &= parse<vName_t>( sFileName, vm, sChoice_SymbolName_L1, true, vSymbolName_L1 );
       if ( bOk ) {
-        for ( Choices::vName_t::value_type& sn: choices.m_vSymbolName_L1 ) {
+        for ( vName_t::value_type& sn: vSymbolName_L1 ) {
           std::replace_if( sn.begin(), sn.end(), [](char ch)->bool{return '~' == ch;}, '#' );
+          choices.m_setSymbolName_L1.emplace( sn );
         }
       }
 
-      bOk &= parse<Choices::vName_t>( sFileName, vm, sChoice_SymbolName_L2, false, choices.m_vSymbolName_L2 );
+      bOk &= parse<vName_t>( sFileName, vm, sChoice_SymbolName_L2, false, vSymbolName_L2 );
       if ( bOk ) {
-        for ( Choices::vName_t::value_type& sn: choices.m_vSymbolName_L2 ) {
+        for ( vName_t::value_type& sn: vSymbolName_L2 ) {
           std::replace_if( sn.begin(), sn.end(), [](char ch)->bool{return '~' == ch;}, '#' );
+          choices.m_setSymbolName_L2.emplace( sn );
         }
       }
 
-      bOk &= parse<Choices::vName_t>( sFileName, vm, sChoice_SymbolName_Greeks, false, choices.m_vSymbolName_Greeks );
-
-      bOk &= parse<Choices::vName_t>( sFileName, vm, sChoice_SymbolName_Atm, false, choices.m_vSymbolName_Atm );
+      bOk &= parse<vName_t>( sFileName, vm, sChoice_SymbolName_Atm, false, vSymbolName_Atm );
       if ( bOk ) {
-        for ( Choices::vName_t::value_type& sn: choices.m_vSymbolName_Atm ) {
+        for ( vName_t::value_type& sn: vSymbolName_Atm ) {
           std::replace_if( sn.begin(), sn.end(), [](char ch)->bool{return '~' == ch;}, '#' );
+          choices.m_setSymbolName_Atm.emplace( sn );
+        }
+      }
+
+      bOk &= parse<vName_t>( sFileName, vm, sChoice_SymbolName_Greeks, false, vSymbolName_Greeks );
+      if ( bOk ) {
+        for ( vName_t::value_type& sn: vSymbolName_Greeks ) {
+          choices.m_setSymbolName_Greeks.emplace( sn );
         }
       }
 

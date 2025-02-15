@@ -57,17 +57,17 @@ Process::Process(
       }
     };
 
-  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_L1 ) {
+  for ( const config::Choices::setName_t::value_type& sIQFeedSymbolName: m_choices.m_setSymbolName_L1 ) {
     f( sIQFeedSymbolName, EToCollect::L1 );
   }
-  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_L2 ) {
+  for ( const config::Choices::setName_t::value_type& sIQFeedSymbolName: m_choices.m_setSymbolName_L2 ) {
     f( sIQFeedSymbolName, EToCollect::L2 );
   }
-  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_Greeks ) {
-    f( sIQFeedSymbolName, EToCollect::Greeks );
-  }
-  for ( const config::Choices::vName_t::value_type& sIQFeedSymbolName: m_choices.m_vSymbolName_Atm ) {
+  for ( const config::Choices::setName_t::value_type& sIQFeedSymbolName: m_choices.m_setSymbolName_Atm ) {
     f( sIQFeedSymbolName, EToCollect::ATM );
+  }
+  for ( const config::Choices::setName_t::value_type& sIQFeedSymbolName: m_choices.m_setSymbolName_Greeks ) {
+    f( sIQFeedSymbolName, EToCollect::Greeks );
   }
 
   StartIQFeed();
@@ -122,7 +122,7 @@ void Process::StartIQFeed() {
 void Process::HandleIQFeedConnected( int ) {
   m_fedrate.SetWatchOn( m_piqfeed );
   m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
-  if ( 0 < m_choices.m_vSymbolName_Atm.size() ) {
+  if ( 0 < m_choices.m_setSymbolName_Atm.size() ) {
     m_pOptionChainQuery = std::make_unique<ou::tf::iqfeed::OptionChainQuery>(
       [this](){ // once query engine is started up
         InitializeComposeInstrument();

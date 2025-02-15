@@ -21,8 +21,8 @@
 
 #pragma once
 
+#include <set>
 #include <string>
-#include <vector>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -30,17 +30,16 @@ namespace config {
 
 struct Choices {
 
-  // todo: convert to set to enforce uniqueness
-  using vName_t = std::vector<std::string>;
-  vName_t m_vSymbolName_L1;     // symbols with level 1 data
-  vName_t m_vSymbolName_L2;     // symbols with level 2 data
-  vName_t m_vSymbolName_Greeks; // greeks for options - add symbol to L1 for L1 data
-  vName_t m_vSymbolName_Atm;    // at the money greeks P+C - TODO need days to expiry (default to 2)
+  using setName_t = std::set<std::string>;
+  setName_t m_setSymbolName_L1;     // symbols with level 1 data
+  setName_t m_setSymbolName_L2;     // symbols with level 2 data
+  setName_t m_setSymbolName_Atm;    // at the money greeks P+C - TODO need days to expiry (default to 2)
+  setName_t m_setSymbolName_Greeks; // greeks for options - add symbol to L1 for L1 data
 
   std::string m_sStopTime;
   boost::posix_time::time_duration m_tdStopTime;
 
-  std::string m_sHDF5FileName; // to be implemented
+  //std::string m_sHDF5FileName; // to be implemented
 };
 
 bool Load( const std::string& sFileName, Choices& );
