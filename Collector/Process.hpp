@@ -78,7 +78,7 @@ private:
   enum class EToCollect { L1, L2, Greeks, ATM };
   using setToCollect_t = std::set<EToCollect>;
 
-  const std::string m_sPathName;
+  const std::string m_sDataPathName;
 
   const config::Choices& m_choices;
   boost::posix_time::ptime m_dtStop;

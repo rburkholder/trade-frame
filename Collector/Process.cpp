@@ -40,7 +40,7 @@ Process::Process(
 , const std::string& sTimeStamp
 , boost::posix_time::ptime dtStop)
 : m_choices( choices )
-, m_sPathName( c_sSaveValuesRoot + "/" + sTimeStamp )
+, m_sDataPathName( c_sSaveValuesRoot + "/" + sTimeStamp )
 , m_dtStop( dtStop )
 {
 
@@ -99,7 +99,7 @@ Process::~Process() {
 
   m_pOptionEngine.reset();
   m_fedrate.SetWatchOff();
-  m_fedrate.SaveSeries( m_sPathName );
+  m_fedrate.SaveSeries( m_sDataPathName );
 
   if ( m_pOptionChainQuery ) {
     m_pOptionChainQuery->Disconnect();
@@ -237,7 +237,7 @@ void Process::ConstructCollectorL1( pWatch_t pWatch ) {
 
   mapCollectL1_t::iterator iterCollectL1 = m_mapCollectL1.find( sSymbolName );
   if ( m_mapCollectL1.end() == iterCollectL1 ) {
-    auto result = m_mapCollectL1.emplace( sSymbolName, std::make_unique<collect::L1>( m_sPathName, pWatch ) );
+    auto result = m_mapCollectL1.emplace( sSymbolName, std::make_unique<collect::L1>( m_sDataPathName, pWatch ) );
     assert( result.second );
   }
   else {
@@ -260,7 +260,7 @@ void Process::ConstructCollectorL2( pWatch_t pWatch ) {
 
   mapCollectL2_t::iterator iterCollectL2 = m_mapCollectL2.find( sSymbolName );
   if ( m_mapCollectL2.end() == iterCollectL2 ) {
-    auto result = m_mapCollectL2.emplace( sSymbolName, std::make_unique<collect::L2>( m_sPathName, pWatch ) );
+    auto result = m_mapCollectL2.emplace( sSymbolName, std::make_unique<collect::L2>( m_sDataPathName, pWatch ) );
     assert( result.second );
   }
   else {
@@ -283,7 +283,7 @@ void Process::ConstructCollectorGreeks( pOption_t pOption ) {
 
   mapCollectGreeks_t::iterator iterCollectGreeks = m_mapCollectGreeks.find( sSymbolName );
   if ( m_mapCollectGreeks.end() == iterCollectGreeks ) {
-    auto result = m_mapCollectGreeks.emplace( sSymbolName, std::make_unique<collect::Greeks>( m_sPathName, pOption ) );
+    auto result = m_mapCollectGreeks.emplace( sSymbolName, std::make_unique<collect::Greeks>( m_sDataPathName, pOption ) );
     assert( result.second );
   }
   else {
@@ -316,7 +316,7 @@ void Process::ConstructCollectorATM( pWatch_t pWatch ) {
     auto result = m_mapCollectATM.emplace(
       sSymbolName,
       std::make_unique<collect::ATM>(
-        m_sPathName,
+        m_sDataPathName,
         pWatch,
         [this]( collect::ATM::pInstrument_t pInstrument )->collect::ATM::pOption_t { // fBuildOption_t
           pOption_t pOption = std::make_shared<ou::tf::option::Option>( pInstrument, m_piqfeed );
