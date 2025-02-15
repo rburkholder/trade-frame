@@ -35,10 +35,10 @@ namespace tf { // namespace tradeframe
 
 using fFillWrite_Hdf5Attribute_t = std::function<void(ou::tf::HDF5Attributes&)>; // one time callback on first write
 
-template<typename T> // ou::tf::Trades, ou::tf::Quotes - timeseries
+template<typename T> // timeseries, eg, ou::tf::Trades, ou::tf::Quotes
 class FillWrite {
 public:
-  FillWrite( const std::string& sPathName, fFillWrite_Hdf5Attribute_t&& );
+  FillWrite( const std::string& sDataPath, fFillWrite_Hdf5Attribute_t&& );
   ~FillWrite();
   void Append( const typename T::datum_t& );
   void Write(); // todo: use local timer
@@ -47,11 +47,12 @@ private:
 
   using rFillWrite_t = std::array<T,2>;
   rFillWrite_t m_rFillWrite; // one writes while one collects
+
   using ixFillWrite = std::atomic<typename rFillWrite_t::size_type>;
   ixFillWrite m_ixFilling;
   ixFillWrite m_ixWriting;
 
-  std::string m_sPathName;
+  std::string m_sDataPath;
 
   bool m_bHdf5AttributesSet;
   fFillWrite_Hdf5Attribute_t m_fFillWrite_Hdf5Attribute;
@@ -59,12 +60,12 @@ private:
 };
 
 template<typename T>
-FillWrite<T>::FillWrite( const std::string& sPathName, fFillWrite_Hdf5Attribute_t&& f )
+FillWrite<T>::FillWrite( const std::string& sDataPath, fFillWrite_Hdf5Attribute_t&& f )
 : m_bHdf5AttributesSet( false )
 , m_fFillWrite_Hdf5Attribute( std::move( f ) )
 , m_ixFilling( 0 )
 , m_ixWriting( 1 )
-, m_sPathName( sPathName )
+, m_sDataPath( sDataPath )
 {
   assert( m_fFillWrite_Hdf5Attribute );
 }
@@ -91,11 +92,11 @@ void FillWrite<T>::Write() {
   if ( 0 != m_rFillWrite[ m_ixWriting ].Size() ) {
     ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
     ou::tf::HDF5WriteTimeSeries<T> wts( dm, true, true, 5, 256 );
-    wts.Write( m_sPathName, &m_rFillWrite[ m_ixWriting ] );
+    wts.Write( m_sDataPath, &m_rFillWrite[ m_ixWriting ] );
 
     if ( !m_bHdf5AttributesSet ) {
       m_bHdf5AttributesSet = true;
-      ou::tf::HDF5Attributes attrT( dm, m_sPathName );
+      ou::tf::HDF5Attributes attrT( dm, m_sDataPath );
       attrT.SetSignature( T::datum_t::Signature() );
       m_fFillWrite_Hdf5Attribute( attrT ); // set typename T specific attributes
     }
