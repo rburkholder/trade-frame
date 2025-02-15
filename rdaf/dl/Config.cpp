@@ -107,3 +107,4 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 }
 
 } // namespace config
+
