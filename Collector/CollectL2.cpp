@@ -25,7 +25,7 @@
 
 namespace collect {
 
-L2::L2( const std::string& sPathPrefix, pWatch_t pWatch )
+L2::L2( const std::string& sFilePath, const std::string& sDataPathPrefix, pWatch_t pWatch )
 {
 
   // TODO: watch built elsewhere, needs to be restartable for a new day?
@@ -40,9 +40,9 @@ L2::L2( const std::string& sPathPrefix, pWatch_t pWatch )
   m_pWatch->RecordSeries( false ); // record manually in Write()
 
   {
-    const std::string sFullPath( sPathPrefix + ou::tf::Quotes::Directory() + pInstrument->GetInstrumentName() );
+    const std::string sFullDataPath( sDataPathPrefix + ou::tf::Quotes::Directory() + pInstrument->GetInstrumentName() );
     m_pfwDepthsByOrder = std::make_unique<fwDepthsByOrder_t>(
-      sFullPath,
+      sFilePath, sFullDataPath,
       [this]( ou::tf::HDF5Attributes& attr ){
         SetAttributes( attr, m_pWatch );
       } );

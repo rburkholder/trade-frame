@@ -33,7 +33,7 @@ public:
 
   using pOption_t = ou::tf::option::Option::pOption_t;
 
-  Greeks( const std::string& sPathPrefix, pOption_t );
+  Greeks( const std::string& sFilePath,const std::string& sDataPathPrefix, pOption_t );
   ~Greeks();
 
   void Write() override; // incremental write

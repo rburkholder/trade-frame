@@ -59,7 +59,8 @@ public:
 
   Process(
     const config::Choices&
-  , const std::string& sTimeStamp
+  , const std::string& sDateStreamStarted
+  , const std::string& sDTStreamStarted
   , boost::posix_time::ptime dtStop
   );
   ~Process();
@@ -78,6 +79,7 @@ private:
   enum class EToCollect { L1, L2, Greeks, ATM };
   using setToCollect_t = std::set<EToCollect>;
 
+  const std::string m_sFilePathName;
   const std::string m_sDataPathName;
 
   const config::Choices& m_choices;

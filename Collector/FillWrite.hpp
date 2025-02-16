@@ -38,7 +38,7 @@ using fFillWrite_Hdf5Attribute_t = std::function<void(ou::tf::HDF5Attributes&)>;
 template<typename T> // timeseries, eg, ou::tf::Trades, ou::tf::Quotes
 class FillWrite {
 public:
-  FillWrite( const std::string& sDataPath, fFillWrite_Hdf5Attribute_t&& );
+  FillWrite( const std::string& sFilePath, const std::string& sDataPath, fFillWrite_Hdf5Attribute_t&& );
   ~FillWrite();
   void Append( const typename T::datum_t& );
   void Write(); // todo: use local timer
@@ -52,7 +52,8 @@ private:
   ixFillWrite m_ixFilling;
   ixFillWrite m_ixWriting;
 
-  std::string m_sDataPath;
+  const std::string m_sFilePath;
+  const std::string m_sDataPath;
 
   bool m_bHdf5AttributesSet;
   fFillWrite_Hdf5Attribute_t m_fFillWrite_Hdf5Attribute;
@@ -60,11 +61,12 @@ private:
 };
 
 template<typename T>
-FillWrite<T>::FillWrite( const std::string& sDataPath, fFillWrite_Hdf5Attribute_t&& f )
+FillWrite<T>::FillWrite( const std::string& sFilePath, const std::string& sDataPath, fFillWrite_Hdf5Attribute_t&& f )
 : m_bHdf5AttributesSet( false )
 , m_fFillWrite_Hdf5Attribute( std::move( f ) )
 , m_ixFilling( 0 )
 , m_ixWriting( 1 )
+, m_sFilePath( sFilePath )
 , m_sDataPath( sDataPath )
 {
   assert( m_fFillWrite_Hdf5Attribute );
@@ -90,7 +92,7 @@ void FillWrite<T>::Write() {
   assert( 2 == ix );
 
   if ( 0 != m_rFillWrite[ m_ixWriting ].Size() ) {
-    ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR );
+    ou::tf::HDF5DataManager dm( ou::tf::HDF5DataManager::RDWR, m_sFilePath );
     ou::tf::HDF5WriteTimeSeries<T> wts( dm, true, true, 5, 256 );
     wts.Write( m_sDataPath, &m_rFillWrite[ m_ixWriting ] );
 

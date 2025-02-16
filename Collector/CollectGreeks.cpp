@@ -25,7 +25,7 @@
 
 namespace collect {
 
-Greeks::Greeks( const std::string& sPathPrefix, pOption_t pOption )
+Greeks::Greeks( const std::string& sFilePath, const std::string& sDataPathPrefix, pOption_t pOption )
 {
 
   // TODO: watch built elsewhere, needs to be restartable for a new day?
@@ -39,9 +39,9 @@ Greeks::Greeks( const std::string& sPathPrefix, pOption_t pOption )
   m_pOption->RecordSeries( false ); // record manually in Write()
 
   {
-    const std::string sFullPath( sPathPrefix + ou::tf::Quotes::Directory() + pInstrument->GetInstrumentName() );
+    const std::string sFullDataPath( sDataPathPrefix + ou::tf::Quotes::Directory() + pInstrument->GetInstrumentName() );
     m_pfwGreeks = std::make_unique<fwGreeks_t>(
-      sFullPath,
+      sFilePath, sDataPathPrefix,
       [this]( ou::tf::HDF5Attributes& attr ){
         SetAttributes( attr, m_pOption );
       } );

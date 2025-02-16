@@ -28,7 +28,9 @@
 namespace collect {
 
 ATM::ATM(
-  const std::string& sPathPrefix, pWatch_t pWatchUnderlying,
+  const std::string& sFilePath,
+  const std::string& sDataPathPrefix,
+  pWatch_t pWatchUnderlying,
   fBuildOption_t&& fBuildOption, fGatherOptions_t&& fGatherOptions,
   fEngine_t&& fEngineOptionStart, fEngine_t&& fEngineOptionStop,
   boost::gregorian::date dateStop // use for expiry calculation
@@ -47,9 +49,9 @@ ATM::ATM(
   m_pWatchUnderlying->RecordSeries( false ); // record manually in Write()
 
   {
-    const std::string sFullPath( sPathPrefix + ou::tf::PriceIVs::Directory() + m_pWatchUnderlying->GetInstrumentName() );
+    const std::string sFullDataPath( sDataPathPrefix + ou::tf::PriceIVs::Directory() + m_pWatchUnderlying->GetInstrumentName() );
     m_pfwATM = std::make_unique<fwATM_t>(
-      sFullPath,
+      sFilePath, sFullDataPath,
       [this]( ou::tf::HDF5Attributes& attr ){
         SetAttributes( attr, m_pWatchUnderlying );
       } );

@@ -61,6 +61,7 @@ int main( int argc, char* argv[] ) {
   std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> > m_pWork
     = std::make_unique<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> >( boost::asio::make_work_guard( m_context) );
 
+  std::string sDateStreamStarted;
   std::string sTSDataStreamStarted;
 
   boost::posix_time::ptime dtStop;
@@ -76,9 +77,11 @@ int main( int argc, char* argv[] ) {
   {
     const auto dt = ou::TimeSource::GlobalInstance().External(); // UTC
 
+    sDateStreamStarted = ou::tf::Instrument::BuildDate( dt.date() );
+
     std::stringstream ss;
     ss
-      << ou::tf::Instrument::BuildDate( dt.date() )
+      << sDateStreamStarted
       << "-"
       << dt.time_of_day()
       ;
@@ -114,7 +117,7 @@ int main( int argc, char* argv[] ) {
   //signals.add( SIGABRT );
 
   using pProcess_t = std::unique_ptr<Process>;
-  pProcess_t pProcess = std::make_unique<Process>( choices, sTSDataStreamStarted, dtStop );
+  pProcess_t pProcess = std::make_unique<Process>( choices, sDateStreamStarted, sTSDataStreamStarted, dtStop );
 
   signals.async_wait(
     [&pProcess,&timerStop,&timerWrite,&m_pWork](const boost::system::error_code& error_code, int signal_number){

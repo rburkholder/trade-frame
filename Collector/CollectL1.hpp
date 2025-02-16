@@ -33,7 +33,7 @@ public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
 
-  L1( const std::string& sPathPrefix, pWatch_t );
+  L1( const std::string& sFilePath, const std::string& sDataPathPrefix, pWatch_t );
   ~L1();
 
   void Write() override; // incremental write

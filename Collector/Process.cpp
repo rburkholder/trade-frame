@@ -31,16 +31,19 @@
 #include "Process.hpp"
 
 namespace {
+  static const std::string c_sFileNameSuffix( "collector.hdf5" );
   static const std::string c_sDBName( "collector.db" );
   static const std::string c_sSaveValuesRoot( "/app/collector" );
 }
 
 Process::Process(
   const config::Choices& choices
-, const std::string& sTimeStamp
+, const std::string& sDateStreamStarted
+, const std::string& sDTStreamStarted
 , boost::posix_time::ptime dtStop)
 : m_choices( choices )
-, m_sDataPathName( c_sSaveValuesRoot + "/" + sTimeStamp )
+, m_sFilePathName( sDateStreamStarted + '-' + c_sFileNameSuffix )
+, m_sDataPathName( c_sSaveValuesRoot + "/" + sDTStreamStarted )
 , m_dtStop( dtStop )
 {
 
@@ -237,7 +240,7 @@ void Process::ConstructCollectorL1( pWatch_t pWatch ) {
 
   mapCollectL1_t::iterator iterCollectL1 = m_mapCollectL1.find( sSymbolName );
   if ( m_mapCollectL1.end() == iterCollectL1 ) {
-    auto result = m_mapCollectL1.emplace( sSymbolName, std::make_unique<collect::L1>( m_sDataPathName, pWatch ) );
+    auto result = m_mapCollectL1.emplace( sSymbolName, std::make_unique<collect::L1>( m_sFilePathName, m_sDataPathName, pWatch ) );
     assert( result.second );
   }
   else {
@@ -260,7 +263,7 @@ void Process::ConstructCollectorL2( pWatch_t pWatch ) {
 
   mapCollectL2_t::iterator iterCollectL2 = m_mapCollectL2.find( sSymbolName );
   if ( m_mapCollectL2.end() == iterCollectL2 ) {
-    auto result = m_mapCollectL2.emplace( sSymbolName, std::make_unique<collect::L2>( m_sDataPathName, pWatch ) );
+    auto result = m_mapCollectL2.emplace( sSymbolName, std::make_unique<collect::L2>( m_sFilePathName, m_sDataPathName, pWatch ) );
     assert( result.second );
   }
   else {
@@ -283,7 +286,7 @@ void Process::ConstructCollectorGreeks( pOption_t pOption ) {
 
   mapCollectGreeks_t::iterator iterCollectGreeks = m_mapCollectGreeks.find( sSymbolName );
   if ( m_mapCollectGreeks.end() == iterCollectGreeks ) {
-    auto result = m_mapCollectGreeks.emplace( sSymbolName, std::make_unique<collect::Greeks>( m_sDataPathName, pOption ) );
+    auto result = m_mapCollectGreeks.emplace( sSymbolName, std::make_unique<collect::Greeks>( m_sFilePathName, m_sDataPathName, pOption ) );
     assert( result.second );
   }
   else {
@@ -316,7 +319,7 @@ void Process::ConstructCollectorATM( pWatch_t pWatch ) {
     auto result = m_mapCollectATM.emplace(
       sSymbolName,
       std::make_unique<collect::ATM>(
-        m_sDataPathName,
+        m_sFilePathName, m_sDataPathName,
         pWatch,
         [this]( collect::ATM::pInstrument_t pInstrument )->collect::ATM::pOption_t { // fBuildOption_t
           pOption_t pOption = std::make_shared<ou::tf::option::Option>( pInstrument, m_piqfeed );
