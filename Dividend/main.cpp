@@ -43,17 +43,19 @@ int main( int argc, char* argv[] ) {
   }
 
   std::cout
-    << "symbol,name,exchange,last($),yield(%),rate,amount,vol,exdiv,payed,shares,state,option"
+    << "symbol,name,exchange,last($),yield(%),ycalc,rate,amount,vol,exdiv,payed,shares,state,option"
     << std::endl;
 
   for ( vSymbols_t::value_type& vt: vSymbols ) {
-    if ( ( choices.m_dblMinimumYield < vt.yield ) && ( choices.m_nMinimumVolume <= vt.nAverageVolume ) ) {
+    //if ( ( choices.m_dblMinimumYield <= vt.yield ) && ( choices.m_nMinimumVolume <= vt.nAverageVolume ) ) {
+    if ( ( choices.m_dblMinimumYield <= vt.yield_calculated ) && ( choices.m_nMinimumVolume <= vt.nAverageVolume ) ) {
       std::cout
                << vt.sSymbol
         << ',' << vt.sCompanyName
         << ',' << vt.sExchange
         << ',' << vt.trade
         << ',' << vt.yield
+        << ',' << vt.yield_calculated
         << ',' << vt.rate
         << ',' << vt.amount
         << ',' << vt.nAverageVolume

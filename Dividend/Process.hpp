@@ -41,6 +41,7 @@ public:
     std::string sCompanyName;
     std::string sExchange;
     double yield;
+    double yield_calculated; // implemented as DTN not supplying yield
     double rate;
     double amount;
     double trade; // last trade

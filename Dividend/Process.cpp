@@ -110,7 +110,7 @@ void Process::HandleConnected( int ) {
       }
     },
     [this](){
-      std::cout << "symbol retrieval done" << std::endl;
+      std::cout << "symbol retrieval done, " << m_vSymbols.size() << " found" << std::endl;
       m_iterSymbols = m_vSymbols.begin();
       while ( ( m_choices.m_nMaxInTransit > m_mapInProgress.size() ) && ( m_vSymbols.end() != m_iterSymbols ) ) {
         Lookup();
@@ -159,6 +159,8 @@ void Process::Lookup() {
         dividend.dateExDividend = fundamentals.dateExDividend;
         dividend.nSharesOutstanding = fundamentals.dblCommonSharesOutstanding;
         dividend.sOptionRoots = fundamentals.sOptionRoots;
+
+        dividend.yield_calculated = 100.0 * ( dividend.rate / dividend.trade );
 
         mapSecurityState_t::const_iterator iterSecurity = m_mapSecurityState.find( dividend.sSymbol );
         if ( m_mapSecurityState.end() != iterSecurity ) {
