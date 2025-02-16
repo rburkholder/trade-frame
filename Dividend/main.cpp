@@ -19,8 +19,6 @@
  * Created: April 1, 2022  19:09
  */
 
-#include <TFTrading/TradingEnumerations.h>
-
 #include "Config.hpp"
 #include "Process.hpp"
 
