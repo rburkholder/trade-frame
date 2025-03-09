@@ -183,7 +183,9 @@ void Process::ConstructWatch( mapToCollect_t::value_type::second_type& value, pI
   switch ( pInstrument->GetInstrumentType() ) {
     case ou::tf::InstrumentType::EInstrumentType::Future:
     case ou::tf::InstrumentType::EInstrumentType::Currency:
-    case ou::tf::InstrumentType::EInstrumentType::Stock: {
+    case ou::tf::InstrumentType::EInstrumentType::Stock:
+    case ou::tf::InstrumentType::EInstrumentType::Index:
+      {
       pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
       value.pWatch = pWatch;
       ConstructCollectors( value.setToCollect, pWatch );
