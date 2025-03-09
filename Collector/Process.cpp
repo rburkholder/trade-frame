@@ -31,7 +31,7 @@
 #include "Process.hpp"
 
 namespace {
-  static const std::string c_sFileNameSuffix( "collector.hdf5" );
+  static const std::string c_sFileNameSuffix( ".hdf5" );
   static const std::string c_sDBName( "collector.db" );
   static const std::string c_sSaveValuesRoot( "/app/collector" );
 }
@@ -42,7 +42,7 @@ Process::Process(
 , const std::string& sDTStreamStarted
 , boost::posix_time::ptime dtStop)
 : m_choices( choices )
-, m_sFilePathName( sDateStreamStarted + '-' + c_sFileNameSuffix )
+, m_sFilePathName( "collector-" + sDateStreamStarted + c_sFileNameSuffix )
 , m_sDataPathName( c_sSaveValuesRoot + "/" + sDTStreamStarted )
 , m_dtStop( dtStop )
 {
