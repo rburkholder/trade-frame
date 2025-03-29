@@ -90,13 +90,14 @@ bool AppHdf5Chart::OnInit() {
   wxBoxSizer* m_sizerStatus = new wxBoxSizer( wxHORIZONTAL );
   sizerMain->Add( m_sizerStatus, 1, wxEXPAND|wxALL, 5 );
 
-  m_pFrameMain->Show( true );
-
   m_bData1Connected = false;
   m_bData2Connected = false;
   m_bExecConnected = false;
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppHdf5Chart::OnClose, this );  // start close of windows and controls
+
+  m_pFrameMain->Bind( wxEVT_MOVE, &AppHdf5Chart::OnFrameMainAutoMove, this ); // intercept first move
+  m_pFrameMain->Show( true ); // triggers the auto move
 
 //  std::string sTimeZoneSpec( "date_time_zonespec.csv" );
 //  if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
@@ -110,17 +111,26 @@ bool AppHdf5Chart::OnInit() {
 
 //  this->m_pData1Provider->Connect();
 
-  CallAfter(
-    [this](){
-      LoadState();
-    }
-  );
-
   return 1;
-
 }
 
-void AppHdf5Chart::SaveState() {
+void AppHdf5Chart::OnFrameMainAutoMove( wxMoveEvent& event ) {
+  // load state works properly _after_ first move (library initiated)
+
+    CallAfter(
+      [this](){
+        LoadState();
+        m_pFrameMain->Layout();
+      }
+    );
+
+    m_pFrameMain->Unbind( wxEVT_MOVE, &AppHdf5Chart::OnFrameMainAutoMove, this );
+
+    event.Skip(); // set to false if we want to ignore auto move
+
+  }
+
+  void AppHdf5Chart::SaveState() {
   std::cout << "Saving Config ..." << std::endl;
   std::ofstream ofs( c_sStateFileName );
   boost::archive::text_oarchive oa(ofs);

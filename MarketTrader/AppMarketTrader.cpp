@@ -84,13 +84,14 @@ bool AppMarketTrader::OnInit() {
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppMarketTrader::OnClose, this );  // start close of windows and controls
 
-  m_pFrameMain->Bind( wxEVT_MOVE, &AppMarketTrader::OnFrameMainAutoMove, this );
+  m_pFrameMain->Bind( wxEVT_MOVE, &AppMarketTrader::OnFrameMainAutoMove, this ); // intercept first move
   m_pFrameMain->Show( true ); // triggers the auto move
 
   return true;
 }
 
 void AppMarketTrader::OnFrameMainAutoMove( wxMoveEvent& event ) {
+// load state works properly _after_ first move (library initiated)
 
   CallAfter(
     [this](){

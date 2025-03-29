@@ -61,6 +61,8 @@ private:
 
   //void HandleMenuActionLoadTree( void );
 
+  void OnFrameMainAutoMove( wxMoveEvent& );
+
   void SaveState();
   void LoadState();
 
