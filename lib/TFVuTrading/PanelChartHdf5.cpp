@@ -13,7 +13,6 @@
  ************************************************************************/
 
 #include <wx/sizer.h>
-#include <wx/splitter.h>
 
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 
@@ -64,7 +63,6 @@ bool PanelChartHdf5::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos
   if (GetSizer()) {
       GetSizer()->SetSizeHints(this);
   }
-  Centre();
   return true;
 }
 
@@ -73,45 +71,52 @@ void PanelChartHdf5::CreateControls() {
   PanelChartHdf5* itemPanel1 = this;
 
   wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
-  itemPanel1->SetSizer(sizerMain);
+  itemPanel1->SetSizer( sizerMain );
 
   // splitter
-  wxSplitterWindow* splitter;
-  splitter = new wxSplitterWindow( this );
-  splitter->SetMinimumPaneSize(10);
-  splitter->SetSashGravity(0.2);
+  m_pSplitter = new wxSplitterWindow( this );
+  m_pSplitter->SetMinimumPaneSize( 20 );
+  m_pSplitter->SetSashGravity( 0.2 );
 
-  // tree
+  m_pSplitter->Bind(
+    wxEVT_SPLITTER_SASH_POS_CHANGING,  // during sash dragging
+    [this]( wxSplitterEvent& event ){
+      const int sash = m_pSplitter->GetSashSize();
+      const int min = m_pSplitter->GetMinimumPaneSize();
+      const int pos = event.GetSashPosition();
+      const int w3 = GetSize().GetWidth();
+      const int w4 = m_pSplitter->GetSize().GetWidth();
+      const int width = w4 - sash - min;
+      const double gravity = (double)pos / (double)width;
+
+      //std::cout
+      //  << "wxEVT_SPLITTER_SASH_POS_CHANGING"
+      //  << ',' << gravity
+      //  << ',' << pos
+      //  << ',' << w3 << ',' << w4
+      //  << std::endl;
+      m_pSplitter->SetSashGravity( gravity );
+      event.Skip();
+    } );
+
   //wxTreeCtrl* tree;
-  m_pHdf5Root = new wxTreeCtrl( splitter );
+  m_pHdf5Root = new wxTreeCtrl( m_pSplitter );
   m_eLatestDatumType = CustomItemData::NoDatum;
   wxTreeItemId idRoot = m_pHdf5Root->AddRoot( "/", -1, -1, new CustomItemData( CustomItemData::Root, m_eLatestDatumType ) );
   m_pHdf5Root->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &PanelChartHdf5::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId() );
-  //m_pFrameMain->Bind( wxEVT_COMMAND_TREE_ITEM_ACTIVATED, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId() );
-//  m_pFrameMain->Bind( wxEVT_COMMAND_TREE_ITEM_ACTIVATED, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId()  );
-//  m_pFrameMain->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId()  );
-//  m_pFrameMain->Bind( wxEVT_COMMAND_TREE_ITEM_RIGHT_CLICK, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId()  );
-//  m_pFrameMain->Bind( wxEVT_COMMAND_TREE_ITEM_MENU, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId()  );
-//  tree->AppendItem( idRoot, "second" );
-//  tree->AppendItem( idRoot, "third" );
 
   // panel for right side of splitter
   wxPanel* panelSplitterRightPanel;
-  panelSplitterRightPanel = new wxPanel( splitter );
+  panelSplitterRightPanel = new wxPanel( m_pSplitter );
 
-  splitter->SplitVertically( m_pHdf5Root, panelSplitterRightPanel, 0 );
-  sizerMain->Add( splitter, 1, wxGROW|wxALL, 5 );
+  m_pSplitter->SplitVertically( m_pHdf5Root, panelSplitterRightPanel, 0 );
+  sizerMain->Add( m_pSplitter, 1, wxGROW|wxALL, 5 );
 
   // sizer for right side of splitter
   wxBoxSizer* sizerRight;
   sizerRight = new wxBoxSizer( wxVERTICAL );
   panelSplitterRightPanel->SetSizer( sizerRight );
 
-  // initialize the tree
-  //m_pHdf5Root->DeleteChildren( m_pHdf5Root->GetRootItem() );
-
-  //m_bPaintingChart = false;
-  //m_bReadyToDrawChart = false;
   m_pWinChartView = new WinChartView( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
   sizerRight->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 5);
 

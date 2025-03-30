@@ -59,8 +59,6 @@ private:
   void OnData2Disconnected( int );
   void OnExecDisconnected( int );
 
-  //void HandleMenuActionLoadTree( void );
-
   void OnFrameMainAutoMove( wxMoveEvent& );
 
   void SaveState();
@@ -69,19 +67,21 @@ private:
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
-    //ar & m_splitPanels->GetSashPosition();
+    ar & *m_pPanelChartHdf5;
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
-    //m_splitPanels->SetSashPosition( x );
+    if ( 2 <= version ) {
+      ar & *m_pPanelChartHdf5;
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
-BOOST_CLASS_VERSION(AppHdf5Chart, 1)
+BOOST_CLASS_VERSION(AppHdf5Chart, 2)
 DECLARE_APP(AppHdf5Chart)
 

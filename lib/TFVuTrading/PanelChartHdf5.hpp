@@ -20,7 +20,11 @@
 
 // TODO: refactor to use PanelFinancialChart when complete?
 
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <wx/treectrl.h>
+#include <wx/splitter.h>
 
 #include "WinChartView.h"
 #include "ModelChartHdf5.h"
@@ -35,6 +39,7 @@ namespace tf { // TradeFrame
 #define SYMBOL_PANEL_CHARTHDF5_POSITION wxDefaultPosition
 
 class PanelChartHdf5: public wxPanel {
+  friend class boost::serialization::access;
 public:
 
   PanelChartHdf5();
@@ -86,6 +91,7 @@ private:
   CustomItemData::EDatumType m_eLatestDatumType;  // need this until all timeseries have a signature attribute associated
 
   wxTreeCtrl* m_pHdf5Root;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
+  wxSplitterWindow* m_pSplitter;
 
   void OnDestroy( wxWindowDestroyEvent& event );
 
@@ -98,7 +104,40 @@ private:
 
   void HandleTreeEventItemActivated( wxTreeEvent& event );
 
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    {
+      double d( m_pSplitter->GetSashGravity() );
+      ar & d;
+      //std::cout << "PanelChartHdf5 gravity saved: " << d << std::endl;
+    }
+    {
+      //const int x( m_pSplitter->GetSashPosition() - m_pSplitter->GetMinimumPaneSize() );
+      //ar & x;
+      //std::cout << "PanelChartHdf5 splitter saved: " << x << std::endl;
+    }
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+
+    double d;
+    ar & d;
+    //std::cout << "PanelChartHdf5 gravity loaded: " << d << std::endl;
+    m_pSplitter->SetSashGravity( d );
+    // not perfect, sash is always GetMinimumPaneSize() too far right
+
+    //int x;
+    //ar & x;
+    //std::cout << "PanelChartHdf5 splitter loaded: " << x << std::endl;
+    //m_pSplitter->SetSashPosition( x );
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 };
 
 } // namespace tf
 } // namespace ou
+
+BOOST_CLASS_VERSION(ou::tf::PanelChartHdf5, 1)

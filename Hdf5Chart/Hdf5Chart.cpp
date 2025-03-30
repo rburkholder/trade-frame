@@ -44,6 +44,10 @@ bool AppHdf5Chart::OnInit() {
 
   wxApp::OnInit();
 
+  if ( !wxApp::OnInit() ) {
+    return false;
+  }
+
   if ( config::Load( c_sChoicesFilename, m_choices ) ) {
   }
   else {
@@ -58,10 +62,6 @@ bool AppHdf5Chart::OnInit() {
 
   m_pFrameMain = new FrameMain( nullptr, wxID_ANY, "Hdf5 Chart" );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
-  //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
-  //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
-  //m_pFrameMain->Center();
-//  m_pFrameMain->Move( -2500, 50 );
   m_pFrameMain->SetSize( 800, 500 );
   SetTopWindow( m_pFrameMain );
 
@@ -74,13 +74,10 @@ bool AppHdf5Chart::OnInit() {
   wxBoxSizer* m_sizerControls;
   m_sizerControls = new wxBoxSizer( wxHORIZONTAL );
   sizerMain->Add( m_sizerControls, 0, wxEXPAND|wxLEFT|wxTOP|wxRIGHT, 5 );
-  //panelSplitterRight->SetSizer( m_sizerControls );
-  //sizerRight->Add( m_sizerControls, 0, wxStretch::wxEXPAND|wxALL, 5 );
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
   m_sizerControls->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 0);
-  m_pPanelLogging->SetMinSize( wxSize( 100, 100 ) );
-//  m_pPanelLogging->Show( true );
+  m_pPanelLogging->SetMinSize( wxSize( wxID_ANY, 200 ) ); // minimum height
 
   m_pPanelChartHdf5 = new ou::tf::PanelChartHdf5( m_choices.m_sHdf5File );
   m_pPanelChartHdf5->Create( m_pFrameMain, wxID_ANY );
