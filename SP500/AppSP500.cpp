@@ -19,6 +19,23 @@
  * Created: March 30, 2025 13:49:15
  */
 
+/*
+  * start by viewing SPY or SPX as primary chart from HDF5 file
+  * add in the SP Tick/Trin/Advance/Decline/ratio indicators
+  * add in some indicators, maybe try the garch studies?
+  * run simulator for validation
+  * add in the ml ability?
+  * run live simulation - iqfeed
+  * run live - ib
+*/
+
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+
+#include <wx/sizer.h>
+
+#include <TFVuTrading/FrameMain.h>
+
 #include "AppSP500.hpp"
 
 namespace {
@@ -39,10 +56,67 @@ bool AppSP500::OnInit() {
   wxApp::SetVendorName( c_sVendorName );
   wxApp::SetVendorDisplayName( "(c)2025 " + c_sVendorName );
 
-  wxApp::OnInit();
+  if ( !wxApp::OnInit() ) {
+    return false;
+  }
+
+  m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppTitle );
+  wxWindowID idFrameMain = m_pFrameMain->GetId();
+
+  m_pFrameMain->SetSize( 800, 500 );
+
+  SetTopWindow( m_pFrameMain );
+
+  wxBoxSizer* sizerFrame;
+  wxBoxSizer* sizerUpper;
+  wxBoxSizer* sizerLower;
+
+  sizerFrame = new wxBoxSizer( wxVERTICAL );
+  m_pFrameMain->SetSizer( sizerFrame );
+
+  m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppSP500::OnClose, this );  // start close of windows and controls
+  m_pFrameMain->Bind( wxEVT_MOVE, &AppSP500::OnFrameMainAutoMove, this ); // intercept first move
+  m_pFrameMain->Show( true ); // triggers the auto move
 
   return true;
 
+}
+
+void AppSP500::OnFrameMainAutoMove( wxMoveEvent& event ) {
+  // load state works properly _after_ first move (library initiated)
+
+  CallAfter(
+    [this](){
+      LoadState();
+      m_pFrameMain->Layout();
+    }
+  );
+
+  m_pFrameMain->Unbind( wxEVT_MOVE, &AppSP500::OnFrameMainAutoMove, this );
+
+  event.Skip(); // set to false if we want to ignore auto move
+
+}
+
+void AppSP500::SaveState() {
+  std::cout << "Saving Config ..." << std::endl;
+  std::ofstream ofs( c_sStateFileName );
+  boost::archive::text_oarchive oa(ofs);
+  oa & *this;
+  std::cout << "  done." << std::endl;
+}
+
+void AppSP500::LoadState() {
+  try {
+    std::cout << "Loading Config ..." << std::endl;
+    std::ifstream ifs( c_sStateFileName );
+    boost::archive::text_iarchive ia(ifs);
+    ia & *this;
+    std::cout << "  done." << std::endl;
+  }
+  catch(...) {
+    std::cout << "load exception" << std::endl;
+  }
 }
 
 int AppSP500::OnExit() {
@@ -65,7 +139,7 @@ void AppSP500::OnClose( wxCloseEvent& event ) {
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a
-  //SaveState();
+  SaveState();
   event.Skip();  // auto followed by Destroy();
 }
 

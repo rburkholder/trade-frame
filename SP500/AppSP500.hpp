@@ -26,19 +26,45 @@
 
 #include <wx/app.h>
 
+#include <TFBitsNPieces/FrameWork02.hpp>
+
 #include <OUCharting/ChartDataView.h>
+
+class FrameMain;
 
 class AppSP500:
   public wxApp
+, public ou::tf::FrameWork02<AppSP500>
 {
   friend class boost::serialization::access;
+  friend ou::tf::FrameWork02<AppSP500>;
 public:
 protected:
 private:
 
+  FrameMain* m_pFrameMain;
+
+  void OnFrameMainAutoMove( wxMoveEvent& );
+
+
   virtual bool OnInit();
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );
+
+  void SaveState();
+  void LoadState();
+
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    ar & *m_pFrameMain;
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    ar & *m_pFrameMain;
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 

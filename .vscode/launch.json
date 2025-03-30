@@ -10,6 +10,28 @@
   },
   "configurations": [
 
+
+    {
+      "name": "(gdb) S&P 500 Trader",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/SP500/SP500",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/debug",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
     {
       "name": "(gdb) Market Trader",
       "type": "cppdbg",
