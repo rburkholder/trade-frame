@@ -48,8 +48,6 @@ protected:
 
 private:
 
-  void HandlePanelClosing();
-
 };
 
 template<typename CRTP>
@@ -74,10 +72,6 @@ FrameWork02<CRTP>::FrameWork02() :
 
 template<typename CRTP>
 FrameWork02<CRTP>::~FrameWork02() {
-}
-
-template<typename CRTP>
-void FrameWork02<CRTP>::HandlePanelClosing() {
 }
 
 } // namespace tf
