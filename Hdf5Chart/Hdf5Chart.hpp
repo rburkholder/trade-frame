@@ -70,12 +70,16 @@ private:
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
+    ar & m_sHdf5FileName;
     ar & *m_pFrameMain;
     ar & *m_pPanelChartHdf5;
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
+    if ( 3 <= version ) {
+      ar & m_sHdf5FileName;
+    }
     ar & *m_pFrameMain;
     if ( 2 <= version ) {
       ar & *m_pPanelChartHdf5;
@@ -86,6 +90,6 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(AppHdf5Chart, 2)
+BOOST_CLASS_VERSION(AppHdf5Chart, 3)
 DECLARE_APP(AppHdf5Chart)
 

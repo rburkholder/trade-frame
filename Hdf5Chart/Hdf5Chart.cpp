@@ -51,15 +51,14 @@ bool AppHdf5Chart::OnInit() {
 
   if ( config::Load( c_sChoicesFilename, m_choices ) ) {
     m_sHdf5FileName = m_choices.m_sHdf5File;
+    if ( boost::filesystem::exists( m_sHdf5FileName ) ) {}
+    else {
+      BOOST_LOG_TRIVIAL(error) << m_sHdf5FileName << " does not exist";
+      return false;
+    }
   }
   else {
-    return false;
-  }
-
-  if ( boost::filesystem::exists( m_sHdf5FileName ) ) {}
-  else {
-    BOOST_LOG_TRIVIAL(error) << m_sHdf5FileName << " does not exist";
-    return false;
+    // choices is default to tradeframe.hdf5
   }
 
   m_pFrameMain = new FrameMain( nullptr, wxID_ANY, "Hdf5 Chart" );
@@ -122,8 +121,12 @@ void AppHdf5Chart::OnFrameMainAutoMove( wxMoveEvent& event ) {
 
     CallAfter(
       [this](){
+        const std::string sOldFileName( m_sHdf5FileName );
         LoadState();
         m_pFrameMain->Layout();
+        if ( sOldFileName != m_sHdf5FileName ) {
+          m_pPanelChartHdf5->SetFileName( m_sHdf5FileName );
+        }
       }
     );
 
