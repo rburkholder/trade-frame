@@ -145,7 +145,6 @@ private:
       ar & y;
       wxSize size( x, y );
       SetSize( size );
-      //Layout(); // needs to be in caller
 
       ar & x;
       ar & y;
