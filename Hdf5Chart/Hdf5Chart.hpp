@@ -42,6 +42,8 @@ public:
 protected:
 private:
 
+  std::string m_sHdf5FileName;
+
   config::Choices m_choices;
 
   FrameMain* m_pFrameMain;
@@ -58,6 +60,8 @@ private:
   void OnData1Disconnected( int );
   void OnData2Disconnected( int );
   void OnExecDisconnected( int );
+
+  void HandleSelectHdf5File( wxCommandEvent& event );
 
   void OnFrameMainAutoMove( wxMoveEvent& );
 

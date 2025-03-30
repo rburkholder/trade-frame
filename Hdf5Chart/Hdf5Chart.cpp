@@ -20,6 +20,7 @@
 #include <boost/archive/text_oarchive.hpp>
 
 #include <wx/sizer.h>
+#include <wx/filedlg.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
@@ -49,14 +50,15 @@ bool AppHdf5Chart::OnInit() {
   }
 
   if ( config::Load( c_sChoicesFilename, m_choices ) ) {
+    m_sHdf5FileName = m_choices.m_sHdf5File;
   }
   else {
     return false;
   }
 
-  if ( boost::filesystem::exists( m_choices.m_sHdf5File ) ) {}
+  if ( boost::filesystem::exists( m_sHdf5FileName ) ) {}
   else {
-    BOOST_LOG_TRIVIAL(error) << m_choices.m_sHdf5File << " does not exist";
+    BOOST_LOG_TRIVIAL(error) << m_sHdf5FileName << " does not exist";
     return false;
   }
 
@@ -77,9 +79,9 @@ bool AppHdf5Chart::OnInit() {
 
   m_pPanelLogging = new ou::tf::PanelLogging( m_pFrameMain, wxID_ANY );
   m_sizerControls->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 0);
-  m_pPanelLogging->SetMinSize( wxSize( wxID_ANY, 200 ) ); // minimum height
+  m_pPanelLogging->SetMinSize( wxSize( wxID_ANY, 100 ) ); // minimum height
 
-  m_pPanelChartHdf5 = new ou::tf::PanelChartHdf5( m_choices.m_sHdf5File );
+  m_pPanelChartHdf5 = new ou::tf::PanelChartHdf5( m_sHdf5FileName );
   m_pPanelChartHdf5->Create( m_pFrameMain, wxID_ANY );
   //m_pPanelChartHdf5 = new ou::tf::PanelChartHdf5( m_pFrameMain, wxID_ANY );
   sizerMain->Add( m_pPanelChartHdf5, 1, wxALL | wxEXPAND, 0);
@@ -100,6 +102,10 @@ bool AppHdf5Chart::OnInit() {
 //  if ( !boost::filesystem::exists( sTimeZoneSpec ) ) {
 //    std::cout << "Required file does not exist:  " << sTimeZoneSpec << std::endl;
 //  }
+
+  int ixItem;
+  ixItem = m_pFrameMain->AddFileMenuItem( _( "Select HDF5 File" ) );
+  m_pFrameMain->Bind( wxEVT_COMMAND_MENU_SELECTED, &AppHdf5Chart::HandleSelectHdf5File, this, ixItem, -1 );
 
   FrameMain::vpItems_t vItems;
   typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
@@ -127,7 +133,28 @@ void AppHdf5Chart::OnFrameMainAutoMove( wxMoveEvent& event ) {
 
   }
 
-  void AppHdf5Chart::SaveState() {
+void AppHdf5Chart::HandleSelectHdf5File( wxCommandEvent& event ) {
+  CallAfter(
+    [this](){
+      wxFileDialog
+        openFileDialog(
+          m_pFrameMain,
+          _("Select HDF5 file"),
+          "", // default dir
+          m_sHdf5FileName, // default file
+          "HDF5 files (*.hdf5)|*.hdf5",
+          wxFD_OPEN|wxFD_FILE_MUST_EXIST
+        );
+      if ( wxID_CANCEL == openFileDialog.ShowModal() ) {}
+      else {
+        m_sHdf5FileName = openFileDialog.GetPath();
+        std::cout << "hdf5 file selected " << m_sHdf5FileName << std::endl;
+        m_pPanelChartHdf5->SetFileName( m_sHdf5FileName );
+      }
+    } );
+}
+
+void AppHdf5Chart::SaveState() {
   std::cout << "Saving Config ..." << std::endl;
   std::ofstream ofs( c_sStateFileName );
   boost::archive::text_oarchive oa(ofs);

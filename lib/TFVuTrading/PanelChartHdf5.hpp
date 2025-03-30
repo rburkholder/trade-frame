@@ -20,6 +20,8 @@
 
 // TODO: refactor to use PanelFinancialChart when complete?
 
+#include <memory>
+
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
@@ -57,9 +59,7 @@ public:
     const wxSize& size = SYMBOL_PANEL_CHARTHDF5_SIZE,
     long style = SYMBOL_PANEL_CHARTHDF5_STYLE );
 
-  static bool ShowToolTips() { return true; };
-  wxBitmap GetBitmapResource( const wxString& name );
-  //wxIcon GetIconResource( const wxString& name );
+  void SetFileName( const std::string& sFileName );
 
 protected:
 
@@ -79,7 +79,8 @@ private:
       : m_eNodeType( eNodeType ), m_eDatumType( eDatumType ) {};
   };
 
-  ou::tf::HDF5DataManager* m_pdm;
+  using pHDF5DataManager_t = std::unique_ptr<ou::tf::HDF5DataManager>;
+  pHDF5DataManager_t m_pdm;
 
   ou::ChartDataView* m_pChartDataView;
   WinChartView* m_pWinChartView;
@@ -97,12 +98,18 @@ private:
 
   size_t LoadDataAndGenerateChart( CustomItemData::EDatumType, const std::string& sPath );
 
+  void IterateObjects();
+
   void HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 );
   void HandleLoadTreeHdf5Object( const std::string& s1, const std::string& s2 );
 
   void HandleBuildTreePathParts( const std::string& sPath );
 
   void HandleTreeEventItemActivated( wxTreeEvent& event );
+
+  static bool ShowToolTips() { return true; };
+  wxBitmap GetBitmapResource( const wxString& name );
+  //wxIcon GetIconResource( const wxString& name );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
