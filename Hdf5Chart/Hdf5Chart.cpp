@@ -43,8 +43,6 @@ bool AppHdf5Chart::OnInit() {
   wxApp::SetAppDisplayName( c_sAppName );
   wxApp::SetVendorDisplayName( "(c)2024 " + c_sVendorName );
 
-  wxApp::OnInit();
-
   if ( !wxApp::OnInit() ) {
     return false;
   }
