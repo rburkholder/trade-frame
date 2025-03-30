@@ -96,7 +96,6 @@ bool AppCurrencyTrader::OnInit() {
   wxWindowID idFrameMain = m_pFrameMain->GetId();
 
   m_pFrameMain->SetSize( 800, 500 );
-  //m_pFrameMain->SetAutoLayout( true );
 
   SetTopWindow( m_pFrameMain );
 
