@@ -13,64 +13,24 @@
  ************************************************************************/
 
 /*
- * File:    AppSP500.hpp
+ * File:    Config.hpp
  * Author:  raymond@burkholder.net
  * Project: SP500
- * Created: March 30, 2025 13:49:15
+ * Created: March 30, 2025 17:59:23
  */
 
 #pragma once
 
-#include <boost/serialization/version.hpp>
-#include <boost/serialization/split_member.hpp>
+#include <string>
 
-#include <wx/app.h>
+namespace config {
 
-#include <TFBitsNPieces/FrameWork02.hpp>
+struct Choices {
 
-#include <OUCharting/ChartDataView.h>
-
-#include "Config.hpp"
-
-class FrameMain;
-
-class AppSP500:
-  public wxApp
-, public ou::tf::FrameWork02<AppSP500>
-{
-  friend class boost::serialization::access;
-  friend ou::tf::FrameWork02<AppSP500>;
-public:
-protected:
-private:
-
-  config::Choices m_choices;
-
-  FrameMain* m_pFrameMain;
-
-  void OnFrameMainAutoMove( wxMoveEvent& );
-
-  virtual bool OnInit();
-  virtual int OnExit();
-  void OnClose( wxCloseEvent& event );
-
-  void SaveState();
-  void LoadState();
-
-  template<typename Archive>
-  void save( Archive& ar, const unsigned int version ) const {
-    ar & *m_pFrameMain;
-  }
-
-  template<typename Archive>
-  void load( Archive& ar, const unsigned int version ) {
-    ar & *m_pFrameMain;
-  }
-
-  BOOST_SERIALIZATION_SPLIT_MEMBER()
+  std::string m_sHdf5File; // optional
 
 };
 
-BOOST_CLASS_VERSION(AppSP500, 1)
+bool Load( const std::string& sFileName, Choices& );
 
-DECLARE_APP(AppSP500)
+} // namespace config

@@ -24,11 +24,13 @@ find_package(Boost ${TF_BOOST_VERSION} CONFIG REQUIRED COMPONENTS system date_ti
 set(
   file_h
     AppSP500.hpp
+    Config.hpp
   )
 
 set(
   file_cpp
     AppSP500.cpp
+    Config.cpp
   )
 
 add_executable(

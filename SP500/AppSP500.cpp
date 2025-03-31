@@ -29,6 +29,8 @@
   * run live - ib
 */
 
+#include <boost/log/trivial.hpp>
+
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
@@ -58,6 +60,17 @@ bool AppSP500::OnInit() {
 
   if ( !wxApp::OnInit() ) {
     return false;
+  }
+
+  if ( config::Load( c_sChoicesFilename, m_choices ) ) {
+    if ( boost::filesystem::exists( m_choices.m_sHdf5File ) ) {}
+    else {
+      BOOST_LOG_TRIVIAL(error) << m_choices.m_sHdf5File << " does not exist";
+      return false;
+    }
+  }
+  else {
+    // choices is default to tradeframe.hdf5
   }
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppTitle );
