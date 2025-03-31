@@ -46,7 +46,7 @@ namespace {
   static const std::string c_sChoicesFilename( c_sAppNamePrefix + ".cfg" );
   static const std::string c_sDbName(          c_sAppNamePrefix + ".db" );
   static const std::string c_sStateFileName(   c_sAppNamePrefix + ".state" );
-  static const std::string c_sTimeZoneSpec( "../date_time_zonespec.csv" );
+  //static const std::string c_sTimeZoneSpec( "../date_time_zonespec.csv" );
   static const std::string c_sVendorName( "One Unified Net Limited" );
 }
 
