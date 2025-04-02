@@ -16,8 +16,6 @@
 // used by BasketTrading
 // similar to PanelChartHdf5 (which might be refactorable/replaceable)
 
-#include <functional>
-
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
@@ -89,23 +87,24 @@ private:
 
   void OnDestroy( wxWindowDestroyEvent& event );
 
-  static bool ShowToolTips() { return true; };
-  wxBitmap GetBitmapResource( const wxString& name );
-  wxIcon GetIconResource( const wxString& name );
-
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-    ar & m_pSplitter->GetSashPosition();
+    double d( m_pSplitter->GetSashGravity() );
+    ar & d;
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
-    int x;
-    ar & x;
-    m_pSplitter->SetSashPosition( x );
+    double d;
+    ar & d;
+    m_pSplitter->SetSashGravity( d );
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+  static bool ShowToolTips() { return true; };
+  wxBitmap GetBitmapResource( const wxString& name );
+  wxIcon GetIconResource( const wxString& name );
 
 };
 

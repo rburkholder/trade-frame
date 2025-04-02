@@ -66,6 +66,27 @@ void PanelFinancialChart::CreateControls() {
   m_pSplitter = new wxSplitterWindow( this );
   m_pSplitter->SetMinimumPaneSize( pxLeftPanelSize );
   m_pSplitter->SetSashGravity( 0.0 );
+  m_pSplitter->Bind( // seems to be the way for state recovery of sash position
+    wxEVT_SPLITTER_SASH_POS_CHANGING,  // during sash dragging
+    [this]( wxSplitterEvent& event ){
+      const int sash = m_pSplitter->GetSashSize();
+      const int min = m_pSplitter->GetMinimumPaneSize();
+      const int pos = event.GetSashPosition();
+      const int w3 = GetSize().GetWidth();
+      const int w4 = m_pSplitter->GetSize().GetWidth();
+      const int width = w4 - sash - min;
+      const double gravity = (double)pos / (double)width;
+
+      //std::cout
+      //  << "wxEVT_SPLITTER_SASH_POS_CHANGING"
+      //  << ',' << gravity
+      //  << ',' << pos
+      //  << ',' << w3 << ',' << w4
+      //  << std::endl;
+      m_pSplitter->SetSashGravity( gravity );
+      event.Skip();
+    } );
+
 
   // tree
   m_pTree = new wxTreeCtrl( m_pSplitter, wxID_ANY, wxDefaultPosition, wxSize(100, 100), wxTR_HAS_BUTTONS |wxTR_TWIST_BUTTONS|wxTR_SINGLE );
