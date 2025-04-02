@@ -19,6 +19,7 @@
 // used by Hdf5Chart
 
 // TODO: refactor to use PanelFinancialChart when complete?
+//   inherit from PanelFinancialChart?
 
 #include <memory>
 
@@ -107,10 +108,6 @@ private:
 
   void HandleTreeEventItemActivated( wxTreeEvent& event );
 
-  static bool ShowToolTips() { return true; };
-  wxBitmap GetBitmapResource( const wxString& name );
-  //wxIcon GetIconResource( const wxString& name );
-
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     {
@@ -127,7 +124,6 @@ private:
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
-
     double d;
     ar & d;
     //std::cout << "PanelChartHdf5 gravity loaded: " << d << std::endl;
@@ -141,6 +137,10 @@ private:
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+  static bool ShowToolTips() { return true; };
+  wxBitmap GetBitmapResource( const wxString& name );
+  wxIcon GetIconResource( const wxString& name );
 
 };
 

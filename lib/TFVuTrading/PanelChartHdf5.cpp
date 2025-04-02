@@ -78,7 +78,7 @@ void PanelChartHdf5::CreateControls() {
   m_pSplitter->SetMinimumPaneSize( 20 );
   m_pSplitter->SetSashGravity( 0.2 );
 
-  m_pSplitter->Bind(
+  m_pSplitter->Bind( // seems to be the way for state recovery of sash position
     wxEVT_SPLITTER_SASH_POS_CHANGING,  // during sash dragging
     [this]( wxSplitterEvent& event ){
       const int sash = m_pSplitter->GetSashSize();
@@ -285,14 +285,14 @@ size_t PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::EDatumType edt,
 }
 
 wxBitmap PanelChartHdf5::GetBitmapResource( const wxString& name ) {
-    wxUnusedVar(name);
-    return wxNullBitmap;
+  wxUnusedVar(name);
+  return wxNullBitmap;
 }
 
-//wxIcon PanelChartHdf5::GetIconResource( const wxString& name ) {
-//    wxUnusedVar(name);
-//    return wxNullIcon;
-//}
+wxIcon PanelChartHdf5::GetIconResource( const wxString& name ) {
+  wxUnusedVar(name);
+  return wxNullIcon;
+}
 
 } // namespace tf
 } // namespace ou
