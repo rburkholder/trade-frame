@@ -60,6 +60,7 @@ set(
     PanelProviderControl.h
     PanelProviderControlv2.hpp
     TreeItem.hpp
+    TreeItem_ItemData.hpp
     ValidatorInstrumentName.h
 #    VisibleItemAttributes.h
     VisibleItemInDevContext.h

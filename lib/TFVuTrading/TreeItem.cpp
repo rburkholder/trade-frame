@@ -23,30 +23,11 @@
 #include <wx/treectrl.h>
 
 #include "TreeItem.hpp"
+#include "TreeItem_ItemData.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-class CustomItemData_Base: public wxTreeItemData {
-public:
-
-  CustomItemData_Base( TreeItem* pTreeItem ) // self?
-  : wxTreeItemData(), m_pTreeItem( pTreeItem ) {}
-
-  ~CustomItemData_Base() {
-    // assumes binds are cleared as well
-    if ( m_pTreeItem ) {
-      delete m_pTreeItem;
-      m_pTreeItem = nullptr;
-    }
-  }
-
-  TreeItem* GetTreeItem() { return m_pTreeItem; }
-
-protected:
-private:
-  TreeItem* m_pTreeItem;
-};
 
 // ================================
 
