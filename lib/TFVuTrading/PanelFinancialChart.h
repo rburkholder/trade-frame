@@ -15,6 +15,7 @@
 
 // used by BasketTrading
 // similar to PanelChartHdf5 (which might be refactorable/replaceable)
+// used to interactively build out a tree
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -44,10 +45,6 @@ class PanelFinancialChart: public wxPanel {
   friend class boost::serialization::access;
 public:
 
-  using TreeItem = ou::tf::TreeItem;
-
-  using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
-
   PanelFinancialChart();
   PanelFinancialChart(
     wxWindow* parent,
@@ -55,7 +52,7 @@ public:
     const wxPoint& pos = SYMBOL_PANELFINANCIALCHART_POSITION,
     const wxSize& size = SYMBOL_PANELFINANCIALCHART_SIZE,
     long style = SYMBOL_PANELFINANCIALCHART_STYLE );
-  ~PanelFinancialChart();
+  virtual ~PanelFinancialChart();
 
   bool Create(
     wxWindow* parent, wxWindowID id = SYMBOL_PANELFINANCIALCHART_IDNAME,
@@ -63,25 +60,29 @@ public:
     const wxSize& size = SYMBOL_PANELFINANCIALCHART_SIZE,
     long style = SYMBOL_PANELFINANCIALCHART_STYLE );
 
+  using TreeItem = ou::tf::TreeItem;
+  using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
+
   TreeItem* SetRoot( const std::string& sName, pChartDataView_t );
-  void SetChartDataView( pChartDataView_t );
+  void SetChartDataView( pChartDataView_t, bool bReCalcViewPort = true ); // does not own ptr
 
 protected:
 
   enum { ID_Null=wxID_HIGHEST, ID_PANELFINANCIALCHART, ID_CHART
   };
 
+  wxTreeCtrl* m_pTree;
+
+  void CreateControls();
+
 private:
 
-  wxTreeCtrl* m_pTree;
-  TreeItem* m_pTreeItem; // root of custom tree items
+  TreeItem* m_pTreeItem; // // root of custom tree items
+
   wxSplitterWindow* m_pSplitter;
 
-  WinChartView* m_pWinChartView; // handles drawing the chart
+  WinChartView* m_pWinChartView; // handles drawing the chart; use shared_ptr?
   pChartDataView_t m_pChartDataView; // for use with tooltip
-
-  void Init();
-  void CreateControls();
 
   void HandleTreeEventItemGetToolTip( wxTreeEvent& );
 

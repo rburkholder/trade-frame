@@ -27,13 +27,11 @@ namespace tf { // TradeFrame
 PanelFinancialChart::PanelFinancialChart()
 : wxPanel(), m_pWinChartView( nullptr )
 {
-  Init();
 }
 
 PanelFinancialChart::PanelFinancialChart( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style )
 : wxPanel(), m_pWinChartView( nullptr )
 {
-  Init();
   Create(parent, id, pos, size, style);
 }
 
@@ -42,6 +40,7 @@ PanelFinancialChart::~PanelFinancialChart() {
 }
 
 bool PanelFinancialChart::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
+
   wxPanel::Create( parent, id, pos, size, style );
 
   CreateControls();
@@ -49,9 +48,6 @@ bool PanelFinancialChart::Create( wxWindow* parent, wxWindowID id, const wxPoint
       GetSizer()->SetSizeHints(this);
   }
   return true;
-}
-
-void PanelFinancialChart::Init() {
 }
 
 void PanelFinancialChart::CreateControls() {
@@ -88,13 +84,11 @@ void PanelFinancialChart::CreateControls() {
     } );
 
 
-  // tree
+  // wxTreeCtrl* tree;
   m_pTree = new wxTreeCtrl( m_pSplitter, wxID_ANY, wxDefaultPosition, wxSize(100, 100), wxTR_HAS_BUTTONS |wxTR_TWIST_BUTTONS|wxTR_SINGLE );
   TreeItem::Bind( this, m_pTree );
   m_pTree->ExpandAll();
   m_pTree->Bind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &PanelFinancialChart::HandleTreeEventItemGetToolTip, this, m_pTree->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
-
-  //m_pTreeItem = new TreeItem( m_pTree, "/" ); // initialize tree - instead this is supplied by outside caller
 
   // panel for right side of splitter
   m_pWinChartView = new WinChartView( m_pSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
@@ -102,14 +96,6 @@ void PanelFinancialChart::CreateControls() {
   m_pSplitter->SplitVertically( m_pTree, m_pWinChartView, 0 );
   sizerMain->Add( m_pSplitter, 1, wxEXPAND|wxALL, 2);
   m_pSplitter->SetSashPosition( pxLeftPanelSize );
-
-  // sizer for right side of splitter
-  //wxBoxSizer* sizerRight = new wxBoxSizer( wxVERTICAL );
-  //panelSplitterRightPanel->SetSizer( sizerRight );
-
-  //sizerRight->Add( m_pWinChartView, 1, wxEXPAND|wxALL, 2);
-
-  //pSplitter->SetSashPosition()
 
   Bind( wxEVT_DESTROY, &PanelFinancialChart::OnDestroy, this );
 }
@@ -132,8 +118,8 @@ TreeItem* PanelFinancialChart::SetRoot( const std::string& sName, pChartDataView
   return m_pTreeItem;
 }
 
-void PanelFinancialChart::SetChartDataView( pChartDataView_t pChartDataView ) {
-  m_pWinChartView->SetChartDataView( pChartDataView.get() );
+void PanelFinancialChart::SetChartDataView( pChartDataView_t pChartDataView, bool bReCalcViewPort  ) {
+  m_pWinChartView->SetChartDataView( pChartDataView.get(), bReCalcViewPort );
   m_pChartDataView = pChartDataView;
 }
 
@@ -146,6 +132,8 @@ void PanelFinancialChart::HandleTreeEventItemGetToolTip( wxTreeEvent& event ) {
 
 void PanelFinancialChart::OnDestroy( wxWindowDestroyEvent& event ) {
   m_pTree->Unbind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &PanelFinancialChart::HandleTreeEventItemGetToolTip, this, m_pTree->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
+  //TreeItem::UnBind( this, m_pTree );
+  m_pTree->DeleteAllItems();
   Unbind( wxEVT_DESTROY, &PanelFinancialChart::OnDestroy, this );
   event.Skip();  // auto followed by Destroy();
 }
