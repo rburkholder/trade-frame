@@ -27,27 +27,25 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-// ================================
-
-class CustomItemData: public wxTreeItemData {
+class CustomItemData_Base: public wxTreeItemData {
 public:
 
-  CustomItemData( TreeItem* pSelf ) // self?
-  : wxTreeItemData(), m_pSelf( pSelf ) {}
+  CustomItemData_Base( TreeItem* pTreeItem ) // self?
+  : wxTreeItemData(), m_pTreeItem( pTreeItem ) {}
 
-  ~CustomItemData() {
+  ~CustomItemData_Base() {
     // assumes binds are cleared as well
-    if ( m_pSelf ) {
-      delete m_pSelf;
-      m_pSelf = nullptr;
+    if ( m_pTreeItem ) {
+      delete m_pTreeItem;
+      m_pTreeItem = nullptr;
     }
   }
 
-  TreeItem* GetTreeItem() { return m_pSelf; }
+  TreeItem* GetTreeItem() { return m_pTreeItem; }
 
 protected:
 private:
-  TreeItem* m_pSelf;
+  TreeItem* m_pTreeItem;
 };
 
 // ================================
@@ -58,7 +56,7 @@ TreeItem::TreeItem( wxTreeCtrl* tree, const std::string& sText )
 {
   assert( nullptr != tree );
   m_pMenuPopup = new wxMenu();
-  m_idSelf = m_pTreeCtrl->AddRoot( sText, -1, -1, new CustomItemData( this ) );
+  m_idSelf = m_pTreeCtrl->AddRoot( sText, -1, -1, new CustomItemData_Base( this ) );
 }
 
 TreeItem::TreeItem( wxTreeCtrl* tree, wxTreeItemId idParent, const std::string& sText ) // private constructor
@@ -67,7 +65,7 @@ TreeItem::TreeItem( wxTreeCtrl* tree, wxTreeItemId idParent, const std::string& 
 {
   assert( nullptr != tree );
   m_pMenuPopup = new wxMenu();
-  m_idSelf = m_pTreeCtrl->AppendItem( idParent, sText, -1, -1, new CustomItemData( this ) );
+  m_idSelf = m_pTreeCtrl->AppendItem( idParent, sText, -1, -1, new CustomItemData_Base( this ) );
 }
 
 TreeItem::~TreeItem() {
@@ -159,7 +157,8 @@ void TreeItem::AppendMenuItem( const std::string& sText, fOnClick_t&& fOnClick )
     );
 }
 
-/* static */ void TreeItem::Bind( wxWindow* pWindow, wxTreeCtrl* pTree ) {
+/* static */
+void TreeItem::Bind( wxWindow* pWindow, wxTreeCtrl* pTree ) {
 
   assert( pWindow );
   assert( pTree );
@@ -169,7 +168,7 @@ void TreeItem::AppendMenuItem( const std::string& sText, fOnClick_t&& fOnClick )
     [pTree]( wxTreeEvent& event ){
       wxTreeItemData* pData = pTree->GetItemData( event.GetItem() );
       if ( nullptr != pData ) {
-        CustomItemData* pCustom = dynamic_cast<CustomItemData*>( pData );
+        CustomItemData_Base* pCustom = dynamic_cast<CustomItemData_Base*>( pData );
         pCustom->GetTreeItem()->HandleTreeEventItemChanged();
       }
     },
@@ -181,7 +180,7 @@ void TreeItem::AppendMenuItem( const std::string& sText, fOnClick_t&& fOnClick )
     [pTree,pWindow]( wxTreeEvent& event ){
       wxTreeItemData* pData = pTree->GetItemData( event.GetItem() );
       assert( nullptr != pData );
-      CustomItemData* pCustom = dynamic_cast<CustomItemData*>( pData );
+      CustomItemData_Base* pCustom = dynamic_cast<CustomItemData_Base*>( pData );
       pCustom->GetTreeItem()->HandleTreeEventItemMenu(); // build a new menu if needed
       wxMenu* pMenuPopup = pCustom->GetTreeItem()->m_pMenuPopup;
       if ( pMenuPopup ) {
@@ -196,13 +195,25 @@ void TreeItem::AppendMenuItem( const std::string& sText, fOnClick_t&& fOnClick )
     [pTree]( wxTreeEvent& event ){
       wxTreeItemData* pData = pTree->GetItemData( event.GetItem() );
       assert( nullptr != pData );
-      CustomItemData* pCustom = dynamic_cast<CustomItemData*>( pData );
+      CustomItemData_Base* pCustom = dynamic_cast<CustomItemData_Base*>( pData );
       pCustom->GetTreeItem()->Deleted( event.GetItem() );
     },
     pTree->GetId()
   );
 
 }
+
+/* static */
+//void TreeItem::UnBind( wxWindow* pWindow, wxTreeCtrl* pTree ) {
+
+//  assert( pWindow );
+//  assert( pTree );
+
+  //pTree->Unbind( wxEVT_TREE_SEL_CHANGED, nullptr, pTree->GetId() );
+  //pTree->Unbind( wxEVT_TREE_ITEM_MENU, nullptr, pTree->GetId() );
+  //pTree->Unbind( wxEVT_TREE_DELETE_ITEM, nullptr, pTree->GetId() );
+
+//}
 
 } // namespace tf
 } // namespace ou

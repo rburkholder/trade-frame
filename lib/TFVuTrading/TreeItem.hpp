@@ -59,6 +59,7 @@ public:
   void AppendMenuItem( const std::string& sText, fOnClick_t&& );
 
   static void Bind( wxWindow*, wxTreeCtrl* );  // Initialize event handling
+  //static void UnBind( wxWindow*, wxTreeCtrl* ); // lambdas need to be methods
 
 protected:
 private:
