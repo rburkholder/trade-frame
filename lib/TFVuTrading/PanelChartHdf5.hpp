@@ -18,19 +18,15 @@
 
 // used by Hdf5Chart
 
-// TODO: refactor to use PanelFinancialChart when complete?
-//   inherit from PanelFinancialChart?
-
 #include <memory>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
 #include <wx/treectrl.h>
-#include <wx/splitter.h>
 
-#include "WinChartView.h"
 #include "ModelChartHdf5.h"
+#include "PanelFinancialChart.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -41,12 +37,11 @@ namespace tf { // TradeFrame
 #define SYMBOL_PANEL_CHARTHDF5_SIZE wxSize(400, 300)
 #define SYMBOL_PANEL_CHARTHDF5_POSITION wxDefaultPosition
 
-class PanelChartHdf5: public wxPanel {
+class PanelChartHdf5: public PanelFinancialChart {
   friend class boost::serialization::access;
 public:
 
   PanelChartHdf5();
-  PanelChartHdf5( const std::string& sFileName );
   PanelChartHdf5(
     wxWindow* parent, wxWindowID id = SYMBOL_PANEL_CHARTHDF5_IDNAME,
     const wxPoint& pos = SYMBOL_PANEL_CHARTHDF5_POSITION,
@@ -60,11 +55,11 @@ public:
     const wxSize& size = SYMBOL_PANEL_CHARTHDF5_SIZE,
     long style = SYMBOL_PANEL_CHARTHDF5_STYLE );
 
+  PanelChartHdf5( const std::string& sFileName );
   void SetFileName( const std::string& sFileName );
 
 protected:
 
-  void Init();
   void CreateControls();
 
 private:
@@ -72,32 +67,26 @@ private:
   enum { ID_Null=wxID_HIGHEST, ID_PANEL_CHARTHDF5 };
 
   // TODO: convert to TreeItem
-  class CustomItemData: public wxTreeItemData { // wxTreeCtrl node/leaf info
+  class CustomItemData_Hdf5: public wxTreeItemData { // wxTreeCtrl node/leaf info
   public:
     enum ENodeType { Root, Group, Object } m_eNodeType;
     enum EDatumType { Quotes, Trades, Bars, Greeks, AtmIV, DepthsByMM, DepthsByOrder, PriceIVs, NoDatum } m_eDatumType;
-    CustomItemData( ENodeType eNodeType, EDatumType eDatumType )
-      : m_eNodeType( eNodeType ), m_eDatumType( eDatumType ) {};
+    CustomItemData_Hdf5( ENodeType eNodeType, EDatumType eDatumType )
+    : m_eNodeType( eNodeType ), m_eDatumType( eDatumType ) {};
   };
 
   using pHDF5DataManager_t = std::unique_ptr<ou::tf::HDF5DataManager>;
   pHDF5DataManager_t m_pdm;
 
-  ou::ChartDataView* m_pChartDataView;
-  WinChartView* m_pWinChartView;
-
   ModelChartHdf5 m_ModelChartHdf5;
+
+  ou::ChartDataView::pChartDataView_t m_pChartDataView;
 
   std::string m_sCurrentPath;  // used while traversing and building tree
   wxTreeItemId m_curTreeItem; // used while traversing and building tree
-  CustomItemData::EDatumType m_eLatestDatumType;  // need this until all timeseries have a signature attribute associated
+  CustomItemData_Hdf5::EDatumType m_eLatestDatumType;  // need this until all timeseries have a signature attribute associated
 
-  wxTreeCtrl* m_pHdf5Root;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
-  wxSplitterWindow* m_pSplitter;
-
-  void OnDestroy( wxWindowDestroyEvent& event );
-
-  size_t LoadDataAndGenerateChart( CustomItemData::EDatumType, const std::string& sPath );
+  size_t LoadDataAndGenerateChart( CustomItemData_Hdf5::EDatumType, const std::string& sPath );
 
   void IterateObjects();
 
@@ -110,37 +99,15 @@ private:
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-    {
-      double d( m_pSplitter->GetSashGravity() );
-      ar & d;
-      //std::cout << "PanelChartHdf5 gravity saved: " << d << std::endl;
-    }
-    {
-      //const int x( m_pSplitter->GetSashPosition() - m_pSplitter->GetMinimumPaneSize() );
-      //ar & x;
-      //std::cout << "PanelChartHdf5 splitter saved: " << x << std::endl;
-    }
+    //PanelFinancialChart::save( ar, version );
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
-    double d;
-    ar & d;
-    //std::cout << "PanelChartHdf5 gravity loaded: " << d << std::endl;
-    m_pSplitter->SetSashGravity( d );
-    // not perfect, sash is always GetMinimumPaneSize() too far right
-
-    //int x;
-    //ar & x;
-    //std::cout << "PanelChartHdf5 splitter loaded: " << x << std::endl;
-    //m_pSplitter->SetSashPosition( x );
+    //PanelFinancialChart::load( ar, version );
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-  static bool ShowToolTips() { return true; };
-  wxBitmap GetBitmapResource( const wxString& name );
-  wxIcon GetIconResource( const wxString& name );
 
 };
 

@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include <wx/sizer.h>
-
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 
 #include "PanelChartHdf5.hpp"
@@ -24,45 +22,35 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 PanelChartHdf5::PanelChartHdf5()
-: wxPanel(),
-  m_pChartDataView( nullptr ), m_pWinChartView( nullptr ), m_pdm( nullptr )
+: PanelFinancialChart(),
+  m_pChartDataView( nullptr ), m_pdm( nullptr )
 {
-  Init();
 }
 
 PanelChartHdf5::PanelChartHdf5( const std::string& sFileName )
-: wxPanel(),
-  m_pChartDataView( nullptr ), m_pWinChartView( nullptr ), m_pdm( nullptr )
+: PanelFinancialChart(),
+  m_pChartDataView( nullptr ), m_pdm( nullptr )
 {
   m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO, sFileName );
-  Init();
 }
 
 PanelChartHdf5::PanelChartHdf5( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style )
-: wxPanel(),
-  m_pChartDataView( nullptr ), m_pWinChartView( nullptr ), m_pdm( nullptr )
+: PanelFinancialChart(),
+  m_pChartDataView( nullptr ), m_pdm( nullptr )
 {
-  Init();
   Create( parent, id, pos, size, style );
 }
 
 PanelChartHdf5::~PanelChartHdf5() {
-  m_pWinChartView->SetChartDataView( nullptr );
-  if ( nullptr != m_pChartDataView ) delete m_pChartDataView;
+  m_pChartDataView.reset();
   m_pdm.reset();
-}
-
-void PanelChartHdf5::Init() {
 }
 
 bool PanelChartHdf5::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
 
-  wxPanel::Create( parent, id, pos, size, style );
+  PanelFinancialChart::Create( parent, id, pos, size, style );
 
   CreateControls();
-  if (GetSizer()) {
-      GetSizer()->SetSizeHints(this);
-  }
   return true;
 }
 
@@ -70,55 +58,11 @@ void PanelChartHdf5::CreateControls() {
 
   PanelChartHdf5* itemPanel1 = this;
 
-  wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
-  itemPanel1->SetSizer( sizerMain );
-
-  // splitter
-  m_pSplitter = new wxSplitterWindow( this );
-  m_pSplitter->SetMinimumPaneSize( 20 );
-  m_pSplitter->SetSashGravity( 0.2 );
-
-  m_pSplitter->Bind( // seems to be the way for state recovery of sash position
-    wxEVT_SPLITTER_SASH_POS_CHANGING,  // during sash dragging
-    [this]( wxSplitterEvent& event ){
-      const int sash = m_pSplitter->GetSashSize();
-      const int min = m_pSplitter->GetMinimumPaneSize();
-      const int pos = event.GetSashPosition();
-      const int w3 = GetSize().GetWidth();
-      const int w4 = m_pSplitter->GetSize().GetWidth();
-      const int width = w4 - sash - min;
-      const double gravity = (double)pos / (double)width;
-
-      //std::cout
-      //  << "wxEVT_SPLITTER_SASH_POS_CHANGING"
-      //  << ',' << gravity
-      //  << ',' << pos
-      //  << ',' << w3 << ',' << w4
-      //  << std::endl;
-      m_pSplitter->SetSashGravity( gravity );
-      event.Skip();
-    } );
-
-  //wxTreeCtrl* tree;
-  m_pHdf5Root = new wxTreeCtrl( m_pSplitter );
-  m_eLatestDatumType = CustomItemData::NoDatum;
-  wxTreeItemId idRoot = m_pHdf5Root->AddRoot( "/", -1, -1, new CustomItemData( CustomItemData::Root, m_eLatestDatumType ) );
-  m_pHdf5Root->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &PanelChartHdf5::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId() );
-
-  // panel for right side of splitter
-  wxPanel* panelSplitterRightPanel;
-  panelSplitterRightPanel = new wxPanel( m_pSplitter );
-
-  m_pSplitter->SplitVertically( m_pHdf5Root, panelSplitterRightPanel, 0 );
-  sizerMain->Add( m_pSplitter, 1, wxGROW|wxALL, 5 );
-
-  // sizer for right side of splitter
-  wxBoxSizer* sizerRight;
-  sizerRight = new wxBoxSizer( wxVERTICAL );
-  panelSplitterRightPanel->SetSizer( sizerRight );
-
-  m_pWinChartView = new WinChartView( panelSplitterRightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER );
-  sizerRight->Add( m_pWinChartView, 1, wxALL|wxEXPAND, 5);
+  // wxTreeCtrl* tree;
+  m_pTree->DeleteAllItems(); // start the tree fresh with our own flavbour
+  m_eLatestDatumType = CustomItemData_Hdf5::NoDatum;
+  wxTreeItemId idRoot = m_pTree->AddRoot( "/", -1, -1, new CustomItemData_Hdf5( CustomItemData_Hdf5::Root, m_eLatestDatumType ) );
+  m_pTree->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &PanelChartHdf5::HandleTreeEventItemActivated, this, m_pTree->GetId() );
 
   if ( nullptr == m_pdm ) {
     m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO );
@@ -126,22 +70,12 @@ void PanelChartHdf5::CreateControls() {
 
   IterateObjects();
 
-  Bind( wxEVT_DESTROY, &PanelChartHdf5::OnDestroy, this );  // start close of windows and controls
-
-}
-
-void PanelChartHdf5::OnDestroy( wxWindowDestroyEvent& event ) {
-  // Exit Steps: #2 -> FrameMain::OnClose
-//  if ( 0 != OnPanelClosing ) OnPanelClosing();
-  // event.Veto();  // possible call, if needed
-  // event.CanVeto(); // if not a
-  event.Skip();  // auto followed by Destroy();
 }
 
 void PanelChartHdf5::SetFileName( const std::string& sPathName ) {
   m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO, sPathName );
-  wxTreeItemId itemRoot = m_pHdf5Root->GetRootItem();
-  m_pHdf5Root->DeleteChildren( itemRoot );
+  wxTreeItemId itemRoot = m_pTree->GetRootItem();
+  m_pTree->DeleteChildren( itemRoot );
   IterateObjects();
 }
 
@@ -156,42 +90,42 @@ void PanelChartHdf5::IterateObjects() {
 }
 
 void PanelChartHdf5::HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 ) {
-  m_eLatestDatumType = CustomItemData::NoDatum;
-  if ( "quotes" == s2 ) m_eLatestDatumType = CustomItemData::Quotes;
-  if ( "trades" == s2 ) m_eLatestDatumType = CustomItemData::Trades;
-  if ( "bar" == s2 ) m_eLatestDatumType = CustomItemData::Bars;
-  if ( "atmiv" == s2 ) m_eLatestDatumType = CustomItemData::AtmIV;
-  if ( "priceiv" == s2 ) m_eLatestDatumType = CustomItemData::PriceIVs;
-  if ( "greeks" == s2 ) m_eLatestDatumType = CustomItemData::Greeks;
-  if ( "depths" == s2 ) m_eLatestDatumType = CustomItemData::DepthsByMM; // deprecated style 2022/04/30
-  if ( "depths_mm" == s2 ) m_eLatestDatumType = CustomItemData::DepthsByMM;
-  if ( "depths_o" == s2 ) m_eLatestDatumType = CustomItemData::DepthsByOrder;
+  m_eLatestDatumType = CustomItemData_Hdf5::NoDatum;
+  if ( "quotes" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::Quotes;
+  if ( "trades" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::Trades;
+  if ( "bar" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::Bars;
+  if ( "atmiv" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::AtmIV;
+  if ( "priceiv" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::PriceIVs;
+  if ( "greeks" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::Greeks;
+  if ( "depths" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::DepthsByMM; // deprecated style 2022/04/30
+  if ( "depths_mm" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::DepthsByMM;
+  if ( "depths_o" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::DepthsByOrder;
   m_sCurrentPath = s1;
-  m_curTreeItem = m_pHdf5Root->GetRootItem();  // should be '/'
+  m_curTreeItem = m_pTree->GetRootItem();  // should be '/'
   m_pdm->IteratePathParts( s1, [this]( const std::string& path){ HandleBuildTreePathParts( path ); } );
 }
 
 void PanelChartHdf5::HandleLoadTreeHdf5Object( const std::string& s1, const std::string& s2 ) {
   // assume group has us in the correct place, just add in the object now
-  m_pHdf5Root->AppendItem( m_curTreeItem, s2, -1, -1, new CustomItemData( CustomItemData::Object, m_eLatestDatumType ) );
+  m_pTree->AppendItem( m_curTreeItem, s2, -1, -1, new CustomItemData_Hdf5( CustomItemData_Hdf5::Object, m_eLatestDatumType ) );
 }
 
 void PanelChartHdf5::HandleBuildTreePathParts( const std::string& sPathPart ) {
   wxTreeItemIdValue tiv;
-  wxTreeItemId ti = m_pHdf5Root->GetFirstChild( m_curTreeItem, tiv );
+  wxTreeItemId ti = m_pTree->GetFirstChild( m_curTreeItem, tiv );
   bool bItemFound( false );
   while ( ti.IsOk() ) {
-    if ( sPathPart == m_pHdf5Root->GetItemText( ti ) ) {
+    if ( sPathPart == m_pTree->GetItemText( ti ) ) {
       m_curTreeItem = ti;
       bItemFound = true;
       break;
     }
     else {
-      ti = m_pHdf5Root->GetNextChild( m_curTreeItem, tiv );
+      ti = m_pTree->GetNextChild( m_curTreeItem, tiv );
     }
   }
   if ( !bItemFound ) {
-    m_curTreeItem = m_pHdf5Root->AppendItem( m_curTreeItem, sPathPart, -1, -1, new CustomItemData( CustomItemData::Group, CustomItemData::NoDatum ) );
+    m_curTreeItem = m_pTree->AppendItem( m_curTreeItem, sPathPart, -1, -1, new CustomItemData_Hdf5( CustomItemData_Hdf5::Group, CustomItemData_Hdf5::NoDatum ) );
   }
 
 }
@@ -201,28 +135,28 @@ void PanelChartHdf5::HandleTreeEventItemActivated( wxTreeEvent& event ) {
   wxTreeItemId id = event.GetItem();
 
   wxTreeItemId id2 = id;
-  std::string sPath = std::string( m_pHdf5Root->GetItemText( id2 ).ToStdString() ); // start here and prefix the path
+  std::string sPath = std::string( m_pTree->GetItemText( id2 ).ToStdString() ); // start here and prefix the path
   while ( true ) {
-    id2 = m_pHdf5Root->GetItemParent( id2 );
+    id2 = m_pTree->GetItemParent( id2 );
     if ( !id2.IsOk() ) break;
     sPath = "/" + sPath;
-    std::string sTmpElement( m_pHdf5Root->GetItemText( id2 ) );
+    std::string sTmpElement( m_pTree->GetItemText( id2 ) );
     if ( "/" != sTmpElement ) {
       sPath = sTmpElement + sPath;
     }
   }
 
-  CustomItemData* pdata = dynamic_cast<CustomItemData*>( m_pHdf5Root->GetItemData( id ) );
+  CustomItemData_Hdf5* pdata = dynamic_cast<CustomItemData_Hdf5*>( m_pTree->GetItemData( id ) );
 
   size_t cntSeriesElements {};
 
   switch ( pdata->m_eNodeType ) {
-  case CustomItemData::Root:
+  case CustomItemData_Hdf5::Root:
     break;
-  case CustomItemData::Group:
+  case CustomItemData_Hdf5::Group:
     sPath += "/";
     break;
-  case CustomItemData::Object:
+  case CustomItemData_Hdf5::Object:
     // load and view time series here
     cntSeriesElements = LoadDataAndGenerateChart( pdata->m_eDatumType, sPath );
     break;
@@ -232,66 +166,55 @@ void PanelChartHdf5::HandleTreeEventItemActivated( wxTreeEvent& event ) {
 
 }
 
-size_t PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData::EDatumType edt, const std::string& sPath ) {
+size_t PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData_Hdf5::EDatumType edt, const std::string& sPath ) {
 
   if ( nullptr != m_pChartDataView ) {
-    m_pWinChartView->SetChartDataView( nullptr );
-    delete m_pChartDataView;
-    m_pChartDataView = nullptr;
+    SetChartDataView( nullptr );
+    m_pChartDataView.reset();
   }
-  m_pChartDataView = new ou::ChartDataView;
+  m_pChartDataView = std::make_shared<ou::ChartDataView>();
 
   size_t cntSeriesElements {};
 
-  if ( CustomItemData::NoDatum == edt ) {
+  if ( CustomItemData_Hdf5::NoDatum == edt ) {
     std::cout << "Can't do this chart type" << std::endl;
   }
   else {
     switch ( edt ) {
-    case CustomItemData::Bars:
-      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Bars>( m_pdm.get(), m_pChartDataView, "Bars", sPath );
+    case CustomItemData_Hdf5::Bars:
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Bars>( m_pdm.get(), m_pChartDataView.get(), "Bars", sPath );
       break;
-    case CustomItemData::Quotes:
-      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Quotes>( m_pdm.get(), m_pChartDataView, "Quotes", sPath );
+    case CustomItemData_Hdf5::Quotes:
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Quotes>( m_pdm.get(), m_pChartDataView.get(), "Quotes", sPath );
       break;
-    case CustomItemData::Trades:
-      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Trades>( m_pdm.get(), m_pChartDataView, "Trades", sPath );
+    case CustomItemData_Hdf5::Trades:
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Trades>( m_pdm.get(), m_pChartDataView.get(), "Trades", sPath );
       break;
-    case CustomItemData::AtmIV:
-      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<PriceIVExpirys>( m_pdm.get(), m_pChartDataView, "Price IV Expiry", sPath );
+    case CustomItemData_Hdf5::AtmIV:
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<PriceIVExpirys>( m_pdm.get(), m_pChartDataView.get(), "Price IV Expiry", sPath );
       break;
-    case CustomItemData::PriceIVs:
-      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<PriceIVs>( m_pdm.get(), m_pChartDataView, "Price IV", sPath );
+    case CustomItemData_Hdf5::PriceIVs:
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<PriceIVs>( m_pdm.get(), m_pChartDataView.get(), "Price IV", sPath );
       break;
-    case CustomItemData::Greeks:
-      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Greeks>( m_pdm.get(), m_pChartDataView, "Greeks", sPath );
+    case CustomItemData_Hdf5::Greeks:
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<Greeks>( m_pdm.get(), m_pChartDataView.get(), "Greeks", sPath );
       break;
-    case CustomItemData::DepthsByMM:
+    case CustomItemData_Hdf5::DepthsByMM:
       std::cout << "DepthsByMM will not show data" << std::endl;
-      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<DepthsByMM>( m_pdm.get(), m_pChartDataView, "DepthsByMM", sPath );
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<DepthsByMM>( m_pdm.get(), m_pChartDataView.get(), "DepthsByMM", sPath );
       break;
-    case CustomItemData::DepthsByOrder:
+    case CustomItemData_Hdf5::DepthsByOrder:
       std::cout << "DepthsByOrder will not show data" << std::endl;
-      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<DepthsByOrder>( m_pdm.get(), m_pChartDataView, "DepthsByOrder", sPath );
+      cntSeriesElements = m_ModelChartHdf5.ChartTimeSeries<DepthsByOrder>( m_pdm.get(), m_pChartDataView.get(), "DepthsByOrder", sPath );
       break;
     default:
-      throw std::runtime_error("unknown CustomItemData");
+      throw std::runtime_error("unknown CustomItemData_Hdf5");
     }
   }
 
-  m_pWinChartView->SetChartDataView( m_pChartDataView, false );
+  SetChartDataView( m_pChartDataView, false );
 
   return cntSeriesElements;
-}
-
-wxBitmap PanelChartHdf5::GetBitmapResource( const wxString& name ) {
-  wxUnusedVar(name);
-  return wxNullBitmap;
-}
-
-wxIcon PanelChartHdf5::GetIconResource( const wxString& name ) {
-  wxUnusedVar(name);
-  return wxNullIcon;
 }
 
 } // namespace tf
