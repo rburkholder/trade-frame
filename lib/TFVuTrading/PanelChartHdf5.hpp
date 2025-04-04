@@ -26,7 +26,7 @@
 #include <wx/treectrl.h>
 
 #include "ModelChartHdf5.h"
-#include "PanelFinancialChart.h"
+#include "PanelFinancialChart.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

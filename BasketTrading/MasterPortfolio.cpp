@@ -33,7 +33,7 @@
 
 #include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/FrameControls.h>
-#include <TFVuTrading/PanelFinancialChart.h>
+#include <TFVuTrading/PanelFinancialChart.hpp>
 #include <TFVuTrading/PanelComboOrder.hpp>
 
 #include "MoneyManager.hpp"

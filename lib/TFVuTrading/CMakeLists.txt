@@ -47,7 +47,7 @@ set(
     NotebookOptionChains.h
     PanelChartHdf5.hpp
     PanelComboOrder.hpp
-    PanelFinancialChart.h
+    PanelFinancialChart.hpp
     PanelLogging.h
     PanelManualOrder.h
     PanelOptionCombo.h

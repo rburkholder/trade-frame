@@ -19,7 +19,7 @@
 
 #include <TFVuTrading/TreeItem.hpp>
 
-#include "PanelFinancialChart.h"
+#include "PanelFinancialChart.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
