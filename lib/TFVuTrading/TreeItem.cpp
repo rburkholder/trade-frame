@@ -66,11 +66,9 @@ TreeItem::~TreeItem() {
   //std::cout << m_idSelf << std::endl;
 }
 
-TreeItem* TreeItem::AppendChild( const std::string& sText, fOnClick_t&& fOnClick, fOnBuildPopUp_t&& fOnBuildPopUp ) {
-  TreeItem* pTreeItemChild = AppendChild( sText );
-  pTreeItemChild->SetOnClick( std::move( fOnClick ) );
-  pTreeItemChild->SetOnBuildPopUp( std::move( fOnBuildPopUp ) );
-  return pTreeItemChild;
+TreeItem* TreeItem::AppendChild( const std::string& sText ) {
+  TreeItem* pTreeItem = new TreeItem( m_pTreeCtrl, m_idSelf, sText );
+  return pTreeItem;
 }
 
 TreeItem* TreeItem::AppendChild( const std::string& sText, fOnClick_t&& fOnClick ) {
@@ -79,9 +77,11 @@ TreeItem* TreeItem::AppendChild( const std::string& sText, fOnClick_t&& fOnClick
   return pTreeItemChild;
 }
 
-TreeItem* TreeItem::AppendChild( const std::string& sText ) {
-  TreeItem* pTreeItem = new TreeItem( m_pTreeCtrl, m_idSelf, sText );
-  return pTreeItem;
+TreeItem* TreeItem::AppendChild( const std::string& sText, fOnClick_t&& fOnClick, fOnBuildPopUp_t&& fOnBuildPopUp ) {
+  TreeItem* pTreeItemChild = AppendChild( sText );
+  pTreeItemChild->SetOnClick( std::move( fOnClick ) );
+  pTreeItemChild->SetOnBuildPopUp( std::move( fOnBuildPopUp ) );
+  return pTreeItemChild;
 }
 
 void TreeItem::SortChildren() {
