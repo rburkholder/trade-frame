@@ -32,14 +32,18 @@ class wxTreeCtrl;
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+class CustomItemData_Base;
+
 class TreeItem {
 public:
 
   using fOnClick_t = std::function<void(TreeItem*)>;       // left click
   using fOnBuildPopUp_t = std::function<void(TreeItem*)>;  // right click
   using fOnDeleted_t = std::function<void()>;
+  using fCustomItemData_Factory_t = std::function<CustomItemData_Base*( TreeItem* )>;
 
   TreeItem( wxTreeCtrl*, const std::string& ); // only used to attach root item
+  TreeItem( wxTreeCtrl*, const std::string&, fCustomItemData_Factory_t&& ); // only used to attach root item
   ~TreeItem();
 
   void SetOnClick( fOnClick_t&& fOnClick ) { m_fOnClick = std::move( fOnClick ); }
@@ -73,6 +77,7 @@ private:
   fOnClick_t m_fOnClick;
   fOnBuildPopUp_t m_fOnBuildPopUp;
   fOnDeleted_t m_fOnDeleted;
+  fCustomItemData_Factory_t m_fCustomItemData_Factory;
 
   TreeItem( wxTreeCtrl*, wxTreeItemId idParent, const std::string& ); // used in AppendChild
 

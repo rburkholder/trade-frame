@@ -28,16 +28,24 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
+  TreeItem::TreeItem( wxTreeCtrl* tree, const std::string& sText )
+  : TreeItem( tree, sText,
+    []( TreeItem* pti )->ou::tf::CustomItemData_Base*{
+      return new ou::tf::CustomItemData_Base( pti );
+    } )
+    {
+  }
 
-// ================================
-
-TreeItem::TreeItem( wxTreeCtrl* tree, const std::string& sText )
+  TreeItem::TreeItem( wxTreeCtrl* tree, const std::string& sText, fCustomItemData_Factory_t&& f )
 : m_pTreeCtrl( tree )
 , m_fOnClick( nullptr ), m_fOnBuildPopUp( nullptr ), m_fOnDeleted( nullptr )
+, m_fCustomItemData_Factory( std::move( f ) )
 {
   assert( nullptr != tree );
+  assert( nullptr != m_fCustomItemData_Factory );
+
   m_pMenuPopup = new wxMenu();
-  m_idSelf = m_pTreeCtrl->AddRoot( sText, -1, -1, new CustomItemData_Base( this ) );
+  m_idSelf = m_pTreeCtrl->AddRoot( sText, -1, -1, m_fCustomItemData_Factory( this ) );
 }
 
 TreeItem::TreeItem( wxTreeCtrl* tree, wxTreeItemId idParent, const std::string& sText ) // private constructor
@@ -46,7 +54,7 @@ TreeItem::TreeItem( wxTreeCtrl* tree, wxTreeItemId idParent, const std::string& 
 {
   assert( nullptr != tree );
   m_pMenuPopup = new wxMenu();
-  m_idSelf = m_pTreeCtrl->AppendItem( idParent, sText, -1, -1, new CustomItemData_Base( this ) );
+  m_idSelf = m_pTreeCtrl->AppendItem( idParent, sText, -1, -1, m_fCustomItemData_Factory( this ) );
 }
 
 TreeItem::~TreeItem() {
