@@ -78,21 +78,6 @@ protected:
 
   void CreateControls();
 
-private:
-
-  wxTreeCtrl* m_pTree;
-
-  TreeItem* m_pTreeRoot; // // root of custom tree items
-
-  wxSplitterWindow* m_pSplitter;
-
-  WinChartView* m_pWinChartView; // handles drawing the chart; use shared_ptr?
-  pChartDataView_t m_pChartDataView; // for use with tooltip
-
-  void HandleTreeEventItemGetToolTip( wxTreeEvent& );
-
-  void OnDestroy( wxWindowDestroyEvent& event );
-
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     double d( m_pSplitter->GetSashGravity() );
@@ -107,6 +92,21 @@ private:
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+private:
+
+  wxTreeCtrl* m_pTree;
+
+  TreeItem* m_pTreeRoot; // // root of custom tree items
+
+  wxSplitterWindow* m_pSplitter;
+
+  WinChartView* m_pWinChartView; // handles drawing the chart; use shared_ptr?
+  pChartDataView_t m_pChartDataView; // for use with tooltip
+
+  void HandleTreeEventItemGetToolTip( wxTreeEvent& );
+
+  void OnDestroy( wxWindowDestroyEvent& event );
 
   static bool ShowToolTips() { return true; };
   wxBitmap GetBitmapResource( const wxString& name );

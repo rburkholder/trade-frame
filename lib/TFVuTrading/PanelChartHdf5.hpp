@@ -101,12 +101,12 @@ private:
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-    //PanelFinancialChart::save( ar, version );
+    PanelFinancialChart::save( ar, version );
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
-    //PanelFinancialChart::load( ar, version );
+    PanelFinancialChart::load( ar, version );
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
