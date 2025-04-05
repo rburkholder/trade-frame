@@ -32,6 +32,11 @@
 
 #include "Config.hpp"
 
+namespace ou { // namespace oneunified
+namespace tf { // namespace tradeframe
+  class PanelFinancialChart;
+}
+}
 class FrameMain;
 
 class AppSP500:
@@ -47,6 +52,7 @@ private:
   config::Choices m_choices;
 
   FrameMain* m_pFrameMain;
+  ou::tf::PanelFinancialChart* m_pPanelFinancialChart;
 
   void OnFrameMainAutoMove( wxMoveEvent& );
 
@@ -60,17 +66,21 @@ private:
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
+    ar & *m_pPanelFinancialChart;
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
+    if ( 2 <= version ) {
+      ar & *m_pPanelFinancialChart;
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
-BOOST_CLASS_VERSION(AppSP500, 1)
+BOOST_CLASS_VERSION(AppSP500, 2)
 
 DECLARE_APP(AppSP500)

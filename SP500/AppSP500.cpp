@@ -37,6 +37,7 @@
 #include <wx/sizer.h>
 
 #include <TFVuTrading/FrameMain.h>
+#include <TFVuTrading/PanelFinancialChart.hpp>
 
 #include "AppSP500.hpp"
 
@@ -86,6 +87,9 @@ bool AppSP500::OnInit() {
 
   sizerFrame = new wxBoxSizer( wxVERTICAL );
   m_pFrameMain->SetSizer( sizerFrame );
+
+  m_pPanelFinancialChart = new ou::tf::PanelFinancialChart( m_pFrameMain );
+  sizerFrame->Add( m_pPanelFinancialChart, 1, wxALL | wxEXPAND, 0 );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppSP500::OnClose, this );  // start close of windows and controls
   m_pFrameMain->Bind( wxEVT_MOVE, &AppSP500::OnFrameMainAutoMove, this ); // intercept first move
