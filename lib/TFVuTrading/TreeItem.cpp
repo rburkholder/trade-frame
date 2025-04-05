@@ -153,7 +153,6 @@ std::string TreeItem::GetText() const {
 }
 
 void TreeItem::Delete() {
-  //  if ( 0 < m_pTree->GetChildrenCount( id ) ) throw std::runtime_error( "item has children" );
   // everything should self delete
   if ( m_pTreeCtrl ) {
     m_pTreeCtrl->Delete( m_idSelf );
