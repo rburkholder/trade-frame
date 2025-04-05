@@ -17,8 +17,6 @@
 #include <wx/sizer.h>
 #include <wx/treectrl.h>
 
-#include <TFVuTrading/TreeItem.hpp>
-
 #include "PanelFinancialChart.hpp"
 
 namespace ou { // One Unified
@@ -100,7 +98,7 @@ void PanelFinancialChart::CreateControls() {
   Bind( wxEVT_DESTROY, &PanelFinancialChart::OnDestroy, this );
 }
 
-TreeItem* PanelFinancialChart::SetRoot( const std::string& sName, pChartDataView_t pChartDataView ) {
+TreeItem* PanelFinancialChart::SetRoot_Common( const std::string& sName, pChartDataView_t pChartDataView, fTreeItem_Factory_t&& f ) {
 
   wxTreeItemId id =  m_pTree->GetRootItem();
 
@@ -108,14 +106,36 @@ TreeItem* PanelFinancialChart::SetRoot( const std::string& sName, pChartDataView
     throw std::runtime_error( "root item already exists" );
   }
   else {
-    m_pTreeItem = new TreeItem( m_pTree, sName );
-    m_pTreeItem->SetOnClick(
+    m_pTreeRoot = f( m_pTree, sName );
+    m_pTreeRoot->SetOnClick(
       [this, pChartDataView]( TreeItem* pti ){
         m_pWinChartView->SetChartDataView( pChartDataView.get() );
       });
     //m_pTree->Expand( id );
   }
-  return m_pTreeItem;
+  return m_pTreeRoot;
+}
+
+TreeItem* PanelFinancialChart::SetRoot( const std::string& sName, pChartDataView_t pChartDataView ) {
+  return SetRoot_Common(
+    sName, pChartDataView,
+    []( wxTreeCtrl* p, const std::string& sName )->TreeItem*{
+      return new TreeItem( p, sName );
+    }
+  );
+}
+
+TreeItem* PanelFinancialChart::SetRoot( const std::string& sName, pChartDataView_t pChartDataView, TreeItem::fCustomItemData_Factory_t&& f ) {
+  return SetRoot_Common(
+    sName, pChartDataView,
+    [f_=std::move(f)]( wxTreeCtrl* p, const std::string& sName )mutable ->TreeItem*{ // one time call only, hence mutable for f_
+      return new TreeItem( p, sName, std::move( f_ ) );
+    }
+  );
+}
+
+void PanelFinancialChart::DeleteTree() {
+  m_pTreeRoot->DeleteChildren();
 }
 
 void PanelFinancialChart::SetChartDataView( pChartDataView_t pChartDataView, bool bReCalcViewPort  ) {

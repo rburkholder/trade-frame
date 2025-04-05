@@ -12,6 +12,8 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+//#include <boost/log/trivial.hpp>
+
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 
 #include "PanelChartHdf5.hpp"
@@ -58,11 +60,14 @@ void PanelChartHdf5::CreateControls() {
 
   PanelChartHdf5* itemPanel1 = this;
 
-  // wxTreeCtrl* tree;
-  m_pTree->DeleteAllItems(); // start the tree fresh with our own flavbour
   m_eLatestDatumType = CustomItemData_Hdf5::NoDatum;
-  wxTreeItemId idRoot = m_pTree->AddRoot( "/", -1, -1, new CustomItemData_Hdf5( CustomItemData_Hdf5::Root, m_eLatestDatumType ) );
-  m_pTree->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &PanelChartHdf5::HandleTreeEventItemActivated, this, m_pTree->GetId() );
+
+  // wxTreeCtrl* tree;
+  m_ptiRoot = SetRoot(
+    "/", nullptr,
+    [this]( TreeItem* pti ){
+      return new CustomItemData_Hdf5( pti, CustomItemData_Hdf5::Root, CustomItemData_Hdf5::NoDatum );
+    } );
 
   if ( nullptr == m_pdm ) {
     m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO );
@@ -74,92 +79,104 @@ void PanelChartHdf5::CreateControls() {
 
 void PanelChartHdf5::SetFileName( const std::string& sPathName ) {
   m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO, sPathName );
-  wxTreeItemId itemRoot = m_pTree->GetRootItem();
-  m_pTree->DeleteChildren( itemRoot );
+  DeleteTree();
   IterateObjects();
 }
 
 void PanelChartHdf5::IterateObjects() {
-  m_sCurrentPath = "/";
-
   ou::tf::hdf5::IterateGroups ig(
     *m_pdm, std::string( "/" ),
-    [this]( const std::string& group,const std::string& name ){ HandleLoadTreeHdf5Group( group, name ); },
-    [this]( const std::string& group,const std::string& name ){ HandleLoadTreeHdf5Object( group, name ); }
+    [this]( const std::string& group,const std::string& name ){ HandleLoadTreeHdf5Group(  group, name ); }, // path
+    [this]( const std::string& group,const std::string& name ){ HandleLoadTreeHdf5Object( group, name ); }  // timeseries
     );
 }
 
-void PanelChartHdf5::HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 ) {
+void PanelChartHdf5::HandleLoadTreeHdf5Group( const std::string& sGroup, const std::string& sName ) {
+  //BOOST_LOG_TRIVIAL(info) << "1 Group  " << sGroup << ' ' << sName;
   m_eLatestDatumType = CustomItemData_Hdf5::NoDatum;
-  if ( "quotes" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::Quotes;
-  if ( "trades" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::Trades;
-  if ( "bar" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::Bars;
-  if ( "atmiv" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::AtmIV;
-  if ( "priceiv" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::PriceIVs;
-  if ( "greeks" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::Greeks;
-  if ( "depths" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::DepthsByMM; // deprecated style 2022/04/30
-  if ( "depths_mm" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::DepthsByMM;
-  if ( "depths_o" == s2 ) m_eLatestDatumType = CustomItemData_Hdf5::DepthsByOrder;
-  m_sCurrentPath = s1;
-  m_curTreeItem = m_pTree->GetRootItem();  // should be '/'
-  m_pdm->IteratePathParts( s1, [this]( const std::string& path){ HandleBuildTreePathParts( path ); } );
+  if ( "quotes"    == sName ) m_eLatestDatumType = CustomItemData_Hdf5::Quotes;
+  if ( "trades"    == sName ) m_eLatestDatumType = CustomItemData_Hdf5::Trades;
+  if ( "bar"       == sName ) m_eLatestDatumType = CustomItemData_Hdf5::Bars;
+  if ( "atmiv"     == sName ) m_eLatestDatumType = CustomItemData_Hdf5::AtmIV;
+  if ( "priceiv"   == sName ) m_eLatestDatumType = CustomItemData_Hdf5::PriceIVs;
+  if ( "greeks"    == sName ) m_eLatestDatumType = CustomItemData_Hdf5::Greeks;
+  if ( "depths"    == sName ) m_eLatestDatumType = CustomItemData_Hdf5::DepthsByMM; // deprecated style 2022/04/30
+  if ( "depths_mm" == sName ) m_eLatestDatumType = CustomItemData_Hdf5::DepthsByMM;
+  if ( "depths_o"  == sName ) m_eLatestDatumType = CustomItemData_Hdf5::DepthsByOrder;
+  m_ptiCurrent = m_ptiRoot;  // should be '/'
+  m_pdm->IteratePathParts( sGroup, [this]( const std::string& path){ HandleBuildTreePathParts( path ); } );
 }
 
-void PanelChartHdf5::HandleLoadTreeHdf5Object( const std::string& s1, const std::string& s2 ) {
+void PanelChartHdf5::HandleLoadTreeHdf5Object( const std::string& sGroup, const std::string& sName ) {
+  //BOOST_LOG_TRIVIAL(info) << "2 Object " << sGroup << ' ' << sName;
   // assume group has us in the correct place, just add in the object now
-  m_pTree->AppendItem( m_curTreeItem, s2, -1, -1, new CustomItemData_Hdf5( CustomItemData_Hdf5::Object, m_eLatestDatumType ) );
+  m_ptiCurrent->AppendChild(
+    sName,
+    std::bind( &PanelChartHdf5::HandleTreeEventItemActivated, this , std::placeholders::_1 ),
+    []( TreeItem* ) {},
+    [this]( TreeItem* pti )->CustomItemData_Base* {
+      return new CustomItemData_Hdf5( pti, CustomItemData_Hdf5::Object, m_eLatestDatumType );
+    }
+  );
 }
 
 void PanelChartHdf5::HandleBuildTreePathParts( const std::string& sPathPart ) {
-  wxTreeItemIdValue tiv;
-  wxTreeItemId ti = m_pTree->GetFirstChild( m_curTreeItem, tiv );
+  //BOOST_LOG_TRIVIAL(info) << "3 Parts at " << m_ptiCurrent->GetText() << '-' << sPathPart;
   bool bItemFound( false );
-  while ( ti.IsOk() ) {
-    if ( sPathPart == m_pTree->GetItemText( ti ) ) {
-      m_curTreeItem = ti;
-      bItemFound = true;
-      break;
-    }
-    else {
-      ti = m_pTree->GetNextChild( m_curTreeItem, tiv );
-    }
-  }
-  if ( !bItemFound ) {
-    m_curTreeItem = m_pTree->AppendItem( m_curTreeItem, sPathPart, -1, -1, new CustomItemData_Hdf5( CustomItemData_Hdf5::Group, CustomItemData_Hdf5::NoDatum ) );
-  }
+  m_ptiCurrent->IterateChildren(
+    [this, &bItemFound, &sPathPart]( TreeItem* pti )->bool /* bContinue */ {
+      //BOOST_LOG_TRIVIAL(info) << "3 Parts iter " << pti->GetText() << ',' << sPathPart;
+      if ( sPathPart == pti->GetText() ) {
+        m_ptiCurrent = pti;
+        bItemFound = true;
+        //BOOST_LOG_TRIVIAL(info) << "3 Parts found " << sPathPart;
+        return false;
+      }
+      return true;
+    } );
 
+  if ( !bItemFound ) {
+    //BOOST_LOG_TRIVIAL(info) << "3 Parts add " << m_ptiCurrent->GetText() << '+' << sPathPart;
+    m_ptiCurrent = m_ptiCurrent->AppendChild(
+      sPathPart,
+      std::bind( &PanelChartHdf5::HandleTreeEventItemActivated, this , std::placeholders::_1 ),
+      []( TreeItem* ) {},
+      []( TreeItem* pti )->CustomItemData_Base* {
+        return new CustomItemData_Hdf5( pti, CustomItemData_Hdf5::Group, CustomItemData_Hdf5::NoDatum );
+      }
+    );
+  }
 }
 
-void PanelChartHdf5::HandleTreeEventItemActivated( wxTreeEvent& event ) {
-
-  wxTreeItemId id = event.GetItem();
-
-  wxTreeItemId id2 = id;
-  std::string sPath = std::string( m_pTree->GetItemText( id2 ).ToStdString() ); // start here and prefix the path
+void PanelChartHdf5::HandleTreeEventItemActivated( TreeItem* pti ) {
+  assert( pti );
+  std::string sPath( pti->GetText() ); // build path towards root
+  TreeItem* ptiCurrent( pti );
   while ( true ) {
-    id2 = m_pTree->GetItemParent( id2 );
-    if ( !id2.IsOk() ) break;
+    ptiCurrent = ptiCurrent->GetParent();
+    if ( nullptr == ptiCurrent ) break;
     sPath = "/" + sPath;
-    std::string sTmpElement( m_pTree->GetItemText( id2 ) );
+    std::string sTmpElement( ptiCurrent->GetText() );
     if ( "/" != sTmpElement ) {
       sPath = sTmpElement + sPath;
     }
   }
 
-  CustomItemData_Hdf5* pdata = dynamic_cast<CustomItemData_Hdf5*>( m_pTree->GetItemData( id ) );
+  CustomItemData_Hdf5* pData = dynamic_cast<CustomItemData_Hdf5*>( pti->CustomItemData() );
+  assert( pData );
 
   size_t cntSeriesElements {};
 
-  switch ( pdata->m_eNodeType ) {
-  case CustomItemData_Hdf5::Root:
-    break;
-  case CustomItemData_Hdf5::Group:
-    sPath += "/";
-    break;
-  case CustomItemData_Hdf5::Object:
-    // load and view time series here
-    cntSeriesElements = LoadDataAndGenerateChart( pdata->m_eDatumType, sPath );
-    break;
+  switch ( pData->m_eNodeType ) {
+    case CustomItemData_Hdf5::Root:
+      break;
+    case CustomItemData_Hdf5::Group:
+      sPath += "/";
+      break;
+    case CustomItemData_Hdf5::Object:
+      // load and view time series here
+      cntSeriesElements = LoadDataAndGenerateChart( pData->m_eDatumType, sPath );
+      break;
   }
 
   std::cout << sPath << " with " << cntSeriesElements << " elements" << std::endl;

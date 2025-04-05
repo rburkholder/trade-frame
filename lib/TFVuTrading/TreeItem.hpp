@@ -41,10 +41,13 @@ public:
   using fOnBuildPopUp_t = std::function<void(TreeItem*)>;  // right click
   using fOnDeleted_t = std::function<void()>;
   using fCustomItemData_Factory_t = std::function<CustomItemData_Base*( TreeItem* )>;
+  using fIterateChildren_t = std::function<bool( TreeItem* )>; // false to stop
 
   TreeItem( wxTreeCtrl*, const std::string& ); // only used to attach root item
   TreeItem( wxTreeCtrl*, const std::string&, fCustomItemData_Factory_t&& ); // only used to attach root item
   ~TreeItem();
+
+  TreeItem* GetParent() { return m_ptiParent; }
 
   void SetOnClick( fOnClick_t&& fOnClick ) { m_fOnClick = std::move( fOnClick ); }
   void SetOnBuildPopUp( fOnBuildPopUp_t&& fOnBuildPopUp ) { m_fOnBuildPopUp = std::move( fOnBuildPopUp ); }
@@ -53,14 +56,21 @@ public:
   TreeItem* AppendChild( const std::string& );  // all tree build operations
   TreeItem* AppendChild( const std::string&, fOnClick_t&& );  // all tree build operations
   TreeItem* AppendChild( const std::string&, fOnClick_t&&, fOnBuildPopUp_t&& );  // all tree build operations
+  TreeItem* AppendChild( const std::string&, fOnClick_t&&, fOnBuildPopUp_t&&, fCustomItemData_Factory_t&& );  // all tree build operations
 
   void SortChildren();
 
+  void IterateChildren( fIterateChildren_t&& );
+
   void Delete();
+  void DeleteChildren();
   void UpdateText( const std::string& );
+  std::string GetText() const;
 
   void NewMenu();
   void AppendMenuItem( const std::string& sText, fOnClick_t&& );
+
+  CustomItemData_Base* CustomItemData();
 
   static void Bind( wxWindow*, wxTreeCtrl* );  // Initialize event handling
   //static void UnBind( wxWindow*, wxTreeCtrl* ); // lambdas need to be methods
@@ -68,18 +78,19 @@ public:
 protected:
 private:
 
+  wxTreeCtrl* m_pTreeCtrl;
+
+  TreeItem* m_ptiParent;
   wxTreeItemId m_idSelf;
-  wxTreeItemId m_idParent;
 
   wxMenu* m_pMenuPopup;
-  wxTreeCtrl* m_pTreeCtrl;
 
   fOnClick_t m_fOnClick;
   fOnBuildPopUp_t m_fOnBuildPopUp;
   fOnDeleted_t m_fOnDeleted;
-  fCustomItemData_Factory_t m_fCustomItemData_Factory;
 
-  TreeItem( wxTreeCtrl*, wxTreeItemId idParent, const std::string& ); // used in AppendChild
+  TreeItem( wxTreeCtrl*, TreeItem* ptiParent, const std::string& ); // used in AppendChild
+  TreeItem( wxTreeCtrl*, TreeItem* ptiParent, const std::string&, fCustomItemData_Factory_t&& ); // used in AppendChild
 
   void HandleTreeEventItemChanged();
   void HandleTreeEventItemMenu();

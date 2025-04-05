@@ -14,7 +14,6 @@
 #pragma once
 
 // used by BasketTrading
-// similar to PanelChartHdf5 (which might be refactorable/replaceable)
 // used to interactively build out a tree
 
 #include <boost/serialization/version.hpp>
@@ -22,6 +21,8 @@
 
 #include <wx/panel.h>
 #include <wx/splitter.h>
+
+#include <TFVuTrading/TreeItem.hpp>
 
 #include "WinChartView.h"
 
@@ -32,8 +33,6 @@ class wxTreeItemId;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-
-class TreeItem;
 
 #define SYMBOL_PANELFINANCIALCHART_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_PANELFINANCIALCHART_TITLE _("Panel Financial Chart")
@@ -63,21 +62,27 @@ public:
   using TreeItem = ou::tf::TreeItem;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
 
+  using fTreeItem_Factory_t = std::function<TreeItem*(wxTreeCtrl*, const std::string&)>;
+  TreeItem* SetRoot_Common( const std::string& sName, pChartDataView_t, fTreeItem_Factory_t&& );
+
   TreeItem* SetRoot( const std::string& sName, pChartDataView_t );
+  TreeItem* SetRoot( const std::string& sName, pChartDataView_t, TreeItem::fCustomItemData_Factory_t&& );
   void SetChartDataView( pChartDataView_t, bool bReCalcViewPort = true ); // does not own ptr
+
+  void DeleteTree();
 
 protected:
 
   enum { ID_Null=wxID_HIGHEST, ID_PANELFINANCIALCHART, ID_CHART
   };
 
-  wxTreeCtrl* m_pTree;
-
   void CreateControls();
 
 private:
 
-  TreeItem* m_pTreeItem; // // root of custom tree items
+  wxTreeCtrl* m_pTree;
+
+  TreeItem* m_pTreeRoot; // // root of custom tree items
 
   wxSplitterWindow* m_pSplitter;
 

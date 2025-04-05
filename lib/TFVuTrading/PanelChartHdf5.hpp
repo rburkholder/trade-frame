@@ -26,6 +26,7 @@
 #include <wx/treectrl.h>
 
 #include "ModelChartHdf5.h"
+#include "TreeItem_ItemData.hpp"
 #include "PanelFinancialChart.hpp"
 
 namespace ou { // One Unified
@@ -66,25 +67,26 @@ private:
 
   enum { ID_Null=wxID_HIGHEST, ID_PANEL_CHARTHDF5 };
 
-  // TODO: convert to TreeItem
-  class CustomItemData_Hdf5: public wxTreeItemData { // wxTreeCtrl node/leaf info
+  class CustomItemData_Hdf5: public CustomItemData_Base { // wxTreeCtrl node/leaf info
   public:
     enum ENodeType { Root, Group, Object } m_eNodeType;
     enum EDatumType { Quotes, Trades, Bars, Greeks, AtmIV, DepthsByMM, DepthsByOrder, PriceIVs, NoDatum } m_eDatumType;
-    CustomItemData_Hdf5( ENodeType eNodeType, EDatumType eDatumType )
-    : m_eNodeType( eNodeType ), m_eDatumType( eDatumType ) {};
+    CustomItemData_Hdf5( TreeItem* pTreeItem, ENodeType eNodeType, EDatumType eDatumType )
+    : CustomItemData_Base( pTreeItem )
+    , m_eNodeType( eNodeType ), m_eDatumType( eDatumType ) {};
   };
 
   using pHDF5DataManager_t = std::unique_ptr<ou::tf::HDF5DataManager>;
   pHDF5DataManager_t m_pdm;
 
+  TreeItem* m_ptiRoot;
+  TreeItem* m_ptiCurrent;
+
   ModelChartHdf5 m_ModelChartHdf5;
 
   ou::ChartDataView::pChartDataView_t m_pChartDataView;
 
-  std::string m_sCurrentPath;  // used while traversing and building tree
-  wxTreeItemId m_curTreeItem; // used while traversing and building tree
-  CustomItemData_Hdf5::EDatumType m_eLatestDatumType;  // need this until all timeseries have a signature attribute associated
+  CustomItemData_Hdf5::EDatumType m_eLatestDatumType;
 
   size_t LoadDataAndGenerateChart( CustomItemData_Hdf5::EDatumType, const std::string& sPath );
 
@@ -95,7 +97,7 @@ private:
 
   void HandleBuildTreePathParts( const std::string& sPath );
 
-  void HandleTreeEventItemActivated( wxTreeEvent& event );
+  void HandleTreeEventItemActivated( TreeItem* );
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
