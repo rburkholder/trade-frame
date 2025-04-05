@@ -64,7 +64,10 @@ namespace Currency {
   // http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
   typedef std::string type;
   // enumeration is subject to change, so do not use enumeration in persistent storage
-  enum ECurrency { USD, GBP, CAD, CHF, HKD, JPY, EUR, KRW, LTL, AUD, CZK, DKK, NZD, HUF, ILS, _Count };
+  enum ECurrency {
+    USD, GBP, CAD, CHF, HKD, JPY, EUR, KRW, LTL, AUD,
+    CZK, DKK, NZD, HUF, ILS, XAU, XAG, MXN,
+    _Count };
   extern const char* Name[]; // indexed by ECurrency
 
   using pair_t = std::pair<ECurrency,ECurrency>;

@@ -38,25 +38,31 @@ namespace Currency {
 
   namespace qi = boost::spirit::qi;
 
-  const char* Name[] = { "USD", "GBP", "CAD", "CHF", "HKD", "JPY", "EUR", "KRW", "LTL", "AUD", "CZK", "DKK", "NZD", "HUF", "ILS", "VOID" };
+  const char* Name[] = {
+    "USD", "GBP", "CAD", "CHF", "HKD", "JPY", "EUR", "KRW", "LTL", "AUD",
+    "CZK", "DKK", "NZD", "HUF", "ILS", "XAU", "XAG", "MXN",
+    "VOID" };
 
   void FillSymbols(  qi::symbols<char, ECurrency>& list ) {
     list.add
-      ( "USD", ECurrency::USD )
-      ( "GBP", ECurrency::GBP )
-      ( "CAD", ECurrency::CAD )
-      ( "CHF", ECurrency::CHF )
-      ( "HKD", ECurrency::HKD )
-      ( "JPY", ECurrency::JPY )
-      ( "EUR", ECurrency::EUR )
-      ( "KRW", ECurrency::KRW )
-      ( "LTL", ECurrency::LTL )
-      ( "AUD", ECurrency::AUD )
-      ( "CZK", ECurrency::CZK )
-      ( "DKK", ECurrency::DKK )
-      ( "NZD", ECurrency::NZD )
-      ( "HUF", ECurrency::HUF )
-      ( "ILS", ECurrency::ILS )
+      ( "USD", ECurrency::USD ) // US Dollar
+      ( "GBP", ECurrency::GBP ) // British Pound
+      ( "CAD", ECurrency::CAD ) // Canadian Dollar
+      ( "CHF", ECurrency::CHF ) // Swiss Franc
+      ( "HKD", ECurrency::HKD ) // Hong Kong Dollar
+      ( "JPY", ECurrency::JPY ) // Japanse Yen
+      ( "EUR", ECurrency::EUR ) // Euro
+      ( "KRW", ECurrency::KRW ) // South Korean Won
+      ( "LTL", ECurrency::LTL ) // Lithuanian Litas
+      ( "AUD", ECurrency::AUD ) // Australia Dollar
+      ( "CZK", ECurrency::CZK ) // Czech Koruna
+      ( "DKK", ECurrency::DKK ) // Danish Krone
+      ( "NZD", ECurrency::NZD ) // New Zeland Dollar
+      ( "HUF", ECurrency::HUF ) // Hungarian Forint
+      ( "ILS", ECurrency::ILS ) // Israeli Shekel
+      ( "XAU", ECurrency::XAU ) // gold ounce
+      ( "XAG", ECurrency::XAG ) // silver ounce
+      ( "MXN", ECurrency::MXN ) // Mexican Peso
       ;
   }
 
@@ -67,8 +73,8 @@ namespace Currency {
       FillSymbols( symCurrency );
 
       ruleCurrency %= symCurrency;
-      ruleStart %= ruleCurrency 
-                >> -( qi::lit( '.' ) | qi::lit( ':' ) | qi::lit( '-' ) ) 
+      ruleStart %= ruleCurrency
+                >> -( qi::lit( '.' ) | qi::lit( ':' ) | qi::lit( '-' ) )
                 >> ruleCurrency;
 
     }
