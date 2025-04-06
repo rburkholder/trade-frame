@@ -15,15 +15,12 @@
 #pragma once
 
 // Started 2013/10/06
-
 // used by Hdf5Chart
 
 #include <memory>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
-
-#include <wx/treectrl.h>
 
 #include "ModelChartHdf5.h"
 #include "TreeItem_ItemData.hpp"
