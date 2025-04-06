@@ -20,8 +20,8 @@
  */
 
 /*
-  * start by viewing SPY or SPX as primary chart from HDF5 file
-  * add in the SP Tick/Trin/Advance/Decline/ratio indicators
+  * start by viewing SPY or SPX as primary chart from HDF5 file - done
+  * add in the SP Tick/Trin/Advance/Decline/ratio indicators - done
   * add in some indicators, maybe try the garch studies?
   * run simulator for validation
   * add in the ml ability?
@@ -140,7 +140,8 @@ void AppSP500::LoadPanelFinancialChart() {
   m_cdv.SetNames( "SPY", sFileName );
 
     m_pkwmSymbol = new ou::KeyWordMatch<ESymbol>( ESymbol::UKNWN, 6 );
-  InitStructures( ESymbol::SPY,  "SPY",    1 );
+  //InitStructures( ESymbol::SPY,  "SPY",    1 );
+  InitStructures( ESymbol::SPY,  "ES-20250620", 1 );
   InitStructures( ESymbol::II6A, "II6A.Z", 2 );
   InitStructures( ESymbol::II6D, "II6D.Z", 3 );
   InitStructures( ESymbol::JT6T, "JT6T.Z", 4 );
@@ -225,11 +226,8 @@ int AppSP500::OnExit() {
 void AppSP500::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
 
-  //m_pWinChartView->SetChartDataView( nullptr, false );
-  //delete m_pChartData;
-  //m_pChartData = nullptr;
-
-  //m_pFrameControls->Close();
+  m_pwcv->SetChartDataView( nullptr, false );
+  m_mapSymbolInfo.clear();
 
   //DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
