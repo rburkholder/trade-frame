@@ -51,6 +51,7 @@ add_subdirectory(lib)
 
 if(EXISTS /usr/local/lib/libwt.so)
   add_subdirectory(TableTrader)
+  add_subdirectory(WebTrader)
 endif()
 
 if(EXISTS /usr/local/lib/rdaf)
