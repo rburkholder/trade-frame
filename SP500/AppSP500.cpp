@@ -36,8 +36,10 @@
 
 #include <wx/sizer.h>
 
+#include <TFHDF5TimeSeries/HDF5Attribute.h>
+#include <TFHDF5TimeSeries/HDF5IterateGroups.h>
+
 #include <TFVuTrading/FrameMain.h>
-#include <TFVuTrading/PanelFinancialChart.hpp>
 
 #include "AppSP500.hpp"
 
@@ -88,8 +90,11 @@ bool AppSP500::OnInit() {
   sizerFrame = new wxBoxSizer( wxVERTICAL );
   m_pFrameMain->SetSizer( sizerFrame );
 
-  m_pPanelFinancialChart = new ou::tf::PanelFinancialChart( m_pFrameMain );
-  sizerFrame->Add( m_pPanelFinancialChart, 1, wxALL | wxEXPAND, 0 );
+  //m_pPanelFinancialChart = new ou::tf::PanelFinancialChart( m_pFrameMain );
+  //sizerFrame->Add( m_pPanelFinancialChart, 1, wxALL | wxEXPAND, 0 );
+
+  m_pwcv = new ou::tf::WinChartView( m_pFrameMain );
+  sizerFrame->Add( m_pwcv, 1,wxALL | wxEXPAND, 0 );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppSP500::OnClose, this );  // start close of windows and controls
   m_pFrameMain->Bind( wxEVT_MOVE, &AppSP500::OnFrameMainAutoMove, this ); // intercept first move
@@ -106,6 +111,7 @@ void AppSP500::OnFrameMainAutoMove( wxMoveEvent& event ) {
     [this](){
       LoadState();
       m_pFrameMain->Layout();
+      LoadPanelFinancialChart();
     }
   );
 
@@ -113,6 +119,79 @@ void AppSP500::OnFrameMainAutoMove( wxMoveEvent& event ) {
 
   event.Skip(); // set to false if we want to ignore auto move
 
+}
+
+void AppSP500::InitStructures( ESymbol eSymbol, const std::string& sName, size_t ixChart ) {
+  m_pkwmSymbol->AddPattern( sName, eSymbol );
+  auto result = m_mapSymbolInfo.emplace( eSymbol, SymbolInfo( sName, ixChart ) );
+  assert( result.second );
+  SymbolInfo& si( result.first->second );
+  m_cdv.Add( ixChart, &si.indicator );
+}
+
+void AppSP500::LoadPanelFinancialChart() {
+
+  //m_ptiRoot = m_pPanelFinancialChart->SetRoot( "/", nullptr );
+
+  // inspiration from PanelChartHdf5
+  const std::string sFileName( "collector-20250403.hdf5" );
+  m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO, sFileName );
+
+  m_cdv.SetNames( "SPY", sFileName );
+
+    m_pkwmSymbol = new ou::KeyWordMatch<ESymbol>( ESymbol::UKNWN, 6 );
+  InitStructures( ESymbol::SPY,  "SPY",    1 );
+  InitStructures( ESymbol::II6A, "II6A.Z", 2 );
+  InitStructures( ESymbol::II6D, "II6D.Z", 3 );
+  InitStructures( ESymbol::JT6T, "JT6T.Z", 4 );
+  InitStructures( ESymbol::LI6N, "LI6N.Z", 5 );
+  InitStructures( ESymbol::TR6T, "TR6T.Z", 6 );
+
+  IterateObjects();
+
+  m_pwcv->SetChartDataView( &m_cdv );
+}
+
+void AppSP500::IterateObjects() {
+  ou::tf::hdf5::IterateGroups ig(
+    *m_pdm, std::string( "/" ),
+    [this]( const std::string& group,const std::string& name ){ HandleLoadTreeHdf5Group(  group, name ); }, // path
+    [this]( const std::string& group,const std::string& name ){ HandleLoadTreeHdf5Object( group, name ); }  // timeseries
+    );
+}
+
+void AppSP500::HandleLoadTreeHdf5Group( const std::string& sGroup, const std::string& sName ) {
+  //BOOST_LOG_TRIVIAL(info) << "1 Group  " << sGroup << ' ' << sName;
+}
+
+void AppSP500::HandleLoadTreeHdf5Object( const std::string& sGroup, const std::string& sName ) {
+  // select only ones in the list
+  ESymbol eSymbol = m_pkwmSymbol->FindMatch( sName );
+  if ( ESymbol::UKNWN != eSymbol ) {
+    ou::tf::HDF5Attributes attrObject( *m_pdm, sGroup );
+    BOOST_LOG_TRIVIAL(info) << "3 Object," << sGroup << ',' << sName << ',' << attrObject.GetSignature();
+    mapSymbolInfo_t::iterator iterSymbol = m_mapSymbolInfo.find( eSymbol );
+    assert ( m_mapSymbolInfo.end() != iterSymbol );
+
+    if ( ou::tf::Trade::Signature() == attrObject.GetSignature() ) {
+      ou::tf::HDF5TimeSeriesContainer<ou::tf::Trade> tsRepository( *m_pdm, sGroup );
+      ou::tf::HDF5TimeSeriesContainer<ou::tf::Trade>::iterator begin, end;
+      begin = tsRepository.begin();
+      end = tsRepository.end();
+      hsize_t cnt = end - begin;
+      ou::tf::Trades& trades( iterSymbol->second.trades );
+      trades.Resize( cnt );
+      tsRepository.Read( begin, end, &trades );
+
+      ou::ChartEntryIndicator& indicator( iterSymbol->second.indicator );
+      indicator.SetName( sName );
+
+      trades.ForEach(
+        [&indicator]( const ou::tf::Trade& trade ){
+          indicator.Append( trade.DateTime(), trade.Price() );
+        } );
+    }
+  }
 }
 
 void AppSP500::SaveState() {
