@@ -116,14 +116,15 @@ private:
   void HomeRoot( Wt::WContainerWidget* );
   void Home( Wt::WContainerWidget* );
 
-  void Page_Template( Wt::WContainerWidget*, fTemplate_t ); // used for l
-
   void ClearContainers(); // tbd
 
   void Containers_PrimaryDefine( Wt::WContainerWidget* ); // primary class containers
   void Container_UnderlyingPortfolio( Wt::WContainerWidget* );
 
+  void Page_Template( Wt::WContainerWidget*, fTemplate_t );
+
   void Page_Login( Wt::WContainerWidget* );
+  void Page_WatchList( Wt::WContainerWidget* );
   void Page_Blank( Wt::WContainerWidget* );
   void Page_SelectUnderlying( Wt::WContainerWidget* );
   void Page_LoadingUnderlyingAndChains_Load( Wt::WContainerWidget*, const std::string& sIQfeedUnderlyingName );

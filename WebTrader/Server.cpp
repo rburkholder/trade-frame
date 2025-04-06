@@ -67,11 +67,12 @@ bool Server::ValidateLogin( const std::string& sUserName, const std::string& sPa
 //   new state can not be requested until orders/positions are cancelled/closed
 // NOTE: there are some session oriented posts which need to be cleared or over-written as the session attachment changes
 Server::EWhatToShow Server::WhereToStart() {
-  EWhatToShow what = EWhatToShow::blank;
+  EWhatToShow what( EWhatToShow::blank );
   Server_impl::EStateEngine stateEngine = m_implServer->StateEngine();
   switch ( stateEngine ) {
     case Server_impl::EStateEngine::init:
-      what = EWhatToShow::select_futures;
+      //what = EWhatToShow::select_futures;
+      what = EWhatToShow::watch_list;
       break;
     case Server_impl::EStateEngine::underlying_populate:
       what = EWhatToShow::select_futures;

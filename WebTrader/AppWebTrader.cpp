@@ -84,6 +84,9 @@ AppWebTrader::AppWebTrader( const Wt::WEnvironment& env )
         case Server::EWhatToShow::blank:
           Page_Blank( pcw );  // TODO: blank with ip and session
           break;
+        case Server::EWhatToShow::watch_list: // 2025/04/06 starts here
+          Page_WatchList( pcw );
+          break;
         case Server::EWhatToShow::select_futures:
           if ( false ) { // skip the login for now
             Page_Login( pcw );
@@ -257,6 +260,10 @@ void AppWebTrader::Page_Template( Wt::WContainerWidget* pcw, fTemplate_t f) {
 void AppWebTrader::HandleLiveRefresh() {
   m_pServer->TriggerUpdates( sessionId() );
   triggerUpdate();
+}
+
+void AppWebTrader::Page_WatchList( Wt::WContainerWidget* pcw ) {
+  Wt::WLabel* pLabelPassWord = pcw->addWidget( std::make_unique<Wt::WLabel>( "Watch List Here" ) );
 }
 
 void AppWebTrader::Page_Login( Wt::WContainerWidget* pcw ) {

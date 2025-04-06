@@ -31,7 +31,7 @@ class Server_impl;
 class Server: public Wt::WServer {
 public:
 
-  enum EWhatToShow { blank, select_futures, chain_expiries, strike_selection };
+  enum EWhatToShow { blank, watch_list, select_futures, chain_expiries, strike_selection };
 
   Server(
     int argc, char *argv[],

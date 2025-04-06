@@ -51,7 +51,7 @@ class Server_impl {
 public:
 
   enum EStateEngine {
-    init, underlying_populate, underlying_acquire, chains_populate, strike_populate, table_populate, order_management_active
+    init, watch_list, underlying_populate, underlying_acquire, chains_populate, strike_populate, table_populate, order_management_active
   };
 
   using fUpdateUnderlyingInfo_t = std::function<void(const std::string&,int)>; // generic name, contract size
@@ -177,6 +177,8 @@ private:
 
   using vRequestContract_t = std::vector<fRequestContract_t>;
   vRequestContract_t m_vRequestContract_Pending; // lifo of requests
+
+  // EStateEngine::watch_list
 
   // EStateEngine::underlying_acquire
 
