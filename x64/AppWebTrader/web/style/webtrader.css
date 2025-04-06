@@ -1,0 +1,176 @@
+
+body {
+  font-family: Gill, Helvetica, sans-serif;
+  color: black;
+  background-color: floralwhite;
+}
+
+.MainTitle {
+  font-weight: bolder;
+  font-size: 30px;
+/*  color: black; */
+  background-color: gray;
+  padding: 5px;
+  border: 2px;
+  margin: 10px;
+  text-align:center;
+  float: top
+}
+
+.block { /* vertical */
+  display: block;
+}
+
+.inline { /* horizontal */
+  display: inline;
+}
+
+.inline_flex {
+  display: inline-flex;
+}
+
+.center {
+  text-align:center;
+}
+
+.w_label {
+  padding: 1px;
+  margin: 1px;
+}
+
+.w_line_edit {
+  padding: 1px;
+  margin: 1px;
+}
+
+.w_push_button {
+  padding: 1px;
+  margin-top: 2px;
+  margin-bottom: 0px;
+  margin-right: 4px;
+  margin-left: 4px;
+}
+
+.w_push_button_x {
+  padding: 1px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  margin-right: 0px;
+  margin-left: 0px;
+}
+
+.w_combo_box {
+  padding: 1px;
+  margin: 1px;
+}
+
+.table_header_column_name {
+  font-weight: bold;
+  text-align:center;
+  display: inline-block;
+}
+
+.fld_select_underlying {
+  width: 100px;
+}
+
+.fld_expiry {
+  text-align:center;
+  background-color: beige;
+}
+
+.fld_ticker {
+  display: inline-block;
+  width: 180px;
+}
+
+.fld_side {
+  display: inline-block;
+  width: 32px;
+  text-align:center;
+}
+
+.fld_strike {
+  display: inline-block;
+  width: 65px;
+  text-align:right;
+}
+
+.fld_type {
+  display: inline-block;
+  width: 30px;
+  text-align:center;
+}
+
+.fld_quote {
+  display: inline-block;
+  width: 50px;
+  text-align:right;
+}
+
+.fld_open_interest {
+  display: inline-block;
+  width: 40px;
+  text-align:right;
+}
+
+.fld_volume {
+  display: inline-block;
+  width: 50px;
+  text-align:right;
+}
+
+.fld_percent_allocation {
+  display: inline-block;
+  width: 40px;
+  text-align:right;
+}
+
+.fld_allocation {
+  display: inline-block;
+  width: 60px;
+  text-align:right;
+}
+
+.fld_allocation_total {
+  display: inline-block;
+  width: 60px;
+  text-align:right;
+  border-width: 1px;
+}
+
+.fld_allocation_total_ok {
+  background-color: beige;
+}
+
+.fld_allocation_total_over {
+  border-color: red;
+  background-color: pink;
+}
+
+.fld_num_contracts {
+  display: inline-block;
+  width: 40px;
+  text-align:right;
+}
+
+.fld_price {
+  display: inline-block;
+  width: 65px;
+  text-align:right;
+}
+
+.fld_pnl {
+  display: inline-block;
+  width: 70px;
+  text-align:right;
+}
+
+.fld_message_error {
+  text-align:center;
+  color: red;
+}
+
+/* display: inline;   to get li stuff in a row    */
+/* display: inline-block; to allow padding, border, margin  */
+

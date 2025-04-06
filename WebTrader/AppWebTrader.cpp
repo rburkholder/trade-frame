@@ -52,7 +52,7 @@ AppWebTrader::AppWebTrader( const Wt::WEnvironment& env )
 , m_pContainerTableEntry( nullptr )
 {
 
-  useStyleSheet("style/tt.css");
+  useStyleSheet("style/webtrader.css");
 
   internalPathChanged().connect( this, &AppWebTrader::HandleInternalPathChanged );
   internalPathInvalid().connect( this, &AppWebTrader::HandleInternalPathInvalid );

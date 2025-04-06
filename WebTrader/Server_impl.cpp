@@ -42,7 +42,6 @@
 /*
   open interest in access summary message?
     lib/TFIQFeed/HistoryQuery.h:134:    unsigned long OpenInterest;
-    lib/TFIQFeed/HistoryQuery.h:134:    unsigned long OpenInterest;
     lib/TFIQFeed/Messages.h:507
     lib/TFIQFeed/Symbol.cpp:206:      summary.nOpenInterest
     lib/TFIQFeed/Symbol.h:57:    int nOpenInterest;
@@ -58,8 +57,8 @@ https://www.webtoolkit.eu/wt/doc/reference/html/overview.html#application_sec
 
 namespace {
   static const std::string sTWS( "tws" );
-  static const std::string sIQFeed( "iqfeed" );
-  static const std::string sDataBaseName( "TableTrader.db" );
+  static const std::string sIQFeed( "iqf" );
+  static const std::string sDataBaseName( "WebTrader.db" );
 }
 
 Server_impl::Server_impl( int ib_client_id, unsigned int ib_client_port )

@@ -33,6 +33,27 @@
     },
 
     {
+      "name": "(gdb) Web Trader",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/WebTrader/AppWebTrader",
+      "args": [ "--docroot='web;/favicon.ico,/resources,/style,/image'", "--http-address=0.0.0.0", "--http-port=8091", "--config=etc/wt_config.xml"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/x64/AppWebTrader",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+
+    {
       "name": "(gdb) Market Trader",
       "type": "cppdbg",
       "request": "launch",

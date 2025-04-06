@@ -1,0 +1,324 @@
+/*
+* jQuery Mobile Framework
+* Copyright (c) jQuery Project
+* Dual licensed under the MIT (MIT-LICENSE.txt) or GPL (GPL-LICENSE.txt) licenses.
+*/
+.spin  {
+	transform: rotate(360deg);
+	animation-name: spin;
+	animation-duration: 1s;
+	animation-iteration-count:  infinite;
+}
+@keyframes spin {
+	from {transform: rotate(0deg);}
+  	to {transform: rotate(360deg);}
+}
+
+/*
+  Transitions from jQtouch (with small modifications): http://www.jqtouch.com/
+  Built by David Kaneda and maintained by Jonathan Stark.
+*/
+.slide.in {
+	transform: translate3d(0,0,0);
+	animation-name: slideinfromright;
+	z-index: 10;
+}
+
+.slide.out {
+	transform: translate3d(-100%,0,0);
+	animation-name: slideouttoleft;
+	z-index: 0;
+}
+
+.slide.in.reverse {
+	transform: translate3d(0,0,0);
+	animation-name: slideinfromleft;
+	z-index: 0;
+}
+
+.slide.out.reverse {
+	transform: translate3d(100%,0,0);
+	animation-name: slideouttoright;
+	z-index: 10;
+}
+
+.slideup.in {
+	transform: translate3d(0,0,0);
+	animation-name: slideinfrombottom;
+	z-index: 10;
+}
+
+.slideup.out {
+	animation-name: dontmove;
+	z-index: 0;
+}
+
+.slideup.out.reverse {
+	transform: translate3d(0,100%,0);
+	animation-name: slideouttobottom;
+	z-index: 10;
+}
+
+.slideup.in.reverse {
+	animation-name: dontmove;
+	z-index: 0;
+}
+
+.slidedown.in {
+	transform: translate3d(0,0,0);
+	animation-name: slideinfromtop;
+	z-index: 10;
+}
+
+.slidedown.out {
+	animation-name: dontmove;
+	z-index: 0;
+}
+
+.slidedown.out.reverse {
+	transform: translate3d(0,-100%,0);
+	animation-name: slideouttotop;
+	z-index: 10;
+}
+
+.slidedown.in.reverse {
+	animation-name: dontmove;
+	z-index: 0;
+}
+
+@keyframes slideinfromright {
+    from { transform: translate3d(100%,0,0); }
+    to { transform: translate3d(0,0,0); }
+}
+
+@keyframes slideinfromleft {
+    from { transform: translate3d(-100%,0,0); }
+    to { transform: translate3d(0,0,0); }
+}
+
+@keyframes slideouttoleft {
+    from { transform: translate3d(0,0,0); }
+    to { transform: translate3d(-100%,0,0); }
+}
+
+@keyframes slideouttoright {
+    from { transform: translate3d(0,0,0); }
+    to { transform: translate3d(100%,0,0); }
+}
+
+@keyframes slideinfromtop {
+    from { transform: translate3d(0,-100%,); }
+    to { transform: translate3d(0,0,0); }
+}
+
+@keyframes slideinfrombottom {
+    from { transform: translate3d(0,100%,0); }
+    to { transform: translate3d(0,0,0); }
+}
+
+@keyframes slideouttobottom {
+    from { transform: translate3d(0,0,0); }
+    to { transform: translate3d(0,100%,0); }
+}
+
+@keyframes slideouttotop {
+    from { transform: translate3d(0,0,0); }
+    to { transform: translate3d(0,-100%,0); }
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeout {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes halffadein {
+    from { opacity: 0; }
+    to { opacity: 0.5; }
+}
+
+@keyframes halffadeout {
+    from { opacity: 0.5; }
+    to { opacity: 0; }
+}
+
+@keyframes bootstrap2fadein {
+    from { opacity: 0; }
+    to { opacity: 0.8; }
+}
+
+@keyframes bootstrap2fadeout {
+    from { opacity: 0.8; }
+    to { opacity: 0; }
+}
+
+.fade.in {
+	opacity: 1;
+	animation-name: fadein;
+}
+
+.fade.out {
+	animation-name: fadeout;
+}
+
+.Wt-dialogcover.fade.in,
+.modal-backdrop.fade.in {
+	opacity: 0.5;
+	animation-name: halffadein;
+}
+
+.Wt-dialogcover.fade.out,
+.modal-backdrop.fade.out {
+	animation-name: halffadeout;
+}
+
+.modal-backdrop.Wt-bootstrap2.fade.in {
+	opacity: 0.8;
+	animation-name: bootstrap2fadein;
+}
+
+.modal-backdrop.Wt-bootstrap2.fade.out {
+	animation-name: bootstrap2fadeout;
+}
+
+/* The properties in this body rule are only necessary for the 'flip' transition.
+ * We need specify the perspective to create a projection matrix. This will add
+ * some depth as the element flips. The depth number represents the distance of
+ * the viewer from the z-plane. According to the CSS3 spec, 1000 is a moderate
+ * value.
+ */
+.ui-mobile-viewport-perspective {
+	perspective: 1000;
+	position: absolute;
+}
+
+.ui-mobile-viewport-transitioning,
+.ui-mobile-viewport-transitioning .ui-page {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+.flip {
+	animation-duration: .65s;
+	backface-visibility:hidden;
+	transform:translate3d(0,0,0); /* Needed to work around an iOS 3.1 bug that causes listview thumbs to disappear when visibility:hidden is used. */
+}
+
+.flip.in {
+	transform: rotateY(0) scale(1);
+	animation-name: flipinfromleft;
+	z-index: 10;
+}
+
+.flip.out {
+	transform: rotateY(-180deg) scale(.8);
+	animation-name: flipouttoleft;
+	z-index: 0;
+}
+
+/* Shake it all about */
+
+.flip.in.reverse {
+	transform: rotateY(0) scale(1);
+	animation-name: flipinfromright;
+	z-index: 0;
+}
+
+.flip.out.reverse {
+	transform: rotateY(180deg) scale(.8);
+	animation-name: flipouttoright;
+	z-index: 10;
+}
+
+@keyframes flipinfromright {
+    from { transform: rotateY(-180deg) scale(.8); }
+    to { transform: rotateY(0) scale(1); }
+}
+
+@keyframes flipinfromleft {
+    from { transform: rotateY(180deg) scale(.8); }
+    to { transform: rotateY(0) scale(1); }
+}
+
+@keyframes flipouttoleft {
+    from { transform: rotateY(0) scale(1); }
+    to { transform: rotateY(-180deg) scale(.8); }
+}
+
+@keyframes flipouttoright {
+    from { transform: rotateY(0) scale(1); }
+    to { transform: rotateY(180deg) scale(.8); }
+}
+
+
+/* Hackish, but reliable. */
+
+@keyframes dontmove {
+    from { opacity: 1; }
+    to { opacity: 1; }
+}
+
+.pop {
+	transform-origin: 50% 50%;
+}
+
+.pop.in {
+	transform: scale(1);
+	animation-name: popin;
+	z-index: 10;
+}
+
+.pop.out.reverse {
+	transform: scale(.2);
+	animation-name: popout;
+	z-index: 10;
+}
+
+.pop.in.reverse {
+	animation-name: dontmove;
+	z-index: 0;
+}
+
+@keyframes popin {
+    from {
+        transform: scale(.2);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+@keyframes popout {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(.2);
+    }
+}
+
+
+.slide.in.fade {
+	animation-name: slideinfromright, fadein;
+	z-index: 10;
+}
+
+.slide.out.fade {
+	animation-name: slideinfromright, fadeout;
+	z-index: 0;
+}
+
+.pop.fade.in {
+        animation-name: popin, fadein;
+	z-index: 10;
+}
+
+.pop.fade.out {
+        animation-name: popout, fadeout;
+	z-index: 0;
+}
