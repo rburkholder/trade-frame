@@ -18,7 +18,7 @@
 
 // 20170416 TODO: split into two modules or classes
 //   generic chart definitions
-//   hdf5 data retrieval for ChartHdf5
+//   hdf5 data retrieval for Hdf5Chart
 
 #include <OUCharting/ChartDataView.h>
 
@@ -35,8 +35,8 @@ namespace tf { // TradeFrame
 class ModelChartHdf5 {
 public:
 
-  ModelChartHdf5( void );
-  virtual ~ModelChartHdf5(void);
+  ModelChartHdf5();
+  virtual ~ModelChartHdf5();
 
   struct Equities {
     const ou::tf::Quotes& quotes;
@@ -80,7 +80,6 @@ public:
     AddChartEntries( pChartDataView, series );
 
     return 0;
-
   }
 
   void HandleQuote( const ou::tf::Quote& quote );
