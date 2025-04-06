@@ -69,8 +69,12 @@ public:
     const std::string& pnl)>;
   using fFill_t = std::function<void(const std::string&)>; // #filled@price
 
+  using fPopulateWatch_t = std::function<void(const std::string&)>;
+
   void SessionAttach( const std::string& sSessionId, const std::string& sClientAddress );
   void SessionDetach( const std::string& sSessionId );
+
+  void PopulateWatch( fPopulateWatch_t&& );
 
   void ResetForNewUnderlying();
   void ResetForNewExpiry();

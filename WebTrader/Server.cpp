@@ -98,6 +98,12 @@ Server::EWhatToShow Server::WhereToStart() {
   return what;
 }
 
+void Server::PopulateWatch( fPopulateWatch_t&& f ) {
+  for ( const std::string& s: m_choices.m_vWatchList ) {
+    f( s );
+  }
+}
+
 void Server::AddCandidateFutures( fAddCandidateFutures_t&& f ) {
   m_implServer->UnderlyingPopulation();  // notify of current state,
   //TODO: need to query Server_impl to see if something in progress, if so, skip to the point of sync

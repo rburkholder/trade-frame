@@ -28,6 +28,9 @@ namespace config {
 
 struct Choices {
 
+  using vWatchList_t = std::vector<std::string>;
+  vWatchList_t m_vWatchList;
+
   // Interactive Brokers api instance
   int ib_client_id;
   unsigned int ib_client_port;

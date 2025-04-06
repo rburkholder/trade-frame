@@ -263,7 +263,13 @@ void AppWebTrader::HandleLiveRefresh() {
 }
 
 void AppWebTrader::Page_WatchList( Wt::WContainerWidget* pcw ) {
-  Wt::WLabel* pLabelPassWord = pcw->addWidget( std::make_unique<Wt::WLabel>( "Watch List Here" ) );
+  Wt::WContainerWidget* pContainerWatchList = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  pContainerWatchList->addStyleClass( "block" );
+  m_pServer->PopulateWatch(
+    [this, pcw=pContainerWatchList]( const std::string& sName ){
+      Wt::WLabel* pLabelPassWord = pcw->addWidget( std::make_unique<Wt::WLabel>( sName ) );
+      pLabelPassWord->addStyleClass( "block" );
+    } );
 }
 
 void AppWebTrader::Page_Login( Wt::WContainerWidget* pcw ) {
