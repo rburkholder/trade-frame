@@ -104,10 +104,9 @@ AppWebTrader::AppWebTrader( const Wt::WEnvironment& env )
           assert( false );
       }
     } );
-
 }
 
-AppWebTrader::~AppWebTrader( ) { }
+AppWebTrader::~AppWebTrader() {}
 
 void AppWebTrader::initialize() {
   BOOST_LOG_TRIVIAL(info) << "AppTableTrader::initialize()";
@@ -517,604 +516,604 @@ void AppWebTrader::Page_TableTrader( Wt::WContainerWidget* pcw /* m_pContainerTa
 
   Wt::WContainerWidget* pContainerButtons = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
 
-    Wt::WPushButton* pBtnChooseUnderlying = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Choose Underlying" ) );
+  Wt::WPushButton* pBtnChooseUnderlying = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Choose Underlying" ) );
 
-      pBtnChooseUnderlying->setEnabled( false );
-      pBtnChooseUnderlying->addStyleClass( "w_push_button" );
+    pBtnChooseUnderlying->setEnabled( false );
+    pBtnChooseUnderlying->addStyleClass( "w_push_button" );
 
-      pBtnChooseUnderlying->clicked().connect(
-        [this,pBtnChooseUnderlying](){
+    pBtnChooseUnderlying->clicked().connect(
+      [this,pBtnChooseUnderlying](){
 
-          //pBtnChooseUnderlying->setEnabled( false );
-          //pBtnChooseExpiry->setEnabled( false );  // won't work
+        //pBtnChooseUnderlying->setEnabled( false );
+        //pBtnChooseExpiry->setEnabled( false );  // won't work
 
-          m_pServer->ResetForNewUnderlying();
-          Page_Template(
-            root(),
-            [this](Wt::WContainerWidget* pcw){
-              Page_SelectUnderlying( pcw );
-            } );
-          triggerUpdate();
-        });
+        m_pServer->ResetForNewUnderlying();
+        Page_Template(
+          root(),
+          [this](Wt::WContainerWidget* pcw){
+            Page_SelectUnderlying( pcw );
+          } );
+        triggerUpdate();
+      });
 
-    Wt::WPushButton* pBtnChooseExpiry = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Choose Expiry" ) );
+  Wt::WPushButton* pBtnChooseExpiry = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Choose Expiry" ) );
 
-      pBtnChooseExpiry->setEnabled( false );
-      pBtnChooseExpiry->addStyleClass( "w_push_button" );
+    pBtnChooseExpiry->setEnabled( false );
+    pBtnChooseExpiry->addStyleClass( "w_push_button" );
 
-      pBtnChooseExpiry->clicked().connect(
-        [this,pBtnChooseUnderlying,pBtnChooseExpiry](){
+    pBtnChooseExpiry->clicked().connect(
+      [this,pBtnChooseUnderlying,pBtnChooseExpiry](){
 
-          //pBtnChooseUnderlying->setEnabled( false );
-          //pBtnChooseExpiry->setEnabled( false );
+        //pBtnChooseUnderlying->setEnabled( false );
+        //pBtnChooseExpiry->setEnabled( false );
 
-          m_pServer->ResetForNewExpiry();
-          Page_Template(
-            root(),
-            [this](Wt::WContainerWidget* pcw){
-              Page_SelectChainExpiry( pcw );
-              Container_UnderlyingPortfolio( m_pContainerUnderlyingLiveData );
-            });
-          triggerUpdate();
-        });
+        m_pServer->ResetForNewExpiry();
+        Page_Template(
+          root(),
+          [this](Wt::WContainerWidget* pcw){
+            Page_SelectChainExpiry( pcw );
+            Container_UnderlyingPortfolio( m_pContainerUnderlyingLiveData );
+          });
+        triggerUpdate();
+      });
 
-    Wt::WPushButton* pBtnCancelAll = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Cancel All" ) );
+  Wt::WPushButton* pBtnCancelAll = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Cancel All" ) );
 
-      pBtnCancelAll->setEnabled( false );
-      pBtnCancelAll->addStyleClass( "w_push_button" );
+    pBtnCancelAll->setEnabled( false );
+    pBtnCancelAll->addStyleClass( "w_push_button" );
 
-      pBtnCancelAll->clicked().connect(
-        [this,pBtnCancelAll](){
-          pBtnCancelAll->setEnabled( false );
-          m_pServer->CancelAll();
-        });
+    pBtnCancelAll->clicked().connect(
+      [this,pBtnCancelAll](){
+        pBtnCancelAll->setEnabled( false );
+        m_pServer->CancelAll();
+      });
 
-    Wt::WPushButton* pBtnCloseAll = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Cancel/Close All" ) );
+  Wt::WPushButton* pBtnCloseAll = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Cancel/Close All" ) );
 
-      pBtnCloseAll->setEnabled( false );
-      pBtnCloseAll->addStyleClass( "w_push_button" );
+    pBtnCloseAll->setEnabled( false );
+    pBtnCloseAll->addStyleClass( "w_push_button" );
 
-      pBtnCloseAll->clicked().connect(
-        [this,pBtnChooseUnderlying,pBtnChooseExpiry,pBtnCancelAll,pBtnCloseAll](){
-          pBtnCancelAll->setEnabled( false );
-          m_pServer->CancelAll();
-          pBtnCloseAll->setEnabled( false );
-          m_pServer->CloseAll();
+    pBtnCloseAll->clicked().connect(
+      [this,pBtnChooseUnderlying,pBtnChooseExpiry,pBtnCancelAll,pBtnCloseAll](){
+        pBtnCancelAll->setEnabled( false );
+        m_pServer->CancelAll();
+        pBtnCloseAll->setEnabled( false );
+        m_pServer->CloseAll();
 
-          // TODO: better state management on these buttons
-          //   available only when no orders are in progress
-          pBtnChooseUnderlying->setEnabled( true );
-          pBtnChooseExpiry->setEnabled( true );
-        });
+        // TODO: better state management on these buttons
+        //   available only when no orders are in progress
+        pBtnChooseUnderlying->setEnabled( true );
+        pBtnChooseExpiry->setEnabled( true );
+      });
 
-    Wt::WPushButton* pBtnPlaceOrders = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Place Orders" ) );
+  Wt::WPushButton* pBtnPlaceOrders = pContainerButtons->addWidget( std::make_unique<Wt::WPushButton>( "Place Orders" ) );
 
-      pBtnPlaceOrders->setEnabled( false );
-      pBtnPlaceOrders->addStyleClass( "w_push_button" );
+    pBtnPlaceOrders->setEnabled( false );
+    pBtnPlaceOrders->addStyleClass( "w_push_button" );
 
-      pBtnPlaceOrders->clicked().connect(
-        [this,pBtnChooseUnderlying,pBtnChooseExpiry,pBtnCancelAll,pBtnCloseAll,pBtnPlaceOrders](){
-          if ( m_pServer->PlaceOrders() ) {
-            //pSelectStrikes->setEnabled( false ); // do this some other way
-            pBtnCancelAll->setEnabled( true );
-            pBtnCloseAll->setEnabled( true );
-            pBtnPlaceOrders->setEnabled (false );
+    pBtnPlaceOrders->clicked().connect(
+      [this,pBtnChooseUnderlying,pBtnChooseExpiry,pBtnCancelAll,pBtnCloseAll,pBtnPlaceOrders](){
+        if ( m_pServer->PlaceOrders() ) {
+          //pSelectStrikes->setEnabled( false ); // do this some other way
+          pBtnCancelAll->setEnabled( true );
+          pBtnCloseAll->setEnabled( true );
+          pBtnPlaceOrders->setEnabled (false );
 
-            // TODO: these will need better state management, particularly during state recovery
-            pBtnChooseUnderlying->setEnabled( false );
-            pBtnChooseExpiry->setEnabled( false );
-          }
-        });
+          // TODO: these will need better state management, particularly during state recovery
+          pBtnChooseUnderlying->setEnabled( false );
+          pBtnChooseExpiry->setEnabled( false );
+        }
+      });
 
-    Wt::WContainerWidget* pContainerTypeSideRange = pContainerData->addWidget( std::make_unique<Wt::WContainerWidget>() );
-    pContainerTypeSideRange->addStyleClass( "inline_flex" );
+  Wt::WContainerWidget* pContainerTypeSideRange = pContainerData->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  pContainerTypeSideRange->addStyleClass( "inline_flex" );
 
-      enum class EOption { call = 1, put = 2 };
-      {
-        auto containerOption = pContainerTypeSideRange->addWidget( std::make_unique<Wt::WGroupBox>("Option Type") );
-        m_pButtonGroupOption = std::make_shared<Wt::WButtonGroup>();
-        Wt::WRadioButton* btnCall = containerOption->addWidget( std::make_unique<Wt::WRadioButton>( "Call" ) );
-        //container->addWidget(std::make_unique<Wt::WBreak>());
-        m_pButtonGroupOption->addButton(btnCall, (int)EOption::call );
-        Wt::WRadioButton* btnPut = containerOption->addWidget( std::make_unique<Wt::WRadioButton>( "Put" ) );
-        //container->addWidget(std::make_unique<Wt::WBreak>());
-        m_pButtonGroupOption->addButton( btnPut, (int)EOption::put );
-        m_pButtonGroupOption->setCheckedButton( m_pButtonGroupOption->button( (int)EOption::call ) );
-      }
+    enum class EOption { call = 1, put = 2 };
+    {
+      auto containerOption = pContainerTypeSideRange->addWidget( std::make_unique<Wt::WGroupBox>("Option Type") );
+      m_pButtonGroupOption = std::make_shared<Wt::WButtonGroup>();
+      Wt::WRadioButton* btnCall = containerOption->addWidget( std::make_unique<Wt::WRadioButton>( "Call" ) );
+      //container->addWidget(std::make_unique<Wt::WBreak>());
+      m_pButtonGroupOption->addButton(btnCall, (int)EOption::call );
+      Wt::WRadioButton* btnPut = containerOption->addWidget( std::make_unique<Wt::WRadioButton>( "Put" ) );
+      //container->addWidget(std::make_unique<Wt::WBreak>());
+      m_pButtonGroupOption->addButton( btnPut, (int)EOption::put );
+      m_pButtonGroupOption->setCheckedButton( m_pButtonGroupOption->button( (int)EOption::call ) );
+    }
 
-      enum class ESide { buy = 1, sell = 2 };
-      {
-        auto containerSide = pContainerTypeSideRange->addWidget( std::make_unique<Wt::WGroupBox>("Operation") );
-        m_pButtonGroupSide = std::make_shared<Wt::WButtonGroup>();
-        Wt::WRadioButton* btnBuy = containerSide->addWidget( std::make_unique<Wt::WRadioButton>( "Buy" ) );
-        //container->addWidget(std::make_unique<Wt::WBreak>());
-        m_pButtonGroupSide->addButton( btnBuy, (int)ESide::buy );
-        Wt::WRadioButton* btnSell = containerSide->addWidget( std::make_unique<Wt::WRadioButton>( "Sell" ) );
-        //container->addWidget(std::make_unique<Wt::WBreak>());
-        m_pButtonGroupSide->addButton( btnSell, (int)ESide::sell );
-        m_pButtonGroupSide->setCheckedButton( m_pButtonGroupSide->button( (int)ESide::buy ) );
-      }
+    enum class ESide { buy = 1, sell = 2 };
+    {
+      auto containerSide = pContainerTypeSideRange->addWidget( std::make_unique<Wt::WGroupBox>("Operation") );
+      m_pButtonGroupSide = std::make_shared<Wt::WButtonGroup>();
+      Wt::WRadioButton* btnBuy = containerSide->addWidget( std::make_unique<Wt::WRadioButton>( "Buy" ) );
+      //container->addWidget(std::make_unique<Wt::WBreak>());
+      m_pButtonGroupSide->addButton( btnBuy, (int)ESide::buy );
+      Wt::WRadioButton* btnSell = containerSide->addWidget( std::make_unique<Wt::WRadioButton>( "Sell" ) );
+      //container->addWidget(std::make_unique<Wt::WBreak>());
+      m_pButtonGroupSide->addButton( btnSell, (int)ESide::sell );
+      m_pButtonGroupSide->setCheckedButton( m_pButtonGroupSide->button( (int)ESide::buy ) );
+    }
 
-      auto pContainerRange = pContainerTypeSideRange->addWidget( std::make_unique<Wt::WGroupBox>("Range Entry") );
-      Wt::WLabel* pLabelStrikeFrom = pContainerRange->addWidget( std::make_unique<Wt::WLabel>( "Strike from:" ) );
-      Wt::WLineEdit* pWLineEditStrikeFrom = pContainerRange->addWidget( std::make_unique<Wt::WLineEdit>() );
-      Wt::WLabel* pLabelStrikeTo = pContainerRange->addWidget( std::make_unique<Wt::WLabel>( "to" ) );
-      Wt::WLineEdit* pWLineEditStrikeTo = pContainerRange->addWidget( std::make_unique<Wt::WLineEdit>() );
-      Wt::WLabel* pLabelStrikeInc = pContainerRange->addWidget( std::make_unique<Wt::WLabel>( "inc" ) );
-      Wt::WLineEdit* pWLineEditStrikeInc = pContainerRange->addWidget( std::make_unique<Wt::WLineEdit>() );
-      Wt::WPushButton* pBtnStrikeAdd = pContainerRange->addWidget( std::make_unique<Wt::WPushButton>( "Add" ) );
-      pContainerRange->addWidget( std::make_unique<Wt::WBreak>() );
-      Wt::WLabel* pLabelRangeMessage = pContainerRange->addWidget( std::make_unique<Wt::WLabel>() );
-      pLabelRangeMessage->setHidden( true );
-      pLabelRangeMessage->addStyleClass( "w_label" );
-      pLabelRangeMessage->addStyleClass( "fld_message_error" );
+    auto pContainerRange = pContainerTypeSideRange->addWidget( std::make_unique<Wt::WGroupBox>("Range Entry") );
+    Wt::WLabel* pLabelStrikeFrom = pContainerRange->addWidget( std::make_unique<Wt::WLabel>( "Strike from:" ) );
+    Wt::WLineEdit* pWLineEditStrikeFrom = pContainerRange->addWidget( std::make_unique<Wt::WLineEdit>() );
+    Wt::WLabel* pLabelStrikeTo = pContainerRange->addWidget( std::make_unique<Wt::WLabel>( "to" ) );
+    Wt::WLineEdit* pWLineEditStrikeTo = pContainerRange->addWidget( std::make_unique<Wt::WLineEdit>() );
+    Wt::WLabel* pLabelStrikeInc = pContainerRange->addWidget( std::make_unique<Wt::WLabel>( "inc" ) );
+    Wt::WLineEdit* pWLineEditStrikeInc = pContainerRange->addWidget( std::make_unique<Wt::WLineEdit>() );
+    Wt::WPushButton* pBtnStrikeAdd = pContainerRange->addWidget( std::make_unique<Wt::WPushButton>( "Add" ) );
+    pContainerRange->addWidget( std::make_unique<Wt::WBreak>() );
+    Wt::WLabel* pLabelRangeMessage = pContainerRange->addWidget( std::make_unique<Wt::WLabel>() );
+    pLabelRangeMessage->setHidden( true );
+    pLabelRangeMessage->addStyleClass( "w_label" );
+    pLabelRangeMessage->addStyleClass( "fld_message_error" );
 
-      pLabelStrikeFrom->addStyleClass( "w_label" );
-      pWLineEditStrikeFrom->addStyleClass( "w_line_edit" );
-      pWLineEditStrikeFrom->addStyleClass( "fld_strike" );
+    pLabelStrikeFrom->addStyleClass( "w_label" );
+    pWLineEditStrikeFrom->addStyleClass( "w_line_edit" );
+    pWLineEditStrikeFrom->addStyleClass( "fld_strike" );
 
-      pLabelStrikeTo->addStyleClass( "w_label" );
-      pWLineEditStrikeTo->addStyleClass( "w_line_edit" );
-      pWLineEditStrikeTo->addStyleClass( "fld_strike" );
+    pLabelStrikeTo->addStyleClass( "w_label" );
+    pWLineEditStrikeTo->addStyleClass( "w_line_edit" );
+    pWLineEditStrikeTo->addStyleClass( "fld_strike" );
 
-      pLabelStrikeInc->addStyleClass( "w_label" );
-      pWLineEditStrikeInc->addStyleClass( "w_line_edit" );
-      pWLineEditStrikeInc->addStyleClass( "fld_strike" );
+    pLabelStrikeInc->addStyleClass( "w_label" );
+    pWLineEditStrikeInc->addStyleClass( "w_line_edit" );
+    pWLineEditStrikeInc->addStyleClass( "fld_strike" );
 
-      pBtnStrikeAdd->addStyleClass( "w_push_button" );
-      // pBtnStrikeAdd.connect is lower down after dependency on pSelectStrikes
+    pBtnStrikeAdd->addStyleClass( "w_push_button" );
+    // pBtnStrikeAdd.connect is lower down after dependency on pSelectStrikes
 
     pContainerData->addWidget( std::make_unique<Wt::WBreak>() );
 
     Wt::WContainerWidget* pContainerAllocationInfo = pContainerData->addWidget( std::make_unique<Wt::WContainerWidget>() );
     pContainerAllocationInfo->addStyleClass( "inline" );
 
-      Wt::WLabel* pLabelChainExpiry = pContainerAllocationInfo->addWidget( std::make_unique<Wt::WLabel>( sDate ) );
-      pLabelChainExpiry->addStyleClass( "w_label" );
-      pLabelChainExpiry->addStyleClass( "fld_expiry" );
+    Wt::WLabel* pLabelChainExpiry = pContainerAllocationInfo->addWidget( std::make_unique<Wt::WLabel>( sDate ) );
+    pLabelChainExpiry->addStyleClass( "w_label" );
+    pLabelChainExpiry->addStyleClass( "fld_expiry" );
 
-      Wt::WLabel* pLabelAllocated = pContainerAllocationInfo->addWidget( std::make_unique<Wt::WLabel>( "Allocated: " ) );
-      pLabelAllocated->addStyleClass( "w_label" );
-      Wt::WLabel* pWLabelTotalAllocated = pContainerAllocationInfo->addWidget( std::make_unique<Wt::WLabel>() );
-      pWLabelTotalAllocated->addStyleClass( "w_label" );
-      pWLabelTotalAllocated->addStyleClass( "fld_allocation_total" );
-      //pLabelAllocated->setBuddy( pWLabelTotalAllocated );
-      pWLabelTotalAllocated->setText( "0" );
+    Wt::WLabel* pLabelAllocated = pContainerAllocationInfo->addWidget( std::make_unique<Wt::WLabel>( "Allocated: " ) );
+    pLabelAllocated->addStyleClass( "w_label" );
+    Wt::WLabel* pWLabelTotalAllocated = pContainerAllocationInfo->addWidget( std::make_unique<Wt::WLabel>() );
+    pWLabelTotalAllocated->addStyleClass( "w_label" );
+    pWLabelTotalAllocated->addStyleClass( "fld_allocation_total" );
+    //pLabelAllocated->setBuddy( pWLabelTotalAllocated );
+    pWLabelTotalAllocated->setText( "0" );
 
-      Wt::WLabel* pLabelInvestment = pContainerAllocationInfo->addWidget( std::make_unique<Wt::WLabel>( "of" ) );
-      pLabelInvestment->addStyleClass( "w_label" );
-      Wt::WLineEdit* pWLineEditInvestment = pContainerAllocationInfo->addWidget( std::make_unique<Wt::WLineEdit>() );
-      pWLineEditInvestment->addStyleClass( "w_line_edit" );
-      pWLineEditInvestment->addStyleClass( "fld_allocation" );
-      pLabelInvestment->setBuddy( pWLineEditInvestment );
-      pWLineEditInvestment->setText( "100000" );
-      m_pServer->ChangeInvestment( pWLineEditInvestment->text().toUTF8() ); // prime the amount
-      pWLineEditInvestment->changed().connect(
-        [this,pWLineEditInvestment](){ // TODO: add validator for integer?
-          m_pServer->ChangeInvestment( pWLineEditInvestment->text().toUTF8() );
-        } );
+    Wt::WLabel* pLabelInvestment = pContainerAllocationInfo->addWidget( std::make_unique<Wt::WLabel>( "of" ) );
+    pLabelInvestment->addStyleClass( "w_label" );
+    Wt::WLineEdit* pWLineEditInvestment = pContainerAllocationInfo->addWidget( std::make_unique<Wt::WLineEdit>() );
+    pWLineEditInvestment->addStyleClass( "w_line_edit" );
+    pWLineEditInvestment->addStyleClass( "fld_allocation" );
+    pLabelInvestment->setBuddy( pWLineEditInvestment );
+    pWLineEditInvestment->setText( "100000" );
+    m_pServer->ChangeInvestment( pWLineEditInvestment->text().toUTF8() ); // prime the amount
+    pWLineEditInvestment->changed().connect(
+      [this,pWLineEditInvestment](){ // TODO: add validator for integer?
+        m_pServer->ChangeInvestment( pWLineEditInvestment->text().toUTF8() );
+      } );
 
-    pContainerData->addWidget( std::make_unique<Wt::WBreak>() );
+  pContainerData->addWidget( std::make_unique<Wt::WBreak>() );
 
-    Wt::WContainerWidget* pContainerForSelectAndTable = pContainerData->addWidget( std::make_unique<Wt::WContainerWidget>() );
-    pContainerForSelectAndTable->addStyleClass( "inline_flex" );
-    pContainerForSelectAndTable->setObjectName( "SelectAndTable" );
+  Wt::WContainerWidget* pContainerForSelectAndTable = pContainerData->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  pContainerForSelectAndTable->addStyleClass( "inline_flex" );
+  pContainerForSelectAndTable->setObjectName( "SelectAndTable" );
 
-      Wt::WContainerWidget* pContainerStrikeList = pContainerForSelectAndTable->addWidget( std::make_unique<Wt::WContainerWidget>() );
-      pContainerStrikeList->addStyleClass( "block" );
+    Wt::WContainerWidget* pContainerStrikeList = pContainerForSelectAndTable->addWidget( std::make_unique<Wt::WContainerWidget>() );
+    pContainerStrikeList->addStyleClass( "block" );
 
-        //Wt::WLabel* pLabelStrikes = pContainerStrikeList->addWidget( std::make_unique<Wt::WLabel>( "Strikes: " ) );
-        //pContainerStrikeList->addWidget( std::make_unique<Wt::WBreak>() );
-        Wt::WSelectionBox* pSelectStrikes = pContainerStrikeList->addWidget( std::make_unique<Wt::WSelectionBox>() );
-        pSelectStrikes->setSelectionMode( Wt::SelectionMode::Extended );
-        pSelectStrikes->setVerticalSize( 10 );
-        //pLabelStrikes->setBuddy( pSelectStrikes );
+      //Wt::WLabel* pLabelStrikes = pContainerStrikeList->addWidget( std::make_unique<Wt::WLabel>( "Strikes: " ) );
+      //pContainerStrikeList->addWidget( std::make_unique<Wt::WBreak>() );
+      Wt::WSelectionBox* pSelectStrikes = pContainerStrikeList->addWidget( std::make_unique<Wt::WSelectionBox>() );
+      pSelectStrikes->setSelectionMode( Wt::SelectionMode::Extended );
+      pSelectStrikes->setVerticalSize( 10 );
+      //pLabelStrikes->setBuddy( pSelectStrikes );
 
-    pBtnStrikeAdd->clicked().connect(
-      [this,pContainerButtons,pSelectStrikes,pWLineEditStrikeFrom,pWLineEditStrikeTo,pWLineEditStrikeInc,pLabelRangeMessage](){
-        pLabelRangeMessage->setHidden( true );
-        std::string sFrom = pWLineEditStrikeFrom->text().toUTF8();
-        std::string sTo   = pWLineEditStrikeTo->text().toUTF8();
-        std::string sInc  = pWLineEditStrikeInc->text().toUTF8();
-        if ( sFrom.empty() || sTo.empty() || sInc.empty() ) {
-          pLabelRangeMessage->setHidden( false );
-          pLabelRangeMessage->setText( "all fields required, and greater than 0.0" );
-        }
-        else {
-          std::string sMessage;
-          double dblFrom = Server::FormatDouble( sFrom, sMessage );
-          double dblTo   = Server::FormatDouble( sTo,   sMessage );
-          double dblInc  = Server::FormatDouble( sInc,  sMessage );
-          if ( sMessage.empty() ) {
-            if ( ( 0.0 == dblFrom ) || ( 0.0 == dblTo ) || ( 0.0 == dblInc ) ) {
-              pLabelRangeMessage->setHidden( false );
-              pLabelRangeMessage->setText( "one or more fields convert to 0" );
-            }
-            else {
-              if ( dblFrom >= dblTo ) {
-                pLabelRangeMessage->setHidden( false );
-                pLabelRangeMessage->setText( "'to' needs to be greater than 'from'" );
-              }
-              else {
-                if ( dblInc > ( dblTo - dblFrom ) ) {
-                  pLabelRangeMessage->setHidden( false );
-                  pLabelRangeMessage->setText( "'inc' needs to be less than 'to' - 'from'" );
-                }
-                else {
-                  using setSelection_t = std::set<int>;
-                  setSelection_t selection = pSelectStrikes->selectedIndexes();
-
-                  for ( double value = dblFrom; value <= dblTo; value += dblInc ) {
-                    std::string sStrike = m_pServer->FormatStrike( value );
-                    int ix = pSelectStrikes->findText( sStrike );
-                    if ( 0 < ix ) { // not sure what an illegal value is
-                      if ( 20 <= selection.size() ) {
-                        pLabelRangeMessage->setHidden( false );
-                        pLabelRangeMessage->setText( "attempting insert of >20 strikes" );
-                        break;
-                      }
-                      else {
-                        selection.insert( ix );
-                      }
-                    }
-                  }
-
-                  pSelectStrikes->setSelectedIndexes( selection );
-                  m_fUpdateStrikeSelection();
-
-                }
-              }
-            }
+  pBtnStrikeAdd->clicked().connect(
+    [this,pContainerButtons,pSelectStrikes,pWLineEditStrikeFrom,pWLineEditStrikeTo,pWLineEditStrikeInc,pLabelRangeMessage](){
+      pLabelRangeMessage->setHidden( true );
+      std::string sFrom = pWLineEditStrikeFrom->text().toUTF8();
+      std::string sTo   = pWLineEditStrikeTo->text().toUTF8();
+      std::string sInc  = pWLineEditStrikeInc->text().toUTF8();
+      if ( sFrom.empty() || sTo.empty() || sInc.empty() ) {
+        pLabelRangeMessage->setHidden( false );
+        pLabelRangeMessage->setText( "all fields required, and greater than 0.0" );
+      }
+      else {
+        std::string sMessage;
+        double dblFrom = Server::FormatDouble( sFrom, sMessage );
+        double dblTo   = Server::FormatDouble( sTo,   sMessage );
+        double dblInc  = Server::FormatDouble( sInc,  sMessage );
+        if ( sMessage.empty() ) {
+          if ( ( 0.0 == dblFrom ) || ( 0.0 == dblTo ) || ( 0.0 == dblInc ) ) {
+            pLabelRangeMessage->setHidden( false );
+            pLabelRangeMessage->setText( "one or more fields convert to 0" );
           }
           else {
-            pLabelRangeMessage->setHidden( false );
-            pLabelRangeMessage->setText( sMessage );
+            if ( dblFrom >= dblTo ) {
+              pLabelRangeMessage->setHidden( false );
+              pLabelRangeMessage->setText( "'to' needs to be greater than 'from'" );
+            }
+            else {
+              if ( dblInc > ( dblTo - dblFrom ) ) {
+                pLabelRangeMessage->setHidden( false );
+                pLabelRangeMessage->setText( "'inc' needs to be less than 'to' - 'from'" );
+              }
+              else {
+                using setSelection_t = std::set<int>;
+                setSelection_t selection = pSelectStrikes->selectedIndexes();
+
+                for ( double value = dblFrom; value <= dblTo; value += dblInc ) {
+                  std::string sStrike = m_pServer->FormatStrike( value );
+                  int ix = pSelectStrikes->findText( sStrike );
+                  if ( 0 < ix ) { // not sure what an illegal value is
+                    if ( 20 <= selection.size() ) {
+                      pLabelRangeMessage->setHidden( false );
+                      pLabelRangeMessage->setText( "attempting insert of >20 strikes" );
+                      break;
+                    }
+                    else {
+                      selection.insert( ix );
+                    }
+                  }
+                }
+
+                pSelectStrikes->setSelectedIndexes( selection );
+                m_fUpdateStrikeSelection();
+
+              }
+            }
           }
         }
-      });
-
-    Wt::WContainerWidget* pContainerTableAndHeaders = pContainerForSelectAndTable->addWidget( std::make_unique<Wt::WContainerWidget>() );
-    pContainerStrikeList->addStyleClass( "block" );
-
-    Wt::WContainerWidget* pContainerTable_Headers = pContainerTableAndHeaders->addWidget( std::make_unique<Wt::WContainerWidget>() );
-    pContainerStrikeList->addStyleClass( "block" );
-
-    struct columns {
-      std::string name;
-      int width;  // TODO: convert this to use the .fld_ class
-      columns( const std::string& name_, int width_ ): name( name_ ), width( width_ ) {}
-    };
-    using vColumns_t = std::vector<columns>;
-    vColumns_t vColumns = {
-      {"ticker", 180}, {"side", 32}, {"strike", 65}, {"type",30}, {"oi",40},{"vol",50},{"bid",50},{"ask",50},
-      {"%alloc",40},{"",10},{"$alloc",60},{"ttl_q",60},{"order",80},
-      {"price",65},{"init_q",45},{"inc_q",45},{"inc_prc",60},{"p/l",70},{"fill_en",70},{"fill_ex",70}
-    };
-
-    for ( const vColumns_t::value_type& vt: vColumns ) {
-      Wt::WLabel* pLabel = pContainerTable_Headers->addWidget( std::make_unique<Wt::WLabel>( vt.name ) );
-      pLabel->addStyleClass( "w_label" );
-      pLabel->addStyleClass( "table_header_column_name" );
-      pLabel->setWidth( vt.width );
-    }
-
-    //pContainerTableAndHeaders->addWidget( std::make_unique<Wt::WBreak>() );
-
-    Wt::WContainerWidget* pContainerTable_DataRows = pContainerTableAndHeaders->addWidget( std::make_unique<Wt::WContainerWidget>() );
-    pContainerStrikeList->addStyleClass( "block" );
-
-    m_pServer->PrepareStrikeSelection(
-      sDate,
-      [pSelectStrikes](const std::string& sStrike){ // fPopulateStrike_t
-        pSelectStrikes->addItem( sStrike );
-      },
-      [this,pContainerButtons,pSelectStrikes,pContainerTable_DataRows,pWLabelTotalAllocated,pBtnPlaceOrders](){ // fPopulateStrikeDone_t
-
-        m_fUpdateStrikeSelection = // used by pSelectStrikes & pBtnEditAllocDelete
-          [this,pSelectStrikes,pContainerTable_DataRows,pWLabelTotalAllocated,pBtnPlaceOrders](){
-            auto set = pSelectStrikes->selectedIndexes();
-            using setStrike_t = std::set<std::string>;
-            setStrike_t setStrike;
-            for ( auto& item :set ) {
-              std::string sStrike( pSelectStrikes->itemText( item ).toUTF8() );
-              setStrike.insert( sStrike );
-            }
-
-            // delete removed entries
-            setStrike_t setDelete;
-            for ( const mapOptionAtStrike_t::value_type& vt: m_mapOptionAtStrike ) {
-              if ( setStrike.end() == setStrike.find( vt.first ) ) {
-                m_pServer->DelStrike( vt.first );
-                setDelete.insert( vt.first );
-              }
-            }
-            for ( const setStrike_t::value_type& vt: setDelete ) {
-              mapOptionAtStrike_t::iterator iter = m_mapOptionAtStrike.find( vt );
-              assert( m_mapOptionAtStrike.end() != iter );
-              iter->second.m_pcw->removeFromParent();
-              m_mapOptionAtStrike.erase( iter );
-            }
-
-            // insert added entries
-            int ix {};
-            for ( const setStrike_t::value_type& vt: setStrike ) {
-              if ( m_mapOptionAtStrike.end() == m_mapOptionAtStrike.find( vt ) ) {
-
-                Wt::WContainerWidget* pOptionRow = pContainerTable_DataRows->insertWidget( ix, std::make_unique<Wt::WContainerWidget>() );
-                auto pair = m_mapOptionAtStrike.emplace( vt, OptionAtStrike( pOptionRow ) );
-                assert( pair.second );
-                OptionAtStrike& oas( pair.first->second );
-
-                Wt::WLabel* pTicker = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Ticker" ) );
-                pTicker->addStyleClass( "w_label" );
-                pTicker->addStyleClass( "fld_ticker" );
-
-                Wt::WLabel* pSide;
-                Server::EOrderSide side;
-                switch ( m_pButtonGroupSide->checkedId() ) {
-                  case (int)ESide::buy:
-                    side = Server::EOrderSide::buy;
-                    pSide = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Buy" ) );
-                    break;
-                  case (int)ESide::sell:
-                    side = Server::EOrderSide::sell;
-                    pSide = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Sell" ) );
-                    break;
-                  default:
-                    assert( false );
-                    break;
-                }
-                pSide->addStyleClass( "w_label" );
-                pSide->addStyleClass( "fld_side" );
-
-                Wt::WLabel* pStrike = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( vt ) );
-                pStrike->addStyleClass( "w_label" );
-                pStrike->addStyleClass( "fld_strike" );
-
-                Wt::WLabel* pType;
-                Server::EOptionType type;
-                switch ( m_pButtonGroupOption->checkedId() ) {
-                  case (int)EOption::call:
-                    type = Server::EOptionType::call;
-                    pType = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Call" ) );
-                    break;
-                  case (int)EOption::put:
-                    type = Server::EOptionType::put;
-                    pType = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Put" ) );
-                    break;
-                  default:
-                    assert( false );
-                    break;
-                }
-                pType->addStyleClass( "w_label" );
-                pType->addStyleClass( "fld_type" );
-
-                Wt::WLabel* pOI  = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "OI" ) );
-                Wt::WLabel* pVol = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Vol" ) );
-                Wt::WLabel* pBid = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Bid" ) );
-                Wt::WLabel* pAsk = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Ask" ) );
-                Wt::WLineEdit* pWLineEditAlloc = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>() );
-                Wt::WPushButton* pBtnEditAllocDelete= pOptionRow->addWidget( std::make_unique<Wt::WPushButton>( "X" ) );
-                Wt::WLabel* pAllocated = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "0" ) );
-                Wt::WLabel* pNumContracts = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "0" ) );
-                Wt::WComboBox* pOrderType = pOptionRow->addWidget( std::make_unique<Wt::WComboBox>() );
-                Wt::WLineEdit* pLimitPrice = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "0" ) ); // limit, scale
-                Wt::WLineEdit* pScaleInitialQuan = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "0" ) ); // scale
-                Wt::WLineEdit* pScaleIncQuan = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "0" ) ); // scale
-                Wt::WLineEdit* pScaleIncPrice = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "0" ) ); // scale
-                Wt::WLabel* pPnL = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "-" ) );
-                Wt::WLabel* pEntryFillPrice = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "-" ) );
-                Wt::WLabel* pExitFillPrice = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "-" ) );
-                pOptionRow->addWidget( std::make_unique<Wt::WBreak>() );
-                Wt::WLabel* pMessage = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "" ) );
-                pMessage->setHidden( true );
-
-                pOI->addStyleClass( "w_label" );
-                pOI->addStyleClass( "fld_open_interest" );
-
-                pVol->addStyleClass( "w_label" );
-                pVol->addStyleClass( "fld_volume" );
-
-                pBid->addStyleClass( "w_label" );
-                pBid->addStyleClass( "fld_quote" );
-
-                pAsk->addStyleClass( "w_label" );
-                pAsk->addStyleClass( "fld_quote" );
-
-                pBtnEditAllocDelete->addStyleClass( "w_push_button_x" );
-                pBtnEditAllocDelete->clicked().connect(
-                  [this,vt,pSelectStrikes](){
-                    int ixThisEntry = pSelectStrikes->findText( vt );
-                    m_pServer->post( // can't delete self while in code
-                      sessionId(),
-                      [this,pSelectStrikes,ixThisEntry](){
-                        using setSelection_t = std::set<int>;
-                        setSelection_t selection = pSelectStrikes->selectedIndexes();
-                        setSelection_t::iterator iter = selection.find( ixThisEntry );
-                        if ( selection.end() != iter ) {
-                          selection.erase( iter );
-                          pSelectStrikes->setSelectedIndexes( selection );
-                          m_fUpdateStrikeSelection();
-                        }
-                        triggerUpdate();
-                      });
-                  });
-
-                pWLineEditAlloc->setText( "0" );
-                //pWLineEditAlloc->keyWentUp().connect( [](){} );
-                pWLineEditAlloc->changed().connect(
-                  [this,vt,pWLineEditAlloc](){
-                    m_pServer->ChangeAllocation( vt, pWLineEditAlloc->text().toUTF8() );
-                  } );
-                pWLineEditAlloc->addStyleClass( "w_line_edit" );
-                pWLineEditAlloc->addStyleClass( "fld_percent_allocation" );
-
-                pAllocated->addStyleClass( "w_label" );
-                pAllocated->addStyleClass( "fld_allocation" );
-
-                pNumContracts->addStyleClass( "w_label" );
-                pNumContracts->addStyleClass( "fld_num_contracts" );
-
-                pOrderType->addItem( "market" );
-                pOrderType->addItem( "limit" );
-                pOrderType->addItem( "lim ask" );
-                pOrderType->addItem( "lim bid" );
-                pOrderType->addItem( "scale" );
-                pOrderType->addStyleClass( "w_combo_box" );
-
-                pOrderType->activated().connect(
-                  [this,vt,pOrderType,pLimitPrice,pScaleInitialQuan,pScaleIncQuan,pScaleIncPrice,pBid,pAsk,pMessage](){
-                    std::string sMessage = ComposeOrderType(
-                      pOrderType->currentIndex(),
-                      vt,
-                      pAsk,pBid,pLimitPrice, pScaleInitialQuan, pScaleIncQuan, pScaleIncPrice
-                    );
-                    pMessage->setText( sMessage );
-                    if ( sMessage.empty() ) pMessage->setHidden( true );
-                    else {
-                      pMessage->setHidden( false );
-                    }
-                  } );
-
-                pLimitPrice->setEnabled( false );
-                pLimitPrice->addStyleClass( "w_line_edit" );
-                pLimitPrice->addStyleClass( "fld_price" );
-                pLimitPrice->changed().connect(
-                  [this,vt,pOrderType,pLimitPrice,pScaleInitialQuan,pScaleIncQuan,pScaleIncPrice,pBid,pAsk,pMessage](){
-                    std::string sMessage = ComposeOrderType(
-                      pOrderType->currentIndex(),
-                      vt,
-                      pAsk,pBid,pLimitPrice, pScaleInitialQuan, pScaleIncQuan, pScaleIncPrice
-                    );
-                    pMessage->setText( sMessage );
-                    if ( sMessage.empty() ) pMessage->setHidden( true );
-                    else {
-                      pMessage->setHidden( false );
-                    }
-                  } );
-
-                pScaleInitialQuan->setEnabled( false );
-                pScaleInitialQuan->addStyleClass( "w_line_edit" );
-                pScaleInitialQuan->addStyleClass( "fld_num_contracts" );
-                pScaleInitialQuan->changed().connect(
-                  [this,vt,pOrderType,pLimitPrice,pScaleInitialQuan,pScaleIncQuan,pScaleIncPrice,pBid,pAsk,pMessage](){
-                    std::string sMessage = ComposeOrderType(
-                      pOrderType->currentIndex(),
-                      vt,
-                      pAsk,pBid,pLimitPrice, pScaleInitialQuan, pScaleIncQuan, pScaleIncPrice
-                    );
-                    pMessage->setText( sMessage );
-                    if ( sMessage.empty() ) pMessage->setHidden( true );
-                    else {
-                      pMessage->setHidden( false );
-                    }
-                  } );
-
-                pScaleIncQuan->setEnabled( false );
-                pScaleIncQuan->addStyleClass( "w_line_edit" );
-                pScaleIncQuan->addStyleClass( "fld_num_contracts" );
-                pScaleIncQuan->changed().connect(
-                  [this,vt,pOrderType,pLimitPrice,pScaleInitialQuan,pScaleIncQuan,pScaleIncPrice,pBid,pAsk,pMessage](){
-                    std::string sMessage = ComposeOrderType(
-                      pOrderType->currentIndex(),
-                      vt,
-                      pAsk,pBid,pLimitPrice, pScaleInitialQuan, pScaleIncQuan, pScaleIncPrice
-                    );
-                    pMessage->setText( sMessage );
-                    if ( sMessage.empty() ) pMessage->setHidden( true );
-                    else {
-                      pMessage->setHidden( false );
-                    }
-                  } );
-
-                pScaleIncPrice->setEnabled( false );
-                pScaleIncPrice->addStyleClass( "w_line_edit" );
-                pScaleIncPrice->addStyleClass( "fld_price" );
-                pScaleIncPrice->changed().connect(
-                  [this,vt,pOrderType,pLimitPrice,pScaleInitialQuan,pScaleIncQuan,pScaleIncPrice,pBid,pAsk,pMessage](){
-                    std::string sMessage = ComposeOrderType(
-                      pOrderType->currentIndex(),
-                      vt,
-                      pAsk,pBid,pLimitPrice, pScaleInitialQuan, pScaleIncQuan, pScaleIncPrice
-                    );
-                    pMessage->setText( sMessage );
-                    if ( sMessage.empty() ) pMessage->setHidden( true );
-                    else {
-                      pMessage->setHidden( false );
-                    }
-                  } );
-
-                pPnL->addStyleClass( "w_label" );
-                pPnL->addStyleClass( "fld_pnl" );
-
-                pEntryFillPrice->addStyleClass( "w_label" );
-                //pEntryFillPrice->addStyleClass( "fld_price" );
-
-                pExitFillPrice->addStyleClass( "w_label" );
-                //pExitFillPrice->addStyleClass( "fld_price" );
-
-                pMessage->addStyleClass( "w_label" );
-                pMessage->addStyleClass( "fld_message_error" );
-
-                m_pServer->AddStrike(
-                  sessionId(),
-                  type, side, vt,
-                  [pTicker](const std::string& sTicker){ // fPopulateOption_t
-                    pTicker->setText( sTicker );
-                  },
-                  [pWLabelTotalAllocated,pAllocated](const std::string& sTotalAllocated, bool bOverAllocated, const std::string& sOptionAllocated ){ // fUpdateAllocated_t
-                    pWLabelTotalAllocated->setText( sTotalAllocated );
-                    if ( bOverAllocated ) {
-                      pWLabelTotalAllocated->removeStyleClass( "fld_allocation_total_ok");
-                      if ( !pWLabelTotalAllocated->hasStyleClass( "fld_allocation_total_over") ) {
-                        pWLabelTotalAllocated->addStyleClass( "fld_allocation_total_over");
-                      }
-                    }
-                    else {
-                      pWLabelTotalAllocated->removeStyleClass( "fld_allocation_total_over");
-                      if ( !pWLabelTotalAllocated->hasStyleClass( "fld_allocation_total_ok") ) {
-                        pWLabelTotalAllocated->addStyleClass( "fld_allocation_total_ok");
-                      }
-                    }
-                    pAllocated->setText( sOptionAllocated );
-                  },
-                  [pBid,pAsk,pVol,pNumContracts,pPnL,pOI](const std::string& sOpenInt, const std::string& sBid, const std::string& sAsk, const std::string& sVolume, const std::string& sContracts, const std::string& sPnL ) { // fRealTime_t
-                    pOI->setText( sOpenInt );
-                    pBid->setText( sBid );
-                    pAsk->setText( sAsk );
-                    pVol->setText( sVolume );
-                    pNumContracts->setText( sContracts );
-                    pPnL->setText( sPnL );
-                  },
-                  [this,pEntryFillPrice](const std::string& sFill ){ // fFill_t async
-                    auto size = pEntryFillPrice->text().value().size();
-                    if ( 1 == size ) { // has '-' as an initial filler
-                      pEntryFillPrice->setText( sFill );
-                    }
-                    else {
-                      pEntryFillPrice->setText( pEntryFillPrice->text() + "," + sFill);
-                    }
-                    triggerUpdate();
-                  },
-                  [this,pExitFillPrice](const std::string& sFill ){ // fFill_t async
-                    pExitFillPrice->setText( sFill );
-                    triggerUpdate();
-                  }
-                  );
-              }
-              ix++;
-            } // end: add entries
-
-            pBtnPlaceOrders->setEnabled( 0 < m_mapOptionAtStrike.size() );
-          }; // pSelectStrikes->changed()
-
-          pSelectStrikes->changed().connect( // only this one works with multiple selection
-            [this](){
-              m_fUpdateStrikeSelection();
-            });
-
+        else {
+          pLabelRangeMessage->setHidden( false );
+          pLabelRangeMessage->setText( sMessage );
+        }
       }
-      ); // m_pServer->PrepareStrikeSelection
+    });
+
+  Wt::WContainerWidget* pContainerTableAndHeaders = pContainerForSelectAndTable->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  pContainerStrikeList->addStyleClass( "block" );
+
+  Wt::WContainerWidget* pContainerTable_Headers = pContainerTableAndHeaders->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  pContainerStrikeList->addStyleClass( "block" );
+
+  struct columns {
+    std::string name;
+    int width;  // TODO: convert this to use the .fld_ class
+    columns( const std::string& name_, int width_ ): name( name_ ), width( width_ ) {}
+  };
+  using vColumns_t = std::vector<columns>;
+  vColumns_t vColumns = {
+    {"ticker", 180}, {"side", 32}, {"strike", 65}, {"type",30}, {"oi",40},{"vol",50},{"bid",50},{"ask",50},
+    {"%alloc",40},{"",10},{"$alloc",60},{"ttl_q",60},{"order",80},
+    {"price",65},{"init_q",45},{"inc_q",45},{"inc_prc",60},{"p/l",70},{"fill_en",70},{"fill_ex",70}
+  };
+
+  for ( const vColumns_t::value_type& vt: vColumns ) {
+    Wt::WLabel* pLabel = pContainerTable_Headers->addWidget( std::make_unique<Wt::WLabel>( vt.name ) );
+    pLabel->addStyleClass( "w_label" );
+    pLabel->addStyleClass( "table_header_column_name" );
+    pLabel->setWidth( vt.width );
+  }
+
+  //pContainerTableAndHeaders->addWidget( std::make_unique<Wt::WBreak>() );
+
+  Wt::WContainerWidget* pContainerTable_DataRows = pContainerTableAndHeaders->addWidget( std::make_unique<Wt::WContainerWidget>() );
+  pContainerStrikeList->addStyleClass( "block" );
+
+  m_pServer->PrepareStrikeSelection(
+    sDate,
+    [pSelectStrikes](const std::string& sStrike){ // fPopulateStrike_t
+      pSelectStrikes->addItem( sStrike );
+    },
+    [this,pContainerButtons,pSelectStrikes,pContainerTable_DataRows,pWLabelTotalAllocated,pBtnPlaceOrders](){ // fPopulateStrikeDone_t
+
+      m_fUpdateStrikeSelection = // used by pSelectStrikes & pBtnEditAllocDelete
+        [this,pSelectStrikes,pContainerTable_DataRows,pWLabelTotalAllocated,pBtnPlaceOrders](){
+          auto set = pSelectStrikes->selectedIndexes();
+          using setStrike_t = std::set<std::string>;
+          setStrike_t setStrike;
+          for ( auto& item :set ) {
+            std::string sStrike( pSelectStrikes->itemText( item ).toUTF8() );
+            setStrike.insert( sStrike );
+          }
+
+          // delete removed entries
+          setStrike_t setDelete;
+          for ( const mapOptionAtStrike_t::value_type& vt: m_mapOptionAtStrike ) {
+            if ( setStrike.end() == setStrike.find( vt.first ) ) {
+              m_pServer->DelStrike( vt.first );
+              setDelete.insert( vt.first );
+            }
+          }
+          for ( const setStrike_t::value_type& vt: setDelete ) {
+            mapOptionAtStrike_t::iterator iter = m_mapOptionAtStrike.find( vt );
+            assert( m_mapOptionAtStrike.end() != iter );
+            iter->second.m_pcw->removeFromParent();
+            m_mapOptionAtStrike.erase( iter );
+          }
+
+          // insert added entries
+          int ix {};
+          for ( const setStrike_t::value_type& vt: setStrike ) {
+            if ( m_mapOptionAtStrike.end() == m_mapOptionAtStrike.find( vt ) ) {
+
+              Wt::WContainerWidget* pOptionRow = pContainerTable_DataRows->insertWidget( ix, std::make_unique<Wt::WContainerWidget>() );
+              auto pair = m_mapOptionAtStrike.emplace( vt, OptionAtStrike( pOptionRow ) );
+              assert( pair.second );
+              OptionAtStrike& oas( pair.first->second );
+
+              Wt::WLabel* pTicker = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Ticker" ) );
+              pTicker->addStyleClass( "w_label" );
+              pTicker->addStyleClass( "fld_ticker" );
+
+              Wt::WLabel* pSide;
+              Server::EOrderSide side;
+              switch ( m_pButtonGroupSide->checkedId() ) {
+                case (int)ESide::buy:
+                  side = Server::EOrderSide::buy;
+                  pSide = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Buy" ) );
+                  break;
+                case (int)ESide::sell:
+                  side = Server::EOrderSide::sell;
+                  pSide = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Sell" ) );
+                  break;
+                default:
+                  assert( false );
+                  break;
+              }
+              pSide->addStyleClass( "w_label" );
+              pSide->addStyleClass( "fld_side" );
+
+              Wt::WLabel* pStrike = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( vt ) );
+              pStrike->addStyleClass( "w_label" );
+              pStrike->addStyleClass( "fld_strike" );
+
+              Wt::WLabel* pType;
+              Server::EOptionType type;
+              switch ( m_pButtonGroupOption->checkedId() ) {
+                case (int)EOption::call:
+                  type = Server::EOptionType::call;
+                  pType = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Call" ) );
+                  break;
+                case (int)EOption::put:
+                  type = Server::EOptionType::put;
+                  pType = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Put" ) );
+                  break;
+                default:
+                  assert( false );
+                  break;
+              }
+              pType->addStyleClass( "w_label" );
+              pType->addStyleClass( "fld_type" );
+
+              Wt::WLabel* pOI  = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "OI" ) );
+              Wt::WLabel* pVol = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Vol" ) );
+              Wt::WLabel* pBid = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Bid" ) );
+              Wt::WLabel* pAsk = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "Ask" ) );
+              Wt::WLineEdit* pWLineEditAlloc = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>() );
+              Wt::WPushButton* pBtnEditAllocDelete= pOptionRow->addWidget( std::make_unique<Wt::WPushButton>( "X" ) );
+              Wt::WLabel* pAllocated = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "0" ) );
+              Wt::WLabel* pNumContracts = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "0" ) );
+              Wt::WComboBox* pOrderType = pOptionRow->addWidget( std::make_unique<Wt::WComboBox>() );
+              Wt::WLineEdit* pLimitPrice = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "0" ) ); // limit, scale
+              Wt::WLineEdit* pScaleInitialQuan = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "0" ) ); // scale
+              Wt::WLineEdit* pScaleIncQuan = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "0" ) ); // scale
+              Wt::WLineEdit* pScaleIncPrice = pOptionRow->addWidget( std::make_unique<Wt::WLineEdit>( "0" ) ); // scale
+              Wt::WLabel* pPnL = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "-" ) );
+              Wt::WLabel* pEntryFillPrice = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "-" ) );
+              Wt::WLabel* pExitFillPrice = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "-" ) );
+              pOptionRow->addWidget( std::make_unique<Wt::WBreak>() );
+              Wt::WLabel* pMessage = pOptionRow->addWidget( std::make_unique<Wt::WLabel>( "" ) );
+              pMessage->setHidden( true );
+
+              pOI->addStyleClass( "w_label" );
+              pOI->addStyleClass( "fld_open_interest" );
+
+              pVol->addStyleClass( "w_label" );
+              pVol->addStyleClass( "fld_volume" );
+
+              pBid->addStyleClass( "w_label" );
+              pBid->addStyleClass( "fld_quote" );
+
+              pAsk->addStyleClass( "w_label" );
+              pAsk->addStyleClass( "fld_quote" );
+
+              pBtnEditAllocDelete->addStyleClass( "w_push_button_x" );
+              pBtnEditAllocDelete->clicked().connect(
+                [this,vt,pSelectStrikes](){
+                  int ixThisEntry = pSelectStrikes->findText( vt );
+                  m_pServer->post( // can't delete self while in code
+                    sessionId(),
+                    [this,pSelectStrikes,ixThisEntry](){
+                      using setSelection_t = std::set<int>;
+                      setSelection_t selection = pSelectStrikes->selectedIndexes();
+                      setSelection_t::iterator iter = selection.find( ixThisEntry );
+                      if ( selection.end() != iter ) {
+                        selection.erase( iter );
+                        pSelectStrikes->setSelectedIndexes( selection );
+                        m_fUpdateStrikeSelection();
+                      }
+                      triggerUpdate();
+                    });
+                });
+
+              pWLineEditAlloc->setText( "0" );
+              //pWLineEditAlloc->keyWentUp().connect( [](){} );
+              pWLineEditAlloc->changed().connect(
+                [this,vt,pWLineEditAlloc](){
+                  m_pServer->ChangeAllocation( vt, pWLineEditAlloc->text().toUTF8() );
+                } );
+              pWLineEditAlloc->addStyleClass( "w_line_edit" );
+              pWLineEditAlloc->addStyleClass( "fld_percent_allocation" );
+
+              pAllocated->addStyleClass( "w_label" );
+              pAllocated->addStyleClass( "fld_allocation" );
+
+              pNumContracts->addStyleClass( "w_label" );
+              pNumContracts->addStyleClass( "fld_num_contracts" );
+
+              pOrderType->addItem( "market" );
+              pOrderType->addItem( "limit" );
+              pOrderType->addItem( "lim ask" );
+              pOrderType->addItem( "lim bid" );
+              pOrderType->addItem( "scale" );
+              pOrderType->addStyleClass( "w_combo_box" );
+
+              pOrderType->activated().connect(
+                [this,vt,pOrderType,pLimitPrice,pScaleInitialQuan,pScaleIncQuan,pScaleIncPrice,pBid,pAsk,pMessage](){
+                  std::string sMessage = ComposeOrderType(
+                    pOrderType->currentIndex(),
+                    vt,
+                    pAsk,pBid,pLimitPrice, pScaleInitialQuan, pScaleIncQuan, pScaleIncPrice
+                  );
+                  pMessage->setText( sMessage );
+                  if ( sMessage.empty() ) pMessage->setHidden( true );
+                  else {
+                    pMessage->setHidden( false );
+                  }
+                } );
+
+              pLimitPrice->setEnabled( false );
+              pLimitPrice->addStyleClass( "w_line_edit" );
+              pLimitPrice->addStyleClass( "fld_price" );
+              pLimitPrice->changed().connect(
+                [this,vt,pOrderType,pLimitPrice,pScaleInitialQuan,pScaleIncQuan,pScaleIncPrice,pBid,pAsk,pMessage](){
+                  std::string sMessage = ComposeOrderType(
+                    pOrderType->currentIndex(),
+                    vt,
+                    pAsk,pBid,pLimitPrice, pScaleInitialQuan, pScaleIncQuan, pScaleIncPrice
+                  );
+                  pMessage->setText( sMessage );
+                  if ( sMessage.empty() ) pMessage->setHidden( true );
+                  else {
+                    pMessage->setHidden( false );
+                  }
+                } );
+
+              pScaleInitialQuan->setEnabled( false );
+              pScaleInitialQuan->addStyleClass( "w_line_edit" );
+              pScaleInitialQuan->addStyleClass( "fld_num_contracts" );
+              pScaleInitialQuan->changed().connect(
+                [this,vt,pOrderType,pLimitPrice,pScaleInitialQuan,pScaleIncQuan,pScaleIncPrice,pBid,pAsk,pMessage](){
+                  std::string sMessage = ComposeOrderType(
+                    pOrderType->currentIndex(),
+                    vt,
+                    pAsk,pBid,pLimitPrice, pScaleInitialQuan, pScaleIncQuan, pScaleIncPrice
+                  );
+                  pMessage->setText( sMessage );
+                  if ( sMessage.empty() ) pMessage->setHidden( true );
+                  else {
+                    pMessage->setHidden( false );
+                  }
+                } );
+
+              pScaleIncQuan->setEnabled( false );
+              pScaleIncQuan->addStyleClass( "w_line_edit" );
+              pScaleIncQuan->addStyleClass( "fld_num_contracts" );
+              pScaleIncQuan->changed().connect(
+                [this,vt,pOrderType,pLimitPrice,pScaleInitialQuan,pScaleIncQuan,pScaleIncPrice,pBid,pAsk,pMessage](){
+                  std::string sMessage = ComposeOrderType(
+                    pOrderType->currentIndex(),
+                    vt,
+                    pAsk,pBid,pLimitPrice, pScaleInitialQuan, pScaleIncQuan, pScaleIncPrice
+                  );
+                  pMessage->setText( sMessage );
+                  if ( sMessage.empty() ) pMessage->setHidden( true );
+                  else {
+                    pMessage->setHidden( false );
+                  }
+                } );
+
+              pScaleIncPrice->setEnabled( false );
+              pScaleIncPrice->addStyleClass( "w_line_edit" );
+              pScaleIncPrice->addStyleClass( "fld_price" );
+              pScaleIncPrice->changed().connect(
+                [this,vt,pOrderType,pLimitPrice,pScaleInitialQuan,pScaleIncQuan,pScaleIncPrice,pBid,pAsk,pMessage](){
+                  std::string sMessage = ComposeOrderType(
+                    pOrderType->currentIndex(),
+                    vt,
+                    pAsk,pBid,pLimitPrice, pScaleInitialQuan, pScaleIncQuan, pScaleIncPrice
+                  );
+                  pMessage->setText( sMessage );
+                  if ( sMessage.empty() ) pMessage->setHidden( true );
+                  else {
+                    pMessage->setHidden( false );
+                  }
+                } );
+
+              pPnL->addStyleClass( "w_label" );
+              pPnL->addStyleClass( "fld_pnl" );
+
+              pEntryFillPrice->addStyleClass( "w_label" );
+              //pEntryFillPrice->addStyleClass( "fld_price" );
+
+              pExitFillPrice->addStyleClass( "w_label" );
+              //pExitFillPrice->addStyleClass( "fld_price" );
+
+              pMessage->addStyleClass( "w_label" );
+              pMessage->addStyleClass( "fld_message_error" );
+
+              m_pServer->AddStrike(
+                sessionId(),
+                type, side, vt,
+                [pTicker](const std::string& sTicker){ // fPopulateOption_t
+                  pTicker->setText( sTicker );
+                },
+                [pWLabelTotalAllocated,pAllocated](const std::string& sTotalAllocated, bool bOverAllocated, const std::string& sOptionAllocated ){ // fUpdateAllocated_t
+                  pWLabelTotalAllocated->setText( sTotalAllocated );
+                  if ( bOverAllocated ) {
+                    pWLabelTotalAllocated->removeStyleClass( "fld_allocation_total_ok");
+                    if ( !pWLabelTotalAllocated->hasStyleClass( "fld_allocation_total_over") ) {
+                      pWLabelTotalAllocated->addStyleClass( "fld_allocation_total_over");
+                    }
+                  }
+                  else {
+                    pWLabelTotalAllocated->removeStyleClass( "fld_allocation_total_over");
+                    if ( !pWLabelTotalAllocated->hasStyleClass( "fld_allocation_total_ok") ) {
+                      pWLabelTotalAllocated->addStyleClass( "fld_allocation_total_ok");
+                    }
+                  }
+                  pAllocated->setText( sOptionAllocated );
+                },
+                [pBid,pAsk,pVol,pNumContracts,pPnL,pOI](const std::string& sOpenInt, const std::string& sBid, const std::string& sAsk, const std::string& sVolume, const std::string& sContracts, const std::string& sPnL ) { // fRealTime_t
+                  pOI->setText( sOpenInt );
+                  pBid->setText( sBid );
+                  pAsk->setText( sAsk );
+                  pVol->setText( sVolume );
+                  pNumContracts->setText( sContracts );
+                  pPnL->setText( sPnL );
+                },
+                [this,pEntryFillPrice](const std::string& sFill ){ // fFill_t async
+                  auto size = pEntryFillPrice->text().value().size();
+                  if ( 1 == size ) { // has '-' as an initial filler
+                    pEntryFillPrice->setText( sFill );
+                  }
+                  else {
+                    pEntryFillPrice->setText( pEntryFillPrice->text() + "," + sFill);
+                  }
+                  triggerUpdate();
+                },
+                [this,pExitFillPrice](const std::string& sFill ){ // fFill_t async
+                  pExitFillPrice->setText( sFill );
+                  triggerUpdate();
+                }
+                );
+            }
+            ix++;
+          } // end: add entries
+
+          pBtnPlaceOrders->setEnabled( 0 < m_mapOptionAtStrike.size() );
+        }; // pSelectStrikes->changed()
+
+        pSelectStrikes->changed().connect( // only this one works with multiple selection
+          [this](){
+            m_fUpdateStrikeSelection();
+          });
+
+    }
+    ); // m_pServer->PrepareStrikeSelection
 
   m_pServer->SyncStrikeSelections(
     [pSelectStrikes](const std::string& sStrike ){
