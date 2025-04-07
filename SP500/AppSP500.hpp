@@ -84,9 +84,20 @@ private:
     ou::ChartEntryIndicator indicatorAsk;
     ou::ChartEntryIndicator indicatorTrade;
     ou::ChartEntryIndicator indicatorBid;
+    boost::posix_time::time_duration tdDelay;
+
     SymbolInfo( const std::string& sName_, size_t ixChart_ )
     : sName( sName_ )
     , ixChart( ixChart_ )
+    , tdDelay( boost::posix_time::time_duration( 0, 0, 0 ) )
+    {}
+
+    SymbolInfo( const std::string& sName_, size_t ixChart_
+    , boost::posix_time::time_duration tdDelay_
+    )
+    : sName( sName_ )
+    , ixChart( ixChart_ )
+    , tdDelay( tdDelay_ )
     {}
   };
   using mapSymbolInfo_t = std::unordered_map<ESymbol,SymbolInfo>;
@@ -97,7 +108,10 @@ private:
 
   void OnFrameMainAutoMove( wxMoveEvent& );
 
-  void InitStructures( ESymbol, const std::string& sName, size_t ixChart );
+  void InitStructures(
+    ESymbol, const std::string& sName, size_t ixChart,
+    boost::posix_time::time_duration = boost::posix_time::time_duration( 0, 0, 0 )
+  );
 
   void LoadPanelFinancialChart();
 

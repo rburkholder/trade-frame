@@ -121,9 +121,9 @@ void AppSP500::OnFrameMainAutoMove( wxMoveEvent& event ) {
 
 }
 
-void AppSP500::InitStructures( ESymbol eSymbol, const std::string& sName, size_t ixChart ) {
+void AppSP500::InitStructures( ESymbol eSymbol, const std::string& sName, size_t ixChart, boost::posix_time::time_duration td ) {
   m_pkwmSymbol->AddPattern( sName, eSymbol );
-  auto result = m_mapSymbolInfo.emplace( eSymbol, SymbolInfo( sName, ixChart ) );
+  auto result = m_mapSymbolInfo.emplace( eSymbol, SymbolInfo( sName, ixChart, td ) );
   assert( result.second );
   SymbolInfo& si( result.first->second );
   si.indicatorTrade.SetColour( ou::Colour::Green );
@@ -147,7 +147,7 @@ void AppSP500::LoadPanelFinancialChart() {
   m_cdv.SetNames( "SPY", sFileName );
 
     m_pkwmSymbol = new ou::KeyWordMatch<ESymbol>( ESymbol::UKNWN, 6 );
-  InitStructures( ESymbol::SPY,  "SPY",    1 );
+  InitStructures( ESymbol::SPY,  "SPY",    1, boost::posix_time::time_duration( 0, 15, 0 ) );
   //InitStructures( ESymbol::SPY,  "ES-20250620", 1 );
   InitStructures( ESymbol::II6A, "II6A.Z", 2 );
   InitStructures( ESymbol::II6D, "II6D.Z", 3 );
@@ -198,15 +198,21 @@ void AppSP500::HandleLoadTreeHdf5Object( const std::string& sGroup, const std::s
       bool bFirst( true );
 
       trades.ForEach(
-        [&indicator,&first,&bFirst]( const ou::tf::Trade& trade ){
-          indicator.Append( trade.DateTime(), trade.Price() );
+        [&indicator,&first,&bFirst,iterSymbol]( const ou::tf::Trade& trade ){
+          boost::posix_time::ptime dt( trade.DateTime() );
+          if ( 1 == iterSymbol->second.ixChart ) {
+            indicator.Append( trade.DateTime() - iterSymbol->second.tdDelay, trade.Price() );
+          }
+          else {
+            indicator.Append( trade.DateTime(), trade.Price() );
+          }
           if ( bFirst ) {
             first = trade.DateTime();
             bFirst = false;
           }
         } );
 
-      if ( 1 == iterSymbol->second.ixChart ) {
+      if ( false && ( 1 == iterSymbol->second.ixChart ) ) {
         ou::tf::Quotes& quotes( iterSymbol->second.quotes );
         ou::ChartEntryIndicator& asks( iterSymbol->second.indicatorAsk );
         ou::ChartEntryIndicator& bids( iterSymbol->second.indicatorBid );
