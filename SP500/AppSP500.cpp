@@ -126,7 +126,14 @@ void AppSP500::InitStructures( ESymbol eSymbol, const std::string& sName, size_t
   auto result = m_mapSymbolInfo.emplace( eSymbol, SymbolInfo( sName, ixChart ) );
   assert( result.second );
   SymbolInfo& si( result.first->second );
-  m_cdv.Add( ixChart, &si.indicator );
+  si.indicatorTrade.SetColour( ou::Colour::Green );
+  m_cdv.Add( ixChart, &si.indicatorTrade );
+  if ( 1 == ixChart ) {
+    si.indicatorAsk.SetColour( ou::Colour::Red );
+    m_cdv.Add( ixChart, &si.indicatorAsk );
+    si.indicatorBid.SetColour( ou::Colour::Blue );
+    m_cdv.Add( ixChart, &si.indicatorBid );
+  }
 }
 
 void AppSP500::LoadPanelFinancialChart() {
@@ -134,14 +141,14 @@ void AppSP500::LoadPanelFinancialChart() {
   //m_ptiRoot = m_pPanelFinancialChart->SetRoot( "/", nullptr );
 
   // inspiration from PanelChartHdf5
-  const std::string sFileName( "collector-20250403.hdf5" );
+  const std::string sFileName( "collector-20250402.hdf5" );
   m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO, sFileName );
 
   m_cdv.SetNames( "SPY", sFileName );
 
     m_pkwmSymbol = new ou::KeyWordMatch<ESymbol>( ESymbol::UKNWN, 6 );
-  //InitStructures( ESymbol::SPY,  "SPY",    1 );
-  InitStructures( ESymbol::SPY,  "ES-20250620", 1 );
+  InitStructures( ESymbol::SPY,  "SPY",    1 );
+  //InitStructures( ESymbol::SPY,  "ES-20250620", 1 );
   InitStructures( ESymbol::II6A, "II6A.Z", 2 );
   InitStructures( ESymbol::II6D, "II6D.Z", 3 );
   InitStructures( ESymbol::JT6T, "JT6T.Z", 4 );
@@ -184,13 +191,53 @@ void AppSP500::HandleLoadTreeHdf5Object( const std::string& sGroup, const std::s
       trades.Resize( cnt );
       tsRepository.Read( begin, end, &trades );
 
-      ou::ChartEntryIndicator& indicator( iterSymbol->second.indicator );
+      ou::ChartEntryIndicator& indicator( iterSymbol->second.indicatorTrade );
       indicator.SetName( sName );
 
+      boost::posix_time::ptime first;
+      bool bFirst( true );
+
       trades.ForEach(
-        [&indicator]( const ou::tf::Trade& trade ){
+        [&indicator,&first,&bFirst]( const ou::tf::Trade& trade ){
           indicator.Append( trade.DateTime(), trade.Price() );
+          if ( bFirst ) {
+            first = trade.DateTime();
+            bFirst = false;
+          }
         } );
+
+      if ( 1 == iterSymbol->second.ixChart ) {
+        ou::tf::Quotes& quotes( iterSymbol->second.quotes );
+        ou::ChartEntryIndicator& asks( iterSymbol->second.indicatorAsk );
+        ou::ChartEntryIndicator& bids( iterSymbol->second.indicatorBid );
+        quotes.ForEach(
+          [&bids,&asks,&first]( const ou::tf::Quote& quote ){
+            boost::posix_time::ptime dt( quote.DateTime() );
+            if ( first <= dt ) {
+              asks.Append( dt, quote.Ask() );
+              bids.Append( dt, quote.Bid() );
+              }
+          } );
+      }
+
+    }
+
+    if ( 1 == iterSymbol->second.ixChart ) {
+      if ( ou::tf::Quote::Signature() == attrObject.GetSignature() ) {
+        ou::tf::HDF5TimeSeriesContainer<ou::tf::Quote> tsRepository( *m_pdm, sGroup );
+        ou::tf::HDF5TimeSeriesContainer<ou::tf::Quote>::iterator begin, end;
+        begin = tsRepository.begin();
+        end = tsRepository.end();
+        hsize_t cnt = end - begin;
+        ou::tf::Quotes& quotes( iterSymbol->second.quotes );
+        quotes.Resize( cnt );
+        tsRepository.Read( begin, end, &quotes );
+
+        ou::ChartEntryIndicator& asks( iterSymbol->second.indicatorAsk );
+        asks.SetName( "ask" );
+        ou::ChartEntryIndicator& bids( iterSymbol->second.indicatorBid );
+        bids.SetName( "bid" );
+      }
     }
   }
 }

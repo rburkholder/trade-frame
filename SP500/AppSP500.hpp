@@ -79,9 +79,11 @@ private:
   struct SymbolInfo {
     const std::string sName;
     size_t ixChart;
-    //ou::tf::Quotes quotes;
     ou::tf::Trades trades;
-    ou::ChartEntryIndicator indicator;
+    ou::tf::Quotes quotes;
+    ou::ChartEntryIndicator indicatorAsk;
+    ou::ChartEntryIndicator indicatorTrade;
+    ou::ChartEntryIndicator indicatorBid;
     SymbolInfo( const std::string& sName_, size_t ixChart_ )
     : sName( sName_ )
     , ixChart( ixChart_ )
