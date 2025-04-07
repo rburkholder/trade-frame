@@ -190,6 +190,69 @@ void Server_impl::SessionDetach( const std::string& sSessionId ) {
   m_mapSession.erase( iter );
 }
 
+void Server_impl::WatchAdd( const std::string& sName ) {
+
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+  pInstrument_t pInstrument;
+
+  mapName2Watch_t::iterator iterName2Watch = m_mapName2Watch.find( sName );
+  if ( m_mapName2Watch.end() == iterName2Watch ) {
+
+    std::function<void(pInstrument_t)> fInit =
+    [this]( pInstrument_t pInstrument ){
+      const std::string& sNameCommon( pInstrument->GetInstrumentName() );
+      const std::string& sNameIqfeed( pInstrument->GetInstrumentName( ou::tf::keytypes::EProviderIQF ) );
+      mapName2Watch_t::iterator iterName2Watch = m_mapName2Watch.find( sNameIqfeed );
+      if ( m_mapName2Watch.end() == iterName2Watch ) {
+        m_mapName2Watch.emplace( sNameIqfeed, sNameCommon );
+      }
+    };
+
+    pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, sName );
+    if ( pInstrument ) { // skip the build
+      fInit( pInstrument );
+      WatchStart( pInstrument );
+    }
+    else {
+      m_pBuildInstrumentIQFeed->Queue(
+        sName,
+        [this,&im,fInit_=std::move(fInit)]( pInstrument_t pInstrument, bool bConstructed ) {
+          fInit_( pInstrument );
+          im.Register( pInstrument );
+          WatchStart( pInstrument );
+        }
+      );
+    }
+    }
+  else {
+    // watch already added & started
+  }
+
+}
+
+void Server_impl::WatchStart( pInstrument_t pInstrument ) {
+  const std::string& sNameCommon( pInstrument->GetInstrumentName() );
+  pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pProviderIQFeed );
+  mapWatch_t::iterator iterWatch = m_mapWatch.find( sNameCommon );
+  assert( m_mapWatch.end() == iterWatch );
+  auto result = m_mapWatch.emplace( sNameCommon, Watch( pWatch ) );
+  assert( result.second );
+}
+
+void Server_impl::WatchRealTime( const std::string& sNameIqfeed, fWatchRealTime_t&& f ) {
+  mapName2Watch_t::iterator iterName2Watch = m_mapName2Watch.find( sNameIqfeed );
+  assert( m_mapName2Watch.end() != iterName2Watch );
+
+  mapWatch_t::const_iterator iterWatch = m_mapWatch.find( iterName2Watch->second );
+  assert( m_mapWatch.end() != iterWatch );
+
+  pWatch_t pWatch( iterWatch->second.m_pWatch );
+
+  const ou::tf::Trade& trade( pWatch->LastTrade() );
+  const ou::tf::Quote& quote( pWatch->LastQuote() );
+  f( sNameIqfeed, quote.Bid(), trade.Price(), quote.Ask() );
+}
+
 void Server_impl::UnderlyingPopulation() {
   m_stateEngine = EStateEngine::underlying_populate;
 }

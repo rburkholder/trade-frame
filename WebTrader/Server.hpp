@@ -69,12 +69,17 @@ public:
     const std::string& pnl)>;
   using fFill_t = std::function<void(const std::string&)>; // #filled@price
 
-  using fPopulateWatch_t = std::function<void(const std::string&)>;
+  using fWatchPopulate_t = std::function<void(const std::string&)>;
+  using fWatchRealTime_t = std::function<void(
+    const std::string& sName,
+    const std::string& sBid, const std::string& sTrade, const std::string& sAsk
+  )>;
 
   void SessionAttach( const std::string& sSessionId, const std::string& sClientAddress );
   void SessionDetach( const std::string& sSessionId );
 
-  void PopulateWatch( fPopulateWatch_t&& );
+  void WatchPopulate( fWatchPopulate_t&& );
+  void WatchRealTime( const std::string& sNameIqfeed, fWatchRealTime_t&& );
 
   void ResetForNewUnderlying();
   void ResetForNewExpiry();

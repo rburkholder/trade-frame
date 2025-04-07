@@ -77,6 +77,7 @@ target_link_libraries(
     TFTrading
     OUCommon
     TFTrading
+    fmt
     dl
     z
     pthread

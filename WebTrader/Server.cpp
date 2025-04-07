@@ -21,6 +21,8 @@
 
 #include <sstream>
 
+#include <fmt/core.h>
+
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -98,10 +100,23 @@ Server::EWhatToShow Server::WhereToStart() {
   return what;
 }
 
-void Server::PopulateWatch( fPopulateWatch_t&& f ) {
+void Server::WatchPopulate( fWatchPopulate_t&& f ) {
   for ( const std::string& s: m_choices.m_vWatchList ) {
+    m_implServer->WatchAdd( s );
     f( s );
   }
+}
+
+void Server::WatchRealTime( const std::string& sNameIqfeed, fWatchRealTime_t&& f) {
+  m_implServer->WatchRealTime(
+    sNameIqfeed,
+    [f_=std::move(f)]( const std::string& sName, double bid, double trade, double ask ){
+      // TODO: use instrument attribute in formatter (supplied by Server_impl)
+      const std::string   sBid( fmt::format( "{:.{}f}", bid,   2 ) );
+      const std::string sTrade( fmt::format( "{:.{}f}", trade, 2 ) );
+      const std::string   sAsk( fmt::format( "{:.{}f}", ask,   2 ) );
+      f_( sName, sBid, sTrade, sAsk );
+    } );
 }
 
 void Server::AddCandidateFutures( fAddCandidateFutures_t&& f ) {

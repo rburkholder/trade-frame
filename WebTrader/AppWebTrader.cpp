@@ -259,16 +259,45 @@ void AppWebTrader::Page_Template( Wt::WContainerWidget* pcw, fTemplate_t f) {
 
 void AppWebTrader::HandleLiveRefresh() {
   m_pServer->TriggerUpdates( sessionId() );
+
+  for ( mapRealTime_t::value_type& vt: m_mapRealTime ) {
+    m_pServer->WatchRealTime(
+      vt.first,
+      [&vt]( const std::string& sName,
+             const std::string& sBid, const std::string& sTrade, const std::string& sAsk ){
+        vt.second.pLabelBid->setText( sBid );
+        vt.second.pLabelTrade->setText( sTrade );
+        vt.second.pLabelAsk->setText( sAsk );
+      } );
+  }
+
   triggerUpdate();
 }
 
 void AppWebTrader::Page_WatchList( Wt::WContainerWidget* pcw ) {
   Wt::WContainerWidget* pContainerWatchList = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
-  pContainerWatchList->addStyleClass( "block" );
-  m_pServer->PopulateWatch(
+  //pContainerWatchList->addStyleClass( "block" );
+  m_pServer->WatchPopulate(
     [this, pcw=pContainerWatchList]( const std::string& sName ){
-      Wt::WLabel* pLabelPassWord = pcw->addWidget( std::make_unique<Wt::WLabel>( sName ) );
-      pLabelPassWord->addStyleClass( "block" );
+      mapRealTime_t::iterator iterRealTime = m_mapRealTime.find( sName );
+      if ( m_mapRealTime.end() == iterRealTime ) {
+        auto result = m_mapRealTime.emplace( sName, RealTime() );
+        assert( result.second );
+        iterRealTime = result.first;
+
+        RealTime& rt( iterRealTime->second );
+
+        rt.pContainerWatch = pcw->addWidget( std::make_unique<Wt::WContainerWidget>() );
+        rt.pContainerWatch->addStyleClass( "block" );
+        rt.pLabelName  = rt.pContainerWatch->addWidget( std::make_unique<Wt::WLabel>( sName ) );
+        rt.pLabelName->addStyleClass( "fld_ticker" );
+        rt.pLabelBid   = rt.pContainerWatch->addWidget( std::make_unique<Wt::WLabel>(  ) );
+        rt.pLabelBid->addStyleClass( "fld_quote" );
+        rt.pLabelTrade = rt.pContainerWatch->addWidget( std::make_unique<Wt::WLabel>(  ) );
+        rt.pLabelTrade->addStyleClass( "fld_price" );
+        rt.pLabelAsk   = rt.pContainerWatch->addWidget( std::make_unique<Wt::WLabel>(  ) );
+        rt.pLabelAsk->addStyleClass( "fld_quote" );
+        }
     } );
 }
 

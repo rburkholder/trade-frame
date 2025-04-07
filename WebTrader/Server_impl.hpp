@@ -74,6 +74,11 @@ public:
   void SessionAttach( const std::string& sSessionId, const std::string& sClientAddress );
   void SessionDetach( const std::string& sSessionId );
 
+  //using fWatchRealTimeRequest_t = std::function<void()>;
+  void WatchAdd( const std::string& sNameIqfeed );
+  using fWatchRealTime_t = std::function<void(const std::string&, double bid, double trade, double ask)>;
+  void WatchRealTime( const std::string& sNameIqfeed, fWatchRealTime_t&& );
+
   void UnderlyingPopulation();
 
   void Underlying_Acquire(
@@ -179,6 +184,27 @@ private:
   vRequestContract_t m_vRequestContract_Pending; // lifo of requests
 
   // EStateEngine::watch_list
+
+  using mapName2Watch_t = std::unordered_map<std::string,std::string>;
+  mapName2Watch_t m_mapName2Watch;
+
+  struct Watch {
+    pWatch_t m_pWatch;
+    Watch( pWatch_t& pWatch ): m_pWatch( pWatch ) {
+      m_pWatch->RecordSeries( false );
+      m_pWatch->StartWatch(); // just track last value
+    }
+    ~Watch() {
+      if ( m_pWatch ) {
+        m_pWatch->StopWatch();
+      }
+    }
+    Watch( Watch&& w ): m_pWatch( std::move( w.m_pWatch ) ) {}
+  };
+  using mapWatch_t = std::unordered_map<std::string,Watch>; // key is instrument common name
+  mapWatch_t m_mapWatch;
+
+  void WatchStart( pInstrument_t );
 
   // EStateEngine::underlying_acquire
 

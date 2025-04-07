@@ -104,6 +104,16 @@ private:
   using fUpdateStrikeSelection_t = std::function<void()>;
   fUpdateStrikeSelection_t m_fUpdateStrikeSelection;
 
+  struct RealTime {
+    Wt::WContainerWidget* pContainerWatch;
+    Wt::WLabel* pLabelName;
+    Wt::WLabel* pLabelBid;
+    Wt::WLabel* pLabelTrade;
+    Wt::WLabel* pLabelAsk;
+  };
+  using mapRealTime_t = std::unordered_map<std::string, RealTime>;
+  mapRealTime_t m_mapRealTime;
+
   void AddLink( Wt::WContainerWidget*, const std::string& sClass, const std::string& sPath, const std::string& sAnchor );
 
   void HandleInternalPathChanged( const std::string& );
