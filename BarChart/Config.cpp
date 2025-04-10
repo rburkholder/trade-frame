@@ -15,8 +15,8 @@
 /*
  * File:    Config.cpp
  * Author:  raymond@burkholder.net
- * Project: SP500
- * Created: March 30, 2025 17:59:23
+ * Project: BarChart
+ * Created: April 9, 2025 20:10:47
  */
 
 #include <fstream>
@@ -30,14 +30,14 @@ namespace po = boost::program_options;
 #include "Config.hpp"
 
 namespace {
-  static const std::string sChoice_sHdf5File( "hdf5_file" );
+  static const std::string sChoice_SecurityName( "security_name" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bRequired, T& dest ) {
     bool bOk = true;
     if ( 0 < vm.count( name ) ) {
       dest = std::move( vm[name].as<T>() );
-      BOOST_LOG_TRIVIAL(info) << name << " = " << dest;
+      //BOOST_LOG_TRIVIAL(info) << name << " = " << dest; // can't log a vector?
     }
     else {
       if ( bRequired ) {
@@ -60,20 +60,20 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     po::options_description config( "HDF5 Chart config" );
     config.add_options()
 
-      ( sChoice_sHdf5File.c_str(), po::value<std::string>( &choices.m_sHdf5File )->default_value( "TradeFrame.hdf5" ), "hdf5 file" )
+      ( sChoice_SecurityName.c_str(), po::value<Choices::vSecurityName_t>( &choices.m_vSecurityName ), "security name" )
       ;
     po::variables_map vm;
 
     std::ifstream ifs( sFileName.c_str() );
 
     if ( !ifs ) {
-      BOOST_LOG_TRIVIAL(error) << "hdf5 chart config file " << sFileName << " does not exist";
+      BOOST_LOG_TRIVIAL(error) << "bar chart config file " << sFileName << " does not exist";
       bOk = false;
     }
     else {
       po::store( po::parse_config_file( ifs, config), vm );
 
-      bOk &= parse<std::string>( sFileName, vm, sChoice_sHdf5File, true, choices.m_sHdf5File );
+      bOk &= parse<Choices::vSecurityName_t>( sFileName, vm, sChoice_SecurityName, true, choices.m_vSecurityName );
     }
 
   }

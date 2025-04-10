@@ -15,19 +15,21 @@
 /*
  * File:    Config.hpp
  * Author:  raymond@burkholder.net
- * Project: SP500
- * Created: March 30, 2025 17:59:23
+ * Project: BarChart
+ * Created: April 9, 2025 20:10:47
  */
 
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace config {
 
 struct Choices {
 
-  std::string m_sHdf5File; // optional
+  using vSecurityName_t = std::vector<std::string>;
+  vSecurityName_t m_vSecurityName;
 
 };
 

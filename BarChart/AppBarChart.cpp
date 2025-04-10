@@ -20,13 +20,11 @@
  */
 
 /*
-  * start by viewing SPY or SPX as primary chart from HDF5 file - done
-  * add in the SP Tick/Trin/Advance/Decline/ratio indicators - done
-  * add in some indicators, maybe try the garch studies?
-  * run simulator for validation
-  * add in the ml ability?
-  * run live simulation - iqfeed
-  * run live - ib
+  show daily bars for a select number instruments
+  show live data for a select number of instruments
+
+  * load up tree from config file
+  * use indicator trading for example of loading daily bars
 */
 
 #include <boost/log/trivial.hpp>
@@ -40,6 +38,7 @@
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 
 #include <TFVuTrading/FrameMain.h>
+#include <TFVuTrading/PanelFinancialChart.hpp>
 
 #include "AppBarChart.hpp"
 
@@ -66,14 +65,9 @@ bool AppBarChart::OnInit() {
   }
 
   if ( config::Load( c_sChoicesFilename, m_choices ) ) {
-    if ( boost::filesystem::exists( m_choices.m_sHdf5File ) ) {}
-    else {
-      BOOST_LOG_TRIVIAL(error) << m_choices.m_sHdf5File << " does not exist";
-      return false;
-    }
   }
   else {
-    // choices is default to tradeframe.hdf5
+    return false;
   }
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppTitle );
@@ -90,11 +84,11 @@ bool AppBarChart::OnInit() {
   sizerFrame = new wxBoxSizer( wxVERTICAL );
   m_pFrameMain->SetSizer( sizerFrame );
 
-  //m_pPanelFinancialChart = new ou::tf::PanelFinancialChart( m_pFrameMain );
-  //sizerFrame->Add( m_pPanelFinancialChart, 1, wxALL | wxEXPAND, 0 );
+  m_pPanelFinancialChart = new ou::tf::PanelFinancialChart( m_pFrameMain );
+  sizerFrame->Add( m_pPanelFinancialChart, 1, wxALL | wxEXPAND, 0 );
 
-  m_pwcv = new ou::tf::WinChartView( m_pFrameMain );
-  sizerFrame->Add( m_pwcv, 1,wxALL | wxEXPAND, 0 );
+  //m_pwcv = new ou::tf::WinChartView( m_pFrameMain );
+  //sizerFrame->Add( m_pwcv, 1,wxALL | wxEXPAND, 0 );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppBarChart::OnClose, this );  // start close of windows and controls
   m_pFrameMain->Bind( wxEVT_MOVE, &AppBarChart::OnFrameMainAutoMove, this ); // intercept first move
@@ -121,131 +115,15 @@ void AppBarChart::OnFrameMainAutoMove( wxMoveEvent& event ) {
 
 }
 
-void AppBarChart::InitStructures( ESymbol eSymbol, const std::string& sName, size_t ixChart, boost::posix_time::time_duration td ) {
-  m_pkwmSymbol->AddPattern( sName, eSymbol );
-  auto result = m_mapSymbolInfo.emplace( eSymbol, SymbolInfo( sName, ixChart, td ) );
-  assert( result.second );
-  SymbolInfo& si( result.first->second );
-  si.indicatorTrade.SetColour( ou::Colour::Green );
-  m_cdv.Add( ixChart, &si.indicatorTrade );
-  if ( 1 == ixChart ) {
-    si.indicatorAsk.SetColour( ou::Colour::Red );
-    m_cdv.Add( ixChart, &si.indicatorAsk );
-    si.indicatorBid.SetColour( ou::Colour::Blue );
-    m_cdv.Add( ixChart, &si.indicatorBid );
-  }
-}
-
 void AppBarChart::LoadPanelFinancialChart() {
 
-  //m_ptiRoot = m_pPanelFinancialChart->SetRoot( "/", nullptr );
+  m_ptiRoot = m_pPanelFinancialChart->SetRoot( "/", nullptr );
 
-  // inspiration from PanelChartHdf5
-  const std::string sFileName( "collector-20250402.hdf5" );
-  m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO, sFileName );
-
-  m_cdv.SetNames( "SPY", sFileName );
-
-    m_pkwmSymbol = new ou::KeyWordMatch<ESymbol>( ESymbol::UKNWN, 6 );
-  InitStructures( ESymbol::SPY,  "SPY",    1, boost::posix_time::time_duration( 0, 15, 0 ) );
-  //InitStructures( ESymbol::SPY,  "ES-20250620", 1 );
-  InitStructures( ESymbol::II6A, "II6A.Z", 2 );
-  InitStructures( ESymbol::II6D, "II6D.Z", 3 );
-  InitStructures( ESymbol::JT6T, "JT6T.Z", 4 );
-  InitStructures( ESymbol::LI6N, "LI6N.Z", 5 );
-  InitStructures( ESymbol::TR6T, "TR6T.Z", 6 );
-
-  IterateObjects();
-
-  m_pwcv->SetChartDataView( &m_cdv );
-}
-
-void AppBarChart::IterateObjects() {
-  ou::tf::hdf5::IterateGroups ig(
-    *m_pdm, std::string( "/" ),
-    [this]( const std::string& group,const std::string& name ){ HandleLoadTreeHdf5Group(  group, name ); }, // path
-    [this]( const std::string& group,const std::string& name ){ HandleLoadTreeHdf5Object( group, name ); }  // timeseries
-    );
-}
-
-void AppBarChart::HandleLoadTreeHdf5Group( const std::string& sGroup, const std::string& sName ) {
-  //BOOST_LOG_TRIVIAL(info) << "1 Group  " << sGroup << ' ' << sName;
-}
-
-void AppBarChart::HandleLoadTreeHdf5Object( const std::string& sGroup, const std::string& sName ) {
-  // select only ones in the list
-  ESymbol eSymbol = m_pkwmSymbol->FindMatch( sName );
-  if ( ESymbol::UKNWN != eSymbol ) {
-    ou::tf::HDF5Attributes attrObject( *m_pdm, sGroup );
-    BOOST_LOG_TRIVIAL(info) << "3 Object," << sGroup << ',' << sName << ',' << attrObject.GetSignature();
-    mapSymbolInfo_t::iterator iterSymbol = m_mapSymbolInfo.find( eSymbol );
-    assert ( m_mapSymbolInfo.end() != iterSymbol );
-
-    if ( ou::tf::Trade::Signature() == attrObject.GetSignature() ) {
-      ou::tf::HDF5TimeSeriesContainer<ou::tf::Trade> tsRepository( *m_pdm, sGroup );
-      ou::tf::HDF5TimeSeriesContainer<ou::tf::Trade>::iterator begin, end;
-      begin = tsRepository.begin();
-      end = tsRepository.end();
-      hsize_t cnt = end - begin;
-      ou::tf::Trades& trades( iterSymbol->second.trades );
-      trades.Resize( cnt );
-      tsRepository.Read( begin, end, &trades );
-
-      ou::ChartEntryIndicator& indicator( iterSymbol->second.indicatorTrade );
-      indicator.SetName( sName );
-
-      boost::posix_time::ptime first;
-      bool bFirst( true );
-
-      trades.ForEach(
-        [&indicator,&first,&bFirst,iterSymbol]( const ou::tf::Trade& trade ){
-          boost::posix_time::ptime dt( trade.DateTime() );
-          if ( 1 == iterSymbol->second.ixChart ) {
-            indicator.Append( trade.DateTime() - iterSymbol->second.tdDelay, trade.Price() );
-          }
-          else {
-            indicator.Append( trade.DateTime(), trade.Price() );
-          }
-          if ( bFirst ) {
-            first = trade.DateTime();
-            bFirst = false;
-          }
-        } );
-
-      if ( false && ( 1 == iterSymbol->second.ixChart ) ) {
-        ou::tf::Quotes& quotes( iterSymbol->second.quotes );
-        ou::ChartEntryIndicator& asks( iterSymbol->second.indicatorAsk );
-        ou::ChartEntryIndicator& bids( iterSymbol->second.indicatorBid );
-        quotes.ForEach(
-          [&bids,&asks,&first]( const ou::tf::Quote& quote ){
-            boost::posix_time::ptime dt( quote.DateTime() );
-            if ( first <= dt ) {
-              asks.Append( dt, quote.Ask() );
-              bids.Append( dt, quote.Bid() );
-              }
-          } );
-      }
-
-    }
-
-    if ( 1 == iterSymbol->second.ixChart ) {
-      if ( ou::tf::Quote::Signature() == attrObject.GetSignature() ) {
-        ou::tf::HDF5TimeSeriesContainer<ou::tf::Quote> tsRepository( *m_pdm, sGroup );
-        ou::tf::HDF5TimeSeriesContainer<ou::tf::Quote>::iterator begin, end;
-        begin = tsRepository.begin();
-        end = tsRepository.end();
-        hsize_t cnt = end - begin;
-        ou::tf::Quotes& quotes( iterSymbol->second.quotes );
-        quotes.Resize( cnt );
-        tsRepository.Read( begin, end, &quotes );
-
-        ou::ChartEntryIndicator& asks( iterSymbol->second.indicatorAsk );
-        asks.SetName( "ask" );
-        ou::ChartEntryIndicator& bids( iterSymbol->second.indicatorBid );
-        bids.SetName( "bid" );
-      }
-    }
+  for ( const std::string& sSecurityName: m_choices.m_vSecurityName ) {
+    ou::tf::TreeItem* pti = m_ptiRoot->AppendChild( sSecurityName );
   }
+
+  //m_pwcv->SetChartDataView( &m_cdv );
 }
 
 void AppBarChart::SaveState() {
@@ -279,8 +157,7 @@ int AppBarChart::OnExit() {
 void AppBarChart::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
 
-  m_pwcv->SetChartDataView( nullptr, false );
-  m_mapSymbolInfo.clear();
+  //m_pwcv->SetChartDataView( nullptr, false );
 
   //DelinkFromPanelProviderControl();
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();

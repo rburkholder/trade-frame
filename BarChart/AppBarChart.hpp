@@ -37,13 +37,19 @@
 #include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
 
 #include <TFVuTrading/TreeItem.hpp>
-#include <TFVuTrading/WinChartView.h>
+//#include <TFVuTrading/WinChartView.h>
 
 #include <TFBitsNPieces/FrameWork02.hpp>
 
 #include "Config.hpp"
 
 class FrameMain;
+
+namespace ou {
+namespace tf {
+  class PanelFinancialChart;
+}
+}
 
 class AppBarChart:
   public wxApp
@@ -58,23 +64,12 @@ private:
   config::Choices m_choices;
 
   FrameMain* m_pFrameMain;
-  //ou::tf::PanelFinancialChart* m_pPanelFinancialChart; // refactor/inherit once functionality is known
+  ou::tf::PanelFinancialChart* m_pPanelFinancialChart;
 
   using pHDF5DataManager_t = std::unique_ptr<ou::tf::HDF5DataManager>;
   pHDF5DataManager_t m_pdm;
 
   ou::tf::TreeItem* m_ptiRoot;
-
-  /*
-  symbol_name_l1=II6A.Z  #S&P 500 ISSUES ADVANCES DTN - sum to 500
-  symbol_name_l1=II6D.Z  #S&P 500 ISSUES DECLINES DTN - sum to 500
-  symbol_name_l1=JT6T.Z  #S&P 500 TICKS NET              - useful
-  symbol_name_l1=LI6N.Z  #EXCHG ONLY S&P 500 TICKS NET   - useful
-  symbol_name_l1=TR6T.Z  #S&P 500 TICKS RATIO  - useful
-  */
-
-  enum class ESymbol { SPY, II6A, II6D, JT6T, LI6N, TR6T, UKNWN } m_eSymbol;
-  ou::KeyWordMatch<ESymbol>* m_pkwmSymbol;
 
   struct SymbolInfo {
     const std::string sName;
@@ -100,25 +95,15 @@ private:
     , tdDelay( tdDelay_ )
     {}
   };
-  using mapSymbolInfo_t = std::unordered_map<ESymbol,SymbolInfo>;
-  mapSymbolInfo_t m_mapSymbolInfo;
+  //using mapSymbolInfo_t = std::unordered_map<ESymbol,SymbolInfo>;
+  //mapSymbolInfo_t m_mapSymbolInfo;
 
   ou::ChartDataView m_cdv;
-  ou::tf::WinChartView* m_pwcv; // handles drawing the chart
+  //ou::tf::WinChartView* m_pwcv; // handles drawing the chart
 
   void OnFrameMainAutoMove( wxMoveEvent& );
 
-  void InitStructures(
-    ESymbol, const std::string& sName, size_t ixChart,
-    boost::posix_time::time_duration = boost::posix_time::time_duration( 0, 0, 0 )
-  );
-
   void LoadPanelFinancialChart();
-
-  void IterateObjects();
-
-  void HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 );
-  void HandleLoadTreeHdf5Object( const std::string& s1, const std::string& s2 );
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -130,14 +115,14 @@ private:
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
-    //ar & *m_pPanelFinancialChart;
+    ar & *m_pPanelFinancialChart;
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
     if ( 2 <= version ) {
-      //ar & *m_pPanelFinancialChart;
+      ar & *m_pPanelFinancialChart;
     }
   }
 
