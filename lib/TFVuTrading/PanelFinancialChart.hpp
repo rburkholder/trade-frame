@@ -13,7 +13,6 @@
 
 #pragma once
 
-// used by BasketTrading
 // used to interactively build out a tree
 
 #include <boost/serialization/version.hpp>
@@ -45,7 +44,7 @@ class PanelFinancialChart: public wxPanel {
 public:
 
   PanelFinancialChart();
-  PanelFinancialChart(
+  PanelFinancialChart( // calls Create
     wxWindow* parent,
     wxWindowID id = SYMBOL_PANELFINANCIALCHART_IDNAME,
     const wxPoint& pos = SYMBOL_PANELFINANCIALCHART_POSITION,
@@ -61,9 +60,6 @@ public:
 
   using TreeItem = ou::tf::TreeItem;
   using pChartDataView_t = ou::ChartDataView::pChartDataView_t;
-
-  using fTreeItem_Factory_t = std::function<TreeItem*(wxTreeCtrl*, const std::string&)>;
-  TreeItem* SetRoot_Common( const std::string& sName, pChartDataView_t, fTreeItem_Factory_t&& );
 
   TreeItem* SetRoot( const std::string& sName, pChartDataView_t );
   TreeItem* SetRoot( const std::string& sName, pChartDataView_t, TreeItem::fCustomItemData_Factory_t&& );
@@ -103,6 +99,9 @@ private:
 
   WinChartView* m_pWinChartView; // handles drawing the chart; use shared_ptr?
   pChartDataView_t m_pChartDataView; // for use with tooltip
+
+  using fTreeItem_Factory_t = std::function<TreeItem*(wxTreeCtrl*, const std::string&)>;
+  TreeItem* SetRoot_Common( const std::string& sName, pChartDataView_t, fTreeItem_Factory_t&& );
 
   void HandleTreeEventItemGetToolTip( wxTreeEvent& );
 
