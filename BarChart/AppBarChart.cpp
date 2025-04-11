@@ -120,10 +120,37 @@ void AppBarChart::LoadPanelFinancialChart() {
   m_ptiRoot = m_pPanelFinancialChart->SetRoot( "/", nullptr );
 
   for ( const std::string& sSecurityName: m_choices.m_vSecurityName ) {
-    ou::tf::TreeItem* pti = m_ptiRoot->AppendChild( sSecurityName );
+    mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSecurityName );
+    if ( m_mapSymbolInfo.end() != iterSymbolInfo ) {
+      BOOST_LOG_TRIVIAL(error) << "Ignoring duplicate security: " << sSecurityName;
+    }
+    else {
+      auto result = m_mapSymbolInfo.emplace( sSecurityName, SymbolInfo() );
+      assert( result.second );
+      iterSymbolInfo = result.first;
+      SymbolInfo& si( iterSymbolInfo->second );
+
+      si.m_pti = m_ptiRoot->AppendChild( sSecurityName );
+      si.m_cePriceBars.SetName( "Daily" );
+
+      si.m_dvChart.Add( EChartSlot::Price, &si.m_cePriceBars );
+      si.m_dvChart.Add( EChartSlot::Volume, &si.m_ceVolume );
+
+      //bars.ForEach( [this]( const ou::tf::Bar& bar ){
+      //  m_cePriceBars.AppendBar( bar );
+      //  m_ceVolume.Append( bar );
+      //} );
+
+    }
+
+
+
+
+
+
+
   }
 
-  //m_pwcv->SetChartDataView( &m_cdv );
 }
 
 void AppBarChart::SaveState() {

@@ -33,11 +33,13 @@
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
+#include <OUCharting/ChartEntryBars.h>
+#include <OUCharting/ChartEntryVolume.h>
+
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
 
 #include <TFVuTrading/TreeItem.hpp>
-//#include <TFVuTrading/WinChartView.h>
 
 #include <TFBitsNPieces/FrameWork02.hpp>
 
@@ -71,35 +73,24 @@ private:
 
   ou::tf::TreeItem* m_ptiRoot;
 
+  enum EChartSlot { Price, Volume };
+
   struct SymbolInfo {
-    const std::string sName;
-    size_t ixChart;
-    ou::tf::Trades trades;
-    ou::tf::Quotes quotes;
-    ou::ChartEntryIndicator indicatorAsk;
-    ou::ChartEntryIndicator indicatorTrade;
-    ou::ChartEntryIndicator indicatorBid;
-    boost::posix_time::time_duration tdDelay;
+    //std::string m_sName;
+    ou::tf::TreeItem* m_pti;
+    ou::ChartDataView m_dvChart; // the data, not movable
+    ou::ChartEntryBars m_cePriceBars;
+    ou::ChartEntryVolume m_ceVolume;
 
-    SymbolInfo( const std::string& sName_, size_t ixChart_ )
-    : sName( sName_ )
-    , ixChart( ixChart_ )
-    , tdDelay( boost::posix_time::time_duration( 0, 0, 0 ) )
-    {}
+    SymbolInfo() {}
+    SymbolInfo( SymbolInfo&& rhs ) {} // nothing to do for emplace use case
 
-    SymbolInfo( const std::string& sName_, size_t ixChart_
-    , boost::posix_time::time_duration tdDelay_
-    )
-    : sName( sName_ )
-    , ixChart( ixChart_ )
-    , tdDelay( tdDelay_ )
-    {}
   };
-  //using mapSymbolInfo_t = std::unordered_map<ESymbol,SymbolInfo>;
-  //mapSymbolInfo_t m_mapSymbolInfo;
+
+  using mapSymbolInfo_t = std::unordered_map<std::string,SymbolInfo>;
+  mapSymbolInfo_t m_mapSymbolInfo;
 
   ou::ChartDataView m_cdv;
-  //ou::tf::WinChartView* m_pwcv; // handles drawing the chart
 
   void OnFrameMainAutoMove( wxMoveEvent& );
 
