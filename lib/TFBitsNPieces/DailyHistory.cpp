@@ -15,7 +15,7 @@
 /*
  * File:    DailyHistory.cpp
  * Author:  raymond@burkholder.net
- * Project: IndicatorTrading
+ * Project: lib/TFBitsNPieces
  * Created: May 17, 2022 16:24
  */
 

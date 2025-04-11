@@ -25,7 +25,6 @@ set(
   file_h
     AppIndicatorTrading.h
     Config.h
-    DailyHistory.hpp
     ExecModel.hpp
     FeedModel.hpp
     InteractiveChart.h
@@ -41,7 +40,6 @@ set(
   file_cpp
     AppIndicatorTrading.cpp
     Config.cpp
-    DailyHistory.cpp
     ExecModel.cpp
     FeedModel.cpp
     InteractiveChart.cpp

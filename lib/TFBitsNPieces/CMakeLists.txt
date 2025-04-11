@@ -10,6 +10,7 @@ set(
   file_h
 #    CalcAboveBelow.h
     BollingerTransitions.h
+    DailyHistory.hpp
     FirstOrDefaultCombiner.h
     FrameWork01.h
     FrameWork02.hpp
@@ -31,6 +32,7 @@ set(
   file_cpp
 #    CalcAboveBelow.cpp
     BollingerTransitions.cpp
+    DailyHistory.cpp
     FrameWork01.cpp
     InstrumentSelection.cpp
     IQFeedInstrumentBuild.cpp

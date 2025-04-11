@@ -42,11 +42,11 @@
 #include <TFVuTrading/MarketDepth/ExecutionControl.hpp>
 
 #include <TFBitsNPieces/FrameWork01.h>
+#include <TFBitsNPieces/DailyHistory.hpp>
 
 #include "Config.h"
 #include "FeedModel.hpp"
 #include "ExecModel.hpp"
-#include "DailyHistory.hpp"
 
 class wxBoxSizer;
 class wxTreeCtrl;
