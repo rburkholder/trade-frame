@@ -105,7 +105,17 @@ void AppBarChart::OnFrameMainAutoMove( wxMoveEvent& event ) {
     [this](){
       LoadState();
       m_pFrameMain->Layout();
-      LoadPanelFinancialChart();
+
+      m_pBarHistory = ou::tf::iqfeed::BarHistory::Construct(
+        [this](){
+          CallAfter(
+            [this](){ // run in gui thread
+              LoadPanelFinancialChart();
+            } );
+
+        } );
+      assert( m_pBarHistory );
+      m_pBarHistory->Connect();
     }
   );
 
@@ -136,21 +146,28 @@ void AppBarChart::LoadPanelFinancialChart() {
       si.m_dvChart.Add( EChartSlot::Price, &si.m_cePriceBars );
       si.m_dvChart.Add( EChartSlot::Volume, &si.m_ceVolume );
 
-      //bars.ForEach( [this]( const ou::tf::Bar& bar ){
-      //  m_cePriceBars.AppendBar( bar );
-      //  m_ceVolume.Append( bar );
-      //} );
-
+      si.m_pti->SetOnClick(
+        [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
+          //BOOST_LOG_TRIVIAL(info) << "clicked: " << iterSymbolInfo->first;
+          SymbolInfo& si( iterSymbolInfo->second );
+          if ( si.m_bBarsLoaded ) {
+            m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
+          }
+          else {
+            m_pBarHistory->Set(
+              [&si]( const ou::tf::Bar& bar ){ // fBar_t&&
+                si.m_cePriceBars.AppendBar( bar );
+                si.m_ceVolume.Append( bar );
+              },
+              [this,&si](){ // fDone_t&&
+                m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
+              } );
+            m_pBarHistory->RequestNEndOfDay( iterSymbolInfo->first, 200 );
+            si.m_bBarsLoaded = true;
+          }
+        } );
     }
-
-
-
-
-
-
-
   }
-
 }
 
 void AppBarChart::SaveState() {
@@ -190,6 +207,9 @@ void AppBarChart::OnClose( wxCloseEvent& event ) {
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a
+  if ( m_pBarHistory ) {
+    m_pBarHistory->Disconnect();
+  }
   SaveState();
   event.Skip();  // auto followed by Destroy();
 }

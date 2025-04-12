@@ -39,6 +39,8 @@
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
 
+#include <TFIQFeed/BarHistory.h>
+
 #include <TFVuTrading/TreeItem.hpp>
 
 #include <TFBitsNPieces/FrameWork02.hpp>
@@ -71,19 +73,22 @@ private:
   using pHDF5DataManager_t = std::unique_ptr<ou::tf::HDF5DataManager>;
   pHDF5DataManager_t m_pdm;
 
+  ou::tf::iqfeed::BarHistory::pBarHistory_t m_pBarHistory;
+
   ou::tf::TreeItem* m_ptiRoot;
 
   enum EChartSlot { Price, Volume };
 
   struct SymbolInfo {
-    //std::string m_sName;
     ou::tf::TreeItem* m_pti;
     ou::ChartDataView m_dvChart; // the data, not movable
     ou::ChartEntryBars m_cePriceBars;
     ou::ChartEntryVolume m_ceVolume;
 
-    SymbolInfo() {}
-    SymbolInfo( SymbolInfo&& rhs ) {} // nothing to do for emplace use case
+    bool m_bBarsLoaded;
+
+    SymbolInfo(): m_bBarsLoaded( false ) {}
+    SymbolInfo( SymbolInfo&& rhs ): m_bBarsLoaded( false ) {} // nothing to do for emplace use case
 
   };
 
