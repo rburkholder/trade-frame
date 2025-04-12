@@ -24,6 +24,7 @@ find_package(Boost ${TF_BOOST_VERSION} CONFIG REQUIRED COMPONENTS system date_ti
 set(
   file_h
     Config.hpp
+    Dividend.hpp
     Process.hpp
   )
 
@@ -31,6 +32,7 @@ set(
   file_cpp
     main.cpp
     Config.cpp
+    Dividend.cpp
     Process.cpp
   )
 
