@@ -52,29 +52,29 @@ namespace typeselect {
 namespace dispatch {
 
 template<typename T>
-const char* FieldType( void ) { // is called with enumerations, so need to figure out appropriate type conversion
+const char* FieldType() { // is called with enumerations, so need to figure out appropriate type conversion
   std::string s;
   s += "FieldType2 bad cast: ";
   s += typeid( T ).name();
   throw std::runtime_error( s );
 }
 
-template<> const char* FieldType<char>( void );
-template<> const char* FieldType<bool>( void );
-template<> const char* FieldType<boost::int64_t>( void );
-template<> const char* FieldType<boost::uint64_t>( void );
-template<> const char* FieldType<boost::int32_t>( void );
-template<> const char* FieldType<boost::uint32_t>( void );
-template<> const char* FieldType<boost::int16_t>( void );
-template<> const char* FieldType<boost::uint16_t>( void );
-template<> const char* FieldType<boost::int8_t>( void );
-template<> const char* FieldType<boost::uint8_t>( void );
-template<> const char* FieldType<std::string>( void );
-template<> const char* FieldType<double>( void );
+template<> const char* FieldType<char>();
+template<> const char* FieldType<bool>();
+template<> const char* FieldType<boost::int64_t>();
+template<> const char* FieldType<boost::uint64_t>();
+template<> const char* FieldType<boost::int32_t>();
+template<> const char* FieldType<boost::uint32_t>();
+template<> const char* FieldType<boost::int16_t>();
+template<> const char* FieldType<boost::uint16_t>();
+template<> const char* FieldType<boost::int8_t>();
+template<> const char* FieldType<boost::uint8_t>();
+template<> const char* FieldType<std::string>();
+template<> const char* FieldType<double>();
 // don't use julian as ptime has no representation earlier than 1400 AD
-template<> const char* FieldType<boost::posix_time::ptime>( void );
+template<> const char* FieldType<boost::posix_time::ptime>();
 template<> const char* FieldType<boost::gregorian::date>();
-template<> const char* FieldType<money_t>( void );
+template<> const char* FieldType<money_t>();
 
 } // namespace dispatch
 
@@ -84,7 +84,7 @@ class Action_Assemble_TableDef: public ou::db::Action_Assemble_TableDef {
 public:
 
   Action_Assemble_TableDef( const std::string& sTableName ): ou::db::Action_Assemble_TableDef( sTableName ) {};
-  ~Action_Assemble_TableDef( void ) {};
+  ~Action_Assemble_TableDef() {};
 
   template<typename T, bool b> // is not enum
   const char* FieldType( const boost::integral_constant<bool, b>& ) {
@@ -116,7 +116,7 @@ class Action_Bind_Values {
 public:
 
   Action_Bind_Values( structStatementState& state ): m_state( state ), m_index( 0 ) {};
-  ~Action_Bind_Values( void ) {};
+  ~Action_Bind_Values() {};
 
   int Bind( char var );
   int Bind( bool var );
@@ -160,7 +160,7 @@ class Action_Extract_Columns {
 public:
 
   Action_Extract_Columns( structStatementState& state ): m_state( state ), m_index( 0 ) {};
-  ~Action_Extract_Columns( void ) {};
+  ~Action_Extract_Columns() {};
 
   void Column( bool& var );
   void Column( char& var );
