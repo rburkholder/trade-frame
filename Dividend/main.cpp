@@ -73,29 +73,36 @@ int main( int argc, char* argv[] ) {
 
   const boost::gregorian::date today( ou::TimeSource::GlobalInstance().External().date() );
 
-  std::cout
+  const bool bStdOut( false );
+
+  if ( bStdOut ) {
+    std::cout
     << "symbol,name,exchange,last($),yield(%),ycalc,rate,amount,vol,exdiv,payed,shares,state,option"
     << std::endl;
+  }
 
+  size_t cnt {};
   for ( vSymbols_t::value_type& vt: vSymbols ) {
     if ( ( choices.m_dblMinimumYield <= vt.yield ) && ( choices.m_nMinimumVolume <= vt.nAverageVolume ) ) {
     //if ( ( choices.m_dblMinimumYield <= vt.yield_calculated ) && ( choices.m_nMinimumVolume <= vt.nAverageVolume ) ) {
-      std::cout
-               << vt.sSymbol
-        << ',' << vt.sCompanyName
-        << ',' << vt.sExchange
-        << ',' << vt.trade
-        << ',' << vt.yield
-        << ',' << vt.yield_calculated
-        << ',' << vt.rate
-        << ',' << vt.amount
-        << ',' << vt.nAverageVolume
-        << ',' << vt.dateExDividend
-        << ',' << vt.datePayed
-        << ',' << vt.nSharesOutstanding
-        << ',' << vt.sState
-        << ',' << vt.sOptionRoots
-        << std::endl;
+      if ( bStdOut ) {
+        std::cout
+                  << vt.sSymbol
+          << ',' << vt.sCompanyName
+          << ',' << vt.sExchange
+          << ',' << vt.trade
+          << ',' << vt.yield
+          << ',' << vt.yield_calculated
+          << ',' << vt.rate
+          << ',' << vt.amount
+          << ',' << vt.nAverageVolume
+          << ',' << vt.dateExDividend
+          << ',' << vt.datePayed
+          << ',' << vt.nSharesOutstanding
+          << ',' << vt.sState
+          << ',' << vt.sOptionRoots
+          << std::endl;
+      }
 
       Dividend::TableRowDef trd(
         vt.sSymbol
@@ -113,8 +120,11 @@ int main( int argc, char* argv[] ) {
       ou::db::QueryFields<Dividend::TableRowDef>::pQueryFields_t pQuery
         = db.Insert<Dividend::TableRowDef>( const_cast<Dividend::TableRowDef&>( trd ) );
 
+      ++cnt;
     }
   }
+
+  std::cout << "symbols written: " << cnt << std::endl;
 
   db.Close();
   db.OnRegisterRows.Remove( &HandleRegisterRows );

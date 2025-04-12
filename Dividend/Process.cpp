@@ -209,11 +209,11 @@ void Process::Lookup() {
               }
             }
 
-            std::cout << "waiting on: ";
+            //std::cout << "waiting on: ";
             for ( mapInProgress_t::value_type& vt: m_mapInProgress ) {
-              std::cout << vt.first << ",";
+              //std::cout << vt.first << ",";
             }
-            std::cout << std::endl;
+            //std::cout << std::endl;
           }
         }
         else {
