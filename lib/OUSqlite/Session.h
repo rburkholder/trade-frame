@@ -32,12 +32,15 @@ namespace db {
 
 // this is an example of how to integrate everything together for session management.
 
-class Session:
+class Session: // session open/close control
   public SessionImpl<ISqlite3>,  // various session functionality
-  public SessionBase<SessionImpl<ISqlite3>, Session> {  // session open/close control
+  public SessionBase<SessionImpl<ISqlite3>, Session>
+{
+  friend SessionImpl<ISqlite3>;
+  friend SessionBase<SessionImpl<ISqlite3>, Session>;
 public:
 
-  typedef boost::shared_ptr<Session> pSession_t;
+  using pSession_t = boost::shared_ptr<Session>;
 
   Session();
   virtual ~Session();
@@ -49,14 +52,15 @@ public:
   ou::Delegate<Session&> OnLoad;  // Either populate (database initialization) or Load (subseqent startups)
   ou::Delegate<Session&> OnDenitializeManagers; //
 
+protected:
+
   void InitializeManagers();  // called by inherited SessionBase.h
   void RegisterRowDefinitions();  // called by inherited SessionBase.h
   void RegisterTablesForCreation();  // called by inherited SessionBase.h
   void PopulateTables();  // called by inherited SessionBase.h
   void LoadTables();      // called by inherited SessionBase.h
-  void DenitializeManagers();  // called by inherieted SessionBase.h
+  void DenitializeManagers();  // called by inherited SessionBase.h
 
-protected:
 private:
 };
 

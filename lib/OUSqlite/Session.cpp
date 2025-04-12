@@ -18,8 +18,8 @@ namespace ou {
 namespace db {
 
 Session::Session()
-  : SessionImpl<ISqlite3>(),
-    SessionBase<SessionImpl<ISqlite3>, Session>() {
+: SessionImpl<ISqlite3>()
+, SessionBase<SessionImpl<ISqlite3>, Session>() {
 }
 
 Session::~Session() {
