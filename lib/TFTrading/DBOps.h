@@ -16,8 +16,6 @@
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
-#include "Database.h"
-
 #include <TFTrading/KeyTypes.h>
 
 #include <TFTrading/InstrumentManager.h>
