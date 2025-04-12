@@ -141,13 +141,14 @@ void AppSP500::LoadPanelFinancialChart() {
   //m_ptiRoot = m_pPanelFinancialChart->SetRoot( "/", nullptr );
 
   // inspiration from PanelChartHdf5
-  const std::string sFileName( "collector-20250402.hdf5" );
+  const std::string sFileName( "collector-20250409.hdf5" );
   m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO, sFileName );
 
   m_cdv.SetNames( "SPY", sFileName );
 
     m_pkwmSymbol = new ou::KeyWordMatch<ESymbol>( ESymbol::UKNWN, 6 );
-  InitStructures( ESymbol::SPY,  "SPY",    1, boost::posix_time::time_duration( 0, 15, 0 ) );
+  //InitStructures( ESymbol::SPY,  "SPY",    1, boost::posix_time::time_duration( 0, 15, 0 ) );
+  InitStructures( ESymbol::SPY,  "SPY",    1 );
   //InitStructures( ESymbol::SPY,  "ES-20250620", 1 );
   InitStructures( ESymbol::II6A, "II6A.Z", 2 );
   InitStructures( ESymbol::II6D, "II6D.Z", 3 );
