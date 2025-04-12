@@ -80,6 +80,14 @@ private:
   struct InProgress {
     vSymbols_iter iterSymbols;
     pAcquireFundamentals_t pAcquireFundamentals;
+    InProgress() {}
+    InProgress( vSymbols_iter iter )
+    : iterSymbols( iter )
+    {}
+    InProgress( InProgress&& rhs )
+    : iterSymbols( std::move( rhs.iterSymbols ) )
+    , pAcquireFundamentals( std::move( rhs.pAcquireFundamentals ) )
+    {}
   };
 
   using mapInProgress_t = std::map<std::string,InProgress>;

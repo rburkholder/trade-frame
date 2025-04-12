@@ -134,12 +134,9 @@ void Process::Lookup() {
   pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, sSymbol );
   pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
 
-  mapInProgress_t::iterator iterInProgress
-    = m_mapInProgress.insert(
-        m_mapInProgress.begin(),
-        mapInProgress_t::value_type( sSymbol, InProgress() ) );
-
-  iterInProgress->second.iterSymbols = m_iterSymbols;
+  auto result = m_mapInProgress.emplace( sSymbol, InProgress( m_iterSymbols ) );
+  assert( result.second );
+  mapInProgress_t::iterator iterInProgress = result.first;
 
   iterInProgress->second.pAcquireFundamentals
     = ou::tf::AcquireFundamentals::Factory (
