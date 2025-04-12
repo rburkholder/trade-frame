@@ -29,6 +29,7 @@ DailyHistory::~DailyHistory() {
 
 void DailyHistory::Load( const std::string& sIQFeedSymbolName, fAddMark_t&& fAddMark, fDone_t&& fDone ) {
 
+  assert( fAddMark );
   assert( fDone );
 
   m_pBarHistory = ou::tf::iqfeed::BarHistory::Construct(
