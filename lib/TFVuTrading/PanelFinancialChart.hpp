@@ -64,6 +64,7 @@ public:
   TreeItem* SetRoot( const std::string& sName, pChartDataView_t );
   TreeItem* SetRoot( const std::string& sName, pChartDataView_t, TreeItem::fCustomItemData_Factory_t&& );
   void SetChartDataView( pChartDataView_t, bool bReCalcViewPort = true ); // does not own ptr
+  void SetChartDataView( ou::ChartDataView*, bool bReCalcViewPort = true ); // does not own ptr
 
   void DeleteTree();
 
@@ -98,7 +99,7 @@ private:
   wxSplitterWindow* m_pSplitter;
 
   WinChartView* m_pWinChartView; // handles drawing the chart; use shared_ptr?
-  pChartDataView_t m_pChartDataView; // for use with tooltip
+  ou::ChartDataView* m_pChartDataView; // for use with tooltip
 
   using fTreeItem_Factory_t = std::function<TreeItem*(wxTreeCtrl*, const std::string&)>;
   TreeItem* SetRoot_Common( const std::string& sName, pChartDataView_t, fTreeItem_Factory_t&& );

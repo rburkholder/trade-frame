@@ -23,18 +23,19 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 PanelFinancialChart::PanelFinancialChart()
-: wxPanel(), m_pWinChartView( nullptr )
+: wxPanel(), m_pWinChartView( nullptr ), m_pChartDataView( nullptr )
 {
 }
 
 PanelFinancialChart::PanelFinancialChart( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style )
-: wxPanel(), m_pWinChartView( nullptr )
+: wxPanel(), m_pWinChartView( nullptr ), m_pChartDataView( nullptr )
 {
   Create(parent, id, pos, size, style);
 }
 
 PanelFinancialChart::~PanelFinancialChart() {
   m_pWinChartView->SetChartDataView( nullptr );
+  m_pChartDataView = nullptr;
 }
 
 bool PanelFinancialChart::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
@@ -140,6 +141,11 @@ void PanelFinancialChart::DeleteTree() {
 
 void PanelFinancialChart::SetChartDataView( pChartDataView_t pChartDataView, bool bReCalcViewPort  ) {
   m_pWinChartView->SetChartDataView( pChartDataView.get(), bReCalcViewPort );
+  m_pChartDataView = pChartDataView.get();
+}
+
+void PanelFinancialChart::SetChartDataView( ou::ChartDataView* pChartDataView, bool bReCalcViewPort  ) {
+  m_pWinChartView->SetChartDataView( pChartDataView, bReCalcViewPort );
   m_pChartDataView = pChartDataView;
 }
 
