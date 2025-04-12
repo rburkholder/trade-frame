@@ -73,6 +73,7 @@ template<> const char* FieldType<std::string>( void );
 template<> const char* FieldType<double>( void );
 // don't use julian as ptime has no representation earlier than 1400 AD
 template<> const char* FieldType<boost::posix_time::ptime>( void );
+template<> const char* FieldType<boost::gregorian::date>();
 template<> const char* FieldType<money_t>( void );
 
 } // namespace dispatch
@@ -130,6 +131,7 @@ public:
   int Bind( const std::string& var );
   int Bind( double var );
   int Bind( const boost::posix_time::ptime& var );
+  int Bind( const boost::gregorian::date& var );
   int Bind( money_t var );
 
   template<typename T>
@@ -173,6 +175,7 @@ public:
   void Column( std::string& var );
   void Column( double& var );
   void Column( boost::posix_time::ptime& var );
+  void Column( boost::gregorian::date& var );
   void Column( money_t& var );
 
   template<typename T>
@@ -182,7 +185,7 @@ public:
   }
 
   template<typename T, bool b> // is not enum
-  void Field( T& var, const boost::integral_constant<bool, b>& ) {  
+  void Field( T& var, const boost::integral_constant<bool, b>& ) {
   //void Field( T& var, const boost::false_type& ) {  // 2012/02/05
     Column( var );
   }
