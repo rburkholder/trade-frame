@@ -23,6 +23,8 @@
 #include <vector>
 #include <memory>
 
+#include <OUCommon/TimeSource.h>
+
 #include <TFIQFeed/Provider.h>
 
 #include "Config.hpp"
@@ -77,16 +79,25 @@ private:
 
   using pAcquireFundamentals_t = std::shared_ptr<ou::tf::AcquireFundamentals>;
 
+  boost::posix_time::time_duration m_tdMaxInProgress;
+
   struct InProgress {
+
+    boost::posix_time::ptime dtStart;
     vSymbols_iter iterSymbols;
     pAcquireFundamentals_t pAcquireFundamentals;
+
     InProgress() {}
+
     InProgress( vSymbols_iter iter )
     : iterSymbols( iter )
+    , dtStart( ou::TimeSource::GlobalInstance().External() )
     {}
+
     InProgress( InProgress&& rhs )
     : iterSymbols( std::move( rhs.iterSymbols ) )
     , pAcquireFundamentals( std::move( rhs.pAcquireFundamentals ) )
+    , dtStart( rhs.dtStart )
     {}
   };
 

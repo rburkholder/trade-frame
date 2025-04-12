@@ -25,6 +25,7 @@
 
 Process::Process( const config::Choices& choices, vSymbols_t& vSymbols )
 : m_choices( choices ), m_vSymbols( vSymbols ), m_bDone( false )
+, m_tdMaxInProgress( 0, 0, 0 )
 {
 
   m_piqfeed = ou::tf::iqfeed::Provider::Factory();
@@ -171,7 +172,13 @@ void Process::Lookup() {
         //    << " div.yield=" << fundamentals.dblDividendYield
         //    << std::endl;
         //}
+
+        boost::posix_time::ptime now( ou::TimeSource::GlobalInstance().External() );
+        auto diff( now - iterInProgress->second.dtStart );
+        if ( m_tdMaxInProgress < diff ) m_tdMaxInProgress = diff;
+
         m_pAcquireFundamentals_burial = std::move( iterInProgress->second.pAcquireFundamentals );
+
         m_mapInProgress.erase( iterInProgress ); // needs to come before the lookup
         if ( m_vSymbols.end() == m_iterSymbols ) {
           if  ( 0 == m_mapInProgress.size() ) {
@@ -179,6 +186,27 @@ void Process::Lookup() {
             m_cvWait.notify_one();
           }
           else {
+            const boost::posix_time::time_duration tdLimit
+              = m_tdMaxInProgress + m_tdMaxInProgress + m_tdMaxInProgress + m_tdMaxInProgress;
+            boost::posix_time::ptime now( ou::TimeSource::GlobalInstance().External() );
+
+            using vInProgress_t = std::vector<mapInProgress_t::iterator>;
+            vInProgress_t vInProgress;
+
+            mapInProgress_t::iterator iterInProgress = m_mapInProgress.begin();
+            while ( m_mapInProgress.end() != iterInProgress ) {
+              auto diff = now - iterInProgress->second.dtStart;
+              if ( tdLimit < diff ) {
+                vInProgress.push_back( iterInProgress );
+              }
+              ++iterInProgress;
+            }
+            for ( vInProgress_t::value_type& vt: vInProgress ) {
+              //m_pAcquireFundamentals_burial = std::move( vt->second.pAcquireFundamentals ); // seg fault
+              m_mapInProgress.erase( vt );
+              std::cout << "erased: " << vt->first << std::endl;
+            }
+
             std::cout << "waiting on: ";
             for ( mapInProgress_t::value_type& vt: m_mapInProgress ) {
               std::cout << vt.first << ",";
