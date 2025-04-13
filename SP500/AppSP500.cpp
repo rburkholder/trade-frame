@@ -280,7 +280,7 @@ int AppSP500::OnExit() {
 void AppSP500::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
 
-  m_pwcv->SetChartDataView( nullptr, false );
+  m_pwcv->SetChartDataView( nullptr );
   m_mapSymbolInfo.clear();
 
   //DelinkFromPanelProviderControl();

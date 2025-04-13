@@ -147,7 +147,7 @@ bool AppRdafL1::OnInit() {
 
   if ( nullptr == m_pChartData ) {
     m_pChartData = new ChartData( m_sTSDataStreamStarted, m_options.sSymbol, m_options, m_pData1Provider );
-    m_pWinChartView->SetChartDataView( m_pChartData->GetChartDataView(), true );
+    m_pWinChartView->SetChartDataView( m_pChartData->GetChartDataView() );
   }
 
   CallAfter(
@@ -220,7 +220,7 @@ int AppRdafL1::OnExit() {
 void AppRdafL1::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
 
-  m_pWinChartView->SetChartDataView( nullptr, false );
+  m_pWinChartView->SetChartDataView( nullptr );
   delete m_pChartData;
   m_pChartData = nullptr;
 

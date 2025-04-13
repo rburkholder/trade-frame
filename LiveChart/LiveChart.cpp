@@ -147,7 +147,7 @@ bool AppLiveChart::OnInit() {
 //      m_pChartData->GetChartDataView()->SetViewPort( dtBegin, dtEnd );
 //    } );
 
-  m_pWinChartView->SetChartDataView( m_pChartData->GetChartDataView(), true );
+  m_pWinChartView->SetChartDataView( m_pChartData->GetChartDataView() );
 
   CallAfter(
     [this](){

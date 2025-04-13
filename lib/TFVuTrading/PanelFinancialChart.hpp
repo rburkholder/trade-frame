@@ -63,8 +63,8 @@ public:
 
   TreeItem* SetRoot( const std::string& sName, pChartDataView_t );
   TreeItem* SetRoot( const std::string& sName, pChartDataView_t, TreeItem::fCustomItemData_Factory_t&& );
-  void SetChartDataView( pChartDataView_t, bool bReCalcViewPort = true ); // does not own ptr
-  void SetChartDataView( ou::ChartDataView*, bool bReCalcViewPort = true ); // does not own ptr
+  void SetChartDataView( pChartDataView_t ); // does not own ptr
+  void SetChartDataView( ou::ChartDataView* ); // does not own ptr
 
   void DeleteTree();
 

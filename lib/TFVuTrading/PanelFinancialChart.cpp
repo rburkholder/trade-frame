@@ -139,13 +139,13 @@ void PanelFinancialChart::DeleteTree() {
   m_pTreeRoot->DeleteChildren();
 }
 
-void PanelFinancialChart::SetChartDataView( pChartDataView_t pChartDataView, bool bReCalcViewPort  ) {
-  m_pWinChartView->SetChartDataView( pChartDataView.get(), bReCalcViewPort );
+void PanelFinancialChart::SetChartDataView( pChartDataView_t pChartDataView  ) {
+  m_pWinChartView->SetChartDataView( pChartDataView.get() );
   m_pChartDataView = pChartDataView.get();
 }
 
-void PanelFinancialChart::SetChartDataView( ou::ChartDataView* pChartDataView, bool bReCalcViewPort  ) {
-  m_pWinChartView->SetChartDataView( pChartDataView, bReCalcViewPort );
+void PanelFinancialChart::SetChartDataView( ou::ChartDataView* pChartDataView  ) {
+  m_pWinChartView->SetChartDataView( pChartDataView );
   m_pChartDataView = pChartDataView;
 }
 

@@ -1125,7 +1125,7 @@ void AppCurrencyTrader::OnClose( wxCloseEvent& event ) {
     Unbind( wxEVT_TIMER, &AppCurrencyTrader::HandleTimer, this, m_timerOneSecond.GetId() );
   }
 
-  m_pWinChartView->SetChartDataView( nullptr, false );
+  m_pWinChartView->SetChartDataView( nullptr );
 
   SaveState();
 

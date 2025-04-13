@@ -229,7 +229,7 @@ size_t PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData_Hdf5::EDatumType
     }
   }
 
-  SetChartDataView( m_pChartDataView, false );
+  SetChartDataView( m_pChartDataView );
 
   return cntSeriesElements;
 }

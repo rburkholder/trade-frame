@@ -61,7 +61,7 @@ public:
     long style = SYMBOL_WIN_CHARTINTERACTIVE_STYLE );
   virtual ~WinChartView();
 
-  void SetChartDataView( ou::ChartDataView* pChartDataView, bool bReCalcViewPort = true ); // bReCalcViewPort isn't used
+  void SetChartDataView( ou::ChartDataView* pChartDataView );
   ou::ChartDataView* GetChartDataView() const { return m_pChartDataView; }
 
   void SetSim( bool bSim = true );
