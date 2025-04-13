@@ -33,6 +33,7 @@
 #include <boost/archive/text_iarchive.hpp>
 
 #include <wx/sizer.h>
+#include <wx/textdlg.h>
 
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
@@ -64,11 +65,11 @@ bool AppBarChart::OnInit() {
     return false;
   }
 
-  if ( config::Load( c_sChoicesFilename, m_choices ) ) {
-  }
-  else {
-    return false;
-  }
+  //if ( config::Load( c_sChoicesFilename, m_choices ) ) {
+  //}
+  //else {
+  //  return false;
+  //}
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppTitle );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -103,6 +104,9 @@ void AppBarChart::OnFrameMainAutoMove( wxMoveEvent& event ) {
 
   CallAfter(
     [this](){
+
+      m_ptiRoot = m_pPanelFinancialChart->SetRoot( "Charts", nullptr );
+
       LoadState();
       m_pFrameMain->Layout();
 
@@ -127,47 +131,86 @@ void AppBarChart::OnFrameMainAutoMove( wxMoveEvent& event ) {
 
 void AppBarChart::LoadPanelFinancialChart() {
 
-  m_ptiRoot = m_pPanelFinancialChart->SetRoot( "/", nullptr );
-
-  for ( const std::string& sSecurityName: m_choices.m_vSecurityName ) {
-    mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSecurityName );
-    if ( m_mapSymbolInfo.end() != iterSymbolInfo ) {
-      BOOST_LOG_TRIVIAL(error) << "Ignoring duplicate security: " << sSecurityName;
-    }
-    else {
-      auto result = m_mapSymbolInfo.emplace( sSecurityName, SymbolInfo() );
-      assert( result.second );
-      iterSymbolInfo = result.first;
-      SymbolInfo& si( iterSymbolInfo->second );
-
-      si.m_pti = m_ptiRoot->AppendChild( sSecurityName );
-      si.m_cePriceBars.SetName( "Daily" );
-
-      si.m_dvChart.Add( EChartSlot::Price, &si.m_cePriceBars );
-      si.m_dvChart.Add( EChartSlot::Volume, &si.m_ceVolume );
-
-      si.m_pti->SetOnClick(
-        [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
-          //BOOST_LOG_TRIVIAL(info) << "clicked: " << iterSymbolInfo->first;
-          SymbolInfo& si( iterSymbolInfo->second );
-          if ( si.m_bBarsLoaded ) {
-            m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
+  m_ptiRoot->SetOnBuildPopUp(
+    [this]( ou::tf::TreeItem* pti ){
+      pti->NewMenu();
+      pti->AppendMenuItem(
+        "Add Group",
+        [this]( ou::tf::TreeItem* pti ){
+          wxTextEntryDialog* dialog = new wxTextEntryDialog( m_pFrameMain, "Group Name:", "Add Group" );
+          //dialog->ForceUpper(); // prints charters in reverse
+          if ( wxID_OK == dialog->ShowModal() ) {
+            std::string sGroupName = dialog->GetValue().Upper();
+            if ( 0 < sGroupName.size() ) {
+              ou::tf::TreeItem* ptiGroup = LoadGroupInfo( sGroupName, m_ptiRoot );
+              }
           }
-          else {
-            m_pBarHistory->Set(
-              [&si]( const ou::tf::Bar& bar ){ // fBar_t&&
-                si.m_cePriceBars.AppendBar( bar );
-                si.m_ceVolume.Append( bar );
-              },
-              [this,&si](){ // fDone_t&&
-                m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
-              } );
-            m_pBarHistory->RequestNEndOfDay( iterSymbolInfo->first, 200 );
-            si.m_bBarsLoaded = true;
-          }
-        } );
+        });
     }
+  );
+
+}
+
+ou::tf::TreeItem* AppBarChart::LoadGroupInfo( const std::string& sGroupName, ou::tf::TreeItem* ptiRoot ) {
+
+  ou::tf::TreeItem* ptiGroup = m_ptiRoot->AppendChild( sGroupName );
+
+  ptiGroup->SetOnBuildPopUp(
+    [this,ptiGroup]( ou::tf::TreeItem* pti ){
+      wxTextEntryDialog* dialog = new wxTextEntryDialog( m_pFrameMain, "Symbol Name:", "Add Symbol" );
+      //dialog->ForceUpper(); // prints charters in reverse
+      if ( wxID_OK == dialog->ShowModal() ) {
+        std::string sSymbolName = dialog->GetValue().Upper();
+        if ( 0 < sSymbolName.size() ) {
+          LoadSymbolInfo( sSymbolName, pti );
+          }
+      }
+    } );
+
+  return ptiGroup;
+}
+
+bool AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::TreeItem* pti ) {
+  bool bAdded( true );
+  mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSecurityName );
+  if ( m_mapSymbolInfo.end() != iterSymbolInfo ) {
+    BOOST_LOG_TRIVIAL(error) << "Ignoring duplicate security: " << sSecurityName;
+    bAdded = false;
   }
+  else {
+    auto result = m_mapSymbolInfo.emplace( sSecurityName, SymbolInfo() );
+    assert( result.second );
+    iterSymbolInfo = result.first;
+    SymbolInfo& si( iterSymbolInfo->second );
+
+    si.m_pti = pti->AppendChild( sSecurityName );
+    si.m_cePriceBars.SetName( "Daily" );
+
+    si.m_dvChart.Add( EChartSlot::Price, &si.m_cePriceBars );
+    si.m_dvChart.Add( EChartSlot::Volume, &si.m_ceVolume );
+
+    si.m_pti->SetOnClick(
+      [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
+        //BOOST_LOG_TRIVIAL(info) << "clicked: " << iterSymbolInfo->first;
+        SymbolInfo& si( iterSymbolInfo->second );
+        if ( si.m_bBarsLoaded ) {
+          m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
+        }
+        else {
+          m_pBarHistory->Set(
+            [&si]( const ou::tf::Bar& bar ){ // fBar_t&&
+              si.m_cePriceBars.AppendBar( bar );
+              si.m_ceVolume.Append( bar );
+            },
+            [this,&si](){ // fDone_t&&
+              m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
+            } );
+          m_pBarHistory->RequestNEndOfDay( iterSymbolInfo->first, 200 );
+          si.m_bBarsLoaded = true;
+        }
+      } );
+  }
+  return bAdded;
 }
 
 void AppBarChart::SaveState() {

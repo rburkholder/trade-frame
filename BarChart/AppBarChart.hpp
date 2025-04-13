@@ -45,7 +45,7 @@
 
 #include <TFBitsNPieces/FrameWork02.hpp>
 
-#include "Config.hpp"
+//#include "Config.hpp"
 
 class FrameMain;
 
@@ -65,7 +65,7 @@ public:
 protected:
 private:
 
-  config::Choices m_choices;
+  //config::Choices m_choices;
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelFinancialChart* m_pPanelFinancialChart;
@@ -100,6 +100,8 @@ private:
   void OnFrameMainAutoMove( wxMoveEvent& );
 
   void LoadPanelFinancialChart();
+  ou::tf::TreeItem* LoadGroupInfo( const std::string&, ou::tf::TreeItem* );
+  bool LoadSymbolInfo( const std::string&, ou::tf::TreeItem* );
 
   virtual bool OnInit();
   virtual int OnExit();
@@ -112,18 +114,62 @@ private:
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
     ar & *m_pPanelFinancialChart;
+
+    m_ptiRoot->IterateChildren(
+      [&ar]( ou::tf::TreeItem* ptiGroup )->bool {
+        std::cout << "group: " << ptiGroup->GetText() << std::endl;
+        ar & true;
+        ar & ptiGroup->GetText();
+
+        ptiGroup->IterateChildren(
+          [&ar]( ou::tf::TreeItem* ptiSymbol )->bool {
+            std::cout << "symbol: " << ptiSymbol->GetText() << std::endl;
+            ar & true;
+            ar & ptiSymbol->GetText();
+            return true; // continue iterating
+          } );
+        ar & false;
+
+        return true; // continue iteratiing
+      } );
+    ar & false;
+
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
     ar & *m_pPanelFinancialChart;
+
+    if ( 2 <= version ) {
+      bool bLoadGroup;
+      ar & bLoadGroup;
+      while ( bLoadGroup ) {
+        std::string sGroupName;
+        ar & sGroupName;
+        std::cout << "group: " << sGroupName << std::endl;
+        ou::tf::TreeItem* ptiGroup = LoadGroupInfo( sGroupName, m_ptiRoot );
+
+        if ( 3 <= version ) {
+          bool bLoadSymbol;
+          ar & bLoadSymbol;
+          while ( bLoadSymbol ) {
+            std::string sSymbolName;
+            ar & sSymbolName;
+            std::cout << "symbol: " << sSymbolName << std::endl;
+            bool bLoaded = LoadSymbolInfo( sSymbolName, ptiGroup );
+            ar & bLoadSymbol;
+          }
+        }
+        ar & bLoadGroup;
+      }
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
-BOOST_CLASS_VERSION(AppBarChart, 1)
+BOOST_CLASS_VERSION(AppBarChart, 3)
 
 DECLARE_APP(AppBarChart)
