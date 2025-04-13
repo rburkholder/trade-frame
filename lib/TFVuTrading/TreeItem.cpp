@@ -69,10 +69,16 @@ TreeItem::TreeItem( wxTreeCtrl* tree, TreeItem* ptiParent, const std::string& sT
 }
 
 TreeItem::~TreeItem() {
+
+  m_fOnClick = nullptr;
+  m_fOnBuildPopUp = nullptr;
+  m_fOnDeleted = nullptr;
+
   if ( m_pMenuPopup ) {
     delete m_pMenuPopup;
     m_pMenuPopup = nullptr;
   }
+  m_ptiParent = nullptr;
   m_pTreeCtrl = nullptr;
   //std::cout << m_idSelf << std::endl;
 }
@@ -154,11 +160,14 @@ std::string TreeItem::GetText() const {
 
 void TreeItem::Delete() {
   // everything should self delete
-  if ( m_pTreeCtrl ) {
-    m_pTreeCtrl->Delete( m_idSelf );
-    // A Deleted event should occur
-    //  will need to verify sequence of events
-  }
+  m_pTreeCtrl->CallAfter(
+    [this](){
+      if ( m_pTreeCtrl ) {
+        m_pTreeCtrl->Delete( m_idSelf );
+        // A Deleted event should occur
+        //  will need to verify sequence of events
+      }
+    } );
 }
 
 void TreeItem::DeleteChildren() {
@@ -253,11 +262,11 @@ void TreeItem::Bind( wxWindow* pWindow, wxTreeCtrl* pTree ) {
 
 }
 
-/* static */
+/* static - requires testing */
 //void TreeItem::UnBind( wxWindow* pWindow, wxTreeCtrl* pTree ) {
 
-//  assert( pWindow );
-//  assert( pTree );
+  //assert( pWindow );
+  //assert( pTree );
 
   //pTree->Unbind( wxEVT_TREE_SEL_CHANGED, nullptr, pTree->GetId() );
   //pTree->Unbind( wxEVT_TREE_ITEM_MENU, nullptr, pTree->GetId() );
