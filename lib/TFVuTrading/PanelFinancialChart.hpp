@@ -66,6 +66,8 @@ public:
   void SetChartDataView( pChartDataView_t ); // does not own ptr
   void SetChartDataView( ou::ChartDataView* ); // does not own ptr
 
+  WinChartView* GetWinChartView() { return m_pWinChartView; }
+
   void DeleteTree();
 
 protected:

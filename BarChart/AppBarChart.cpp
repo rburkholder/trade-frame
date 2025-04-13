@@ -87,6 +87,7 @@ bool AppBarChart::OnInit() {
 
   m_pPanelFinancialChart = new ou::tf::PanelFinancialChart( m_pFrameMain );
   sizerFrame->Add( m_pPanelFinancialChart, 1, wxALL | wxEXPAND, 0 );
+  m_pPanelFinancialChart->GetWinChartView()->SetReview();
 
   //m_pwcv = new ou::tf::WinChartView( m_pFrameMain );
   //sizerFrame->Add( m_pwcv, 1,wxALL | wxEXPAND, 0 );
@@ -221,6 +222,17 @@ bool AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::Tree
         //BOOST_LOG_TRIVIAL(info) << "clicked: " << iterSymbolInfo->first;
         SymbolInfo& si( iterSymbolInfo->second );
         if ( si.m_bBarsLoaded ) {
+          /*
+          ou::ChartEntryTime::range_t range( si.m_dvChart.GetViewPort() );
+          if ( range.dtBegin == range.dtEnd ) {
+            range = si.m_dvChart.GetExtents();
+            si.m_dvChart.SetViewPort( range );
+          }
+          else {
+            boost::posix_time::time_duration td = range.dtEnd - range.dtBegin;
+            auto ticks( td.ticks() );
+          }
+          */
           m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
         }
         else {
