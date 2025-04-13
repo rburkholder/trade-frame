@@ -54,7 +54,7 @@ WinChartView::~WinChartView() {
 
 void WinChartView::Init() {
 
-  SetSim( false );
+  SetLive();
 
   m_stateMouse = EMouse::NothingSpecial;
 
@@ -321,7 +321,7 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
   int xLeft, xX, xRight;
   m_chartMaster.GetX( xLeft, xX, xRight );
 
-  if ( xLeft < xRight ) {
+  if ( xLeft < xRight ) { // needs inequality for tdCursorOld divisor
     // zoom in/out around cursor
     // TODO: use this to provide date/time on cursor
 
@@ -444,14 +444,19 @@ void WinChartView::HandleGuiRefresh( wxTimerEvent& event ) {
   DrawChart();
 }
 
-void WinChartView::SetSim( bool bSim ) {
-  m_bSim = bSim;
-  if ( bSim ) {
-    m_state = EState::sim_trail;
-  }
-  else {
-    m_state = EState::live_trail;
-  }
+void WinChartView::SetSim() {
+  m_bSim = true;
+  m_state = EState::sim_trail;
+}
+
+void WinChartView::SetReview() {
+  m_bSim = false;
+  m_state = EState::live_review;
+}
+
+void WinChartView::SetLive() {
+  m_bSim = false;
+  m_state = EState::live_trail;
 }
 
 // TODO: there may be an issue with cursor & no data, which locks up the gui

@@ -158,7 +158,6 @@ void AppSP500::LoadPanelFinancialChart() {
 
   IterateObjects();
 
-  m_pwcv->SetSim( false );
   m_pwcv->SetChartDataView( &m_cdv );
 }
 

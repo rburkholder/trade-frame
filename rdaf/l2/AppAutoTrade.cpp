@@ -344,7 +344,7 @@ bool AppAutoTrade::OnInit() {
   m_dvChart.Add( 2, &m_ceCommissionsPaid );
 
   if ( m_choices.bStartSimulator ) { // set sim mode prior to assigning data view
-    m_pWinChartView->SetSim( true );
+    m_pWinChartView->SetSim();
   }
   m_pWinChartView->SetChartDataView( &m_dvChart );
 
@@ -358,7 +358,7 @@ bool AppAutoTrade::OnInit() {
     c_sMenuItemPortfolio,
     [this]( TreeItem* pTreeItem ){
       if ( m_choices.bStartSimulator ) { // set sim mode prior to assigning data view
-        m_pWinChartView->SetSim( true );
+        m_pWinChartView->SetSim();
       }
       m_pWinChartView->SetChartDataView( &m_dvChart );
     }
@@ -397,7 +397,7 @@ bool AppAutoTrade::OnInit() {
         mapStrategy_t::iterator iter = m_mapStrategy.find( sSymbol );
         assert( m_mapStrategy.end() != iter );
         if ( m_choices.bStartSimulator ) { // set sim mode prior to assigning data view
-          m_pWinChartView->SetSim( true );
+          m_pWinChartView->SetSim();
         }
         m_pWinChartView->SetChartDataView( &iter->second->GetChartDataView() );
       }
@@ -422,7 +422,7 @@ bool AppAutoTrade::OnInit() {
           // need to vefify proper period when collector starts at 5:30est
           //pStrategy->InitForUSEquityExchanges( dateSim );
           pStrategyFutures->InitFor24HourMarkets( dateSim );
-          m_pWinChartView->SetSim( true );
+          m_pWinChartView->SetSim();
         }
 
         pStrategy = std::move( pStrategyFutures );

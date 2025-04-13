@@ -216,7 +216,7 @@ void AppCurrencyTrader::PopulateTreeRoot() {
     c_sMenuItemPortfolio,
     [this]( TreeItem* pTreeItem ){
       if ( 0 != m_choices.m_sHdf5SimSet.size() ) {
-        m_pWinChartView->SetSim( true );
+        m_pWinChartView->SetSim();
       }
       m_pWinChartView->SetChartDataView( &m_dvPortfolio );
     }
@@ -427,7 +427,7 @@ void AppCurrencyTrader::ConstructStrategyList() {
           mapPair_t::iterator iter = m_mapPair.find( idInstrument );
           assert( m_mapPair.end() != iter );
           if ( 0 != m_choices.m_sHdf5SimSet.size() ) {
-            m_pWinChartView->SetSim( true );
+            m_pWinChartView->SetSim();
           }
           m_pWinChartView->SetChartDataView( &iter->second.pStrategy->GetChartDataView() );
         }
