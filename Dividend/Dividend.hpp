@@ -19,6 +19,12 @@
  * Created: April 12, 2025  09:00:13
  */
 
+/*
+  Todo: maintain the name of the symbol for readability
+  Todo: track notes in a table rather than the dividend config file
+  Todo: manage the queries here rather than in Process
+*/
+
 #pragma once
 
 #include <string>
