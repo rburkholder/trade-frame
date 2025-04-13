@@ -146,7 +146,7 @@ void AppSP500::LoadPanelFinancialChart() {
 
   m_cdv.SetNames( "SPY", sFileName );
 
-    m_pkwmSymbol = new ou::KeyWordMatch<ESymbol>( ESymbol::UKNWN, 6 );
+  m_pkwmSymbol = new ou::KeyWordMatch<ESymbol>( ESymbol::UKNWN, 6 );
   //InitStructures( ESymbol::SPY,  "SPY",    1, boost::posix_time::time_duration( 0, 15, 0 ) );
   InitStructures( ESymbol::SPY,  "SPY",    1 );
   //InitStructures( ESymbol::SPY,  "ES-20250620", 1 );
@@ -158,6 +158,7 @@ void AppSP500::LoadPanelFinancialChart() {
 
   IterateObjects();
 
+  m_pwcv->SetSim( false );
   m_pwcv->SetChartDataView( &m_cdv );
 }
 
@@ -202,13 +203,13 @@ void AppSP500::HandleLoadTreeHdf5Object( const std::string& sGroup, const std::s
         [&indicator,&first,&bFirst,iterSymbol]( const ou::tf::Trade& trade ){
           boost::posix_time::ptime dt( trade.DateTime() );
           if ( 1 == iterSymbol->second.ixChart ) {
-            indicator.Append( trade.DateTime() - iterSymbol->second.tdDelay, trade.Price() );
+            indicator.Append( dt - iterSymbol->second.tdDelay, trade.Price() );
           }
           else {
-            indicator.Append( trade.DateTime(), trade.Price() );
+            indicator.Append( dt, trade.Price() );
           }
           if ( bFirst ) {
-            first = trade.DateTime();
+            first = dt;
             bFirst = false;
           }
         } );
