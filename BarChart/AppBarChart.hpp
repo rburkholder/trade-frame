@@ -117,9 +117,7 @@ private:
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
-    if ( 2 <= version ) {
-      ar & *m_pPanelFinancialChart;
-    }
+    ar & *m_pPanelFinancialChart;
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
