@@ -237,11 +237,15 @@ bool AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::Tree
         }
       } );
     si.m_pti->SetOnBuildPopUp(
-      []( ou::tf::TreeItem* pti ){
+      [this]( ou::tf::TreeItem* pti ){
         pti->NewMenu();
         pti->AppendMenuItem(
           "Delete",
-          []( ou::tf::TreeItem* pti ){
+          [this]( ou::tf::TreeItem* pti ){
+            m_pPanelFinancialChart->SetChartDataView( nullptr );
+            mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( pti->GetText() );
+            assert( m_mapSymbolInfo.end() != iterSymbolInfo );
+            m_mapSymbolInfo.erase( iterSymbolInfo );
             pti->Delete();
           } );
       } );

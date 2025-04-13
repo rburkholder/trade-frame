@@ -92,6 +92,7 @@ private:
 
   };
 
+  // todo: map entries could be stored in TreeItem instead
   using mapSymbolInfo_t = std::unordered_map<std::string,SymbolInfo>;
   mapSymbolInfo_t m_mapSymbolInfo;
 
