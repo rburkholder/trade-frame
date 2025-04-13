@@ -415,21 +415,6 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
   event.Skip();
 }
 
-void WinChartView::RescaleViewPort() { // is not referenced
-
-  ViewPort_t vp; // this isn't used anywhere.  refer to
-
-  if ( m_bBeginExtentFound ) {
-    // assume 'begin' extent never changes - time moves forward
-    vp.dtBegin = m_vpPrior.dtBegin; // may or may not need this line
-    vp.dtEnd = m_pChartDataView->GetExtentEnd();
-  }
-  else {
-    vp = m_pChartDataView->GetExtents();
-    if ( vp.HasBegin() ) m_bBeginExtentFound = true;
-  }
-}
-
 void WinChartView::HandleMouseEnter( wxMouseEvent& event ) {
   //std::cout << "mouse enter" << std::endl;
   m_chartMaster.CrossHairDraw( true );

@@ -125,8 +125,6 @@ private:
 
   void ThreadDrawChart();  // thread starts here
 
-  void RescaleViewPort();
-
   void UpdateChartMaster();
 
   void HandlePaint( wxPaintEvent& );
