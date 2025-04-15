@@ -170,7 +170,7 @@ void AppLiveChart::HandleSaveValues( void ) {
     //std::string sPrefix86400sec( "/bar/86400/AtmIV/" + iter->second.sName.substr( 0, 1 ) + "/" + iter->second.sName );
     //std::string sPrefix86400sec( "/bar/86400/AtmIV/" + m_pBundle->Name() );
     //m_pBundle->SaveData( sPrefixSession, sPrefix86400sec );
-    std::string sPrefixSession( "/app/LiveChart/" + m_sTSDataStreamStarted + "/"
+    std::string sPrefixSession( "/app/livechart/" + m_sTSDataStreamStarted + "/"
       + m_pChartData->GetWatch()->GetInstrument()->GetInstrumentName() );
     m_pChartData->GetWatch()->SaveSeries( sPrefixSession );
   }

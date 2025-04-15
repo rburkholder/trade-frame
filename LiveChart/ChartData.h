@@ -27,9 +27,9 @@ public:
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
 
   ChartData( pProvider_t );
-  ~ChartData(void);
+  ~ChartData();
 
-  ou::tf::Watch* GetWatch( void ) { return m_pWatch; };
+  ou::tf::Watch* GetWatch() { return m_pWatch; };
 
 protected:
 private:

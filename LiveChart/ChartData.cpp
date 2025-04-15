@@ -17,7 +17,7 @@
 #include "ChartData.h"
 
 ChartData::ChartData( pProvider_t pProvider )
-  : ou::ChartDVBasics()
+: ou::ChartDVBasics()
 {
   //static const std::string name( "QGC#" );
   //static const std::string name( "GLD" );
@@ -30,10 +30,9 @@ ChartData::ChartData( pProvider_t pProvider )
   m_pWatch->OnQuote.Add( MakeDelegate( this, &ou::ChartDVBasics::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &ou::ChartDVBasics::HandleTrade ) );
   m_pWatch->StartWatch();
-
 }
 
-ChartData::~ChartData(void) {
+ChartData::~ChartData() {
   m_pWatch->StopWatch();
   m_pWatch->OnQuote.Remove( MakeDelegate( this, &ou::ChartDVBasics::HandleQuote ) );
   m_pWatch->OnTrade.Remove( MakeDelegate( this, &ou::ChartDVBasics::HandleTrade ) );
