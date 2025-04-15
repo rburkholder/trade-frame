@@ -22,7 +22,6 @@
 #pragma once
 
 #include <string>
-#include <thread>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
