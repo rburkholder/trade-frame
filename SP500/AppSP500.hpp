@@ -42,6 +42,7 @@
 #include <TFBitsNPieces/FrameWork02.hpp>
 
 #include "Config.hpp"
+#include "Strategy.hpp"
 
 class FrameMain;
 
@@ -105,6 +106,9 @@ private:
 
   ou::ChartDataView m_cdv;
   ou::tf::WinChartView* m_pwcv; // handles drawing the chart
+
+  using pStrategy_t = std::unique_ptr<Strategy>;
+  pStrategy_t m_pStrategy;
 
   void OnFrameMainAutoMove( wxMoveEvent& );
 

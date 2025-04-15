@@ -59,7 +59,7 @@ bool AppSP500::OnInit() {
 
   wxApp::SetAppDisplayName( c_sAppTitle );
   wxApp::SetVendorName( c_sVendorName );
-  wxApp::SetVendorDisplayName( "(c)2025 " + c_sVendorName );
+  wxApp::SetVendorDisplayName( "(C)2025 " + c_sVendorName );
 
   if ( !wxApp::OnInit() ) {
     return false;

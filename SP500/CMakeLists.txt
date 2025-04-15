@@ -25,12 +25,14 @@ set(
   file_h
     AppSP500.hpp
     Config.hpp
+    Strategy.hpp
   )
 
 set(
   file_cpp
     AppSP500.cpp
     Config.cpp
+    Strategy.cpp
   )
 
 add_executable(
