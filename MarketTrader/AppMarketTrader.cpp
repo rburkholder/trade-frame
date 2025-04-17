@@ -242,8 +242,10 @@ void AppMarketTrader::OnClose( wxCloseEvent& event ) {
 
   SaveState();
 
-  m_pLuaMarketTie->DelPath( c_sDirectoryLua );
-  m_pLuaMarketTie.reset();
+  if ( m_pLuaMarketTie ) {
+    m_pLuaMarketTie->DelPath( c_sDirectoryLua );
+    m_pLuaMarketTie.reset();
+  }
   m_pTelegramBot.reset();
 
   DisableProviders();
