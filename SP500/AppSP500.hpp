@@ -33,6 +33,10 @@
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
+#include <TFIQFeed/Provider.h>
+#include <TFInteractiveBrokers/IBTWS.h>
+//#include <TFSimulation/SimulationProvider.h>
+
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
 
@@ -55,6 +59,11 @@ class AppSP500:
 public:
 protected:
 private:
+
+  using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
+  using pProviderIB_t = ou::tf::ib::TWS::pProvider_t;
+  using pProviderIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
+  //using pProviderSimulator_t = ou::tf::SimulationProvider::pProvider_t;
 
   config::Choices m_choices;
 
@@ -106,6 +115,13 @@ private:
 
   ou::ChartDataView m_cdv;
   ou::tf::WinChartView* m_pwcv; // handles drawing the chart
+
+  pProvider_t m_data;
+  pProvider_t m_exec;
+
+  pProviderIQFeed_t    m_iqf; // live - [ data ], simulation - [ execution ]
+  pProviderIB_t        m_tws; // live - [ execution ]
+  //pProviderSimulator_t m_sim; // may not need this as iqf does sim
 
   using pStrategy_t = std::unique_ptr<Strategy>;
   pStrategy_t m_pStrategy;
