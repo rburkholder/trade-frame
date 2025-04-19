@@ -33,7 +33,6 @@ protected:
 private:
 
   using vInput_t = std::vector<NeuralNet::Input>;
-
   vInput_t m_vInput; // queue Input until direction established
 
   NeuralNet m_net;
