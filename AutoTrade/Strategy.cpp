@@ -21,15 +21,11 @@
 
 #include <boost/log/trivial.hpp>
 
-#include <TFTrading/Watch.h>
-
 #include <TFBitsNPieces/Stochastic.hpp>
 
 #include "Config.hpp"
 #include "Strategy.hpp"
 #include "Strategy_impl.hpp"
-
-using pWatch_t = ou::tf::Watch::pWatch_t;
 
 namespace {
   static const int k_hi = 80;
@@ -37,6 +33,7 @@ namespace {
   static const double c_zigzag_hi = 96.0;
   static const double c_zigzag_lo =  4.0;
 }
+
 Strategy::Strategy( ou::ChartDataView& cdv, const config::Options& options )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
 , m_cdv( cdv )
