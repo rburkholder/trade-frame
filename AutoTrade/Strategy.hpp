@@ -30,8 +30,6 @@
 #include <OUCharting/ChartEntryVolume.h>
 #include <OUCharting/ChartEntryIndicator.h>
 
-#include <OUCharting/ChartDataView.h>
-
 #include <TFIndicators/TSEMA.h>
 
 #include <TFTimeSeries/BarFactory.h>

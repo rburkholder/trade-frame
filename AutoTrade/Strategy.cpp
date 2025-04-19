@@ -21,6 +21,8 @@
 
 #include <boost/log/trivial.hpp>
 
+#include <OUCharting/ChartDataView.h>
+
 #include <TFTrading/Watch.h>
 
 #include <TFBitsNPieces/Stochastic.hpp>
