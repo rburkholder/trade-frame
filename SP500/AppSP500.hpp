@@ -40,6 +40,8 @@
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
 
+#include <TFTrading/DBWrapper.h>
+
 #include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/WinChartView.h>
 
@@ -69,6 +71,8 @@ private:
 
   FrameMain* m_pFrameMain;
   //ou::tf::PanelFinancialChart* m_pPanelFinancialChart; // refactor/inherit once functionality is known
+
+  std::unique_ptr<ou::tf::db> m_pdb;
 
   using pHDF5DataManager_t = std::unique_ptr<ou::tf::HDF5DataManager>;
   pHDF5DataManager_t m_pdm;

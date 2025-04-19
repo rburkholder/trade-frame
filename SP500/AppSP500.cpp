@@ -78,6 +78,8 @@ bool AppSP500::OnInit() {
     return false;
   }
 
+  m_pdb = std::make_unique<ou::tf::db>( c_sDbName );
+
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppTitle );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
 
