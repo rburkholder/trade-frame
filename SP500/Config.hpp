@@ -27,7 +27,8 @@ namespace config {
 
 struct Choices {
 
-  std::string m_sHdf5File; // optional
+  bool m_bSimStart; // run simulation
+  std::string m_sHdf5File; // required for simulation
 
 };
 

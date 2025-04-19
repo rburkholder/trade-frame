@@ -78,6 +78,12 @@ bool AppSP500::OnInit() {
     return false;
   }
 
+  if ( m_choices.m_bSimStart ) {
+    if ( boost::filesystem::exists( c_sDbName ) ) {
+      boost::filesystem::remove( c_sDbName );
+    }
+  }
+
   m_pdb = std::make_unique<ou::tf::db>( c_sDbName );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppTitle );

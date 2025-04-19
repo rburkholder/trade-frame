@@ -30,6 +30,7 @@ namespace po = boost::program_options;
 #include "Config.hpp"
 
 namespace {
+  static const std::string sChoice_SimStart(  "sim_start" );
   static const std::string sChoice_sHdf5File( "hdf5_file" );
 
   template<typename T>
@@ -57,23 +58,32 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
   try {
 
-    po::options_description config( "HDF5 Chart config" );
+    po::options_description config( "SP500 config" );
     config.add_options()
 
-      ( sChoice_sHdf5File.c_str(), po::value<std::string>( &choices.m_sHdf5File )->default_value( "TradeFrame.hdf5" ), "hdf5 file" )
-      ;
+    ( sChoice_SimStart.c_str(), po::value<bool>( &choices.m_bSimStart )->default_value( true ), "run simulation" )
+    ( sChoice_sHdf5File.c_str(), po::value<std::string>( &choices.m_sHdf5File )->default_value( "TradeFrame.hdf5" ), "hdf5 file" )
+    ;
     po::variables_map vm;
 
     std::ifstream ifs( sFileName.c_str() );
-
     if ( !ifs ) {
-      BOOST_LOG_TRIVIAL(error) << "hdf5 chart config file " << sFileName << " does not exist";
+      BOOST_LOG_TRIVIAL(error) << "SP500 config file " << sFileName << " does not exist";
       bOk = false;
     }
     else {
       po::store( po::parse_config_file( ifs, config), vm );
 
-      bOk &= parse<std::string>( sFileName, vm, sChoice_sHdf5File, true, choices.m_sHdf5File );
+      bOk &= parse<bool>( sFileName, vm, sChoice_SimStart, false, choices.m_bSimStart );
+      bOk &= parse<std::string>( sFileName, vm, sChoice_sHdf5File, false, choices.m_sHdf5File );
+    }
+
+    if ( choices.m_bSimStart ) {
+      if ( 0 < choices.m_sHdf5File.size() ) {}
+      else {
+        bOk = false;
+        BOOST_LOG_TRIVIAL(error) << sFileName << ' ' << sChoice_sHdf5File << " required";
+      }
     }
 
   }
@@ -85,6 +95,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     BOOST_LOG_TRIVIAL(error) << sFileName << " config unknown error";
     bOk = false;
   }
+
+
 
   return bOk;
 
