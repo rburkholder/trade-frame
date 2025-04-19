@@ -69,15 +69,15 @@ target_link_libraries(
       TFVuTrading
       TFTrading
       TFOptions
-      TFTrading
-      TFIQFeed
       TFHDF5TimeSeries
-      OUCommon
+      TFIQFeed
+      TFIndicators
+      TFTimeSeries
+      TFTrading
       OUSQL
       OUSqlite
       OUCharting
-      TFIndicators
-      TFTimeSeries
+      OUCommon
       dl
       z
       curl
