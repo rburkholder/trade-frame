@@ -19,6 +19,8 @@
  * Created: March 30, 2025 13:49:15
  */
 
+// inspiration from AutoTrade
+
 /*
   * start by viewing SPY or SPX as primary chart from HDF5 file - done
   * add in the SP Tick/Trin/Advance/Decline/ratio indicators - done
@@ -73,7 +75,7 @@ bool AppSP500::OnInit() {
     }
   }
   else {
-    // choices is default to tradeframe.hdf5
+    return false;
   }
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppTitle );
@@ -141,10 +143,9 @@ void AppSP500::LoadPanelFinancialChart() {
   //m_ptiRoot = m_pPanelFinancialChart->SetRoot( "/", nullptr );
 
   // inspiration from PanelChartHdf5
-  const std::string sFileName( "collector-20250409.hdf5" );
-  m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO, sFileName );
+  m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO, m_choices.m_sHdf5File );
 
-  m_cdv.SetNames( "SPY", sFileName );
+  m_cdv.SetNames( "SPY", m_choices.m_sHdf5File );
 
   m_pkwmSymbol = new ou::KeyWordMatch<ESymbol>( ESymbol::UKNWN, 6 );
   //InitStructures( ESymbol::SPY,  "SPY",    1, boost::posix_time::time_duration( 0, 15, 0 ) );
