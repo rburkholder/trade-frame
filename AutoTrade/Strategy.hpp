@@ -204,7 +204,6 @@ private:
 
   void HandleRHTrading( const ou::tf::Bar& bar );
   void HandleRHTrading_01Sec( const ou::tf::Bar& bar );
-  void HandleRHTrading_60Sec( const ou::tf::Bar& bar );
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
 
