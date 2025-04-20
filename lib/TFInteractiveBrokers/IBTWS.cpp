@@ -332,8 +332,8 @@ void TWS::RequestContractDetails(
   case InstrumentType::Future:
     ContractExpiryField( contract, pInstrument->GetExpiryYear(), pInstrument->GetExpiryMonth(), pInstrument->GetExpiryDay() );
     contract.tradingClass = sSymbolBaseName;
-    if ( "COMEX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC options, IQFeed supplied
-    if ( "COMEX_GBX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC options, IQFeed supplied
+    //if ( "COMEX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC options, IQFeed supplied
+    //if ( "COMEX_GBX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC options, IQFeed supplied
     //if ( "CME" == pInstrument->GetExchangeName() ) contract.exchange = "GLOBEX";   // ES options, IQFeed supplied
     break;
   case InstrumentType::FuturesOption:
@@ -341,8 +341,8 @@ void TWS::RequestContractDetails(
     contract.tradingClass = sSymbolBaseName;
     contract.strike = pInstrument->GetStrike();
     contract.right = pInstrument->GetOptionSide();
-    if ( "COMEX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC, IQFeed supplied
-    if ( "COMEX_GBX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC, IQFeed supplied
+    //if ( "COMEX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC, IQFeed supplied
+    //if ( "COMEX_GBX" == pInstrument->GetExchangeName() ) contract.exchange = "NYMEX";  // GC, IQFeed supplied
     //if ( "CME" == pInstrument->GetExchangeName() ) contract.exchange = "GLOBEX";   // ES?, IQFeed supplied
     break;
   case InstrumentType::Currency:
