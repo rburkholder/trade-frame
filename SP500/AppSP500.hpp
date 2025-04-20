@@ -64,8 +64,8 @@ private:
 
   using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
   using pProviderIB_t = ou::tf::ib::TWS::pProvider_t;
-  using pProviderIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
-  using pProviderSimulator_t = ou::tf::SimulationProvider::pProvider_t;
+  using pProviderIQF_t = ou::tf::iqfeed::Provider::pProvider_t;
+  using pProviderSim_t = ou::tf::SimulationProvider::pProvider_t;
 
   config::Choices m_choices;
 
@@ -120,31 +120,43 @@ private:
   ou::ChartDataView m_cdv;
   ou::tf::WinChartView* m_pwcv; // handles drawing the chart
 
-  //std::string m_sSimulatorGroupDirectory;
+  std::string m_sSimulatorGroupDirectory;
+
+  boost::gregorian::date           m_startDateUTC;
+  boost::posix_time::time_duration m_startTimeUTC;
 
   pProvider_t m_data;
   pProvider_t m_exec;
 
-  pProviderIQFeed_t    m_iqf; // live - [ data ], simulation - [ execution ]
-  pProviderIB_t        m_tws; // live - [ execution ]
-  pProviderSimulator_t m_sim; // may not need this as iqf does sim
+  pProviderIQF_t m_iqf; // live - [ data ], simulation - [ execution ]
+  pProviderIB_t  m_tws; // live - [ execution ]
+  pProviderSim_t m_sim; // may not need this as iqf does sim
 
   using pStrategy_t = std::unique_ptr<Strategy>;
   pStrategy_t m_pStrategy;
 
   void OnFrameMainAutoMove( wxMoveEvent& );
 
+  bool BuildProviders_Sim();
+  void HandleSimConnected( int );
+  void HandleMenuActionSimStart();
+  void HandleMenuActionSimStop();
+  void HandleMenuActionSimEmitStats();
+  void HandleSimComplete();
+
   void InitStructures(
     ESymbol, const std::string& sName, size_t ixChart,
     boost::posix_time::time_duration = boost::posix_time::time_duration( 0, 0, 0 )
   );
 
+  void RunSimulation();
   void LoadPanelFinancialChart();
 
   void IterateObjects();
 
   void HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 );
-  void HandleLoadTreeHdf5Object( const std::string& s1, const std::string& s2 );
+  void HandleLoadTreeHdf5Object_Static( const std::string& s1, const std::string& s2 );
+  void HandleLoadTreeHdf5Object_Sim( const std::string& s1, const std::string& s2 );
 
   virtual bool OnInit();
   virtual int OnExit();

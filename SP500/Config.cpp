@@ -30,7 +30,7 @@ namespace po = boost::program_options;
 #include "Config.hpp"
 
 namespace {
-  static const std::string sChoice_SimStart(  "sim_start" );
+  static const std::string sChoice_SimStart(  "run_sim" );
   static const std::string sChoice_sHdf5File( "hdf5_file" );
 
   template<typename T>
@@ -61,7 +61,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     po::options_description config( "SP500 config" );
     config.add_options()
 
-    ( sChoice_SimStart.c_str(), po::value<bool>( &choices.m_bSimStart )->default_value( true ), "run simulation" )
+    ( sChoice_SimStart.c_str(), po::value<bool>( &choices.m_bRunSim )->default_value( true ), "run simulation" )
     ( sChoice_sHdf5File.c_str(), po::value<std::string>( &choices.m_sHdf5File )->default_value( "TradeFrame.hdf5" ), "hdf5 file" )
     ;
     po::variables_map vm;
@@ -74,11 +74,11 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     else {
       po::store( po::parse_config_file( ifs, config), vm );
 
-      bOk &= parse<bool>( sFileName, vm, sChoice_SimStart, false, choices.m_bSimStart );
+      bOk &= parse<bool>( sFileName, vm, sChoice_SimStart, false, choices.m_bRunSim );
       bOk &= parse<std::string>( sFileName, vm, sChoice_sHdf5File, false, choices.m_sHdf5File );
     }
 
-    if ( choices.m_bSimStart ) {
+    if ( choices.m_bRunSim ) {
       if ( 0 < choices.m_sHdf5File.size() ) {}
       else {
         bOk = false;
