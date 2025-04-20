@@ -125,6 +125,9 @@ private:
   ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryVolume m_ceVolume;
 
+  //ou::ChartEntryIndicator m_ceAsk;
+  //ou::ChartEntryIndicator m_ceBid;
+
   ou::ChartEntryShape m_ceLongEntry;
   ou::ChartEntryShape m_ceLongFill;
   ou::ChartEntryShape m_ceLongExit;
