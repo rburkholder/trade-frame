@@ -44,8 +44,9 @@ Strategy::Strategy(
 , m_dblAdv {}, m_dblDec {}
 , m_dblMid {}
 , m_dblEma13 {}, m_dblEma29 {}
+, m_stateTickHi( ETickHi::Neutral ), m_stateTickLo( ETickLo::Neutral )
 //, m_dblLastTrin {}
-, m_dblTickJ {}, m_dblTickL {}
+, m_dblTickJ {}, m_dblTickL {}//, m_dblTickLmt {}
 {
   SetupChart();
 
@@ -221,6 +222,41 @@ void Strategy::HandleTickL( const ou::tf::Trade& tick ) {
   m_dblTickL = tick.Price();
   m_ceTickL.Append( dt, m_dblTickL );
   m_ceTickDiff.Append( dt, m_dblTickL - m_dblTickJ );
+
+  static const double hi( +200.0 );
+
+  switch ( m_stateTickHi ) {
+    case ETickHi::Neutral:
+      if ( hi <= m_dblTickL ) {
+        m_stateTickHi = ETickHi::UpOvr;
+      }
+      break;
+    case ETickHi::UpOvr:
+    case ETickHi::Up:
+      m_stateTickHi = ( hi < m_dblTickL ) ? ETickHi::Up : ETickHi::DnOvr;
+      break;
+    case ETickHi::DnOvr:
+      m_stateTickHi = ( hi > m_dblTickL ) ? ETickHi::Neutral : ETickHi::UpOvr;
+      break;
+  }
+
+  static const double lo( -200.0 );
+
+  switch ( m_stateTickLo ) {
+    case ETickLo::Neutral:
+      if ( lo >= m_dblTickL ) {
+        m_stateTickLo = ETickLo::DnOvr;
+      }
+      break;
+    case ETickLo::DnOvr:
+    case ETickLo::Dn:
+      m_stateTickLo = ( lo > m_dblTickL ) ? ETickLo::Dn : ETickLo::UpOvr;
+      break;
+    case ETickLo::UpOvr:
+      m_stateTickLo = ( lo < m_dblTickL ) ? ETickLo::Neutral : ETickLo::DnOvr;
+      break;
+  }
+
 }
 
 void Strategy::HandleAdv( const ou::tf::Trade& tick ) {

@@ -87,8 +87,8 @@ private:
     Done // no more action
   };
 
-  enum class ETickHi { Neutral, UpOvr, Up2Dn, Dn2Up, DnOvr };
-  enum class ETickLo { Neutral, DnOvr, Dn2Up, Up2Dn, UpOvr };
+  enum class ETickHi { Neutral, UpOvr, Up, DnOvr };
+  enum class ETickLo { Neutral, DnOvr, Dn, UpOvr };
 
   using pOrder_t = ou::tf::Order::pOrder_t;
 
@@ -98,6 +98,8 @@ private:
   fStop_t m_fStop;
 
   ETradeState m_stateTrade;
+  ETickHi m_stateTickHi;
+  ETickLo m_stateTickLo;
 
   pPosition_t m_pPosition;
   pWatch_t m_pTickJ;
@@ -111,6 +113,7 @@ private:
 
   double m_dblTickJ;
   double m_dblTickL;
+  //double m_dblTickLmt;
 
   double m_dblAdv;
   double m_dblDec;
