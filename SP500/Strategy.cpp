@@ -125,9 +125,9 @@ void Strategy::Start() {
 
 void Strategy::SetupChart() {
 
-  m_cemPosOne.AddMark(  +1.0, ou::Colour::Black,  "+1" );
-  m_cemZero.AddMark(     0.0, ou::Colour::Black,   "0" );
-  m_cemNegOne.AddMark(  -1.0, ou::Colour::Black,  "-1" );
+  m_cemPosOne.AddMark( +1.0, ou::Colour::Black,   "+1" );
+    m_cemZero.AddMark(  0.0, ou::Colour::Black, "zero" );
+  m_cemNegOne.AddMark( -1.0, ou::Colour::Black,   "-1" );
 
   m_ceTrade.SetName( "Trade" );
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
@@ -184,21 +184,17 @@ void Strategy::CalcAdvDec( boost::posix_time::ptime dt ) {
   const double sum( m_dblAdv + m_dblDec );
   const double diff( m_dblAdv - m_dblDec );
   const double ratio( diff / sum );
-  //const double half( ratio / 2.0 );
   m_ceAdvDec.Append( dt, ratio );
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
-
   TimeTick( bar );
-
-  double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
-  m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
-  m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
-
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
+  double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
+  m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
+  m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
