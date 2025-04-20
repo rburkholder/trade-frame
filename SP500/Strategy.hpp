@@ -97,7 +97,8 @@ private:
   ETradeState m_stateTrade;
 
   pPosition_t m_pPosition;
-  pWatch_t m_pTick;
+  pWatch_t m_pTickJ;
+  pWatch_t m_pTickL;
   pWatch_t m_pTrin;
   pWatch_t m_pAdv;
   pWatch_t m_pDec;
@@ -129,7 +130,8 @@ private:
   ou::ChartEntryShape m_ceShortFill;
   ou::ChartEntryShape m_ceShortExit;
 
-  ou::ChartEntryIndicator m_ceTick;
+  ou::ChartEntryIndicator m_ceTickJ;
+  ou::ChartEntryIndicator m_ceTickL;
   ou::ChartEntryIndicator m_ceTrin;
 
   ou::ChartEntryIndicator m_ceAdvDec;
@@ -141,7 +143,8 @@ private:
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
 
-  void HandleTick( const ou::tf::Trade& );
+  void HandleTickJ( const ou::tf::Trade& );
+  void HandleTickL( const ou::tf::Trade& );
   void HandleTrin( const ou::tf::Trade& );
 
   void HandleAdv( const ou::tf::Trade& );

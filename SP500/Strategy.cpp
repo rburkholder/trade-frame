@@ -60,12 +60,20 @@ Strategy::Strategy(
     } );
 
   m_fConstructWatch(
-    //"JT6T.Z",
+    "JT6T.Z",
+    [this]( pWatch_t pWatch ){
+      m_pTickJ = pWatch;
+      m_pTickJ->OnTrade.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleTickJ ) );
+      m_pTickJ->StartWatch();
+      Start();
+    } );
+
+  m_fConstructWatch(
     "LI6N.Z",
     [this]( pWatch_t pWatch ){
-      m_pTick = pWatch;
-      m_pTick->OnTrade.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleTick ) );
-      m_pTick->StartWatch();
+      m_pTickL = pWatch;
+      m_pTickL->OnTrade.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleTickL ) );
+      m_pTickL->StartWatch();
       Start();
     } );
 
@@ -98,9 +106,13 @@ Strategy::~Strategy() {
     m_pAdv->StopWatch();
     m_pAdv->OnTrade.Remove( fastdelegate::MakeDelegate( this, &Strategy::HandleAdv ) );
   }
-  if ( m_pTick ) {
-    m_pTick->StopWatch();
-    m_pTick->OnTrade.Remove( fastdelegate::MakeDelegate( this, &Strategy::HandleTick ) );
+  if ( m_pTickJ ) {
+    m_pTickJ->StopWatch();
+    m_pTickJ->OnTrade.Remove( fastdelegate::MakeDelegate( this, &Strategy::HandleTickJ ) );
+  }
+  if ( m_pTickL ) {
+    m_pTickL->StopWatch();
+    m_pTickL->OnTrade.Remove( fastdelegate::MakeDelegate( this, &Strategy::HandleTickL ) );
   }
   if ( m_pPosition ) {
     pWatch_t pWatch = m_pPosition->GetWatch();
@@ -115,7 +127,8 @@ Strategy::~Strategy() {
 void Strategy::Start() {
   bool bOkToStart( true );
   bOkToStart &= nullptr != m_pPosition.get();
-  bOkToStart &= nullptr != m_pTick.get();
+  bOkToStart &= nullptr != m_pTickJ.get();
+  bOkToStart &= nullptr != m_pTickL.get();
   bOkToStart &= nullptr != m_pAdv.get();
   bOkToStart &= nullptr != m_pDec.get();
   if ( bOkToStart ) {
@@ -136,9 +149,13 @@ void Strategy::SetupChart() {
   m_ceVolume.SetName( "Volume" );
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
-  m_ceTick.SetName( "Tick" );
   m_cdv.Add( EChartSlot::Tick, &m_cemZero );
-  m_cdv.Add( EChartSlot::Tick, &m_ceTick );
+  m_ceTickJ.SetName( "TickJ" );
+  m_ceTickJ.SetColour( ou::Colour::Green );
+  m_cdv.Add( EChartSlot::Tick, &m_ceTickJ );
+  m_ceTickL.SetName( "TickL" );
+  m_ceTickL.SetColour( ou::Colour::DarkOrange );
+  m_cdv.Add( EChartSlot::Tick, &m_ceTickL );
 
   m_ceAdvDec.SetName( "AdvDec" );
   m_cdv.Add( EChartSlot::AdvDec, &m_cemZero );
@@ -166,8 +183,12 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   m_ceVolume.Append( trade.DateTime(), trade.Volume() );
 }
 
-void Strategy::HandleTick( const ou::tf::Trade& tick ) {
-  m_ceTick.Append( tick.DateTime(), tick.Price() );
+void Strategy::HandleTickJ( const ou::tf::Trade& tick ) {
+  m_ceTickJ.Append( tick.DateTime(), tick.Price() );
+}
+
+void Strategy::HandleTickL( const ou::tf::Trade& tick ) {
+  m_ceTickL.Append( tick.DateTime(), tick.Price() );
 }
 
 void Strategy::HandleAdv( const ou::tf::Trade& tick ) {
