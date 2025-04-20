@@ -104,8 +104,10 @@ private:
   pWatch_t m_pDec;
 
   double m_dblMid;
-  double m_dblLastTick;
-  double m_dblLastTrin;
+  //double m_dblLastTrin;
+
+  double m_dblTickJ;
+  double m_dblTickL;
 
   double m_dblAdv;
   double m_dblDec;
@@ -132,7 +134,8 @@ private:
 
   ou::ChartEntryIndicator m_ceTickJ;
   ou::ChartEntryIndicator m_ceTickL;
-  ou::ChartEntryIndicator m_ceTrin;
+  ou::ChartEntryIndicator m_ceTickDiff;
+  //ou::ChartEntryIndicator m_ceTrin;
 
   ou::ChartEntryIndicator m_ceAdvDec;
 

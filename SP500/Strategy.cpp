@@ -42,7 +42,9 @@ Strategy::Strategy(
 , m_ceLongExit( ou::ChartEntryShape::EShape::LongStop, ou::Colour::Blue )
 , m_bfQuotes01Sec(  1 )
 , m_dblAdv {}, m_dblDec {}
-, m_dblMid {}, m_dblLastTick {}, m_dblLastTrin {}
+, m_dblMid {}
+//, m_dblLastTrin {}
+, m_dblTickJ {}, m_dblTickL {}
 {
   SetupChart();
 
@@ -151,11 +153,14 @@ void Strategy::SetupChart() {
 
   m_cdv.Add( EChartSlot::Tick, &m_cemZero );
   m_ceTickJ.SetName( "TickJ" );
-  m_ceTickJ.SetColour( ou::Colour::Green );
+  m_ceTickJ.SetColour( ou::Colour::Blue );
   m_cdv.Add( EChartSlot::Tick, &m_ceTickJ );
   m_ceTickL.SetName( "TickL" );
   m_ceTickL.SetColour( ou::Colour::DarkOrange );
   m_cdv.Add( EChartSlot::Tick, &m_ceTickL );
+  m_ceTickDiff.SetName( "Diff" );
+  m_ceTickDiff.SetColour( ou::Colour::Magenta );
+  m_cdv.Add( EChartSlot::Tick, &m_ceTickDiff );
 
   m_ceAdvDec.SetName( "AdvDec" );
   m_cdv.Add( EChartSlot::AdvDec, &m_cemZero );
@@ -184,11 +189,17 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 }
 
 void Strategy::HandleTickJ( const ou::tf::Trade& tick ) {
-  m_ceTickJ.Append( tick.DateTime(), tick.Price() );
+  const auto dt( tick.DateTime() );
+  m_dblTickJ = tick.Price();
+  m_ceTickJ.Append( dt, m_dblTickJ );
+  m_ceTickDiff.Append( dt, m_dblTickL - m_dblTickJ );
 }
 
 void Strategy::HandleTickL( const ou::tf::Trade& tick ) {
-  m_ceTickL.Append( tick.DateTime(), tick.Price() );
+  const auto dt( tick.DateTime() );
+  m_dblTickL = tick.Price();
+  m_ceTickL.Append( dt, m_dblTickL );
+  m_ceTickDiff.Append( dt, m_dblTickL - m_dblTickJ );
 }
 
 void Strategy::HandleAdv( const ou::tf::Trade& tick ) {
