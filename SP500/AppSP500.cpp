@@ -345,6 +345,9 @@ void AppSP500::HandleSimConnected( int ) {
     [this](){
     }
   );
+  assert( m_pStrategy );
+  m_pStrategy->InitForUSEquityExchanges( m_startDateUTC );
+  m_pStrategy->InitForNextDay();
 }
 
 void AppSP500::HandleMenuActionSimStart() {
