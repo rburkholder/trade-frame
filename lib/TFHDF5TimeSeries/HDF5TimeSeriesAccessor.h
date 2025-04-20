@@ -80,21 +80,21 @@ template<class DD> HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor( HDF5DataM
     UpdateElementCount();
   }
   catch ( H5::AttributeIException& e ) {
-    std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor AttributeIException " << e.getDetailMsg() << std::endl;
+    std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor AttributeIException (" << m_sPathName << ") " << e.getDetailMsg() << std::endl;
     e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &HDF5DataManager::PrintH5ErrorStackItem, this );
     throw std::runtime_error( "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor error 0" );
   }
   catch ( H5::Exception& e ) {
-    std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor " << e.getDetailMsg() << std::endl;
+    std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor H " << m_sPathName << ' ' << e.getDetailMsg() << std::endl;
     e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &HDF5DataManager::PrintH5ErrorStackItem, this );
     throw std::runtime_error( "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor error 1" );
   }
   catch ( std::runtime_error& e ) {
-    std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor " << e.what() << std::endl;
+    std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor R " << m_sPathName << ' ' << e.what() << std::endl;
     throw std::runtime_error( "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor error 2" );
   }
   catch (...) {
-    std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor unknown error" << std::endl;
+    std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor unknown error (" << m_sPathName << ')' << std::endl;
     throw std::runtime_error( "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor error 3" );
   }
 }
