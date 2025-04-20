@@ -87,6 +87,9 @@ private:
     Done // no more action
   };
 
+  enum class ETickHi { Neutral, UpOvr, Up2Dn, Dn2Up, DnOvr };
+  enum class ETickLo { Neutral, DnOvr, Dn2Up, Up2Dn, UpOvr };
+
   using pOrder_t = ou::tf::Order::pOrder_t;
 
   fConstructWatch_t m_fConstructWatch;
@@ -112,7 +115,8 @@ private:
   double m_dblAdv;
   double m_dblDec;
 
-  double m_dblEma;
+  double m_dblEma13;
+  double m_dblEma29;
 
   ou::tf::Quote m_quote;
 
@@ -130,7 +134,8 @@ private:
   //ou::ChartEntryIndicator m_ceAsk;
   //ou::ChartEntryIndicator m_ceBid;
 
-  ou::ChartEntryIndicator m_ceEma;
+  ou::ChartEntryIndicator m_ceEma13;
+  ou::ChartEntryIndicator m_ceEma29;
 
   ou::ChartEntryShape m_ceLongEntry;
   ou::ChartEntryShape m_ceLongFill;
