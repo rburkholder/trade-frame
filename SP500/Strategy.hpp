@@ -71,7 +71,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, Tick, Trin, PL };
+  enum EChartSlot { Price, Volume, Tick, AdvDec, PL };
   enum class ETradeState {
     Init,  // initiaize state in current market
     Neutral, // netral state prior to active search
@@ -99,10 +99,15 @@ private:
   pPosition_t m_pPosition;
   pWatch_t m_pTick;
   pWatch_t m_pTrin;
+  pWatch_t m_pAdv;
+  pWatch_t m_pDec;
 
   double m_dblMid;
   double m_dblLastTick;
   double m_dblLastTrin;
+
+  double m_dblAdv;
+  double m_dblDec;
 
   ou::tf::Quote m_quote;
 
@@ -127,6 +132,8 @@ private:
   ou::ChartEntryIndicator m_ceTick;
   ou::ChartEntryIndicator m_ceTrin;
 
+  ou::ChartEntryIndicator m_ceAdvDec;
+
   ou::ChartEntryIndicator m_ceProfitLoss;
 
   ou::tf::BarFactory m_bfQuotes01Sec;
@@ -136,6 +143,11 @@ private:
 
   void HandleTick( const ou::tf::Trade& );
   void HandleTrin( const ou::tf::Trade& );
+
+  void HandleAdv( const ou::tf::Trade& );
+  void HandleDec( const ou::tf::Trade& );
+
+  void CalcAdvDec( boost::posix_time::ptime );
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
 

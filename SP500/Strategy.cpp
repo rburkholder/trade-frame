@@ -41,24 +41,12 @@ Strategy::Strategy(
 , m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
 , m_ceLongExit( ou::ChartEntryShape::EShape::LongStop, ou::Colour::Blue )
 , m_bfQuotes01Sec(  1 )
+, m_dblAdv {}, m_dblDec {}
 , m_dblMid {}, m_dblLastTick {}, m_dblLastTrin {}
 {
-  m_cemPosOne.AddMark(  +1.0, ou::Colour::Black,  "+1" );
-  m_cemZero.AddMark(     0.0, ou::Colour::Black,   "0" );
-  m_cemNegOne.AddMark(  -1.0, ou::Colour::Black,  "-1" );
-
-  m_ceTrade.SetName( "Trade" );
-  m_ceTrade.SetColour( ou::Colour::DarkGreen );
-
-  m_ceVolume.SetName( "Volume" );
-
-  m_ceTick.SetName( "Tick" );
-
-  m_ceProfitLoss.SetName( "P/L" );
+  SetupChart();
 
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
-
-  SetupChart();
 
   m_fConstructPosition(
     "SPY",
@@ -80,18 +68,45 @@ Strategy::Strategy(
       m_pTick->StartWatch();
       Start();
     } );
-}
+
+  m_fConstructWatch(
+    "II6A.Z", // advancers
+    [this]( pWatch_t pWatch ){
+      m_pAdv = pWatch;
+      m_pAdv->OnTrade.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleAdv ) );
+      m_pAdv->StartWatch();
+      Start();
+    } );
+
+  m_fConstructWatch(
+    "II6D.Z", // decliners
+    [this]( pWatch_t pWatch ){
+      m_pDec = pWatch;
+      m_pDec->OnTrade.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleDec ) );
+      m_pDec->StartWatch();
+      Start();
+    } );
+
+  }
 
 Strategy::~Strategy() {
+  if ( m_pDec ) {
+    m_pDec->StopWatch();
+    m_pDec->OnTrade.Remove( fastdelegate::MakeDelegate( this, &Strategy::HandleDec ) );
+  }
+  if ( m_pAdv ) {
+    m_pAdv->StopWatch();
+    m_pAdv->OnTrade.Remove( fastdelegate::MakeDelegate( this, &Strategy::HandleAdv ) );
+  }
+  if ( m_pTick ) {
+    m_pTick->StopWatch();
+    m_pTick->OnTrade.Remove( fastdelegate::MakeDelegate( this, &Strategy::HandleTick ) );
+  }
   if ( m_pPosition ) {
     pWatch_t pWatch = m_pPosition->GetWatch();
     pWatch->StopWatch();
     pWatch->OnQuote.Remove( fastdelegate::MakeDelegate( this, &Strategy::HandleQuote ) );
     pWatch->OnTrade.Remove( fastdelegate::MakeDelegate( this, &Strategy::HandleTrade ) );
-  }
-  if ( m_pTick ) {
-    m_pTick->StopWatch();
-    m_pTick->OnTrade.Remove( fastdelegate::MakeDelegate( this, &Strategy::HandleTick ) );
   }
   m_bfQuotes01Sec.SetOnBarComplete( nullptr );
   m_cdv.Clear();
@@ -101,6 +116,8 @@ void Strategy::Start() {
   bool bOkToStart( true );
   bOkToStart &= nullptr != m_pPosition.get();
   bOkToStart &= nullptr != m_pTick.get();
+  bOkToStart &= nullptr != m_pAdv.get();
+  bOkToStart &= nullptr != m_pDec.get();
   if ( bOkToStart ) {
     m_fStart();
   }
@@ -108,7 +125,28 @@ void Strategy::Start() {
 
 void Strategy::SetupChart() {
 
+  m_cemPosOne.AddMark(  +1.0, ou::Colour::Black,  "+1" );
+  m_cemZero.AddMark(     0.0, ou::Colour::Black,   "0" );
+  m_cemNegOne.AddMark(  -1.0, ou::Colour::Black,  "-1" );
+
+  m_ceTrade.SetName( "Trade" );
+  m_ceTrade.SetColour( ou::Colour::DarkGreen );
   m_cdv.Add( EChartSlot::Price, &m_ceTrade );
+
+  m_ceVolume.SetName( "Volume" );
+  m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
+
+  m_ceTick.SetName( "Tick" );
+  m_cdv.Add( EChartSlot::Tick, &m_cemZero );
+  m_cdv.Add( EChartSlot::Tick, &m_ceTick );
+
+  m_ceAdvDec.SetName( "AdvDec" );
+  m_cdv.Add( EChartSlot::AdvDec, &m_cemZero );
+  m_cdv.Add( EChartSlot::AdvDec, &m_ceAdvDec );
+
+  m_ceProfitLoss.SetName( "P/L" );
+  //m_cdv.Add( EChartSlot::PL, &m_cemZero );
+  m_cdv.Add( EChartSlot::PL, &m_ceProfitLoss );
 
   m_cdv.Add( EChartSlot::Price, &m_ceLongEntry );
   m_cdv.Add( EChartSlot::Price, &m_ceLongFill );
@@ -116,18 +154,10 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::Price, &m_ceShortEntry );
   m_cdv.Add( EChartSlot::Price, &m_ceShortFill );
   m_cdv.Add( EChartSlot::Price, &m_ceShortExit );
-
-  m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
-
-  m_cdv.Add( EChartSlot::Tick, &m_cemZero );
-  m_cdv.Add( EChartSlot::Tick, &m_ceTick );
-
-  //m_cdv.Add( EChartSlot::PL, &m_cemZero );
-  m_cdv.Add( EChartSlot::PL, &m_ceProfitLoss );
-
 }
 
-void Strategy::HandleQuote( const ou::tf::Quote& ) {
+void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
+  m_quote = quote;
   m_bfQuotes01Sec.Add( m_quote.DateTime(), m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
 }
 
@@ -138,6 +168,24 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
 void Strategy::HandleTick( const ou::tf::Trade& tick ) {
   m_ceTick.Append( tick.DateTime(), tick.Price() );
+}
+
+void Strategy::HandleAdv( const ou::tf::Trade& tick ) {
+  m_dblAdv = tick.Price();
+  CalcAdvDec( tick.DateTime() );
+}
+
+void Strategy::HandleDec( const ou::tf::Trade& tick ) {
+  m_dblDec = tick.Price();
+  CalcAdvDec( tick.DateTime() );
+}
+
+void Strategy::CalcAdvDec( boost::posix_time::ptime dt ) {
+  const double sum( m_dblAdv + m_dblDec );
+  const double diff( m_dblAdv - m_dblDec );
+  const double ratio( diff / sum );
+  //const double half( ratio / 2.0 );
+  m_ceAdvDec.Append( dt, ratio );
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
