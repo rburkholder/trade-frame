@@ -125,6 +125,9 @@ private:
 
   pOrder_t m_pOrder;
 
+  size_t m_nEnterLong;
+  size_t m_nEnterShort;
+
   ou::ChartDataView& m_cdv;
 
   ou::ChartEntryMark m_cemPosOne;

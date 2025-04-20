@@ -19,6 +19,8 @@
  * Created: April 14, 2025 20:32:29
  */
 
+#include <boost/log/trivial.hpp>
+
 #include "Strategy.hpp"
 
 Strategy::Strategy(
@@ -45,6 +47,7 @@ Strategy::Strategy(
 , m_dblMid {}
 , m_dblEma13 {}, m_dblEma29 {}
 , m_stateTickHi( ETickHi::Neutral ), m_stateTickLo( ETickLo::Neutral )
+, m_nEnterLong {}, m_nEnterShort {}
 //, m_dblLastTrin {}
 , m_dblTickJ {}, m_dblTickL {}//, m_dblTickLmt {}
 {
@@ -304,7 +307,61 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   TimeTick( bar );
 }
 
-void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) { // once a second
+void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
+  const auto dt( trade.DateTime() );
+  const auto price( trade.Price() );
+  switch ( m_stateTrade ) {
+    case ETradeState::Search:
+      if ( ETickHi::DnOvr == m_stateTickHi ) {
+        BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
+        m_ceShortEntry.AddLabel( dt, price, "short" );
+        ++m_nEnterShort;
+        m_stateTrade = ETradeState::ShortSubmitted;
+      }
+      else {
+        if ( ETickLo::UpOvr == m_stateTickLo ) {
+          BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
+          m_ceLongEntry.AddLabel( dt, price, "long" );
+          ++m_nEnterLong;
+          m_stateTrade = ETradeState::LongSubmitted;
+        }
+      }
+      break;
+    case ETradeState::LongSubmitted:
+      if ( ETickLo::Neutral == m_stateTickLo ) {
+        BOOST_LOG_TRIVIAL(trace) << "ETickLo::Neutral exit";
+        m_stateTrade = ETradeState::Search;
+      }
+      break;
+    case ETradeState::ShortSubmitted:
+      if ( ETickHi::Neutral == m_stateTickHi ) {
+        BOOST_LOG_TRIVIAL(trace) << "ETickHi::Neutral exit";
+        m_stateTrade = ETradeState::Search;
+      }
+      break;
+    case ETradeState::LongExit:
+      break;
+    case ETradeState::ShortExit:
+      break;
+    case ETradeState::LongExitSubmitted:
+      break;
+    case ETradeState::ShortExitSubmitted:
+      break;
+    case ETradeState::Neutral:
+      BOOST_LOG_TRIVIAL(trace) << "neutral," << m_nEnterLong << ',' << m_nEnterShort;
+      break;
+    case ETradeState::EndOfDayCancel:
+      BOOST_LOG_TRIVIAL(trace) << "eod cancel," << m_nEnterLong << ',' << m_nEnterShort;
+      break;
+    case ETradeState::EndOfDayNeutral:
+      BOOST_LOG_TRIVIAL(trace) << "eod neutral," << m_nEnterLong << ',' << m_nEnterShort;
+      break;
+    case ETradeState::Done:
+      break;
+    case ETradeState::Init:
+      m_stateTrade = ETradeState::Search;
+      break;
+  }
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
@@ -367,14 +424,16 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
   m_pOrder.reset();
 }
 
-void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
+void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration td ) { // one shot
+  BOOST_LOG_TRIVIAL(trace) << "event HandleCancel," << td << ',' << m_nEnterLong << ',' << m_nEnterShort;
   m_stateTrade = ETradeState::EndOfDayCancel;
   if ( m_pPosition ) {
     m_pPosition->CancelOrders();
   }
 }
 
-void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration ) { // one shot
+void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration td ) { // one shot
+  BOOST_LOG_TRIVIAL(trace) << "event HandleGoNeutral," << td << ',' << m_nEnterLong << ',' << m_nEnterShort;
   m_stateTrade = ETradeState::EndOfDayNeutral;
   if ( m_pPosition ) {
     m_pPosition->ClosePosition();
