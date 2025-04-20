@@ -43,6 +43,7 @@ Strategy::Strategy(
 , m_bfQuotes01Sec(  1 )
 , m_dblAdv {}, m_dblDec {}
 , m_dblMid {}
+, m_dblEma {}
 //, m_dblLastTrin {}
 , m_dblTickJ {}, m_dblTickL {}
 {
@@ -148,6 +149,10 @@ void Strategy::SetupChart() {
   m_ceTrade.SetColour( ou::Colour::DarkGreen );
   m_cdv.Add( EChartSlot::Price, &m_ceTrade );
 
+  m_ceEma.SetName( "27 sec ema" );
+  m_ceEma.SetColour( ou::Colour::Purple );
+  m_cdv.Add( EChartSlot::Price, &m_ceEma );
+
   //m_ceAsk.SetName( "Ask" );
   //m_ceAsk.SetColour( ou::Colour::Red );
   //m_cdv.Add( EChartSlot::Price, &m_ceAsk );
@@ -197,6 +202,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   m_ceTrade.Append( trade.DateTime(), trade.Price() );
   m_ceVolume.Append( trade.DateTime(), trade.Volume() );
+  TimeTick( trade );
 }
 
 void Strategy::HandleTickJ( const ou::tf::Trade& tick ) {
@@ -231,7 +237,20 @@ void Strategy::CalcAdvDec( boost::posix_time::ptime dt ) {
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
+  static const double seconds( 27.0 );
+  static const double cur( 1.0 / seconds );
+  static const double prv( 1.0 - cur );
+  if ( 0.0 == m_dblEma ) {
+    m_dblEma = bar.Close();
+  }
+  else {
+    m_dblEma = prv * m_dblEma + cur * bar.Close();
+  }
+  m_ceEma.Append( bar.DateTime(), m_dblEma );
   TimeTick( bar );
+}
+
+void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) { // once a second
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second

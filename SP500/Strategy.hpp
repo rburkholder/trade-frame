@@ -112,6 +112,8 @@ private:
   double m_dblAdv;
   double m_dblDec;
 
+  double m_dblEma;
+
   ou::tf::Quote m_quote;
 
   pOrder_t m_pOrder;
@@ -127,6 +129,8 @@ private:
 
   //ou::ChartEntryIndicator m_ceAsk;
   //ou::ChartEntryIndicator m_ceBid;
+
+  ou::ChartEntryIndicator m_ceEma;
 
   ou::ChartEntryShape m_ceLongEntry;
   ou::ChartEntryShape m_ceLongFill;
@@ -160,9 +164,9 @@ private:
 
   void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
 
-  void HandleRHTrading( const ou::tf::Bar& bar );
-  void HandleRHTrading_01Sec( const ou::tf::Bar& bar );
-  void HandleRHTrading_60Sec( const ou::tf::Bar& bar );
+  void HandleRHTrading( const ou::tf::Trade& );
+
+  void HandleRHTrading( const ou::tf::Bar& );
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
 
