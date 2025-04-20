@@ -21,7 +21,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 namespace InstrumentType { // IBTWS.cpp, HDF5 Attributes depend on this order
-  enum EInstrumentType { Unknown=0, Stock, Option, Future, FuturesOption, Currency, Index, ETF, Bond, Commodity, Metal, _Count };
+  enum EInstrumentType: std::uint8_t { Unknown=0, Stock, Option, Future, FuturesOption, Currency, Index, ETF, Bond, Commodity, Metal, _Count };
   extern const char* Name[];
 }
 
