@@ -111,6 +111,8 @@ bool AppSP500::OnInit() {
 
   m_pwcv = new ou::tf::WinChartView( m_pFrameMain );
   sizerFrame->Add( m_pwcv, 1,wxALL | wxEXPAND, 0 );
+  m_pwcv->SetSim();
+  m_pwcv->SetChartDataView( &m_cdv );
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppSP500::OnClose, this );  // start close of windows and controls
   m_pFrameMain->Bind( wxEVT_MOVE, &AppSP500::OnFrameMainAutoMove, this ); // intercept first move
@@ -159,7 +161,7 @@ void AppSP500::RunSimulation() {
 }
 
 void AppSP500::HandleLoadTreeHdf5Object_Sim( const std::string& sGroup, const std::string& sName ) {
-  // confirm all objects in one directory, to be used by simulator
+  // for now, confirm all objects in one directory, to be used by simulator
 
   std::string sPrefix;
   size_t instance {};
@@ -192,6 +194,40 @@ void AppSP500::HandleLoadTreeHdf5Object_Sim( const std::string& sGroup, const st
   }
   else {
     assert( sPrefix == m_sSimulatorGroupDirectory );
+  }
+
+  ou::tf::HDF5Attributes attrObject( *m_pdm, sGroup );
+  BOOST_LOG_TRIVIAL(info)
+    << "Sim Object,"
+    << sGroup << ',' << sName << ','
+    << attrObject.GetSignature() << ','
+    << attrObject.GetInstrumentType() << ','
+    << attrObject.GetMultiplier() << ','
+    << attrObject.GetSignificantDigits()
+    ;
+  mapHdf5Instrument_t::iterator iterHdf5Instrument = m_mapHdf5Instrument.find( sName );
+  if ( m_mapHdf5Instrument.end() == iterHdf5Instrument ) {
+    pInstrument_t pInstrument;
+    auto type = attrObject.GetInstrumentType();
+    switch ( type ) {
+      case ou::tf::InstrumentType::EInstrumentType::Stock:
+        pInstrument = std::make_shared<ou::tf::Instrument>(
+          sName, type, "simulator"
+        );
+        break;
+      case ou::tf::InstrumentType::EInstrumentType::Index:
+        pInstrument = std::make_shared<ou::tf::Instrument>(
+          sName, type, "simulator"
+        );
+        break;
+      default:
+        assert( true ); // ignore other types for now
+    }
+    if ( pInstrument ) {
+      pInstrument->SetMultiplier( attrObject.GetMultiplier() );
+      pInstrument->SetSignificantDigits( attrObject.GetSignificantDigits() );
+      m_mapHdf5Instrument.emplace( sName, pInstrument );
+    }
   }
 }
 
@@ -282,7 +318,33 @@ bool AppSP500::BuildProviders_Sim() {
 }
 
 void AppSP500::HandleSimConnected( int ) {
-  BOOST_LOG_TRIVIAL(info) << "ready to build strategy";
+  using pWatch_t = Strategy::pWatch_t;
+  using pPosition_t = Strategy::pPosition_t;
+  BOOST_LOG_TRIVIAL(info) << "building strategy";
+  m_pStrategy = std::make_unique<Strategy>(
+    m_cdv,
+    [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedWatch_t&& f ){ // fConstructWatch_t
+      mapHdf5Instrument_t::iterator iter = m_mapHdf5Instrument.find( sIQFeedSymbolName );
+      assert( m_mapHdf5Instrument.end() != iter );
+      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( iter->second, m_data );
+      f( pWatch );
+    },
+    [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedPosition_t&& f ){ // fConstructPosition_t
+      mapHdf5Instrument_t::iterator iter = m_mapHdf5Instrument.find( sIQFeedSymbolName );
+      assert( m_mapHdf5Instrument.end() != iter );
+      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( iter->second, m_data );
+      pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_exec );
+      f( pPosition );
+    },
+    [this](){
+      CallAfter( [this](){
+        BOOST_LOG_TRIVIAL(info) << "simulation run";
+        m_sim->Run();
+      } );
+    },
+    [this](){
+    }
+  );
 }
 
 void AppSP500::HandleMenuActionSimStart() {
@@ -341,7 +403,6 @@ void AppSP500::LoadPanelFinancialChart() {
 
   IterateObjects();
 
-  m_pwcv->SetChartDataView( &m_cdv );
 }
 
 void AppSP500::IterateObjects() {
@@ -361,7 +422,14 @@ void AppSP500::HandleLoadTreeHdf5Object_Static( const std::string& sGroup, const
   ESymbol eSymbol = m_pkwmSymbol->FindMatch( sName );
   if ( ESymbol::UKNWN != eSymbol ) {
     ou::tf::HDF5Attributes attrObject( *m_pdm, sGroup );
-    BOOST_LOG_TRIVIAL(info) << "3 Object," << sGroup << ',' << sName << ',' << attrObject.GetSignature();
+    BOOST_LOG_TRIVIAL(info)
+      << "3 Object,"
+      << sGroup << ',' << sName << ','
+      << attrObject.GetSignature() << ','
+      << attrObject.GetInstrumentType() << ','
+      << attrObject.GetMultiplier() << ','
+      << attrObject.GetSignificantDigits()
+      ;
     mapSymbolInfo_t::iterator iterSymbol = m_mapSymbolInfo.find( eSymbol );
     assert ( m_mapSymbolInfo.end() != iterSymbol );
 

@@ -117,6 +117,10 @@ private:
   using mapSymbolInfo_t = std::unordered_map<ESymbol,SymbolInfo>;
   mapSymbolInfo_t m_mapSymbolInfo;
 
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using mapHdf5Instrument_t = std::unordered_map<std::string,pInstrument_t>;
+  mapHdf5Instrument_t m_mapHdf5Instrument;
+
   ou::ChartDataView m_cdv;
   ou::tf::WinChartView* m_pwcv; // handles drawing the chart
 

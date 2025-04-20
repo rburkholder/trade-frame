@@ -21,10 +21,153 @@
 
 #pragma once
 
-class Strategy {
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
+#include <OUCharting/ChartEntryBars.h>
+#include <OUCharting/ChartEntryMark.h>
+#include <OUCharting/ChartEntryShape.h>
+#include <OUCharting/ChartEntryVolume.h>
+#include <OUCharting/ChartEntryIndicator.h>
+
+#include <OUCharting/ChartDataView.h>
+
+//#include <TFIndicators/TSEMA.h>
+
+#include <TFTimeSeries/BarFactory.h>
+
+#include <TFTrading/Order.h>
+#include <TFTrading/Position.h>
+#include <TFTrading/DailyTradeTimeFrames.h>
+
+class Strategy
+: public ou::tf::DailyTradeTimeFrame<Strategy>
+{
+  friend ou::tf::DailyTradeTimeFrame<Strategy>;
+  friend class boost::serialization::access;
 public:
-  Strategy();
+
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pPosition_t = ou::tf::Position::pPosition_t;
+
+  using fConstructedWatch_t = std::function<void( pWatch_t )>;
+  using fConstructWatch_t = std::function<void( const std::string sIQFeedSymbolName, fConstructedWatch_t&& )>;
+
+  using fConstructedPosition_t = std::function<void( pPosition_t )>;
+  using fConstructPosition_t = std::function<void( const std::string sIQFeedSymbolName, fConstructedPosition_t&& )>;
+
+  using fStart_t = std::function<void()>;
+  using fStop_t = std::function<void()>;
+
+  Strategy(
+    ou::ChartDataView&
+  , fConstructWatch_t&&
+  , fConstructPosition_t&&
+  , fStart_t&&
+  , fStop_t&&
+  );
   ~Strategy();
+
 protected:
 private:
+
+  enum EChartSlot { Price, Volume, Tick, Trin, PL };
+  enum class ETradeState {
+    Init,  // initiaize state in current market
+    Neutral, // netral state prior to active search
+    Search,  // looking for long or short enter
+    LongSubmitted, // order has been submitted, waiting for confirmation
+    LongExit,  // position exists, looking for exit
+    ShortSubmitted,  // order has been submitted, waiting for confirmtaion
+    ShortExit,  // position exists, looking for exit
+    LongExitSubmitted, // wait for exit to complete
+    ShortExitSubmitted, // wait for exit to complete
+    EndOfDayCancel,
+    EndOfDayNeutral,
+    Done // no more action
+  };
+
+  using pOrder_t = ou::tf::Order::pOrder_t;
+
+  fConstructWatch_t m_fConstructWatch;
+  fConstructPosition_t m_fConstructPosition;
+  fStart_t m_fStart;
+  fStop_t m_fStop;
+
+  ETradeState m_stateTrade;
+
+  pPosition_t m_pPosition;
+  pWatch_t m_pTick;
+  pWatch_t m_pTrin;
+
+  double m_dblMid;
+  double m_dblLastTick;
+  double m_dblLastTrin;
+
+  ou::tf::Quote m_quote;
+
+  pOrder_t m_pOrder;
+
+  ou::ChartDataView& m_cdv;
+
+  ou::ChartEntryMark m_cemPosOne;
+  ou::ChartEntryMark m_cemZero;
+  ou::ChartEntryMark m_cemNegOne;
+
+  ou::ChartEntryIndicator m_ceTrade;
+  ou::ChartEntryVolume m_ceVolume;
+
+  ou::ChartEntryShape m_ceLongEntry;
+  ou::ChartEntryShape m_ceLongFill;
+  ou::ChartEntryShape m_ceLongExit;
+  ou::ChartEntryShape m_ceShortEntry;
+  ou::ChartEntryShape m_ceShortFill;
+  ou::ChartEntryShape m_ceShortExit;
+
+  ou::ChartEntryIndicator m_ceTick;
+  ou::ChartEntryIndicator m_ceTrin;
+
+  ou::ChartEntryIndicator m_ceProfitLoss;
+
+  ou::tf::BarFactory m_bfQuotes01Sec;
+
+  void HandleQuote( const ou::tf::Quote& );
+  void HandleTrade( const ou::tf::Trade& );
+
+  void HandleTick( const ou::tf::Trade& );
+  void HandleTrin( const ou::tf::Trade& );
+
+  void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
+
+  void HandleRHTrading( const ou::tf::Bar& bar );
+  void HandleRHTrading_01Sec( const ou::tf::Bar& bar );
+  void HandleRHTrading_60Sec( const ou::tf::Bar& bar );
+  void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
+  void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
+
+  void EnterLong( const ptime dt, const double tag );
+  void EnterShort( const ptime dt, const double tag );
+
+  void ExitLong( const ptime dt, const double tag );
+  void ExitShort( const ptime dt, const double tag );
+
+  void HandleOrderCancelled( const ou::tf::Order& );
+  void HandleOrderFilled( const ou::tf::Order& );
+
+  void SetupChart();
+  void Start();
+
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 };
+
+BOOST_CLASS_VERSION(Strategy, 1)
+
