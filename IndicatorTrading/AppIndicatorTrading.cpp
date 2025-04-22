@@ -61,7 +61,7 @@
 #include "200DayChart.hpp"
 #include "SessionChart.hpp"
 #include "InteractiveChart.h"
-#include "AppIndicatorTrading.h"
+#include "AppIndicatorTrading.hpp"
 
 namespace {
   static const std::string sAppName( "Indicator Trading" );

@@ -23,7 +23,7 @@ find_package(Boost ${TF_BOOST_VERSION} CONFIG REQUIRED COMPONENTS system date_ti
 
 set(
   file_h
-    AppIndicatorTrading.h
+    AppIndicatorTrading.hpp
     Config.hpp
     ExecModel.hpp
     FeedModel.hpp

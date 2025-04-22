@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    AppIndicatorTrading.h
+ * File:    AppIndicatorTrading.hpp
  * Author:  raymond@burkholder.net
  * Project: IndicatorTrading
  * Created: February 8, 2022 00:12
