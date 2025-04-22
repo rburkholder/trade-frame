@@ -31,6 +31,7 @@ struct Choices {
 
   // Interactive Brokers api instance
   int ib_client_id;
+  int ib_client_port;
 
   unsigned int nBlockSize; // delta order per click
 

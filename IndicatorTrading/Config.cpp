@@ -32,6 +32,7 @@ namespace po = boost::program_options;
 namespace {
   static const std::string sOption_Symbol( "symbol" );
   static const std::string sOption_IbClientId( "ib_client_id" );
+  static const std::string sOption_IbClientPort( "ib_client_port" );
   static const std::string sOption_BlockSize( "order block size" );
   static const std::string sOption_Threads( "threads" );
   static const std::string sOption_DaysFront( "days_front" );
@@ -72,6 +73,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     config.add_options()
       ( sOption_Symbol.c_str(), po::value<std::string>( &choices.sSymbol ), "symbol" )
       ( sOption_IbClientId.c_str(), po::value<int>( &choices.ib_client_id )->default_value( 1 ), "IB Client ID" )
+      ( sOption_IbClientPort.c_str(), po::value<int>( &choices.ib_client_port )->default_value( 7497 ), "IB Client Port" )
       ( sOption_BlockSize.c_str(), po::value<unsigned int>( &choices.nBlockSize )->default_value( 1 ), "Order Block Size" )
       ( sOption_Threads.c_str(), po::value<size_t>( &choices.nThreads )->default_value( 1 ), "threads" )
 
@@ -105,6 +107,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       std::replace_if( choices.sSymbol.begin(), choices.sSymbol.end(), [](char ch)->bool{return '~' == ch;}, '#' );
 
       bOk &= parse<int>( sFileName, vm, sOption_IbClientId, choices.ib_client_id );
+      bOk &= parse<int>( sFileName, vm, sOption_IbClientPort, choices.ib_client_port );
       bOk &= parse<unsigned int>( sFileName, vm, sOption_BlockSize, choices.nBlockSize );
       bOk &= parse<size_t>( sFileName, vm, sOption_Threads, choices.nThreads );
 
