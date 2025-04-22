@@ -32,7 +32,7 @@ set(
     OptionTracker.hpp
     SessionChart.hpp
     Strategy.hpp
-    TradeLifeTime.h
+    TradeLifeTime.hpp
     200DayChart.hpp
   )
 

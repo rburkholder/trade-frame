@@ -26,7 +26,7 @@
 #include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/PanelOrderButtons_structs.h>
 
-#include "TradeLifeTime.h"
+#include "TradeLifeTime.hpp"
 
 using EPositionEntryMethod = ou::tf::PanelOrderButtons_Order::EPositionEntryMethod;
 using EPositionExitProfitMethod = ou::tf::PanelOrderButtons_Order::EPositionExitProfitMethod;

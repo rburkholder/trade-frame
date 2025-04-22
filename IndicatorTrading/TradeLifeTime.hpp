@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    TradeLifeTime.h
+ * File:    TradeLifeTime.hpp
  * Author:  raymond@burkholder.net
  * Project: IndicatorTrading
  * Created: March 9, 2022 16:38

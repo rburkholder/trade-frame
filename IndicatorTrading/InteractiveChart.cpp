@@ -37,7 +37,7 @@
 
 #include "Config.hpp"
 #include "Strategy.hpp"
-#include "TradeLifeTime.h"
+#include "TradeLifeTime.hpp"
 #include "OptionTracker.hpp"
 #include "InteractiveChart.h"
 
