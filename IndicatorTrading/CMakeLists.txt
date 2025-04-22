@@ -27,7 +27,7 @@ set(
     Config.hpp
     ExecModel.hpp
     FeedModel.hpp
-    InteractiveChart.h
+    InteractiveChart.hpp
     Indicators.hpp
     OptionTracker.hpp
     SessionChart.hpp

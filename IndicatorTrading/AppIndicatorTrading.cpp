@@ -60,7 +60,7 @@
 
 #include "200DayChart.hpp"
 #include "SessionChart.hpp"
-#include "InteractiveChart.h"
+#include "InteractiveChart.hpp"
 #include "AppIndicatorTrading.hpp"
 
 namespace {

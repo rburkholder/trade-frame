@@ -39,7 +39,7 @@
 #include "Strategy.hpp"
 #include "TradeLifeTime.hpp"
 #include "OptionTracker.hpp"
-#include "InteractiveChart.h"
+#include "InteractiveChart.hpp"
 
 namespace {
   static const size_t nBarSeconds = 1;

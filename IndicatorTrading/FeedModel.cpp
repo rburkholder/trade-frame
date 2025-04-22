@@ -23,7 +23,7 @@
 
 #include "Config.hpp"
 #include "FeedModel.hpp"
-#include "InteractiveChart.h"
+#include "InteractiveChart.hpp"
 
 // TODO: need to add the daily high/lows to ladder
 //   refactor from AppIndicatorTrading::LoadDailyHistory
