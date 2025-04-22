@@ -15,7 +15,7 @@
 /*
  * File:    TradeState.cpp
  * Author:  raymond@burkholder.net
- * Project: CurrencyTrader
+ * Project: TFBitsNPieces
  * Created: November 5, 2024 21:37
  */
 

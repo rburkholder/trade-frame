@@ -33,8 +33,6 @@ set(
     Ind_UltSmth.hpp
     PanelCurrencyStats.hpp
     Strategy.hpp
-    TrackOrder.hpp
-    TradeState.hpp
   )
 
 set(
@@ -48,8 +46,6 @@ set(
     Ind_UltSmth.cpp
     PanelCurrencyStats.cpp
     Strategy.cpp
-    TrackOrder.cpp
-    TradeState.cpp
   )
 
 add_executable(

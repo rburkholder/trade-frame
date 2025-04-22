@@ -24,6 +24,8 @@ set(
     ReadCboeWeeklyOptionsCsv.h
     ReadCboeWeeklyOptionsXls.h
     Stochastic.hpp
+    TrackOrder.hpp
+    TradeState.hpp
     TreeOps.h
     TreeOpsItems.h
   )
@@ -42,6 +44,8 @@ set(
     ReadCboeWeeklyOptionsCsv.cpp
     ReadCboeWeeklyOptionsXls.cpp
     Stochastic.cpp
+    TrackOrder.cpp
+    TradeState.cpp
     TreeOps.cpp
     TreeOpsItems.cpp
   )
@@ -52,6 +56,7 @@ add_library(
   ${file_cpp}
   )
 
+target_compile_definitions(${PROJECT_NAME} PUBLIC BOOST_LOG_DYN_LINK )
 target_compile_definitions(${PROJECT_NAME} PUBLIC wxUSE_GUI )
 #add_compile_options(`/usr/local/bin/wx-config --cxxflags`)
 target_compile_definitions(${PROJECT_NAME} PUBLIC -D_FILE_OFFSET_BITS=64 )

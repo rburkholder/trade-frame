@@ -39,13 +39,14 @@
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
+#include <TFBitsNPieces/TrackOrder.hpp>
+
 #include "Ind_Ema.hpp"
 //#include "Ind_UltSmth.hpp"
 
 #include "CubicRegression.hpp"
 
 #include "Common.hpp"
-#include "TrackOrder.hpp"
 
 namespace ou {
 namespace tf {
