@@ -27,7 +27,7 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-#include "Config.h"
+#include "Config.hpp"
 
 namespace {
   static const std::string sOption_Symbol( "symbol" );

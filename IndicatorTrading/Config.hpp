@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    Config.h
+ * File:    Config.hpp
  * Author:  raymond@burkholder.net
  * Project: IndicatorTrading
  * Created: February 8, 2022 00:16

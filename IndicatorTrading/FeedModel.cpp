@@ -21,7 +21,7 @@
 
 #include <TFVuTrading/MarketDepth/PanelTrade.hpp>
 
-#include "Config.h"
+#include "Config.hpp"
 #include "FeedModel.hpp"
 #include "InteractiveChart.h"
 

@@ -43,7 +43,7 @@
 #include <TFBitsNPieces/FrameWork01.h>
 #include <TFBitsNPieces/DailyHistory.hpp>
 
-#include "Config.h"
+#include "Config.hpp"
 #include "FeedModel.hpp"
 #include "ExecModel.hpp"
 

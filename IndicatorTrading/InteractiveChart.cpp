@@ -35,7 +35,7 @@
 
 #include <TFVuTrading/TreeItem.hpp>
 
-#include "Config.h"
+#include "Config.hpp"
 #include "Strategy.hpp"
 #include "TradeLifeTime.h"
 #include "OptionTracker.hpp"
