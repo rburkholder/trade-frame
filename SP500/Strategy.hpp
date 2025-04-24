@@ -40,6 +40,8 @@
 #include <TFTrading/Position.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
+#include <TFBitsNPieces/TrackOrder.hpp>
+
 class Strategy
 : public ou::tf::DailyTradeTimeFrame<Strategy>
 {
