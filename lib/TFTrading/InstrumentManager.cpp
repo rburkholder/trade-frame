@@ -218,10 +218,10 @@ bool InstrumentManager::LoadInstrument( idInstrument_t id, pInstrument_t& pInstr
   if ( m_pSession->Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
     Instrument::TableRowDef instrument;
     m_pSession->Columns<InstrumentKey, Instrument::TableRowDef>( pExistsQuery, instrument );
-      pInstrument = std::make_shared<Instrument>( instrument );
-      Assign( pInstrument );
-      LoadAlternateInstrumentNames( pInstrument );  // comes after assign
-      bFound = true;
+    pInstrument = std::make_shared<Instrument>( instrument );
+    Assign( pInstrument );
+    LoadAlternateInstrumentNames( pInstrument );  // comes after assign
+    bFound = true;
   }
   return bFound;
 }
