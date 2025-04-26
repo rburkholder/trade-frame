@@ -24,9 +24,9 @@ find_package(Boost ${TF_BOOST_VERSION} CONFIG REQUIRED COMPONENTS system date_ti
 set(
   file_h
     Config.hpp
-    DbRecordDividend.hpp
-    DbRecordSymbol.hpp
-    DbRecordTag.hpp
+    TableDividend.hpp
+    TableSymbol.hpp
+    TableTag.hpp
     Process.hpp
   )
 
@@ -34,9 +34,9 @@ set(
   file_cpp
     main.cpp
     Config.cpp
-    DbRecordDividend.cpp
-    DbRecordSymbol.cpp
-    DbRecordTag.cpp
+    TableDividend.cpp
+    TableSymbol.cpp
+    TableTag.cpp
     Process.cpp
   )
 

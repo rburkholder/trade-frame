@@ -13,67 +13,25 @@
  ************************************************************************/
 
 /*
- * File:    DbRecordTag.hpp
+ * File:    DbRecordTag.cpp
  * Author:  raymond@burkholder.net
  * Project: Dividend
  * Created: April 26, 2025 10:38:26
  */
 
-#pragma once
+ #include "TableTag.hpp"
 
-#include <string>
+ namespace db {
+ namespace table {
 
-#include <OUSQL/Functions.h>
+  const std::string Tag::c_TableName( "tag" );
+/*
+  create table tag (
+    tag_name text not null,
+    symbol_name text not null,
+    constraint PK_tag primary key( tag_name, symbol_name )
+    );
+*/
 
-namespace db {
-namespace record {
-
-class Tag {
-public:
-
-  static const std::string c_TableName;
-
-  struct TableRowDef {
-
-    std::string sTag;
-    std::string sSymbol;
-
-    template<typename A>
-    void Fields( A& a ) {
-      ou::db::Field( a, "tag_name", sTag );
-      ou::db::Field( a, "symbol_name", sSymbol );
-    }
-
-    TableRowDef() // default constructor
-    {}
-
-    TableRowDef(
-      std::string sTag_
-    , std::string sSymbol_
-    )
-    : sTag( sTag_ ), sSymbol( sSymbol_ )
-    {}
-  };
-
-  struct TableCreateDef: TableRowDef {
-    template<typename A>
-    void Fields( A& a ) {
-      TableRowDef::Fields( a );
-      ou::db::Key( a, "tag_name" );
-      ou::db::Key( a, "symbol_name" );
-    }
-  };
-
-  Tag() {}
-  ~Tag() {}
-
-  //const TableRowDef& GetRow() const { return m_row; };
-
-protected:
-private:
-
-  //TableRowDef m_row;
-};
-
-} // namespace record
-} // namespace db
+ } // namespace table
+ } // namespace db

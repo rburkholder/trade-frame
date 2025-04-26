@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    DbRecordDividend.hpp
+ * File:    TableDividend.hpp
  * Author:  raymond@burkholder.net
  * Project: Dividend
  * Created: April 12, 2025  09:00:13
@@ -34,7 +34,7 @@
 #include <OUSQL/Functions.h>
 
 namespace db {
-namespace record {
+namespace table {
 
 class Dividend {
 public:
@@ -113,5 +113,5 @@ private:
   //TableRowDef m_row;
 };
 
-} // namespace record
+} // namespace table
 } // namespace db

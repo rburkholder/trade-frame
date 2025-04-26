@@ -13,58 +13,45 @@
  ************************************************************************/
 
 /*
- * File:    DbRecordSymbol.hpp
+ * File:    TableTag.hpp
  * Author:  raymond@burkholder.net
  * Project: Dividend
- * Created: April 26, 2025 10:46:03
+ * Created: April 26, 2025 10:38:26
  */
 
 #pragma once
 
 #include <string>
 
-#include <boost/date_time/gregorian/greg_date.hpp>
-
 #include <OUSQL/Functions.h>
 
 namespace db {
-namespace record {
+namespace table {
 
-class Symbol {
+class Tag {
 public:
 
   static const std::string c_TableName;
 
   struct TableRowDef {
 
+    std::string sTag;
     std::string sSymbol;
-    std::string sName;
-    boost::gregorian::date dateCreated;
-    boost::gregorian::date dateUpdated;
-    std::string sNotes;
 
     template<typename A>
     void Fields( A& a ) {
+      ou::db::Field( a, "tag_name", sTag );
       ou::db::Field( a, "symbol_name", sSymbol );
-      ou::db::Field( a, "symbol_fullname", sName );
-      ou::db::Field( a, "date_created", dateCreated );
-      ou::db::Field( a, "date_updated", dateUpdated );
-      ou::db::Field( a, "notes", sNotes );
     }
 
     TableRowDef() // default constructor
     {}
 
     TableRowDef(
-      std::string sSymbol_
-    , std::string sName_
-    , boost::gregorian::date dateCreated_
-    , boost::gregorian::date dateUpdated_
-    , std::string sNotes_
+      std::string sTag_
+    , std::string sSymbol_
     )
-    : sSymbol( sSymbol_ ), sName( sName_ )
-    , dateCreated( dateCreated_ ), dateUpdated( dateUpdated_ )
-    , sNotes( sNotes_ )
+    : sTag( sTag_ ), sSymbol( sSymbol_ )
     {}
   };
 
@@ -72,12 +59,13 @@ public:
     template<typename A>
     void Fields( A& a ) {
       TableRowDef::Fields( a );
+      ou::db::Key( a, "tag_name" );
       ou::db::Key( a, "symbol_name" );
     }
   };
 
-  Symbol() {}
-  ~Symbol() {}
+  Tag() {}
+  ~Tag() {}
 
   //const TableRowDef& GetRow() const { return m_row; };
 
@@ -87,5 +75,5 @@ private:
   //TableRowDef m_row;
 };
 
-} // namespace record
+} // namespace table
 } // namespace db

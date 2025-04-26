@@ -13,16 +13,16 @@
  ************************************************************************/
 
 /*
- * File:    DbRecordSymbol.cpp
+ * File:    TableSymbol.cpp
  * Author:  raymond@burkholder.net
  * Project: Dividend
  * Created: April 26, 2025 10:46:03
  */
 
- #include "DbRecordSymbol.hpp"
+ #include "TableSymbol.hpp"
 
  namespace db {
- namespace record {
+ namespace table {
 
   const std::string Symbol::c_TableName( "symbol" );
 
@@ -36,5 +36,5 @@
     );
 */
 
- } // namespace record
+ } // namespace table
  } // namespace db

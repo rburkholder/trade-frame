@@ -13,18 +13,18 @@
  ************************************************************************/
 
 /*
- * File:    DbRecordDDividend.cpp
+ * File:    TableDividend.cpp
  * Author:  raymond@burkholder.net
  * Project: Dividend
  * Created: April 12, 2025  09:00:13
  */
 
-#include "DbRecordDividend.hpp"
+#include "TableDividend.hpp"
 
 namespace db {
-namespace record {
+namespace table {
 
   const std::string Dividend::c_TableName( "dividend" );
 
-} // namespace record
+} // namespace table
 } // namespace db
