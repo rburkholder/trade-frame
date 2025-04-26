@@ -32,13 +32,13 @@ const static std::string sTableName_Dividend( "dividend" );
 void HandleRegisterTables( ou::db::Session& session ) {
   // called when db created
   //std::cout << "HandleRegisterTables placeholder" << std::endl;
-  session.RegisterTable<Dividend::TableCreateDef>( sTableName_Dividend );
+  session.RegisterTable<db::record::Dividend::TableCreateDef>( sTableName_Dividend );
 }
 
 void HandleRegisterRows( ou::db::Session& session ) {
   // called when db created and when exists
   //std::cout << "HandleRegisterRows placeholder" << std::endl;
-  session.MapRowDefToTableName<Dividend::TableRowDef>( sTableName_Dividend );
+  session.MapRowDefToTableName<db::record::Dividend::TableRowDef>( sTableName_Dividend );
 }
 
 int main( int argc, char* argv[] ) {
@@ -104,7 +104,7 @@ int main( int argc, char* argv[] ) {
           << std::endl;
       }
 
-      Dividend::TableRowDef trd(
+      db::record::Dividend::TableRowDef trd(
         vt.sSymbol
       , today
       , vt.trade
@@ -117,8 +117,8 @@ int main( int argc, char* argv[] ) {
       , vt.dateExDividend
       );
 
-      ou::db::QueryFields<Dividend::TableRowDef>::pQueryFields_t pQuery
-        = db.Insert<Dividend::TableRowDef>( const_cast<Dividend::TableRowDef&>( trd ) );
+      ou::db::QueryFields<db::record::Dividend::TableRowDef>::pQueryFields_t pQuery
+        = db.Insert<db::record::Dividend::TableRowDef>( const_cast<db::record::Dividend::TableRowDef&>( trd ) );
 
       ++cnt;
     }

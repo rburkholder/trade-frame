@@ -33,6 +33,9 @@
 
 #include <OUSQL/Functions.h>
 
+namespace db {
+namespace record {
+
 class Dividend {
 public:
 
@@ -107,3 +110,6 @@ private:
 
   //TableRowDef m_row;
 };
+
+} // namespace record
+} // namespace db
