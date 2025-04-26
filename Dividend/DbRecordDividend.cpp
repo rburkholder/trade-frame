@@ -19,4 +19,4 @@
  * Created: April 12, 2025  09:00:13
  */
 
-#include "Dividend.hpp"
+#include "DbRecordDividend.hpp"

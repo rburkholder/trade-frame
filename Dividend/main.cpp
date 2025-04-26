@@ -24,7 +24,7 @@
 #include <TFTrading/Database.h>
 
 #include "Config.hpp"
-#include "Dividend.hpp"
+#include "DbRecordDividend.hpp"
 #include "Process.hpp"
 
 const static std::string sTableName_Dividend( "dividend" );
