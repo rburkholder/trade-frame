@@ -13,18 +13,25 @@
  ************************************************************************/
 
 /*
- * File:    DbRecordDDividend.cpp
+ * File:    DbRecordTag.cpp
  * Author:  raymond@burkholder.net
  * Project: Dividend
- * Created: April 12, 2025  09:00:13
+ * Created: April 26, 2025 10:38:26
  */
 
-#include "DbRecordDividend.hpp"
+ #include "DbRecordTag.hpp"
 
-namespace db {
-namespace record {
+ namespace db {
+ namespace record {
 
-  const std::string Dividend::c_TableName( "dividend" );
+  const std::string Tag::c_TableName( "tag" );
+/*
+  create table tag (
+    tag_name text not null,
+    symbol_name text not null,
+    constraint PK_tag primary key( tag_name, symbol_name )
+    );
+*/
 
-} // namespace record
-} // namespace db
+ } // namespace record
+ } // namespace db

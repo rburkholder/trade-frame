@@ -13,18 +13,28 @@
  ************************************************************************/
 
 /*
- * File:    DbRecordDDividend.cpp
+ * File:    DbRecordSymbol.cpp
  * Author:  raymond@burkholder.net
  * Project: Dividend
- * Created: April 12, 2025  09:00:13
+ * Created: April 26, 2025 10:46:03
  */
 
-#include "DbRecordDividend.hpp"
+ #include "DbRecordSymbol.hpp"
 
-namespace db {
-namespace record {
+ namespace db {
+ namespace record {
 
-  const std::string Dividend::c_TableName( "dividend" );
+  const std::string Symbol::c_TableName( "symbol" );
 
-} // namespace record
-} // namespace db
+/*
+  create table symbol (
+    symbol_name text not null primary key,
+    symbol_fullname text not null,
+    date_created text not null,
+    date_updated text not null,
+    notes text not null
+    );
+*/
+
+ } // namespace record
+ } // namespace db

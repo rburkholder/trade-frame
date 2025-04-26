@@ -25,6 +25,8 @@ set(
   file_h
     Config.hpp
     DbRecordDividend.hpp
+    DbRecordSymbol.hpp
+    DbRecordTag.hpp
     Process.hpp
   )
 
@@ -33,6 +35,8 @@ set(
     main.cpp
     Config.cpp
     DbRecordDividend.cpp
+    DbRecordSymbol.cpp
+    DbRecordTag.cpp
     Process.cpp
   )
 

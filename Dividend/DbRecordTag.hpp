@@ -13,18 +13,67 @@
  ************************************************************************/
 
 /*
- * File:    DbRecordDDividend.cpp
+ * File:    DbRecordTag.hpp
  * Author:  raymond@burkholder.net
  * Project: Dividend
- * Created: April 12, 2025  09:00:13
+ * Created: April 26, 2025 10:38:26
  */
 
-#include "DbRecordDividend.hpp"
+#pragma once
+
+#include <string>
+
+#include <OUSQL/Functions.h>
 
 namespace db {
 namespace record {
 
-  const std::string Dividend::c_TableName( "dividend" );
+class Tag {
+public:
+
+  static const std::string c_TableName;
+
+  struct TableRowDef {
+
+    std::string sTag;
+    std::string sSymbol;
+
+    template<typename A>
+    void Fields( A& a ) {
+      ou::db::Field( a, "tag_name", sTag );
+      ou::db::Field( a, "symbol_name", sSymbol );
+    }
+
+    TableRowDef() // default constructor
+    {}
+
+    TableRowDef(
+      std::string sTag_
+    , std::string sSymbol_
+    )
+    : sTag( sTag_ ), sSymbol( sSymbol_ )
+    {}
+  };
+
+  struct TableCreateDef: TableRowDef {
+    template<typename A>
+    void Fields( A& a ) {
+      TableRowDef::Fields( a );
+      ou::db::Key( a, "tag_name" );
+      ou::db::Key( a, "symbol_name" );
+    }
+  };
+
+  Tag() {}
+  ~Tag() {}
+
+  //const TableRowDef& GetRow() const { return m_row; };
+
+protected:
+private:
+
+  //TableRowDef m_row;
+};
 
 } // namespace record
 } // namespace db

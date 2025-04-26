@@ -23,23 +23,62 @@
 
 #include <TFTrading/Database.h>
 
-#include "Config.hpp"
+#include "DbRecordTag.hpp"
+#include "DbRecordSymbol.hpp"
 #include "DbRecordDividend.hpp"
-#include "Process.hpp"
 
-const static std::string sTableName_Dividend( "dividend" );
+#include "Config.hpp"
+#include "Process.hpp"
 
 void HandleRegisterTables( ou::db::Session& session ) {
   // called when db created
   //std::cout << "HandleRegisterTables placeholder" << std::endl;
-  session.RegisterTable<db::record::Dividend::TableCreateDef>( sTableName_Dividend );
+  session.RegisterTable<db::record::Tag::TableCreateDef>( db::record::Tag::c_TableName );
+  session.RegisterTable<db::record::Symbol::TableCreateDef>( db::record::Symbol::c_TableName );
+  session.RegisterTable<db::record::Dividend::TableCreateDef>( db::record::Dividend::c_TableName );
 }
 
 void HandleRegisterRows( ou::db::Session& session ) {
   // called when db created and when exists
   //std::cout << "HandleRegisterRows placeholder" << std::endl;
-  session.MapRowDefToTableName<db::record::Dividend::TableRowDef>( sTableName_Dividend );
+  session.MapRowDefToTableName<db::record::Tag::TableRowDef>( db::record::Tag::c_TableName );
+  session.MapRowDefToTableName<db::record::Symbol::TableRowDef>( db::record::Symbol::c_TableName );
+  session.MapRowDefToTableName<db::record::Dividend::TableRowDef>( db::record::Dividend::c_TableName );
 }
+
+struct SymbolKey {
+  const std::string& sSymbol;
+  template<class A>
+  void Fields( A& a ) {
+    ou::db::Field( a, "symbol_name", sSymbol );
+  }
+  SymbolKey( const std::string& sSymbol_ ): sSymbol( sSymbol_ ) {};
+};
+
+bool SymbolExists( ou::db::Session& db, const std::string& sSymbol, db::record::Symbol::TableRowDef& row ) {
+  bool bFound( false );
+  SymbolKey key( sSymbol );
+  ou::db::QueryFields<SymbolKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
+    = db.SQL<SymbolKey>( "select * from " + db::record::Symbol::c_TableName, key ).Where( "symbol_name = ?" ).NoExecute();
+  db.Bind<SymbolKey>( pExistsQuery );
+  if ( db.Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
+    db.Columns<SymbolKey, db::record::Symbol::TableRowDef>( pExistsQuery, row );
+    bFound = true;
+  }
+  return bFound;
+}
+
+struct UpdateSymbol {
+  const std::string& sSymbol;
+  const boost::gregorian::date dateUpdated;
+  template<class A>
+  void Fields( A& a ) {
+    ou::db::Field( a, "date_updated", dateUpdated );
+    ou::db::Field( a, "symbol_name", sSymbol );
+  }
+  UpdateSymbol( const std::string& sSymbol_, const boost::gregorian::date dateUpdated_ )
+  : sSymbol( sSymbol_ ), dateUpdated( dateUpdated_ ) {}
+};
 
 int main( int argc, char* argv[] ) {
 
@@ -87,7 +126,7 @@ int main( int argc, char* argv[] ) {
     //if ( ( choices.m_dblMinimumYield <= vt.yield_calculated ) && ( choices.m_nMinimumVolume <= vt.nAverageVolume ) ) {
       if ( bStdOut ) {
         std::cout
-                  << vt.sSymbol
+                 << vt.sSymbol
           << ',' << vt.sCompanyName
           << ',' << vt.sExchange
           << ',' << vt.trade
@@ -104,7 +143,23 @@ int main( int argc, char* argv[] ) {
           << std::endl;
       }
 
-      db::record::Dividend::TableRowDef trd(
+      db::record::Symbol::TableRowDef trdSymbol( // might be overwritten
+        vt.sSymbol, vt.sCompanyName, today, today, vt.sState
+      );
+      if ( SymbolExists( db, vt.sSymbol, trdSymbol ) ) {
+        UpdateSymbol update( vt.sSymbol, today );
+        ou::db::QueryFields<UpdateSymbol>::pQueryFields_t pQuery
+          = db.SQL<UpdateSymbol>(
+            "update " + db::record::Symbol::c_TableName + " set date_updated=?", update ).Where( "symbol_name=?" )
+          ;
+        trdSymbol.dateUpdated = today;
+      }
+      else {
+        ou::db::QueryFields<db::record::Symbol::TableRowDef>::pQueryFields_t pQuery
+          = db.Insert<db::record::Symbol::TableRowDef>( trdSymbol );
+      }
+
+      db::record::Dividend::TableRowDef trdDividend(
         vt.sSymbol
       , today
       , vt.trade
@@ -118,7 +173,7 @@ int main( int argc, char* argv[] ) {
       );
 
       ou::db::QueryFields<db::record::Dividend::TableRowDef>::pQueryFields_t pQuery
-        = db.Insert<db::record::Dividend::TableRowDef>( const_cast<db::record::Dividend::TableRowDef&>( trd ) );
+        = db.Insert<db::record::Dividend::TableRowDef>( const_cast<db::record::Dividend::TableRowDef&>( trdDividend ) );
 
       ++cnt;
     }
