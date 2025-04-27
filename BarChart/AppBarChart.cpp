@@ -216,47 +216,6 @@ void AppBarChart::LoadPanelFinancialChart() {
 
 }
 
-ou::tf::TreeItem* AppBarChart::LoadGroupInfo( const std::string& sGroupName, ou::tf::TreeItem* ptiRoot ) {
-
-  ou::tf::TreeItem* ptiGroup = m_ptiRoot->AppendChild( sGroupName );
-
-  ptiGroup->SetOnBuildPopUp(
-    [this]( ou::tf::TreeItem* ptiGroup ){
-      ptiGroup->NewMenu();
-      ptiGroup->AppendMenuItem(
-        "Add Symbol",
-        [this]( ou::tf::TreeItem* ptiGroup ){
-          wxTextEntryDialog* dialog = new wxTextEntryDialog( m_pFrameMain, "Symbol Name:", "Add Symbol" );
-          //dialog->ForceUpper(); // prints charters in reverse
-          if ( wxID_OK == dialog->ShowModal() ) {
-            std::string sSymbolName = dialog->GetValue().Upper();
-            if ( 0 < sSymbolName.size() ) {
-              LoadSymbolInfo( sSymbolName, ptiGroup );
-              }
-          }
-        } );
-      ptiGroup->AppendMenuItem(
-        "Rename",
-        [this]( ou::tf::TreeItem* pti ){
-          wxTextEntryDialog* dialog = new wxTextEntryDialog( m_pFrameMain, "New Group Name:", "Change Group Name" );
-          //dialog->ForceUpper(); // prints charters in reverse
-          if ( wxID_OK == dialog->ShowModal() ) {
-            std::string sGroupName = dialog->GetValue().Upper();
-            if ( 0 < sGroupName.size() ) {
-              pti->UpdateText( sGroupName );
-              }
-          }
-        } );
-      ptiGroup->AppendMenuItem(
-        "Sort",
-        []( ou::tf::TreeItem* pti ){
-          pti->SortChildren();
-        } );
-    } );
-
-  return ptiGroup;
-}
-
 void AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::TreeItem* pti ) {
 
   mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSecurityName );

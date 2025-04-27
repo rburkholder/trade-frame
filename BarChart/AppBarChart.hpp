@@ -134,7 +134,6 @@ private:
   void FilterByTag();
 
   void LoadPanelFinancialChart();
-  ou::tf::TreeItem* LoadGroupInfo( const std::string&, ou::tf::TreeItem* );
   void LoadSymbolInfo( const std::string&, ou::tf::TreeItem* );
 
   void HandleCheckListBoxEvent( wxCommandEvent& );
