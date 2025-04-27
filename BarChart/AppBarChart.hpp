@@ -98,6 +98,7 @@ private:
     ou::ChartEntryVolume m_ceVolume;
 
     bool m_bBarsLoaded;
+    std::string m_sNotes;
 
     SymbolInfo()
     : m_bBarsLoaded( false )
@@ -151,11 +152,10 @@ private:
     ar & *m_pFrameMain;
     ar & *m_pPanelFinancialChart;
 
-    // version 5
-
     ar & m_mapSymbolInfo.size();
     for ( const mapSymbolInfo_t::value_type& vt: m_mapSymbolInfo ) {
       ar & vt.first;
+      ar & vt.second.m_sNotes;
     }
 
     ar & m_mapTagSymbol.size();
@@ -234,13 +234,18 @@ private:
         }
         break;
       case 5:
+      case 6:
         {
           mapSymbolInfo_t::size_type nSymbolInfo;
           ar & nSymbolInfo;
           while ( 0 != nSymbolInfo ) {
             std::string sSymbol;
             ar & sSymbol;
-            m_mapSymbolInfo.emplace( sSymbol, SymbolInfo() );
+            auto result = m_mapSymbolInfo.emplace( sSymbol, SymbolInfo() );
+            assert( result.second );
+            if ( 6 == version ) {
+              ar & result.first->second.m_sNotes;
+            }
             LoadSymbolInfo( sSymbol, m_ptiRoot );
             --nSymbolInfo;
           }
@@ -273,6 +278,6 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(AppBarChart, 5)
+BOOST_CLASS_VERSION(AppBarChart, 6)
 
 DECLARE_APP(AppBarChart)

@@ -263,6 +263,16 @@ void AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::Tree
     [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
       pti->NewMenu();
       pti->AppendMenuItem(
+        "Note",
+        [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
+          wxTextEntryDialog* dialog = new wxTextEntryDialog( m_pFrameMain, "Notes:", "Update Notes" );
+          dialog->SetValue( iterSymbolInfo->second.m_sNotes );
+          if ( wxID_OK == dialog->ShowModal() ) {
+            std::string sNotes = dialog->GetValue();
+            iterSymbolInfo->second.m_sNotes = sNotes;
+          }
+        } );
+      pti->AppendMenuItem(
         "Add Tag",
         [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
           wxTextEntryDialog* dialog = new wxTextEntryDialog( m_pFrameMain, "Tag Name:", "Add Tag" );
