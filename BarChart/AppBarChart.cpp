@@ -37,6 +37,7 @@
 #include <wx/textdlg.h>
 #include <wx/checklst.h>
 
+#include <TFTrading/Instrument.h>
 #include <TFTrading/AcquireFundamentals.h>
 
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
@@ -410,8 +411,14 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
       fields.sLast = boost::lexical_cast<std::string>( ki.dblLast );
       fields.sAmount = boost::lexical_cast<std::string>( ki.dblAmount );
       fields.sRate = boost::lexical_cast<std::string>( ki.dblRate );
-      fields.sExDiv = std::string();
-      fields.sPayed = std::string();
+      if ( 0.0 < ki.dblYield ) {
+        fields.sExDiv = ou::tf::Instrument::BuildDate( ki.dateExDividend );
+        fields.sPayed = ou::tf::Instrument::BuildDate( ki.datePayed );
+        }
+      else {
+        fields.sExDiv = std::string();
+        fields.sPayed = std::string();
+        }
       fields.sNotes = iterSymbolInfo->second.m_sNotes;
       fields.sName = boost::lexical_cast<std::string>( ki.sCompanyName );
       fields.fBtnUndo =
@@ -457,8 +464,8 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
           ki.dblRate = fundamentals.dblDividendRate;
           ki.dblYield = fundamentals.dblDividendYield;
           ki.dblAmount = fundamentals.dblDividendAmount;
-          //dividend.datePayed = fundamentals.datePayed;
-          //dividend.dateExDividend = fundamentals.dateExDividend;
+          ki.datePayed = fundamentals.datePayed;
+          ki.dateExDividend = fundamentals.dateExDividend;
 
           f_( iterSymbolInfo );
 

@@ -28,6 +28,8 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
+#include <boost/date_time/gregorian/greg_date.hpp>
+
 #include <wx/app.h>
 #include <wx/frame.h>
 
@@ -112,6 +114,9 @@ private:
     double dblRate;
     double dblYield;
     double dblAmount;
+
+    boost::gregorian::date datePayed;
+    boost::gregorian::date dateExDividend;
 
     bool bLoaded;
 
