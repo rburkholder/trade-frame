@@ -298,8 +298,17 @@ void AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::Tree
         "Delete",
         [this]( ou::tf::TreeItem* pti ){
           m_pPanelFinancialChart->SetChartDataView( nullptr );
-          mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( pti->GetText() );
+          const std::string sSymbol( pti->GetText() );
+          mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSymbol );
           assert( m_mapSymbolInfo.end() != iterSymbolInfo );
+
+          for ( mapTagSymbol_t::value_type& vt: m_mapTagSymbol ) {
+            CallAfter(
+              [this,sTag_=vt.first,sSymbol_=std::move(sSymbol)](){
+                DelTag( sTag_, sSymbol_ );
+              } );
+          }
+
           m_mapSymbolInfo.erase( iterSymbolInfo );
           pti->Delete();
         } );
