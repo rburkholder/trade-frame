@@ -467,7 +467,7 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
 
         }
       );
-    m_pAcquireFundamentals->Start();
+      m_pAcquireFundamentals->Start();
     }
 }
 
