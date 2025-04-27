@@ -70,6 +70,7 @@ target_link_libraries(
       TFTrading
       TFIQFeed
       TFHDF5TimeSeries
+      TFTrading
       OUCommon
       OUSQL
       OUSqlite

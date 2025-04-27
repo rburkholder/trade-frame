@@ -36,6 +36,8 @@
 #include <wx/textdlg.h>
 #include <wx/checklst.h>
 
+#include <TFTrading/AcquireFundamentals.h>
+
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 
@@ -103,6 +105,11 @@ bool AppBarChart::OnInit() {
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppBarChart::OnClose, this );  // start close of windows and controls
   m_pFrameMain->Bind( wxEVT_MOVE, &AppBarChart::OnFrameMainAutoMove, this ); // intercept first move
   m_pFrameMain->Show( true ); // triggers the auto move
+
+  m_piqfeed = ou::tf::iqfeed::Provider::Factory();
+  m_piqfeed->OnConnected.Add( MakeDelegate( this, &AppBarChart::HandleIQFeedConnected ) );
+  m_piqfeed->Connect();
+
 
   return true;
 
@@ -231,6 +238,7 @@ void AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::Tree
   si.m_pti->SetOnClick(
     [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
       //BOOST_LOG_TRIVIAL(info) << "clicked: " << iterSymbolInfo->first;
+      SymbolFundamentals( iterSymbolInfo );
       SymbolInfo& si( iterSymbolInfo->second );
       if ( si.m_bBarsLoaded ) {
         /*
@@ -367,6 +375,70 @@ void AppBarChart::FilterByTag() {
   }
 }
 
+void AppBarChart::HandleIQFeedConnected( int ) {
+}
+
+void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo ) {
+
+  auto f =
+    []( mapSymbolInfo_t::iterator iterSymbolInfo ){
+      KeyInfo& ki( iterSymbolInfo->second.m_key_info );
+      std::cout
+      << iterSymbolInfo->first
+      << ",yld=" << ki.dblYield
+      << ",lst=" << ki.dblLast
+      << ",rate=" << ki.dblRate
+      << "," << ki.sCompanyName
+      << std::endl;
+    };
+
+  if ( iterSymbolInfo->second.m_key_info.bLoaded ) {
+    f( iterSymbolInfo );
+  }
+  else {
+    using pWatch_t = ou::tf::Watch::pWatch_t;
+    using Summary = ou::tf::Watch::Summary;
+    using Fundamentals = ou::tf::Watch::Fundamentals;
+    using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
+    const std::string& sSymbol( iterSymbolInfo->first );
+
+    assert( m_piqfeed );
+    assert( m_piqfeed->Connected() );
+
+    pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( sSymbol );
+    pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, sSymbol );
+    pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
+
+    assert( nullptr == m_pAcquireFundamentals );
+
+    m_pAcquireFundamentals
+      = ou::tf::AcquireFundamentals::Factory (
+        std::move( pWatch ),
+        [this,iterSymbolInfo,f_=std::move(f)]( pWatch_t pWatch ){
+          KeyInfo& ki( iterSymbolInfo->second.m_key_info );
+          const Summary& summary( pWatch->GetSummary() );
+          ki.dblLast = summary.dblTrade;
+          const Fundamentals& fundamentals( pWatch->GetFundamentals() );
+          ki.sCompanyName = fundamentals.sCompanyName;
+          ki.dblRate = fundamentals.dblDividendRate;
+          ki.dblYield = fundamentals.dblDividendYield;
+          ki.dblAmount = fundamentals.dblDividendAmount;
+          //dividend.datePayed = fundamentals.datePayed;
+          //dividend.dateExDividend = fundamentals.dateExDividend;
+
+          f_( iterSymbolInfo );
+
+          m_pAcquireFundamentals_burial = std::move( m_pAcquireFundamentals );
+          m_pAcquireFundamentals.reset();
+          ki.bLoaded = true;
+
+        }
+      );
+    }
+    m_pAcquireFundamentals->Start();
+}
+
 void AppBarChart::SaveState() {
   std::cout << "Saving Config ..." << std::endl;
   std::ofstream ofs( c_sStateFileName );
@@ -407,6 +479,11 @@ void AppBarChart::OnClose( wxCloseEvent& event ) {
   if ( m_pBarHistory ) {
     m_pBarHistory->Disconnect();
   }
+
+  m_pAcquireFundamentals_burial.reset();
+
+  m_piqfeed->Disconnect();
+  m_piqfeed.reset();
 
   m_clbTags->Unbind( wxEVT_CHECKLISTBOX, &AppBarChart::HandleCheckListBoxEvent, this );
   m_pFrameMain->Unbind( wxEVT_CLOSE_WINDOW, &AppBarChart::OnClose, this );

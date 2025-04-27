@@ -41,6 +41,7 @@
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
 
+#include <TFIQFeed/Provider.h>
 #include <TFIQFeed/BarHistory.h>
 
 #include <TFVuTrading/TreeItem.hpp>
@@ -56,6 +57,7 @@ class wxCommandEvent;
 namespace ou {
 namespace tf {
   class PanelFinancialChart;
+  class AcquireFundamentals;
 }
 }
 
@@ -86,9 +88,35 @@ private:
 
   ou::tf::iqfeed::BarHistory::pBarHistory_t m_pBarHistory;
 
+  using pIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
+  pIQFeed_t m_piqfeed;
+
+  using pAcquireFundamentals_t = std::shared_ptr<ou::tf::AcquireFundamentals>;
+  pAcquireFundamentals_t m_pAcquireFundamentals;
+  pAcquireFundamentals_t m_pAcquireFundamentals_burial;
+
   ou::tf::TreeItem* m_ptiRoot;
 
   enum EChartSlot { Price, Volume };
+
+  struct KeyInfo {
+
+    std::string sCompanyName;
+    double dblLast;
+    double dblRate;
+    double dblYield;
+    double dblAmount;
+
+    bool bLoaded;
+
+    KeyInfo()
+    : dblLast {}
+    , dblRate {}
+    , dblYield {}
+    , dblAmount {}
+    , bLoaded( false )
+    {}
+  };
 
   struct SymbolInfo {
 
@@ -96,6 +124,8 @@ private:
     ou::ChartDataView m_dvChart; // the data, not movable
     ou::ChartEntryBars m_cePriceBars;
     ou::ChartEntryVolume m_ceVolume;
+
+    KeyInfo m_key_info;
 
     bool m_bBarsLoaded;
     std::string m_sNotes;
@@ -129,6 +159,9 @@ private:
   ou::ChartDataView m_cdv;
 
   void OnFrameMainAutoMove( wxMoveEvent& );
+
+  void HandleIQFeedConnected( int );
+  void SymbolFundamentals( mapSymbolInfo_t::iterator );
 
   void AddTag( const std::string& sTag, const std::string& sSymbol );
   void DelTag( const std::string& sTag, const std::string& sSymbol );
