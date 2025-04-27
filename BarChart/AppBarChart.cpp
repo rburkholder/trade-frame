@@ -396,13 +396,14 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
   auto f =
     [this]( mapSymbolInfo_t::iterator iterSymbolInfo ){
       KeyInfo& ki( iterSymbolInfo->second.m_key_info );
-      std::cout
-      << iterSymbolInfo->first
-      << ",yld=" << ki.dblYield
-      << ",lst=" << ki.dblLast
-      << ",rate=" << ki.dblRate
-      << "," << ki.sCompanyName
-      << std::endl;
+
+      //std::cout
+      //<< iterSymbolInfo->first
+      //<< ",yld=" << ki.dblYield
+      //<< ",lst=" << ki.dblLast
+      //<< ",rate=" << ki.dblRate
+      //<< "," << ki.sCompanyName
+      //<< std::endl;
 
       PanelSymbolInfo::Fields fields;
       fields.sYield = boost::lexical_cast<std::string>( ki.dblYield );
