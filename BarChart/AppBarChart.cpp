@@ -34,6 +34,7 @@
 
 #include <wx/sizer.h>
 #include <wx/textdlg.h>
+#include <wx/checklst.h>
 
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
@@ -79,14 +80,21 @@ bool AppBarChart::OnInit() {
   SetTopWindow( m_pFrameMain );
 
   wxBoxSizer* sizerFrame;
-  wxBoxSizer* sizerUpper;
-  wxBoxSizer* sizerLower;
 
-  sizerFrame = new wxBoxSizer( wxVERTICAL );
+  sizerFrame = new wxBoxSizer( wxHORIZONTAL );
   m_pFrameMain->SetSizer( sizerFrame );
 
+  wxArrayString m_lbTagsStrings;
+  m_clbTags = new wxCheckListBox(
+    m_pFrameMain, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    m_lbTagsStrings, wxLB_MULTIPLE|wxLB_EXTENDED|wxLB_NEEDED_SB //|wxLB_SORT
+  );
+  sizerFrame->Add( m_clbTags, 0, wxGROW|wxALL, 1 );
+
+  m_clbTags->Bind( wxEVT_CHECKLISTBOX, &AppBarChart::HandleCheckListBoxEvent, this );
+
   m_pPanelFinancialChart = new ou::tf::PanelFinancialChart( m_pFrameMain );
-  sizerFrame->Add( m_pPanelFinancialChart, 1, wxALL | wxEXPAND, 0 );
+  sizerFrame->Add( m_pPanelFinancialChart, 1, wxALL | wxEXPAND, 1 );
   m_pPanelFinancialChart->GetWinChartView()->SetReview();
 
   //m_pwcv = new ou::tf::WinChartView( m_pFrameMain );
@@ -130,23 +138,51 @@ void AppBarChart::OnFrameMainAutoMove( wxMoveEvent& event ) {
 
 }
 
+void AppBarChart::AddTag( const std::string& sTag, const std::string& sSymbol ) {
+  mapTagSymbol_t::iterator iterTagSymbol = m_mapTagSymbol.find( sTag );
+  if ( m_mapTagSymbol.end() == iterTagSymbol ) {
+    setSymbol_t setSymbol = { sSymbol };
+    auto result = m_mapTagSymbol.emplace( sTag, std::move( setSymbol ) );
+    assert( result.second );
+    wxArrayString rTag;
+    rTag.Add( sTag );
+    m_clbTags->InsertItems( rTag, 0 );
+  }
+  else {
+    setSymbol_t& setSymbol( iterTagSymbol->second );
+    setSymbol_t::iterator iterSymbol = setSymbol.find( sSymbol );
+    if ( setSymbol.end() == iterSymbol ) {
+      setSymbol.insert( sSymbol );
+    }
+  }
+}
+
 void AppBarChart::LoadPanelFinancialChart() {
 
   m_ptiRoot->SetOnBuildPopUp(
     [this]( ou::tf::TreeItem* pti ){
       pti->NewMenu();
       pti->AppendMenuItem(
-        "Add Group",
+        "Add Symbol",
         [this]( ou::tf::TreeItem* pti ){
-          wxTextEntryDialog* dialog = new wxTextEntryDialog( m_pFrameMain, "Group Name:", "Add Group" );
+          wxTextEntryDialog* dialog = new wxTextEntryDialog( m_pFrameMain, "Symbol Name:", "Add Symbol" );
           //dialog->ForceUpper(); // prints charters in reverse
           if ( wxID_OK == dialog->ShowModal() ) {
-            std::string sGroupName = dialog->GetValue().Upper();
-            if ( 0 < sGroupName.size() ) {
-              ou::tf::TreeItem* ptiGroup = LoadGroupInfo( sGroupName, m_ptiRoot );
+            std::string sSymbolName = dialog->GetValue().Upper();
+            if ( 0 < sSymbolName.size() ) {
+              mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSymbolName );
+              //assert( m_mapSymbolInfo.end() == iterSymbolInfo ); // symbols are unique across groups
+              if ( m_mapSymbolInfo.end() != iterSymbolInfo ) {
+                std::cout << "symbol " << sSymbolName << " already exists" << std::endl;
               }
+              else {
+                auto result = m_mapSymbolInfo.emplace( sSymbolName, SymbolInfo() );
+                assert( result.second );
+                LoadSymbolInfo( sSymbolName, pti );
+              }
+            }
           }
-        });
+        } );
       pti->AppendMenuItem(
         "Sort",
         []( ou::tf::TreeItem* pti ){
@@ -198,71 +234,128 @@ ou::tf::TreeItem* AppBarChart::LoadGroupInfo( const std::string& sGroupName, ou:
   return ptiGroup;
 }
 
-bool AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::TreeItem* pti ) {
-  bool bAdded( true );
+void AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::TreeItem* pti ) {
+
   mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSecurityName );
-  if ( m_mapSymbolInfo.end() != iterSymbolInfo ) {
-    BOOST_LOG_TRIVIAL(error) << "Ignoring duplicate security: " << sSecurityName;
-    bAdded = false;
-  }
-  else {
-    auto result = m_mapSymbolInfo.emplace( sSecurityName, SymbolInfo() );
-    assert( result.second );
-    iterSymbolInfo = result.first;
-    SymbolInfo& si( iterSymbolInfo->second );
+  assert( m_mapSymbolInfo.end() != iterSymbolInfo );
 
-    si.m_pti = pti->AppendChild( sSecurityName );
-    si.m_cePriceBars.SetName( "Daily" );
+  //auto result = m_mapSymbolInfo.emplace( sSecurityName, SymbolInfo() );
+  //assert( result.second );
+  //iterSymbolInfo = result.first;
+  SymbolInfo& si( iterSymbolInfo->second );
 
-    si.m_dvChart.Add( EChartSlot::Price, &si.m_cePriceBars );
-    si.m_dvChart.Add( EChartSlot::Volume, &si.m_ceVolume );
+  si.m_pti = pti->AppendChild( sSecurityName );
 
-    si.m_pti->SetOnClick(
-      [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
-        //BOOST_LOG_TRIVIAL(info) << "clicked: " << iterSymbolInfo->first;
-        SymbolInfo& si( iterSymbolInfo->second );
-        if ( si.m_bBarsLoaded ) {
-          /*
-          ou::ChartEntryTime::range_t range( si.m_dvChart.GetViewPort() );
-          if ( range.dtBegin == range.dtEnd ) {
-            range = si.m_dvChart.GetExtents();
-            si.m_dvChart.SetViewPort( range );
-          }
-          else {
-            boost::posix_time::time_duration td = range.dtEnd - range.dtBegin;
-            auto ticks( td.ticks() );
-          }
-          */
-          m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
+  si.m_pti->SetOnClick(
+    [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
+      //BOOST_LOG_TRIVIAL(info) << "clicked: " << iterSymbolInfo->first;
+      SymbolInfo& si( iterSymbolInfo->second );
+      if ( si.m_bBarsLoaded ) {
+        /*
+        ou::ChartEntryTime::range_t range( si.m_dvChart.GetViewPort() );
+        if ( range.dtBegin == range.dtEnd ) {
+          range = si.m_dvChart.GetExtents();
+          si.m_dvChart.SetViewPort( range );
         }
         else {
-          m_pBarHistory->Set(
-            [&si]( const ou::tf::Bar& bar ){ // fBar_t&&
-              si.m_cePriceBars.AppendBar( bar );
-              si.m_ceVolume.Append( bar );
-            },
-            [this,&si](){ // fDone_t&&
-              m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
-            } );
-          m_pBarHistory->RequestNEndOfDay( iterSymbolInfo->first, 200 );
-          si.m_bBarsLoaded = true;
+          boost::posix_time::time_duration td = range.dtEnd - range.dtBegin;
+          auto ticks( td.ticks() );
         }
-      } );
-    si.m_pti->SetOnBuildPopUp(
-      [this]( ou::tf::TreeItem* pti ){
-        pti->NewMenu();
-        pti->AppendMenuItem(
-          "Delete",
-          [this]( ou::tf::TreeItem* pti ){
-            m_pPanelFinancialChart->SetChartDataView( nullptr );
-            mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( pti->GetText() );
-            assert( m_mapSymbolInfo.end() != iterSymbolInfo );
-            m_mapSymbolInfo.erase( iterSymbolInfo );
-            pti->Delete();
+        */
+        m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
+      }
+      else {
+        m_pBarHistory->Set(
+          [&si]( const ou::tf::Bar& bar ){ // fBar_t&&
+            si.m_cePriceBars.AppendBar( bar );
+            si.m_ceVolume.Append( bar );
+          },
+          [this,&si](){ // fDone_t&&
+            m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
           } );
-      } );
+        m_pBarHistory->RequestNEndOfDay( iterSymbolInfo->first, 200 );
+        si.m_bBarsLoaded = true;
+      }
+    } );
+  si.m_pti->SetOnBuildPopUp(
+    [this]( ou::tf::TreeItem* pti ){
+      pti->NewMenu();
+      pti->AppendMenuItem(
+        "Add Tag",
+        [this]( ou::tf::TreeItem* pti ){
+          wxTextEntryDialog* dialog = new wxTextEntryDialog( m_pFrameMain, "Tag Name:", "Add Tag" );
+          //dialog->ForceUpper(); // prints charters in reverse
+          if ( wxID_OK == dialog->ShowModal() ) {
+            std::string sTag = dialog->GetValue().Upper();
+            if ( 0 < sTag.size() ) {
+              //LoadSymbolInfo( sSymbolName, pti );
+              }
+          }
+        } );
+        pti->AppendMenuItem(
+          "Delete Tag",
+          [this]( ou::tf::TreeItem* pti ){
+            wxTextEntryDialog* dialog = new wxTextEntryDialog( m_pFrameMain, "Tag Name:", "Delete Tag" );
+            //dialog->ForceUpper(); // prints charters in reverse
+            if ( wxID_OK == dialog->ShowModal() ) {
+              std::string sTag = dialog->GetValue().Upper();
+              if ( 0 < sTag.size() ) {
+                //LoadSymbolInfo( sSymbolName, pti );
+                }
+            }
+          } );
+        pti->AppendMenuItem(
+        "Delete",
+        [this]( ou::tf::TreeItem* pti ){
+          m_pPanelFinancialChart->SetChartDataView( nullptr );
+          mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( pti->GetText() );
+          assert( m_mapSymbolInfo.end() != iterSymbolInfo );
+          m_mapSymbolInfo.erase( iterSymbolInfo );
+          pti->Delete();
+        } );
+    } );
+}
+
+void AppBarChart::HandleCheckListBoxEvent( wxCommandEvent& event ) {
+  auto id = event.GetSelection();
+  bool b( m_clbTags->IsChecked( id ) );
+  std::cout << "selection " << id << ',' << b << std::endl;
+  FilterByTag();
+  event.Skip();
+}
+
+void AppBarChart::FilterByTag() {
+
+  m_ptiRoot->DeleteChildren();
+
+  wxArrayInt rChecked;
+  unsigned int nChecked = m_clbTags->GetCheckedItems( rChecked );
+
+  if ( 0 == nChecked ) { // show all
+    for ( mapSymbolInfo_t::value_type& vt: m_mapSymbolInfo ) {
+      LoadSymbolInfo( vt.first, m_ptiRoot );
+    }
   }
-  return bAdded;
+  else { // show subset
+    setSymbol_t setSymbol_aggregate;
+    for ( wxArrayInt::value_type vt: rChecked ) {
+      std::string sTag( m_clbTags->GetString( vt ) );
+      mapTagSymbol_t::iterator iterTagSymbol = m_mapTagSymbol.find( sTag );
+      if ( m_mapTagSymbol.end() != iterTagSymbol ) {
+        setSymbol_t& setSymbol_tag( iterTagSymbol->second );
+        setSymbol_aggregate.insert( setSymbol_tag.begin(), setSymbol_tag.end() );
+      }
+    }
+    for ( const setSymbol_t::value_type& vt: setSymbol_aggregate ) {
+      mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( vt );
+      if ( m_mapSymbolInfo.end() == iterSymbolInfo ) {
+        std::cout << "FilterByTag symbol " << vt << " not found" << std::endl;
+      }
+      else {
+        LoadSymbolInfo( vt, m_ptiRoot );
+      }
+    }
+  }
 }
 
 void AppBarChart::SaveState() {
@@ -305,6 +398,10 @@ void AppBarChart::OnClose( wxCloseEvent& event ) {
   if ( m_pBarHistory ) {
     m_pBarHistory->Disconnect();
   }
+
+  m_clbTags->Unbind( wxEVT_CHECKLISTBOX, &AppBarChart::HandleCheckListBoxEvent, this );
+  m_pFrameMain->Unbind( wxEVT_CLOSE_WINDOW, &AppBarChart::OnClose, this );
+
   SaveState();
   event.Skip();  // auto followed by Destroy();
 }
