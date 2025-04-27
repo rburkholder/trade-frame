@@ -99,8 +99,6 @@ private:
 
     bool m_bBarsLoaded;
 
-    setTag_t m_setTag;
-
     SymbolInfo()
     : m_bBarsLoaded( false )
     , m_pti( nullptr )
@@ -108,18 +106,9 @@ private:
       Init();
     }
 
-    SymbolInfo( setTag_t&& setTag )
-    : m_bBarsLoaded( false )
-    , m_pti( nullptr )
-    , m_setTag( std::move( setTag ) )
-    {
-      Init();
-    }
-
     SymbolInfo( SymbolInfo&& rhs )
     : m_bBarsLoaded( false )
     , m_pti( rhs.m_pti )
-    , m_setTag( std::move( rhs.m_setTag ) )
     {
       Init();
     }
@@ -141,6 +130,7 @@ private:
   void OnFrameMainAutoMove( wxMoveEvent& );
 
   void AddTag( const std::string& sTag, const std::string& sSymbol );
+  void DelTag( const std::string& sTag, const std::string& sSymbol );
   void FilterByTag();
 
   void LoadPanelFinancialChart();
@@ -158,45 +148,32 @@ private:
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
+
     ar & *m_pFrameMain;
     ar & *m_pPanelFinancialChart;
 
-    if ( 3 == version ) {
-      m_ptiRoot->IterateChildren(
-        [&ar]( ou::tf::TreeItem* ptiGroup )->bool {
-          std::cout << "group: " << ptiGroup->GetText() << std::endl;
-          ar & true;
-          ar & ptiGroup->GetText();
+    // version 5
 
-          ptiGroup->IterateChildren(
-            [&ar]( ou::tf::TreeItem* ptiSymbol )->bool {
-              std::cout << "symbol: " << ptiSymbol->GetText() << std::endl;
-              ar & true;
-              ar & ptiSymbol->GetText();
-              return true; // continue iterating
-            } );
-          ar & false;
-
-          return true; // continue iteratiing
-        } );
-      ar & false;
+    ar & m_mapSymbolInfo.size();
+    for ( const mapSymbolInfo_t::value_type& vt: m_mapSymbolInfo ) {
+      ar & vt.first;
     }
 
-    if ( 4 == version ) {
-      ar & m_mapSymbolInfo.size();
-      for ( const mapSymbolInfo_t::value_type& vt: m_mapSymbolInfo ) {
-        ar & vt.first;
-        const setTag_t& setTag( vt.second.m_setTag );
-        ar & setTag.size();
-        for ( const setTag_t::value_type& item: setTag ) {
-          ar & item;
-        }
+    ar & m_mapTagSymbol.size();
+    for ( const mapTagSymbol_t::value_type& vt: m_mapTagSymbol ) {
+      ar & vt.first;
+      const setSymbol_t& setSymbol( vt.second );
+      ar & setSymbol.size();
+      for ( const setSymbol_t::value_type& sSymbol: setSymbol ) {
+        ar & sSymbol;
       }
     }
+
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
+
     ar & *m_pFrameMain;
     ar & *m_pPanelFinancialChart;
 
@@ -204,18 +181,19 @@ private:
       case 2:
       case 3:
         {
-          bool bLoadGroup;
-          ar & bLoadGroup;
-          while ( bLoadGroup ) {
-            std::string sGroupName;
-            ar & sGroupName;
-            std::cout << "group: " << sGroupName << std::endl;
-            //ou::tf::TreeItem* ptiGroup = LoadGroupInfo( sGroupName, m_ptiRoot );
+          bool bLoadTag;
+          ar & bLoadTag;
+          while ( bLoadTag ) {
+
+            std::string sTag;
+            ar & sTag;
+            std::cout << "tag: " << sTag << std::endl;
 
             if ( 3 <= version ) {
               bool bLoadSymbol;
               ar & bLoadSymbol;
               while ( bLoadSymbol ) {
+
                 std::string sSymbolName;
                 ar & sSymbolName;
                 std::cout << "symbol: " << sSymbolName << std::endl;
@@ -223,17 +201,15 @@ private:
                 mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSymbolName );
                 assert( m_mapSymbolInfo.end() == iterSymbolInfo ); // symbols are unique across groups
 
-                AddTag( sGroupName, sSymbolName );
-                setTag_t setTag;
-                setTag.emplace( sGroupName );
-                auto result = m_mapSymbolInfo.emplace( sSymbolName, SymbolInfo( std::move( setTag ) ) );
+                AddTag( sTag, sSymbolName );
+                auto result = m_mapSymbolInfo.emplace( sSymbolName, SymbolInfo() );
                 assert( result.second );
 
                 LoadSymbolInfo( sSymbolName, m_ptiRoot );
                 ar & bLoadSymbol;
               }
             }
-            ar & bLoadGroup;
+            ar & bLoadTag;
           }
         }
         break;
@@ -246,20 +222,50 @@ private:
             ar & sSymbol;
             setTag_t::size_type nTag;
             ar & nTag;
-            setTag_t setTag;
             while ( 0 != nTag ) {
               std::string sTag;
               ar & sTag;
               AddTag( sTag, sSymbol );
-              setTag.emplace( std::move( sTag ) );
               --nTag;
             }
-            m_mapSymbolInfo.emplace( sSymbol, SymbolInfo( std::move( setTag ) ) );
+            m_mapSymbolInfo.emplace( sSymbol, SymbolInfo() );
             LoadSymbolInfo( sSymbol, m_ptiRoot );
             --nSymbolInfo;
           }
         }
         break;
+      case 5:
+        {
+          mapSymbolInfo_t::size_type nSymbolInfo;
+          ar & nSymbolInfo;
+          while ( 0 != nSymbolInfo ) {
+            std::string sSymbol;
+            ar & sSymbol;
+            m_mapSymbolInfo.emplace( sSymbol, SymbolInfo() );
+            LoadSymbolInfo( sSymbol, m_ptiRoot );
+            --nSymbolInfo;
+          }
+
+          mapTagSymbol_t::size_type nTagSymbol;
+          ar & nTagSymbol;
+          while ( 0 != nTagSymbol ) {
+            std::string sTag;
+            ar & sTag;
+            setSymbol_t setSymbol;
+            setSymbol_t::size_type nSymbol;
+            ar & nSymbol;
+            while ( 0 != nSymbol ) {
+              std::string sSymbol;
+              ar & sSymbol;
+              setSymbol.insert( sSymbol );
+              AddTag( sTag, sSymbol );
+              --nSymbol;
+            }
+            m_mapTagSymbol.emplace( sTag, std::move( setSymbol ) );
+            --nTagSymbol;
+          }
+        }
+      break;
     }
 
   }
@@ -268,6 +274,6 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(AppBarChart, 4)
+BOOST_CLASS_VERSION(AppBarChart, 5)
 
 DECLARE_APP(AppBarChart)

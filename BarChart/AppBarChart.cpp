@@ -144,15 +144,38 @@ void AppBarChart::AddTag( const std::string& sTag, const std::string& sSymbol ) 
     setSymbol_t setSymbol = { sSymbol };
     auto result = m_mapTagSymbol.emplace( sTag, std::move( setSymbol ) );
     assert( result.second );
-    wxArrayString rTag;
-    rTag.Add( sTag );
-    m_clbTags->InsertItems( rTag, 0 );
+    CallAfter(
+      [this,sTag](){
+        wxArrayString rTag;
+        rTag.Add( sTag );
+        m_clbTags->InsertItems( rTag, 0 );
+      } );
   }
   else {
     setSymbol_t& setSymbol( iterTagSymbol->second );
     setSymbol_t::iterator iterSymbol = setSymbol.find( sSymbol );
     if ( setSymbol.end() == iterSymbol ) {
       setSymbol.insert( sSymbol );
+    }
+  }
+}
+
+void AppBarChart::DelTag( const std::string& sTag, const std::string& sSymbol ) {
+  mapTagSymbol_t::iterator iterTagSymbol = m_mapTagSymbol.find( sTag );
+  if ( m_mapTagSymbol.end() == iterTagSymbol ) {}
+  else {
+    setSymbol_t& setSymbol( iterTagSymbol->second );
+    setSymbol_t::iterator iterSymbol = setSymbol.find( sSymbol );
+    if ( setSymbol.end() != iterSymbol ) {
+      setSymbol.erase( iterSymbol );
+      if ( 0 == setSymbol.size() ) {
+        m_mapTagSymbol.erase( iterTagSymbol );
+        CallAfter(
+          [this,sTag](){
+            int n = m_clbTags->FindString( sTag );
+            m_clbTags->Delete( n );
+          } );
+      }
     }
   }
 }
@@ -278,30 +301,38 @@ void AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::Tree
       }
     } );
   si.m_pti->SetOnBuildPopUp(
-    [this]( ou::tf::TreeItem* pti ){
+    [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
       pti->NewMenu();
       pti->AppendMenuItem(
         "Add Tag",
-        [this]( ou::tf::TreeItem* pti ){
+        [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
           wxTextEntryDialog* dialog = new wxTextEntryDialog( m_pFrameMain, "Tag Name:", "Add Tag" );
           //dialog->ForceUpper(); // prints charters in reverse
           if ( wxID_OK == dialog->ShowModal() ) {
             std::string sTag = dialog->GetValue().Upper();
             if ( 0 < sTag.size() ) {
-              //LoadSymbolInfo( sSymbolName, pti );
-              }
+              AddTag( sTag, iterSymbolInfo->first );
+              CallAfter(
+                [this](){
+                  FilterByTag();
+              } );
+            }
           }
         } );
         pti->AppendMenuItem(
           "Delete Tag",
-          [this]( ou::tf::TreeItem* pti ){
+          [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
             wxTextEntryDialog* dialog = new wxTextEntryDialog( m_pFrameMain, "Tag Name:", "Delete Tag" );
             //dialog->ForceUpper(); // prints charters in reverse
             if ( wxID_OK == dialog->ShowModal() ) {
               std::string sTag = dialog->GetValue().Upper();
               if ( 0 < sTag.size() ) {
-                //LoadSymbolInfo( sSymbolName, pti );
-                }
+                DelTag( sTag, iterSymbolInfo->first );
+                CallAfter(
+                  [this](){
+                    FilterByTag();
+                } );
+              }
             }
           } );
         pti->AppendMenuItem(
@@ -319,7 +350,7 @@ void AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::Tree
 void AppBarChart::HandleCheckListBoxEvent( wxCommandEvent& event ) {
   auto id = event.GetSelection();
   bool b( m_clbTags->IsChecked( id ) );
-  std::cout << "selection " << id << ',' << b << std::endl;
+  //std::cout << "selection " << id << ',' << b << std::endl;
   FilterByTag();
   event.Skip();
 }
