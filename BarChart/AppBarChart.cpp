@@ -188,10 +188,10 @@ void AppBarChart::LoadPanelFinancialChart() {
       pti->AppendMenuItem(
         "Add Symbol",
         [this]( ou::tf::TreeItem* pti ){
-          wxTextEntryDialog* dialog = new wxTextEntryDialog( m_pFrameMain, "Symbol Name:", "Add Symbol" );
+          wxTextEntryDialog dialog( m_pFrameMain, "Symbol Name:", "Add Symbol" );
           //dialog->ForceUpper(); // prints charters in reverse
-          if ( wxID_OK == dialog->ShowModal() ) {
-            std::string sSymbolName = dialog->GetValue().Upper();
+          if ( wxID_OK == dialog.ShowModal() ) {
+            std::string sSymbolName = dialog.GetValue().Upper();
             if ( 0 < sSymbolName.size() ) {
               mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSymbolName );
               //assert( m_mapSymbolInfo.end() == iterSymbolInfo ); // symbols are unique across groups
@@ -265,20 +265,20 @@ void AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::Tree
       pti->AppendMenuItem(
         "Note",
         [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
-          wxTextEntryDialog* dialog = new wxTextEntryDialog( m_pFrameMain, "Notes:", "Update Notes" );
-          dialog->SetValue( iterSymbolInfo->second.m_sNotes );
-          if ( wxID_OK == dialog->ShowModal() ) {
-            std::string sNotes = dialog->GetValue();
+          wxTextEntryDialog dialog( m_pFrameMain, "Notes:", "Update Notes" );
+          dialog.SetValue( iterSymbolInfo->second.m_sNotes );
+          if ( wxID_OK == dialog.ShowModal() ) {
+            std::string sNotes = dialog.GetValue();
             iterSymbolInfo->second.m_sNotes = sNotes;
           }
         } );
       pti->AppendMenuItem(
         "Add Tag",
         [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
-          wxTextEntryDialog* dialog = new wxTextEntryDialog( m_pFrameMain, "Tag Name:", "Add Tag" );
+          wxTextEntryDialog dialog( m_pFrameMain, "Tag Name:", "Add Tag" );
           //dialog->ForceUpper(); // prints charters in reverse
-          if ( wxID_OK == dialog->ShowModal() ) {
-            std::string sTag = dialog->GetValue().Upper();
+          if ( wxID_OK == dialog.ShowModal() ) {
+            std::string sTag = dialog.GetValue().Upper();
             if ( 0 < sTag.size() ) {
               AddTag( sTag, iterSymbolInfo->first );
               CallAfter(
@@ -291,10 +291,10 @@ void AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::Tree
         pti->AppendMenuItem(
           "Delete Tag",
           [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
-            wxTextEntryDialog* dialog = new wxTextEntryDialog( m_pFrameMain, "Tag Name:", "Delete Tag" );
+            wxTextEntryDialog dialog( m_pFrameMain, "Tag Name:", "Delete Tag" );
             //dialog->ForceUpper(); // prints charters in reverse
-            if ( wxID_OK == dialog->ShowModal() ) {
-              std::string sTag = dialog->GetValue().Upper();
+            if ( wxID_OK == dialog.ShowModal() ) {
+              std::string sTag = dialog.GetValue().Upper();
               if ( 0 < sTag.size() ) {
                 DelTag( sTag, iterSymbolInfo->first );
                 CallAfter(
