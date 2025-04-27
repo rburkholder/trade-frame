@@ -79,6 +79,7 @@ target_link_libraries(
       OUCharting
       TFIndicators
       TFTimeSeries
+      fmt
       dl
       z
       curl

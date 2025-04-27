@@ -28,10 +28,11 @@
 */
 
 #include <boost/log/trivial.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
+
+#include <fmt/core.h>
 
 #include <wx/sizer.h>
 #include <wx/textdlg.h>
@@ -407,10 +408,11 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
       //<< std::endl;
 
       PanelSymbolInfo::Fields fields;
-      fields.sYield = boost::lexical_cast<std::string>( ki.dblYield );
-      fields.sLast = boost::lexical_cast<std::string>( ki.dblLast );
-      fields.sAmount = boost::lexical_cast<std::string>( ki.dblAmount );
-      fields.sRate = boost::lexical_cast<std::string>( ki.dblRate );
+      fields.sYield =  fmt::format( "{:.{}f}", ki.dblYield, 2 );
+      fields.sLast =  fmt::format( "{:.{}f}", ki.dblLast, 2 );
+      fields.sAmount =  fmt::format( "{:.{}f}", ki.dblAmount, 2 );
+      fields.sRate =  fmt::format( "{:.{}f}", ki.dblRate, 2 );
+
       if ( 0.0 < ki.dblYield ) {
         fields.sExDiv = ou::tf::Instrument::BuildDate( ki.dateExDividend );
         fields.sPayed = ou::tf::Instrument::BuildDate( ki.datePayed );
