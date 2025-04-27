@@ -412,15 +412,15 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
       fields.sRate = boost::lexical_cast<std::string>( ki.dblRate );
       fields.sExDiv = std::string();
       fields.sPayed = std::string();
-      fields.sNotes = std::string();
+      fields.sNotes = iterSymbolInfo->second.m_sNotes;
       fields.sName = boost::lexical_cast<std::string>( ki.sCompanyName );
       fields.fBtnUndo =
-        []()->std::string{
-          return std::string();
+        [iterSymbolInfo]()->std::string{
+          return iterSymbolInfo->second.m_sNotes;
         };
       fields.fBtnSave =
-        []( const std::string& sNotes ){
-
+        [iterSymbolInfo]( const std::string& sNotes ){
+          iterSymbolInfo->second.m_sNotes = sNotes;
         };
       m_pPanelSymbolInfo->SetFields( fields );
     };
