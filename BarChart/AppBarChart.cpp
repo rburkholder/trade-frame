@@ -28,6 +28,7 @@
 */
 
 #include <boost/log/trivial.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
@@ -45,6 +46,7 @@
 #include <TFVuTrading/PanelFinancialChart.hpp>
 
 #include "AppBarChart.hpp"
+#include "PanelSymbolInfo.hpp"
 
 namespace {
   static const std::string c_sAppTitle(        "Daily Bars Review" );
@@ -102,6 +104,18 @@ bool AppBarChart::OnInit() {
   //m_pwcv = new ou::tf::WinChartView( m_pFrameMain );
   //sizerFrame->Add( m_pwcv, 1,wxALL | wxEXPAND, 0 );
 
+  m_pFrameSymbolInfo
+    = new wxFrame( m_pFrameMain, wxID_ANY, "Symbol Info",
+      wxDefaultPosition, wxDefaultSize,
+      wxRESIZE_BORDER | wxFRAME_FLOAT_ON_PARENT
+    );
+  wxBoxSizer* sizerFrameSymbolInfo = new wxBoxSizer( wxHORIZONTAL );
+  m_pFrameSymbolInfo->SetSizer( sizerFrameSymbolInfo );
+  m_pPanelSymbolInfo = new PanelSymbolInfo( m_pFrameSymbolInfo, wxID_ANY );
+  sizerFrameSymbolInfo->Add( m_pPanelSymbolInfo, 1, wxGROW|wxALL, 0 );
+  m_pFrameSymbolInfo->Layout();
+  m_pFrameSymbolInfo->Show();
+
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppBarChart::OnClose, this );  // start close of windows and controls
   m_pFrameMain->Bind( wxEVT_MOVE, &AppBarChart::OnFrameMainAutoMove, this ); // intercept first move
   m_pFrameMain->Show( true ); // triggers the auto move
@@ -109,7 +123,6 @@ bool AppBarChart::OnInit() {
   m_piqfeed = ou::tf::iqfeed::Provider::Factory();
   m_piqfeed->OnConnected.Add( MakeDelegate( this, &AppBarChart::HandleIQFeedConnected ) );
   m_piqfeed->Connect();
-
 
   return true;
 
@@ -381,7 +394,7 @@ void AppBarChart::HandleIQFeedConnected( int ) {
 void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo ) {
 
   auto f =
-    []( mapSymbolInfo_t::iterator iterSymbolInfo ){
+    [this]( mapSymbolInfo_t::iterator iterSymbolInfo ){
       KeyInfo& ki( iterSymbolInfo->second.m_key_info );
       std::cout
       << iterSymbolInfo->first
@@ -390,6 +403,25 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
       << ",rate=" << ki.dblRate
       << "," << ki.sCompanyName
       << std::endl;
+
+      PanelSymbolInfo::Fields fields;
+      fields.sYield = boost::lexical_cast<std::string>( ki.dblYield );
+      fields.sLast = boost::lexical_cast<std::string>( ki.dblLast );
+      fields.sAmount = boost::lexical_cast<std::string>( ki.dblAmount );
+      fields.sRate = boost::lexical_cast<std::string>( ki.dblRate );
+      fields.sExDiv = std::string();
+      fields.sPayed = std::string();
+      fields.sNotes = std::string();
+      fields.sName = boost::lexical_cast<std::string>( ki.sCompanyName );
+      fields.fBtnUndo =
+        []()->std::string{
+          return std::string();
+        };
+      fields.fBtnSave =
+        []( const std::string& sNotes ){
+
+        };
+      m_pPanelSymbolInfo->SetFields( fields );
     };
 
   if ( iterSymbolInfo->second.m_key_info.bLoaded ) {
@@ -435,8 +467,8 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
 
         }
       );
-    }
     m_pAcquireFundamentals->Start();
+    }
 }
 
 void AppBarChart::SaveState() {

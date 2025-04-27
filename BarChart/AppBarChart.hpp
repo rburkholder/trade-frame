@@ -29,6 +29,7 @@
 #include <boost/serialization/split_member.hpp>
 
 #include <wx/app.h>
+#include <wx/frame.h>
 
 #include <OUCommon/KeyWordMatch.h>
 
@@ -50,9 +51,11 @@
 
 //#include "Config.hpp"
 
-class FrameMain;
 class wxCheckListBox;
 class wxCommandEvent;
+
+class FrameMain;
+class PanelSymbolInfo;
 
 namespace ou {
 namespace tf {
@@ -75,6 +78,9 @@ private:
 
   FrameMain* m_pFrameMain;
   ou::tf::PanelFinancialChart* m_pPanelFinancialChart;
+
+  wxFrame* m_pFrameSymbolInfo;
+  PanelSymbolInfo* m_pPanelSymbolInfo;
 
   wxCheckListBox* m_clbTags;
 
@@ -185,6 +191,14 @@ private:
     ar & *m_pFrameMain;
     ar & *m_pPanelFinancialChart;
 
+    wxSize size = m_pFrameSymbolInfo->GetSize();
+    ar & size.x;
+    ar & size.y;
+
+    wxPoint point = m_pFrameSymbolInfo->GetPosition();
+    ar & point.x;
+    ar & point.y;
+
     ar & m_mapSymbolInfo.size();
     for ( const mapSymbolInfo_t::value_type& vt: m_mapSymbolInfo ) {
       ar & vt.first;
@@ -208,6 +222,19 @@ private:
 
     ar & *m_pFrameMain;
     ar & *m_pPanelFinancialChart;
+
+    if ( 7 <= version ) {
+      int x, y;
+      ar & x;
+      ar & y;
+      wxSize size( x, y );
+      m_pFrameSymbolInfo->SetSize( size );
+
+      ar & x;
+      ar & y;
+      wxPoint point( x, y );
+      m_pFrameSymbolInfo->SetPosition( point );
+    }
 
     switch ( version ) {
       case 2:
@@ -268,6 +295,7 @@ private:
         break;
       case 5:
       case 6:
+      case 7:
         {
           mapSymbolInfo_t::size_type nSymbolInfo;
           ar & nSymbolInfo;
@@ -276,7 +304,7 @@ private:
             ar & sSymbol;
             auto result = m_mapSymbolInfo.emplace( sSymbol, SymbolInfo() );
             assert( result.second );
-            if ( 6 == version ) {
+            if ( 6 <= version ) {
               ar & result.first->second.m_sNotes;
             }
             LoadSymbolInfo( sSymbol, m_ptiRoot );
@@ -311,6 +339,6 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(AppBarChart, 6)
+BOOST_CLASS_VERSION(AppBarChart, 7)
 
 DECLARE_APP(AppBarChart)
