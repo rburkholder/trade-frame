@@ -101,7 +101,7 @@ void Process::HandleConnected( int ) {
 
   m_piqfeed->SymbolList(
     setListedMarket, setSecurityType,
-    [this](const std::string& sSymbol, key_t keyListedMarket){
+    [this](const std::string& sSymbol, key_t keyListedMarket){ // fSymbol_t
       mapIgnoreName_t::iterator iter = m_mapIgnoreName.find( sSymbol );
       if ( m_mapIgnoreName.end() != iter ) {
         iter->second = true;
@@ -110,7 +110,7 @@ void Process::HandleConnected( int ) {
         m_vSymbols.push_back( dividend_t( sSymbol ) );
       }
     },
-    [this](){
+    [this](){ // fDone_t
       std::cout << "symbol retrieval done, " << m_vSymbols.size() << " found" << std::endl;
       m_iterSymbols = m_vSymbols.begin();
       while ( ( m_choices.m_nMaxInTransit > m_mapInProgress.size() ) && ( m_vSymbols.end() != m_iterSymbols ) ) {
