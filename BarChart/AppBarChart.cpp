@@ -96,7 +96,7 @@ bool AppBarChart::OnInit() {
     m_lbTagsStrings, wxLB_MULTIPLE|wxLB_EXTENDED|wxLB_NEEDED_SB //|wxLB_SORT
   );
   sizerFrame->Add( m_clbTags, 0, wxGROW|wxALL, 1 );
-
+  m_clbTags->SetMinClientSize( wxSize( 150, -1 ) );
   m_clbTags->Bind( wxEVT_CHECKLISTBOX, &AppBarChart::HandleCheckListBoxEvent, this );
 
   m_pPanelFinancialChart = new ou::tf::PanelFinancialChart( m_pFrameMain );
