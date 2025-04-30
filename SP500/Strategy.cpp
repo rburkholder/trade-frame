@@ -46,6 +46,7 @@ Strategy::Strategy(
 , m_dblAdv {}, m_dblDec {}
 , m_dblMid {}
 , m_dblEma13 {}, m_dblEma29 {}
+, m_dblEma50 {}, m_dblEma200 {}
 , m_stateTickHi( ETickHi::Neutral ), m_stateTickLo( ETickLo::Neutral )
 , m_nEnterLong {}, m_nEnterShort {}
 //, m_dblLastTrin {}
@@ -160,6 +161,14 @@ void Strategy::SetupChart() {
   m_ceEma29.SetName( "29s ema" );
   m_ceEma29.SetColour( ou::Colour::DarkTurquoise );
   m_cdv.Add( EChartSlot::Price, &m_ceEma29 );
+
+  m_ceEma50.SetName( "50s ema" );
+  m_ceEma50.SetColour( ou::Colour::Purple );
+  m_cdv.Add( EChartSlot::Price, &m_ceEma50 );
+
+  m_ceEma200.SetName( "200s ema" );
+  m_ceEma200.SetColour( ou::Colour::DarkTurquoise );
+  m_cdv.Add( EChartSlot::Price, &m_ceEma200 );
 
   //m_ceAsk.SetName( "Ask" );
   //m_ceAsk.SetColour( ou::Colour::Red );
@@ -280,30 +289,22 @@ void Strategy::CalcAdvDec( boost::posix_time::ptime dt ) {
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
-  {
-    static const double seconds( 13.0 );
-    static const double cur( 1.0 / seconds );
-    static const double prv( 1.0 - cur );
-    if ( 0.0 == m_dblEma13 ) {
-      m_dblEma13 = bar.Close();
-    }
-    else {
-      m_dblEma13 = prv * m_dblEma13 + cur * bar.Close();
-    }
-    m_ceEma13.Append( bar.DateTime(), m_dblEma13 );
-  }
-  {
-    static const double seconds( 29.0 );
-    static const double cur( 1.0 / seconds );
-    static const double prv( 1.0 - cur );
-    if ( 0.0 == m_dblEma29 ) {
-      m_dblEma29 = bar.Close();
-    }
-    else {
-      m_dblEma29 = prv * m_dblEma29 + cur * bar.Close();
-    }
-    m_ceEma29.Append( bar.DateTime(), m_dblEma29 );
-  }
+  auto f// turn into template to facilitate constexpr
+    = []( double seconds, const ou::tf::Bar& bar, double& ema, ou::ChartEntryIndicator& cei )-> void{
+      const double cur( 1.0 / seconds );
+      const double prv( 1.0 - cur );
+      if ( 0.0 == ema ) {
+        ema = bar.Close();
+      }
+      else {
+        ema = prv * ema + cur * bar.Close();
+      }
+      cei.Append( bar.DateTime(), ema );
+    };
+  f(  13, bar, m_dblEma13, m_ceEma13 );
+  f(  29, bar, m_dblEma29, m_ceEma29 );
+  f(  50, bar, m_dblEma50, m_ceEma50 );
+  f( 200, bar, m_dblEma200, m_ceEma200 );
   TimeTick( bar );
 }
 

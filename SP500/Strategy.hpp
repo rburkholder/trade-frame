@@ -122,6 +122,8 @@ private:
 
   double m_dblEma13;
   double m_dblEma29;
+  double m_dblEma50;
+  double m_dblEma200;
 
   ou::tf::Quote m_quote;
 
@@ -144,6 +146,8 @@ private:
 
   ou::ChartEntryIndicator m_ceEma13;
   ou::ChartEntryIndicator m_ceEma29;
+  ou::ChartEntryIndicator m_ceEma50;
+  ou::ChartEntryIndicator m_ceEma200;
 
   ou::ChartEntryShape m_ceLongEntry;
   ou::ChartEntryShape m_ceLongFill;
