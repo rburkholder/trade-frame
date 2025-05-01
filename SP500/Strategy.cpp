@@ -163,11 +163,11 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::Price, &m_ceEma29 );
 
   m_ceEma50.SetName( "50s ema" );
-  m_ceEma50.SetColour( ou::Colour::Purple );
+  m_ceEma50.SetColour( ou::Colour::DarkMagenta );
   m_cdv.Add( EChartSlot::Price, &m_ceEma50 );
 
   m_ceEma200.SetName( "200s ema" );
-  m_ceEma200.SetColour( ou::Colour::DarkTurquoise );
+  m_ceEma200.SetColour( ou::Colour::OrangeRed );
   m_cdv.Add( EChartSlot::Price, &m_ceEma200 );
 
   //m_ceAsk.SetName( "Ask" );
