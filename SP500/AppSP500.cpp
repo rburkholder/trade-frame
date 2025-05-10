@@ -45,6 +45,7 @@
 
 #include <TFVuTrading/FrameMain.h>
 
+#include "Torch.hpp"
 #include "AppSP500.hpp"
 
 namespace {
@@ -68,6 +69,8 @@ bool AppSP500::OnInit() {
   if ( !wxApp::OnInit() ) {
     return false;
   }
+
+  TorchTest();
 
   if ( config::Load( c_sChoicesFilename, m_choices ) ) {
     if ( boost::filesystem::exists( m_choices.m_sHdf5File ) ) {}

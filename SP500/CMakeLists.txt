@@ -1,10 +1,18 @@
 # trade-frame/SP500
-cmake_minimum_required (VERSION 3.13)
+cmake_minimum_required (VERSION 3.18 FATAL_ERROR)
+
+cmake_policy(SET CMP0104 NEW)
+cmake_policy(SET CMP0105 NEW)
 
 PROJECT(SP500)
 
+set(CMAKE_PREFIX_PATH "/usr/local/share/libtorch")
+
 #set(CMAKE_EXE_LINKER_FLAGS "--trace --verbose")
 #set(CMAKE_VERBOSE_MAKEFILE ON)
+
+find_package(Torch REQUIRED)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 set(Boost_ARCHITECTURE "-x64")
 #set(BOOST_LIBRARYDIR "/usr/local/lib")
@@ -26,6 +34,7 @@ set(
     AppSP500.hpp
     Config.hpp
     Strategy.hpp
+    Torch.hpp
   )
 
 set(
@@ -33,6 +42,7 @@ set(
     AppSP500.cpp
     Config.cpp
     Strategy.cpp
+    Torch.cpp
   )
 
 add_executable(
@@ -63,6 +73,7 @@ target_link_directories(
 
 target_link_libraries(
   ${PROJECT_NAME}
+      ${TORCH_LIBRARIES}
       TFBitsNPieces
       TFInteractiveBrokers
       TFSimulation

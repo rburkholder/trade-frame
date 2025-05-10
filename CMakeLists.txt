@@ -45,10 +45,13 @@ add_subdirectory(MarketTrader)
 add_subdirectory(MultipleFutures)
 add_subdirectory(Phemex)
 add_subdirectory(Scanner)
-add_subdirectory(SP500)
 add_subdirectory(Weeklies)
 
 add_subdirectory(lib)
+
+if(EXISTS /usr/local/share/libtorch)
+  add_subdirectory(SP500)
+endif()
 
 if(EXISTS /usr/local/lib/libwt.so)
   add_subdirectory(TableTrader)

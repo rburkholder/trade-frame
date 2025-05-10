@@ -6,6 +6,10 @@ TRIN, TICK and Advance/Decline market supplied indicators.
 The initial iteration of this application relies on HDF5 files 
 collected by the Collector application with the following configuration:
 
+LibTorch is being introduced for testing an LSTM based model for machine learning.
+* libtorch needs to reside in /usr/local/share
+* libtorch can be downloaded from https://pytorch.org/get-started/locally/
+
 ```
 symbol_name_l1=SPY
 symbol_name_l1=II6A.Z  #S&P 500 ISSUES ADVANCES DTN - sum to 500
