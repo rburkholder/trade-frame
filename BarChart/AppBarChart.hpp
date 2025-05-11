@@ -21,14 +21,17 @@
 
 #pragma once
 
-#include <map>
-#include <set>
 #include <unordered_map>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
 #include <boost/date_time/gregorian/greg_date.hpp>
+
+#include <boost/multi_index/member.hpp>
+#include <boost/multi_index_container.hpp>
+#include <boost/multi_index/ordered_index.hpp>
+#include <boost/multi_index/composite_key.hpp>
 
 #include <wx/app.h>
 #include <wx/frame.h>
@@ -86,10 +89,47 @@ private:
 
   wxCheckListBox* m_clbTags;
 
-  using setTag_t = std::set<std::string>;
-  using setSymbol_t = std::set<std::string>;
-  using mapTagSymbol_t = std::map<std::string, setSymbol_t>;
-  mapTagSymbol_t m_mapTagSymbol;
+  using sTag_t = std::string;
+  using sSymbol_t = std::string;
+
+  struct ixTag{};
+  struct ixSymbol{};
+  struct ixTagSymbol{};
+
+  struct TagSymbol {
+    std::string sTag;
+    std::string sSymbol;
+    TagSymbol(){}
+    TagSymbol( sTag_t sTag_, sSymbol_t sSymbol_ )
+    : sTag( sTag_ ), sSymbol( sSymbol_ )
+    {}
+    TagSymbol( TagSymbol&& rhs )
+    : sTag( std::move( rhs.sTag ) ), sSymbol( std::move( rhs.sSymbol ) )
+    {}
+  };
+
+  using mmapTagSymbol_t = boost::multi_index_container<
+    TagSymbol,
+    boost::multi_index::indexed_by<
+      boost::multi_index::ordered_non_unique<
+        boost::multi_index::tag<ixTag>,
+        boost::multi_index::member<TagSymbol,sTag_t,&TagSymbol::sTag>
+      >,
+      boost::multi_index::ordered_non_unique<
+        boost::multi_index::tag<ixSymbol>,
+        boost::multi_index::member<TagSymbol,sSymbol_t,&TagSymbol::sSymbol>
+      >,
+      boost::multi_index::ordered_unique<
+        boost::multi_index::tag<ixTagSymbol>,
+        boost::multi_index::composite_key<
+          TagSymbol,
+          boost::multi_index::member<TagSymbol,sTag_t,&TagSymbol::sTag>,
+          boost::multi_index::member<TagSymbol,sSymbol_t,&TagSymbol::sSymbol>
+        >
+      >
+    >
+  >;
+  mmapTagSymbol_t m_mmapTagSymbol;
 
   using pHDF5DataManager_t = std::unique_ptr<ou::tf::HDF5DataManager>;
   pHDF5DataManager_t m_pdm;
@@ -174,8 +214,8 @@ private:
   void HandleIQFeedConnected( int );
   void SymbolFundamentals( mapSymbolInfo_t::iterator );
 
-  void AddTag( const std::string& sTag, const std::string& sSymbol );
-  void DelTag( const std::string& sTag, const std::string& sSymbol );
+  void AddTag( const sTag_t&, const sSymbol_t& );
+  void DelTag( const sTag_t&, const sSymbol_t& );
   void FilterByTag();
 
   void LoadPanelFinancialChart();
@@ -210,14 +250,10 @@ private:
       ar & vt.second.m_sNotes;
     }
 
-    ar & m_mapTagSymbol.size();
-    for ( const mapTagSymbol_t::value_type& vt: m_mapTagSymbol ) {
-      ar & vt.first;
-      const setSymbol_t& setSymbol( vt.second );
-      ar & setSymbol.size();
-      for ( const setSymbol_t::value_type& sSymbol: setSymbol ) {
-        ar & sSymbol;
-      }
+    ar & m_mmapTagSymbol.size();
+    for ( const mmapTagSymbol_t::value_type& vt: m_mmapTagSymbol ) {
+      ar & vt.sTag;
+      ar & vt.sSymbol;
     }
 
   }
@@ -244,59 +280,8 @@ private:
     switch ( version ) {
       case 2:
       case 3:
-        {
-          bool bLoadTag;
-          ar & bLoadTag;
-          while ( bLoadTag ) {
-
-            std::string sTag;
-            ar & sTag;
-            std::cout << "tag: " << sTag << std::endl;
-
-            if ( 3 <= version ) {
-              bool bLoadSymbol;
-              ar & bLoadSymbol;
-              while ( bLoadSymbol ) {
-
-                std::string sSymbolName;
-                ar & sSymbolName;
-                std::cout << "symbol: " << sSymbolName << std::endl;
-
-                mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSymbolName );
-                assert( m_mapSymbolInfo.end() == iterSymbolInfo ); // symbols are unique across groups
-
-                AddTag( sTag, sSymbolName );
-                auto result = m_mapSymbolInfo.emplace( sSymbolName, SymbolInfo() );
-                assert( result.second );
-
-                LoadSymbolInfo( sSymbolName, m_ptiRoot );
-                ar & bLoadSymbol;
-              }
-            }
-            ar & bLoadTag;
-          }
-        }
-        break;
       case 4:
-        {
-          mapSymbolInfo_t::size_type nSymbolInfo;
-          ar & nSymbolInfo;
-          while ( 0 != nSymbolInfo ) {
-            std::string sSymbol;
-            ar & sSymbol;
-            setTag_t::size_type nTag;
-            ar & nTag;
-            while ( 0 != nTag ) {
-              std::string sTag;
-              ar & sTag;
-              AddTag( sTag, sSymbol );
-              --nTag;
-            }
-            m_mapSymbolInfo.emplace( sSymbol, SymbolInfo() );
-            LoadSymbolInfo( sSymbol, m_ptiRoot );
-            --nSymbolInfo;
-          }
-        }
+        std::cout << "cannot serialize versions 2, 3, 4" << std::endl;
         break;
       case 5:
       case 6:
@@ -317,22 +302,48 @@ private:
           }
           m_ptiRoot->SortChildren();
 
-          mapTagSymbol_t::size_type nTagSymbol;
+          mmapTagSymbol_t::size_type nTagSymbol;
           ar & nTagSymbol;
           while ( 0 != nTagSymbol ) {
             std::string sTag;
             ar & sTag;
-            setSymbol_t setSymbol;
-            setSymbol_t::size_type nSymbol;
+            size_t nSymbol;
             ar & nSymbol;
             while ( 0 != nSymbol ) {
               std::string sSymbol;
               ar & sSymbol;
-              setSymbol.insert( sSymbol );
               AddTag( sTag, sSymbol );
               --nSymbol;
             }
-            m_mapTagSymbol.emplace( sTag, std::move( setSymbol ) );
+            --nTagSymbol;
+          }
+        }
+      break;
+      case 8:
+        {
+          mapSymbolInfo_t::size_type nSymbolInfo;
+          ar & nSymbolInfo;
+          while ( 0 != nSymbolInfo ) {
+            std::string sSymbol;
+            ar & sSymbol;
+            auto result = m_mapSymbolInfo.emplace( sSymbol, SymbolInfo() );
+            assert( result.second );
+            if ( 6 <= version ) {
+              ar & result.first->second.m_sNotes;
+            }
+            LoadSymbolInfo( sSymbol, m_ptiRoot );
+            --nSymbolInfo;
+          }
+          m_ptiRoot->SortChildren();
+
+          mmapTagSymbol_t::size_type nTagSymbol;
+          ar & nTagSymbol;
+          while ( 0 != nTagSymbol ) {
+            sTag_t sTag;
+            ar & sTag;
+            sSymbol_t sSymbol;
+            ar & sSymbol;
+            AddTag( sTag, sSymbol );
             --nTagSymbol;
           }
         }
@@ -345,6 +356,6 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(AppBarChart, 7)
+BOOST_CLASS_VERSION(AppBarChart, 8)
 
 DECLARE_APP(AppBarChart)

@@ -27,6 +27,8 @@
   * use indicator trading for example of loading daily bars
 */
 
+#include <set>
+
 #include <boost/log/trivial.hpp>
 
 #include <boost/archive/text_oarchive.hpp>
@@ -160,46 +162,50 @@ void AppBarChart::OnFrameMainAutoMove( wxMoveEvent& event ) {
 
 }
 
-void AppBarChart::AddTag( const std::string& sTag, const std::string& sSymbol ) {
-  mapTagSymbol_t::iterator iterTagSymbol = m_mapTagSymbol.find( sTag );
-  if ( m_mapTagSymbol.end() == iterTagSymbol ) {
-    setSymbol_t setSymbol = { sSymbol };
-    auto result = m_mapTagSymbol.emplace( sTag, std::move( setSymbol ) );
-    assert( result.second );
+void AppBarChart::AddTag( const sTag_t& sTag, const sSymbol_t& sSymbol ) {
+
+  using setTag_t = mmapTagSymbol_t::index<ixTag>::type;
+
+  const setTag_t& index( m_mmapTagSymbol.get<ixTag>() );
+  setTag_t::iterator iterTag = index.find( sTag );
+  const setTag_t::size_type n( index.size() );
+
+  if ( index.end() == iterTag ) {
+    wxArrayString rTag;
+    rTag.Add( sTag );
     CallAfter(
-      [this,sTag](){
-        wxArrayString rTag;
-        rTag.Add( sTag );
-        m_clbTags->InsertItems( rTag, 0 );
+      [this,rTag_=std::move(rTag)](){
+        m_clbTags->InsertItems( rTag_, 0 );
       } );
   }
-  else {
-    setSymbol_t& setSymbol( iterTagSymbol->second );
-    setSymbol_t::iterator iterSymbol = setSymbol.find( sSymbol );
-    if ( setSymbol.end() == iterSymbol ) {
-      setSymbol.insert( sSymbol );
-    }
+
+  using setTagSymbol_t = mmapTagSymbol_t::index<ixTagSymbol>::type;
+  setTagSymbol_t::iterator iterTagSymbol = m_mmapTagSymbol.get<ixTagSymbol>().find( std::make_tuple( sTag, sSymbol ) );
+  if ( m_mmapTagSymbol.get<ixTagSymbol>().end() == iterTagSymbol ) {
+    auto result = m_mmapTagSymbol.emplace( TagSymbol( sTag, sSymbol ) );
+    assert( result.second );
   }
 }
 
-void AppBarChart::DelTag( const std::string& sTag, const std::string& sSymbol ) {
-  mapTagSymbol_t::iterator iterTagSymbol = m_mapTagSymbol.find( sTag );
-  if ( m_mapTagSymbol.end() == iterTagSymbol ) {}
+void AppBarChart::DelTag( const sTag_t& sTag, const sSymbol_t& sSymbol ) {
+
+  using setTagSymbol_t = mmapTagSymbol_t::index<ixTagSymbol>::type;
+  setTagSymbol_t::iterator iterTagSymbol = m_mmapTagSymbol.get<ixTagSymbol>().find( std::make_tuple( sTag, sSymbol ) );
+  if ( m_mmapTagSymbol.get<ixTagSymbol>().end() == iterTagSymbol ) {}
   else {
-    setSymbol_t& setSymbol( iterTagSymbol->second );
-    setSymbol_t::iterator iterSymbol = setSymbol.find( sSymbol );
-    if ( setSymbol.end() != iterSymbol ) {
-      setSymbol.erase( iterSymbol );
-      if ( 0 == setSymbol.size() ) {
-        m_mapTagSymbol.erase( iterTagSymbol );
-        CallAfter(
-          [this,sTag](){
-            int n = m_clbTags->FindString( sTag );
-            m_clbTags->Delete( n );
-          } );
-      }
+    m_mmapTagSymbol.get<ixTagSymbol>().erase( iterTagSymbol );
+
+    using setTag_t = mmapTagSymbol_t::index<ixTag>::type;
+    setTag_t::iterator iterTag = m_mmapTagSymbol.get<ixTag>().find( sTag );
+    if ( m_mmapTagSymbol.get<ixTag>().end() == iterTag ) {
+      CallAfter(
+        [this,sTag](){
+          int n = m_clbTags->FindString( sTag );
+          m_clbTags->Delete( n );
+        } );
     }
   }
+
 }
 
 void AppBarChart::LoadPanelFinancialChart() {
@@ -332,15 +338,21 @@ void AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::Tree
         "Delete",
         [this]( ou::tf::TreeItem* pti ){
           m_pPanelFinancialChart->SetChartDataView( nullptr );
-          const std::string sSymbol( pti->GetText() );
+          const sSymbol_t sSymbol( pti->GetText() );
           mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSymbol );
           assert( m_mapSymbolInfo.end() != iterSymbolInfo );
 
-          for ( mapTagSymbol_t::value_type& vt: m_mapTagSymbol ) {
-            CallAfter(
-              [this,sTag_=vt.first,sSymbol_=std::move(sSymbol)](){
-                DelTag( sTag_, sSymbol_ );
-              } );
+          using setSymbol_t = mmapTagSymbol_t::index<ixSymbol>::type;
+          setSymbol_t::iterator iterSymbol = m_mmapTagSymbol.get<ixSymbol>().find( sSymbol );
+          if ( m_mmapTagSymbol.get<ixSymbol>().end() == iterSymbol ) {
+            setSymbol_t::iterator iter = iterSymbol;
+            while( m_mmapTagSymbol.get<ixSymbol>().end() != iter ) {
+              CallAfter(
+                [this,sTag=iter->sTag,sSymbol](){
+                  DelTag( sTag, sSymbol );
+                } );
+              ++iter;
+            }
           }
 
           m_mapSymbolInfo.erase( iterSymbolInfo );
@@ -370,16 +382,22 @@ void AppBarChart::FilterByTag() {
     }
   }
   else { // show subset
-    setSymbol_t setSymbol_aggregate;
+
+    using setTag_t = mmapTagSymbol_t::index<ixTag>::type;
+
+    using setSymbol_t = std::set<sSymbol_t>;
+    setSymbol_t setSymbol;
+
     for ( wxArrayInt::value_type vt: rChecked ) {
-      std::string sTag( m_clbTags->GetString( vt ) );
-      mapTagSymbol_t::iterator iterTagSymbol = m_mapTagSymbol.find( sTag );
-      if ( m_mapTagSymbol.end() != iterTagSymbol ) {
-        setSymbol_t& setSymbol_tag( iterTagSymbol->second );
-        setSymbol_aggregate.insert( setSymbol_tag.begin(), setSymbol_tag.end() );
+      const sTag_t sTag( m_clbTags->GetString( vt ) );
+      setTag_t::iterator iterTag = m_mmapTagSymbol.get<ixTag>().find( sTag );
+      while ( m_mmapTagSymbol.get<ixTag>().end() != iterTag ) {
+        if ( sTag != iterTag->sTag ) break;
+        setSymbol.insert( iterTag->sSymbol );
+        ++iterTag;
       }
     }
-    for ( const setSymbol_t::value_type& vt: setSymbol_aggregate ) {
+    for ( const setSymbol_t::value_type& vt: setSymbol ) {
       mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( vt );
       if ( m_mapSymbolInfo.end() == iterSymbolInfo ) {
         std::cout << "FilterByTag symbol " << vt << " not found" << std::endl;
