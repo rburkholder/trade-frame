@@ -6,11 +6,15 @@ cmake_policy(SET CMP0105 NEW)
 
 PROJECT(SP500)
 
-set(CMAKE_PREFIX_PATH "/usr/local/share/libtorch")
-
 #set(CMAKE_EXE_LINKER_FLAGS "--trace --verbose")
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
+set(CMAKE_CUDA_STANDARD 17)
+set(CMAKE_CUDA_ARCHITECTURES native )
+set(CMAKE_CUDA_COMPILER "/etc/alternatives/cuda/bin/nvcc" )
+set(nvtx3_dir "/usr/local/cuda/targets/x86_64-linux/include/nvtx3" )
+
+set(CMAKE_PREFIX_PATH "/usr/local/share/libtorch")
 find_package(Torch REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
