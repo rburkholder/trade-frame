@@ -168,7 +168,6 @@ void AppBarChart::AddTag( const sTag_t& sTag, const sSymbol_t& sSymbol ) {
 
   const setTag_t& index( m_mmapTagSymbol.get<ixTag>() );
   setTag_t::iterator iterTag = index.find( sTag );
-  const setTag_t::size_type n( index.size() );
 
   if ( index.end() == iterTag ) {
     wxArrayString rTag;
@@ -288,6 +287,22 @@ void AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::Tree
         m_pBarHistory->RequestNEndOfDay( iterSymbolInfo->first, 200 );
         si.m_bBarsLoaded = true;
       }
+
+      using setSymbol_t = mmapTagSymbol_t::index<ixSymbol>::type;
+
+      const sSymbol_t& sSymbol( iterSymbolInfo->first );
+      const setSymbol_t& index( m_mmapTagSymbol.get<ixSymbol>() );
+      setSymbol_t::const_iterator iterSymbol = index.find( iterSymbolInfo->first );
+
+      wxArrayString rTag;
+
+      while ( index.end() != iterSymbol ) {
+        if ( sSymbol != iterSymbol->sSymbol ) break;
+        rTag.Add( iterSymbol->sTag );
+        ++iterSymbol;
+      }
+      m_pPanelSymbolInfo->SetTags( rTag );
+
     } );
   si.m_pti->SetOnBuildPopUp(
     [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){

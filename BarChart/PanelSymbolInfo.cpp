@@ -197,6 +197,10 @@ void PanelSymbolInfo::SetFields( Fields& fields ) {
   m_fBtnUndo = std::move( fields.fBtnUndo );
 }
 
+void PanelSymbolInfo::SetTags( wxArrayString& rTags ) {
+  m_lbTags->Set( rTags );
+}
+
 void PanelSymbolInfo::OnBTNUndoClick( wxCommandEvent& event ) { // wxEVT_COMMAND_BUTTON_CLICKED
   if ( m_fBtnUndo ) m_txtNotes->SetValue( m_fBtnUndo() );
   event.Skip();

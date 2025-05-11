@@ -71,6 +71,7 @@ PanelSymbolInfo(
 
   };
   void SetFields( Fields& );
+  void SetTags( wxArrayString& );
 
 protected:
 private:
