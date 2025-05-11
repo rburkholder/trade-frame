@@ -224,6 +224,7 @@ void AppBarChart::LoadPanelFinancialChart() {
                 auto result = m_mapSymbolInfo.emplace( sSymbolName, SymbolInfo() );
                 assert( result.second );
                 LoadSymbolInfo( sSymbolName, pti );
+                m_ptiRoot->SortChildren();
               }
             }
           }
@@ -388,6 +389,7 @@ void AppBarChart::FilterByTag() {
       }
     }
   }
+  m_ptiRoot->SortChildren();
 }
 
 void AppBarChart::HandleIQFeedConnected( int ) {

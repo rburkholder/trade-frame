@@ -315,6 +315,7 @@ private:
             LoadSymbolInfo( sSymbol, m_ptiRoot );
             --nSymbolInfo;
           }
+          m_ptiRoot->SortChildren();
 
           mapTagSymbol_t::size_type nTagSymbol;
           ar & nTagSymbol;
