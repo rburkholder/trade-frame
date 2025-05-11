@@ -30,6 +30,7 @@
 #define SYMBOL_PANEL_SymbolInfo_POSITION wxDefaultPosition
 
 class wxButton;
+class wxListBox;
 class wxTextCtrl;
 class wxStaticText;
 
@@ -83,6 +84,7 @@ private:
   , ID_STATIC_Payed, ID_TEXT_Payed
   , ID_TEXT_Notes, ID_STATIC_NAME
   , ID_BTN_Undo, ID_BTN_Save
+  , ID_LB_TAGS
   };
 
   wxTextCtrl* m_txtYield;
@@ -95,6 +97,7 @@ private:
   wxButton* m_btnUndo;
   wxButton* m_btnSave;
   wxStaticText* m_txtName;
+  wxListBox* m_lbTags;
 
   fBtnSave_t m_fBtnSave;
   fBtnUndo_t m_fBtnUndo;
