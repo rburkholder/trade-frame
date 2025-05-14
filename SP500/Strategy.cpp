@@ -43,7 +43,7 @@ Strategy::Strategy(
 , m_ceShortExit( ou::ChartEntryShape::EShape::ShortStop, ou::Colour::Red )
 , m_ceLongExit( ou::ChartEntryShape::EShape::LongStop, ou::Colour::Blue )
 , m_bfQuotes01Sec(  1 )
-, m_dblAdv {}, m_dblDec {}
+, m_dblAdv {}, m_dblDec {}, m_dblAdvDecRatio {}
 , m_dblMid {}
 , m_dblEma13 {}, m_dblEma29 {}
 , m_dblEma50 {}, m_dblEma200 {}
@@ -217,6 +217,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 }
 
 void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
+  m_trade = trade;
   m_ceTrade.Append( trade.DateTime(), trade.Price() );
   m_ceVolume.Append( trade.DateTime(), trade.Volume() );
   TimeTick( trade );
@@ -285,10 +286,12 @@ void Strategy::CalcAdvDec( boost::posix_time::ptime dt ) {
   const double sum( m_dblAdv + m_dblDec );
   const double diff( m_dblAdv - m_dblDec );
   const double ratio( diff / sum );
+  m_dblAdvDecRatio = ratio;
   m_ceAdvDec.Append( dt, ratio );
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
+
   auto f// turn into template to facilitate constexpr
     = []( double seconds, const ou::tf::Bar& bar, double& ema, ou::ChartEntryIndicator& cei )-> void{
       const double cur( 1.0 / seconds );
@@ -305,6 +308,16 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   f(  29, bar, m_dblEma29, m_ceEma29 );
   f(  50, bar, m_dblEma50, m_ceEma50 );
   f( 200, bar, m_dblEma200, m_ceEma200 );
+
+  m_rDataRaw[ (std::size_t)EVecIx::ema200 ].push_back( m_dblEma200 );
+  m_rDataRaw[ (std::size_t)EVecIx::ema50 ].push_back( m_dblEma50 );
+  m_rDataRaw[ (std::size_t)EVecIx::ema29 ].push_back( m_dblEma29 );
+  m_rDataRaw[ (std::size_t)EVecIx::ema13 ].push_back( m_dblEma13 );
+  m_rDataRaw[ (std::size_t)EVecIx::trade ].push_back( m_trade.Price() );
+  m_rDataRaw[ (std::size_t)EVecIx::tickj ].push_back( m_dblTickJ );
+  m_rDataRaw[ (std::size_t)EVecIx::tickl ].push_back( m_dblTickL );
+  m_rDataRaw[ (std::size_t)EVecIx::advdec ].push_back( m_dblAdvDecRatio );
+
   TimeTick( bar );
 }
 

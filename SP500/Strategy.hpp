@@ -21,6 +21,9 @@
 
 #pragma once
 
+#include <array>
+#include <vector>
+
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
@@ -119,6 +122,7 @@ private:
 
   double m_dblAdv;
   double m_dblDec;
+  double m_dblAdvDecRatio;
 
   double m_dblEma13;
   double m_dblEma29;
@@ -126,6 +130,12 @@ private:
   double m_dblEma200;
 
   ou::tf::Quote m_quote;
+  ou::tf::Trade m_trade;
+
+  enum class EVecIx { ema200 = 0, ema50, ema29, ema13, trade, tickj, tickl, advdec, count_ };
+  using rVector = std::array<std::vector<double>, (std::size_t)EVecIx::count_>;
+  rVector m_rDataRaw;
+  rVector m_rDataScaled;
 
   pOrder_t m_pOrder;
 
