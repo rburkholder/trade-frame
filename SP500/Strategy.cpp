@@ -309,14 +309,21 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   f(  50, bar, m_dblEma50, m_ceEma50 );
   f( 200, bar, m_dblEma200, m_ceEma200 );
 
-  m_rDataRaw[ (std::size_t)EVecIx::ema200 ].push_back( m_dblEma200 );
-  m_rDataRaw[ (std::size_t)EVecIx::ema50 ].push_back( m_dblEma50 );
-  m_rDataRaw[ (std::size_t)EVecIx::ema29 ].push_back( m_dblEma29 );
-  m_rDataRaw[ (std::size_t)EVecIx::ema13 ].push_back( m_dblEma13 );
-  m_rDataRaw[ (std::size_t)EVecIx::trade ].push_back( m_trade.Price() );
-  m_rDataRaw[ (std::size_t)EVecIx::tickj ].push_back( m_dblTickJ );
-  m_rDataRaw[ (std::size_t)EVecIx::tickl ].push_back( m_dblTickL );
-  m_rDataRaw[ (std::size_t)EVecIx::advdec ].push_back( m_dblAdvDecRatio );
+  const rValues_t r = { m_dblEma200, m_dblEma50, m_dblEma29, m_dblEma13, m_trade.Price(), m_dblTickJ, m_dblTickL, m_dblAdvDecRatio };
+
+  auto p( r.begin() );
+  auto end( r.end() );
+  double max( *p );
+  double min( *p );
+  ++p;
+  while ( end != p ) {
+    const double value( *p );
+    if ( max < value ) max = value;
+    if ( min > value ) min = value;
+    ++p;
+  }
+
+  m_rDataRaw.emplace_back( r );
 
   TimeTick( bar );
 }

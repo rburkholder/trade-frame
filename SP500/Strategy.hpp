@@ -132,10 +132,11 @@ private:
   ou::tf::Quote m_quote;
   ou::tf::Trade m_trade;
 
-  enum class EVecIx { ema200 = 0, ema50, ema29, ema13, trade, tickj, tickl, advdec, count_ };
-  using rVector = std::array<std::vector<double>, (std::size_t)EVecIx::count_>;
-  rVector m_rDataRaw;
-  rVector m_rDataScaled;
+  enum EVecIx { ixEma200 = 0, ixEma50, ixEma29, ixEma13, ixTrade, ixTickj, ixTickl, ixAdvdec, countIx_ };
+  using rValues_t = std::array<double, EVecIx::countIx_>;
+  using vValues_t = std::vector<rValues_t>;
+  vValues_t m_rDataRaw;
+  vValues_t m_rDataScaled;
 
   pOrder_t m_pOrder;
 
