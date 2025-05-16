@@ -146,29 +146,57 @@ void Strategy::Start() {
 
 void Strategy::SetupChart() {
 
+  static const ou::Colour::EColour c_colourEma200( ou::Colour::OrangeRed );
+  static const ou::Colour::EColour c_colourEma50(  ou::Colour::DarkMagenta );
+  static const ou::Colour::EColour c_colourEma29(  ou::Colour::DarkTurquoise );
+  static const ou::Colour::EColour c_colourEma13(  ou::Colour::Purple );
+  static const ou::Colour::EColour c_colourPrice(  ou::Colour::DarkGreen );
+
   m_cemPosOne.AddMark( +1.0, ou::Colour::Black,   "+1" );
     m_cemZero.AddMark(  0.0, ou::Colour::Black, "zero" );
   m_cemNegOne.AddMark( -1.0, ou::Colour::Black,   "-1" );
 
   m_ceTrade.SetName( "Trade" );
-  m_ceTrade.SetColour( ou::Colour::DarkGreen );
+  m_ceTrade.SetColour( c_colourPrice );
   m_cdv.Add( EChartSlot::Price, &m_ceTrade );
 
   m_ceEma13.SetName( "13s ema" );
-  m_ceEma13.SetColour( ou::Colour::Purple );
+  m_ceEma13.SetColour( c_colourEma13 );
   m_cdv.Add( EChartSlot::Price, &m_ceEma13 );
 
   m_ceEma29.SetName( "29s ema" );
-  m_ceEma29.SetColour( ou::Colour::DarkTurquoise );
+  m_ceEma29.SetColour( c_colourEma29 );
   m_cdv.Add( EChartSlot::Price, &m_ceEma29 );
 
   m_ceEma50.SetName( "50s ema" );
-  m_ceEma50.SetColour( ou::Colour::DarkMagenta );
+  m_ceEma50.SetColour( c_colourEma50 );
   m_cdv.Add( EChartSlot::Price, &m_ceEma50 );
 
   m_ceEma200.SetName( "200s ema" );
-  m_ceEma200.SetColour( ou::Colour::OrangeRed );
+  m_ceEma200.SetColour( c_colourEma200 );
   m_cdv.Add( EChartSlot::Price, &m_ceEma200 );
+
+  m_cdv.Add( EChartSlot::Ratio, &m_cemZero );
+
+  m_ceTrade_ratio.SetName( "Trade" );
+  m_ceTrade_ratio.SetColour( c_colourPrice );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceTrade_ratio );
+
+  m_ceEma13_ratio.SetName( "13s ema" );
+  m_ceEma13_ratio.SetColour( c_colourEma13 );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceEma13_ratio );
+
+  m_ceEma29_ratio.SetName( "29s ema" );
+  m_ceEma29_ratio.SetColour( c_colourEma29 );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceEma29_ratio );
+
+  m_ceEma50_ratio.SetName( "50s ema" );
+  m_ceEma50_ratio.SetColour( c_colourEma50 );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceEma50_ratio );
+
+  m_ceEma200_ratio.SetName( "200s ema" );
+  m_ceEma200_ratio.SetColour( c_colourEma200 );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceEma200_ratio );
 
   //m_ceAsk.SetName( "Ask" );
   //m_ceAsk.SetColour( ou::Colour::Red );
@@ -311,17 +339,49 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 
   const rValues_t r = { m_dblEma200, m_dblEma50, m_dblEma29, m_dblEma13, m_trade.Price(), m_dblTickJ, m_dblTickL, m_dblAdvDecRatio };
 
-  auto p( r.begin() );
-  auto end( r.end() );
-  double max( *p );
-  double min( *p );
-  ++p;
-  while ( end != p ) {
-    const double value( *p );
-    if ( max < value ) max = value;
-    if ( min > value ) min = value;
-    ++p;
+  struct maxmin {
+    double& max;
+    double& min;
+    maxmin( double& max_, double& min_, double init )
+    : max( max_ ), min( min_ ) {
+      max = min = init;
+    }
+    void test( const double value ) {
+      if ( max < value ) max = value;
+      if ( min > value ) min = value;
+    }
+  };
+
+  double max;
+  double min;
+  maxmin mm( max, min, m_dblEma200 );
+  mm.test( m_dblEma50 );
+  mm.test( m_dblEma29 );
+  mm.test( m_dblEma13 );
+  // on purpose: no test on price
+
+  if ( max > min ) {
+
+    const double range( max - min );
+
+    const double ratioEma200 = 2.0 * ( ( m_dblEma200 - min ) / range ) - 1.0; // zero other values to this - detrend timeseries
+    const double ratioEma50  = 2.0 * ( ( m_dblEma50 - min ) / range ) - 1.0;
+    const double ratioEma29  = 2.0 * ( ( m_dblEma29 - min ) / range ) - 1.0;
+    const double ratioEma13  = 2.0 * ( ( m_dblEma13 - min ) / range ) - 1.0;
+    const double ratioPrice  = 2.0 * ( ( m_trade.Price() - min ) / range ) - 1.0;
+
+    // todo: assign to indicators for visual verification
+    // todo: apply sigmoid/tanh to values to scale for lstm use
+
+    m_ceEma200_ratio.Append( bar.DateTime(), ratioEma200 );
+    m_ceEma50_ratio.Append( bar.DateTime(), ratioEma50 );
+    m_ceEma29_ratio.Append( bar.DateTime(), ratioEma29 );
+    m_ceEma13_ratio.Append( bar.DateTime(), ratioEma13 );
+    m_ceTrade_ratio.Append( bar.DateTime(), ratioPrice );
+
   }
+
+
 
   m_rDataRaw.emplace_back( r );
 
