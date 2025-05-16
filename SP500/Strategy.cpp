@@ -210,9 +210,11 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
   m_cdv.Add( EChartSlot::Tick, &m_cemZero );
+
   m_ceTickJ.SetName( "TickJ" );
   m_ceTickJ.SetColour( ou::Colour::Blue );
   m_cdv.Add( EChartSlot::Tick, &m_ceTickJ );
+
   m_ceTickL.SetName( "TickL" );
   m_ceTickL.SetColour( ou::Colour::DarkOrange );
   m_cdv.Add( EChartSlot::Tick, &m_ceTickL );
@@ -254,14 +256,14 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 void Strategy::HandleTickJ( const ou::tf::Trade& tick ) {
   const auto dt( tick.DateTime() );
   m_dblTickJ = tick.Price();
-  m_ceTickJ.Append( dt, m_dblTickJ );
+  m_ceTickJ.Append( dt, m_dblTickJ / 100.0 );
   //m_ceTickDiff.Append( dt, m_dblTickL - m_dblTickJ );
 }
 
 void Strategy::HandleTickL( const ou::tf::Trade& tick ) {
   const auto dt( tick.DateTime() );
   m_dblTickL = tick.Price();
-  m_ceTickL.Append( dt, m_dblTickL );
+  m_ceTickL.Append( dt, m_dblTickL / 200.0 );
   //m_ceTickDiff.Append( dt, m_dblTickL - m_dblTickJ );
 
   static const double hi( +200.0 );
