@@ -322,22 +322,10 @@ void Strategy::CalcAdvDec( boost::posix_time::ptime dt ) {
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 
-  auto f// turn into template to facilitate constexpr
-    = []( double seconds, const ou::tf::Bar& bar, double& ema, ou::ChartEntryIndicator& cei )-> void{
-      const double cur( 1.0 / seconds );
-      const double prv( 1.0 - cur );
-      if ( 0.0 == ema ) {
-        ema = bar.Close();
-      }
-      else {
-        ema = prv * ema + cur * bar.Close();
-      }
-      cei.Append( bar.DateTime(), ema );
-    };
-  f(  13, bar, m_dblEma13, m_ceEma13 );
-  f(  29, bar, m_dblEma29, m_ceEma29 );
-  f(  50, bar, m_dblEma50, m_ceEma50 );
-  f( 200, bar, m_dblEma200, m_ceEma200 );
+  UpdateEma<13>(  bar, m_dblEma13, m_ceEma13 );
+  UpdateEma<29>(  bar, m_dblEma29, m_ceEma29 );
+  UpdateEma<50>(  bar, m_dblEma50, m_ceEma50 );
+  UpdateEma<200>( bar, m_dblEma200, m_ceEma200 );
 
   const rValues_t r = { m_dblEma200, m_dblEma50, m_dblEma29, m_dblEma13, m_trade.Price(), m_dblTickJ, m_dblTickL, m_dblAdvDecRatio };
 

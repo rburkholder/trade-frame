@@ -184,6 +184,20 @@ private:
 
   ou::tf::BarFactory m_bfQuotes01Sec;
 
+  template<unsigned int n>
+  void UpdateEma( const ou::tf::Bar& bar, double& ema, ou::ChartEntryIndicator& cei ) {
+    constexpr double seconds( n );
+    constexpr double cur( 1.0 / seconds );
+    constexpr double prv( 1.0 - cur );
+    if ( 0.0 == ema ) {
+      ema = bar.Close();
+    }
+    else {
+      ema = prv * ema + cur * bar.Close();
+    }
+    cei.Append( bar.DateTime(), ema );
+    };
+
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
 
