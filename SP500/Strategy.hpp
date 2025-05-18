@@ -175,7 +175,6 @@ private:
 
   ou::ChartEntryIndicator m_ceTickJ;
   ou::ChartEntryIndicator m_ceTickL;
-  //ou::ChartEntryIndicator m_ceTickDiff;
   //ou::ChartEntryIndicator m_ceTrin;
 
   ou::ChartEntryIndicator m_ceAdvDec;

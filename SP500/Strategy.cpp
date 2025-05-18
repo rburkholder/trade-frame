@@ -218,9 +218,6 @@ void Strategy::SetupChart() {
   m_ceTickL.SetName( "TickL" );
   m_ceTickL.SetColour( ou::Colour::DarkOrange );
   m_cdv.Add( EChartSlot::Tick, &m_ceTickL );
-  //m_ceTickDiff.SetName( "Diff" );
-  //m_ceTickDiff.SetColour( ou::Colour::Magenta );
-  //m_cdv.Add( EChartSlot::Tick, &m_ceTickDiff );
 
   m_ceAdvDec.SetName( "AdvDec" );
   m_cdv.Add( EChartSlot::AdvDec, &m_cemZero );
@@ -256,15 +253,13 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 void Strategy::HandleTickJ( const ou::tf::Trade& tick ) {
   const auto dt( tick.DateTime() );
   m_dblTickJ = tick.Price();
-  m_ceTickJ.Append( dt, m_dblTickJ / 100.0 );
-  //m_ceTickDiff.Append( dt, m_dblTickL - m_dblTickJ );
+  m_ceTickJ.Append( dt, m_dblTickJ / 100.0 );  // approx normalization
 }
 
 void Strategy::HandleTickL( const ou::tf::Trade& tick ) {
   const auto dt( tick.DateTime() );
   m_dblTickL = tick.Price();
-  m_ceTickL.Append( dt, m_dblTickL / 200.0 );
-  //m_ceTickDiff.Append( dt, m_dblTickL - m_dblTickJ );
+  m_ceTickL.Append( dt, m_dblTickL / 200.0 );  // approx normalization
 
   static const double hi( +200.0 );
 
@@ -322,20 +317,20 @@ void Strategy::CalcAdvDec( boost::posix_time::ptime dt ) {
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 
-  UpdateEma<13>(  bar, m_dblEma13, m_ceEma13 );
-  UpdateEma<29>(  bar, m_dblEma29, m_ceEma29 );
-  UpdateEma<50>(  bar, m_dblEma50, m_ceEma50 );
+  UpdateEma< 13>( bar, m_dblEma13,  m_ceEma13  );
+  UpdateEma< 29>( bar, m_dblEma29,  m_ceEma29  );
+  UpdateEma< 50>( bar, m_dblEma50,  m_ceEma50  );
   UpdateEma<200>( bar, m_dblEma200, m_ceEma200 );
-
-  const rValues_t r = { m_dblEma200, m_dblEma50, m_dblEma29, m_dblEma13, m_trade.Price(), m_dblTickJ, m_dblTickL, m_dblAdvDecRatio };
 
   struct maxmin {
     double& max;
     double& min;
+
     maxmin( double& max_, double& min_, double init )
     : max( max_ ), min( min_ ) {
       max = min = init;
     }
+
     void test( const double value ) {
       if ( max < value ) max = value;
       if ( min > value ) min = value;
@@ -354,14 +349,12 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 
     const double range( max - min );
 
-    const double ratioEma200 = 2.0 * ( ( m_dblEma200 - min ) / range ) - 1.0; // zero other values to this - detrend timeseries
+    // detrend timeseries
+    const double ratioEma200 = 2.0 * ( ( m_dblEma200 - min ) / range ) - 1.0;
     const double ratioEma50  = 2.0 * ( ( m_dblEma50 - min ) / range ) - 1.0;
     const double ratioEma29  = 2.0 * ( ( m_dblEma29 - min ) / range ) - 1.0;
     const double ratioEma13  = 2.0 * ( ( m_dblEma13 - min ) / range ) - 1.0;
     const double ratioPrice  = 2.0 * ( ( m_trade.Price() - min ) / range ) - 1.0;
-
-    // todo: assign to indicators for visual verification
-    // todo: apply sigmoid/tanh to values to scale for lstm use
 
     m_ceEma200_ratio.Append( bar.DateTime(), ratioEma200 );
     m_ceEma50_ratio.Append( bar.DateTime(), ratioEma50 );
@@ -369,10 +362,11 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
     m_ceEma13_ratio.Append( bar.DateTime(), ratioEma13 );
     m_ceTrade_ratio.Append( bar.DateTime(), ratioPrice );
 
+    // todo: apply sigmoid/tanh to values to scale for lstm use
+
   }
 
-
-
+  const rValues_t r = { m_dblEma200, m_dblEma50, m_dblEma29, m_dblEma13, m_trade.Price(), m_dblTickJ, m_dblTickL, m_dblAdvDecRatio };
   m_rDataRaw.emplace_back( r );
 
   TimeTick( bar );
