@@ -491,6 +491,9 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
     pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, sSymbol );
     pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
 
+    // todo:  need to fix when canadian symbols acquired
+    //   need toronto stock exchange
+    //   need to determine if fundamentals are avalaible
     assert( nullptr == m_pAcquireFundamentals );
 
     m_pAcquireFundamentals
