@@ -55,6 +55,8 @@ void PanelSymbolInfo::Init() {
   m_fBtnSave = nullptr;
   m_fBtnUndo = nullptr;
 
+  m_bByFields = false;
+
 }
 
 bool PanelSymbolInfo::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
@@ -176,15 +178,20 @@ void PanelSymbolInfo::CreateControls() {
 
   m_btnSave = new wxButton( itemPanel1, ID_BTN_Save, _("Save"), wxDefaultPosition, wxDefaultSize, 0 );
   itemBoxSizer30->Add(m_btnSave, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 2);
+  m_btnDefaultBackground = m_btnSave->GetBackgroundColour();
 
   m_btnUndo->Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelSymbolInfo::OnBTNUndoClick, this );
-  m_btnSave->Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelSymbolInfo::OnBTNSaveClick, this ) ;
+  m_btnSave->Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelSymbolInfo::OnBTNSaveClick, this );
+  m_txtNotes->Bind( wxEVT_COMMAND_TEXT_UPDATED, &PanelSymbolInfo::OnTextUpdated, this );
 
   Bind( wxEVT_CLOSE_WINDOW, &PanelSymbolInfo::OnClose, this );
 
 }
 
 void PanelSymbolInfo::SetFields( const Fields& fields ) {
+
+  m_bByFields = true;
+
   m_txtYield->SetValue( fields.sYield );
   m_txtLast->SetValue( fields.sLast );
   m_txtAmount->SetValue( fields.sAmount );
@@ -195,6 +202,8 @@ void PanelSymbolInfo::SetFields( const Fields& fields ) {
   m_txtName->SetLabel( fields.sName );
   m_fBtnSave = std::move( fields.fBtnSave );
   m_fBtnUndo = std::move( fields.fBtnUndo );
+
+  m_bByFields = false;
 }
 
 void PanelSymbolInfo::SetTags( const wxArrayString& rTags ) {
@@ -202,16 +211,32 @@ void PanelSymbolInfo::SetTags( const wxArrayString& rTags ) {
 }
 
 void PanelSymbolInfo::OnBTNUndoClick( wxCommandEvent& event ) { // wxEVT_COMMAND_BUTTON_CLICKED
-  if ( m_fBtnUndo ) m_txtNotes->SetValue( m_fBtnUndo() );
+  if ( m_fBtnUndo ) {
+    m_txtNotes->SetValue( m_fBtnUndo() );
+    m_txtNotes->SetBackgroundColour( m_btnDefaultBackground );
+  }
   event.Skip();
 }
+
 void PanelSymbolInfo::OnBTNSaveClick( wxCommandEvent& event ) { // wxEVT_COMMAND_BUTTON_CLICKED
   const std::string sNotes( m_txtNotes->GetValue() );
   if ( m_fBtnSave ) m_fBtnSave( sNotes );
+  m_btnSave->SetBackgroundColour( m_btnDefaultBackground );
+  event.Skip();
+}
+
+void PanelSymbolInfo::OnTextUpdated( wxCommandEvent& event ) { // wxEVT_COMMAND_TEXT_UPDATED
+  if ( m_bByFields ) {}
+  else {
+    m_btnSave->SetBackgroundColour( *wxYELLOW );
+  }
   event.Skip();
 }
 
 void PanelSymbolInfo::OnClose( wxCloseEvent& event ) {
+  m_btnUndo->Unbind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelSymbolInfo::OnBTNUndoClick, this );
+  m_btnSave->Unbind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelSymbolInfo::OnBTNSaveClick, this );
+  m_txtNotes->Unbind( wxEVT_COMMAND_TEXT_UPDATED, &PanelSymbolInfo::OnTextUpdated, this );
   Unbind( wxEVT_CLOSE_WINDOW, &PanelSymbolInfo::OnClose, this );
 }
 

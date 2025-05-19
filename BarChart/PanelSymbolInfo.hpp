@@ -133,10 +133,14 @@ private:
   fBtnSave_t m_fBtnSave;
   fBtnUndo_t m_fBtnUndo;
 
+  bool m_bByFields;
+  wxColour m_btnDefaultBackground;
+
   void Init();
 
   void OnBTNUndoClick( wxCommandEvent& event );
   void OnBTNSaveClick( wxCommandEvent& event );
+  void OnTextUpdated( wxCommandEvent& event );
 
   void OnClose( wxCloseEvent& event );
 
