@@ -1,3 +1,6 @@
+2025/05/18 
+https://en.cppreference.com/w/cpp/language/lambda
+
 2014/11/11
 
 pimpl
