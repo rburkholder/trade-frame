@@ -351,9 +351,9 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 
     // detrend timeseries
     const double ratioEma200 = 2.0 * ( ( m_dblEma200 - min ) / range ) - 1.0;
-    const double ratioEma50  = 2.0 * ( ( m_dblEma50 - min ) / range ) - 1.0;
-    const double ratioEma29  = 2.0 * ( ( m_dblEma29 - min ) / range ) - 1.0;
-    const double ratioEma13  = 2.0 * ( ( m_dblEma13 - min ) / range ) - 1.0;
+    const double ratioEma50  = 2.0 * ( ( m_dblEma50  - min ) / range ) - 1.0;
+    const double ratioEma29  = 2.0 * ( ( m_dblEma29  - min ) / range ) - 1.0;
+    const double ratioEma13  = 2.0 * ( ( m_dblEma13  - min ) / range ) - 1.0;
     const double ratioPrice  = 2.0 * ( ( m_trade.Price() - min ) / range ) - 1.0;
 
     m_ceEma200_ratio.Append( bar.DateTime(), ratioEma200 );
