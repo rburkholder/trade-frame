@@ -466,7 +466,11 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
         [iterSymbolInfo]( const std::string& sNotes ){
           iterSymbolInfo->second.m_sNotes = sNotes;
         };
-      m_pPanelSymbolInfo->SetFields( fields );
+      CallAfter(
+        [this,fields_=std::move(fields)]() { // note: the std::move is not being used - CallAfter has a reference parameter
+          m_pPanelSymbolInfo->SetFields( fields_ );
+        } );
+
     };
 
   if ( iterSymbolInfo->second.m_key_info.bLoaded ) {

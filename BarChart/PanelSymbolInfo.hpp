@@ -69,9 +69,39 @@ PanelSymbolInfo(
     fBtnSave_t fBtnSave;
     fBtnUndo_t fBtnUndo;
 
+    Fields()
+    : fBtnSave( nullptr ), fBtnUndo( nullptr )
+    {}
+
+    Fields( Fields&& rhs )
+    : sYield(   std::move( rhs.sYield ) )
+    , sLast(    std::move( rhs.sLast ) )
+    , sAmount(  std::move( rhs.sAmount ) )
+    , sRate(    std::move( rhs.sRate ) )
+    , sExDiv(   std::move( rhs.sExDiv ) )
+    , sPayed(   std::move( rhs.sPayed ) )
+    , sNotes(   std::move( rhs.sNotes ) )
+    , sName(    std::move( rhs.sName ) )
+    , fBtnSave( std::move( rhs.fBtnSave ) )
+    , fBtnUndo( std::move( rhs.fBtnUndo ) )
+    {}
+
+    Fields( const Fields& rhs )
+    : sYield(   rhs.sYield )
+    , sLast(    rhs.sLast )
+    , sAmount(  rhs.sAmount )
+    , sRate(    rhs.sRate )
+    , sExDiv(   rhs.sExDiv )
+    , sPayed(   rhs.sPayed )
+    , sNotes(   rhs.sNotes )
+    , sName(    rhs.sName )
+    , fBtnSave( rhs.fBtnSave )
+    , fBtnUndo( rhs.fBtnUndo )
+    {}
+
   };
-  void SetFields( Fields& );
-  void SetTags( wxArrayString& );
+  void SetFields( const Fields& );
+  void SetTags( const wxArrayString& );
 
 protected:
 private:

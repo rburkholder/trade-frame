@@ -184,7 +184,7 @@ void PanelSymbolInfo::CreateControls() {
 
 }
 
-void PanelSymbolInfo::SetFields( Fields& fields ) {
+void PanelSymbolInfo::SetFields( const Fields& fields ) {
   m_txtYield->SetValue( fields.sYield );
   m_txtLast->SetValue( fields.sLast );
   m_txtAmount->SetValue( fields.sAmount );
@@ -197,7 +197,7 @@ void PanelSymbolInfo::SetFields( Fields& fields ) {
   m_fBtnUndo = std::move( fields.fBtnUndo );
 }
 
-void PanelSymbolInfo::SetTags( wxArrayString& rTags ) {
+void PanelSymbolInfo::SetTags( const wxArrayString& rTags ) {
   m_lbTags->Set( rTags );
 }
 
