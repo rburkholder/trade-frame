@@ -70,8 +70,8 @@ bool AppSP500::OnInit() {
     return false;
   }
 
-  //TorchTest();
-  //return false; // prelimnary exit for testing
+  TorchTest_v2();
+  return false; // preliminary exit for testing
 
   if ( config::Load( c_sChoicesFilename, m_choices ) ) {
     if ( boost::filesystem::exists( m_choices.m_sHdf5File ) ) {}
