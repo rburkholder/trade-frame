@@ -138,9 +138,10 @@ private:
 
   void Init();
 
-  void OnBTNUndoClick( wxCommandEvent& event );
-  void OnBTNSaveClick( wxCommandEvent& event );
-  void OnTextUpdated( wxCommandEvent& event );
+  void OnBTNUndoClick( wxCommandEvent& );
+  void OnBTNSaveClick( wxCommandEvent& );
+  void OnTextUpdated( wxCommandEvent& );
+  void OnTextFocusKilled( wxFocusEvent& );
 
   void OnClose( wxCloseEvent& event );
 

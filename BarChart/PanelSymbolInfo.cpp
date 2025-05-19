@@ -183,6 +183,7 @@ void PanelSymbolInfo::CreateControls() {
   m_btnUndo->Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelSymbolInfo::OnBTNUndoClick, this );
   m_btnSave->Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelSymbolInfo::OnBTNSaveClick, this );
   m_txtNotes->Bind( wxEVT_COMMAND_TEXT_UPDATED, &PanelSymbolInfo::OnTextUpdated, this );
+  m_txtNotes->Bind( wxEVT_KILL_FOCUS, &PanelSymbolInfo::OnTextFocusKilled, this );
 
   Bind( wxEVT_CLOSE_WINDOW, &PanelSymbolInfo::OnClose, this );
 
@@ -226,10 +227,17 @@ void PanelSymbolInfo::OnBTNSaveClick( wxCommandEvent& event ) { // wxEVT_COMMAND
 }
 
 void PanelSymbolInfo::OnTextUpdated( wxCommandEvent& event ) { // wxEVT_COMMAND_TEXT_UPDATED
-  if ( m_bByFields ) {}
+  if ( m_bByFields ) {
+    m_btnSave->SetBackgroundColour( m_btnDefaultBackground );
+  }
   else {
     m_btnSave->SetBackgroundColour( *wxYELLOW );
   }
+  event.Skip();
+}
+
+void PanelSymbolInfo::OnTextFocusKilled( wxFocusEvent& event ) { // wxEVT_KILL_FOCUS
+  // save the text
   event.Skip();
 }
 
@@ -237,6 +245,7 @@ void PanelSymbolInfo::OnClose( wxCloseEvent& event ) {
   m_btnUndo->Unbind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelSymbolInfo::OnBTNUndoClick, this );
   m_btnSave->Unbind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelSymbolInfo::OnBTNSaveClick, this );
   m_txtNotes->Unbind( wxEVT_COMMAND_TEXT_UPDATED, &PanelSymbolInfo::OnTextUpdated, this );
+  m_txtNotes->Unbind( wxEVT_KILL_FOCUS, &PanelSymbolInfo::OnTextFocusKilled, this );
   Unbind( wxEVT_CLOSE_WINDOW, &PanelSymbolInfo::OnClose, this );
 }
 
