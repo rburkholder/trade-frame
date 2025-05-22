@@ -30,7 +30,8 @@ Strategy::Strategy(
 , fStart_t&& fStart
 , fStop_t&& fStop
 )
-: m_cdv( cdv )
+: ou::tf::DailyTradeTimeFrame<Strategy>()
+, m_cdv( cdv )
 , m_stateTrade( ETradeState::Init )
 , m_fConstructWatch( std::move( fConstructWatch ) )
 , m_fConstructPosition( std::move( fConstructPosition ) )
