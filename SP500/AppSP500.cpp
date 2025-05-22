@@ -377,7 +377,8 @@ void AppSP500::HandleMenuActionSimEmitStats() {
 }
 
 void AppSP500::HandleSimComplete() {
-  BOOST_LOG_TRIVIAL(info) << "simulation complete";
+  BOOST_LOG_TRIVIAL(info) << "simulation complete, post processing";
+  m_pStrategy->PostProcess();
 }
 
 void AppSP500::InitStructures( ESymbol eSymbol, const std::string& sName, size_t ixChart, boost::posix_time::time_duration td ) {

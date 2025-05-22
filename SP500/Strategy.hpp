@@ -73,6 +73,8 @@ public:
   );
   ~Strategy();
 
+  void PostProcess();
+
 protected:
 private:
 

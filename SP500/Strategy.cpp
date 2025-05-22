@@ -435,6 +435,10 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 }
 
+void Strategy::PostProcess() {
+  // preparation for ML training goes here
+}
+
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
   m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
   m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
