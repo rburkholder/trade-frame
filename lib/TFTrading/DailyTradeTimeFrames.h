@@ -82,6 +82,8 @@ public:
   boost::posix_time::ptime GetMarketClose() const { return m_dtMarketClose; }
   boost::posix_time::ptime GetSoftwareReset() const { return m_dtSoftwareReset; }
 
+  bool RHTrading() const { return m_bRHTrading; }
+
 protected:
 
   enum class TimeFrame { Done, PreRH, BellHeard, PauseForQuotes, RHTrading, Cancel, Cancelling, GoNeutral, GoingNeutral, WaitForRHClose, AtRHClose, AfterRH, Closed, SoftwareReset };
@@ -120,13 +122,15 @@ private:
   boost::posix_time::ptime m_dtMarketClose;
   boost::posix_time::ptime m_dtSoftwareReset;
 
+  bool m_bRHTrading;
   TimeFrame m_stateTimeFrame;
 
 };
 
 template<class T>
 DailyTradeTimeFrame<T>::DailyTradeTimeFrame()
-: m_stateTimeFrame( TimeFrame::PreRH )
+: m_bRHTrading( false )
+, m_stateTimeFrame( TimeFrame::PreRH )
   // turn these into traits:  equities, futures, currencies
 {
   InitForUSEquityExchanges( ou::TimeSource::GlobalInstance().External().date() );
@@ -134,7 +138,8 @@ DailyTradeTimeFrame<T>::DailyTradeTimeFrame()
 
 template<class T>
 DailyTradeTimeFrame<T>::DailyTradeTimeFrame( boost::gregorian::date date )
-: m_stateTimeFrame( TimeFrame::PreRH )
+: m_bRHTrading( false )
+, m_stateTimeFrame( TimeFrame::PreRH )
   // turn these into traits:  equities, futures, currencies
 {
   InitForUSEquityExchanges( date );
@@ -329,6 +334,7 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
       m_stateTimeFrame = TimeFrame::AtRHClose;
       boost::gregorian::date date( dt.date() );
       boost::posix_time::time_duration time( dt.time_of_day() );
+      m_bRHTrading = false; // before or after the event?
       static_cast<T*>(this)->HandleAtRHClose( date, time );  // one shot
       m_stateTimeFrame = TimeFrame::AfterRH;
       static_cast<T*>(this)->HandleAfterRH( dd );
@@ -350,6 +356,7 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
     //ss << dt << "," << m_dtRHOpen;
     if ( dt >= m_dtRHOpen ) {
       m_stateTimeFrame = TimeFrame::BellHeard;
+      m_bRHTrading = true;
       boost::gregorian::date date( dt.date() );
       boost::posix_time::time_duration time( dt.time_of_day() );
       static_cast<T*>(this)->HandleBellHeard( date, time );  // one shot
