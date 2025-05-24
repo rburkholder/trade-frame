@@ -137,8 +137,8 @@ private:
   enum EVecIx { ixEma200 = 0, ixEma50, ixEma29, ixEma13, ixTrade, ixTickj, ixTickl, ixAdvdec, countIx_ };
   using rValues_t = std::array<double, EVecIx::countIx_>;
   using vValues_t = std::vector<rValues_t>;
-  vValues_t m_rDataRaw;
-  vValues_t m_rDataScaled;
+  vValues_t m_vDataRaw;
+  vValues_t m_vDataScaled;
 
   pOrder_t m_pOrder;
 

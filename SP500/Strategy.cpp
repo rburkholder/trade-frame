@@ -439,7 +439,7 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   }
 
   const rValues_t r = { m_dblEma200, m_dblEma50, m_dblEma29, m_dblEma13, m_trade.Price(), m_dblTickJ, m_dblTickL, m_dblAdvDecRatio };
-  m_rDataRaw.emplace_back( r );
+  m_vDataRaw.emplace_back( r );
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
