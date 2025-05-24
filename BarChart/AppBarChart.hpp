@@ -140,7 +140,6 @@ private:
   pIQFeed_t m_piqfeed;
 
   using pAcquireFundamentals_t = std::shared_ptr<ou::tf::AcquireFundamentals>;
-  pAcquireFundamentals_t m_pAcquireFundamentals;
   pAcquireFundamentals_t m_pAcquireFundamentals_burial;
 
   ou::tf::TreeItem* m_ptiRoot;
@@ -175,6 +174,8 @@ private:
     ou::ChartDataView m_dvChart; // the data, not movable
     ou::ChartEntryBars m_cePriceBars;
     ou::ChartEntryVolume m_ceVolume;
+
+    pAcquireFundamentals_t m_pAcquireFundamentals;
 
     KeyInfo m_key_info;
 

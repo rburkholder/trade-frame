@@ -473,53 +473,59 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
 
     };
 
-  if ( iterSymbolInfo->second.m_key_info.bLoaded ) {
+  SymbolInfo& si( iterSymbolInfo->second );
+  if ( si.m_key_info.bLoaded ) {
     f( iterSymbolInfo );
   }
   else {
-    using pWatch_t = ou::tf::Watch::pWatch_t;
-    using Summary = ou::tf::Watch::Summary;
-    using Fundamentals = ou::tf::Watch::Fundamentals;
-    using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+    if ( si.m_pAcquireFundamentals ) {
+      // already in process
+    }
+    else {
+      using pWatch_t = ou::tf::Watch::pWatch_t;
+      using Summary = ou::tf::Watch::Summary;
+      using Fundamentals = ou::tf::Watch::Fundamentals;
+      using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
-    const std::string& sSymbol( iterSymbolInfo->first );
+      const std::string& sSymbol( iterSymbolInfo->first );
 
-    assert( m_piqfeed );
-    assert( m_piqfeed->Connected() );
+      assert( m_piqfeed );
+      assert( m_piqfeed->Connected() );
 
-    pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( sSymbol );
-    pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, sSymbol );
-    pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
+      pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( sSymbol );
+      pInstrument->SetAlternateName( ou::tf::Instrument::eidProvider_t::EProviderIQF, sSymbol );
+      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_piqfeed );
 
-    // todo:  need to fix when canadian symbols acquired
-    //   need toronto stock exchange
-    //   need to determine if fundamentals are avalaible
-    assert( nullptr == m_pAcquireFundamentals );
+      // todo:  need to fix when canadian symbols acquired
+      //   need toronto stock exchange
+      //   need to determine if fundamentals are avalaible
 
-    m_pAcquireFundamentals
-      = ou::tf::AcquireFundamentals::Factory (
-        std::move( pWatch ),
-        [this,iterSymbolInfo,f_=std::move(f)]( pWatch_t pWatch ){
-          KeyInfo& ki( iterSymbolInfo->second.m_key_info );
-          const Summary& summary( pWatch->GetSummary() );
-          ki.dblLast = summary.dblTrade;
-          const Fundamentals& fundamentals( pWatch->GetFundamentals() );
-          ki.sCompanyName = fundamentals.sCompanyName;
-          ki.dblRate = fundamentals.dblDividendRate;
-          ki.dblYield = fundamentals.dblDividendYield;
-          ki.dblAmount = fundamentals.dblDividendAmount;
-          ki.datePayed = fundamentals.datePayed;
-          ki.dateExDividend = fundamentals.dateExDividend;
+      si.m_pAcquireFundamentals
+        = ou::tf::AcquireFundamentals::Factory (
+          std::move( pWatch ),
+          [this,iterSymbolInfo,f_=std::move(f)]( pWatch_t pWatch ){
+            SymbolInfo& si( iterSymbolInfo->second );
+            KeyInfo& ki( si.m_key_info );
+            const Summary& summary( pWatch->GetSummary() );
+            ki.dblLast = summary.dblTrade;
+            const Fundamentals& fundamentals( pWatch->GetFundamentals() );
+            ki.sCompanyName = fundamentals.sCompanyName;
+            ki.dblRate = fundamentals.dblDividendRate;
+            ki.dblYield = fundamentals.dblDividendYield;
+            ki.dblAmount = fundamentals.dblDividendAmount;
+            ki.datePayed = fundamentals.datePayed;
+            ki.dateExDividend = fundamentals.dateExDividend;
 
-          f_( iterSymbolInfo );
+            f_( iterSymbolInfo );
 
-          m_pAcquireFundamentals_burial = std::move( m_pAcquireFundamentals );
-          m_pAcquireFundamentals.reset();
-          ki.bLoaded = true;
+            m_pAcquireFundamentals_burial = std::move( si.m_pAcquireFundamentals );
+            si.m_pAcquireFundamentals.reset();
+            ki.bLoaded = true;
 
-        }
-      );
-      m_pAcquireFundamentals->Start();
+          }
+        );
+        si.m_pAcquireFundamentals->Start();
+      }
     }
 }
 
