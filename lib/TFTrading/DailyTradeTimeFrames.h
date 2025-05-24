@@ -331,10 +331,10 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
     break;
   case TimeFrame::WaitForRHClose:
     if ( dt >= m_dtRHClose ) {
+      m_bRHTrading = false;
       m_stateTimeFrame = TimeFrame::AtRHClose;
       boost::gregorian::date date( dt.date() );
       boost::posix_time::time_duration time( dt.time_of_day() );
-      m_bRHTrading = false; // before or after the event?
       static_cast<T*>(this)->HandleAtRHClose( date, time );  // one shot
       m_stateTimeFrame = TimeFrame::AfterRH;
       static_cast<T*>(this)->HandleAfterRH( dd );
