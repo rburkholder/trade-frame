@@ -252,60 +252,67 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 }
 
 void Strategy::HandleTickJ( const ou::tf::Trade& tick ) {
-  const auto dt( tick.DateTime() );
-  m_dblTickJ = tick.Price();
-  m_ceTickJ.Append( dt, m_dblTickJ / 100.0 );  // approx normalization
+  if ( RHTrading() ) {
+    const auto dt( tick.DateTime() );
+    m_dblTickJ = tick.Price();
+    m_ceTickJ.Append( dt, m_dblTickJ / 100.0 );  // approx normalization
+  }
 }
 
 void Strategy::HandleTickL( const ou::tf::Trade& tick ) {
-  const auto dt( tick.DateTime() );
-  m_dblTickL = tick.Price();
-  m_ceTickL.Append( dt, m_dblTickL / 200.0 );  // approx normalization
+  if ( RHTrading() ) {
+    const auto dt( tick.DateTime() );
+    m_dblTickL = tick.Price();
+    m_ceTickL.Append( dt, m_dblTickL / 200.0 );  // approx normalization
 
-  static const double hi( +200.0 );
+    static const double hi( +200.0 );
 
-  switch ( m_stateTickHi ) {
-    case ETickHi::Neutral:
-      if ( hi <= m_dblTickL ) {
-        m_stateTickHi = ETickHi::UpOvr;
-      }
-      break;
-    case ETickHi::UpOvr:
-    case ETickHi::Up:
-      m_stateTickHi = ( hi < m_dblTickL ) ? ETickHi::Up : ETickHi::DnOvr;
-      break;
-    case ETickHi::DnOvr:
-      m_stateTickHi = ( hi > m_dblTickL ) ? ETickHi::Neutral : ETickHi::UpOvr;
-      break;
+    switch ( m_stateTickHi ) {
+      case ETickHi::Neutral:
+        if ( hi <= m_dblTickL ) {
+          m_stateTickHi = ETickHi::UpOvr;
+        }
+        break;
+      case ETickHi::UpOvr:
+      case ETickHi::Up:
+        m_stateTickHi = ( hi < m_dblTickL ) ? ETickHi::Up : ETickHi::DnOvr;
+        break;
+      case ETickHi::DnOvr:
+        m_stateTickHi = ( hi > m_dblTickL ) ? ETickHi::Neutral : ETickHi::UpOvr;
+        break;
+    }
+
+    static const double lo( -200.0 );
+
+    switch ( m_stateTickLo ) {
+      case ETickLo::Neutral:
+        if ( lo >= m_dblTickL ) {
+          m_stateTickLo = ETickLo::DnOvr;
+        }
+        break;
+      case ETickLo::DnOvr:
+      case ETickLo::Dn:
+        m_stateTickLo = ( lo > m_dblTickL ) ? ETickLo::Dn : ETickLo::UpOvr;
+        break;
+      case ETickLo::UpOvr:
+        m_stateTickLo = ( lo < m_dblTickL ) ? ETickLo::Neutral : ETickLo::DnOvr;
+        break;
+    }
   }
-
-  static const double lo( -200.0 );
-
-  switch ( m_stateTickLo ) {
-    case ETickLo::Neutral:
-      if ( lo >= m_dblTickL ) {
-        m_stateTickLo = ETickLo::DnOvr;
-      }
-      break;
-    case ETickLo::DnOvr:
-    case ETickLo::Dn:
-      m_stateTickLo = ( lo > m_dblTickL ) ? ETickLo::Dn : ETickLo::UpOvr;
-      break;
-    case ETickLo::UpOvr:
-      m_stateTickLo = ( lo < m_dblTickL ) ? ETickLo::Neutral : ETickLo::DnOvr;
-      break;
-  }
-
 }
 
 void Strategy::HandleAdv( const ou::tf::Trade& tick ) {
-  m_dblAdv = tick.Price();
-  CalcAdvDec( tick.DateTime() );
+  if ( RHTrading() ) {
+    m_dblAdv = tick.Price();
+    CalcAdvDec( tick.DateTime() );
+  }
 }
 
 void Strategy::HandleDec( const ou::tf::Trade& tick ) {
-  m_dblDec = tick.Price();
-  CalcAdvDec( tick.DateTime() );
+  if ( RHTrading() ) {
+    m_dblDec = tick.Price();
+    CalcAdvDec( tick.DateTime() );
+  }
 }
 
 void Strategy::CalcAdvDec( boost::posix_time::ptime dt ) {
