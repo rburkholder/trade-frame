@@ -205,6 +205,13 @@ private:
       m_dvChart.Add( EChartSlot::Volume, &m_ceVolume );
     }
 
+    ~SymbolInfo() {
+      m_pti = nullptr;
+      m_pAcquireFundamentals.reset();
+      m_dvChart.Remove( EChartSlot::Price, &m_cePriceBars );
+      m_dvChart.Remove( EChartSlot::Volume, &m_ceVolume );
+    }
+
   };
 
   // todo: map entries could be stored in TreeItem instead
