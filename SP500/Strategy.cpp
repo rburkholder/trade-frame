@@ -394,6 +394,9 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   UpdateEma< 50>( bar, m_dblEma50,  m_ceEma50  );
   UpdateEma<200>( bar, m_dblEma200, m_ceEma200 );
 
+  const rValues_t r = { m_dblEma200, m_dblEma50, m_dblEma29, m_dblEma13, m_trade.Price(), m_dblTickJ, m_dblTickL, m_dblAdvDecRatio };
+  m_vDataRaw.emplace_back( r );
+
   struct maxmin {
     double& max;
     double& min;
@@ -405,7 +408,9 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
 
     void test( const double value ) {
       if ( max < value ) max = value;
-      if ( min > value ) min = value;
+      else {
+        if ( min > value ) min = value;
+      }
     }
   };
 
@@ -429,17 +434,15 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
     const double ratioPrice  = 2.0 * ( ( m_trade.Price() - min ) / range ) - 1.0;
 
     m_ceEma200_ratio.Append( bar.DateTime(), ratioEma200 );
-    m_ceEma50_ratio.Append( bar.DateTime(), ratioEma50 );
-    m_ceEma29_ratio.Append( bar.DateTime(), ratioEma29 );
-    m_ceEma13_ratio.Append( bar.DateTime(), ratioEma13 );
-    m_ceTrade_ratio.Append( bar.DateTime(), ratioPrice );
+    m_ceEma50_ratio.Append(  bar.DateTime(), ratioEma50 );
+    m_ceEma29_ratio.Append(  bar.DateTime(), ratioEma29 );
+    m_ceEma13_ratio.Append(  bar.DateTime(), ratioEma13 );
+    m_ceTrade_ratio.Append(  bar.DateTime(), ratioPrice );
 
     // todo: apply sigmoid/tanh to values to scale for lstm use
 
   }
 
-  const rValues_t r = { m_dblEma200, m_dblEma50, m_dblEma29, m_dblEma13, m_trade.Price(), m_dblTickJ, m_dblTickL, m_dblAdvDecRatio };
-  m_vDataRaw.emplace_back( r );
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
