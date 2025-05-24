@@ -170,21 +170,23 @@ private:
 
   struct SymbolInfo {
 
-    ou::tf::TreeItem* m_pti;
-    ou::ChartDataView m_dvChart; // the data, not movable
+    bool m_bBarsLoaded;
+    std::string m_sNotes;
+
     ou::ChartEntryBars m_cePriceBars;
     ou::ChartEntryVolume m_ceVolume;
 
+    ou::ChartDataView m_dvChart; // the data, not movable
+
+    ou::tf::TreeItem* m_pti;
     pAcquireFundamentals_t m_pAcquireFundamentals;
 
     KeyInfo m_key_info;
 
-    bool m_bBarsLoaded;
-    std::string m_sNotes;
-
     SymbolInfo()
     : m_bBarsLoaded( false )
     , m_pti( nullptr )
+    , m_pAcquireFundamentals( nullptr )
     {
       Init();
     }
@@ -192,6 +194,7 @@ private:
     SymbolInfo( SymbolInfo&& rhs )
     : m_bBarsLoaded( false )
     , m_pti( rhs.m_pti )
+    , m_pAcquireFundamentals( std::move( rhs.m_pAcquireFundamentals ) )
     {
       Init();
     }
