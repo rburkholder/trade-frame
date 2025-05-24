@@ -211,7 +211,8 @@ private:
 
   void CalcAdvDec( boost::posix_time::ptime );
 
-  void HandleBarQuotes01Sec( const ou::tf::Bar& bar );
+  void HandleBarQuotes01Sec( const ou::tf::Bar& );
+  void Calc01SecIndicators( const ou::tf::Bar& );
 
   void HandleRHTrading( const ou::tf::Trade& );
 
