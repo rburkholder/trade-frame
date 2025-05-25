@@ -503,9 +503,10 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
     m_ceAdvDec_ratio.Append(  bar.DateTime(), dblAdvDec );
 
     const rValues_t scaled = {
-      ratioEma200, ratioEma50, ratioEma29, ratioEma13,
-      scaledPrice,
-      dblTickJ, dblTickL, dblAdvDec
+      ratioEma200, ratioEma50, ratioEma29, ratioEma13
+    , scaledPrice
+    , dblTickJ, dblTickL
+    , 0.5 // dblAdvDec use neutral mid until multi-day series tackled
     };
     m_vDataScaled.emplace_back( scaled );
 
