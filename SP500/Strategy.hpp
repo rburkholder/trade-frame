@@ -164,7 +164,7 @@ private:
   using rValues_t = std::array<double, EVecIx::countIx_>;
   using vValues_t = std::vector<rValues_t>;
   vValues_t m_vDataRaw;
-  vValues_t m_vDataScaled;
+  //vValues_t m_vDataScaled;
 
   pOrder_t m_pOrder;
 

@@ -459,6 +459,12 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
 void Strategy::PostProcess() {
   // preparation for ML training goes here
+  BOOST_LOG_TRIVIAL(info)
+    << "vector size: "
+           << m_vDataRaw.size() << "sec"
+    << ',' << m_vDataRaw.size() / 60.0 << "min"
+    << ',' << m_vDataRaw.size() / 3600.0 << "hr"
+    ;
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
