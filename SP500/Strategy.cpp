@@ -415,11 +415,14 @@ namespace {
 
   // from AutoTrade/NeuralNet.cpp
   template<int coef>
-  inline double bipolar_sigmoid( double x ) { // -1.0 .. +1.0
+  inline double bipolar_sigmoid( double x ) { // -1.0 .. +1.0 (aka tanh)
     constexpr double k( -coef );
     const double ex = std::exp( x * k );
     return ( 1.0 - ex ) / ( 1.0 + ex );
   }
+
+  // additional activiation functions:
+  // https://machinelearninggeek.com/activation-functions/
 }
 
 void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
@@ -475,17 +478,17 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
     const double ratioEma29(  ( m_dblEma29  - min ) / range );
     const double ratioEma13(  ( m_dblEma13  - min ) / range );
 
-    const double ratioPrice( ( ( price - min ) / range ) * 2.0 - 1.0 );
+    const double ratioPrice( ( ( price - min ) / range ) * 2.0 - 1.0 ); // even scaling top and bottom
     const double sigmoidPrice( bipolar_sigmoid<3>( ratioPrice ) );
-    const double scaledPrice( sigmoidPrice * 0.5 + 0.5 );
+    const double scaledPrice( sigmoidPrice * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 
-    const double sigmoidTickJ( bipolar_sigmoid<2>( m_dblTickJ ) );
-    const double dblTickJ( sigmoidTickJ * 0.5 + 0.5 );
+    const double sigmoidTickJ( bipolar_sigmoid<2>( m_dblTickJ ) ); // even scaling top and bottom
+    const double dblTickJ( sigmoidTickJ * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 
-    const double sigmoidTickL( bipolar_sigmoid<2>( m_dblTickL ) );
-    const double dblTickL( sigmoidTickL * 0.5 + 0.5 );
+    const double sigmoidTickL( bipolar_sigmoid<2>( m_dblTickL ) ); // even scaling top and bottom
+    const double dblTickL( sigmoidTickL * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 
-    const double dblAdvDec( m_dblAdvDecRatio * 0.5 + 0.5 );
+    const double dblAdvDec( m_dblAdvDecRatio * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 
     m_ceEma200_ratio.Append( bar.DateTime(), ratioEma200 );
     m_ceEma50_ratio.Append(  bar.DateTime(), ratioEma50 );
