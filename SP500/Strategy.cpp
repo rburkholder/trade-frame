@@ -491,16 +491,16 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
     const double dblAdvDec( m_dblAdvDecRatio * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 
     m_ceEma200_ratio.Append( bar.DateTime(), ratioEma200 );
-    m_ceEma50_ratio.Append(  bar.DateTime(), ratioEma50 );
-    m_ceEma29_ratio.Append(  bar.DateTime(), ratioEma29 );
-    m_ceEma13_ratio.Append(  bar.DateTime(), ratioEma13 );
+     m_ceEma50_ratio.Append( bar.DateTime(),  ratioEma50 );
+     m_ceEma29_ratio.Append( bar.DateTime(),  ratioEma29 );
+     m_ceEma13_ratio.Append( bar.DateTime(),  ratioEma13 );
 
-    m_ceTrade_ratio.Append(  bar.DateTime(), scaledPrice );
+    m_ceTrade_ratio.Append( bar.DateTime(), scaledPrice );
 
-    m_ceTickJ_sigmoid.Append(  bar.DateTime(), dblTickJ );
-    m_ceTickL_sigmoid.Append(  bar.DateTime(), dblTickL );
+    m_ceTickJ_sigmoid.Append( bar.DateTime(), dblTickJ );
+    m_ceTickL_sigmoid.Append( bar.DateTime(), dblTickL );
 
-    m_ceAdvDec_ratio.Append(  bar.DateTime(), dblAdvDec );
+    m_ceAdvDec_ratio.Append( bar.DateTime(), dblAdvDec );
 
     const rValues_t scaled = {
       ratioEma200, ratioEma50, ratioEma29, ratioEma13
