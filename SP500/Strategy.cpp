@@ -246,6 +246,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
 void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   m_trade = trade;
+  m_vwp.Add( trade.Price(), trade.Volume() );
   m_ceTrade.Append( trade.DateTime(), trade.Price() );
   m_ceVolume.Append( trade.DateTime(), trade.Volume() );
   TimeTick( trade );
@@ -389,12 +390,16 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
 
 void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
 
-  UpdateEma< 13>( bar, m_dblEma13,  m_ceEma13  );
-  UpdateEma< 29>( bar, m_dblEma29,  m_ceEma29  );
-  UpdateEma< 50>( bar, m_dblEma50,  m_ceEma50  );
-  UpdateEma<200>( bar, m_dblEma200, m_ceEma200 );
+  const double vwp( m_vwp() );
+  const double price( 0.0 == vwp ? bar.Close() : vwp );
+  const ou::tf::Price price_( bar.DateTime(), price );
 
-  const rValues_t r = { m_dblEma200, m_dblEma50, m_dblEma29, m_dblEma13, m_trade.Price(), m_dblTickJ, m_dblTickL, m_dblAdvDecRatio };
+  UpdateEma< 13>( price_, m_dblEma13,  m_ceEma13  );
+  UpdateEma< 29>( price_, m_dblEma29,  m_ceEma29  );
+  UpdateEma< 50>( price_, m_dblEma50,  m_ceEma50  );
+  UpdateEma<200>( price_, m_dblEma200, m_ceEma200 );
+
+  const rValues_t r = { m_dblEma200, m_dblEma50, m_dblEma29, m_dblEma13, price, m_dblTickJ, m_dblTickL, m_dblAdvDecRatio };
   m_vDataRaw.emplace_back( r );
 
   struct maxmin {
@@ -431,7 +436,7 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
     const double ratioEma50  = 2.0 * ( ( m_dblEma50  - min ) / range ) - 1.0;
     const double ratioEma29  = 2.0 * ( ( m_dblEma29  - min ) / range ) - 1.0;
     const double ratioEma13  = 2.0 * ( ( m_dblEma13  - min ) / range ) - 1.0;
-    const double ratioPrice  = 2.0 * ( ( m_trade.Price() - min ) / range ) - 1.0;
+    const double ratioPrice  = 2.0 * ( ( price - min ) / range ) - 1.0;
 
     m_ceEma200_ratio.Append( bar.DateTime(), ratioEma200 );
     m_ceEma50_ratio.Append(  bar.DateTime(), ratioEma50 );

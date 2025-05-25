@@ -118,6 +118,32 @@ private:
   double m_dblMid;
   //double m_dblLastTrin;
 
+  struct VolumeWeightedPrice {
+
+    double m_dblSumVolume;
+    double m_dblSumVolumePrice;
+
+    VolumeWeightedPrice()
+    : m_dblSumVolumePrice {}, m_dblSumVolume {} {}
+
+    void Add( double price, ou::tf::Price::volume_t volume ) {
+      const double volume_( volume );
+      m_dblSumVolume += volume_;
+      m_dblSumVolumePrice += volume_ * price;
+    }
+
+    double operator()() {
+      if ( 0.0 == m_dblSumVolume ) return 0.0;
+      else {
+        const double price( m_dblSumVolumePrice / m_dblSumVolume );
+        m_dblSumVolumePrice = m_dblSumVolume = 0.0;
+        return price;
+      }
+    }
+  };
+
+  VolumeWeightedPrice m_vwp;
+
   double m_dblTickJ;
   double m_dblTickL;
   //double m_dblTickLmt;
@@ -186,17 +212,18 @@ private:
   ou::tf::BarFactory m_bfQuotes01Sec;
 
   template<unsigned int n>
-  void UpdateEma( const ou::tf::Bar& bar, double& ema, ou::ChartEntryIndicator& cei ) {
+  void UpdateEma( const ou::tf::Price& price_, double& ema, ou::ChartEntryIndicator& cei ) {
     constexpr double seconds( n );
     constexpr double cur( 1.0 / seconds );
     constexpr double prv( 1.0 - cur );
+    const double price( price_.Value() );
     if ( 0.0 == ema ) {
-      ema = bar.Close();
+      ema = price;
     }
     else {
-      ema = prv * ema + cur * bar.Close();
+      ema = prv * ema + cur * price;
     }
-    cei.Append( bar.DateTime(), ema );
+    cei.Append( price_.DateTime(), ema );
     };
 
   void HandleQuote( const ou::tf::Quote& );
