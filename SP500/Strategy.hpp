@@ -164,7 +164,7 @@ private:
   using rValues_t = std::array<double, EVecIx::countIx_>;
   using vValues_t = std::vector<rValues_t>;
   vValues_t m_vDataRaw;
-  //vValues_t m_vDataScaled;
+  vValues_t m_vDataScaled;
 
   pOrder_t m_pOrder;
 
@@ -193,6 +193,10 @@ private:
   ou::ChartEntryIndicator m_ceEma50_ratio;
   ou::ChartEntryIndicator m_ceEma200_ratio;
   ou::ChartEntryIndicator m_ceTrade_ratio;
+
+  ou::ChartEntryIndicator m_ceTickJ_sigmoid;
+  ou::ChartEntryIndicator m_ceTickL_sigmoid;
+  ou::ChartEntryIndicator m_ceAdvDec_ratio;
 
   ou::ChartEntryShape m_ceLongEntry;
   ou::ChartEntryShape m_ceLongFill;

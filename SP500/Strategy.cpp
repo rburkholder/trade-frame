@@ -152,6 +152,10 @@ void Strategy::SetupChart() {
   static const ou::Colour::EColour c_colourEma29(  ou::Colour::DarkTurquoise );
   static const ou::Colour::EColour c_colourEma13(  ou::Colour::Purple );
   static const ou::Colour::EColour c_colourPrice(  ou::Colour::DarkGreen );
+  static const ou::Colour::EColour c_colourTickJ(  ou::Colour::Chocolate );
+  static const ou::Colour::EColour c_colourTickL(  ou::Colour::MediumPurple );
+  static const ou::Colour::EColour c_colourAdvDec( ou::Colour::Maroon );
+
 
   m_cemPosOne.AddMark( +1.0, ou::Colour::Black,   "+1" );
     m_cemZero.AddMark(  0.0, ou::Colour::Black, "zero" );
@@ -199,6 +203,18 @@ void Strategy::SetupChart() {
   m_ceEma200_ratio.SetColour( c_colourEma200 );
   m_cdv.Add( EChartSlot::Ratio, &m_ceEma200_ratio );
 
+  m_ceTickJ_sigmoid.SetName( "TickJ" );
+  m_ceTickJ_sigmoid.SetColour( c_colourTickJ );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceTickJ_sigmoid );
+
+  m_ceTickL_sigmoid.SetName( "TickL" );
+  m_ceTickL_sigmoid.SetColour( c_colourTickL );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceTickL_sigmoid );
+
+  m_ceAdvDec_ratio.SetName( "AdvDec" );
+  m_ceAdvDec_ratio.SetColour( c_colourAdvDec );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceAdvDec_ratio );
+
   //m_ceAsk.SetName( "Ask" );
   //m_ceAsk.SetColour( ou::Colour::Red );
   //m_cdv.Add( EChartSlot::Price, &m_ceAsk );
@@ -213,14 +229,15 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::Tick, &m_cemZero );
 
   m_ceTickJ.SetName( "TickJ" );
-  m_ceTickJ.SetColour( ou::Colour::Blue );
+  m_ceTickJ.SetColour( c_colourTickJ );
   m_cdv.Add( EChartSlot::Tick, &m_ceTickJ );
 
   m_ceTickL.SetName( "TickL" );
-  m_ceTickL.SetColour( ou::Colour::DarkOrange );
+  m_ceTickL.SetColour( c_colourTickL );
   m_cdv.Add( EChartSlot::Tick, &m_ceTickL );
 
   m_ceAdvDec.SetName( "AdvDec" );
+  m_ceAdvDec.SetColour( c_colourAdvDec );
   m_cdv.Add( EChartSlot::AdvDec, &m_cemZero );
   m_cdv.Add( EChartSlot::AdvDec, &m_ceAdvDec );
 
@@ -255,18 +272,18 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 void Strategy::HandleTickJ( const ou::tf::Trade& tick ) {
   if ( RHTrading() ) {
     const auto dt( tick.DateTime() );
-    m_dblTickJ = tick.Price();
-    m_ceTickJ.Append( dt, m_dblTickJ / 100.0 );  // approx normalization
+    m_dblTickJ = tick.Price() / 100.0;
+    m_ceTickJ.Append( dt, m_dblTickJ );  // approx normalization
   }
 }
 
 void Strategy::HandleTickL( const ou::tf::Trade& tick ) {
   if ( RHTrading() ) {
     const auto dt( tick.DateTime() );
-    m_dblTickL = tick.Price();
-    m_ceTickL.Append( dt, m_dblTickL / 200.0 );  // approx normalization
+    m_dblTickL = tick.Price() / 200.0;
+    m_ceTickL.Append( dt, m_dblTickL );  // approx normalization
 
-    static const double hi( +200.0 );
+    static const double hi( +1.0 );
 
     switch ( m_stateTickHi ) {
       case ETickHi::Neutral:
@@ -283,7 +300,7 @@ void Strategy::HandleTickL( const ou::tf::Trade& tick ) {
         break;
     }
 
-    static const double lo( -200.0 );
+    static const double lo( -1.0 );
 
     switch ( m_stateTickLo ) {
       case ETickLo::Neutral:
@@ -388,6 +405,23 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   }
 }
 
+namespace {
+  // from AutoTrade/NeuralNet.cpp
+  template<int coef>
+  inline double binary_sigmoid( double x ) { // 0.0 .. 1.0
+    constexpr double k( -coef );
+    return 1.0 / ( 1.0 + std::exp( x * k ) );
+  }
+
+  // from AutoTrade/NeuralNet.cpp
+  template<int coef>
+  inline double bipolar_sigmoid( double x ) { // -1.0 .. +1.0
+    constexpr double k( -coef );
+    const double ex = std::exp( x * k );
+    return ( 1.0 - ex ) / ( 1.0 + ex );
+  }
+}
+
 void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
 
   const double vwp( m_vwp() );
@@ -399,8 +433,12 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   UpdateEma< 50>( price_, m_dblEma50,  m_ceEma50  );
   UpdateEma<200>( price_, m_dblEma200, m_ceEma200 );
 
-  const rValues_t r = { m_dblEma200, m_dblEma50, m_dblEma29, m_dblEma13, price, m_dblTickJ, m_dblTickL, m_dblAdvDecRatio };
-  m_vDataRaw.emplace_back( r );
+  const rValues_t raw = {
+    m_dblEma200, m_dblEma50, m_dblEma29, m_dblEma13,
+    price,
+    m_dblTickJ, m_dblTickL, m_dblAdvDecRatio
+  };
+  m_vDataRaw.emplace_back( raw );
 
   struct maxmin {
     double& max;
@@ -431,20 +469,42 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
 
     const double range( max - min );
 
-    // detrend timeseries
-    const double ratioEma200 = 2.0 * ( ( m_dblEma200 - min ) / range ) - 1.0;
-    const double ratioEma50  = 2.0 * ( ( m_dblEma50  - min ) / range ) - 1.0;
-    const double ratioEma29  = 2.0 * ( ( m_dblEma29  - min ) / range ) - 1.0;
-    const double ratioEma13  = 2.0 * ( ( m_dblEma13  - min ) / range ) - 1.0;
-    const double ratioPrice  = 2.0 * ( ( price - min ) / range ) - 1.0;
+    // detrend timeseries to 0.0 - 1.0
+    const double ratioEma200( ( m_dblEma200 - min ) / range );
+    const double ratioEma50(  ( m_dblEma50  - min ) / range );
+    const double ratioEma29(  ( m_dblEma29  - min ) / range );
+    const double ratioEma13(  ( m_dblEma13  - min ) / range );
+
+    const double ratioPrice( ( ( price - min ) / range ) * 2.0 - 1.0 );
+    const double sigmoidPrice( bipolar_sigmoid<3>( ratioPrice ) );
+    const double scaledPrice( sigmoidPrice * 0.5 + 0.5 );
+
+    const double sigmoidTickJ( bipolar_sigmoid<2>( m_dblTickJ ) );
+    const double dblTickJ( sigmoidTickJ * 0.5 + 0.5 );
+
+    const double sigmoidTickL( bipolar_sigmoid<2>( m_dblTickL ) );
+    const double dblTickL( sigmoidTickL * 0.5 + 0.5 );
+
+    const double dblAdvDec( m_dblAdvDecRatio * 0.5 + 0.5 );
 
     m_ceEma200_ratio.Append( bar.DateTime(), ratioEma200 );
     m_ceEma50_ratio.Append(  bar.DateTime(), ratioEma50 );
     m_ceEma29_ratio.Append(  bar.DateTime(), ratioEma29 );
     m_ceEma13_ratio.Append(  bar.DateTime(), ratioEma13 );
-    m_ceTrade_ratio.Append(  bar.DateTime(), ratioPrice );
 
-    // todo: apply sigmoid/tanh to values to scale for lstm use
+    m_ceTrade_ratio.Append(  bar.DateTime(), scaledPrice );
+
+    m_ceTickJ_sigmoid.Append(  bar.DateTime(), dblTickJ );
+    m_ceTickL_sigmoid.Append(  bar.DateTime(), dblTickL );
+
+    m_ceAdvDec_ratio.Append(  bar.DateTime(), dblAdvDec );
+
+    const rValues_t scaled = {
+      ratioEma200, ratioEma50, ratioEma29, ratioEma13,
+      scaledPrice,
+      dblTickJ, dblTickL, dblAdvDec
+    };
+    m_vDataScaled.emplace_back( scaled );
 
   }
 
@@ -460,10 +520,16 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 void Strategy::PostProcess() {
   // preparation for ML training goes here
   BOOST_LOG_TRIVIAL(info)
-    << "vector size: "
+    << "raw vector size: "
            << m_vDataRaw.size() << "sec"
     << ',' << m_vDataRaw.size() / 60.0 << "min"
     << ',' << m_vDataRaw.size() / 3600.0 << "hr"
+    ;
+    BOOST_LOG_TRIVIAL(info)
+    << "scaled vector size: "
+           << m_vDataScaled.size() << "sec"
+    << ',' << m_vDataScaled.size() / 60.0 << "min"
+    << ',' << m_vDataScaled.size() / 3600.0 << "hr"
     ;
 }
 
