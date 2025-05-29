@@ -46,8 +46,8 @@ Strategy::Strategy(
 , m_bfQuotes01Sec(  1 )
 , m_dblAdv {}, m_dblDec {}, m_dblAdvDecRatio {}
 , m_dblMid {}
-, m_dblEma13 {}, m_dblEma29 {}
-, m_dblEma50 {}, m_dblEma200 {}
+, m_dblEma013 {}, m_dblEma029 {}
+, m_dblEma050 {}, m_dblEma200 {}
 , m_stateTickHi( ETickHi::Neutral ), m_stateTickLo( ETickLo::Neutral )
 , m_nEnterLong {}, m_nEnterShort {}
 //, m_dblLastTrin {}
@@ -165,17 +165,17 @@ void Strategy::SetupChart() {
   m_ceTrade.SetColour( c_colourPrice );
   m_cdv.Add( EChartSlot::Price, &m_ceTrade );
 
-  m_ceEma13.SetName( "13s ema" );
-  m_ceEma13.SetColour( c_colourEma13 );
-  m_cdv.Add( EChartSlot::Price, &m_ceEma13 );
+  m_ceEma013.SetName( "13s ema" );
+  m_ceEma013.SetColour( c_colourEma13 );
+  m_cdv.Add( EChartSlot::Price, &m_ceEma013 );
 
-  m_ceEma29.SetName( "29s ema" );
-  m_ceEma29.SetColour( c_colourEma29 );
-  m_cdv.Add( EChartSlot::Price, &m_ceEma29 );
+  m_ceEma029.SetName( "29s ema" );
+  m_ceEma029.SetColour( c_colourEma29 );
+  m_cdv.Add( EChartSlot::Price, &m_ceEma029 );
 
-  m_ceEma50.SetName( "50s ema" );
-  m_ceEma50.SetColour( c_colourEma50 );
-  m_cdv.Add( EChartSlot::Price, &m_ceEma50 );
+  m_ceEma050.SetName( "50s ema" );
+  m_ceEma050.SetColour( c_colourEma50 );
+  m_cdv.Add( EChartSlot::Price, &m_ceEma050 );
 
   m_ceEma200.SetName( "200s ema" );
   m_ceEma200.SetColour( c_colourEma200 );
@@ -187,17 +187,17 @@ void Strategy::SetupChart() {
   m_ceTrade_ratio.SetColour( c_colourPrice );
   m_cdv.Add( EChartSlot::Ratio, &m_ceTrade_ratio );
 
-  m_ceEma13_ratio.SetName( "13s ema" );
-  m_ceEma13_ratio.SetColour( c_colourEma13 );
-  m_cdv.Add( EChartSlot::Ratio, &m_ceEma13_ratio );
+  m_ceEma013_ratio.SetName( "13s ema" );
+  m_ceEma013_ratio.SetColour( c_colourEma13 );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceEma013_ratio );
 
-  m_ceEma29_ratio.SetName( "29s ema" );
-  m_ceEma29_ratio.SetColour( c_colourEma29 );
-  m_cdv.Add( EChartSlot::Ratio, &m_ceEma29_ratio );
+  m_ceEma029_ratio.SetName( "29s ema" );
+  m_ceEma029_ratio.SetColour( c_colourEma29 );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceEma029_ratio );
 
-  m_ceEma50_ratio.SetName( "50s ema" );
-  m_ceEma50_ratio.SetColour( c_colourEma50 );
-  m_cdv.Add( EChartSlot::Ratio, &m_ceEma50_ratio );
+  m_ceEma050_ratio.SetName( "50s ema" );
+  m_ceEma050_ratio.SetColour( c_colourEma50 );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceEma050_ratio );
 
   m_ceEma200_ratio.SetName( "200s ema" );
   m_ceEma200_ratio.SetColour( c_colourEma200 );
@@ -431,13 +431,13 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   const double price( 0.0 == vwp ? bar.Close() : vwp );
   const ou::tf::Price price_( bar.DateTime(), price );
 
-  UpdateEma< 13>( price_, m_dblEma13,  m_ceEma13  );
-  UpdateEma< 29>( price_, m_dblEma29,  m_ceEma29  );
-  UpdateEma< 50>( price_, m_dblEma50,  m_ceEma50  );
+  UpdateEma< 13>( price_, m_dblEma013, m_ceEma013  );
+  UpdateEma< 29>( price_, m_dblEma029, m_ceEma029  );
+  UpdateEma< 50>( price_, m_dblEma050, m_ceEma050  );
   UpdateEma<200>( price_, m_dblEma200, m_ceEma200 );
 
   const rValues_t raw = {
-    m_dblEma200, m_dblEma50, m_dblEma29, m_dblEma13,
+    m_dblEma200, m_dblEma050, m_dblEma029, m_dblEma013,
     price,
     m_dblTickJ, m_dblTickL, m_dblAdvDecRatio
   };
@@ -463,9 +463,9 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   double max;
   double min;
   maxmin mm( max, min, m_dblEma200 );
-  mm.test( m_dblEma50 );
-  mm.test( m_dblEma29 );
-  mm.test( m_dblEma13 );
+  mm.test( m_dblEma050 );
+  mm.test( m_dblEma029 );
+  mm.test( m_dblEma013 );
   // on purpose: no test on price
 
   if ( max > min ) {
@@ -474,9 +474,9 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
 
     // detrend timeseries to 0.0 - 1.0
     const double ratioEma200( ( m_dblEma200 - min ) / range );
-    const double ratioEma50(  ( m_dblEma50  - min ) / range );
-    const double ratioEma29(  ( m_dblEma29  - min ) / range );
-    const double ratioEma13(  ( m_dblEma13  - min ) / range );
+    const double ratioEma050( ( m_dblEma050 - min ) / range );
+    const double ratioEma029( ( m_dblEma029 - min ) / range );
+    const double ratioEma013( ( m_dblEma013 - min ) / range );
 
     const double ratioPrice( ( ( price - min ) / range ) * 2.0 - 1.0 ); // even scaling top and bottom
     const double sigmoidPrice( bipolar_sigmoid<3>( ratioPrice ) );
@@ -491,9 +491,9 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
     const double dblAdvDec( m_dblAdvDecRatio * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 
     m_ceEma200_ratio.Append( bar.DateTime(), ratioEma200 );
-     m_ceEma50_ratio.Append( bar.DateTime(),  ratioEma50 );
-     m_ceEma29_ratio.Append( bar.DateTime(),  ratioEma29 );
-     m_ceEma13_ratio.Append( bar.DateTime(),  ratioEma13 );
+    m_ceEma050_ratio.Append( bar.DateTime(), ratioEma050 );
+    m_ceEma029_ratio.Append( bar.DateTime(), ratioEma029 );
+    m_ceEma013_ratio.Append( bar.DateTime(), ratioEma013 );
 
     m_ceTrade_ratio.Append( bar.DateTime(), scaledPrice );
 
@@ -503,7 +503,7 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
     m_ceAdvDec_ratio.Append( bar.DateTime(), dblAdvDec );
 
     const rValues_t scaled = {
-      ratioEma200, ratioEma50, ratioEma29, ratioEma13
+      ratioEma200, ratioEma050, ratioEma029, ratioEma013
     , scaledPrice
     , dblTickJ, dblTickL
     , 0.5 // dblAdvDec use neutral mid until multi-day series tackled

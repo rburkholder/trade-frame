@@ -152,9 +152,9 @@ private:
   double m_dblDec;
   double m_dblAdvDecRatio;
 
-  double m_dblEma13;
-  double m_dblEma29;
-  double m_dblEma50;
+  double m_dblEma013;
+  double m_dblEma029;
+  double m_dblEma050;
   double m_dblEma200;
 
   ou::tf::Quote m_quote;
@@ -183,14 +183,14 @@ private:
   //ou::ChartEntryIndicator m_ceAsk;
   //ou::ChartEntryIndicator m_ceBid;
 
-  ou::ChartEntryIndicator m_ceEma13;
-  ou::ChartEntryIndicator m_ceEma29;
-  ou::ChartEntryIndicator m_ceEma50;
+  ou::ChartEntryIndicator m_ceEma013;
+  ou::ChartEntryIndicator m_ceEma029;
+  ou::ChartEntryIndicator m_ceEma050;
   ou::ChartEntryIndicator m_ceEma200;
 
-  ou::ChartEntryIndicator m_ceEma13_ratio;
-  ou::ChartEntryIndicator m_ceEma29_ratio;
-  ou::ChartEntryIndicator m_ceEma50_ratio;
+  ou::ChartEntryIndicator m_ceEma013_ratio;
+  ou::ChartEntryIndicator m_ceEma029_ratio;
+  ou::ChartEntryIndicator m_ceEma050_ratio;
   ou::ChartEntryIndicator m_ceEma200_ratio;
   ou::ChartEntryIndicator m_ceTrade_ratio;
 
