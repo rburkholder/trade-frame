@@ -535,6 +535,15 @@ void Strategy::PostProcess() {
     << ',' << m_vDataScaled.size() / 60.0 << "min"
     << ',' << m_vDataScaled.size() / 3600.0 << "hr"
     ;
+
+    const size_t secondsSource( 210 );
+    const size_t secondsPrediction( 30);
+    const size_t secondsTotal( secondsSource + secondsPrediction );
+
+    vValues_t::size_type ixDataScaled {};
+    while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
+      ixDataScaled += secondsTotal;
+    }
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
