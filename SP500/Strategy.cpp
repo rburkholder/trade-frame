@@ -536,9 +536,12 @@ void Strategy::PostProcess() {
     << ',' << m_vDataScaled.size() / 3600.0 << "hr"
     ;
 
-  const size_t secondsInput( 210 );
-  const size_t secondsOutput( 30);
-  const size_t secondsTotal( secondsInput + secondsOutput );
+  // using as a guide:
+  //  https://machinelearningmastery.com/how-to-develop-lstm-models-for-time-series-forecasting/
+
+  const size_t secondsInput( 210 ); // training sample
+  const size_t secondsOutput( 30);  // prediction sample
+  const size_t secondsTotal( secondsInput + secondsOutput ); // training + prediction
 
   vValues_t::size_type ixDataScaled {};
   using vSamples_t = std::vector<vValues_t>;
@@ -557,9 +560,11 @@ void Strategy::PostProcess() {
   }
 
   BOOST_LOG_TRIVIAL(info)
-    << "input vector size: " << vInput.size();
+    << "data usage: " << ixDataScaled << ',' << m_vDataScaled.size() << ',' << ixDataScaled + secondsTotal;
   BOOST_LOG_TRIVIAL(info)
-    << "output vector size: " << vOutput.size();
+    << "input sample count: " << vInput.size();
+  BOOST_LOG_TRIVIAL(info)
+    << "output sample count: " << vOutput.size();
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
