@@ -529,21 +529,37 @@ void Strategy::PostProcess() {
     << ',' << m_vDataRaw.size() / 60.0 << "min"
     << ',' << m_vDataRaw.size() / 3600.0 << "hr"
     ;
-    BOOST_LOG_TRIVIAL(info)
+  BOOST_LOG_TRIVIAL(info)
     << "scaled vector size: "
            << m_vDataScaled.size() << "sec"
     << ',' << m_vDataScaled.size() / 60.0 << "min"
     << ',' << m_vDataScaled.size() / 3600.0 << "hr"
     ;
 
-    const size_t secondsSource( 210 );
-    const size_t secondsPrediction( 30);
-    const size_t secondsTotal( secondsSource + secondsPrediction );
+  const size_t secondsInput( 210 );
+  const size_t secondsOutput( 30);
+  const size_t secondsTotal( secondsInput + secondsOutput );
 
-    vValues_t::size_type ixDataScaled {};
-    while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
-      ixDataScaled += secondsTotal;
-    }
+  vValues_t::size_type ixDataScaled {};
+  using vSamples_t = std::vector<vValues_t>;
+  vSamples_t vInput;   // secondsInput
+  vSamples_t vOutput;  // secondsOutput
+  vValues_t::const_iterator bgn( m_vDataScaled.begin() ); // begin of input
+  vValues_t::const_iterator mid( bgn + secondsInput ); // end of input, begin of output
+  vValues_t::const_iterator end( mid + secondsOutput ); // end of output
+  while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
+    vInput.emplace_back( vValues_t( bgn, mid ) );
+    vOutput.emplace_back( vValues_t( mid, end ) );
+    bgn += secondsOutput;
+    mid += secondsOutput;
+    end += secondsOutput;
+    ixDataScaled += secondsOutput;
+  }
+
+  BOOST_LOG_TRIVIAL(info)
+    << "input vector size: " << vInput.size();
+  BOOST_LOG_TRIVIAL(info)
+    << "output vector size: " << vOutput.size();
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
