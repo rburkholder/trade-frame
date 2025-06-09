@@ -436,7 +436,7 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   UpdateEma< 50>( price_, m_dblEma050, m_ceEma050  );
   UpdateEma<200>( price_, m_dblEma200, m_ceEma200 );
 
-  const rValues_t raw = {
+  const rValues_t<double> raw = {
     m_dblEma200, m_dblEma050, m_dblEma029, m_dblEma013,
     price,
     m_dblTickJ, m_dblTickL, m_dblAdvDecRatio
@@ -473,39 +473,39 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
     const double range( max - min );
 
     // detrend timeseries to 0.0 - 1.0
-    const double ratioEma200( ( m_dblEma200 - min ) / range );
-    const double ratioEma050( ( m_dblEma050 - min ) / range );
-    const double ratioEma029( ( m_dblEma029 - min ) / range );
-    const double ratioEma013( ( m_dblEma013 - min ) / range );
+    const float ratioEma200( ( m_dblEma200 - min ) / range );
+    const float ratioEma050( ( m_dblEma050 - min ) / range );
+    const float ratioEma029( ( m_dblEma029 - min ) / range );
+    const float ratioEma013( ( m_dblEma013 - min ) / range );
 
-    const double ratioPrice( ( ( price - min ) / range ) * 2.0 - 1.0 ); // even scaling top and bottom
-    const double sigmoidPrice( bipolar_sigmoid<3>( ratioPrice ) );
-    const double scaledPrice( sigmoidPrice * 0.5 + 0.5 ); // translate to 0.0 - 1.0
+    const float ratioPrice( ( ( price - min ) / range ) * 2.0 - 1.0 ); // even scaling top and bottom
+    const float sigmoidPrice( bipolar_sigmoid<3>( ratioPrice ) );
+    const float scaledPrice( sigmoidPrice * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 
-    const double sigmoidTickJ( bipolar_sigmoid<2>( m_dblTickJ ) ); // even scaling top and bottom
-    const double dblTickJ( sigmoidTickJ * 0.5 + 0.5 ); // translate to 0.0 - 1.0
+    const float sigmoidTickJ( bipolar_sigmoid<2>( m_dblTickJ ) ); // even scaling top and bottom
+    const float fltTickJ( sigmoidTickJ * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 
-    const double sigmoidTickL( bipolar_sigmoid<2>( m_dblTickL ) ); // even scaling top and bottom
-    const double dblTickL( sigmoidTickL * 0.5 + 0.5 ); // translate to 0.0 - 1.0
+    const float sigmoidTickL( bipolar_sigmoid<2>( m_dblTickL ) ); // even scaling top and bottom
+    const float fltTickL( sigmoidTickL * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 
-    const double dblAdvDec( m_dblAdvDecRatio * 0.5 + 0.5 ); // translate to 0.0 - 1.0
+    const float fltAdvDec( m_dblAdvDecRatio * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 
-    m_ceEma200_ratio.Append( bar.DateTime(), ratioEma200 );
-    m_ceEma050_ratio.Append( bar.DateTime(), ratioEma050 );
-    m_ceEma029_ratio.Append( bar.DateTime(), ratioEma029 );
-    m_ceEma013_ratio.Append( bar.DateTime(), ratioEma013 );
+    m_ceEma200_ratio.Append( bar.DateTime(), ratioEma200 ); // todo: use the double version
+    m_ceEma050_ratio.Append( bar.DateTime(), ratioEma050 ); // todo: use the double version
+    m_ceEma029_ratio.Append( bar.DateTime(), ratioEma029 ); // todo: use the double version
+    m_ceEma013_ratio.Append( bar.DateTime(), ratioEma013 ); // todo: use the double version
 
-    m_ceTrade_ratio.Append( bar.DateTime(), scaledPrice );
+    m_ceTrade_ratio.Append( bar.DateTime(), scaledPrice ); // todo: use the double version
 
-    m_ceTickJ_sigmoid.Append( bar.DateTime(), dblTickJ );
-    m_ceTickL_sigmoid.Append( bar.DateTime(), dblTickL );
+    m_ceTickJ_sigmoid.Append( bar.DateTime(), fltTickJ ); // todo: use the double version
+    m_ceTickL_sigmoid.Append( bar.DateTime(), fltTickL ); // todo: use the double version
 
-    m_ceAdvDec_ratio.Append( bar.DateTime(), dblAdvDec );
+    m_ceAdvDec_ratio.Append( bar.DateTime(), fltAdvDec ); // todo: use the double version
 
-    const rValues_t scaled = {
+    const rValues_t<float> scaled = {
       ratioEma200, ratioEma050, ratioEma029, ratioEma013
     , scaledPrice
-    , dblTickJ, dblTickL
+    , fltTickJ, fltTickL
     , 0.5 // dblAdvDec use neutral mid until multi-day series tackled
     };
     m_vDataScaled.emplace_back( scaled );
@@ -543,16 +543,16 @@ void Strategy::PostProcess() {
   const size_t secondsOutput( 30);  // prediction sample
   const size_t secondsTotal( secondsInput + secondsOutput ); // training + prediction
 
-  vValues_t::size_type ixDataScaled {};
-  using vSamples_t = std::vector<vValues_t>;
+  vValuesFlt_t::size_type ixDataScaled {};
+  using vSamples_t = std::vector<vValuesFlt_t>;
   vSamples_t vInput;   // secondsInput
   vSamples_t vOutput;  // secondsOutput
-  vValues_t::const_iterator bgn( m_vDataScaled.begin() ); // begin of input
-  vValues_t::const_iterator mid( bgn + secondsInput ); // end of input, begin of output
-  vValues_t::const_iterator end( mid + secondsOutput ); // end of output
+  vValuesFlt_t::const_iterator bgn( m_vDataScaled.begin() ); // begin of input
+  vValuesFlt_t::const_iterator mid( bgn + secondsInput ); // end of input, begin of output
+  vValuesFlt_t::const_iterator end( mid + secondsOutput ); // end of output
   while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
-    vInput.emplace_back( vValues_t( bgn, mid ) );
-    vOutput.emplace_back( vValues_t( mid, end ) );
+    vInput.emplace_back( vValuesFlt_t( bgn, mid ) );
+    vOutput.emplace_back( vValuesFlt_t( mid, end ) );
     bgn += secondsOutput;
     mid += secondsOutput;
     end += secondsOutput;

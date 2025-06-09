@@ -161,10 +161,14 @@ private:
   ou::tf::Trade m_trade;
 
   enum EVecIx { ixEma200 = 0, ixEma50, ixEma29, ixEma13, ixTrade, ixTickj, ixTickl, ixAdvdec, countIx_ };
-  using rValues_t = std::array<double, EVecIx::countIx_>;
-  using vValues_t = std::vector<rValues_t>;
-  vValues_t m_vDataRaw;
-  vValues_t m_vDataScaled;
+
+  template<typename type>
+  using rValues_t = std::array<type, EVecIx::countIx_>;
+
+  using vValuesDbl_t = std::vector<rValues_t<double> >;
+  using vValuesFlt_t = std::vector<rValues_t<float> >;
+  vValuesDbl_t m_vDataRaw;
+  vValuesFlt_t m_vDataScaled; // LSTM prefers float?
 
   pOrder_t m_pOrder;
 
