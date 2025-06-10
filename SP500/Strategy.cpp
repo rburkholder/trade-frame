@@ -472,40 +472,46 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
 
     const double range( max - min );
 
+    struct Real {
+      const double dbl;
+      const float flt;
+      Real( double val ): dbl( val ), flt( val ) {}
+    };
+
     // detrend timeseries to 0.0 - 1.0
-    const float ratioEma200( ( m_dblEma200 - min ) / range );
-    const float ratioEma050( ( m_dblEma050 - min ) / range );
-    const float ratioEma029( ( m_dblEma029 - min ) / range );
-    const float ratioEma013( ( m_dblEma013 - min ) / range );
+    const Real ratioEma200( ( m_dblEma200 - min ) / range );
+    const Real ratioEma050( ( m_dblEma050 - min ) / range );
+    const Real ratioEma029( ( m_dblEma029 - min ) / range );
+    const Real ratioEma013( ( m_dblEma013 - min ) / range );
 
-    const float ratioPrice( ( ( price - min ) / range ) * 2.0 - 1.0 ); // even scaling top and bottom
-    const float sigmoidPrice( bipolar_sigmoid<3>( ratioPrice ) );
-    const float scaledPrice( sigmoidPrice * 0.5 + 0.5 ); // translate to 0.0 - 1.0
+    const double ratioPrice( ( ( price - min ) / range ) * 2.0 - 1.0 ); // even scaling top and bottom
+    const double sigmoidPrice( bipolar_sigmoid<3>( ratioPrice ) );
+    const Real scaledPrice( sigmoidPrice * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 
-    const float sigmoidTickJ( bipolar_sigmoid<2>( m_dblTickJ ) ); // even scaling top and bottom
-    const float fltTickJ( sigmoidTickJ * 0.5 + 0.5 ); // translate to 0.0 - 1.0
+    const double sigmoidTickJ( bipolar_sigmoid<2>( m_dblTickJ ) ); // even scaling top and bottom
+    const Real realTickJ( sigmoidTickJ * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 
-    const float sigmoidTickL( bipolar_sigmoid<2>( m_dblTickL ) ); // even scaling top and bottom
-    const float fltTickL( sigmoidTickL * 0.5 + 0.5 ); // translate to 0.0 - 1.0
+    const double sigmoidTickL( bipolar_sigmoid<2>( m_dblTickL ) ); // even scaling top and bottom
+    const Real realTickL( sigmoidTickL * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 
-    const float fltAdvDec( m_dblAdvDecRatio * 0.5 + 0.5 ); // translate to 0.0 - 1.0
+    const Real fltAdvDec( m_dblAdvDecRatio * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 
-    m_ceEma200_ratio.Append( bar.DateTime(), ratioEma200 ); // todo: use the double version
-    m_ceEma050_ratio.Append( bar.DateTime(), ratioEma050 ); // todo: use the double version
-    m_ceEma029_ratio.Append( bar.DateTime(), ratioEma029 ); // todo: use the double version
-    m_ceEma013_ratio.Append( bar.DateTime(), ratioEma013 ); // todo: use the double version
+    m_ceEma200_ratio.Append( bar.DateTime(), ratioEma200.dbl );
+    m_ceEma050_ratio.Append( bar.DateTime(), ratioEma050.dbl );
+    m_ceEma029_ratio.Append( bar.DateTime(), ratioEma029.dbl );
+    m_ceEma013_ratio.Append( bar.DateTime(), ratioEma013.dbl );
 
-    m_ceTrade_ratio.Append( bar.DateTime(), scaledPrice ); // todo: use the double version
+    m_ceTrade_ratio.Append( bar.DateTime(), scaledPrice.dbl );
 
-    m_ceTickJ_sigmoid.Append( bar.DateTime(), fltTickJ ); // todo: use the double version
-    m_ceTickL_sigmoid.Append( bar.DateTime(), fltTickL ); // todo: use the double version
+    m_ceTickJ_sigmoid.Append( bar.DateTime(), realTickJ.dbl );
+    m_ceTickL_sigmoid.Append( bar.DateTime(), realTickL.dbl );
 
-    m_ceAdvDec_ratio.Append( bar.DateTime(), fltAdvDec ); // todo: use the double version
+    m_ceAdvDec_ratio.Append( bar.DateTime(), fltAdvDec.dbl );
 
     const rValues_t<float> scaled = {
-      ratioEma200, ratioEma050, ratioEma029, ratioEma013
-    , scaledPrice
-    , fltTickJ, fltTickL
+      ratioEma200.flt, ratioEma050.flt, ratioEma029.flt, ratioEma013.flt
+    , scaledPrice.flt
+    , realTickJ.flt, realTickL.flt
     , 0.5 // dblAdvDec use neutral mid until multi-day series tackled
     };
     m_vDataScaled.emplace_back( scaled );
