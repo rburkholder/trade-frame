@@ -549,20 +549,24 @@ void Strategy::PostProcess() {
   const size_t secondsOutput( 30);  // prediction sample
   const size_t secondsTotal( secondsInput + secondsOutput ); // training + prediction
 
-  vValuesFlt_t::size_type ixDataScaled {};
   using vSamples_t = std::vector<vValuesFlt_t>;
   vSamples_t vInput;   // secondsInput
   vSamples_t vOutput;  // secondsOutput
-  vValuesFlt_t::const_iterator bgn( m_vDataScaled.begin() ); // begin of input
-  vValuesFlt_t::const_iterator mid( bgn + secondsInput ); // end of input, begin of output
-  vValuesFlt_t::const_iterator end( mid + secondsOutput ); // end of output
-  while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
-    vInput.emplace_back( vValuesFlt_t( bgn, mid ) );
-    vOutput.emplace_back( vValuesFlt_t( mid, end ) );
-    bgn += secondsOutput;
-    mid += secondsOutput;
-    end += secondsOutput;
-    ixDataScaled += secondsOutput;
+
+  vValuesFlt_t::size_type ixDataScaled {};
+
+  {
+    vValuesFlt_t::const_iterator bgn( m_vDataScaled.begin() ); // begin of input
+    vValuesFlt_t::const_iterator mid( bgn + secondsInput ); // end of input, begin of output
+    vValuesFlt_t::const_iterator end( mid + secondsOutput ); // end of output
+    while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
+      vInput.emplace_back( vValuesFlt_t( bgn, mid ) );
+      vOutput.emplace_back( vValuesFlt_t( mid, end ) );
+      bgn += secondsOutput;
+      mid += secondsOutput;
+      end += secondsOutput;
+      ixDataScaled += secondsOutput;
+    }
   }
 
   BOOST_LOG_TRIVIAL(info)
@@ -571,6 +575,7 @@ void Strategy::PostProcess() {
     << "input sample count: " << vInput.size();
   BOOST_LOG_TRIVIAL(info)
     << "output sample count: " << vOutput.size();
+
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
