@@ -3,12 +3,15 @@
 An adventure into trading the S&P 500 using SPY with the support of 
 TRIN, TICK and Advance/Decline market supplied indicators.
 
-The initial iteration of this application relies on HDF5 files 
-collected by the Collector application with the following configuration:
-
 LibTorch is being introduced for testing an LSTM based model for machine learning.
 * libtorch needs to reside in /usr/local/share
 * libtorch can be downloaded from https://pytorch.org/get-started/locally/
+* if one or more NVidia cards are present, libcuda can be used by libtorch
+* see [Installing LibTorch with Cuda on NVIDIA GeForce RTX 4070](https://blog.raymond.burkholder.net/index.php?/archives/1285-Installing-LibTorch-with-Cuda-on-NVIDIA-GeForce-RTX-4070.html) for installation hints.
+
+The initial iteration of this application relies on HDF5 files 
+collected by the Collector application with the following 
+collector.cfg configuration:
 
 ```
 symbol_name_l1=SPY
