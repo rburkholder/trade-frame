@@ -21,6 +21,8 @@
 
 #include <boost/log/trivial.hpp>
 
+#include <torch/torch.h>
+
 #include "Strategy.hpp"
 
 Strategy::Strategy(
@@ -576,6 +578,16 @@ void Strategy::PostProcess() {
   BOOST_LOG_TRIVIAL(info)
     << "output sample count: " << vOutput.size();
 
+  torch::manual_seed( 0 );
+
+  auto tensor = torch::empty(
+    { (long)vInput.size(), secondsInput, countIx_ },  // for testing, will need to resize to include output
+    torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCUDA )
+  );
+
+  auto ptr( tensor.data_ptr() );
+  // fix this, need to iterate through the source, and iterate through the tensor
+  //std::memcpy( ptr, reinterpret_cast<void*>( vInput.data() ), tensor.numel() * sizeof(at::kFloat ) );
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
