@@ -160,10 +160,10 @@ private:
   ou::tf::Quote m_quote;
   ou::tf::Trade m_trade;
 
-  enum EVecIx { ixEma200 = 0, ixEma50, ixEma29, ixEma13, ixTrade, ixTickj, ixTickl, ixAdvdec, countIx_ };
+  enum EVecIx { ixEma200 = 0, ixEma50, ixEma29, ixEma13, ixTrade, ixTickj, ixTickl, ixAdvdec, countField_ };
 
   template<typename type>
-  using rValues_t = std::array<type, EVecIx::countIx_>;
+  using rValues_t = std::array<type, EVecIx::countField_>;
 
   using vValuesDbl_t = std::vector<rValues_t<double> >;
   using vValuesFlt_t = std::vector<rValues_t<float> >;
