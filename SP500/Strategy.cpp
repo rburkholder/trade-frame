@@ -582,11 +582,25 @@ void Strategy::PostProcess() {
 
   auto tensor = torch::empty(
     { (long)vInput.size(), secondsInput, countIx_ },  // for testing, will need to resize to include output
-    torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCUDA )
+    //torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCUDA ) // todo: determine how to load
+    torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCPU )
   );
 
-  auto ptr( tensor.data_ptr() );
-  // fix this, need to iterate through the source, and iterate through the tensor
+  const size_t nSample( secondsInput * countIx_ ); // for testing, will need to resie to include output
+  //const size_t nBytes( nSample * sizeof( at::kFloat ) );
+  const size_t sizeTorchFloat( sizeof( torch::kFloat32 ) );
+  const size_t nBytes( countIx_ * sizeof( float ) );
+  const auto total( tensor.numel() * sizeTorchFloat );
+  auto pVoid( tensor.data_ptr() );
+  uint8_t* pByte( reinterpret_cast<uint8_t*>( pVoid ) );
+  size_t loops {};
+  for ( const vSamples_t::value_type& vt1: vInput ) {
+    for ( const vValuesFlt_t::value_type& vt2: vt1 ) {
+      std::memcpy( pByte, reinterpret_cast<const uint8_t*>( vt2.data() ), nBytes );
+      pByte += nBytes;
+      ++loops;
+    }
+  }
   //std::memcpy( ptr, reinterpret_cast<void*>( vInput.data() ), tensor.numel() * sizeof(at::kFloat ) );
 }
 
