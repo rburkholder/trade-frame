@@ -547,23 +547,39 @@ void Strategy::PostProcess() {
   // using as a guide:
   //  https://machinelearningmastery.com/how-to-develop-lstm-models-for-time-series-forecasting/
 
-  const size_t secondsInput( 210 ); // training sample
-  const size_t secondsOutput( 30);  // prediction sample
-  const size_t secondsTotal( secondsInput + secondsOutput ); // training + prediction
+  static const size_t secondsInput( 210 ); // training sample
+  static const size_t secondsOutput( 30);  // prediction sample
+  static const size_t secondsTotal( secondsInput + secondsOutput ); // training + prediction
 
-  using vSamples_t = std::vector<vValuesFlt_t>;
-  vSamples_t vInput;   // secondsInput
-  vSamples_t vOutput;  // secondsOutput
+  static const size_t sizeTorchFloat( sizeof( torch::kFloat32 ) );
+  static const size_t nSumFieldBytes( countField_ * sizeof( float ) );
+  assert( sizeTorchFloat == sizeof( float ) );
+
+  const size_t nSampleFields( secondsInput * countField_ );
+  const size_t nSampleFieldBytes( nSampleFields * sizeTorchFloat );
+
+  const size_t nSamples( m_vDataScaled.size() / secondsOutput ); // assumes integer math with truncation
+
+  using rFields_t = float[ countField_ ];
+  using rSample_t = rFields_t[ secondsInput ];
+  using rSamples_t = rSample_t[ nSamples ]; // will this work? no, as this is a compile time construct
+
+  rSamples_t rInputSamples;   // secondsInput
+  rSamples_t rOutputSamples;  // secondsOutput
 
   vValuesFlt_t::size_type ixDataScaled {};
 
   {
+    rSamples_t* pInputSamples( &rInputSamples );
+
     vValuesFlt_t::const_iterator bgn( m_vDataScaled.begin() ); // begin of input
     vValuesFlt_t::const_iterator mid( bgn + secondsInput ); // end of input, begin of output
     vValuesFlt_t::const_iterator end( mid + secondsOutput ); // end of output
     while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
-      vInput.emplace_back( vValuesFlt_t( bgn, mid ) );
-      vOutput.emplace_back( vValuesFlt_t( mid, end ) );
+      std::memcpy( pInputSamples, bgn->data(), nSampleFieldBytes );
+      pInputSamples += secondsInput;
+      //vInput.emplace_back( vValuesFlt_t( bgn, mid ) );
+      //vOutput.emplace_back( vValuesFlt_t( mid, end ) );
       bgn += secondsOutput;
       mid += secondsOutput;
       end += secondsOutput;
@@ -573,33 +589,30 @@ void Strategy::PostProcess() {
 
   BOOST_LOG_TRIVIAL(info)
     << "data usage: " << ixDataScaled << ',' << m_vDataScaled.size() << ',' << ixDataScaled + secondsTotal;
-  BOOST_LOG_TRIVIAL(info)
-    << "input sample count: " << vInput.size();
-  BOOST_LOG_TRIVIAL(info)
-    << "output sample count: " << vOutput.size();
+  //BOOST_LOG_TRIVIAL(info)
+  //  << "input sample count: " << vInput.size();
+  //BOOST_LOG_TRIVIAL(info)
+  //  << "output sample count: " << vOutput.size();
 
   torch::manual_seed( 0 );
 
-  auto tensor = torch::empty(
-    { (long)vInput.size(), secondsInput, countField_ },  // for testing, will need to resize to include output
-    //torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCUDA ) // todo: determine how to load
-    torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCPU )
-  );
+  //auto tensor = torch::empty(
+  //  { (long)vInput.size(), secondsInput, countField_ },  // for testing, will need to resize to include output
+  //  //torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCUDA ) // todo: determine how to load
+  //  torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCPU )
+  //);
 
-  const size_t nSampleField( secondsInput * countField_ ); // for testing, will need to resie to include output
-  const size_t sizeTorchFloat( sizeof( torch::kFloat32 ) );
-  const size_t nFieldBytes( countField_ * sizeof( float ) );
-  const auto total( tensor.numel() * sizeTorchFloat );
-  auto pVoid( tensor.data_ptr() );
-  uint8_t* pByte( reinterpret_cast<uint8_t*>( pVoid ) );
+  //const auto total( tensor.numel() * sizeTorchFloat );
+  //auto pVoid( tensor.data_ptr() );
+  //uint8_t* pByte( reinterpret_cast<uint8_t*>( pVoid ) );
   //size_t loops {};
-  for ( const vSamples_t::value_type& vt1: vInput ) {
-    for ( const vValuesFlt_t::value_type& vt2: vt1 ) {
-      std::memcpy( pByte, reinterpret_cast<const uint8_t*>( vt2.data() ), nFieldBytes );
-      pByte += nFieldBytes;
-      //++loops;
-    }
-  }
+  //for ( const vSamples_t::value_type& vt1: vInput ) {
+  //  for ( const vValuesFlt_t::value_type& vt2: vt1 ) {
+  //    std::memcpy( pByte, reinterpret_cast<const uint8_t*>( vt2.data() ), nFieldBytes );
+  //    pByte += nFieldBytes;
+  //    //++loops;
+  //  }
+  //}
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
