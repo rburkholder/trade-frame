@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <array>
 #include <vector>
 
 #include <boost/serialization/version.hpp>
@@ -163,10 +162,32 @@ private:
   enum EVecIx { ixEma200 = 0, ixEma50, ixEma29, ixEma13, ixTrade, ixTickj, ixTickl, ixAdvdec, countField_ };
 
   template<typename type>
-  using rValues_t = std::array<type, EVecIx::countField_>;
+  using rFields_t = type[ countField_ ];
 
-  using vValuesDbl_t = std::vector<rValues_t<double> >;
-  using vValuesFlt_t = std::vector<rValues_t<float> >;
+  template<typename type>
+  struct fields_t {
+    rFields_t<type> fields;
+    fields_t( const fields_t& rhs )
+    {
+      std::memcpy( fields, rhs.fields, countField_ * sizeof( type ) );
+    }
+    // todo: how to bulid an initializer?
+    fields_t( const type v1, const type v2, const type v3, const type v4
+            , const type v5, const type v6, const type v7, const type v8 )
+    {
+      fields[ 0 ] = v1;
+      fields[ 1 ] = v2;
+      fields[ 2 ] = v3;
+      fields[ 3 ] = v4;
+      fields[ 4 ] = v5;
+      fields[ 5 ] = v6;
+      fields[ 6 ] = v7;
+      fields[ 7 ] = v8;
+    }
+  };
+
+  using vValuesDbl_t = std::vector<fields_t<double> >;
+  using vValuesFlt_t = std::vector<fields_t<float> >;
   vValuesDbl_t m_vDataRaw;
   vValuesFlt_t m_vDataScaled; // LSTM prefers float?
 

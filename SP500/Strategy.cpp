@@ -438,12 +438,12 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   UpdateEma< 50>( price_, m_dblEma050, m_ceEma050  );
   UpdateEma<200>( price_, m_dblEma200, m_ceEma200 );
 
-  const rValues_t<double> raw = {
+  const fields_t<double> raw(
     m_dblEma200, m_dblEma050, m_dblEma029, m_dblEma013,
     price,
     m_dblTickJ, m_dblTickL, m_dblAdvDecRatio
-  };
-  m_vDataRaw.emplace_back( raw );
+  );
+  m_vDataRaw.push_back( raw );
 
   struct maxmin {
     double& max;
@@ -510,13 +510,13 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
 
     m_ceAdvDec_ratio.Append( bar.DateTime(), fltAdvDec.dbl );
 
-    const rValues_t<float> scaled = {
+    const fields_t<float> scaled(
       ratioEma200.flt, ratioEma050.flt, ratioEma029.flt, ratioEma013.flt
     , scaledPrice.flt
     , realTickJ.flt, realTickL.flt
     , 0.5 // dblAdvDec use neutral mid until multi-day series tackled
-    };
-    m_vDataScaled.emplace_back( scaled );
+    );
+    m_vDataScaled.push_back( scaled );
 
   }
 
@@ -544,6 +544,11 @@ void Strategy::PostProcess() {
     << ',' << m_vDataScaled.size() / 3600.0 << "hr"
     ;
 
+  BOOST_LOG_TRIVIAL(info)
+           << "size of fields_t<float>: " << sizeof( fields_t<float> )
+    << ',' << "size of fields_t<double>: " << sizeof( fields_t<double> )
+    ;
+
   // using as a guide:
   //  https://machinelearningmastery.com/how-to-develop-lstm-models-for-time-series-forecasting/
 
@@ -551,12 +556,14 @@ void Strategy::PostProcess() {
   static const size_t secondsOutput( 30);  // prediction sample
   static const size_t secondsTotal( secondsInput + secondsOutput ); // training + prediction
 
-  static const size_t sizeTorchFloat( sizeof( torch::kFloat32 ) );
+  //static const size_t sizeTorchFloat( sizeof( torch::kFloat32 ) );
+  static const size_t sizeFloat( sizeof( float ) );
+  //assert( sizeTorchFloat == sizeFloat );
+
   static const size_t nSumFieldBytes( countField_ * sizeof( float ) );
-  assert( sizeTorchFloat == sizeof( float ) );
 
   const size_t nSampleFields( secondsInput * countField_ );
-  const size_t nSampleFieldBytes( nSampleFields * sizeTorchFloat );
+  const size_t nSampleFieldBytes( nSampleFields * sizeFloat );
 
   const size_t nSamples( m_vDataScaled.size() / secondsOutput ); // assumes integer math with truncation
 
@@ -570,13 +577,14 @@ void Strategy::PostProcess() {
   vValuesFlt_t::size_type ixDataScaled {};
 
   {
-    rSamples_t* pInputSamples( &rInputSamples );
-
-    vValuesFlt_t::const_iterator bgn( m_vDataScaled.begin() ); // begin of input
+    vValuesFlt_t::const_iterator bgn = m_vDataScaled.begin(); // begin of input
     vValuesFlt_t::const_iterator mid( bgn + secondsInput ); // end of input, begin of output
     vValuesFlt_t::const_iterator end( mid + secondsOutput ); // end of output
+
+    rSamples_t* pInputSamples( &rInputSamples );
+/*
     while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
-      std::memcpy( pInputSamples, bgn->data(), nSampleFieldBytes );
+      std::memcpy( pInputSamples, bgn.base(), nSampleFieldBytes );
       pInputSamples += secondsInput;
       //vInput.emplace_back( vValuesFlt_t( bgn, mid ) );
       //vOutput.emplace_back( vValuesFlt_t( mid, end ) );
@@ -585,6 +593,7 @@ void Strategy::PostProcess() {
       end += secondsOutput;
       ixDataScaled += secondsOutput;
     }
+*/
   }
 
   BOOST_LOG_TRIVIAL(info)
@@ -594,7 +603,7 @@ void Strategy::PostProcess() {
   //BOOST_LOG_TRIVIAL(info)
   //  << "output sample count: " << vOutput.size();
 
-  torch::manual_seed( 0 );
+  //torch::manual_seed( 0 ); // stack smashing?
 
   //auto tensor = torch::empty(
   //  { (long)vInput.size(), secondsInput, countField_ },  // for testing, will need to resize to include output
