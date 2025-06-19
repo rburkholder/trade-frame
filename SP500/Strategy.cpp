@@ -566,8 +566,9 @@ void Strategy::PostProcess() {
   static const size_t nSampleFields( secondsInput * countField_ );
   static const size_t nSampleFieldBytes( nSampleFields * sizeFloat );
 
-  const size_t nSamples( m_vDataScaled.size() / secondsOutput ); // assumes integer math with truncation
+  const size_t nSamples_theory( m_vDataScaled.size() / secondsOutput ); // assumes integer math with truncation
 
+  long nSamples_actual {};
   vValuesFlt_t::size_type ixDataScaled {};
 
   vValuesFlt_t vSourceForTensor; // implicit 3 dimensions:  [sample index][time index][field index]
@@ -583,7 +584,10 @@ void Strategy::PostProcess() {
       mid += secondsOutput;
       end += secondsOutput;
       ixDataScaled += secondsOutput;
+      ++nSamples_actual;
     }
+    // won't match for now:
+    BOOST_LOG_TRIVIAL(info) << "nSamples: " << nSamples_actual << ',' << nSamples_theory;
   }
 
   BOOST_LOG_TRIVIAL(info)
@@ -596,22 +600,18 @@ void Strategy::PostProcess() {
   //torch::manual_seed( 0 ); // stack smashing?
 
   //auto tensor = torch::empty(
-  //  { (long)vInput.size(), secondsInput, countField_ },  // for testing, will need to resize to include output
+  //  { nSamples_actual, secondsInput, countField_ },  // for testing, will need to resize to include output
   //  //torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCUDA ) // todo: determine how to load
   //  torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCPU )
   //);
 
-  //const auto total( tensor.numel() * sizeTorchFloat );
-  //auto pVoid( tensor.data_ptr() );
-  //uint8_t* pByte( reinterpret_cast<uint8_t*>( pVoid ) );
-  //size_t loops {};
-  //for ( const vSamples_t::value_type& vt1: vInput ) {
-  //  for ( const vValuesFlt_t::value_type& vt2: vt1 ) {
-  //    std::memcpy( pByte, reinterpret_cast<const uint8_t*>( vt2.data() ), nFieldBytes );
-  //    pByte += nFieldBytes;
-  //    //++loops;
-  //  }
-  //}
+  torch::Tensor tensor =
+    torch::from_blob( vSourceForTensor.data(), {nSamples_actual, secondsInput, countField_ },
+    torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCPU ) // torch::kCUDA requires device memory setup
+  ).clone();
+
+  //BOOST_LOG_TRIVIAL(info) << "tensor: " << tensor;
+
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
