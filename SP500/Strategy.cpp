@@ -19,6 +19,8 @@
  * Created: April 14, 2025 20:32:29
  */
 
+#include <algorithm>
+
 #include <boost/log/trivial.hpp>
 
 #include <torch/torch.h>
@@ -556,50 +558,38 @@ void Strategy::PostProcess() {
   static const size_t secondsOutput( 30);  // prediction sample
   static const size_t secondsTotal( secondsInput + secondsOutput ); // training + prediction
 
-  //static const size_t sizeTorchFloat( sizeof( torch::kFloat32 ) );
   static const size_t sizeFloat( sizeof( float ) );
-  //assert( sizeTorchFloat == sizeFloat );
 
-  static const size_t nSumFieldBytes( countField_ * sizeof( float ) );
+  static const size_t nFieldBytes( countField_ * sizeFloat );
+  assert( nFieldBytes == sizeof( fields_t<float> ) );
 
-  const size_t nSampleFields( secondsInput * countField_ );
-  const size_t nSampleFieldBytes( nSampleFields * sizeFloat );
+  static const size_t nSampleFields( secondsInput * countField_ );
+  static const size_t nSampleFieldBytes( nSampleFields * sizeFloat );
 
   const size_t nSamples( m_vDataScaled.size() / secondsOutput ); // assumes integer math with truncation
 
-  using rFields_t = float[ countField_ ];
-  using rSample_t = rFields_t[ secondsInput ];
-  using rSamples_t = rSample_t[ nSamples ]; // will this work? no, as this is a compile time construct
-
-  rSamples_t rInputSamples;   // secondsInput
-  rSamples_t rOutputSamples;  // secondsOutput
-
   vValuesFlt_t::size_type ixDataScaled {};
+
+  vValuesFlt_t vSourceForTensor; // implicit 3 dimensions:  [sample index][time index][field index]
 
   {
     vValuesFlt_t::const_iterator bgn = m_vDataScaled.begin(); // begin of input
     vValuesFlt_t::const_iterator mid( bgn + secondsInput ); // end of input, begin of output
     vValuesFlt_t::const_iterator end( mid + secondsOutput ); // end of output
 
-    rSamples_t* pInputSamples( &rInputSamples );
-/*
     while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
-      std::memcpy( pInputSamples, bgn.base(), nSampleFieldBytes );
-      pInputSamples += secondsInput;
-      //vInput.emplace_back( vValuesFlt_t( bgn, mid ) );
-      //vOutput.emplace_back( vValuesFlt_t( mid, end ) );
+      std::copy( bgn, mid, std::back_inserter( vSourceForTensor ) );
       bgn += secondsOutput;
       mid += secondsOutput;
       end += secondsOutput;
       ixDataScaled += secondsOutput;
     }
-*/
   }
 
   BOOST_LOG_TRIVIAL(info)
     << "data usage: " << ixDataScaled << ',' << m_vDataScaled.size() << ',' << ixDataScaled + secondsTotal;
-  //BOOST_LOG_TRIVIAL(info)
-  //  << "input sample count: " << vInput.size();
+  BOOST_LOG_TRIVIAL(info)
+    << "input sample count: " << vSourceForTensor.size();
   //BOOST_LOG_TRIVIAL(info)
   //  << "output sample count: " << vOutput.size();
 
