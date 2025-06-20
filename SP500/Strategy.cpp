@@ -637,6 +637,10 @@ void Strategy::PostProcess() {
 
   //BOOST_LOG_TRIVIAL(info) << "tensor: " << tensor;
 
+  // building the time series, need to fix the tensor based upon:
+  // https://machinelearningmastery.com/how-to-develop-lstm-models-for-time-series-forecasting/
+  // https://machinelearningmastery.com/lstm-for-time-series-prediction-in-pytorch/
+
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
