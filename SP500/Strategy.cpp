@@ -631,6 +631,10 @@ void Strategy::PostProcess() {
     torch::TensorOptions().dtype( torch::kFloat32 ) // torch::kCUDA requires device memory setup
   ).to( device );
 
+  // https://github.com/pytorch/pytorch
+  // https://docs.pytorch.org/docs/stable/torch.html
+  // https://docs.pytorch.org/cppdocs/api/classat_1_1_tensor.html
+
   //BOOST_LOG_TRIVIAL(info) << "tensor: " << tensor;
 
 }
