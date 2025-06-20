@@ -609,10 +609,27 @@ void Strategy::PostProcess() {
   //   * .to( torch::KCUDA ) - cannot directly construct a GPU tensor from a CPU-allocated raw data pointer using from_blob.
   //   * .clone() - from_blob does not manage memory, so underlying needs to be valid during lifetime of tensor, or .clone() it
 
+  // references:
+  //   https://github.com/pytorch/pytorch/issues/14000
+  //   https://github.com/pytorch/pytorch/blob/main/tools/autograd/templates/variable_factories.h
+  //   https://docs.pytorch.org/cppdocs/notes/tensor_creation.html
+  //   https://docs.alcf.anl.gov/polaris/data-science/frameworks/libtorch/#linking-the-torch-libraries
+
+  torch::DeviceType device;
+  int num_devices = 0;
+  if ( torch::cuda::is_available() ) {
+    device = torch::kCUDA;
+    num_devices = torch::cuda::device_count();
+    BOOST_LOG_TRIVIAL(info) << "Number of CUDA devices detected: " << num_devices;
+  } else {
+    device = torch::kCPU;
+    BOOST_LOG_TRIVIAL(info) << "No CUDA devices detected, set device to CPU";
+  }
+
   torch::Tensor tensor =
     torch::from_blob( vSourceForTensor.data(), {nSamples_actual, secondsInput, countField_ },
-    torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCPU ) // torch::kCUDA requires device memory setup
-  ).to( torch::kCUDA );
+    torch::TensorOptions().dtype( torch::kFloat32 ) // torch::kCUDA requires device memory setup
+  ).to( device );
 
   //BOOST_LOG_TRIVIAL(info) << "tensor: " << tensor;
 
