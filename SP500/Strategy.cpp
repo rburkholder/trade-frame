@@ -605,10 +605,14 @@ void Strategy::PostProcess() {
   //  torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCPU )
   //);
 
+  // notes:
+  //   * .to( torch::KCUDA ) - cannot directly construct a GPU tensor from a CPU-allocated raw data pointer using from_blob.
+  //   * .clone() - from_blob does not manage memory, so underlying needs to be valid during lifetime of tensor, or .clone() it
+
   torch::Tensor tensor =
     torch::from_blob( vSourceForTensor.data(), {nSamples_actual, secondsInput, countField_ },
     torch::TensorOptions().dtype( torch::kFloat32 ).device( torch::kCPU ) // torch::kCUDA requires device memory setup
-  ).clone();
+  ).to( torch::kCUDA );
 
   //BOOST_LOG_TRIVIAL(info) << "tensor: " << tensor;
 
