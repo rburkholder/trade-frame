@@ -159,17 +159,17 @@ private:
   ou::tf::Quote m_quote;
   ou::tf::Trade m_trade;
 
-  enum EVecIx { ixEma200 = 0, ixEma50, ixEma29, ixEma13, ixTrade, ixTickj, ixTickl, ixAdvdec, countField_ };
+  enum EFeature { ixEma200 = 0, ixEma50, ixEma29, ixEma13, ixTrade, ixTickj, ixTickl, ixAdvdec, countFeature_ };
 
   template<typename type>
-  using rFields_t = type[ countField_ ];
+  using rFields_t = type[ countFeature_ ];
 
   template<typename type>
   struct fields_t {
     rFields_t<type> fields;
     fields_t( const fields_t& rhs )
     {
-      std::memcpy( fields, rhs.fields, countField_ * sizeof( type ) );
+      std::memcpy( fields, rhs.fields, countFeature_ * sizeof( type ) );
     }
     // todo: how to bulid an initializer?
     fields_t( const type v1, const type v2, const type v3, const type v4
