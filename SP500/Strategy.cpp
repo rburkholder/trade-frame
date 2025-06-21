@@ -597,10 +597,10 @@ void Strategy::PostProcess() {
 
   static const size_t sizeFloat( sizeof( float ) );
 
-  static const size_t nFieldBytes( countFeature_ * sizeFloat );
+  static const size_t nFieldBytes( nInputFeature_ * sizeFloat );
   assert( nFieldBytes == sizeof( fields_t<float> ) );
 
-  static const size_t nSampleFields( secondsInput * countFeature_ );
+  static const size_t nSampleFields( secondsInput * nInputFeature_ );
   static const size_t nSampleFieldBytes( nSampleFields * sizeFloat );
 
   const size_t nSamples_theory( m_vDataScaled.size() / secondsOutput ); // assumes integer math with truncation
@@ -667,7 +667,7 @@ void Strategy::PostProcess() {
   }
 
   torch::Tensor tensor =
-    torch::from_blob( vSourceForTensor.data(), { nSamples_actual, secondsInput, countFeature_ },
+    torch::from_blob( vSourceForTensor.data(), { nSamples_actual, secondsInput, nInputFeature_ },
     torch::TensorOptions().dtype( torch::kFloat32 ) // torch::kCUDA requires device memory setup
   ).to( device );
 
@@ -684,13 +684,13 @@ void Strategy::PostProcess() {
   //   which usually has a larger dimension than the number of features in the input.
 
   // Hyperparameters
-  int input_size = countFeature_;
-  int hidden_size = countFeature_ * 3;
+  int input_size = nInputFeature_;
+  int hidden_size = nInputFeature_ * 3;
   int num_layers = 1;
   int output_size = 1;
   double learning_rate = 0.01;
   int num_epochs = 100;
-  int sequence_length = 20;
+  int sequence_length = secondsInput;
 
     // Instantiate the model
   LSTM lstm_model( input_size, hidden_size, num_layers, output_size );
