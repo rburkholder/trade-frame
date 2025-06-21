@@ -593,7 +593,9 @@ void Strategy::PostProcess() {
   BOOST_LOG_TRIVIAL(info)
     << "data usage: " << ixDataScaled << ',' << m_vDataScaled.size() << ',' << ixDataScaled + secondsTotal;
   BOOST_LOG_TRIVIAL(info)
-    << "input sample count: " << vSourceForTensor.size();
+    << "input samples * (time steps in each sample): "
+    << nSamples_actual << ',' << secondsInput << '='
+    << vSourceForTensor.size();
   //BOOST_LOG_TRIVIAL(info)
   //  << "output sample count: " << vOutput.size();
 
@@ -621,7 +623,8 @@ void Strategy::PostProcess() {
     device = torch::kCUDA;
     num_devices = torch::cuda::device_count();
     BOOST_LOG_TRIVIAL(info) << "Number of CUDA devices detected: " << num_devices;
-  } else {
+  }
+  else {
     device = torch::kCPU;
     BOOST_LOG_TRIVIAL(info) << "No CUDA devices detected, set device to CPU";
   }
