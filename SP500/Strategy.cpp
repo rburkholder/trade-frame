@@ -531,6 +531,43 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 }
 
+class LSTM : public torch::nn::Module {
+public:
+
+  LSTM( int input_size, int hidden_size, int num_layers, int output_size )
+  : lstm( torch::nn::LSTMOptions( input_size, hidden_size ).num_layers( num_layers ) )
+  , linear( hidden_size, output_size )
+  {
+    register_module( "lstm", lstm );
+    register_module( "linear", linear );
+  }
+
+  torch::Tensor forward( torch::Tensor x, std::tuple<torch::Tensor, torch::Tensor>& hidden_state ) {
+
+    torch::Tensor out;
+
+    // Pass the input through the LSTM layer
+    std::tie( out, hidden_state ) = lstm->forward( x, hidden_state );
+
+    // Pass the output of the LSTM layer through the linear layer
+    // from v1:
+    //torch::Tensor prediction = linear->forward( out.reshape( { -1, lstm->options.hidden_size() } ) );
+    torch::Tensor prediction = linear->forward( out );
+    return prediction;
+  }
+
+  std::tuple<torch::Tensor, torch::Tensor> init_hidden( int batch_size ) {
+    torch::Tensor hidden_state = torch::zeros( { lstm->options.num_layers(), batch_size, lstm->options.hidden_size() } );
+    torch::Tensor   cell_state = torch::zeros( { lstm->options.num_layers(), batch_size, lstm->options.hidden_size() } );
+    return std::make_tuple( hidden_state, cell_state );
+  }
+
+private:
+  torch::nn::LSTM lstm;
+  torch::nn::Linear linear;
+};
+
+
 void Strategy::PostProcess() {
   // preparation for ML training goes here
   BOOST_LOG_TRIVIAL(info)
@@ -630,7 +667,7 @@ void Strategy::PostProcess() {
   }
 
   torch::Tensor tensor =
-    torch::from_blob( vSourceForTensor.data(), {nSamples_actual, secondsInput, countFeature_ },
+    torch::from_blob( vSourceForTensor.data(), { nSamples_actual, secondsInput, countFeature_ },
     torch::TensorOptions().dtype( torch::kFloat32 ) // torch::kCUDA requires device memory setup
   ).to( device );
 
@@ -643,6 +680,20 @@ void Strategy::PostProcess() {
   // building the time series, need to fix the tensor based upon:
   // https://machinelearningmastery.com/how-to-develop-lstm-models-for-time-series-forecasting/
   // https://machinelearningmastery.com/lstm-for-time-series-prediction-in-pytorch/
+  // * The power of an LSTM cell depends on the size of the hidden state or cell memory,
+  //   which usually has a larger dimension than the number of features in the input.
+
+  // Hyperparameters
+  int input_size = countFeature_;
+  int hidden_size = countFeature_ * 3;
+  int num_layers = 1;
+  int output_size = 1;
+  double learning_rate = 0.01;
+  int num_epochs = 100;
+  int sequence_length = 20;
+
+    // Instantiate the model
+  LSTM lstm_model( input_size, hidden_size, num_layers, output_size );
 
 }
 
