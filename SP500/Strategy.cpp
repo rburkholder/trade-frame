@@ -561,8 +561,8 @@ public:
     //out.to( x.device() );
 
     // Pass the output of the LSTM layer through the linear layer
-    torch::Tensor prediction = linear->forward( out );
-    //torch::Tensor prediction = linear->forward( out ).to( x.device() );
+    //torch::Tensor prediction = linear->forward( out );
+    torch::Tensor prediction = linear->forward( out ).to( x.device() );
     //torch::Tensor prediction = linear->forward( out.reshape( { -1, lstm->options.hidden_size() } ) ).to( x.device() );
     return prediction;
   }
@@ -643,12 +643,12 @@ void Strategy::PostProcess() {
   long nSamples_actual {};
   vValuesFlt_t::size_type ixDataScaled {};
 
-  //vValuesFlt_t vSourceForXTensor; // implicit 3 dimensions:  [sample index][sample size in seconds][feature list]
-  //std::vector<float> vSourceForYTensor; // [samples match X][1 second for prediction][last index implies 1 feature]
+  vValuesFlt_t vSourceForTensorX; // implicit 3 dimensions:  [sample index][sample size in seconds][feature list]
+  std::vector<float> vSourceForTensorY; // [samples match X][1 second for prediction][last index implies 1 feature]
 
-  using vTensor_t = std::vector<torch::Tensor>;
-  vTensor_t vTensorX;
-  vTensor_t vTensorY;
+  //using vTensor_t = std::vector<torch::Tensor>;
+  //vTensor_t vTensorX;
+  //vTensor_t vTensorY;
 
   {
     vValuesFlt_t::const_iterator bgnX = m_vDataScaled.begin(); // begin of input
@@ -657,19 +657,20 @@ void Strategy::PostProcess() {
     vValuesFlt_t::const_iterator bgnY( bgnX + secondsYOffset ); // end of output - predict this
     vValuesFlt_t::const_iterator endY( bgnY + secondsSequence );
 
-    vValuesFlt_t vX; // nInputFeature_ features
-    std::vector<float> vY; // 1 feature
+    //vValuesFlt_t vX; // nInputFeature_ features
+    //std::vector<float> vY; // 1 feature
 
     while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
 
-      vX.clear();
-      std::copy( bgnX, endX, std::back_inserter( vX ) );
-      vTensorX.push_back( torch::from_blob( vX.data(), { 1, secondsSequence, nInputFeature } ).clone().to( device ) );
+      //vX.clear();
+      //std::copy( bgnX, endX, std::back_inserter( vX ) );
+      std::copy( bgnX, endX, std::back_inserter( vSourceForTensorX ) );
+      //vTensorX.push_back( torch::from_blob( vX.data(), { 1, secondsSequence, nInputFeature } ).clone().to( device ) );
 
-      vY.clear();
-      //std::copy( mid, end, std::back_inserter( vY ) );
-      std::for_each( bgnY, endY, [&vY]( auto& entry ){ vY.push_back( entry.fields[ ixTrade ] ); } );
-      vTensorY.push_back( torch::from_blob( vY.data(), { 1, secondsSequence, nOutputFeature } ).clone().to( device ) );
+      //vY.clear();
+      //std::for_each( bgnY, endY, [&vY]( auto& entry ){ vY.push_back( entry.fields[ ixTrade ] ); } );
+      std::for_each( bgnY, endY, [&vSourceForTensorY]( auto& entry ){ vSourceForTensorY.push_back( entry.fields[ ixTrade ] ); } );
+      //vTensorY.push_back( torch::from_blob( vY.data(), { 1, secondsSequence, nOutputFeature } ).clone().to( device ) );
 
       bgnX += secondsSampleOffset;
       endX += secondsSampleOffset;
@@ -688,22 +689,24 @@ void Strategy::PostProcess() {
     << "input samples * (time steps in each sample): "
     << nSamples_actual
     << ',' << secondsSequence
-    << '=' << '(' << vTensorX.size()
-    << ','        << vTensorY.size()
+    //<< '=' << '(' << vTensorX.size()
+    //<< ','        << vTensorY.size()
+    << '=' << '(' << vSourceForTensorX.size()
+    << ','        << vSourceForTensorY.size()
            << ')'
     ;
   //BOOST_LOG_TRIVIAL(info)
   //  << "output sample count: " << vOutput.size();
 
-  //torch::Tensor tensorX = // input
-  //  torch::from_blob( vSourceForXTensor.data(), { nSamples_actual, secondsInput, nInputFeature_ },
-  //  torch::TensorOptions().dtype( torch::kFloat32 ) // torch::kCUDA requires device memory setup
-  //).to( device );
+  torch::Tensor tensorX = // input
+    torch::from_blob( vSourceForTensorX.data(), { nSamples_actual, secondsSequence, nInputFeature },
+    torch::TensorOptions().dtype( torch::kFloat32 )
+  ).to( device );
 
-  //torch::Tensor tensorY = // output
-  //  torch::from_blob( vSourceForYTensor.data(), { nSamples_actual, 1, nOutputFeature },
-  //  torch::TensorOptions().dtype( torch::kFloat32 ) // torch::kCUDA requires device memory setup
-  //).to( device );
+  torch::Tensor tensorY = // output
+    torch::from_blob( vSourceForTensorY.data(), { nSamples_actual, secondsSequence, nOutputFeature },
+    torch::TensorOptions().dtype( torch::kFloat32 )
+  ).to( device );
 
   // https://github.com/pytorch/pytorch
   // https://docs.pytorch.org/docs/stable/torch.html
@@ -718,6 +721,8 @@ void Strategy::PostProcess() {
   //   which usually has a larger dimension than the number of features in the input.
 
   // Hyperparameters
+  const int batch_size( nSamples_actual );
+  //const int batch_size( 1 );
   const int input_size = nInputFeature_;
   const int hidden_size = nInputFeature_ * 9;
   const int sequence_length = secondsSequence;
@@ -741,21 +746,36 @@ void Strategy::PostProcess() {
 
     torch::Tensor loss;
 
-    vTensor_t::iterator iterTensorY( vTensorY.begin() );
-    for ( torch::Tensor& tensorX: vTensorX ) {
+    bool singles( false );
+    if ( singles ) {
+      /*
+      vTensor_t::iterator iterTensorY( vTensorY.begin() );
+      for ( torch::Tensor& tensorX: vTensorX ) {
 
-      //LSTM::lstm_state_t state( model.init_states( device, secondsInput ) );  // not # samples, but # seconds in each sample?
-      LSTM::lstm_state_t state( model.init_states( device, 1 ) ); // batch size 1
+        //LSTM::lstm_state_t state( model.init_states( device, secondsInput ) );  // not # samples, but # seconds in each sample?
+        LSTM::lstm_state_t state( model.init_states( device, batch_size ) ); // batch size 1
 
-      //torch::Tensor predictions = model.forward( tensorX, state ).to( device );
+        //torch::Tensor predictions = model.forward( tensorX, state ).to( device );
+        torch::Tensor predictions = model.forward( tensorX, state );
+        loss = criterion( predictions, *iterTensorY );  // warning: loss.h:106] Warning: Using a target size ([1, 1, 1]) that is different to the input size ([1, 210, 1])
+
+        optimizer.zero_grad();
+        loss.backward();
+        optimizer.step();
+
+        ++iterTensorY;
+      }
+      */
+    }
+    else {
+      LSTM::lstm_state_t state( model.init_states( device, batch_size ) ); //
+
       torch::Tensor predictions = model.forward( tensorX, state );
-      loss = criterion( predictions, *iterTensorY );  // warning: loss.h:106] Warning: Using a target size ([1, 1, 1]) that is different to the input size ([1, 210, 1])
+      loss = criterion( predictions, tensorY );
 
       optimizer.zero_grad();
       loss.backward();
       optimizer.step();
-
-      ++iterTensorY;
     }
 
     //std::get<0>( state ).detach();
