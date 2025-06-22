@@ -546,6 +546,7 @@ public:
   }
 
   lstm_state_t init_states( torch::DeviceType device, int batch_size  ) {
+    //BOOST_LOG_TRIVIAL(debug) << "LSTM::init_state batch_size: " << batch_size;
     torch::Tensor hidden_state = torch::zeros( { lstm->options.num_layers(), batch_size, lstm->options.hidden_size() } ).to( device );
     torch::Tensor   cell_state = torch::zeros( { lstm->options.num_layers(), batch_size, lstm->options.hidden_size() } ).to( device );
     return std::make_tuple( hidden_state, cell_state );
@@ -573,6 +574,7 @@ private:
 }
 
 void Strategy::PostProcess() {
+
   // preparation for ML training goes here
   BOOST_LOG_TRIVIAL(info)
     << "raw vector size: "
@@ -591,63 +593,6 @@ void Strategy::PostProcess() {
            << "size of fields_t<float>: " << sizeof( fields_t<float> )
     << ',' << "size of fields_t<double>: " << sizeof( fields_t<double> )
     ;
-
-  // using as a guide:
-  //  https://machinelearningmastery.com/how-to-develop-lstm-models-for-time-series-forecasting/
-
-  static const size_t secondsInput( 210 ); // training sample
-  static const size_t secondsOutput( 30);  // prediction sample
-  static const size_t secondsTotal( secondsInput + secondsOutput ); // training + prediction
-  static const size_t secondsOffset( 23 );  // offset for each sample
-
-  static const size_t sizeFloat( sizeof( float ) );
-
-  static const size_t nFieldBytes( nInputFeature_ * sizeFloat );
-  assert( nFieldBytes == sizeof( fields_t<float> ) );
-
-  static const size_t nSampleFields( secondsInput * nInputFeature_ );
-  static const size_t nSampleFieldBytes( nSampleFields * sizeFloat );
-
-  static const int nOutputFeature( 1 );
-
-  const size_t nSamples_theory( m_vDataScaled.size() / secondsOutput ); // assumes integer math with truncation
-
-  long nSamples_actual {};
-  vValuesFlt_t::size_type ixDataScaled {};
-
-  vValuesFlt_t vSourceForXTensor; // implicit 3 dimensions:  [sample index][sample size in seconds][feature list]
-  std::vector<float> vSourceForYTensor; // [samples match X][1 second for prediction][last index implies 1 feature]
-
-  {
-    vValuesFlt_t::const_iterator bgn = m_vDataScaled.begin(); // begin of input
-    vValuesFlt_t::const_iterator mid( bgn + secondsInput ); // end of input, begin of output
-    vValuesFlt_t::const_iterator end( mid + secondsOutput ); // end of output - predict this
-
-    while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
-      std::copy( bgn, mid, std::back_inserter( vSourceForXTensor ) );
-      vSourceForYTensor.push_back( end->fields[ ixTrade ] );
-      bgn += secondsOffset;
-      mid += secondsOffset;
-      end += secondsOffset;
-      ixDataScaled += secondsOffset;
-      ++nSamples_actual;
-    }
-    // won't match for now:
-    BOOST_LOG_TRIVIAL(info) << "nSamples: " << nSamples_actual << ',' << nSamples_theory;
-  }
-
-  BOOST_LOG_TRIVIAL(info)
-    << "data usage: " << ixDataScaled << ',' << m_vDataScaled.size() << ',' << ixDataScaled + secondsTotal;
-  BOOST_LOG_TRIVIAL(info)
-    << "input samples * (time steps in each sample): "
-    << nSamples_actual
-    << ',' << secondsInput
-    << '=' << '(' << vSourceForXTensor.size()
-    << ','        << vSourceForYTensor.size()
-           << ')'
-    ;
-  //BOOST_LOG_TRIVIAL(info)
-  //  << "output sample count: " << vOutput.size();
 
   torch::manual_seed( 1 );
   torch::cuda::manual_seed_all( 1 );
@@ -677,15 +622,87 @@ void Strategy::PostProcess() {
   // force for now:
   //device = torch::kCPU;
 
-  torch::Tensor tensorX = // input
-    torch::from_blob( vSourceForXTensor.data(), { nSamples_actual, secondsInput, nInputFeature_ },
-    torch::TensorOptions().dtype( torch::kFloat32 ) // torch::kCUDA requires device memory setup
-  ).to( device );
+  // using as a guide:
+  //  https://machinelearningmastery.com/how-to-develop-lstm-models-for-time-series-forecasting/
 
-  torch::Tensor tensorY = // output
-    torch::from_blob( vSourceForYTensor.data(), { nSamples_actual, 1, nOutputFeature },
-    torch::TensorOptions().dtype( torch::kFloat32 ) // torch::kCUDA requires device memory setup
-  ).to( device );
+  static const size_t secondsInput( 210 ); // training sample
+  //static const size_t secondsOutput( 30);  // prediction sample
+  static const size_t secondsOutput( secondsInput);  // prediction sample  (Y needs to match X? )
+  static const size_t secondsTotal( secondsInput + secondsOutput ); // training + prediction
+  static const size_t secondsOffset( 23 );  // offset for each sample
+
+  static const size_t sizeFloat( sizeof( float ) );
+
+  static const size_t nFieldBytes( nInputFeature_ * sizeFloat );
+  assert( nFieldBytes == sizeof( fields_t<float> ) );
+
+  static const size_t nSampleFields( secondsInput * nInputFeature_ );
+  static const size_t nSampleFieldBytes( nSampleFields * sizeFloat );
+
+  static const int nOutputFeature( 1 );
+
+  const size_t nSamples_theory( m_vDataScaled.size() / secondsOutput ); // assumes integer math with truncation
+
+  long nSamples_actual {};
+  vValuesFlt_t::size_type ixDataScaled {};
+
+  //vValuesFlt_t vSourceForXTensor; // implicit 3 dimensions:  [sample index][sample size in seconds][feature list]
+  //std::vector<float> vSourceForYTensor; // [samples match X][1 second for prediction][last index implies 1 feature]
+
+  using vTensor_t = std::vector<torch::Tensor>;
+  vTensor_t vTensorX;
+  vTensor_t vTensorY;
+
+  {
+    vValuesFlt_t::const_iterator bgn = m_vDataScaled.begin(); // begin of input
+    vValuesFlt_t::const_iterator mid( bgn + secondsInput ); // end of input, begin of output
+    vValuesFlt_t::const_iterator end( mid + secondsOutput ); // end of output - predict this
+
+    vValuesFlt_t vX;
+    vValuesFlt_t vY;
+
+    while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
+
+      vX.clear();
+      std::copy( bgn, mid, std::back_inserter( vX ) );
+      vTensorX.push_back( torch::from_blob( vX.data(), { 1, secondsInput, nInputFeature_ } ).clone().to( device ) );
+
+      vY.clear();
+      std::copy( mid, end, std::back_inserter( vY ) );
+      vTensorY.push_back( torch::from_blob( vY.data(), { 1, secondsOutput, nOutputFeature } ).clone().to( device ) );
+
+      bgn += secondsOffset;
+      mid += secondsOffset;
+      end += secondsOffset;
+      ixDataScaled += secondsOffset;
+      ++nSamples_actual;
+    }
+    // won't match for now:
+    BOOST_LOG_TRIVIAL(info) << "nSamples: " << nSamples_actual << ',' << nSamples_theory;
+  }
+
+  BOOST_LOG_TRIVIAL(info)
+    << "data usage: " << ixDataScaled << ',' << m_vDataScaled.size() << ',' << ixDataScaled + secondsTotal;
+  BOOST_LOG_TRIVIAL(info)
+    << "input samples * (time steps in each sample): "
+    << nSamples_actual
+    << ',' << secondsInput
+    << '=' << '(' << vTensorX.size()
+    << ','        << vTensorY.size()
+           << ')'
+    ;
+  //BOOST_LOG_TRIVIAL(info)
+  //  << "output sample count: " << vOutput.size();
+
+  //torch::Tensor tensorX = // input
+  //  torch::from_blob( vSourceForXTensor.data(), { nSamples_actual, secondsInput, nInputFeature_ },
+  //  torch::TensorOptions().dtype( torch::kFloat32 ) // torch::kCUDA requires device memory setup
+  //).to( device );
+
+  //torch::Tensor tensorY = // output
+  //  torch::from_blob( vSourceForYTensor.data(), { nSamples_actual, 1, nOutputFeature },
+  //  torch::TensorOptions().dtype( torch::kFloat32 ) // torch::kCUDA requires device memory setup
+  //).to( device );
 
   // https://github.com/pytorch/pytorch
   // https://docs.pytorch.org/docs/stable/torch.html
@@ -713,31 +730,42 @@ void Strategy::PostProcess() {
 
   // Loss, optimizer, state
   torch::nn::MSELoss criterion; // loss function
-  torch::optim::Adam optimizer( model.parameters(), learning_rate );
-  LSTM::lstm_state_t state( model.init_states( device, tensorX.size( 1 ) ) );  // not # samples, but # seconds in each sample?
-
-  model.to( device );
   criterion->to( device );
+
+  torch::optim::Adam optimizer( model.parameters(), learning_rate );
+
+  model.train();
+  model.to( device );
 
   for ( size_t epoch = 0; epoch < num_epochs; ++epoch ) {
 
-    model.train();
-    optimizer.zero_grad();
+    torch::Tensor loss;
 
-    torch::Tensor outputs = model.forward( tensorX, state ).to( device );
+    vTensor_t::iterator iterTensorY( vTensorY.begin() );
+    for ( torch::Tensor& tensorX: vTensorX ) {
 
-    auto loss = criterion( outputs, tensorY ).to( tensorX.device() );
-    loss.backward();
-    optimizer.step();
+      LSTM::lstm_state_t state( model.init_states( device, secondsInput ) );  // not # samples, but # seconds in each sample?
+
+      torch::Tensor predictions = model.forward( tensorX, state ).to( device );
+      loss = criterion( predictions, *iterTensorY );
+
+      optimizer.zero_grad();
+      loss.backward();
+      optimizer.step();
+
+      ++ iterTensorY;
+    }
 
     //std::get<0>( state ).detach();
     //std::get<1>( state ).detach();
 
-    if ( 0 == ( epoch % 10 ) ) {
-      BOOST_LOG_TRIVIAL(info) << "epoch " << epoch << '/' << num_epochs << " loss: " << loss.item<float>();
+    if ( 0 == ( ( 1 + epoch ) % 10 ) ) {
+      BOOST_LOG_TRIVIAL(info) << "epoch " << ( 1 + epoch ) << '/' << num_epochs << " loss: " << loss.item<float>();
     }
 
   }
+
+  BOOST_LOG_TRIVIAL(info) << "training done";
 
 }
 
