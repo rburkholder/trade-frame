@@ -100,7 +100,7 @@ void TorchTest_v2() {
 
       // Forward pass
       torch::Tensor predictions = model.forward( x_batches[i], hidden_state );  // run time error here, as mentioned above
-      loss = criterion(predictions, y_batches[i]);
+      loss = criterion( predictions, y_batches[i] );
 
       // Backward and optimize
       optimizer.zero_grad();
