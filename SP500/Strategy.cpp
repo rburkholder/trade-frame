@@ -625,24 +625,20 @@ void Strategy::PostProcess() {
   // using as a guide:
   //  https://machinelearningmastery.com/how-to-develop-lstm-models-for-time-series-forecasting/
 
-  static const size_t secondsInput( 210 ); // training sample
-  static const size_t secondsOutput( 30 );  // prediction sample
-  //static const size_t secondsOutput( secondsInput);  // prediction sample  (Y needs to match X? )
-  //static const size_t secondsOutput( 1 );  // prediction sample
-  static const size_t secondsTotal( secondsInput + secondsOutput ); // training + prediction
-  static const size_t secondsOffset( 23 );  // offset for each sample
+  static const size_t secondsSequence( 210 ); // duration of sample sequence
+  static const size_t secondsYOffset( 30 );  // Y.length must be same as X.length, => offset of Y for prediction on last time slot
+  static const size_t secondsTotal( secondsSequence + secondsYOffset ); // training + prediction
+  static const size_t secondsSampleOffset( 23 );  // offset for each sample
 
   static const size_t sizeFloat( sizeof( float ) );
 
   static const size_t nFieldBytes( nInputFeature_ * sizeFloat );
   assert( nFieldBytes == sizeof( fields_t<float> ) );
 
-  static const size_t nSampleFields( secondsInput * nInputFeature_ );
-  static const size_t nSampleFieldBytes( nSampleFields * sizeFloat );
-
+  static const int nInputFeature( nInputFeature_ );
   static const int nOutputFeature( 1 );
 
-  const size_t nSamples_theory( m_vDataScaled.size() / secondsOutput ); // assumes integer math with truncation
+  const size_t nSamples_theory( m_vDataScaled.size() / secondsSampleOffset ); // assumes integer math with truncation
 
   long nSamples_actual {};
   vValuesFlt_t::size_type ixDataScaled {};
@@ -655,9 +651,11 @@ void Strategy::PostProcess() {
   vTensor_t vTensorY;
 
   {
-    vValuesFlt_t::const_iterator bgn = m_vDataScaled.begin(); // begin of input
-    vValuesFlt_t::const_iterator mid( bgn + secondsInput ); // end of input, begin of output
-    vValuesFlt_t::const_iterator end( mid + secondsOutput ); // end of output - predict this
+    vValuesFlt_t::const_iterator bgnX = m_vDataScaled.begin(); // begin of input
+    vValuesFlt_t::const_iterator endX( bgnX + secondsSequence ); // end of input, begin of output
+
+    vValuesFlt_t::const_iterator bgnY( bgnX + secondsYOffset ); // end of output - predict this
+    vValuesFlt_t::const_iterator endY( bgnY + secondsSequence );
 
     vValuesFlt_t vX; // nInputFeature_ features
     std::vector<float> vY; // 1 feature
@@ -665,18 +663,19 @@ void Strategy::PostProcess() {
     while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
 
       vX.clear();
-      std::copy( bgn, mid, std::back_inserter( vX ) );
-      vTensorX.push_back( torch::from_blob( vX.data(), { 1, secondsInput, nInputFeature_ } ).clone().to( device ) );
+      std::copy( bgnX, endX, std::back_inserter( vX ) );
+      vTensorX.push_back( torch::from_blob( vX.data(), { 1, secondsSequence, nInputFeature } ).clone().to( device ) );
 
       vY.clear();
       //std::copy( mid, end, std::back_inserter( vY ) );
-      vY.push_back( mid->fields[ ixTrade ] );
-      vTensorY.push_back( torch::from_blob( vY.data(), { 1, 1, nOutputFeature } ).clone().to( device ) );
+      std::for_each( bgnY, endY, [&vY]( auto& entry ){ vY.push_back( entry.fields[ ixTrade ] ); } );
+      vTensorY.push_back( torch::from_blob( vY.data(), { 1, secondsSequence, nOutputFeature } ).clone().to( device ) );
 
-      bgn += secondsOffset;
-      mid += secondsOffset;
-      end += secondsOffset;
-      ixDataScaled += secondsOffset;
+      bgnX += secondsSampleOffset;
+      endX += secondsSampleOffset;
+      bgnY += secondsSampleOffset;
+      endY += secondsSampleOffset;
+      ixDataScaled += secondsSampleOffset;
       ++nSamples_actual;
     }
     // won't match for now:
@@ -688,7 +687,7 @@ void Strategy::PostProcess() {
   BOOST_LOG_TRIVIAL(info)
     << "input samples * (time steps in each sample): "
     << nSamples_actual
-    << ',' << secondsInput
+    << ',' << secondsSequence
     << '=' << '(' << vTensorX.size()
     << ','        << vTensorY.size()
            << ')'
@@ -721,7 +720,7 @@ void Strategy::PostProcess() {
   // Hyperparameters
   const int input_size = nInputFeature_;
   const int hidden_size = nInputFeature_ * 9;
-  const int sequence_length = secondsInput;
+  const int sequence_length = secondsSequence;
   const int num_layers = 1;
   const int output_size = nOutputFeature;
   const double learning_rate = 0.01;
