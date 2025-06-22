@@ -85,21 +85,21 @@ void TorchTest_v2() {
   }
 
   // Instantiate the model
-  LSTM lstm_model( input_size, hidden_size, num_layers, output_size );
+  LSTM model( input_size, hidden_size, num_layers, output_size );
 
   // Loss and optimizer
   torch::nn::MSELoss criterion;
-  torch::optim::Adam optimizer( lstm_model.parameters(), learning_rate );
+  torch::optim::Adam optimizer( model.parameters(), learning_rate );
 
   // Training loop
   for ( int epoch = 0; epoch < num_epochs; ++epoch ) {
     torch::Tensor loss;
     for (size_t i = 0; i < x_batches.size(); ++i) {
-      // Initialize hidden state
-      std::tuple<torch::Tensor, torch::Tensor> hidden_state = lstm_model.init_hidden(1);
+      // Initialize hidden state & cell state
+      std::tuple<torch::Tensor, torch::Tensor> hidden_state = model.init_hidden( 1 ); // 1 is batch size
 
       // Forward pass
-      torch::Tensor predictions = lstm_model.forward( x_batches[i], hidden_state );  // run time error here, as mentioned above
+      torch::Tensor predictions = model.forward( x_batches[i], hidden_state );  // run time error here, as mentioned above
       loss = criterion(predictions, y_batches[i]);
 
       // Backward and optimize
@@ -116,10 +116,10 @@ void TorchTest_v2() {
   // Prediction
   std::vector<float> future_predictions;
   torch::Tensor input_seq = x_batches.back();
-  std::tuple<torch::Tensor, torch::Tensor> hidden_state = lstm_model.init_hidden(1);
+  std::tuple<torch::Tensor, torch::Tensor> hidden_state = model.init_hidden(1);
 
   for (int i = 0; i < 10; ++i) {
-    torch::Tensor prediction = lstm_model.forward(input_seq, hidden_state);
+    torch::Tensor prediction = model.forward(input_seq, hidden_state);
     future_predictions.push_back(prediction[0][sequence_length - 1][0].item<float>());
 
       // Update input sequence for next prediction
@@ -149,9 +149,10 @@ void TorchTest_v1() {
     torch::nn::LSTM lstm;
     torch::nn::Linear linear;
 
-    LSTM( int input_size, int hidden_size, int num_layers, int num_classes ) :
-      lstm(torch::nn::LSTMOptions(input_size, hidden_size).num_layers( num_layers )),
-      linear( hidden_size, num_classes ) {
+    LSTM( int input_size, int hidden_size, int num_layers, int num_features )
+    : lstm(torch::nn::LSTMOptions(input_size, hidden_size).num_layers( num_layers ))
+    , linear( hidden_size, num_features )
+    {
       register_module( "lstm", lstm );
       register_module( "linear", linear );
     }
@@ -175,12 +176,12 @@ void TorchTest_v1() {
   const int input_size = 28;
   const int hidden_size = 128;
   const int num_layers = 2;
-  const int num_classes = 10;
+  const int num_features = 10;
   const int seq_length = 28;
   const int batch_size = 64;
 
   // Create the LSTM network
-  LSTM lstm( input_size, hidden_size, num_layers, num_classes );
+  LSTM lstm( input_size, hidden_size, num_layers, num_features );
 
   // Create a random input tensor
   auto input = torch::randn( { seq_length, batch_size, input_size } );
