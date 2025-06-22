@@ -531,14 +531,14 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 }
 
-namespace {
+namespace {  // *****************
 class LSTM : public torch::nn::Module {
 public:
 
   using lstm_state_t = std::tuple<torch::Tensor, torch::Tensor>; // hidden state, cell state
 
   LSTM( int input_size, int hidden_size, int num_layers, int output_size )
-  : lstm( torch::nn::LSTMOptions( input_size, hidden_size ).num_layers( num_layers ) )
+  : lstm( torch::nn::LSTMOptions( input_size, hidden_size ).num_layers( num_layers ).batch_first(( true ) ) )
   , linear( hidden_size, output_size )
   {
     register_module( "lstm", lstm );
@@ -571,7 +571,7 @@ private:
   torch::nn::LSTM lstm;
   torch::nn::Linear linear;
 };
-}
+}  // *****************
 
 void Strategy::PostProcess() {
 
@@ -626,8 +626,9 @@ void Strategy::PostProcess() {
   //  https://machinelearningmastery.com/how-to-develop-lstm-models-for-time-series-forecasting/
 
   static const size_t secondsInput( 210 ); // training sample
-  //static const size_t secondsOutput( 30);  // prediction sample
-  static const size_t secondsOutput( secondsInput);  // prediction sample  (Y needs to match X? )
+  static const size_t secondsOutput( 30 );  // prediction sample
+  //static const size_t secondsOutput( secondsInput);  // prediction sample  (Y needs to match X? )
+  //static const size_t secondsOutput( 1 );  // prediction sample
   static const size_t secondsTotal( secondsInput + secondsOutput ); // training + prediction
   static const size_t secondsOffset( 23 );  // offset for each sample
 
@@ -658,8 +659,8 @@ void Strategy::PostProcess() {
     vValuesFlt_t::const_iterator mid( bgn + secondsInput ); // end of input, begin of output
     vValuesFlt_t::const_iterator end( mid + secondsOutput ); // end of output - predict this
 
-    vValuesFlt_t vX;
-    vValuesFlt_t vY;
+    vValuesFlt_t vX; // nInputFeature_ features
+    std::vector<float> vY; // 1 feature
 
     while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
 
@@ -668,8 +669,9 @@ void Strategy::PostProcess() {
       vTensorX.push_back( torch::from_blob( vX.data(), { 1, secondsInput, nInputFeature_ } ).clone().to( device ) );
 
       vY.clear();
-      std::copy( mid, end, std::back_inserter( vY ) );
-      vTensorY.push_back( torch::from_blob( vY.data(), { 1, secondsOutput, nOutputFeature } ).clone().to( device ) );
+      //std::copy( mid, end, std::back_inserter( vY ) );
+      vY.push_back( mid->fields[ ixTrade ] );
+      vTensorY.push_back( torch::from_blob( vY.data(), { 1, 1, nOutputFeature } ).clone().to( device ) );
 
       bgn += secondsOffset;
       mid += secondsOffset;
@@ -718,7 +720,7 @@ void Strategy::PostProcess() {
 
   // Hyperparameters
   const int input_size = nInputFeature_;
-  const int hidden_size = nInputFeature_ * 3;
+  const int hidden_size = nInputFeature_ * 9;
   const int sequence_length = secondsInput;
   const int num_layers = 1;
   const int output_size = nOutputFeature;
@@ -727,15 +729,14 @@ void Strategy::PostProcess() {
 
     // Instantiate the model
   LSTM model( input_size, hidden_size, num_layers, output_size );
+  model.train();
+  model.to( device );
 
   // Loss, optimizer, state
-  torch::nn::MSELoss criterion; // loss function
+  torch::nn::MSELoss criterion( torch::nn::MSELossOptions().reduction( torch::kMean ) ); // loss function
   criterion->to( device );
 
   torch::optim::Adam optimizer( model.parameters(), learning_rate );
-
-  model.train();
-  model.to( device );
 
   for ( size_t epoch = 0; epoch < num_epochs; ++epoch ) {
 
@@ -744,16 +745,18 @@ void Strategy::PostProcess() {
     vTensor_t::iterator iterTensorY( vTensorY.begin() );
     for ( torch::Tensor& tensorX: vTensorX ) {
 
-      LSTM::lstm_state_t state( model.init_states( device, secondsInput ) );  // not # samples, but # seconds in each sample?
+      //LSTM::lstm_state_t state( model.init_states( device, secondsInput ) );  // not # samples, but # seconds in each sample?
+      LSTM::lstm_state_t state( model.init_states( device, 1 ) ); // batch size 1
 
-      torch::Tensor predictions = model.forward( tensorX, state ).to( device );
-      loss = criterion( predictions, *iterTensorY );
+      //torch::Tensor predictions = model.forward( tensorX, state ).to( device );
+      torch::Tensor predictions = model.forward( tensorX, state );
+      loss = criterion( predictions, *iterTensorY );  // warning: loss.h:106] Warning: Using a target size ([1, 1, 1]) that is different to the input size ([1, 210, 1])
 
       optimizer.zero_grad();
       loss.backward();
       optimizer.step();
 
-      ++ iterTensorY;
+      ++iterTensorY;
     }
 
     //std::get<0>( state ).detach();
