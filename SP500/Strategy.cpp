@@ -728,8 +728,8 @@ void Strategy::PostProcess() {
   const int sequence_length = secondsSequence;
   const int num_layers = 1;
   const int output_size = nOutputFeature;
-  const double learning_rate = 0.01;
-  const int num_epochs = 100;
+  const double learning_rate = 0.001;
+  const int num_epochs = 10000;
 
     // Instantiate the model
   LSTM model( input_size, hidden_size, num_layers, output_size );
@@ -781,7 +781,7 @@ void Strategy::PostProcess() {
     //std::get<0>( state ).detach();
     //std::get<1>( state ).detach();
 
-    if ( 0 == ( ( 1 + epoch ) % 10 ) ) {
+    if ( 0 == ( ( 1 + epoch ) % 100 ) ) {
       BOOST_LOG_TRIVIAL(info) << "epoch " << ( 1 + epoch ) << '/' << num_epochs << " loss: " << loss.item<float>();
     }
 
