@@ -613,6 +613,7 @@ void Strategy::PostProcess() {
     device = torch::kCUDA;
     num_devices = torch::cuda::device_count();
     BOOST_LOG_TRIVIAL(info) << "Number of CUDA devices detected: " << num_devices;
+    // when > 1, then can use, as example ' .device(torch::kCUDA, 1 )'
   }
   else {
     device = torch::kCPU;
@@ -788,6 +789,11 @@ void Strategy::PostProcess() {
   }
 
   BOOST_LOG_TRIVIAL(info) << "training done";
+
+  model.eval();
+  // with torch.no_grad()  ?
+  // prediction = model( x );
+  // use a second layer to reduce the output size?
 
 }
 
