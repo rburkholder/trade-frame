@@ -159,7 +159,8 @@ private:
   ou::tf::Quote m_quote;
   ou::tf::Trade m_trade;
 
-  enum EFeature { ixEma200 = 0, ixEma050, ixEma029, ixEma013, ixTrade, ixTickj, ixTickl, ixAdvdec, nInputFeature_ };
+  //enum EFeature { ixEma200 = 0, ixEma050, ixEma029, ixEma013, ixTrade, ixTickj, ixTickl, ixAdvdec, nInputFeature_ };
+  enum EFeature { ixEma200 = 0, ixEma050, ixEma029, ixEma013, ixTrade, ixTickj, ixTickl, nInputFeature_ };
 
   template<typename type>
   using rFields_t = type[ nInputFeature_ ];
@@ -173,7 +174,7 @@ private:
     }
     // todo: how to bulid an initializer?
     fields_t( const type v1, const type v2, const type v3, const type v4
-            , const type v5, const type v6, const type v7, const type v8 )
+            , const type v5, const type v6, const type v7 /*, const type v8 */ )
     {
       fields[ ixEma200 ] = v1;
       fields[ ixEma050 ] = v2;
@@ -182,7 +183,7 @@ private:
       fields[ ixTrade  ] = v5;
       fields[ ixTickj  ] = v6;
       fields[ ixTickl  ] = v7;
-      fields[ ixAdvdec ] = v8;
+      //fields[ ixAdvdec ] = v8;
     }
   };
 

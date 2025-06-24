@@ -441,9 +441,10 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   UpdateEma<200>( price_, m_dblEma200, m_ceEma200 );
 
   const fields_t<double> raw(
-    m_dblEma200, m_dblEma050, m_dblEma029, m_dblEma013,
-    price,
-    m_dblTickJ, m_dblTickL, m_dblAdvDecRatio
+    m_dblEma200, m_dblEma050, m_dblEma029, m_dblEma013
+  , price
+  , m_dblTickJ, m_dblTickL
+  //, m_dblAdvDecRatio
   );
   m_vDataRaw.push_back( raw );
 
@@ -516,7 +517,7 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
       ratioEma200.flt, ratioEma050.flt, ratioEma029.flt, ratioEma013.flt
     , scaledPrice.flt
     , realTickJ.flt, realTickL.flt
-    , 0.5 // dblAdvDec use neutral mid until multi-day series tackled
+    //, 0.5 // dblAdvDec use neutral mid until multi-day series tackled
     );
     m_vDataScaled.push_back( scaled );
 
