@@ -145,7 +145,6 @@ private:
 
   double m_dblTickJ;
   double m_dblTickL;
-  //double m_dblTickLmt;
 
   double m_dblAdv;
   double m_dblDec;
@@ -205,9 +204,6 @@ private:
 
   ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryVolume m_ceVolume;
-
-  //ou::ChartEntryIndicator m_ceAsk;
-  //ou::ChartEntryIndicator m_ceBid;
 
   ou::ChartEntryIndicator m_ceEma013;
   ou::ChartEntryIndicator m_ceEma029;

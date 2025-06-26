@@ -55,7 +55,7 @@ Strategy::Strategy(
 , m_stateTickHi( ETickHi::Neutral ), m_stateTickLo( ETickLo::Neutral )
 , m_nEnterLong {}, m_nEnterShort {}
 //, m_dblLastTrin {}
-, m_dblTickJ {}, m_dblTickL {}//, m_dblTickLmt {}
+, m_dblTickJ {}, m_dblTickL {}
 {
   SetupChart();
 
@@ -219,14 +219,6 @@ void Strategy::SetupChart() {
   m_ceAdvDec_ratio.SetColour( c_colourAdvDec );
   m_cdv.Add( EChartSlot::Ratio, &m_ceAdvDec_ratio );
 
-  //m_ceAsk.SetName( "Ask" );
-  //m_ceAsk.SetColour( ou::Colour::Red );
-  //m_cdv.Add( EChartSlot::Price, &m_ceAsk );
-
-  //m_ceBid.SetName( "Bid" );
-  //m_ceBid.SetColour( ou::Colour::Blue );
-  //m_cdv.Add( EChartSlot::Price, &m_ceBid );
-
   m_ceVolume.SetName( "Volume" );
   m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
 
@@ -259,10 +251,8 @@ void Strategy::SetupChart() {
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   m_quote = quote;
-  //const auto dt( quote.DateTime() );
-  //m_ceAsk.Append( dt, quote.Ask() );
-  //m_ceBid.Append( dt, quote.Bid() );
-  m_bfQuotes01Sec.Add( m_quote.DateTime(), m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
+  const auto dt( quote.DateTime() );
+  m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
 }
 
 void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
