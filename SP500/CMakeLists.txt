@@ -37,6 +37,7 @@ set(
   file_h
     AppSP500.hpp
     Config.hpp
+    LSTM.hpp
     Strategy.hpp
     Torch.hpp
   )
@@ -45,6 +46,7 @@ set(
   file_cpp
     AppSP500.cpp
     Config.cpp
+    LSTM.cpp
     Strategy.cpp
     Torch.cpp
   )

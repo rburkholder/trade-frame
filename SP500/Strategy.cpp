@@ -23,8 +23,7 @@
 
 #include <boost/log/trivial.hpp>
 
-#include <torch/torch.h>
-
+#include "LSTM.hpp"
 #include "Strategy.hpp"
 
 Strategy::Strategy(
@@ -521,48 +520,6 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 }
-
-namespace {  // *****************
-class LSTM : public torch::nn::Module {
-public:
-
-  using lstm_state_t = std::tuple<torch::Tensor, torch::Tensor>; // hidden state, cell state
-
-  LSTM( int input_size, int hidden_size, int num_layers, int output_size )
-  : lstm( torch::nn::LSTMOptions( input_size, hidden_size ).num_layers( num_layers ).batch_first(( true ) ) )
-  , linear( hidden_size, output_size )
-  {
-    register_module( "lstm", lstm );
-    register_module( "linear", linear );
-  }
-
-  lstm_state_t init_states( torch::DeviceType device, int batch_size  ) {
-    //BOOST_LOG_TRIVIAL(debug) << "LSTM::init_state batch_size: " << batch_size;
-    torch::Tensor hidden_state = torch::zeros( { lstm->options.num_layers(), batch_size, lstm->options.hidden_size() } ).to( device );
-    torch::Tensor   cell_state = torch::zeros( { lstm->options.num_layers(), batch_size, lstm->options.hidden_size() } ).to( device );
-    return std::make_tuple( hidden_state, cell_state );
-  }
-
-  torch::Tensor forward( torch::Tensor x, lstm_state_t& state ) {
-
-    torch::Tensor out;
-
-    // Pass the input through the LSTM layer
-    std::tie( out, state ) = lstm->forward( x, state );
-    //out.to( x.device() );
-
-    // Pass the output of the LSTM layer through the linear layer
-    //torch::Tensor prediction = linear->forward( out );
-    torch::Tensor prediction = linear->forward( out ).to( x.device() );
-    //torch::Tensor prediction = linear->forward( out.reshape( { -1, lstm->options.hidden_size() } ) ).to( x.device() );
-    return prediction;
-  }
-
-private:
-  torch::nn::LSTM lstm;
-  torch::nn::Linear linear;
-};
-}  // *****************
 
 void Strategy::PostProcess() {
 
