@@ -22,7 +22,7 @@
  #include "LSTM.hpp"
 
 LSTM::LSTM( int input_size, int hidden_size, int num_layers, int output_size )
-: lstm( torch::nn::LSTMOptions( input_size, hidden_size ).num_layers( num_layers ).batch_first(( true ) ) )
+: lstm( torch::nn::LSTMOptions( input_size, hidden_size ).num_layers( num_layers ).batch_first( true ) )
 , linear( hidden_size, output_size )
 {
   register_module( "lstm", lstm );
