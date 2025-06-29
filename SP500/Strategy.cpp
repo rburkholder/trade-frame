@@ -614,11 +614,13 @@ void Strategy::BuildModel( torch::DeviceType device ) {
     torch::from_blob( vSourceForTensorX.data(), { nSamples_actual, secondsSequence, nInputFeature },
     torch::TensorOptions().dtype( torch::kFloat32 )
   ).to( device );
+  BOOST_LOG_TRIVIAL(info) << "tensorX sizes: " << tensorX.sizes();
 
   torch::Tensor tensorY = // output
     torch::from_blob( vSourceForTensorY.data(), { nSamples_actual, secondsSequence, nOutputFeature },
     torch::TensorOptions().dtype( torch::kFloat32 )
   ).to( device );
+  BOOST_LOG_TRIVIAL(info) << "tensorY sizes: " << tensorY.sizes();
 
   // https://github.com/pytorch/pytorch
   // https://docs.pytorch.org/docs/stable/torch.html
