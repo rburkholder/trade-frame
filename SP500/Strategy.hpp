@@ -44,6 +44,8 @@
 
 #include <TFBitsNPieces/TrackOrder.hpp>
 
+#include <c10/core/DeviceType.h>
+
 class Strategy
 : public ou::tf::DailyTradeTimeFrame<Strategy>
 {
@@ -72,7 +74,8 @@ public:
   );
   ~Strategy();
 
-  void PostProcess();
+  void BuildModel( torch::DeviceType );
+  //void PostProcess();
 
 protected:
 private:

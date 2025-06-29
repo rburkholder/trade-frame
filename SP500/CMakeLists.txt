@@ -39,6 +39,8 @@ set(
     Config.hpp
     LSTM.hpp
     Strategy.hpp
+    StrategyManager.hpp
+    StrategyManager_impl.hpp
     Torch.hpp
   )
 
@@ -48,6 +50,8 @@ set(
     Config.cpp
     LSTM.cpp
     Strategy.cpp
+    StrategyManager.cpp
+    StrategyManager_impl.cpp
     Torch.cpp
   )
 

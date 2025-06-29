@@ -521,7 +521,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 }
 
-void Strategy::PostProcess() {
+void Strategy::BuildModel( torch::DeviceType device ) {
 
   // preparation for ML training goes here
   BOOST_LOG_TRIVIAL(info)
@@ -542,9 +542,6 @@ void Strategy::PostProcess() {
     << ',' << "size of fields_t<double>: " << sizeof( fields_t<double> )
     ;
 
-  torch::manual_seed( 1 );
-  torch::cuda::manual_seed_all( 1 );
-
   // notes:
   //   * .clone() - from_blob does not manage memory, so underlying needs to be valid during lifetime of tensor, or .clone() it
 
@@ -554,19 +551,6 @@ void Strategy::PostProcess() {
   //   https://docs.pytorch.org/cppdocs/notes/tensor_creation.html
   //   https://docs.alcf.anl.gov/polaris/data-science/frameworks/libtorch/#linking-the-torch-libraries
   //   https://www.geeksforgeeks.org/deep-learning/long-short-term-memory-networks-using-pytorch/
-
-  torch::DeviceType device;
-  int num_devices = 0;
-  if ( torch::cuda::is_available() ) {
-    device = torch::kCUDA;
-    num_devices = torch::cuda::device_count();
-    BOOST_LOG_TRIVIAL(info) << "Number of CUDA devices detected: " << num_devices;
-    // when > 1, then can use, as example ' .device(torch::kCUDA, 1 )'
-  }
-  else {
-    device = torch::kCPU;
-    BOOST_LOG_TRIVIAL(info) << "No CUDA devices detected, set device to CPU";
-  }
 
   // using as a guide:
   //  https://machinelearningmastery.com/how-to-develop-lstm-models-for-time-series-forecasting/
