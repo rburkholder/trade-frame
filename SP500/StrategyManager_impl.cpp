@@ -186,12 +186,18 @@ void StrategyManager_impl::HandleSimComplete() {
     BOOST_LOG_TRIVIAL(info) << "no CUDA devices detected, set device to CPU";
   }
 
-  m_pStrategy->BuildModel( device );
+  pLSTM_t pModel = m_pStrategy->BuildModel( device );
 
   // todo:
   // * init simulator, run strategy, build model
   // * init simulator, run strategy, use model for prediction
   // * save/load models
+
+  pModel->eval();
+  // with torch.no_grad()  ?
+  // prediction = model( x );
+  // use a second layer to reduce the output size?
+
 }
 
 void StrategyManager_impl::IterateObjects() {

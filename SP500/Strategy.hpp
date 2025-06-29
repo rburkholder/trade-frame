@@ -46,6 +46,8 @@
 
 #include <c10/core/DeviceType.h>
 
+class LSTM;
+
 class Strategy
 : public ou::tf::DailyTradeTimeFrame<Strategy>
 {
@@ -74,8 +76,8 @@ public:
   );
   ~Strategy();
 
-  void BuildModel( torch::DeviceType );
-  //void PostProcess();
+  using pLSTM_t = std::shared_ptr<LSTM>;
+  pLSTM_t BuildModel( torch::DeviceType );
 
 protected:
 private:

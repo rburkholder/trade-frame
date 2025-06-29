@@ -521,7 +521,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 }
 
-void Strategy::BuildModel( torch::DeviceType device ) {
+Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device ) {
 
   // preparation for ML training goes here
   BOOST_LOG_TRIVIAL(info)
@@ -646,23 +646,23 @@ void Strategy::BuildModel( torch::DeviceType device ) {
   const int num_epochs = 10000;
 
     // Instantiate the model
-  LSTM model( input_size, hidden_size, num_layers, output_size );
-  model.train();
-  model.to( device );
+  pLSTM_t pModel = std::make_shared<LSTM>( input_size, hidden_size, num_layers, output_size );
+  pModel->train();
+  pModel->to( device );
 
   // Loss, optimizer, state
   torch::nn::MSELoss criterion( torch::nn::MSELossOptions().reduction( torch::kMean ) ); // loss function
   criterion->to( device );
 
-  torch::optim::Adam optimizer( model.parameters(), learning_rate );
+  torch::optim::Adam optimizer( pModel->parameters(), learning_rate );
 
   for ( size_t epoch = 0; epoch < num_epochs; ++epoch ) {
 
     torch::Tensor loss;
 
-    LSTM::lstm_state_t state( model.init_states( device, batch_size ) ); //
+    LSTM::lstm_state_t state( pModel->init_states( device, batch_size ) ); //
 
-    torch::Tensor predictions = model.forward( tensorX, state );
+    torch::Tensor predictions = pModel->forward( tensorX, state );
     loss = criterion( predictions, tensorY );
 
     optimizer.zero_grad();
@@ -680,10 +680,7 @@ void Strategy::BuildModel( torch::DeviceType device ) {
 
   BOOST_LOG_TRIVIAL(info) << "training done";
 
-  model.eval();
-  // with torch.no_grad()  ?
-  // prediction = model( x );
-  // use a second layer to reduce the output size?
+  return pModel;
 
 }
 
