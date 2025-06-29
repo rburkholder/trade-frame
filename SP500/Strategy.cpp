@@ -542,9 +542,6 @@ void Strategy::BuildModel( torch::DeviceType device ) {
     << ',' << "size of fields_t<double>: " << sizeof( fields_t<double> )
     ;
 
-  // notes:
-  //   * .clone() - from_blob does not manage memory, so underlying needs to be valid during lifetime of tensor, or .clone() it
-
   // references:
   //   https://github.com/pytorch/pytorch/issues/14000
   //   https://github.com/pytorch/pytorch/blob/main/tools/autograd/templates/variable_factories.h
@@ -621,6 +618,10 @@ void Strategy::BuildModel( torch::DeviceType device ) {
     torch::TensorOptions().dtype( torch::kFloat32 )
   ).to( device );
   BOOST_LOG_TRIVIAL(info) << "tensorY sizes: " << tensorY.sizes();
+
+  // notes:
+  // * from_blob does not manage memory, so underlying needs to be valid during lifetime of tensor
+  // * to removed dependency, , .clone() it
 
   // https://github.com/pytorch/pytorch
   // https://docs.pytorch.org/docs/stable/torch.html

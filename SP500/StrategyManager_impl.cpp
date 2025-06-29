@@ -178,16 +178,20 @@ void StrategyManager_impl::HandleSimComplete() {
   if ( torch::cuda::is_available() ) {
     device = torch::kCUDA;
     num_devices = torch::cuda::device_count();
-    BOOST_LOG_TRIVIAL(info) << "Number of CUDA devices detected: " << num_devices;
+    BOOST_LOG_TRIVIAL(info) << "number of CUDA devices detected: " << num_devices;
     // when > 1, then can use, as example ' .device(torch::kCUDA, 1 )'
   }
   else {
     device = torch::kCPU;
-    BOOST_LOG_TRIVIAL(info) << "No CUDA devices detected, set device to CPU";
+    BOOST_LOG_TRIVIAL(info) << "no CUDA devices detected, set device to CPU";
   }
 
   m_pStrategy->BuildModel( device );
-  //m_pStrategy->PostProcess();
+
+  // todo:
+  // * init simulator, run strategy, build model
+  // * init simulator, run strategy, use model for prediction
+  // * save/load models
 }
 
 void StrategyManager_impl::IterateObjects() {
