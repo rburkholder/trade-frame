@@ -223,7 +223,7 @@ void AppBarChart::LoadPanelFinancialChart() {
               mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSymbolName );
               //assert( m_mapSymbolInfo.end() == iterSymbolInfo ); // symbols are unique across groups
               if ( m_mapSymbolInfo.end() != iterSymbolInfo ) {
-                std::cout << "symbol " << sSymbolName << " already exists" << std::endl;
+                BOOST_LOG_TRIVIAL(warning) << "symbol " << sSymbolName << " already exists" << std::endl;
               }
               else {
                 auto result = m_mapSymbolInfo.emplace( sSymbolName, SymbolInfo() );
@@ -359,15 +359,14 @@ void AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::Tree
 
           using setSymbol_t = mmapTagSymbol_t::index<ixSymbol>::type;
           setSymbol_t::iterator iterSymbol = m_mmapTagSymbol.get<ixSymbol>().find( sSymbol );
-          if ( m_mmapTagSymbol.get<ixSymbol>().end() == iterSymbol ) {
-            setSymbol_t::iterator iter = iterSymbol;
-            while( m_mmapTagSymbol.get<ixSymbol>().end() != iter ) {
-              CallAfter(
-                [this,sTag=iter->sTag,sSymbol](){
-                  DelTag( sTag, sSymbol );
-                } );
-              ++iter;
-            }
+          while( m_mmapTagSymbol.get<ixSymbol>().end() != iterSymbol ) {
+            if ( sSymbol != iterSymbol->sSymbol ) break;
+            CallAfter( // need this as DelTag would invalidate the interator via deletion
+              [this,sTag=iterSymbol->sTag,sSymbol](){
+                BOOST_LOG_TRIVIAL(info) << "Delete DelTag " << sSymbol << ',' << sTag;
+                DelTag( sTag, sSymbol );
+              } );
+            ++iterSymbol;
           }
 
           m_mapSymbolInfo.erase( iterSymbolInfo );
@@ -415,7 +414,7 @@ void AppBarChart::FilterByTag() {
     for ( const setSymbol_t::value_type& vt: setSymbol ) {
       mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( vt );
       if ( m_mapSymbolInfo.end() == iterSymbolInfo ) {
-        std::cout << "FilterByTag symbol " << vt << " not found" << std::endl;
+        BOOST_LOG_TRIVIAL(error) << "FilterByTag symbol " << vt << " not found";
       }
       else {
         LoadSymbolInfo( vt, m_ptiRoot );
