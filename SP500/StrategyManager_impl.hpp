@@ -21,7 +21,8 @@
 
 #pragma once
 
-// need to keep Torch stuff separate from wxWidgets stuff.  Includes negatively interact with each other.
+// need to keep Torch stuff separate from wxWidgets stuff.
+// source includes negatively interact with each other.
 
 #include <unordered_map>
 
@@ -124,7 +125,9 @@ private:
   using pLSTM_t = std::shared_ptr<LSTM>;
   pLSTM_t m_pLSTM;
 
-  void IterateObjects();
+  using fHandleLoadTreeHdf5Object_t = std::function<void(const std::string&, const std::string&)>;
+  void IterateHDF5( fHandleLoadTreeHdf5Object_t&& );
+
   void RunSimulation();
 
   void InitStructures(
@@ -138,8 +141,8 @@ private:
   void HandleSimConnected( int );
   void HandleSimComplete();
 
-  void HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 );
-  void HandleLoadTreeHdf5Object_Static( const std::string& s1, const std::string& s2 );
-  void HandleLoadTreeHdf5Object_Sim( const std::string& s1, const std::string& s2 );
+  void HandleLoadTreeHdf5Group(         const std::string&, const std::string& );
+  void HandleLoadTreeHdf5Object_Static( const std::string&, const std::string& );
+  void HandleLoadTreeHdf5Object_Sim(    const std::string&, const std::string& );
 
 };

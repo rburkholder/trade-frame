@@ -37,13 +37,17 @@ StrategyManager_impl::StrategyManager_impl( const config::Choices& choices, ou::
     RunSimulation();
   }
   else {
+    assert( false ); // not fleshed out yet
+    IterateHDF5( [this](const std::string& s1, const std::string& s2 ){ HandleLoadTreeHdf5Object_Static( s1, s2 ); } );
     LoadPanelFinancialChart();
-    IterateObjects();
   }
 }
 
 StrategyManager_impl::~StrategyManager_impl() {
+  m_pStrategy.reset();
+  m_pLSTM.reset();
   m_mapSymbolInfo.clear();
+  m_mapHdf5Instrument.clear();
 }
 
 void StrategyManager_impl::RunSimulation() {
@@ -52,12 +56,7 @@ void StrategyManager_impl::RunSimulation() {
  // construct strategy with symbols
  //   provide watch & position constructors
 
-  ou::tf::hdf5::IterateGroups ig(
-    *m_pdm, std::string( "/" ),
-    [this]( const std::string& group,const std::string& name ){ HandleLoadTreeHdf5Group(  group, name ); }, // path
-    [this]( const std::string& group,const std::string& name ){ HandleLoadTreeHdf5Object_Sim( group, name ); }  // timeseries
-  );
-
+  IterateHDF5( [this](const std::string& s1, const std::string& s2 ){ HandleLoadTreeHdf5Object_Sim( s1, s2 ); } );
   BuildProviders_Sim();
 }
 
@@ -200,11 +199,11 @@ void StrategyManager_impl::HandleSimComplete() {
 
 }
 
-void StrategyManager_impl::IterateObjects() {
+void StrategyManager_impl::IterateHDF5( fHandleLoadTreeHdf5Object_t&& f ) {
   ou::tf::hdf5::IterateGroups ig(
     *m_pdm, std::string( "/" ),
     [this]( const std::string& group,const std::string& name ){ HandleLoadTreeHdf5Group(  group, name ); }, // path
-    [this]( const std::string& group,const std::string& name ){ HandleLoadTreeHdf5Object_Static( group, name ); }  // timeseries
+    std::move( f )  // timeseries
     );
 }
 
