@@ -552,18 +552,21 @@ Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device ) {
   // using as a guide:
   //  https://machinelearningmastery.com/how-to-develop-lstm-models-for-time-series-forecasting/
 
+  // Note: Y.length must be same as X.length, but Y can have different feature count
+
   static const size_t secondsSequence( 210 ); // duration of sample sequence
-  static const size_t secondsYOffset( 30 );  // Y.length must be same as X.length, => offset of Y for prediction on last time slot
+  static const size_t secondsYOffset( 30 ); // attempt prediction this far in the future
   static const size_t secondsTotal( secondsSequence + secondsYOffset ); // training + prediction
+
   static const size_t secondsSampleOffset( 23 );  // offset for each sample
 
-  static const size_t sizeFloat( sizeof( float ) );
-
-  static const size_t nFieldBytes( nInputFeature_ * sizeFloat );
-  assert( nFieldBytes == sizeof( fields_t<float> ) );
+  static const int nOutputFeature( 1 );
 
   static const int nInputFeature( nInputFeature_ );
-  static const int nOutputFeature( 1 );
+  static const size_t sizeFloat( sizeof( float ) );
+
+  static const size_t nFieldBytes( nInputFeature * sizeFloat );
+  assert( nFieldBytes == sizeof( fields_t<float> ) );
 
   const size_t nSamples_theory( m_vDataScaled.size() / secondsSampleOffset ); // assumes integer math with truncation
 
@@ -575,16 +578,22 @@ Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device ) {
 
   {
     vValuesFlt_t::const_iterator bgnX = m_vDataScaled.begin(); // begin of input
-    vValuesFlt_t::const_iterator endX( bgnX + secondsSequence ); // end of input, begin of output
+    vValuesFlt_t::const_iterator endX( bgnX + secondsSequence ); // end of inpu
 
-    vValuesFlt_t::const_iterator bgnY( bgnX + secondsYOffset ); // end of output - predict this
-    vValuesFlt_t::const_iterator endY( bgnY + secondsSequence );
+    vValuesFlt_t::const_iterator bgnY( bgnX + secondsYOffset ); // start of prediction time frame
+    vValuesFlt_t::const_iterator endY( bgnY + secondsSequence ); // length same as X sequence length
 
     while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
 
+      // append X sequence
       std::copy( bgnX, endX, std::back_inserter( vSourceForTensorX ) );
 
-      std::for_each( bgnY, endY, [&vSourceForTensorY]( auto& entry ){ vSourceForTensorY.push_back( entry.fields[ ixTrade ] ); } );
+      // append Y sequence
+      std::for_each(
+         bgnY, endY,
+         [&vSourceForTensorY]( auto& entry ){
+          vSourceForTensorY.push_back( entry.fields[ ixTrade ] );
+        } );
 
       bgnX += secondsSampleOffset;
       endX += secondsSampleOffset;
@@ -607,21 +616,21 @@ Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device ) {
     << ','        << vSourceForTensorY.size()
            << ')'
     ;
+
+  // note: from_blob does not manage memory, so underlying needs to be valid during lifetime of tensor
+
   torch::Tensor tensorX = // input
     torch::from_blob( vSourceForTensorX.data(), { nSamples_actual, secondsSequence, nInputFeature },
     torch::TensorOptions().dtype( torch::kFloat32 )
-  ).to( device );
+  ).to( device ); // without .clone(), data source remains in the vector
   BOOST_LOG_TRIVIAL(info) << "tensorX sizes: " << tensorX.sizes();
 
   torch::Tensor tensorY = // output
     torch::from_blob( vSourceForTensorY.data(), { nSamples_actual, secondsSequence, nOutputFeature },
     torch::TensorOptions().dtype( torch::kFloat32 )
-  ).to( device );
+  ).to( device ); // without .clone(), data source remains in the vector
   BOOST_LOG_TRIVIAL(info) << "tensorY sizes: " << tensorY.sizes();
 
-  // notes:
-  // * from_blob does not manage memory, so underlying needs to be valid during lifetime of tensor
-  // * to removed dependency, , .clone() it
 
   // https://github.com/pytorch/pytorch
   // https://docs.pytorch.org/docs/stable/torch.html
@@ -637,13 +646,14 @@ Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device ) {
 
   // Hyperparameters
   const int batch_size( nSamples_actual );
-  const int input_size = nInputFeature_;
-  const int hidden_size = nInputFeature_ * 9;
-  const int sequence_length = secondsSequence;
-  const int num_layers = 1;
-  const int output_size = nOutputFeature;
-  const double learning_rate = 0.001;
-  const int num_epochs = 10000;
+  const int input_size( nInputFeature );
+  const int hidden_size( nInputFeature * 9 );
+  const int output_size( nOutputFeature );
+  const int sequence_length( secondsSequence );
+  const int num_layers( 1 );
+
+  const double learning_rate( 0.001 );
+  const int num_epochs( 10000 );
 
     // Instantiate the model
   pLSTM_t pModel = std::make_shared<LSTM>( input_size, hidden_size, num_layers, output_size );
@@ -660,7 +670,7 @@ Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device ) {
 
     torch::Tensor loss;
 
-    LSTM::lstm_state_t state( pModel->init_states( device, batch_size ) ); //
+    LSTM::lstm_state_t state( pModel->init_states( device, batch_size ) );
 
     torch::Tensor predictions = pModel->forward( tensorX, state );
     loss = criterion( predictions, tensorY );
