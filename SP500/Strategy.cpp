@@ -25,6 +25,7 @@
 
 #include "LSTM.hpp"
 #include "Strategy.hpp"
+#include "HyperParameters.hpp"
 
 Strategy::Strategy(
   ou::ChartDataView& cdv
@@ -521,7 +522,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 }
 
-Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device ) {
+Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device, const HyperParameters& hp ) {
 
   // preparation for ML training goes here
   BOOST_LOG_TRIVIAL(info)
@@ -652,8 +653,11 @@ Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device ) {
   const int sequence_length( secondsSequence );
   const int num_layers( 1 );
 
-  const double learning_rate( 0.001 );
-  const int num_epochs( 10000 );
+  assert( 100 <= hp.m_nEpochs );
+
+  const double learning_rate( hp.m_dblLearningRate ); // 0.001 is good
+  const int num_epochs( hp.m_nEpochs ); // 10000 is good
+  const int epoch_skip( num_epochs / 100.0 );
 
     // Instantiate the model
   pLSTM_t pModel = std::make_shared<LSTM>( input_size, hidden_size, num_layers, output_size );
@@ -682,7 +686,7 @@ Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device ) {
     //std::get<0>( state ).detach();
     //std::get<1>( state ).detach();
 
-    if ( 0 == ( ( 1 + epoch ) % 100 ) ) {
+    if ( 0 == ( ( 1 + epoch ) % epoch_skip ) ) {
       BOOST_LOG_TRIVIAL(info) << "epoch " << ( 1 + epoch ) << '/' << num_epochs << " loss: " << loss.item<float>();
     }
 

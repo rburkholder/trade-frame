@@ -13,29 +13,17 @@
  ************************************************************************/
 
 /*
- * File:    Config.hpp
+ * File:    HyperParameters.hpp
  * Author:  raymond@burkholder.net
  * Project: SP500
- * Created: March 30, 2025 17:59:23
+ * Created: July 2, 2025 17:23:45
  */
 
 #pragma once
 
-#include <string>
+struct HyperParameters {
 
-#include "HyperParameters.hpp"
-
-namespace config {
-
-struct Choices {
-
-  bool m_bRunSim; // run simulation
-  std::string m_sHdf5File; // required for simulation
-
-  HyperParameters m_hp;
+  double m_dblLearningRate;
+  int m_nEpochs;
 
 };
-
-bool Load( const std::string& sFileName, Choices& );
-
-} // namespace config

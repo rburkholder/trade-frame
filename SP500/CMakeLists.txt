@@ -37,6 +37,7 @@ set(
   file_h
     AppSP500.hpp
     Config.hpp
+    HyperParameters.hpp
     LSTM.hpp
     Strategy.hpp
     StrategyManager.hpp

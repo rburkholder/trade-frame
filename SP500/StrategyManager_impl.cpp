@@ -185,7 +185,7 @@ void StrategyManager_impl::HandleSimComplete() {
     BOOST_LOG_TRIVIAL(info) << "no CUDA devices detected, set device to CPU";
   }
 
-  pLSTM_t pModel = m_pStrategy->BuildModel( device );
+  pLSTM_t pModel = m_pStrategy->BuildModel( device, m_choices.m_hp );
 
   // todo:
   // * init simulator, run strategy, build model

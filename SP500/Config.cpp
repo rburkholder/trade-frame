@@ -32,6 +32,8 @@ namespace po = boost::program_options;
 namespace {
   static const std::string sChoice_SimStart(  "run_sim" );
   static const std::string sChoice_sHdf5File( "hdf5_file" );
+  static const std::string sChoice_sLearningRate( "learning_rate" );
+  static const std::string sChoice_sNumEpochs( "num_epochs" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bRequired, T& dest ) {
@@ -63,6 +65,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
     ( sChoice_SimStart.c_str(), po::value<bool>( &choices.m_bRunSim )->default_value( true ), "run simulation" )
     ( sChoice_sHdf5File.c_str(), po::value<std::string>( &choices.m_sHdf5File )->default_value( "TradeFrame.hdf5" ), "hdf5 file" )
+    ( sChoice_sLearningRate.c_str(), po::value<double>( &choices.m_hp.m_dblLearningRate )->default_value( 0.01 ), "learning rate" )
+    ( sChoice_sNumEpochs.c_str(), po::value<int>( &choices.m_hp.m_nEpochs )->default_value( 1000 ), "number of epochs" )
     ;
     po::variables_map vm;
 
@@ -76,6 +80,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
       bOk &= parse<bool>( sFileName, vm, sChoice_SimStart, false, choices.m_bRunSim );
       bOk &= parse<std::string>( sFileName, vm, sChoice_sHdf5File, false, choices.m_sHdf5File );
+      bOk &= parse<double>( sFileName, vm, sChoice_sLearningRate, false, choices.m_hp.m_dblLearningRate );
+      bOk &= parse<int>( sFileName, vm, sChoice_sNumEpochs, false, choices.m_hp.m_nEpochs );
     }
 
     if ( choices.m_bRunSim ) {
@@ -84,6 +90,13 @@ bool Load( const std::string& sFileName, Choices& choices ) {
         bOk = false;
         BOOST_LOG_TRIVIAL(error) << sFileName << ' ' << sChoice_sHdf5File << " required";
       }
+    }
+
+    if ( 100.0 > choices.m_hp.m_nEpochs ) {
+      BOOST_LOG_TRIVIAL(error)
+        << sFileName << ' '
+        << sChoice_sNumEpochs << " (" << choices.m_hp.m_nEpochs << ") < 100";
+      bOk = false;
     }
 
   }
@@ -95,8 +108,6 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     BOOST_LOG_TRIVIAL(error) << sFileName << " config unknown error";
     bOk = false;
   }
-
-
 
   return bOk;
 
