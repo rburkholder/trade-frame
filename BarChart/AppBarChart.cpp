@@ -457,6 +457,7 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
         fields.sPayed = std::string();
         }
       fields.sNotes = iterSymbolInfo->second.m_sNotes;
+      fields.sSymbol = iterSymbolInfo->first;
       fields.sName = boost::lexical_cast<std::string>( ki.sCompanyName );
       fields.fBtnUndo =
         [iterSymbolInfo]()->std::string{
@@ -468,6 +469,7 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
         };
       CallAfter(
         [this,fields_=std::move(fields)]() { // note: the std::move is not being used - CallAfter has a reference parameter
+          m_pFrameSymbolInfo->SetTitle( "Symbol Info - " + fields_.sSymbol );
           m_pPanelSymbolInfo->SetFields( fields_ );
         } );
 

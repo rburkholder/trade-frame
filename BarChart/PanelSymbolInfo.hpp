@@ -57,6 +57,9 @@ PanelSymbolInfo(
   using fBtnUndo_t = std::function<std::string()>;
 
   struct Fields {
+
+    std::string sSymbol;
+    std::string sName;
     std::string sYield;
     std::string sLast;
     std::string sAmount;
@@ -64,7 +67,6 @@ PanelSymbolInfo(
     std::string sExDiv;
     std::string sPayed;
     std::string sNotes;
-    std::string sName;
 
     fBtnSave_t fBtnSave;
     fBtnUndo_t fBtnUndo;
@@ -74,27 +76,29 @@ PanelSymbolInfo(
     {}
 
     Fields( Fields&& rhs )
-    : sYield(   std::move( rhs.sYield ) )
+    : sSymbol(  std::move( rhs.sSymbol ) )
+    , sName(    std::move( rhs.sName ) )
+    , sYield(   std::move( rhs.sYield ) )
     , sLast(    std::move( rhs.sLast ) )
     , sAmount(  std::move( rhs.sAmount ) )
     , sRate(    std::move( rhs.sRate ) )
     , sExDiv(   std::move( rhs.sExDiv ) )
     , sPayed(   std::move( rhs.sPayed ) )
     , sNotes(   std::move( rhs.sNotes ) )
-    , sName(    std::move( rhs.sName ) )
     , fBtnSave( std::move( rhs.fBtnSave ) )
     , fBtnUndo( std::move( rhs.fBtnUndo ) )
     {}
 
     Fields( const Fields& rhs )
-    : sYield(   rhs.sYield )
+    : sSymbol(  rhs.sSymbol )
+    , sName(    rhs.sName )
+    , sYield(   rhs.sYield )
     , sLast(    rhs.sLast )
     , sAmount(  rhs.sAmount )
     , sRate(    rhs.sRate )
     , sExDiv(   rhs.sExDiv )
     , sPayed(   rhs.sPayed )
     , sNotes(   rhs.sNotes )
-    , sName(    rhs.sName )
     , fBtnSave( rhs.fBtnSave )
     , fBtnUndo( rhs.fBtnUndo )
     {}
