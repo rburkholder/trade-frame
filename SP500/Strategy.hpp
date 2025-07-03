@@ -192,10 +192,8 @@ private:
     }
   };
 
-  using vValuesDbl_t = std::vector<fields_t<double> >;
   using vValuesFlt_t = std::vector<fields_t<float> >;
-  vValuesDbl_t m_vDataRaw;
-  vValuesFlt_t m_vDataScaled; // LSTM prefers float?
+  vValuesFlt_t m_vDataScaled; // LSTM prefers float, values are 0.0 to 1.0 anyway
 
   pOrder_t m_pOrder;
 

@@ -430,14 +430,6 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   UpdateEma< 50>( price_, m_dblEma050, m_ceEma050  );
   UpdateEma<200>( price_, m_dblEma200, m_ceEma200 );
 
-  const fields_t<double> raw(
-    m_dblEma200, m_dblEma050, m_dblEma029, m_dblEma013
-  , price
-  , m_dblTickJ, m_dblTickL
-  //, m_dblAdvDecRatio
-  );
-  m_vDataRaw.push_back( raw );
-
   struct maxmin {
     double& max;
     double& min;
@@ -524,13 +516,6 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
 Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device, const HyperParameters& hp ) {
 
-  // preparation for ML training goes here
-  BOOST_LOG_TRIVIAL(info)
-    << "raw vector size: "
-           << m_vDataRaw.size() << "sec"
-    << ',' << m_vDataRaw.size() / 60.0 << "min"
-    << ',' << m_vDataRaw.size() / 3600.0 << "hr"
-    ;
   BOOST_LOG_TRIVIAL(info)
     << "scaled vector size: "
            << m_vDataScaled.size() << "sec"
