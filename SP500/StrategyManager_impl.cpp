@@ -152,12 +152,12 @@ void StrategyManager_impl::HandleSimConnected( int ) {
       pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_exec );
       f( pPosition );
     },
-    [this](){
+    [this](){ // fStart_t
       // does this cross into foreground thread?
       BOOST_LOG_TRIVIAL(info) << "simulation run";
       m_sim->Run();
     },
-    [this](){
+    [this](){ // fStop_t
     }
   );
   assert( m_pStrategy );
