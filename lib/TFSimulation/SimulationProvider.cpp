@@ -21,7 +21,7 @@
 #include <TFTrading/OrderManager.h>
 
 #include "MergeDatedDatums.h"
-#include "SimulationProvider.h"
+#include "SimulationProvider.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

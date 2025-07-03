@@ -16,7 +16,7 @@
 #include <TFIQFeed/Provider.h>
 //#include <TFAlpaca/Provider.hpp>
 #include <TFInteractiveBrokers/IBTWS.h>
-#include <TFSimulation/SimulationProvider.h>
+#include <TFSimulation/SimulationProvider.hpp>
 
 #include "ProviderManager.h"
 
