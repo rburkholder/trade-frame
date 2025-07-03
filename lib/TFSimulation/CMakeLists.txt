@@ -7,14 +7,14 @@ PROJECT(TFSimulation)
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(
-  file_h
+  file_hpp
 #    CrossThreadMerge.h
-    MergeDatedDatumCarrier.h
-    MergeDatedDatums.h    
-    SimulateOrderExecution.h
+    MergeDatedDatumCarrier.hpp
+    MergeDatedDatums.hpp
+    SimulateOrderExecution.hpp
     SimulationInterface.hpp
-    SimulationProvider.h
-    SimulationSymbol.h
+    SimulationProvider.hpp
+    SimulationSymbol.hpp
   )
 
 set(
@@ -28,7 +28,7 @@ set(
 
 add_library(
   ${PROJECT_NAME}
-    ${file_h}
+    ${file_hpp}
     ${file_cpp}
   )
 
