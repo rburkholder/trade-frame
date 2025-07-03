@@ -104,8 +104,6 @@ protected:
   ptime m_dtSimStop;
   unsigned long m_nProcessedDatums;
 
-  MergeDatedDatums* m_pMerge;
-
   pSymbol_t virtual NewCSymbol( pInstrument_t pInstrument );
 
   void StartQuoteWatch( pSymbol_t pSymbol );
@@ -124,12 +122,16 @@ protected:
   OnSimulationComplete_t m_OnSimulationComplete;
 
   void Merge();  // the background thread
+  void Reset();
 
   void HandleExecution( Order::idOrder_t orderId, const Execution &exec );
   void HandleCommission( Order::idOrder_t orderId, double commission );
   void HandleCancellation( Order::idOrder_t orderId );
 
 private:
+
+  using pMerge_t = std::unique_ptr<MergeDatedDatums>;
+  pMerge_t m_pMerge;
 
   std::thread m_threadMerge;
 

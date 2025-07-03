@@ -28,7 +28,6 @@ namespace tf { // TradeFrame
 
 SimulationProvider::SimulationProvider()
 : sim::SimulationInterface<SimulationProvider,SimulationSymbol>()
-, m_pMerge( nullptr )
 , m_sHdf5FileName( HDF5DataManager::GetHdf5FileDefault() )
 {
   m_sName = "Simulator";
@@ -42,15 +41,7 @@ SimulationProvider::SimulationProvider()
 }
 
 SimulationProvider::~SimulationProvider() {
-
-  if ( m_threadMerge.joinable() ) {
-    m_threadMerge.join(); // wait for completion
-  }
-
-  if ( 0 != m_pMerge ) {
-    delete m_pMerge;
-    m_pMerge = nullptr;
-  }
+  Reset();
 }
 
 void SimulationProvider::SetHdf5FileName( const std::string& sHdf5FileName ) {
@@ -140,6 +131,8 @@ void SimulationProvider::StopGreekWatch( pSymbol_t pSymbol ) {
 // root of background simulation thread, thread is started from Run.
 void SimulationProvider::Merge() {
 
+  m_pMerge = std::make_unique<MergeDatedDatums>();
+
   if ( nullptr != m_OnSimulationThreadStarted ) m_OnSimulationThreadStarted();
 
   // for each of the symbols, add the quote, trade and greek series
@@ -204,6 +197,17 @@ void SimulationProvider::Merge() {
   ou::TimeSource::LocalCommonInstance().SetSimulationMode( bOldMode );
 
   if ( nullptr != m_OnSimulationThreadEnded ) m_OnSimulationThreadEnded();
+
+  m_pMerge.reset();
+}
+
+void SimulationProvider::Reset() {
+
+  // todo: what happens when Merge is 'stopped'?
+  if ( m_threadMerge.joinable() ) {
+    m_threadMerge.join(); // wait for completion
+  }
+
 }
 
 void SimulationProvider::Run( bool bAsync ) {
@@ -211,11 +215,10 @@ void SimulationProvider::Run( bool bAsync ) {
   if ( 0 == m_sGroupDirectory.size() ) throw std::invalid_argument( "Group Directory is empty" );
   if ( 0 == m_mapSymbols.size() ) throw std::invalid_argument( "No Symbols to simulate" );
 
-  if ( 0 != m_pMerge ) {
+  if ( nullptr != m_pMerge.get() ) {
     std::cout << "Simulation already in progress" << std::endl;
   }
   else {
-    m_pMerge = new MergeDatedDatums();
     m_threadMerge = std::move( std::thread( std::bind( &SimulationProvider::Merge, this ) ) );
 
     if ( !bAsync ) {
@@ -240,7 +243,7 @@ void SimulationProvider::EmitStats( std::stringstream& ss ) {
 
 // at some point:  run, stop, pause, resume, reset
 void SimulationProvider::Stop() {
-  if ( NULL == m_pMerge ) {
+  if ( nullptr == m_pMerge.get() ) {
     std::cout << "no simulation to stop" << std::endl;
   }
   else {
