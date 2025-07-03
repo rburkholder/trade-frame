@@ -24,7 +24,7 @@ using namespace fastdelegate;
 
 #include <TFTimeSeries/TimeSeries.h>
 
-#include "MergeDatedDatumCarrier.h"
+#include "MergeDatedDatumCarrier.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
