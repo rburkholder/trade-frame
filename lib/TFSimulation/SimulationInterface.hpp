@@ -26,7 +26,6 @@
 #include <TFTrading/Order.h>
 #include <TFTrading/ProviderInterface.h>
 
-#include "SimulationSymbol.hpp"
 #include "SimulateOrderExecution.h"
 
 namespace ou { // One Unified
