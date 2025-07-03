@@ -20,7 +20,7 @@
 #include <TFTrading/KeyTypes.h>
 #include <TFTrading/OrderManager.h>
 
-#include "MergeDatedDatums.h"
+#include "MergeDatedDatums.hpp"
 #include "SimulationProvider.hpp"
 
 namespace ou { // One Unified

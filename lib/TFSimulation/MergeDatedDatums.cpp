@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "MergeDatedDatums.h"
+#include "MergeDatedDatums.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
