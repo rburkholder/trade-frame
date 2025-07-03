@@ -21,7 +21,7 @@
 
 #include <TFTrading/Symbol.h>
 
-#include <TFSimulation/SimulateOrderExecution.h>
+#include <TFSimulation/SimulateOrderExecution.hpp>
 
 #include "Messages.h"
 #include "Fundamentals.h"
