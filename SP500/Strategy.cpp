@@ -657,7 +657,7 @@ Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device, const HyperPar
 
   const double learning_rate( hp.m_dblLearningRate ); // 0.001 is good
   const int num_epochs( hp.m_nEpochs ); // 10000 is good
-  const int epoch_skip( num_epochs / 100.0 );
+  const int epoch_skip( num_epochs / 100 );
 
     // Instantiate the model
   pLSTM_t pModel = std::make_shared<LSTM>( input_size, hidden_size, num_layers, output_size );
