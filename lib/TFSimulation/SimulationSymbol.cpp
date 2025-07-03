@@ -17,7 +17,7 @@
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 #include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
 
-#include "SimulationSymbol.h"
+#include "SimulationSymbol.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

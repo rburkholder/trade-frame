@@ -25,7 +25,7 @@ using namespace fastdelegate;
 
 #include <TFTrading/Order.h>
 
-#include "SimulationSymbol.h"
+#include "SimulationSymbol.hpp"
 #include "SimulationInterface.hpp"
 
 namespace ou { // One Unified
