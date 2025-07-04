@@ -22,11 +22,13 @@
 #include <sstream>
 
 #include <boost/regex.hpp>
+#include <boost/log/trivial.hpp>
 
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 
 #include "Config.hpp"
+#include "Features.hpp"
 #include "StrategyManager_impl.hpp"
 
 StrategyManager_impl::StrategyManager_impl( const config::Choices& choices, ou::ChartDataView& cdv )
@@ -160,6 +162,10 @@ void StrategyManager_impl::HandleSimConnected( int ) {
       m_sim->Run();
     },
     [this](){ // fStop_t
+    },
+    [this]( const Features_raw& raw, Features_scaled& scaled )->float{ // fForward_t
+      m_model.Append( raw, scaled );
+      return 0.0;
     }
   );
   assert( m_pStrategy );
@@ -191,7 +197,7 @@ void StrategyManager_impl::HandleSimComplete() {
     BOOST_LOG_TRIVIAL(info) << "no CUDA devices detected, set device to CPU";
   }
 
-  pLSTM_t pModel = m_pStrategy->BuildModel( device, m_choices.m_hp );
+  pLSTM_t pModel = m_model.Build( device, m_choices.m_hp );
 
   // todo:
   // * init simulator, run strategy, build model

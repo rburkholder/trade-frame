@@ -37,8 +37,10 @@ set(
   file_h
     AppSP500.hpp
     Config.hpp
+    Features.hpp
     HyperParameters.hpp
     LSTM.hpp
+    Model.hpp
     Strategy.hpp
     StrategyManager.hpp
     StrategyManager_impl.hpp
@@ -50,6 +52,7 @@ set(
     AppSP500.cpp
     Config.cpp
     LSTM.cpp
+    Model.cpp
     Strategy.cpp
     StrategyManager.cpp
     StrategyManager_impl.cpp

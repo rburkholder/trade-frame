@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <vector>
-
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
@@ -44,10 +42,7 @@
 
 #include <TFBitsNPieces/TrackOrder.hpp>
 
-#include <c10/core/DeviceType.h>
-
-class LSTM;
-class HyperParameters;
+#include "Features.hpp"
 
 class Strategy
 : public ou::tf::DailyTradeTimeFrame<Strategy>
@@ -68,17 +63,17 @@ public:
   using fStart_t = std::function<void()>;
   using fStop_t = std::function<void()>;
 
+  using fForward_t = std::function<float( const Features_raw&, Features_scaled& )>;
+
   Strategy(
     ou::ChartDataView&
   , fConstructWatch_t&&
   , fConstructPosition_t&&
   , fStart_t&&
   , fStop_t&&
+  , fForward_t&&
   );
   ~Strategy();
-
-  using pLSTM_t = std::shared_ptr<LSTM>;
-  pLSTM_t BuildModel( torch::DeviceType, const HyperParameters& );
 
 protected:
 private:
@@ -149,51 +144,12 @@ private:
 
   VolumeWeightedPrice m_vwp;
 
-  double m_dblTickJ;
-  double m_dblTickL;
-
-  double m_dblAdv;
-  double m_dblDec;
-  double m_dblAdvDecRatio;
-
-  double m_dblEma013;
-  double m_dblEma029;
-  double m_dblEma050;
-  double m_dblEma200;
+  Features_raw m_features;
 
   ou::tf::Quote m_quote;
   ou::tf::Trade m_trade;
 
-  //enum EFeature { ixEma200 = 0, ixEma050, ixEma029, ixEma013, ixTrade, ixTickj, ixTickl, ixAdvdec, nInputFeature_ };
-  enum EFeature { ixEma200 = 0, ixEma050, ixEma029, ixEma013, ixTrade, ixTickj, ixTickl, nInputFeature_ };
-
-  template<typename type>
-  using rFields_t = type[ nInputFeature_ ];
-
-  template<typename type>
-  struct fields_t {
-    rFields_t<type> fields;
-    fields_t( const fields_t& rhs )
-    {
-      std::memcpy( fields, rhs.fields, nInputFeature_ * sizeof( type ) );
-    }
-    // todo: how to bulid an initializer?
-    fields_t( const type v1, const type v2, const type v3, const type v4
-            , const type v5, const type v6, const type v7 /*, const type v8 */ )
-    {
-      fields[ ixEma200 ] = v1;
-      fields[ ixEma050 ] = v2;
-      fields[ ixEma029 ] = v3;
-      fields[ ixEma013 ] = v4;
-      fields[ ixTrade  ] = v5;
-      fields[ ixTickj  ] = v6;
-      fields[ ixTickl  ] = v7;
-      //fields[ ixAdvdec ] = v8;
-    }
-  };
-
-  using vValuesFlt_t = std::vector<fields_t<float> >;
-  vValuesFlt_t m_vDataScaled; // LSTM prefers float, values are 0.0 to 1.0 anyway
+  fForward_t m_fForward;
 
   pOrder_t m_pOrder;
 

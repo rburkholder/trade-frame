@@ -38,6 +38,7 @@
 #include <TFSimulation/SimulationProvider.hpp>
 
 #include "LSTM.hpp"
+#include "Model.hpp"
 #include "Strategy.hpp"
 
 namespace config {
@@ -122,6 +123,7 @@ private:
   using pStrategy_t = std::unique_ptr<Strategy>;
   pStrategy_t m_pStrategy;
 
+  Model m_model;
   using pLSTM_t = std::shared_ptr<LSTM>;
   pLSTM_t m_pLSTM;
 
