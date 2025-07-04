@@ -15,6 +15,8 @@
 #include <cassert>
 #include <stdexcept>
 
+#include <boost/log/trivial.hpp>
+
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 
 #include <TFTrading/KeyTypes.h>
@@ -216,7 +218,7 @@ void SimulationProvider::Run( bool bAsync ) {
   if ( 0 == m_mapSymbols.size() ) throw std::invalid_argument( "No Symbols to simulate" );
 
   if ( nullptr != m_pMerge.get() ) {
-    std::cout << "Simulation already in progress" << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "Simulation already in progress";
   }
   else {
     m_threadMerge = std::move( std::thread( std::bind( &SimulationProvider::Merge, this ) ) );
@@ -244,11 +246,11 @@ void SimulationProvider::EmitStats( std::stringstream& ss ) {
 // at some point:  run, stop, pause, resume, reset
 void SimulationProvider::Stop() {
   if ( nullptr == m_pMerge.get() ) {
-    std::cout << "no simulation to stop" << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "no simulation to stop";
   }
   else {
     m_pMerge->Stop();
-    std::cout << "stopping simulation" << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "stopping simulation";
   }
 }
 
