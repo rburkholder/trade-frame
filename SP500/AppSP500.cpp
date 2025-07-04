@@ -188,23 +188,21 @@ void AppSP500::LoadState() {
   }
 }
 
-int AppSP500::OnExit() {
-  // Exit Steps: #4
-//  DelinkFromPanelProviderControl();  generates stack errors
-
-  return wxAppConsole::OnExit();
-}
-
 void AppSP500::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
 
   m_pwcv->SetChartDataView( nullptr );
 
-  //DelinkFromPanelProviderControl();
-//  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a
   SaveState();
   event.Skip();  // auto followed by Destroy();
 }
 
+int AppSP500::OnExit() {
+  // Exit Steps: #4
+
+  m_pStrategyManager.reset();
+
+  return wxAppConsole::OnExit();
+}
