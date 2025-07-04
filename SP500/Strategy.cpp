@@ -27,6 +27,12 @@
 #include "Strategy.hpp"
 #include "HyperParameters.hpp"
 
+namespace {
+  static const size_t c_secondsSampleOffset( 23 );  // offset for each sample
+  static const size_t c_secondsSequence( 210 ); // duration of sample sequence
+  static const size_t c_secondsYOffset( 30 ); // attempt prediction this far in the future
+}
+
 Strategy::Strategy(
   ou::ChartDataView& cdv
 , fConstructWatch_t&& fConstructWatch
@@ -501,7 +507,7 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
     , realTickJ.flt, realTickL.flt
     //, 0.5 // dblAdvDec use neutral mid until multi-day series tackled
     );
-    m_vDataScaled.push_back( scaled );
+    m_vDataScaled.push_back( scaled ); // will need to timestamp each entry
 
   }
 
@@ -540,11 +546,7 @@ Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device, const HyperPar
 
   // Note: Y.length must be same as X.length, but Y can have different feature count
 
-  static const size_t secondsSequence( 210 ); // duration of sample sequence
-  static const size_t secondsYOffset( 30 ); // attempt prediction this far in the future
-  static const size_t secondsTotal( secondsSequence + secondsYOffset ); // training + prediction
-
-  static const size_t secondsSampleOffset( 23 );  // offset for each sample
+  static const size_t secondsTotal( c_secondsSequence + c_secondsYOffset ); // training + prediction
 
   static const int nOutputFeature( 1 );
 
@@ -554,7 +556,7 @@ Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device, const HyperPar
   static const size_t nFieldBytes( nInputFeature * sizeFloat );
   assert( nFieldBytes == sizeof( fields_t<float> ) );
 
-  const size_t nSamples_theory( m_vDataScaled.size() / secondsSampleOffset ); // assumes integer math with truncation
+  const size_t nSamples_theory( m_vDataScaled.size() / c_secondsSampleOffset ); // assumes integer math with truncation
 
   long nSamples_actual {};
   vValuesFlt_t::size_type ixDataScaled {};
@@ -564,10 +566,10 @@ Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device, const HyperPar
 
   {
     vValuesFlt_t::const_iterator bgnX = m_vDataScaled.begin(); // begin of input
-    vValuesFlt_t::const_iterator endX( bgnX + secondsSequence ); // end of inpu
+    vValuesFlt_t::const_iterator endX( bgnX + c_secondsSequence ); // end of inpu
 
-    vValuesFlt_t::const_iterator bgnY( bgnX + secondsYOffset ); // start of prediction time frame
-    vValuesFlt_t::const_iterator endY( bgnY + secondsSequence ); // length same as X sequence length
+    vValuesFlt_t::const_iterator bgnY( bgnX + c_secondsYOffset ); // start of prediction time frame
+    vValuesFlt_t::const_iterator endY( bgnY + c_secondsSequence ); // length same as X sequence length
 
     while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
 
@@ -581,11 +583,11 @@ Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device, const HyperPar
           vSourceForTensorY.push_back( entry.fields[ ixTrade ] );
         } );
 
-      bgnX += secondsSampleOffset;
-      endX += secondsSampleOffset;
-      bgnY += secondsSampleOffset;
-      endY += secondsSampleOffset;
-      ixDataScaled += secondsSampleOffset;
+      bgnX += c_secondsSampleOffset;
+      endX += c_secondsSampleOffset;
+      bgnY += c_secondsSampleOffset;
+      endY += c_secondsSampleOffset;
+      ixDataScaled += c_secondsSampleOffset;
       ++nSamples_actual;
     }
     // won't match for now:
@@ -597,7 +599,7 @@ Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device, const HyperPar
   BOOST_LOG_TRIVIAL(info)
     << "input samples * (time steps in each sample): "
     << nSamples_actual
-    << ',' << secondsSequence
+    << ',' << c_secondsSequence
     << '=' << '(' << vSourceForTensorX.size()
     << ','        << vSourceForTensorY.size()
            << ')'
@@ -606,13 +608,13 @@ Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device, const HyperPar
   // note: from_blob does not manage memory, so underlying needs to be valid during lifetime of tensor
 
   torch::Tensor tensorX = // input
-    torch::from_blob( vSourceForTensorX.data(), { nSamples_actual, secondsSequence, nInputFeature },
+    torch::from_blob( vSourceForTensorX.data(), { nSamples_actual, c_secondsSequence, nInputFeature },
     torch::TensorOptions().dtype( torch::kFloat32 )
   ).to( device ); // without .clone(), data source remains in the vector
   BOOST_LOG_TRIVIAL(info) << "tensorX sizes: " << tensorX.sizes();
 
   torch::Tensor tensorY = // output
-    torch::from_blob( vSourceForTensorY.data(), { nSamples_actual, secondsSequence, nOutputFeature },
+    torch::from_blob( vSourceForTensorY.data(), { nSamples_actual, c_secondsSequence, nOutputFeature },
     torch::TensorOptions().dtype( torch::kFloat32 )
   ).to( device ); // without .clone(), data source remains in the vector
   BOOST_LOG_TRIVIAL(info) << "tensorY sizes: " << tensorY.sizes();
@@ -635,7 +637,7 @@ Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device, const HyperPar
   const int input_size( nInputFeature );
   const int hidden_size( nInputFeature * 9 );
   const int output_size( nOutputFeature );
-  const int sequence_length( secondsSequence );
+  const int sequence_length( c_secondsSequence );
   const int num_layers( 1 );
 
   assert( 100 <= hp.m_nEpochs );
