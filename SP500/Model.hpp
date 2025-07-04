@@ -21,16 +21,16 @@
 
 #pragma once
 
-#include <boost/date_time/posix_time/ptime.hpp>
 #include <memory>
 #include <vector>
+#include <cstring>
 
 #include <c10/core/DeviceType.h>
 
 class LSTM;
+class Features_raw;
+class Features_scaled;
 class HyperParameters;
-
-#include "Features.hpp"
 
 class Model {
 public:
@@ -40,8 +40,9 @@ public:
 
   void Append( const Features_raw&, Features_scaled& );
 
-  using pLSTM_t = std::shared_ptr<LSTM>;
-  pLSTM_t Build( torch::DeviceType, const HyperParameters& );
+  void Build( torch::DeviceType, const HyperParameters& );
+
+  void Eval();
 
 protected:
 private:
@@ -78,4 +79,6 @@ private:
   vValuesFlt_t m_vDataScaled; // LSTM prefers float, values are 0.0 to 1.0 anyway
   vValuesFlt_t::const_iterator m_iterDataScaled;
 
+  using pLSTM_t = std::unique_ptr<LSTM>;
+  pLSTM_t m_pLSTM;
 };

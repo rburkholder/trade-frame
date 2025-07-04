@@ -25,6 +25,7 @@
 
 #include "LSTM.hpp"
 #include "Model.hpp"
+#include "Features.hpp"
 #include "HyperParameters.hpp"
 
 namespace {
@@ -36,9 +37,12 @@ namespace {
 Model::Model()
 : m_iterDataScaled( m_vDataScaled.begin() )
 {
+  torch::manual_seed( 1 );
+  torch::cuda::manual_seed_all( 1 );
 }
 
 Model::~Model() {
+  m_pLSTM.reset();
 }
 
 namespace {
@@ -132,7 +136,7 @@ void Model::Append( const Features_raw& raw, Features_scaled& scaled ) {
 
 }
 
-Model::pLSTM_t Model::Build( torch::DeviceType device, const HyperParameters& hp ) {
+void Model::Build( torch::DeviceType device, const HyperParameters& hp ) {
 
   BOOST_LOG_TRIVIAL(info)
     << "scaled vector size: "
@@ -259,23 +263,23 @@ Model::pLSTM_t Model::Build( torch::DeviceType device, const HyperParameters& hp
   const int epoch_skip( num_epochs / 100 );
 
     // Instantiate the model
-  pLSTM_t pModel = std::make_shared<LSTM>( input_size, hidden_size, num_layers, output_size );
-  pModel->train();
-  pModel->to( device );
+  m_pLSTM = std::make_unique<LSTM>( input_size, hidden_size, num_layers, output_size );
+  m_pLSTM->train();
+  m_pLSTM->to( device );
 
   // Loss, optimizer, state
   torch::nn::MSELoss criterion( torch::nn::MSELossOptions().reduction( torch::kMean ) ); // loss function
   criterion->to( device );
 
-  torch::optim::Adam optimizer( pModel->parameters(), learning_rate );
+  torch::optim::Adam optimizer( m_pLSTM->parameters(), learning_rate );
 
   for ( size_t epoch = 0; epoch < num_epochs; ++epoch ) {
 
     torch::Tensor loss;
 
-    LSTM::lstm_state_t state( pModel->init_states( device, batch_size ) );
+    LSTM::lstm_state_t state( m_pLSTM->init_states( device, batch_size ) );
 
-    torch::Tensor predictions = pModel->forward( tensorX, state );
+    torch::Tensor predictions = m_pLSTM->forward( tensorX, state );
     loss = criterion( predictions, tensorY );
 
     optimizer.zero_grad();
@@ -293,7 +297,9 @@ Model::pLSTM_t Model::Build( torch::DeviceType device, const HyperParameters& hp
 
   BOOST_LOG_TRIVIAL(info) << "training done";
 
-  return pModel;
+}
 
+void Model::Eval() {
+  m_pLSTM->eval();
 }
 
