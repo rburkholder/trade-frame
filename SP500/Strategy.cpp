@@ -31,6 +31,15 @@ namespace {
   static const size_t c_secondsSampleOffset( 23 );  // offset for each sample
   static const size_t c_secondsSequence( 210 ); // duration of sample sequence
   static const size_t c_secondsYOffset( 30 ); // attempt prediction this far in the future
+
+  static const ou::Colour::EColour c_colourEma200( ou::Colour::OrangeRed );
+  static const ou::Colour::EColour c_colourEma50(  ou::Colour::DarkMagenta );
+  static const ou::Colour::EColour c_colourEma29(  ou::Colour::DarkTurquoise );
+  static const ou::Colour::EColour c_colourEma13(  ou::Colour::Purple );
+  static const ou::Colour::EColour c_colourPrice(  ou::Colour::DarkGreen );
+  static const ou::Colour::EColour c_colourTickJ(  ou::Colour::Chocolate );
+  static const ou::Colour::EColour c_colourTickL(  ou::Colour::MediumPurple );
+  static const ou::Colour::EColour c_colourAdvDec( ou::Colour::Maroon );
 }
 
 Strategy::Strategy(
@@ -156,16 +165,6 @@ void Strategy::Start() {
 }
 
 void Strategy::SetupChart() {
-
-  static const ou::Colour::EColour c_colourEma200( ou::Colour::OrangeRed );
-  static const ou::Colour::EColour c_colourEma50(  ou::Colour::DarkMagenta );
-  static const ou::Colour::EColour c_colourEma29(  ou::Colour::DarkTurquoise );
-  static const ou::Colour::EColour c_colourEma13(  ou::Colour::Purple );
-  static const ou::Colour::EColour c_colourPrice(  ou::Colour::DarkGreen );
-  static const ou::Colour::EColour c_colourTickJ(  ou::Colour::Chocolate );
-  static const ou::Colour::EColour c_colourTickL(  ou::Colour::MediumPurple );
-  static const ou::Colour::EColour c_colourAdvDec( ou::Colour::Maroon );
-
 
   m_cemPosOne.AddMark( +1.0, ou::Colour::Black,   "+1" );
     m_cemZero.AddMark(  0.0, ou::Colour::Black, "zero" );
