@@ -611,13 +611,13 @@ Strategy::pLSTM_t Strategy::BuildModel( torch::DeviceType device, const HyperPar
     torch::from_blob( vSourceForTensorX.data(), { nSamples_actual, c_secondsSequence, nInputFeature },
     torch::TensorOptions().dtype( torch::kFloat32 )
   ).to( device ); // without .clone(), data source remains in the vector
-  BOOST_LOG_TRIVIAL(info) << "tensorX sizes: " << tensorX.sizes();
+  BOOST_LOG_TRIVIAL(info) << "batched tensorX sizes: " << tensorX.sizes();
 
   torch::Tensor tensorY = // output
     torch::from_blob( vSourceForTensorY.data(), { nSamples_actual, c_secondsSequence, nOutputFeature },
     torch::TensorOptions().dtype( torch::kFloat32 )
   ).to( device ); // without .clone(), data source remains in the vector
-  BOOST_LOG_TRIVIAL(info) << "tensorY sizes: " << tensorY.sizes();
+  BOOST_LOG_TRIVIAL(info) << "batched tensorY sizes: " << tensorY.sizes();
 
 
   // https://github.com/pytorch/pytorch
