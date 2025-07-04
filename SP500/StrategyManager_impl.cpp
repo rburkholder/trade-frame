@@ -24,6 +24,8 @@
 #include <boost/regex.hpp>
 #include <boost/log/trivial.hpp>
 
+#include <torch/torch.h>
+
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 
@@ -49,7 +51,6 @@ StrategyManager_impl::StrategyManager_impl( const config::Choices& choices, ou::
 
 StrategyManager_impl::~StrategyManager_impl() {
   m_pStrategy.reset();
-  m_pLSTM.reset();
   m_mapSymbolInfo.clear();
   m_mapHdf5Instrument.clear();
 }
@@ -181,9 +182,6 @@ void StrategyManager_impl::HandleSimComplete() {
 
   BOOST_LOG_TRIVIAL(info) << "simulation complete, post processing";
 
-  torch::manual_seed( 1 );
-  torch::cuda::manual_seed_all( 1 );
-
   torch::DeviceType device;
   int num_devices = 0;
   if ( torch::cuda::is_available() ) {
@@ -197,14 +195,14 @@ void StrategyManager_impl::HandleSimComplete() {
     BOOST_LOG_TRIVIAL(info) << "no CUDA devices detected, set device to CPU";
   }
 
-  pLSTM_t pModel = m_model.Build( device, m_choices.m_hp );
+  m_model.Build( device, m_choices.m_hp );
 
   // todo:
   // * init simulator, run strategy, build model
   // * init simulator, run strategy, use model for prediction
   // * save/load models
 
-  pModel->eval();
+  m_model.Eval();
   // with torch.no_grad()  ?
   // prediction = model( x );
   // use a second layer to reduce the output size?

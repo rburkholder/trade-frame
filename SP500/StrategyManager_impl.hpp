@@ -37,7 +37,6 @@
 #include <TFInteractiveBrokers/IBTWS.h>
 #include <TFSimulation/SimulationProvider.hpp>
 
-#include "LSTM.hpp"
 #include "Model.hpp"
 #include "Strategy.hpp"
 
@@ -124,8 +123,6 @@ private:
   pStrategy_t m_pStrategy;
 
   Model m_model;
-  using pLSTM_t = std::shared_ptr<LSTM>;
-  pLSTM_t m_pLSTM;
 
   using fHandleLoadTreeHdf5Object_t = std::function<void(const std::string&, const std::string&)>;
   void IterateHDF5( fHandleLoadTreeHdf5Object_t&& );
