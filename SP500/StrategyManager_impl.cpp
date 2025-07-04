@@ -19,6 +19,8 @@
  * Created: June 28, 2025 21:20:51
  */
 
+#include <sstream>
+
 #include <boost/regex.hpp>
 
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
@@ -166,6 +168,10 @@ void StrategyManager_impl::HandleSimConnected( int ) {
 }
 
 void StrategyManager_impl::HandleSimComplete() {
+
+  std::stringstream ss;
+  m_sim->EmitStats( ss );
+  BOOST_LOG_TRIVIAL(info) << "simulation results " << ss.str();
 
   BOOST_LOG_TRIVIAL(info) << "simulation complete, post processing";
 
