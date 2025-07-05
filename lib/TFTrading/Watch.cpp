@@ -181,7 +181,7 @@ void Watch::EnableWatch() {
       pSymbol->OnSummaryMessage.Add( MakeDelegate( this, &Watch::HandleIQFeedSummaryMessage ) );
     }
     else {
-      std::cout << m_pInstrument->GetInstrumentName() << ": Watch works best with IQFeed" << std::endl;
+      //std::cout << m_pInstrument->GetInstrumentName() << ": Watch works best with IQFeed" << std::endl;
     }
 
     // these two message types come second so that the symbol gets registered in previous statements
