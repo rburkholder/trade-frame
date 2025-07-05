@@ -116,23 +116,23 @@ void Model::Append( const Features_raw& raw, Features_scaled& scaled ) {
 
     scaled.AdvDec = ( raw.dblAdvDecRatio * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 
-    const fields_t<float> features_scaled(
-      scaled.ema200.flt, scaled.ema050.flt, scaled.ema029.flt, scaled.ema013.flt
-    , scaled.price.flt
-    , scaled.tickJ.flt, scaled.tickL.flt
-    //, 0.5 // dblAdvDec use neutral mid until multi-day series tackled
-    );
-    m_vDataScaled.push_back( features_scaled ); // will need to timestamp each entry
-
-    if ( c_secondsSequence <= m_vDataScaled.size() ) {
-
-      ++m_iterDataScaled;
-    }
+    //if ( c_secondsSequence <= m_vDataScaled.size() ) {
+    //  ++m_iterDataScaled;
+    //}
 
   }
   else {
     scaled.Zero();
   }
+
+  const fields_t<float> scaled_flt(
+    scaled.ema200.flt, scaled.ema050.flt, scaled.ema029.flt, scaled.ema013.flt
+  , scaled.price.flt
+  , scaled.tickJ.flt, scaled.tickL.flt
+  //, 0.5 // dblAdvDec use neutral mid until multi-day series tackled
+  );
+
+  m_vDataScaled.push_back( scaled_flt ); // will need to timestamp each entry
 
 }
 
