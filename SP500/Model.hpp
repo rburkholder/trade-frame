@@ -39,7 +39,6 @@ public:
   ~Model();
 
   void Append( const Features_raw&, Features_scaled& );
-
   void Build( const HyperParameters& );
 
   void Eval();
