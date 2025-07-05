@@ -37,6 +37,19 @@ namespace {
 Model::Model()
 : m_iterDataScaled( m_vDataScaled.begin() )
 {
+
+  int num_devices = 0;
+  if ( torch::cuda::is_available() ) {
+    m_torchDevice = torch::kCUDA;
+    num_devices = torch::cuda::device_count();
+    BOOST_LOG_TRIVIAL(info) << "number of CUDA devices detected: " << num_devices;
+    // when > 1, then can use, as example ' .device(torch::kCUDA, 1 )'
+  }
+  else {
+    m_torchDevice = torch::kCPU;
+    BOOST_LOG_TRIVIAL(info) << "no CUDA devices detected, set device to CPU";
+  }
+
   torch::manual_seed( 1 );
   torch::cuda::manual_seed_all( 1 );
 }
@@ -136,7 +149,7 @@ void Model::Append( const Features_raw& raw, Features_scaled& scaled ) {
 
 }
 
-void Model::Build( torch::DeviceType device, const HyperParameters& hp ) {
+void Model::Build( const HyperParameters& hp ) {
 
   BOOST_LOG_TRIVIAL(info)
     << "scaled vector size: "
@@ -226,13 +239,13 @@ void Model::Build( torch::DeviceType device, const HyperParameters& hp ) {
   torch::Tensor tensorX = // input
     torch::from_blob( vSourceForTensorX.data(), { nSamples_actual, c_secondsSequence, nInputFeature },
     torch::TensorOptions().dtype( torch::kFloat32 )
-  ).to( device ); // without .clone(), data source remains in the vector
+  ).to( m_torchDevice ); // without .clone(), data source remains in the vector
   BOOST_LOG_TRIVIAL(info) << "batched tensorX sizes: " << tensorX.sizes();
 
   torch::Tensor tensorY = // output
     torch::from_blob( vSourceForTensorY.data(), { nSamples_actual, c_secondsSequence, nOutputFeature },
     torch::TensorOptions().dtype( torch::kFloat32 )
-  ).to( device ); // without .clone(), data source remains in the vector
+  ).to( m_torchDevice ); // without .clone(), data source remains in the vector
   BOOST_LOG_TRIVIAL(info) << "batched tensorY sizes: " << tensorY.sizes();
 
 
@@ -265,11 +278,11 @@ void Model::Build( torch::DeviceType device, const HyperParameters& hp ) {
     // Instantiate the model
   m_pLSTM = std::make_unique<LSTM>( input_size, hidden_size, num_layers, output_size );
   m_pLSTM->train();
-  m_pLSTM->to( device );
+  m_pLSTM->to( m_torchDevice );
 
   // Loss, optimizer, state
   torch::nn::MSELoss criterion( torch::nn::MSELossOptions().reduction( torch::kMean ) ); // loss function
-  criterion->to( device );
+  criterion->to( m_torchDevice );
 
   torch::optim::Adam optimizer( m_pLSTM->parameters(), learning_rate );
 
@@ -277,7 +290,7 @@ void Model::Build( torch::DeviceType device, const HyperParameters& hp ) {
 
     torch::Tensor loss;
 
-    LSTM::lstm_state_t state( m_pLSTM->init_states( device, batch_size ) );
+    LSTM::lstm_state_t state( m_pLSTM->init_states( m_torchDevice, batch_size ) );
 
     torch::Tensor predictions = m_pLSTM->forward( tensorX, state );
     loss = criterion( predictions, tensorY );

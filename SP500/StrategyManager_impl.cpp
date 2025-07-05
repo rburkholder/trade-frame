@@ -24,8 +24,6 @@
 #include <boost/regex.hpp>
 #include <boost/log/trivial.hpp>
 
-#include <torch/torch.h>
-
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 
@@ -33,9 +31,10 @@
 #include "Features.hpp"
 #include "StrategyManager_impl.hpp"
 
-StrategyManager_impl::StrategyManager_impl( const config::Choices& choices, ou::ChartDataView& cdv )
+StrategyManager_impl::StrategyManager_impl( const config::Choices& choices, ou::ChartDataView& cdv, fQueueTask_t&& f )
 : m_choices( choices )
 , m_cdv( cdv )
+, m_fQueueTask( std::move( f ) )
 {
   m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO, m_choices.m_sHdf5File );
 
@@ -131,7 +130,6 @@ bool StrategyManager_impl::BuildProviders_Sim() {
   // construct the simulation menu, attach the events, and start simulation
   if ( bOk ) {
     m_sim->OnConnected.Add( MakeDelegate( this, &StrategyManager_impl::HandleSimConnected ) );
-    m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete ) );
     m_sim->Connect();
   }
 
@@ -139,9 +137,36 @@ bool StrategyManager_impl::BuildProviders_Sim() {
 }
 
 void StrategyManager_impl::HandleSimConnected( int ) {
+  // todo:
+  // * init simulator, run strategy, use model for prediction
+  // * save/load models
+  RunStrategy_step1();
+}
+
+void StrategyManager_impl::RunStrategy_step1() {
+  // run strategy to build model
+  BOOST_LOG_TRIVIAL(info) << "model build: started";
+  m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_build ) );
+  RunStrategy(
+    [this]( const Features_raw& raw, Features_scaled& scaled )->float {
+      m_model.Append( raw, scaled );
+      return 0.0;
+    } );
+}
+
+void StrategyManager_impl::RunStrategy_step2() {
+  // run stratgy with built model
+  m_model.Eval();
+  // with torch.no_grad()  ?
+  // prediction = model( x );
+  // use a second layer to reduce the output size?
+
+
+}
+
+void StrategyManager_impl::RunStrategy( Strategy::fForward_t&& f ) {
   using pWatch_t = Strategy::pWatch_t;
   using pPosition_t = Strategy::pPosition_t;
-  BOOST_LOG_TRIVIAL(info) << "strategy build: started";
   m_pStrategy = std::make_unique<Strategy>(
     m_cdv,
     [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedWatch_t&& f ){ // fConstructWatch_t
@@ -159,27 +184,21 @@ void StrategyManager_impl::HandleSimConnected( int ) {
     },
     [this](){ // fStart_t
       // does this cross into foreground thread?
-      BOOST_LOG_TRIVIAL(info) << "strategy build: simulation run";
+      BOOST_LOG_TRIVIAL(info) << "strategy: simulation run";
       m_sim->Run();
     },
     [this](){ // fStop_t
     },
-    [this]( const Features_raw& raw, Features_scaled& scaled )->float{ // fForward_t
-      m_model.Append( raw, scaled );
-      return 0.0;
-    }
+    std::move( f ) // fForward_t
   );
 
   assert( m_pStrategy );
   m_pStrategy->InitForUSEquityExchanges( m_startDateUTC );
-  m_pStrategy->InitForNextDay();
-
-  BOOST_LOG_TRIVIAL(info) << "strategy build: finished";
-
+  m_pStrategy->InitForNextDay(); // due to also collecting futures which started previous evening
   m_pStrategy->Start();
 }
 
-void StrategyManager_impl::HandleSimComplete() {
+void StrategyManager_impl::HandleSimComplete_build() {
 
   std::stringstream ss;
   m_sim->EmitStats( ss );
@@ -187,30 +206,9 @@ void StrategyManager_impl::HandleSimComplete() {
 
   BOOST_LOG_TRIVIAL(info) << "simulation complete, post processing";
 
-  torch::DeviceType device;
-  int num_devices = 0;
-  if ( torch::cuda::is_available() ) {
-    device = torch::kCUDA;
-    num_devices = torch::cuda::device_count();
-    BOOST_LOG_TRIVIAL(info) << "number of CUDA devices detected: " << num_devices;
-    // when > 1, then can use, as example ' .device(torch::kCUDA, 1 )'
-  }
-  else {
-    device = torch::kCPU;
-    BOOST_LOG_TRIVIAL(info) << "no CUDA devices detected, set device to CPU";
-  }
+  m_model.Build( m_choices.m_hp );
 
-  m_model.Build( device, m_choices.m_hp );
-
-  // todo:
-  // * init simulator, run strategy, build model
-  // * init simulator, run strategy, use model for prediction
-  // * save/load models
-
-  m_model.Eval();
-  // with torch.no_grad()  ?
-  // prediction = model( x );
-  // use a second layer to reduce the output size?
+  m_fQueueTask( [this](){ RunStrategy_step2(); } );
 
 }
 

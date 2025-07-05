@@ -36,11 +36,15 @@ class StrategyManager_impl;
 class StrategyManager {
 public:
 
-  StrategyManager( const config::Choices&, ou::ChartDataView& );
+  using fTask_t = std::function<void()>;
+  using fQueueTask_t = std::function<void( fTask_t&& )>;
+
+  StrategyManager( const config::Choices&, ou::ChartDataView&, fQueueTask_t&& );
   ~StrategyManager();
 
 protected:
 private:
+
   using pStrategyManager_impl_t = std::unique_ptr<StrategyManager_impl>;
   pStrategyManager_impl_t m_pStrategyManager_impl;
 };

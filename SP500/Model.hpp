@@ -40,12 +40,14 @@ public:
 
   void Append( const Features_raw&, Features_scaled& );
 
-  void Build( torch::DeviceType, const HyperParameters& );
+  void Build( const HyperParameters& );
 
   void Eval();
 
 protected:
 private:
+
+  torch::DeviceType m_torchDevice;
 
   //enum EFeature { ixEma200 = 0, ixEma050, ixEma029, ixEma013, ixTrade, ixTickj, ixTickl, ixAdvdec, nInputFeature_ };
   enum EFeature { ixEma200 = 0, ixEma050, ixEma029, ixEma013, ixTrade, ixTickj, ixTickl, nInputFeature_ };

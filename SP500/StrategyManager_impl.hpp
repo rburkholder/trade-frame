@@ -47,7 +47,10 @@ namespace config {
 class StrategyManager_impl {
 public:
 
-  StrategyManager_impl( const config::Choices&, ou::ChartDataView& );
+  using fTask_t = std::function<void()>;
+  using fQueueTask_t = std::function<void( fTask_t&& )>;
+
+  StrategyManager_impl( const config::Choices&, ou::ChartDataView&, fQueueTask_t&& );
   ~StrategyManager_impl();
 
 protected:
@@ -56,6 +59,8 @@ private:
   const config::Choices& m_choices;
 
   ou::ChartDataView& m_cdv; // todo: construct per strategy
+
+  fQueueTask_t m_fQueueTask;
 
   boost::gregorian::date           m_startDateUTC;
   boost::posix_time::time_duration m_startTimeUTC;
@@ -138,10 +143,14 @@ private:
 
   bool BuildProviders_Sim();
   void HandleSimConnected( int );
-  void HandleSimComplete();
+  void HandleSimComplete_build();
 
   void HandleLoadTreeHdf5Group(         const std::string&, const std::string& );
   void HandleLoadTreeHdf5Object_Static( const std::string&, const std::string& );
   void HandleLoadTreeHdf5Object_Sim(    const std::string&, const std::string& );
+
+  void RunStrategy( Strategy::fForward_t&& );
+  void RunStrategy_step1();
+  void RunStrategy_step2();
 
 };

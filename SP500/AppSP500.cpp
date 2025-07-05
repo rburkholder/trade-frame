@@ -137,7 +137,10 @@ void AppSP500::OnFrameMainAutoMove( wxMoveEvent& event ) {
     [this](){
       LoadState();
       m_pFrameMain->Layout();
-      m_pStrategyManager = std::make_unique<StrategyManager>( m_choices, m_cdv );
+      m_pStrategyManager = std::make_unique<StrategyManager>(
+        m_choices, m_cdv,
+        [this]( StrategyManager::fTask_t&& f ){ CallAfter( f ); }
+      );
     }
   );
 
