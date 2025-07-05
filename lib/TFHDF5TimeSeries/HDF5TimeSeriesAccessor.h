@@ -66,11 +66,6 @@ template<class DD> HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor( HDF5DataM
 , m_sPathName( sPathName )
 {
 
-  if ( !m_dm.GetH5File()->nameExists( m_sPathName.c_str() ) ) {
-    std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor " << m_sPathName << " does not exist" << std::endl;
-    throw std::runtime_error( "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor non existence" );
-  }
-
   try {
     m_pDiskDataSet = new H5::DataSet( m_dm.GetH5File()->openDataSet( m_sPathName.c_str() ) );
     m_pDiskCompType = new H5::CompType( *m_pDiskDataSet );
@@ -91,9 +86,15 @@ template<class DD> HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor( HDF5DataM
     throw std::runtime_error( "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor error 0" );
   }
   catch ( H5::Exception& e ) {
-    std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor H " << m_sPathName << ' ' << e.getDetailMsg() << std::endl;
-    e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &HDF5DataManager::PrintH5ErrorStackItem, this );
-    throw std::runtime_error( "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor error 1" );
+    if ( !m_dm.GetH5File()->nameExists( m_sPathName.c_str() ) ) {
+      std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor " << m_sPathName << " does not exist" << std::endl;
+      throw std::runtime_error( "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor non existence" );
+    }
+    else {
+      std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor H " << m_sPathName << ' ' << e.getDetailMsg() << std::endl;
+      e.walkErrorStack( H5E_WALK_DOWNWARD, (H5E_walk2_t) &HDF5DataManager::PrintH5ErrorStackItem, this );
+      throw std::runtime_error( "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor error 1" );
+    }
   }
   catch ( std::runtime_error& e ) {
     std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor R " << m_sPathName << ' ' << e.what() << std::endl;
