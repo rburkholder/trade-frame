@@ -61,9 +61,15 @@ template<class DD> void HDF5TimeSeriesAccessor<DD>::UpdateElementCount( void ) {
   SetNewSize( m_curElementCount );
 }
 
-template<class DD> HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor( HDF5DataManager& dm, const std::string &sPathName):
-  m_dm( dm ),
-  m_sPathName( sPathName ) {
+template<class DD> HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor( HDF5DataManager& dm, const std::string &sPathName)
+: m_dm( dm )
+, m_sPathName( sPathName )
+{
+
+  if ( !m_dm.GetH5File()->nameExists( m_sPathName.c_str() ) ) {
+    std::cout << "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor " << m_sPathName << " does not exist" << std::endl;
+    throw std::runtime_error( "HDF5TimeSeriesAccessor<DD>::HDF5TimeSeriesAccessor non existence" );
+  }
 
   try {
     m_pDiskDataSet = new H5::DataSet( m_dm.GetH5File()->openDataSet( m_sPathName.c_str() ) );
