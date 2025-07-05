@@ -51,6 +51,7 @@ set(
   file_cpp
     AppSP500.cpp
     Config.cpp
+    Features.cpp
     LSTM.cpp
     Model.cpp
     Strategy.cpp
