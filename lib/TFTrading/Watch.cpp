@@ -26,29 +26,33 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-Watch::Watch( pInstrument_t& pInstrument, pProvider_t pDataProvider ) :
-  m_pInstrument( pInstrument ),
-  m_pDataProvider( pDataProvider ),
-  m_PriceMax( 0 ), m_PriceMin( 0 ), m_VolumeTotal( 0 ),
-  m_bWatching( false ), m_bWatchingEnabled( false ), m_bRecordSeries( true ),
-  m_cntWatching {}, m_nEnableStats {},
-  m_cntBestSpread {}, m_dblBestSpread {}, m_cntTotalSpread {},
-  m_bEventsAttached( false )
+Watch::Watch( pInstrument_t& pInstrument, pProvider_t pDataProvider )
+: m_pInstrument( pInstrument )
+, m_pDataProvider( pDataProvider )
+, m_PriceMax( 0 ), m_PriceMin( 0 ), m_VolumeTotal( 0 )
+, m_bWatching( false ), m_bWatchingEnabled( false ), m_bRecordSeries( true )
+, m_cntWatching {}, m_nEnableStats {}
+, m_cntBestSpread {}, m_dblBestSpread {}, m_cntTotalSpread {}
+, m_bEventsAttached( false )
+, m_bAddedDepthByMMHandler( false ), m_bAddedDepthByOrderHandler( false )
+, m_bAddedQuoteHandler( false )
 {
   assert( pInstrument );
   assert( pDataProvider );
   Initialize();
 }
 
-Watch::Watch( const Watch& rhs ) :
-  m_pInstrument( rhs.m_pInstrument ),
-  m_pDataProvider( rhs.m_pDataProvider ),
-  m_PriceMax( rhs.m_PriceMax ), m_PriceMin( rhs.m_PriceMin ), m_VolumeTotal( rhs.m_VolumeTotal ),
-  m_quote( rhs.m_quote ), m_trade( rhs.m_trade ),
-  m_bWatching( false ), m_bWatchingEnabled( false ), m_bRecordSeries( rhs.m_bRecordSeries ),
-  m_cntWatching {}, m_nEnableStats {},
-  m_cntBestSpread {}, m_dblBestSpread {}, m_cntTotalSpread {},
-  m_bEventsAttached( false )
+Watch::Watch( const Watch& rhs )
+: m_pInstrument( rhs.m_pInstrument )
+, m_pDataProvider( rhs.m_pDataProvider )
+, m_PriceMax( rhs.m_PriceMax ), m_PriceMin( rhs.m_PriceMin ), m_VolumeTotal( rhs.m_VolumeTotal )
+, m_quote( rhs.m_quote ), m_trade( rhs.m_trade )
+, m_bWatching( false ), m_bWatchingEnabled( false ), m_bRecordSeries( rhs.m_bRecordSeries )
+, m_cntWatching {}, m_nEnableStats {}
+, m_cntBestSpread {}, m_dblBestSpread {}, m_cntTotalSpread {}
+, m_bEventsAttached( false )
+, m_bAddedDepthByMMHandler( false ), m_bAddedDepthByOrderHandler( false )
+, m_bAddedQuoteHandler( false )
 {
   assert( 0 == rhs.m_cntWatching );
   assert( 0 == rhs.m_nEnableStats );
@@ -151,7 +155,19 @@ void Watch::HandleDisconnected( int ) {
 
 void Watch::EnableWatch() {
   if ( m_bWatchingEnabled && !m_bWatching && m_pDataProvider->Connected() ) {
-//    std::cout << "Start Watching " << m_pInstrument->GetInstrumentName() << std::endl;
+    // std::cout << "Start Watching " << m_pInstrument->GetInstrumentName() << std::endl;
+
+    if (
+         ( 0 == OnQuote.Size() )
+      && ( 0 == OnTrade.Size() )
+      && ( 0 == OnDepthByMM.Size() )
+      && ( 0 == OnDepthByOrder.Size() )
+      && ( 0 == OnFundamentals.Size() )
+      && ( 0 == OnSummary.Size() )
+    ) {
+      std::cout << m_pInstrument->GetInstrumentName() << ": warning, no OnXXX events assigned" << std::endl;
+    }
+
     m_bWatching = true;
 
     if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) { // hook up prior to watch start
@@ -169,11 +185,21 @@ void Watch::EnableWatch() {
     }
 
     // these two message types come second so that the symbol gets registered in previous statements
-    m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
+    if ( 0 != OnQuote.Size() ) {
+      m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
+      m_bAddedQuoteHandler = true;
+    }
     m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
     if ( m_pDataProvider->ProvidesDepth() ) {
-      m_pDataProvider->AddDepthByMMHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleDepthByMM ) );
-      m_pDataProvider->AddDepthByOrderHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleDepthByOrder ) );
+      if ( 0 != OnDepthByMM.Size() ) {
+        m_pDataProvider->AddDepthByMMHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleDepthByMM ) );
+        m_bAddedDepthByMMHandler = true;
+      }
+      if ( 0 != OnDepthByOrder.Size() ) {
+        m_pDataProvider->AddDepthByOrderHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleDepthByOrder ) );
+        m_bAddedDepthByOrderHandler = true;
+      }
+
     }
   }
 }
@@ -192,11 +218,21 @@ void Watch::DisableWatch() {
   if ( m_bWatching ) {
     //std::cout << "Stop Watching " << m_pInstrument->GetInstrumentName() << std::endl;
     if ( m_pDataProvider->ProvidesDepth() ) {
-      m_pDataProvider->RemoveDepthByMMHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleDepthByMM ) );
-      m_pDataProvider->RemoveDepthByOrderHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleDepthByOrder ) );
+      if ( m_bAddedDepthByMMHandler ) {
+        m_pDataProvider->RemoveDepthByMMHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleDepthByMM ) );
+        m_bAddedDepthByMMHandler = false;
+      }
+      if ( m_bAddedDepthByOrderHandler ) {
+        m_pDataProvider->RemoveDepthByOrderHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleDepthByOrder ) );
+        m_bAddedDepthByOrderHandler = false;
+      }
+
     }
     m_pDataProvider->RemoveTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
-    m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
+    if ( m_bAddedQuoteHandler ) {
+      m_pDataProvider->RemoveQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
+      m_bAddedQuoteHandler = false;
+    }
     m_bWatching = false;
     if ( ou::tf::keytypes::EProviderIQF == m_pDataProvider->ID() ) {
       ou::tf::iqfeed::Provider::pProvider_t pIQFeedProvider;

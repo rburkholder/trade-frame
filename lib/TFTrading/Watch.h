@@ -88,10 +88,13 @@ public:
   DepthsByMM& GetDepthsByMM() { return m_depths_mm; }; // not const so can delegate
   DepthsByOrder& GetDepthsByOrder() { return m_depths_order; }; // not const so can delegate
 
+  // NOTE: **************
+  // NOTE: this need to be set prior to starting a watch
+  // NOTE: unset these after stopping the watch
   ou::Delegate<const Quote&> OnQuote;
   ou::Delegate<const Trade&> OnTrade;
-  ou::Delegate<const DepthByMM&> OnDepthByMM;  // simulator
-  ou::Delegate<const DepthByOrder&> OnDepthByOrder; // simulator
+  ou::Delegate<const DepthByMM&> OnDepthByMM;  // simulator, iqfeed?
+  ou::Delegate<const DepthByOrder&> OnDepthByOrder; // simulator, iqfeed?
   ou::Delegate<const Fundamentals&> OnFundamentals; // iqfeed
   ou::Delegate<const Summary&> OnSummary; // iqfeed
 
@@ -143,6 +146,10 @@ private:
   bool m_bWatchingEnabled;
   bool m_bWatching; // in/out of connected state
   bool m_bEventsAttached; // code validation
+
+  bool m_bAddedQuoteHandler;
+  bool m_bAddedDepthByMMHandler;
+  bool m_bAddedDepthByOrderHandler;
 
   size_t m_cntWatching;
   size_t m_nEnableStats;
