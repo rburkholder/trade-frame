@@ -75,6 +75,8 @@ public:
   );
   ~Strategy();
 
+  void Start();
+
 protected:
 private:
 
@@ -243,7 +245,7 @@ private:
   void HandleOrderFilled( const ou::tf::Order& );
 
   void SetupChart();
-  void Start();
+  void ValidateAndStart();
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

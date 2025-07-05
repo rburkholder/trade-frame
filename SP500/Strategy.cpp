@@ -65,54 +65,7 @@ Strategy::Strategy(
 
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
 
-  m_fConstructPosition(
-    "SPY",
-    [this]( pPosition_t pPosition ){
-      m_pPosition = pPosition;
-      pWatch_t pWatch = pPosition->GetWatch();
-      pWatch->OnQuote.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleQuote ) );
-      pWatch->OnTrade.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleTrade ) );
-      pWatch->StartWatch();
-      Start();
-    } );
-
-  m_fConstructWatch(
-    "JT6T.Z",
-    [this]( pWatch_t pWatch ){
-      m_pTickJ = pWatch;
-      m_pTickJ->OnTrade.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleTickJ ) );
-      m_pTickJ->StartWatch();
-      Start();
-    } );
-
-  m_fConstructWatch(
-    "LI6N.Z",
-    [this]( pWatch_t pWatch ){
-      m_pTickL = pWatch;
-      m_pTickL->OnTrade.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleTickL ) );
-      m_pTickL->StartWatch();
-      Start();
-    } );
-
-  m_fConstructWatch(
-    "II6A.Z", // advancers
-    [this]( pWatch_t pWatch ){
-      m_pAdv = pWatch;
-      m_pAdv->OnTrade.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleAdv ) );
-      m_pAdv->StartWatch();
-      Start();
-    } );
-
-  m_fConstructWatch(
-    "II6D.Z", // decliners
-    [this]( pWatch_t pWatch ){
-      m_pDec = pWatch;
-      m_pDec->OnTrade.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleDec ) );
-      m_pDec->StartWatch();
-      Start();
-    } );
-
-  }
+}
 
 Strategy::~Strategy() {
   if ( m_pDec ) {
@@ -142,6 +95,57 @@ Strategy::~Strategy() {
 }
 
 void Strategy::Start() {
+
+  m_fConstructPosition(
+    "SPY",
+    [this]( pPosition_t pPosition ){
+      m_pPosition = pPosition;
+      pWatch_t pWatch = pPosition->GetWatch();
+      pWatch->OnQuote.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleQuote ) );
+      pWatch->OnTrade.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleTrade ) );
+      pWatch->StartWatch();
+      ValidateAndStart();
+    } );
+
+  m_fConstructWatch(
+    "JT6T.Z",
+    [this]( pWatch_t pWatch ){
+      m_pTickJ = pWatch;
+      m_pTickJ->OnTrade.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleTickJ ) );
+      m_pTickJ->StartWatch();
+      ValidateAndStart();
+    } );
+
+  m_fConstructWatch(
+    "LI6N.Z",
+    [this]( pWatch_t pWatch ){
+      m_pTickL = pWatch;
+      m_pTickL->OnTrade.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleTickL ) );
+      m_pTickL->StartWatch();
+      ValidateAndStart();
+    } );
+
+  m_fConstructWatch(
+    "II6A.Z", // advancers
+    [this]( pWatch_t pWatch ){
+      m_pAdv = pWatch;
+      m_pAdv->OnTrade.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleAdv ) );
+      m_pAdv->StartWatch();
+      ValidateAndStart();
+    } );
+
+  m_fConstructWatch(
+    "II6D.Z", // decliners
+    [this]( pWatch_t pWatch ){
+      m_pDec = pWatch;
+      m_pDec->OnTrade.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleDec ) );
+      m_pDec->StartWatch();
+      ValidateAndStart();
+    } );
+
+}
+
+void Strategy::ValidateAndStart() {
   bool bOkToStart( true );
   bOkToStart &= nullptr != m_pPosition.get();
   bOkToStart &= nullptr != m_pTickJ.get();

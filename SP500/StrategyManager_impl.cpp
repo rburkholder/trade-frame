@@ -141,7 +141,7 @@ bool StrategyManager_impl::BuildProviders_Sim() {
 void StrategyManager_impl::HandleSimConnected( int ) {
   using pWatch_t = Strategy::pWatch_t;
   using pPosition_t = Strategy::pPosition_t;
-  BOOST_LOG_TRIVIAL(info) << "building strategy";
+  BOOST_LOG_TRIVIAL(info) << "strategy build: started";
   m_pStrategy = std::make_unique<Strategy>(
     m_cdv,
     [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedWatch_t&& f ){ // fConstructWatch_t
@@ -159,7 +159,7 @@ void StrategyManager_impl::HandleSimConnected( int ) {
     },
     [this](){ // fStart_t
       // does this cross into foreground thread?
-      BOOST_LOG_TRIVIAL(info) << "simulation run";
+      BOOST_LOG_TRIVIAL(info) << "strategy build: simulation run";
       m_sim->Run();
     },
     [this](){ // fStop_t
@@ -169,9 +169,14 @@ void StrategyManager_impl::HandleSimConnected( int ) {
       return 0.0;
     }
   );
+
   assert( m_pStrategy );
   m_pStrategy->InitForUSEquityExchanges( m_startDateUTC );
   m_pStrategy->InitForNextDay();
+
+  BOOST_LOG_TRIVIAL(info) << "strategy build: finished";
+
+  m_pStrategy->Start();
 }
 
 void StrategyManager_impl::HandleSimComplete() {
