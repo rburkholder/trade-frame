@@ -145,7 +145,42 @@ void Model::Append( const Features_raw& raw, Features_scaled& scaled ) {
 
 }
 
+ou::tf::Price Model::EmptyPrice( boost::posix_time::ptime dt ) {
+  return ou::tf::Price( dt + boost::posix_time::seconds( c_secondsYOffset ), 0.0 );
+}
+
+void Model::Eval() {
+  // with torch.no_grad()  ?
+  m_vDataScaled.clear();
+  m_iterDataScaled = m_vDataScaled.begin();
+  m_pLSTM->eval();
+}
+
+ou::tf::Price Model::Predict( boost::posix_time::ptime dt ) {
+  static const int nInputFeature( nInputFeature_ );
+  float price {};
+  if ( c_secondsSequence <= m_vDataScaled.size() ) {
+    assert( c_secondsSequence == m_vDataScaled.end() - m_iterDataScaled );
+
+    torch::Tensor tensorX = // input
+      torch::from_blob( (void*)(&(*m_iterDataScaled)), { 1, c_secondsSequence, nInputFeature },
+      torch::TensorOptions().dtype( torch::kFloat32 )
+    ).to( m_torchDevice );
+
+    LSTM::lstm_state_t state( m_pLSTM->init_states( m_torchDevice, 1 ) );
+    torch::Tensor prediction = m_pLSTM->forward( tensorX, state );
+    //BOOST_LOG_TRIVIAL(info) << "prediction sizes: " << prediction.sizes();
+
+    price = prediction[ 0 ][ c_secondsSequence - 1 ][ 0 ].item<float>();
+
+    ++m_iterDataScaled;
+  }
+  return ou::tf::Price( dt + boost::posix_time::seconds( c_secondsYOffset ), price );
+}
+
 void Model::Build( const HyperParameters& hp ) {
+
+  // use a second layer to reduce the output size?
 
   BOOST_LOG_TRIVIAL(info)
     << "scaled vector size: "
@@ -307,8 +342,3 @@ void Model::Build( const HyperParameters& hp ) {
   BOOST_LOG_TRIVIAL(info) << "training done";
 
 }
-
-void Model::Eval() {
-  m_pLSTM->eval();
-}
-
