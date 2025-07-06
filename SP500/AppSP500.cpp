@@ -107,7 +107,6 @@ bool AppSP500::OnInit() {
   m_pwcv = new ou::tf::WinChartView( m_pFrameMain );
   sizerFrame->Add( m_pwcv, 1,wxALL | wxEXPAND, 0 );
   m_pwcv->SetSim();
-  m_pwcv->SetChartDataView( &m_cdv );
 
   if ( m_choices.m_bRunSim ) {
     FrameMain::vpItems_t vItems;
@@ -123,8 +122,6 @@ bool AppSP500::OnInit() {
   m_pFrameMain->Bind( wxEVT_MOVE, &AppSP500::OnFrameMainAutoMove, this ); // intercept first move
   m_pFrameMain->Show( true ); // triggers the auto move
 
-  m_cdv.SetNames( "SPY", m_choices.m_sHdf5File );
-
   return true;
 
 }
@@ -138,8 +135,9 @@ void AppSP500::OnFrameMainAutoMove( wxMoveEvent& event ) {
       LoadState();
       m_pFrameMain->Layout();
       m_pStrategyManager = std::make_unique<StrategyManager>(
-        m_choices, m_cdv,
-        [this]( StrategyManager::fTask_t&& f ){ CallAfter( f ); }
+        m_choices
+      , [this]( StrategyManager::fTask_t&& f ){ CallAfter( f ); }
+      , [this]( ou::ChartDataView& cdv ){ m_pwcv->SetChartDataView( &cdv ); }
       );
     }
   );

@@ -22,8 +22,13 @@
 #include "StrategyManager.hpp"
 #include "StrategyManager_impl.hpp"
 
-StrategyManager::StrategyManager( const config::Choices& choices, ou::ChartDataView& cdv, fQueueTask_t&& f ) {
-  m_pStrategyManager_impl = std::make_unique<StrategyManager_impl>( choices, cdv, std::move( f ) );
+StrategyManager::StrategyManager(
+  const config::Choices& choices, fQueueTask_t&& fQueueTask, fSetChartDataView_t&& fSetChartDataView
+) {
+  m_pStrategyManager_impl
+    = std::make_unique<StrategyManager_impl>(
+      choices, std::move( fQueueTask ), std::move( fSetChartDataView )
+    );
 }
 
 StrategyManager::~StrategyManager() {

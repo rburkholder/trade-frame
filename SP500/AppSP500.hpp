@@ -60,7 +60,6 @@ private:
 
   ou::tf::TreeItem* m_ptiRoot;
 
-  ou::ChartDataView m_cdv; // todo: migrate to StrategyManager_impl, to use per Strategy
   ou::tf::WinChartView* m_pwcv; // handles drawing the chart
 
   using pStrategyManager_t = std::unique_ptr<StrategyManager>;

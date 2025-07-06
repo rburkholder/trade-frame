@@ -49,8 +49,13 @@ public:
 
   using fTask_t = std::function<void()>;
   using fQueueTask_t = std::function<void( fTask_t&& )>;
+  using fSetChartDataView_t = std::function<void( ou::ChartDataView& )>;
 
-  StrategyManager_impl( const config::Choices&, ou::ChartDataView&, fQueueTask_t&& );
+  StrategyManager_impl(
+    const config::Choices&
+  , fQueueTask_t&&
+  , fSetChartDataView_t&&
+  );
   ~StrategyManager_impl();
 
 protected:
@@ -58,7 +63,11 @@ private:
 
   const config::Choices& m_choices;
 
-  ou::ChartDataView& m_cdv; // todo: construct per strategy
+  ou::ChartDataView m_cdv;
+  ou::ChartDataView m_cdv_build;
+  ou::ChartDataView m_cdv_predict; // might reuse the first if Clear() works properly
+
+  fSetChartDataView_t m_fSetChartDataView;
 
   fQueueTask_t m_fQueueTask;
 
@@ -144,13 +153,14 @@ private:
   bool BuildProviders_Sim();
   void HandleSimConnected( int );
   void HandleSimComplete_build();
+  void HandleSimComplete_predict();
 
   void HandleLoadTreeHdf5Group(         const std::string&, const std::string& );
   void HandleLoadTreeHdf5Object_Static( const std::string&, const std::string& );
   void HandleLoadTreeHdf5Object_Sim(    const std::string&, const std::string& );
 
-  void RunStrategy( Strategy::fForward_t&& );
-  void RunStrategy_step1();
-  void RunStrategy_step2();
+  void RunStrategy( ou::ChartDataView&, Strategy::fForward_t&& );
+  void RunStrategy_build();
+  void RunStrategy_predict();
 
 };

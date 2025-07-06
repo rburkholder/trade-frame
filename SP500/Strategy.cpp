@@ -32,6 +32,7 @@ namespace {
   static const ou::Colour::EColour c_colourTickJ(  ou::Colour::Chocolate );
   static const ou::Colour::EColour c_colourTickL(  ou::Colour::MediumPurple );
   static const ou::Colour::EColour c_colourAdvDec( ou::Colour::Maroon );
+  static const ou::Colour::EColour c_colourPrdct(  ou::Colour::Blue );
 }
 
 Strategy::Strategy(
@@ -235,6 +236,11 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::AdvDec, &m_cemZero );
   m_cdv.Add( EChartSlot::AdvDec, &m_ceAdvDec );
 
+  m_cePrediction.SetName( "Predict" );
+  m_cePrediction.SetColour( c_colourPrdct );
+  m_cdv.Add( EChartSlot::Predict, &m_ceTrade_ratio );
+  m_cdv.Add( EChartSlot::Predict, &m_cePrediction );
+
   m_ceProfitLoss.SetName( "P/L" );
   //m_cdv.Add( EChartSlot::PL, &m_cemZero );
   m_cdv.Add( EChartSlot::PL, &m_ceProfitLoss );
@@ -413,7 +419,8 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   UpdateEma<200>( price_, m_features.dblEma200, m_ceEma200 );
 
   Features_scaled scaled;
-  m_fForward( m_features, scaled );
+  ou::tf::Price prediction = m_fForward( m_features, scaled );
+  m_cePrediction.Append( prediction );
 
   m_ceTrade_ratio.Append( bar.DateTime(), scaled.price.dbl );
 

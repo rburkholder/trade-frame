@@ -31,10 +31,14 @@
 #include "Features.hpp"
 #include "StrategyManager_impl.hpp"
 
-StrategyManager_impl::StrategyManager_impl( const config::Choices& choices, ou::ChartDataView& cdv, fQueueTask_t&& f )
+StrategyManager_impl::StrategyManager_impl(
+  const config::Choices& choices
+, fQueueTask_t&& fQueueTask
+, fSetChartDataView_t&& fSetChartDataView
+)
 : m_choices( choices )
-, m_cdv( cdv )
-, m_fQueueTask( std::move( f ) )
+, m_fQueueTask( std::move( fQueueTask ) )
+, m_fSetChartDataView( std::move( fSetChartDataView ) )
 {
   m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO, m_choices.m_sHdf5File );
 
@@ -140,35 +144,45 @@ void StrategyManager_impl::HandleSimConnected( int ) {
   // todo:
   // * init simulator, run strategy, use model for prediction
   // * save/load models
-  RunStrategy_step1();
+  m_fQueueTask( [this](){ RunStrategy_build(); } );
 }
 
-void StrategyManager_impl::RunStrategy_step1() {
+void StrategyManager_impl::RunStrategy_build() {
   // run strategy to build model
   BOOST_LOG_TRIVIAL(info) << "model build: started";
   m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_build ) );
+  m_cdv_build.SetNames( "SPY - build", m_choices.m_sHdf5File );
+  m_fSetChartDataView( m_cdv_build );
   RunStrategy(
-    [this]( const Features_raw& raw, Features_scaled& scaled )->float {
+    m_cdv_build,
+    [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price {
       m_model.Append( raw, scaled );
-      return 0.0;
+      return m_model.EmptyPrice( raw.dt );
     } );
 }
 
-void StrategyManager_impl::RunStrategy_step2() {
+void StrategyManager_impl::RunStrategy_predict() {
   // run stratgy with built model
+  BOOST_LOG_TRIVIAL(info) << "model predict: started";
   m_model.Eval();
-  // with torch.no_grad()  ?
-  // prediction = model( x );
-  // use a second layer to reduce the output size?
-
-
+  m_sim->Reset();
+  m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_predict ) );
+  m_cdv_build.Clear(); // clear references to strategy being destructed
+  m_cdv_predict.SetNames( "SPY - predict", m_choices.m_sHdf5File );
+  m_fSetChartDataView( m_cdv_predict );
+  RunStrategy(
+    m_cdv_predict,
+    [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price {
+      m_model.Append( raw, scaled );
+      return m_model.Predict( raw.dt );
+    } );
 }
 
-void StrategyManager_impl::RunStrategy( Strategy::fForward_t&& f ) {
+void StrategyManager_impl::RunStrategy( ou::ChartDataView& cdv, Strategy::fForward_t&& f ) {
   using pWatch_t = Strategy::pWatch_t;
   using pPosition_t = Strategy::pPosition_t;
   m_pStrategy = std::make_unique<Strategy>(
-    m_cdv,
+    cdv,
     [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedWatch_t&& f ){ // fConstructWatch_t
       mapHdf5Instrument_t::iterator iter = m_mapHdf5Instrument.find( sIQFeedSymbolName );
       assert( m_mapHdf5Instrument.end() != iter );
@@ -202,13 +216,20 @@ void StrategyManager_impl::HandleSimComplete_build() {
 
   std::stringstream ss;
   m_sim->EmitStats( ss );
-  BOOST_LOG_TRIVIAL(info) << "simulation results " << ss.str();
-
-  BOOST_LOG_TRIVIAL(info) << "simulation complete, post processing";
+  BOOST_LOG_TRIVIAL(info) << "simulation (build) results " << ss.str();
 
   m_model.Build( m_choices.m_hp );
 
-  m_fQueueTask( [this](){ RunStrategy_step2(); } );
+  // allow the simulation thread to finish
+  m_fQueueTask( [this](){ RunStrategy_predict(); } );
+
+}
+
+void StrategyManager_impl::HandleSimComplete_predict() {
+
+  std::stringstream ss;
+  m_sim->EmitStats( ss );
+  BOOST_LOG_TRIVIAL(info) << "simulation (predict) results " << ss.str();
 
 }
 

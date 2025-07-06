@@ -38,8 +38,9 @@ public:
 
   using fTask_t = std::function<void()>;
   using fQueueTask_t = std::function<void( fTask_t&& )>;
+  using fSetChartDataView_t = std::function<void( ou::ChartDataView& )>;
 
-  StrategyManager( const config::Choices&, ou::ChartDataView&, fQueueTask_t&& );
+  StrategyManager( const config::Choices&, fQueueTask_t&&, fSetChartDataView_t&& );
   ~StrategyManager();
 
 protected:
