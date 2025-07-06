@@ -157,8 +157,13 @@ void Model::Eval() {
 }
 
 ou::tf::Price Model::Predict( boost::posix_time::ptime dt ) {
+
   static const int nInputFeature( nInputFeature_ );
   float price {};
+
+  // TODO: need to test with and without
+  torch::NoGradGuard no_grad;
+
   if ( c_secondsSequence <= m_vDataScaled.size() ) {
     assert( c_secondsSequence == m_vDataScaled.end() - m_iterDataScaled );
 
