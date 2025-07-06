@@ -68,6 +68,7 @@ public:
   }
 
   virtual void Connect();
+  void Reset();
   virtual void Disconnect();
 
   void SetHdf5FileName( const std::string& );
@@ -122,7 +123,6 @@ protected:
   OnSimulationComplete_t m_OnSimulationComplete;
 
   void Merge();  // the background thread
-  void Reset();
 
   void HandleExecution( Order::idOrder_t orderId, const Execution &exec );
   void HandleCommission( Order::idOrder_t orderId, double commission );
