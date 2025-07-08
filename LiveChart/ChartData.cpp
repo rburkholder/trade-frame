@@ -15,7 +15,7 @@
 #include <TFTrading/Instrument.h>
 //#include <TFTrading/InstrumentManager.h>
 
-#include "ChartData.h"
+#include "ChartData.hpp"
 
 ChartData::ChartData( pProvider_t pProvider, const std::string& sSymbolName )
 : ou::ChartDVBasics()

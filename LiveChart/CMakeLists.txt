@@ -23,7 +23,7 @@ find_package(Boost ${TF_BOOST_VERSION} CONFIG REQUIRED COMPONENTS system date_ti
 
 set(
   file_h
-    ChartData.h
+    ChartData.hpp
     Config.hpp
     LiveChart.hpp
   )

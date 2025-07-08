@@ -33,7 +33,7 @@
 #include <TFVuTrading/WinChartView.h>
 
 #include "Config.hpp"
-#include "ChartData.h"
+#include "ChartData.hpp"
 
 class AppLiveChart:
   public wxApp, public ou::tf::FrameWork01<AppLiveChart> {
