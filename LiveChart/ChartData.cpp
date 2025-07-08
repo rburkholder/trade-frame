@@ -32,6 +32,12 @@ ChartData::ChartData( pProvider_t pProvider, const std::string& sSymbolName )
   m_pWatch->StartWatch();
 }
 
+void ChartData::SaveSeries( const std::string& sPrefix ) {
+  if ( m_pWatch ) {
+    m_pWatch->SaveSeries( sPrefix );
+  }
+}
+
 ChartData::~ChartData() {
   m_pWatch->StopWatch();
   m_pWatch->OnQuote.Remove( MakeDelegate( this, &ou::ChartDVBasics::HandleQuote ) );

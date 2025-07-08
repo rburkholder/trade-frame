@@ -30,7 +30,7 @@ public:
   ~ChartData();
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
-  pWatch_t GetWatch() { return m_pWatch; };
+  void SaveSeries( const std::string& sPrefix );
 
 protected:
 private:
