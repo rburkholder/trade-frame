@@ -16,6 +16,8 @@
 
 // Started 2013/09/26
 
+#include <unordered_map>
+
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
@@ -35,6 +37,12 @@
 #include "Config.hpp"
 #include "ChartData.hpp"
 
+namespace ou {
+namespace tf {
+  class TreeItem;
+}
+}
+
 class AppLiveChart:
   public wxApp, public ou::tf::FrameWork01<AppLiveChart> {
     friend class boost::serialization::access;
@@ -51,23 +59,23 @@ private:
   ou::tf::PanelLogging* m_pPanelLogging;
   ou::tf::WinChartView* m_pWinChartView;
 
-  ChartData* m_pChartData;
-
   //ou::tf::DBOps m_db;
 
-  ptime m_dtTopOfMinute;
+  wxTreeCtrl* m_pTreeChart;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
+  ou::tf::TreeItem* m_ptiRoot;
 
-  class CustomItemData: public wxTreeItemData { // wxTreeCtrl node/leaf info
-  public:
-    enum enumNodeType { Root, Group, Object } m_eNodeType;
-    enum enumDatumType { Quotes, Trades, Bars, NoDatum } m_eDatumType;
-    CustomItemData( enumNodeType eNodeType, enumDatumType eDatumType )
-      : m_eNodeType( eNodeType ), m_eDatumType( eDatumType ) {};
+  struct Chart {
+    ou::tf::TreeItem* m_pti;
+    ChartData* m_pChartData;
+    Chart(): m_pti( nullptr ), m_pChartData( nullptr ) {}
+    ~Chart() {
+      m_pti = nullptr;
+      delete m_pChartData;
+      m_pChartData = nullptr;
+    }
   };
-  wxTreeCtrl* m_pHdf5Root;  // http://docs.wxwidgets.org/trunk/classwx_tree_ctrl.html
-  std::string m_sCurrentPath;  // used while traversing and building tree
-  wxTreeItemId m_curTreeItem; // used while traversing and building tree
-  CustomItemData::enumDatumType m_eLatestDatumType;  // need this until all timeseries have a signature attribute associated
+  using mapChart_t = std::unordered_map<std::string, Chart>;
+  mapChart_t m_mapChart;
 
   virtual bool OnInit();
   virtual int OnExit();

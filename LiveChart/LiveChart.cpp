@@ -27,6 +27,8 @@
 //#include <TFTrading/AccountManager.h>
 //#include <TFTrading/OrderManager.h>
 
+#include <TFVuTrading/TreeItem.hpp>
+
 #include "LiveChart.hpp"
 
 namespace {
@@ -53,9 +55,8 @@ bool AppLiveChart::OnInit() {
 
   if ( config::Load( c_sChoicesFilename, m_choices ) ) {
     auto size = m_choices.vSymbol.size();
-    if ( 1 == size ) {}
-    else {
-      std::cout << "one symbol required, suppled " << size << " symbols" << std::endl;
+    if ( 0 == size ) {
+      std::cout << "symbols required" << std::endl;
       return false;
     }
   }
@@ -81,18 +82,9 @@ bool AppLiveChart::OnInit() {
   splitter->SetSashGravity(0.2);
 
   // tree
-  //wxTreeCtrl* tree;
-  m_pHdf5Root = new wxTreeCtrl( splitter );
-  m_eLatestDatumType = CustomItemData::NoDatum;
-  wxTreeItemId idRoot = m_pHdf5Root->AddRoot( "/", -1, -1, new CustomItemData( CustomItemData::Root, m_eLatestDatumType ) );
-//  m_pHdf5Root->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId() );
-  //m_pFrameMain->Bind( wxEVT_COMMAND_TREE_ITEM_ACTIVATED, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId() );
-//  m_pFrameMain->Bind( wxEVT_COMMAND_TREE_ITEM_ACTIVATED, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId()  );
-//  m_pFrameMain->Bind( wxEVT_COMMAND_TREE_SEL_CHANGED, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId()  );
-//  m_pFrameMain->Bind( wxEVT_COMMAND_TREE_ITEM_RIGHT_CLICK, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId()  );
-//  m_pFrameMain->Bind( wxEVT_COMMAND_TREE_ITEM_MENU, &AppLiveChart::HandleTreeEventItemActivated, this, m_pHdf5Root->GetId()  );
-//  tree->AppendItem( idRoot, "second" );
-//  tree->AppendItem( idRoot, "third" );
+  m_pTreeChart = new wxTreeCtrl( splitter );
+  m_ptiRoot = new ou::tf::TreeItem( m_pTreeChart, "charts" );
+  ou::tf::TreeItem::Bind( splitter, m_pTreeChart );
 
   // panel for right side of splitter
   wxPanel* panelSplitterRightPanel;
@@ -121,7 +113,7 @@ bool AppLiveChart::OnInit() {
   sizerControls->Add( m_pPanelLogging, 1, wxALL | wxEXPAND, 0);
 //  m_pPanelLogging->Show( true );
 
-  splitter->SplitVertically( m_pHdf5Root, panelSplitterRightPanel, 0 );
+  splitter->SplitVertically( m_pTreeChart, panelSplitterRightPanel, 0 );
   sizerFrame->Add( splitter, 1, wxGROW|wxALL, 5 );
 
   m_pWinChartView = new ou::tf::WinChartView( panelSplitterRightPanel, wxID_ANY );
@@ -156,21 +148,26 @@ bool AppLiveChart::OnInit() {
 //  vItems.push_back( new mi( "e1 Load Tree", MakeDelegate( this, &AppLiveChart::HandleMenuActionLoadTree ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
-  m_pChartData = new ChartData( m_pData1Provider, *m_choices.vSymbol.begin() );
+  for ( const config::Choices::vSymbol_t::value_type& vt: m_choices.vSymbol ) {
+    mapChart_t::iterator iter = m_mapChart.find( vt );
+    if ( m_mapChart.end() != iter ) {
+      std::cout << "duplicate symbol: " << vt << std::endl;
+    }
+    else {
+      auto result = m_mapChart.emplace( vt, Chart() );
+      assert( result.second );
+      iter = result.first;
+      Chart& chart( iter->second );
+      chart.m_pChartData = new ChartData( m_pData1Provider, vt );
+      chart.m_pti = m_ptiRoot->AppendChild(
+        vt
+      , [this,pcdv = chart.m_pChartData->GetChartDataView()]( ou::tf::TreeItem* pti ){
+        m_pWinChartView->SetChartDataView( pcdv );
+      });
+    }
+  }
+
   m_pData1Provider->Connect();
-
-//  m_pWinChartView->SetOnRefreshData(
-//    [this](){
-//      ptime now = ou::TimeSource::Instance().External();
-//      static boost::posix_time::time_duration::fractional_seconds_type fs( 1 );
-//      boost::posix_time::time_duration td( 0, 0, 0, fs - now.time_of_day().fractional_seconds() );
-//      ptime dtEnd = now + td;
-//      static boost::posix_time::time_duration tdLength( 0, 10, 0 );
-//      ptime dtBegin = dtEnd - tdLength;
-//      m_pChartData->GetChartDataView()->SetViewPort( dtBegin, dtEnd );
-//    } );
-
-  m_pWinChartView->SetChartDataView( m_pChartData->GetChartDataView() );
 
   CallAfter(
     [this](){
@@ -194,7 +191,9 @@ void AppLiveChart::HandleSaveValues() {
     //std::string sPrefix86400sec( "/bar/86400/AtmIV/" + m_pBundle->Name() );
     //m_pBundle->SaveData( sPrefixSession, sPrefix86400sec );
     const std::string sPrefix( "/app/livechart/" + m_sTSDataStreamStarted );
-    m_pChartData->SaveSeries( sPrefix );
+    for ( const mapChart_t::value_type& vt: m_mapChart ) {
+      vt.second.m_pChartData->SaveSeries( sPrefix );
+    }
   }
   catch(...) {
     std::cout << " ... issues with saving ... " << std::endl;
@@ -217,6 +216,8 @@ void AppLiveChart::OnClose( wxCloseEvent& event ) {
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
 
   SaveState();
+
+  m_mapChart.clear();
 
   event.Skip();  // auto followed by Destroy();
 }
