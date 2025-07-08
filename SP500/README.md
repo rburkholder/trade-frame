@@ -1,7 +1,7 @@
 # SP500 Application
 
-An adventure into trading the S&P 500 using SPY with the support of 
-TRIN, TICK and Advance/Decline market supplied indicators.
+An adventure into trading the S&P 500 using SPY with the support of
+TRIN, TICK and Advance/Decline market supplied indicators via libtorch training.
 
 LibTorch is being introduced for testing an LSTM based model for machine learning.
 * libtorch needs to reside in /usr/local/share
@@ -9,8 +9,8 @@ LibTorch is being introduced for testing an LSTM based model for machine learnin
 * if one or more NVidia cards are present, libcuda can be used by libtorch
 * see [Installing LibTorch with Cuda on NVIDIA GeForce RTX 4070](https://blog.raymond.burkholder.net/index.php?/archives/1285-Installing-LibTorch-with-Cuda-on-NVIDIA-GeForce-RTX-4070.html) for installation hints.
 
-The initial iteration of this application relies on HDF5 files 
-collected by the Collector application with the following 
+The initial iteration of this application relies on HDF5 files
+collected by the Collector application with the following
 collector.cfg configuration:
 
 ```
@@ -24,6 +24,20 @@ symbol_name_l1=TR6T.Z  #S&P 500 TICKS RATIO  - useful
 symbol_name_l1=VI6A.Z  #S&P 500 ISSUES VOLUME UP
 symbol_name_l1=VI6D.Z  #S&P 500 ISSUES VOLUME DOWN
 stop_time=17:20:00
+```
+
+Current code:
+* runs a training cycle, then
+* runs a prediction cycle
+
+The configuration file provides key settings (including two hyperparameters):
+
+```
+$ cat x64/debug/sp500.cfg
+run_sim=true
+hdf5_file=collector-20250416.hdf5
+learning_rate=0.001
+num_epochs=10000
 ```
 
 Symbols and their contribution to signals:
