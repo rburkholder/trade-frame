@@ -25,7 +25,7 @@ set(
   file_h
     ChartData.h
     Config.hpp
-    LiveChart.h
+    LiveChart.hpp
   )
 
 set(

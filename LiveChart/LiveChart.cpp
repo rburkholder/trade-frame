@@ -27,7 +27,7 @@
 //#include <TFTrading/AccountManager.h>
 //#include <TFTrading/OrderManager.h>
 
-#include "LiveChart.h"
+#include "LiveChart.hpp"
 
 namespace {
   static const std::string c_sAppTitle(        "LiveChart" );
