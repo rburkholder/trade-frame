@@ -16,16 +16,11 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-//#include <boost/lexical_cast.hpp>
-
 #include <wx/frame.h>
 #include <wx/sizer.h>
 #include <wx/panel.h>
+#include <wx/textdlg.h>
 #include <wx/splitter.h>
-
-//#include <TFTrading/InstrumentManager.h>
-//#include <TFTrading/AccountManager.h>
-//#include <TFTrading/OrderManager.h>
 
 #include <TFVuTrading/TreeItem.hpp>
 
@@ -86,6 +81,22 @@ bool AppLiveChart::OnInit() {
   m_ptiRoot->SetOnClick(
     [this]( ou::tf::TreeItem* ){
       m_pWinChartView->SetChartDataView( nullptr );
+    } );
+  m_ptiRoot->SetOnBuildPopUp(
+    [this]( ou::tf::TreeItem* pti ){
+      pti->NewMenu();
+      pti->AppendMenuItem(
+        "Add Symbol",
+        [this]( ou::tf::TreeItem* pti ){
+          wxTextEntryDialog dialog( m_pFrameMain, "Symbol Name:", "Add Symbol" );
+          //dialog->ForceUpper(); // prints charters in reverse
+          if ( wxID_OK == dialog.ShowModal() ) {
+            std::string sSymbolName = dialog.GetValue().Upper();
+            if ( 0 < sSymbolName.size() ) {
+              AddSymbol( sSymbolName );
+            }
+          }
+        } );
     } );
   ou::tf::TreeItem::Bind( splitter, m_pTreeChart );
 
@@ -152,22 +163,7 @@ bool AppLiveChart::OnInit() {
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   for ( const config::Choices::vSymbol_t::value_type& vt: m_choices.vSymbol ) {
-    mapChart_t::iterator iter = m_mapChart.find( vt );
-    if ( m_mapChart.end() != iter ) {
-      std::cout << "duplicate symbol: " << vt << std::endl;
-    }
-    else {
-      auto result = m_mapChart.emplace( vt, Chart() );
-      assert( result.second );
-      iter = result.first;
-      Chart& chart( iter->second );
-      chart.m_pChartData = new ChartData( m_pData1Provider, vt );
-      chart.m_pti = m_ptiRoot->AppendChild(
-        vt
-      , [this,pcdv = chart.m_pChartData->GetChartDataView()]( ou::tf::TreeItem* pti ){
-        m_pWinChartView->SetChartDataView( pcdv );
-      });
-    }
+    AddSymbol( vt );
   }
 
   m_pData1Provider->Connect();
@@ -179,7 +175,42 @@ bool AppLiveChart::OnInit() {
   );
 
   return 1;
+}
 
+void AppLiveChart::AddSymbol( const std::string& sName ) {
+  mapChart_t::iterator iter = m_mapChart.find( sName );
+  if ( m_mapChart.end() != iter ) {
+    std::cout << "duplicate symbol: " << sName << std::endl;
+  }
+  else {
+    auto result = m_mapChart.emplace( sName, Chart() );
+    assert( result.second );
+    iter = result.first;
+    Chart& chart( iter->second );
+    chart.m_pChartData = new ChartData( m_pData1Provider, sName );
+    chart.m_pti = m_ptiRoot->AppendChild(
+      sName
+    , [this,pcdv = chart.m_pChartData->GetChartDataView()]( ou::tf::TreeItem* pti ){ // fOnClick_t
+      m_pWinChartView->SetChartDataView( pcdv );
+      }
+    , [this,iter]( ou::tf::TreeItem* pti ){// fOnBuildPopUp
+      pti->NewMenu();
+      pti->AppendMenuItem(
+        "Delete",
+        [this,iter]( ou::tf::TreeItem* pti ){
+          CallAfter(
+            [this,iter](){
+              Chart& chart( iter->second );
+              chart.m_pti->Delete();
+              if ( m_pWinChartView->GetChartDataView() == chart.m_pChartData->GetChartDataView() ) {
+                m_pWinChartView->SetChartDataView( nullptr );
+              }
+              m_mapChart.erase( iter );
+            } );
+        });
+      }
+  );
+  }
 }
 
 void AppLiveChart::HandleMenuActionSaveValues() {

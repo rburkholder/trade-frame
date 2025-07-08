@@ -70,8 +70,10 @@ private:
     Chart(): m_pti( nullptr ), m_pChartData( nullptr ) {}
     ~Chart() {
       m_pti = nullptr;
-      delete m_pChartData;
-      m_pChartData = nullptr;
+      if ( nullptr != m_pChartData ) {
+        delete m_pChartData;
+        m_pChartData = nullptr;
+      }
     }
   };
   using mapChart_t = std::unordered_map<std::string, Chart>;
@@ -91,6 +93,8 @@ private:
   void OnData1Disconnected( int );
   void OnData2Disconnected( int );
   void OnExecDisconnected( int );
+
+  void AddSymbol( const std::string& );
 
   //void HandleMenuAction0ObtainNewIQFeedSymbolListRemote();
   //void HandleMenuAction1ObtainNewIQFeedSymbolListLocal();
