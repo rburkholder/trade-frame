@@ -26,7 +26,7 @@ ChartData::ChartData( pProvider_t pProvider, const std::string& sSymbolName )
   // = ou::tf::InstrumentManager::GlobalInstance().ConstructInstrument( sSymbolName, "SMART", ou::tf::InstrumentType::Future );
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   pInstrument_t pInstrument = std::make_shared<ou::tf::Instrument>( sSymbolName ); // suffices for IQFeed instrument
-  m_pWatch = new ou::tf::Watch( pInstrument, pProvider );
+  m_pWatch = std::make_shared<ou::tf::Watch>( pInstrument, pProvider );
   m_pWatch->OnQuote.Add( MakeDelegate( this, &ou::ChartDVBasics::HandleQuote ) );
   m_pWatch->OnTrade.Add( MakeDelegate( this, &ou::ChartDVBasics::HandleTrade ) );
   m_pWatch->StartWatch();
@@ -36,6 +36,6 @@ ChartData::~ChartData() {
   m_pWatch->StopWatch();
   m_pWatch->OnQuote.Remove( MakeDelegate( this, &ou::ChartDVBasics::HandleQuote ) );
   m_pWatch->OnTrade.Remove( MakeDelegate( this, &ou::ChartDVBasics::HandleTrade ) );
-  delete m_pWatch;
+  m_pWatch.reset();
 }
 

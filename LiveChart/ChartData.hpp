@@ -24,17 +24,18 @@
 class ChartData: public ou::ChartDVBasics {
 public:
 
-  typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
+  using pProvider_t = ou::tf::ProviderInterfaceBase::pProvider_t;
 
   ChartData( pProvider_t, const std::string& );
   ~ChartData();
 
-  ou::tf::Watch* GetWatch() { return m_pWatch; };
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  pWatch_t GetWatch() { return m_pWatch; };
 
 protected:
 private:
 
-  ou::tf::Watch* m_pWatch;
+  pWatch_t m_pWatch;
 
 };
 
