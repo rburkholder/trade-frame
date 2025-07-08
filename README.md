@@ -192,7 +192,7 @@ These are some of the currently supported applications:
 * ![IndicatorTrading](IndicatorTrading/README.md) - view and trade with futures level II data
 * ![IQFeedMarketSymbols](IQFeedMarketSymbols/README.md) - automatically download and decompress the latest mkt_symbol.txt file from dtn/iqfeed
 * ![IQFeedGetHistory](IQFeedGetHistory/README.md) - load up with historical data for looking for trading ideas
-* ![LiveChart](LiveChart/README.md) - view an instrument in real time
+* ![LiveChart](LiveChart/README.md) - view instruments in real time
 * ![SP500](SP500/README.md) - Backtest SPY symbol with support of ticks_ratio using libtorch LSTM based model to train/predict on Collector data
 
 Sample code, not supported:

@@ -32,13 +32,12 @@
 #include "LiveChart.hpp"
 
 namespace {
+  static const std::string c_sVendorName( "One Unified Net Limited" );
   static const std::string c_sAppTitle(        "LiveChart" );
   static const std::string c_sAppNamePrefix(   "livechart" );
   static const std::string c_sChoicesFilename( c_sAppNamePrefix + ".cfg" );
-  //static const std::string c_sDbName(          c_sAppNamePrefix + ".db" );
   static const std::string c_sStateFileName(   c_sAppNamePrefix + ".state" );
-  //static const std::string c_sTimeZoneSpec( "../date_time_zonespec.csv" );
-  static const std::string c_sVendorName( "One Unified Net Limited" );
+  //static const std::string c_sDbName(          c_sAppNamePrefix + ".db" );
 }
 
 IMPLEMENT_APP(AppLiveChart)
@@ -84,6 +83,10 @@ bool AppLiveChart::OnInit() {
   // tree
   m_pTreeChart = new wxTreeCtrl( splitter );
   m_ptiRoot = new ou::tf::TreeItem( m_pTreeChart, "charts" );
+  m_ptiRoot->SetOnClick(
+    [this]( ou::tf::TreeItem* ){
+      m_pWinChartView->SetChartDataView( nullptr );
+    } );
   ou::tf::TreeItem::Bind( splitter, m_pTreeChart );
 
   // panel for right side of splitter
