@@ -32,6 +32,7 @@
 #include <TFVuTrading/PanelLogging.h>
 #include <TFVuTrading/WinChartView.h>
 
+#include "Config.hpp"
 #include "ChartData.h"
 
 class AppLiveChart:
@@ -41,6 +42,8 @@ class AppLiveChart:
 public:
 protected:
 private:
+
+  config::Choices m_choices;
 
   ou::action::Worker m_worker;
 

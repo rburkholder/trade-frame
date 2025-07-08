@@ -20,8 +20,8 @@
 
 #include <wx/frame.h>
 #include <wx/sizer.h>
-#include <wx/splitter.h>
 #include <wx/panel.h>
+#include <wx/splitter.h>
 
 //#include <TFTrading/InstrumentManager.h>
 //#include <TFTrading/AccountManager.h>
@@ -30,14 +30,37 @@
 #include "LiveChart.h"
 
 namespace {
-  static const std::string sStateFileName = "LiveChart.state";
+  static const std::string c_sAppTitle(        "LiveChart" );
+  static const std::string c_sAppNamePrefix(   "livechart" );
+  static const std::string c_sChoicesFilename( c_sAppNamePrefix + ".cfg" );
+  //static const std::string c_sDbName(          c_sAppNamePrefix + ".db" );
+  static const std::string c_sStateFileName(   c_sAppNamePrefix + ".state" );
+  //static const std::string c_sTimeZoneSpec( "../date_time_zonespec.csv" );
+  static const std::string c_sVendorName( "One Unified Net Limited" );
 }
 
 IMPLEMENT_APP(AppLiveChart)
 
 bool AppLiveChart::OnInit() {
 
-  m_pFrameMain = new FrameMain( 0, wxID_ANY, "LiveChart" );
+  wxApp::SetAppDisplayName( c_sAppTitle );
+  wxApp::SetVendorName( c_sVendorName );
+  wxApp::SetVendorDisplayName( "(C)2025 " + c_sVendorName );
+
+  if ( !wxApp::OnInit() ) {
+    return false;
+  }
+
+  if ( config::Load( c_sChoicesFilename, m_choices ) ) {
+    auto size = m_choices.vSymbol.size();
+    if ( 1 == size ) {}
+    else {
+      std::cout << "one symbol required, suppled " << size << " symbols" << std::endl;
+      return false;
+    }
+  }
+
+  m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppTitle );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   //m_pFrameMain->Bind( wxEVT_SIZE, &AppStrategy1::HandleFrameMainSize, this, idFrameMain );
   //m_pFrameMain->Bind( wxEVT_MOVE, &AppStrategy1::HandleFrameMainMove, this, idFrameMain );
@@ -133,7 +156,7 @@ bool AppLiveChart::OnInit() {
 //  vItems.push_back( new mi( "e1 Load Tree", MakeDelegate( this, &AppLiveChart::HandleMenuActionLoadTree ) ) );
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
-  m_pChartData = new ChartData( m_pData1Provider );
+  m_pChartData = new ChartData( m_pData1Provider, *m_choices.vSymbol.begin() );
   m_pData1Provider->Connect();
 
 //  m_pWinChartView->SetOnRefreshData(
@@ -239,7 +262,7 @@ void AppLiveChart::OnExecDisconnected( int ) {
 
 void AppLiveChart::SaveState() {
   std::cout << "Saving Config ..." << std::endl;
-  std::ofstream ofs( sStateFileName );
+  std::ofstream ofs( c_sStateFileName );
   boost::archive::text_oarchive oa(ofs);
   oa & *this;
   std::cout << "  done." << std::endl;
@@ -248,7 +271,7 @@ void AppLiveChart::SaveState() {
 void AppLiveChart::LoadState() {
   try {
     std::cout << "Loading Config ..." << std::endl;
-    std::ifstream ifs( sStateFileName );
+    std::ifstream ifs( c_sStateFileName );
     boost::archive::text_iarchive ia(ifs);
     ia & *this;
     std::cout << "  done." << std::endl;

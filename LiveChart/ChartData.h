@@ -18,15 +18,15 @@
 
 #include <OUCharting/ChartDVBasics.h>
 
-#include <TFTrading/ProviderManager.h>
 #include <TFTrading/Watch.h>
+#include <TFTrading/ProviderManager.h>
 
 class ChartData: public ou::ChartDVBasics {
 public:
 
   typedef ou::tf::ProviderInterfaceBase::pProvider_t pProvider_t;
 
-  ChartData( pProvider_t );
+  ChartData( pProvider_t, const std::string& );
   ~ChartData();
 
   ou::tf::Watch* GetWatch() { return m_pWatch; };
