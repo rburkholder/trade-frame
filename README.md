@@ -181,16 +181,21 @@ The lib directory has a series of libraries I use throughout the various project
 These are some of the currently supported applications:
 
 * ![AutoTrade](AutoTrade/README.md) - code as template for automated trading - start of some ML based work
-* ![CurrencyTrader](CurrencyTrader/README.md) - exploratory code for understanding currency trading concepts
-* ![ComboTrading](ComboTrading/README.md) - basics of trading multiple securities, such as various options strategies
 * ![BasketTrading](BasketTrading/README.md) - a work in progress for trading futures based options combinations
-* ![IndicatorTrading](IndicatorTrading/README.md) - view and trade with futures level II data
-* ![DepthOfMarket](DepthOfMarket/README.md) - use a level II ladder to trade futures
+* ![Collector](Collector/README.md) - stream real time bid/ask/tick data to disk for use in backtesting and training
+* ![ComboTrading](ComboTrading/README.md) - basics of trading multiple securities, such as various options strategies
+* ![CurrencyTrader](CurrencyTrader/README.md) - exploratory code for understanding currency trading concepts
 * ![Dividend](Dividend/README.md) - console app to query IQFeed for possible dividend based equity investments
-* Hdf5Chart - view the contents of the hdf5 data set
-* LiveChart - view an instrument in real time
+* ![DepthOfMarket](DepthOfMarket/README.md) - use a level II ladder to trade futures
+* ![Hdf5Chart](Hdf5Chart/README.md) - view the contents of the hdf5 data set
+* ![IndicatorTrading](IndicatorTrading/README.md) - view and trade with futures level II data
 * ![IQFeedMarketSymbols](IQFeedMarketSymbols/README.md) - automatically download and decompress the latest mkt_symbol.txt file from dtn/iqfeed
 * ![IQFeedGetHistory](IQFeedGetHistory/README.md) - load up with historical data for looking for trading ideas
+* LiveChart - view an instrument in real time
+* ![SP500](SP500/README.md) - Backtest SPY symbol with support of ticks_ratio using libtorch LSTM based model to train/predict on Collector data
+
+Sample code, not supported:
+
 * StickShift2 - some rough code for some option trading ideas
 * HedgedBollinger - some experiments in futures, mostly tracking at the money implied volatility
 
