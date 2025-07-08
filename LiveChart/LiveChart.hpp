@@ -26,7 +26,7 @@
 
 #include <TFBitsNPieces/FrameWork01.h>
 
-#include <TFTrading/DBOps.h>
+//#include <TFTrading/DBOps.h>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>
@@ -53,7 +53,7 @@ private:
 
   ChartData* m_pChartData;
 
-  ou::tf::DBOps m_db;
+  //ou::tf::DBOps m_db;
 
   ptime m_dtTopOfMinute;
 
