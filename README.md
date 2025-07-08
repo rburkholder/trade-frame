@@ -181,6 +181,7 @@ The lib directory has a series of libraries I use throughout the various project
 These are some of the currently supported applications:
 
 * ![AutoTrade](AutoTrade/README.md) - code as template for automated trading - start of some ML based work
+* ![BarChart](BarChart/README.md) - tag instruments by interest and review last 200 daily bars
 * ![BasketTrading](BasketTrading/README.md) - a work in progress for trading futures based options combinations
 * ![Collector](Collector/README.md) - stream real time bid/ask/tick data to disk for use in backtesting and training
 * ![ComboTrading](ComboTrading/README.md) - basics of trading multiple securities, such as various options strategies
