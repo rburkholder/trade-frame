@@ -182,11 +182,11 @@ bool AppLiveChart::OnInit() {
 
 }
 
-void AppLiveChart::HandleMenuActionSaveValues( void ) {
+void AppLiveChart::HandleMenuActionSaveValues() {
   m_worker.Run( MakeDelegate( this, &AppLiveChart::HandleSaveValues ) );
 }
 
-void AppLiveChart::HandleSaveValues( void ) {
+void AppLiveChart::HandleSaveValues() {
   std::cout << "Saving collected values ... " << std::endl;
   try {
     //std::string sPrefixSession( "/app/LiveChart/" + m_sTSDataStreamStarted + "/" + m_pBundle->Name() );
@@ -281,14 +281,14 @@ void AppLiveChart::LoadState() {
   }
 }
 
-void AppLiveChart::HandleRegisterTables(  ou::db::Session& session ) {
-}
+//void AppLiveChart::HandleRegisterTables(  ou::db::Session& session ) {
+//}
 
-void AppLiveChart::HandleRegisterRows(  ou::db::Session& session ) {
-}
+//void AppLiveChart::HandleRegisterRows(  ou::db::Session& session ) {
+//}
 
-void AppLiveChart::HandlePopulateDatabase( void ) {
 /*
+void AppLiveChart::HandlePopulateDatabase() {
   ou::tf::AccountManager::pAccountAdvisor_t pAccountAdvisor
     = ou::tf::AccountManager::Instance().ConstructAccountAdvisor( "aaRay", "Raymond Burkholder", "One Unified" );
 
@@ -311,6 +311,6 @@ void AppLiveChart::HandlePopulateDatabase( void ) {
   m_pPortfolioCurrencyUSD
     = ou::tf::PortfolioManager::Instance().ConstructPortfolio(
     "USD", "aoRay", "Master", ou::tf::Portfolio::CurrencySummary, ou::tf::Currency::Name[ ou::tf::Currency::USD ], "Hedged Bollinger" );
-*/
 }
+*/
 

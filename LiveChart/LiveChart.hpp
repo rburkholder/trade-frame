@@ -73,9 +73,9 @@ private:
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );
 
-  void HandleRegisterTables( ou::db::Session& session );
-  void HandleRegisterRows( ou::db::Session& session );
-  void HandlePopulateDatabase( void );
+  //void HandleRegisterTables( ou::db::Session& session );
+  //void HandleRegisterRows( ou::db::Session& session );
+  //void HandlePopulateDatabase( void );
 
   void OnData1Connected( int );
   void OnData2Connected( int );
@@ -84,26 +84,26 @@ private:
   void OnData2Disconnected( int );
   void OnExecDisconnected( int );
 
-  void HandleMenuAction0ObtainNewIQFeedSymbolListRemote( void );
-  void HandleMenuAction1ObtainNewIQFeedSymbolListLocal( void );
-  void HandleMenuAction2LoadIQFeedSymbolList( void );
-  void HandleMenuActionInitializeSymbolSet( void );
-  void HandleMenuActionSaveValues( void );
-  void HandleMenuActionEmitYieldCurve( void );
-  void HandleMenuActionLoadTree( void );
+  //void HandleMenuAction0ObtainNewIQFeedSymbolListRemote();
+  //void HandleMenuAction1ObtainNewIQFeedSymbolListLocal();
+  //void HandleMenuAction2LoadIQFeedSymbolList();
+  //void HandleMenuActionInitializeSymbolSet();
+  void HandleMenuActionSaveValues();
+  //void HandleMenuActionEmitYieldCurve();
+  //void HandleMenuActionLoadTree();
 
-  void HandleObtainNewIQFeedSymbolListRemote( void );
-  void HandleObtainNewIQFeedSymbolListLocal( void );
-  void HandleLoadIQFeedSymbolList( void );
+  //void HandleObtainNewIQFeedSymbolListRemote();
+  //void HandleObtainNewIQFeedSymbolListLocal();
+  //void HandleLoadIQFeedSymbolList();
 
-  void HandleSaveValues( void );
+  void HandleSaveValues();
 
-  void HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 );
-  void HandleLoadTreeHdf5Object( const std::string& s1, const std::string& s2 );
+  //void HandleLoadTreeHdf5Group( const std::string& s1, const std::string& s2 );
+  //void HandleLoadTreeHdf5Object( const std::string& s1, const std::string& s2 );
 
-  void HandleBuildTreePathParts( const std::string& sPath );
+  //void HandleBuildTreePathParts( const std::string& sPath );
 
-  void HandleTreeEventItemActivated( wxTreeEvent& event );
+  //void HandleTreeEventItemActivated( wxTreeEvent& event );
 
   void SaveState();
   void LoadState();
