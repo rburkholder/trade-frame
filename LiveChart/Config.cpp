@@ -33,12 +33,26 @@ namespace {
   static const std::string sChoice_Symbol(  "symbol" );
 
   template<typename T>
+  void log( const std::string& name, typename std::enable_if<std::is_pod<T>::value>::type& dest ) {
+    BOOST_LOG_TRIVIAL(info) << name << " = " << dest;
+  }
+
+  void log( const std::string& name, const std::string& dest ) {
+    BOOST_LOG_TRIVIAL(info) << name << " = " << dest;
+  }
+
+  void log( const std::string& name, const config::Choices::vSymbol_t& dest ) {
+    for ( const config::Choices::vSymbol_t::value_type& value: dest ) {
+      BOOST_LOG_TRIVIAL(info) << name << " = " << value;
+    }
+  }
+
+  template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bRequired, T& dest ) {
     bool bOk = true;
     if ( 0 < vm.count( name ) ) {
       dest = std::move( vm[name].as<T>() );
-      //BOOST_LOG_TRIVIAL(info) << name << " = " << dest;
-      BOOST_LOG_TRIVIAL(info) << name << " = " ; // todo:  need fix to do vector
+      log( name, dest );
     }
     else {
       if ( bRequired ) {
@@ -74,7 +88,11 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       po::store( po::parse_config_file( ifs, config), vm );
 
       bOk &= parse<Choices::vSymbol_t>( sFileName, vm, sChoice_Symbol, false, choices.vSymbol );
-      // todo:  fix # in symbol name
+      if ( bOk ) {
+        for ( Choices::vSymbol_t::value_type& sn: choices.vSymbol ) {
+          std::replace_if( sn.begin(), sn.end(), [](char ch)->bool{return '~' == ch;}, '#' );
+        }
+      }
     }
 
   }
