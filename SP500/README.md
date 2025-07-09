@@ -35,7 +35,8 @@ The configuration file provides key settings (including two hyperparameters):
 ```
 $ cat x64/debug/sp500.cfg
 run_sim=true
-hdf5_file=collector-20250416.hdf5
+file_training=collector-20250629.hdf5
+file_validate=collector-20250630.hdf5
 learning_rate=0.001
 num_epochs=10000
 ```
