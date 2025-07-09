@@ -31,7 +31,8 @@ namespace po = boost::program_options;
 
 namespace {
   static const std::string sChoice_SimStart(  "run_sim" );
-  static const std::string sChoice_sHdf5File( "hdf5_file" );
+  static const std::string sChoice_sFileTraining( "file_training" );
+  static const std::string sChoice_sFileValidate( "file_validate" );
   static const std::string sChoice_sLearningRate( "learning_rate" );
   static const std::string sChoice_sNumEpochs( "num_epochs" );
 
@@ -64,7 +65,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     config.add_options()
 
     ( sChoice_SimStart.c_str(), po::value<bool>( &choices.m_bRunSim )->default_value( true ), "run simulation" )
-    ( sChoice_sHdf5File.c_str(), po::value<std::string>( &choices.m_sHdf5File )->default_value( "TradeFrame.hdf5" ), "hdf5 file" )
+    ( sChoice_sFileTraining.c_str(), po::value<std::string>( &choices.m_sFileTraining )->default_value( "" ), "training file" )
+    ( sChoice_sFileValidate.c_str(), po::value<std::string>( &choices.m_sFileValidate )->default_value( "" ), "validation file" )
     ( sChoice_sLearningRate.c_str(), po::value<double>( &choices.m_hp.m_dblLearningRate )->default_value( 0.01 ), "learning rate" )
     ( sChoice_sNumEpochs.c_str(), po::value<int>( &choices.m_hp.m_nEpochs )->default_value( 1000 ), "number of epochs" )
     ;
@@ -79,16 +81,25 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       po::store( po::parse_config_file( ifs, config), vm );
 
       bOk &= parse<bool>( sFileName, vm, sChoice_SimStart, false, choices.m_bRunSim );
-      bOk &= parse<std::string>( sFileName, vm, sChoice_sHdf5File, false, choices.m_sHdf5File );
+      bOk &= parse<std::string>( sFileName, vm, sChoice_sFileTraining, false, choices.m_sFileTraining );
+      bOk &= parse<std::string>( sFileName, vm, sChoice_sFileValidate, false, choices.m_sFileValidate );
       bOk &= parse<double>( sFileName, vm, sChoice_sLearningRate, false, choices.m_hp.m_dblLearningRate );
       bOk &= parse<int>( sFileName, vm, sChoice_sNumEpochs, false, choices.m_hp.m_nEpochs );
     }
 
     if ( choices.m_bRunSim ) {
-      if ( 0 < choices.m_sHdf5File.size() ) {}
+      if ( 0 < choices.m_sFileTraining.size() ) {}
       else {
         bOk = false;
-        BOOST_LOG_TRIVIAL(error) << sFileName << ' ' << sChoice_sHdf5File << " required";
+        BOOST_LOG_TRIVIAL(error) << sFileName << ' ' << sChoice_sFileTraining << " required";
+      }
+    }
+
+    if ( choices.m_bRunSim ) {
+      if ( 0 < choices.m_sFileValidate.size() ) {}
+      else {
+        bOk = false;
+        BOOST_LOG_TRIVIAL(error) << sFileName << ' ' << sChoice_sFileValidate << " required";
       }
     }
 

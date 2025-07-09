@@ -43,13 +43,13 @@
 #include "AppSP500.hpp"
 
 namespace {
+  static const std::string c_sVendorName( "One Unified Net Limited" );
   static const std::string c_sAppTitle(        "SP500 Trading" );
   static const std::string c_sAppNamePrefix(   "sp500" );
   static const std::string c_sChoicesFilename( c_sAppNamePrefix + ".cfg" );
   static const std::string c_sDbName(          c_sAppNamePrefix + ".db" );
   static const std::string c_sStateFileName(   c_sAppNamePrefix + ".state" );
   //static const std::string c_sTimeZoneSpec( "../date_time_zonespec.csv" );
-  static const std::string c_sVendorName( "One Unified Net Limited" );
 }
 
 IMPLEMENT_APP(AppSP500)
@@ -65,9 +65,14 @@ bool AppSP500::OnInit() {
   }
 
   if ( config::Load( c_sChoicesFilename, m_choices ) ) {
-    if ( boost::filesystem::exists( m_choices.m_sHdf5File ) ) {}
+    if ( boost::filesystem::exists( m_choices.m_sFileTraining ) ) {}
     else {
-      BOOST_LOG_TRIVIAL(error) << m_choices.m_sHdf5File << " does not exist";
+      BOOST_LOG_TRIVIAL(error) << "training file " << m_choices.m_sFileTraining << " does not exist";
+      return false;
+    }
+    if ( boost::filesystem::exists( m_choices.m_sFileValidate ) ) {}
+    else {
+      BOOST_LOG_TRIVIAL(error) << "validation file " << m_choices.m_sFileValidate << " does not exist";
       return false;
     }
   }

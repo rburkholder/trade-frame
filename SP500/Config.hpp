@@ -30,7 +30,8 @@ namespace config {
 struct Choices {
 
   bool m_bRunSim; // run simulation
-  std::string m_sHdf5File; // required for simulation
+  std::string m_sFileTraining; // required for simulation
+  std::string m_sFileValidate; // required for simulation
 
   HyperParameters m_hp;
 

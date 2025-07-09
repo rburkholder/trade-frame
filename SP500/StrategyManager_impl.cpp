@@ -40,7 +40,7 @@ StrategyManager_impl::StrategyManager_impl(
 , m_fQueueTask( std::move( fQueueTask ) )
 , m_fSetChartDataView( std::move( fSetChartDataView ) )
 {
-  m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO, m_choices.m_sHdf5File );
+  m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO, m_choices.m_sFileTraining );
 
   if ( m_choices.m_bRunSim ) {
     RunSimulation();
@@ -79,22 +79,22 @@ bool StrategyManager_impl::BuildProviders_Sim() {
   //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will post across unsynchronized threads
 
   try {
-    if ( 0 < m_choices.m_sHdf5File.size() ) {
-      m_sim->SetHdf5FileName( m_choices.m_sHdf5File );
+    if ( 0 < m_choices.m_sFileTraining.size() ) {
+      m_sim->SetHdf5FileName( m_choices.m_sFileTraining );
     }
     m_sim->SetGroupDirectory( m_sSimulatorGroupDirectory );
   }
   catch( const H5::Exception& e ) {
     // need to look at lib/TFHDF5TimeSeries/HDF5DataManager.cpp line 100 for refinement
-    BOOST_LOG_TRIVIAL(error) << "group open failed (1) " << m_choices.m_sHdf5File << ',' << m_sSimulatorGroupDirectory;
+    BOOST_LOG_TRIVIAL(error) << "group open failed (1) " << m_choices.m_sFileTraining << ',' << m_sSimulatorGroupDirectory;
     bOk = false;
   }
   catch( const std::exception& e ) {
-    BOOST_LOG_TRIVIAL(error) << "group open failed (2) " << m_choices.m_sHdf5File << ',' << m_sSimulatorGroupDirectory;
+    BOOST_LOG_TRIVIAL(error) << "group open failed (2) " << m_choices.m_sFileTraining << ',' << m_sSimulatorGroupDirectory;
     bOk = false;
   }
   catch( ... ) {
-    BOOST_LOG_TRIVIAL(error) << "group open failed (3) " << m_choices.m_sHdf5File << ',' << m_sSimulatorGroupDirectory;
+    BOOST_LOG_TRIVIAL(error) << "group open failed (3) " << m_choices.m_sFileTraining << ',' << m_sSimulatorGroupDirectory;
     bOk = false;
   }
 
@@ -151,7 +151,7 @@ void StrategyManager_impl::RunStrategy_build() {
   // run strategy to build model
   BOOST_LOG_TRIVIAL(info) << "model build: started";
   m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_build ) );
-  m_cdv_build.SetNames( "SPY - build", m_choices.m_sHdf5File );
+  m_cdv_build.SetNames( "SPY - build", m_choices.m_sFileTraining );
   m_fSetChartDataView( m_cdv_build );
   RunStrategy(
     m_cdv_build,
@@ -168,7 +168,7 @@ void StrategyManager_impl::RunStrategy_predict() {
   m_sim->Reset();
   m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_predict ) );
   m_cdv_build.Clear(); // clear references to strategy being destructed
-  m_cdv_predict.SetNames( "SPY - predict", m_choices.m_sHdf5File );
+  m_cdv_predict.SetNames( "SPY - predict", m_choices.m_sFileTraining );
   m_fSetChartDataView( m_cdv_predict );
   RunStrategy(
     m_cdv_predict,
