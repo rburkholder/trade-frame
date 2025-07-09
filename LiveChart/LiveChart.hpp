@@ -65,9 +65,15 @@ private:
   ou::tf::TreeItem* m_ptiRoot;
 
   struct Chart {
+    enum class EType { config, dynamic } type;
     ou::tf::TreeItem* m_pti;
     ChartData* m_pChartData;
-    Chart(): m_pti( nullptr ), m_pChartData( nullptr ) {}
+    Chart( EType type_ ): type( type_ ), m_pti( nullptr ), m_pChartData( nullptr ) {}
+    Chart( Chart&& rhs )
+    : type( rhs.type )
+    , m_pti( std::move( rhs.m_pti ) )
+    , m_pChartData( std::move( rhs.m_pChartData ) )
+    {}
     ~Chart() {
       m_pti = nullptr;
       if ( nullptr != m_pChartData ) {
@@ -94,7 +100,7 @@ private:
   void OnData2Disconnected( int );
   void OnExecDisconnected( int );
 
-  void AddSymbol( const std::string& );
+  void AddSymbol( Chart::EType type, const std::string& );
 
   //void HandleMenuAction0ObtainNewIQFeedSymbolListRemote();
   //void HandleMenuAction1ObtainNewIQFeedSymbolListLocal();
@@ -124,17 +130,32 @@ private:
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
     //ar & m_splitPanels->GetSashPosition();
+    ar & m_mapChart.size();
+    for ( const mapChart_t::value_type& vt: m_mapChart ) {
+      if ( Chart::EType::dynamic == vt.second.type ) {
+        ar & vt.first;
+      }
+    }
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
     //m_splitPanels->SetSashPosition( x );
+    if ( 2 == version ) {
+      int cnt;
+      ar & cnt;
+      std::string sName;
+      while ( 0 != cnt ) {
+        ar & sName;
+        AddSymbol( Chart::EType::dynamic, sName );
+      }
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
-BOOST_CLASS_VERSION(AppLiveChart, 1)
+BOOST_CLASS_VERSION(AppLiveChart, 2)
 DECLARE_APP(AppLiveChart)

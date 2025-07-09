@@ -93,7 +93,7 @@ bool AppLiveChart::OnInit() {
           if ( wxID_OK == dialog.ShowModal() ) {
             std::string sSymbolName = dialog.GetValue().Upper();
             if ( 0 < sSymbolName.size() ) {
-              AddSymbol( sSymbolName );
+              AddSymbol( Chart::EType::dynamic, sSymbolName );
             }
           }
         } );
@@ -163,7 +163,7 @@ bool AppLiveChart::OnInit() {
   m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   for ( const config::Choices::vSymbol_t::value_type& vt: m_choices.vSymbol ) {
-    AddSymbol( vt );
+    AddSymbol( Chart::EType::config, vt );
   }
 
   m_pData1Provider->Connect();
@@ -177,13 +177,13 @@ bool AppLiveChart::OnInit() {
   return 1;
 }
 
-void AppLiveChart::AddSymbol( const std::string& sName ) {
+void AppLiveChart::AddSymbol( Chart::EType type, const std::string& sName ) {
   mapChart_t::iterator iter = m_mapChart.find( sName );
   if ( m_mapChart.end() != iter ) {
     std::cout << "duplicate symbol: " << sName << std::endl;
   }
   else {
-    auto result = m_mapChart.emplace( sName, Chart() );
+    auto result = m_mapChart.emplace( sName, Chart( type ) );
     assert( result.second );
     iter = result.first;
     Chart& chart( iter->second );
