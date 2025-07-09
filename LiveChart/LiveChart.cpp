@@ -174,7 +174,7 @@ bool AppLiveChart::OnInit() {
     }
   );
 
-  return 1;
+  return true;
 }
 
 void AppLiveChart::AddSymbol( Chart::EType type, const std::string& sName ) {
