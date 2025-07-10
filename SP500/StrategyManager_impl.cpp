@@ -283,7 +283,7 @@ void StrategyManager_impl::HandleLoadTreeHdf5Object_Sim( const std::string& sGro
     assert( sPrefix == m_sSimulatorGroupDirectory );
   }
 
-  std::string sStatus( "added" );
+  bool bAdded( true );
   ou::tf::HDF5Attributes attrObject( *m_pdm, sGroup );
   mapHdf5Instrument_t::iterator iterHdf5Instrument = m_mapHdf5Instrument.find( sName );
   if ( m_mapHdf5Instrument.end() == iterHdf5Instrument ) {
@@ -301,7 +301,7 @@ void StrategyManager_impl::HandleLoadTreeHdf5Object_Sim( const std::string& sGro
         );
         break;
       default:
-        sStatus = "ignored";
+        bAdded = false;
         assert( true ); // ignore other types for now
     }
     if ( pInstrument ) {
@@ -318,7 +318,7 @@ void StrategyManager_impl::HandleLoadTreeHdf5Object_Sim( const std::string& sGro
   << attrObject.GetInstrumentType() << ','
   << attrObject.GetMultiplier() << ','
   << attrObject.GetSignificantDigits() << ','
-  << sStatus
+  << ( bAdded ? "added" : "ignored" )
   ;
 
 }
