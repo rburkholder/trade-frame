@@ -255,7 +255,7 @@ void StrategyManager_impl::HandleLoadTreeHdf5Object_Sim( const std::string& sGro
   while ( sGroup.end() != ixLead ) {
     if ( '/' == *ixLead ) {
       switch ( instance ) {
-        case 0: // leading
+        case 0: // leading /
           break;
         case 1: // 'app'
           break;
@@ -274,6 +274,8 @@ void StrategyManager_impl::HandleLoadTreeHdf5Object_Sim( const std::string& sGro
     ++ixLead;
   }
 
+  // sPrefix has something similar to: '"/app/collector/20250629-21:40:01.765214"'
+
   if ( 0 == m_sSimulatorGroupDirectory.size() ) {
     m_sSimulatorGroupDirectory = sPrefix;
   }
@@ -281,15 +283,8 @@ void StrategyManager_impl::HandleLoadTreeHdf5Object_Sim( const std::string& sGro
     assert( sPrefix == m_sSimulatorGroupDirectory );
   }
 
+  std::string sStatus( "added" );
   ou::tf::HDF5Attributes attrObject( *m_pdm, sGroup );
-  BOOST_LOG_TRIVIAL(info)
-    << "Sim Object,"
-    << sGroup << ',' << sName << ','
-    << attrObject.GetSignature() << ','
-    << attrObject.GetInstrumentType() << ','
-    << attrObject.GetMultiplier() << ','
-    << attrObject.GetSignificantDigits()
-    ;
   mapHdf5Instrument_t::iterator iterHdf5Instrument = m_mapHdf5Instrument.find( sName );
   if ( m_mapHdf5Instrument.end() == iterHdf5Instrument ) {
     pInstrument_t pInstrument;
@@ -306,6 +301,7 @@ void StrategyManager_impl::HandleLoadTreeHdf5Object_Sim( const std::string& sGro
         );
         break;
       default:
+        sStatus = "ignored";
         assert( true ); // ignore other types for now
     }
     if ( pInstrument ) {
@@ -314,8 +310,20 @@ void StrategyManager_impl::HandleLoadTreeHdf5Object_Sim( const std::string& sGro
       m_mapHdf5Instrument.emplace( sName, pInstrument );
     }
   }
+
+  BOOST_LOG_TRIVIAL(info)
+  << "Sim Object,"
+  << sGroup << ',' << sName << ','
+  << attrObject.GetSignature() << ','
+  << attrObject.GetInstrumentType() << ','
+  << attrObject.GetMultiplier() << ','
+  << attrObject.GetSignificantDigits() << ','
+  << sStatus
+  ;
+
 }
 
+// non-sim mode
 void StrategyManager_impl::HandleLoadTreeHdf5Object_Static( const std::string& sGroup, const std::string& sName ) {
   // select only ones in the list
   ESymbol eSymbol = m_pkwmSymbol->FindMatch( sName );
@@ -399,6 +407,7 @@ void StrategyManager_impl::HandleLoadTreeHdf5Object_Static( const std::string& s
   }
 }
 
+// non-sim mode
 void StrategyManager_impl::InitStructures( ESymbol eSymbol, const std::string& sName, size_t ixChart, boost::posix_time::time_duration td ) {
   m_pkwmSymbol->AddPattern( sName, eSymbol );
   auto result = m_mapSymbolInfo.emplace( eSymbol, SymbolInfo( sName, ixChart, td ) );
@@ -414,6 +423,7 @@ void StrategyManager_impl::InitStructures( ESymbol eSymbol, const std::string& s
   }
 }
 
+// non-sim mode
 void StrategyManager_impl::LoadPanelFinancialChart() {
 
   m_pkwmSymbol = new ou::KeyWordMatch<ESymbol>( ESymbol::UKNWN, 6 );
