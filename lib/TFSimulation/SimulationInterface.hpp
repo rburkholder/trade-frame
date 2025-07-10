@@ -74,6 +74,10 @@ protected:
 
   size_t MonitoredSymbolsCount() const { return m_mapOrderExecution.size(); }
 
+  void Clear() {
+    m_mapOrderExecution.clear();
+  }
+
 private:
 
   struct EventHolders {

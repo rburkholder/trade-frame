@@ -210,6 +210,9 @@ void SimulationProvider::Reset() {
     m_threadMerge.join(); // wait for completion
   }
 
+  sim::SimulationInterface<SimulationProvider,SimulationSymbol>::Clear();
+  m_mapSymbols.clear();
+
 }
 
 void SimulationProvider::Run( bool bAsync ) {
