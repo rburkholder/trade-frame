@@ -169,15 +169,17 @@ void ChartMaster::ChartData( XYChart* pXY0 ) {
   m_pCdv->EachChartEntryCarrier(
     [this,&dblXBegin,&dblXEnd]( ou::ChartEntryCarrier& carrier ){
       size_t ixChart = carrier.GetActualChartId();
-      ChartEntryBase::structChartAttributes Attributes;
-      if ( carrier.GetChartEntry()->AddEntryToChart( m_vSubCharts[ ixChart ].get(), &Attributes ) ) {
-        // following assumes values are always > 0
-        dblXBegin = ( 0 == dblXBegin )
-          ? Attributes.dblXMin
-          : std::min<double>( dblXBegin, Attributes.dblXMin );
-        dblXEnd   = ( 0 == dblXEnd   )
-          ? Attributes.dblXMax
-          : std::max<double>( dblXEnd,   Attributes.dblXMax );
+      ChartEntryBase::structChartAttributes attributes;
+      if ( carrier.GetChartEntry()->AddEntryToChart( m_vSubCharts[ ixChart ].get(), &attributes ) ) {
+        //std::cout << "  attribute " << ixChart << ',' << attributes.dblXMin << ',' << attributes.dblXMax << std::endl;
+        dblXBegin
+          = ( 0 == dblXBegin )
+          ? attributes.dblXMin
+          : std::min<double>( dblXBegin, attributes.dblXMin );
+        dblXEnd
+          = ( 0 == dblXEnd )
+          ? attributes.dblXMax
+          : std::max<double>( dblXEnd,   attributes.dblXMax );
       }
     } );
 
@@ -185,6 +187,7 @@ void ChartMaster::ChartData( XYChart* pXY0 ) {
   if ( dblXBegin != dblXEnd ) {
     pXY0->xAxis()->setDateScale( dblXBegin, dblXEnd, 0, 0 );
     m_bHasData = true;
+    //std::cout << "setDateScale: " << dblXBegin << " - " << dblXEnd << std::endl;
   }
   else {
     m_bHasData = false;
