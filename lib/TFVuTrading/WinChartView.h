@@ -105,10 +105,6 @@ private:
 
   boost::posix_time::time_duration m_tdViewPortWidth; // width of currently displayed window
 
-  //double m_dblViewPortRatio; // 0.0 ... 1.0 (expands around mouse)
-  ViewPort_t m_vpPrior;
-  bool m_bBeginExtentFound;
-
   ou::ChartMaster m_chartMaster;
   ou::ChartDataView* m_pChartDataView;
 

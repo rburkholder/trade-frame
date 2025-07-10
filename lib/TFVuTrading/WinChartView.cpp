@@ -61,8 +61,6 @@ void WinChartView::Init() {
   m_bInDrawChart = false;
   m_pChartDataView = nullptr;
 
-  m_bBeginExtentFound = false;
-
   m_tdViewPortWidth = boost::posix_time::time_duration( 0, 10, 0 );  // default viewport width to 10 minutes
 
 }
@@ -494,6 +492,7 @@ void WinChartView::DrawChart() {
                   break;
               }
 
+              //std::cout << "SetViewPort: " << m_vpDataViewVisual.dtBegin << " - " << m_vpDataViewVisual.dtEnd << std::endl;
               m_pChartDataView->SetViewPort( m_vpDataViewVisual );
 
               UpdateChartMaster();  // PROBLEM in lock 1
