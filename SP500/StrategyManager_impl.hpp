@@ -88,9 +88,6 @@ private:
 
   std::string m_sSimulatorGroupDirectory;
 
-  //using pHDF5DataManager_t = std::unique_ptr<ou::tf::HDF5DataManager>;
-  //pHDF5DataManager_t m_pdm;
-
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using mapHdf5Instrument_t = std::unordered_map<std::string,pInstrument_t>;
   mapHdf5Instrument_t m_mapHdf5Instrument;

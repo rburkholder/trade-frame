@@ -71,6 +71,9 @@ StrategyManager_impl::StrategyManager_impl(
 }
 
 StrategyManager_impl::~StrategyManager_impl() {
+  m_fSetChartDataView( nullptr );
+  m_pStrategy.reset();
+  m_sim->Reset();
   m_mapSymbolInfo.clear();
   m_mapHdf5Instrument.clear();
 }
@@ -272,7 +275,7 @@ void StrategyManager_impl::CleanUp_build() {
 
 void StrategyManager_impl::HandleSimComplete_predict() {
 
-  m_fSetChartDataView( nullptr );
+  // m_fSetChartDataView( nullptr );
 
   std::stringstream ss;
   m_sim->EmitStats( ss );
@@ -283,8 +286,8 @@ void StrategyManager_impl::HandleSimComplete_predict() {
 }
 
 void StrategyManager_impl::CleanUp_predict() {
-  m_pStrategy.reset(); // needs to be prior to sim reset
-  m_sim->Reset();
+  //m_pStrategy.reset(); // needs to be prior to sim reset
+  //m_sim->Reset(); // can't do this without resetting strategy first
 }
 
 void StrategyManager_impl::IterateHDF5( ou::tf::HDF5DataManager& hdm, fHandleLoadTreeHdf5Object_t&& f ) {
