@@ -352,14 +352,14 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   switch ( m_stateTrade ) {
     case ETradeState::Search:
       if ( ETickHi::DnOvr == m_stateTickHi ) {
-        BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
+        //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
         m_ceShortEntry.AddLabel( dt, price, "short" );
         ++m_nEnterShort;
         m_stateTrade = ETradeState::ShortSubmitted;
       }
       else {
         if ( ETickLo::UpOvr == m_stateTickLo ) {
-          BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
+          //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
           m_ceLongEntry.AddLabel( dt, price, "long" );
           ++m_nEnterLong;
           m_stateTrade = ETradeState::LongSubmitted;
@@ -368,13 +368,13 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
       break;
     case ETradeState::LongSubmitted:
       if ( ETickLo::Neutral == m_stateTickLo ) {
-        BOOST_LOG_TRIVIAL(trace) << "ETickLo::Neutral exit";
+        //BOOST_LOG_TRIVIAL(trace) << "ETickLo::Neutral exit";
         m_stateTrade = ETradeState::Search;
       }
       break;
     case ETradeState::ShortSubmitted:
       if ( ETickHi::Neutral == m_stateTickHi ) {
-        BOOST_LOG_TRIVIAL(trace) << "ETickHi::Neutral exit";
+        //BOOST_LOG_TRIVIAL(trace) << "ETickHi::Neutral exit";
         m_stateTrade = ETradeState::Search;
       }
       break;
@@ -405,7 +405,8 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
 
 void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
 
-  m_features.dt = bar.DateTime();
+  const boost::posix_time::ptime dt( bar.DateTime() );
+  m_features.dt = dt;
 
   const double vwp( m_vwp() );
   const double price( 0.0 == vwp ? bar.Close() : vwp );
@@ -418,21 +419,21 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   UpdateEma< 50>( price_, m_features.dblEma050, m_ceEma050  );
   UpdateEma<200>( price_, m_features.dblEma200, m_ceEma200 );
 
-  Features_scaled scaled;
+  Features_scaled scaled; // receives scaled data
   ou::tf::Price prediction = m_fForward( m_features, scaled );
   m_cePrediction.Append( prediction );
 
-  m_ceTrade_ratio.Append( bar.DateTime(), scaled.price.dbl );
+  m_ceTrade_ratio.Append( dt, scaled.price.dbl );
 
-  m_ceEma200_ratio.Append( bar.DateTime(), scaled.ema200.dbl );
-  m_ceEma050_ratio.Append( bar.DateTime(), scaled.ema050.dbl );
-  m_ceEma029_ratio.Append( bar.DateTime(), scaled.ema029.dbl );
-  m_ceEma013_ratio.Append( bar.DateTime(), scaled.ema013.dbl );
+  m_ceEma200_ratio.Append( dt, scaled.ema200.dbl );
+  m_ceEma050_ratio.Append( dt, scaled.ema050.dbl );
+  m_ceEma029_ratio.Append( dt, scaled.ema029.dbl );
+  m_ceEma013_ratio.Append( dt, scaled.ema013.dbl );
 
-  m_ceTickJ_sigmoid.Append( bar.DateTime(), scaled.tickJ.dbl );
-  m_ceTickL_sigmoid.Append( bar.DateTime(), scaled.tickL.dbl );
+  m_ceTickJ_sigmoid.Append( dt, scaled.tickJ.dbl );
+  m_ceTickL_sigmoid.Append( dt, scaled.tickL.dbl );
 
-  m_ceAdvDec_ratio.Append( bar.DateTime(), scaled.AdvDec.dbl );
+  m_ceAdvDec_ratio.Append( dt, scaled.AdvDec.dbl );
 
 }
 
