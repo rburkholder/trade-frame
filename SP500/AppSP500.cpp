@@ -65,21 +65,29 @@ bool AppSP500::OnInit() {
   }
 
   if ( config::Load( c_sChoicesFilename, m_choices ) ) {
-    if ( boost::filesystem::exists( m_choices.m_sFileTraining ) ) {}
-    else {
-      BOOST_LOG_TRIVIAL(error) << "training file " << m_choices.m_sFileTraining << " does not exist";
-      return false;
+    using EMode = config::Choices::EMode;
+
+    if ( ( EMode::train_and_validate == m_choices.eMode ) || ( EMode::view_training == m_choices.eMode ) ) {
+      if ( boost::filesystem::exists( m_choices.m_sFileTraining ) ) {}
+      else {
+        BOOST_LOG_TRIVIAL(error) << "training file " << m_choices.m_sFileTraining << " does not exist";
+        return false;
+      }
     }
-    if ( boost::filesystem::exists( m_choices.m_sFileValidate ) ) {}
-    else {
-      BOOST_LOG_TRIVIAL(error) << "validation file " << m_choices.m_sFileValidate << " does not exist";
-      return false;
+
+    if ( ( EMode::train_and_validate == m_choices.eMode ) || ( EMode::view_validate == m_choices.eMode ) ) {
+      if ( boost::filesystem::exists( m_choices.m_sFileValidate ) ) {}
+      else {
+        BOOST_LOG_TRIVIAL(error) << "validation file " << m_choices.m_sFileValidate << " does not exist";
+        return false;
+      }
     }
   }
   else {
     return false;
   }
 
+  /*
   if ( m_choices.m_bRunSim ) {
     if ( boost::filesystem::exists( c_sDbName ) ) {
       boost::filesystem::remove( c_sDbName );
@@ -91,6 +99,7 @@ bool AppSP500::OnInit() {
   }
 
   m_pdb = std::make_unique<ou::tf::db>( c_sDbName );
+  */
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppTitle );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -113,6 +122,7 @@ bool AppSP500::OnInit() {
   sizerFrame->Add( m_pwcv, 1,wxALL | wxEXPAND, 0 );
   m_pwcv->SetSim();
 
+  /*
   if ( m_choices.m_bRunSim ) {
     FrameMain::vpItems_t vItems;
     using mi = FrameMain::structMenuItem;  // vxWidgets takes ownership of the objects
@@ -122,6 +132,7 @@ bool AppSP500::OnInit() {
     vItems.push_back( new mi( "Stats",  MakeDelegate( this, &AppSP500::HandleMenuActionSimEmitStats ) ) );
     m_pFrameMain->AddDynamicMenu( "Simulation", vItems );
   }
+  */
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppSP500::OnClose, this );  // start close of windows and controls
   m_pFrameMain->Bind( wxEVT_MOVE, &AppSP500::OnFrameMainAutoMove, this ); // intercept first move
@@ -142,7 +153,9 @@ void AppSP500::OnFrameMainAutoMove( wxMoveEvent& event ) {
       m_pStrategyManager = std::make_unique<StrategyManager>(
         m_choices
       , [this]( StrategyManager::fTask_t&& f ){ CallAfter( f ); } // fQueueTask_t
-      , [this]( ou::ChartDataView& cdv ){ m_pwcv->SetChartDataView( &cdv ); } // fSetChartDataView_t
+      , [this]( ou::ChartDataView* pcdv ){ // fSetChartDataView_t
+          m_pwcv->SetChartDataView( pcdv );
+        }
       );
     }
   );

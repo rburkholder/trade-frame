@@ -27,10 +27,12 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
+#include <OUCommon/KeyWordMatch.h>
+
 #include "Config.hpp"
 
 namespace {
-  static const std::string sChoice_SimStart(  "run_sim" );
+  static const std::string sChoice_Mode(  "mode" );
   static const std::string sChoice_sFileTraining( "file_training" );
   static const std::string sChoice_sFileValidate( "file_validate" );
   static const std::string sChoice_sLearningRate( "learning_rate" );
@@ -58,13 +60,19 @@ namespace config {
 bool Load( const std::string& sFileName, Choices& choices ) {
 
   bool bOk( true );
+  std::string sMode;
+
+  ou::KeyWordMatch<config::Choices::EMode> kwmMode( config::Choices::EMode::unknown, 3 );
+  kwmMode.AddPattern( "view_training_data", config::Choices::EMode::view_training );
+  kwmMode.AddPattern( "view_validate_data", config::Choices::EMode::view_validate );
+  kwmMode.AddPattern( "train/validate", config::Choices::EMode::train_and_validate );
 
   try {
 
     po::options_description config( "SP500 config" );
     config.add_options()
 
-    ( sChoice_SimStart.c_str(), po::value<bool>( &choices.m_bRunSim )->default_value( true ), "run simulation" )
+    ( sChoice_Mode.c_str(), po::value<std::string>( &sMode ), "mode setting: view_training_data, view_validate_data, train/validate" )
     ( sChoice_sFileTraining.c_str(), po::value<std::string>( &choices.m_sFileTraining )->default_value( "" ), "training file" )
     ( sChoice_sFileValidate.c_str(), po::value<std::string>( &choices.m_sFileValidate )->default_value( "" ), "validation file" )
     ( sChoice_sLearningRate.c_str(), po::value<double>( &choices.m_hp.m_dblLearningRate )->default_value( 0.01 ), "learning rate" )
@@ -80,27 +88,23 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     else {
       po::store( po::parse_config_file( ifs, config), vm );
 
-      bOk &= parse<bool>( sFileName, vm, sChoice_SimStart, false, choices.m_bRunSim );
+      bOk &= parse<std::string>( sFileName, vm, sChoice_Mode, false, sMode );
       bOk &= parse<std::string>( sFileName, vm, sChoice_sFileTraining, false, choices.m_sFileTraining );
       bOk &= parse<std::string>( sFileName, vm, sChoice_sFileValidate, false, choices.m_sFileValidate );
       bOk &= parse<double>( sFileName, vm, sChoice_sLearningRate, false, choices.m_hp.m_dblLearningRate );
       bOk &= parse<int>( sFileName, vm, sChoice_sNumEpochs, false, choices.m_hp.m_nEpochs );
     }
 
-    if ( choices.m_bRunSim ) {
-      if ( 0 < choices.m_sFileTraining.size() ) {}
-      else {
-        bOk = false;
-        BOOST_LOG_TRIVIAL(error) << sFileName << ' ' << sChoice_sFileTraining << " required";
-      }
+    if ( 0 < choices.m_sFileTraining.size() ) {}
+    else {
+      bOk = false;
+      BOOST_LOG_TRIVIAL(error) << sFileName << ' ' << sChoice_sFileTraining << " required";
     }
 
-    if ( choices.m_bRunSim ) {
-      if ( 0 < choices.m_sFileValidate.size() ) {}
-      else {
-        bOk = false;
-        BOOST_LOG_TRIVIAL(error) << sFileName << ' ' << sChoice_sFileValidate << " required";
-      }
+    if ( 0 < choices.m_sFileValidate.size() ) {}
+    else {
+      bOk = false;
+      BOOST_LOG_TRIVIAL(error) << sFileName << ' ' << sChoice_sFileValidate << " required";
     }
 
     if ( 100.0 > choices.m_hp.m_nEpochs ) {
@@ -118,6 +122,12 @@ bool Load( const std::string& sFileName, Choices& choices ) {
   catch(...) {
     BOOST_LOG_TRIVIAL(error) << sFileName << " config unknown error";
     bOk = false;
+  }
+
+  choices.eMode = kwmMode.FindMatch( sMode );
+  if ( config::Choices::EMode::unknown == choices.eMode ) {
+    bOk = false;
+    BOOST_LOG_TRIVIAL(error) << sFileName << " unknown mode setting: " << sMode;
   }
 
   return bOk;

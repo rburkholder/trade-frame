@@ -49,7 +49,7 @@ public:
 
   using fTask_t = std::function<void()>;
   using fQueueTask_t = std::function<void( fTask_t&& )>;
-  using fSetChartDataView_t = std::function<void( ou::ChartDataView& )>;
+  using fSetChartDataView_t = std::function<void( ou::ChartDataView* )>;
 
   StrategyManager_impl(
     const config::Choices&
@@ -88,8 +88,8 @@ private:
 
   std::string m_sSimulatorGroupDirectory;
 
-  using pHDF5DataManager_t = std::unique_ptr<ou::tf::HDF5DataManager>;
-  pHDF5DataManager_t m_pdm;
+  //using pHDF5DataManager_t = std::unique_ptr<ou::tf::HDF5DataManager>;
+  //pHDF5DataManager_t m_pdm;
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using mapHdf5Instrument_t = std::unordered_map<std::string,pInstrument_t>;
@@ -139,27 +139,30 @@ private:
   Model m_model;
 
   using fHandleLoadTreeHdf5Object_t = std::function<void(const std::string&, const std::string&)>;
-  void IterateHDF5( fHandleLoadTreeHdf5Object_t&& );
-
-  void RunSimulation();
+  void IterateHDF5( ou::tf::HDF5DataManager&, fHandleLoadTreeHdf5Object_t&& );
 
   void InitStructures(
     ESymbol, const std::string& sName, size_t ixChart,
     boost::posix_time::time_duration = boost::posix_time::time_duration( 0, 0, 0 )
   );
-
   void LoadPanelFinancialChart();
 
+  void RunSimulation();
+
   bool BuildProviders_Sim();
+  bool ValidateSimFile( const std::string& );
   void HandleSimConnected( int );
   void HandleSimComplete_build();
+  void CleanUp_build();
   void HandleSimComplete_predict();
+  void CleanUp_predict();
 
-  void HandleLoadTreeHdf5Group(         const std::string&, const std::string& );
-  void HandleLoadTreeHdf5Object_Static( const std::string&, const std::string& );
-  void HandleLoadTreeHdf5Object_Sim(    const std::string&, const std::string& );
+  void HandleLoadTreeHdf5Object_View( ou::tf::HDF5DataManager&, const std::string&, const std::string& );
+  void HandleLoadTreeHdf5Object_Sim(   ou::tf::HDF5DataManager&, const std::string&, const std::string& );
 
-  void RunStrategy( ou::ChartDataView&, Strategy::fForward_t&& );
+  void HandleLoadTreeHdf5Group( const std::string&, const std::string& );
+
+  void RunStrategy( boost::gregorian::date, ou::ChartDataView&, Strategy::fForward_t&& );
   void RunStrategy_build();
   void RunStrategy_predict();
 

@@ -29,7 +29,8 @@ namespace config {
 
 struct Choices {
 
-  bool m_bRunSim; // run simulation
+  enum class EMode { view_training, view_validate, train_and_validate, unknown } eMode;
+
   std::string m_sFileTraining; // required for simulation
   std::string m_sFileValidate; // required for simulation
 

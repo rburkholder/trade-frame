@@ -56,7 +56,7 @@ private:
   FrameMain* m_pFrameMain;
   //ou::tf::PanelFinancialChart* m_pPanelFinancialChart; // refactor/inherit once functionality is known
 
-  std::unique_ptr<ou::tf::db> m_pdb;
+  //std::unique_ptr<ou::tf::db> m_pdb;
 
   ou::tf::TreeItem* m_ptiRoot;
 

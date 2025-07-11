@@ -26,6 +26,9 @@ symbol_name_l1=VI6D.Z  #S&P 500 ISSUES VOLUME DOWN
 stop_time=17:20:00
 ```
 
+Note: m_pStrategy->InitForNextDay() assumes that the Collector has been started prior to 18:00 EST
+the previous evening to facilitate the collection of currencies and overnight futures
+
 Current code:
 * runs a training cycle, then
 * runs a prediction cycle
@@ -34,11 +37,19 @@ The configuration file provides key settings (including two hyperparameters):
 
 ```
 $ cat x64/debug/sp500.cfg
-run_sim=true
+# choose 1 of 3 modes:
+#mode=view_training_data
+#mode=view_validate_data
+mode=train/validate
+# two files for running the train/validate cycle:
 file_training=collector-20250629.hdf5
 file_validate=collector-20250630.hdf5
-learning_rate=0.001
-num_epochs=10000
+# fine tuning:
+#learning_rate=0.001
+#num_epochs=10000
+# rough testing:
+learning_rate=0.01
+num_epochs=1000
 ```
 
 Symbols and their contribution to signals:

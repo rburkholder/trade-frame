@@ -40,31 +40,42 @@ StrategyManager_impl::StrategyManager_impl(
 , m_fQueueTask( std::move( fQueueTask ) )
 , m_fSetChartDataView( std::move( fSetChartDataView ) )
 {
-  m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO, m_choices.m_sFileTraining );
 
-  if ( m_choices.m_bRunSim ) {
-    RunSimulation();
+  switch ( m_choices.eMode ) {
+    case config::Choices::EMode::view_training:
+      {
+        m_cdv.SetNames( "SPY - training", m_choices.m_sFileTraining );
+        LoadPanelFinancialChart();
+        ou::tf::HDF5DataManager hdm(  ou::tf::HDF5DataManager::RO, m_choices.m_sFileTraining );
+        IterateHDF5( hdm, [this,&hdm]( const std::string& s1, const std::string& s2 ){ HandleLoadTreeHdf5Object_View( hdm, s1, s2 ); } );
+      }
+      break;
+    case config::Choices::EMode::view_validate:
+      {
+        m_cdv.SetNames( "SPY - validate", m_choices.m_sFileValidate );
+        LoadPanelFinancialChart();
+        ou::tf::HDF5DataManager hdm(  ou::tf::HDF5DataManager::RO, m_choices.m_sFileValidate );
+        IterateHDF5( hdm, [this,&hdm](const std::string& s1, const std::string& s2 ){ HandleLoadTreeHdf5Object_View( hdm, s1, s2 ); } );
+      }
+      break;
+    case config::Choices::EMode::train_and_validate:
+      {
+        RunSimulation();
+      }
+      break;
+    case config::Choices::EMode::unknown:
+      assert( false );
+      break;
   }
-  else {
-    assert( false ); // not fleshed out yet
-    IterateHDF5( [this](const std::string& s1, const std::string& s2 ){ HandleLoadTreeHdf5Object_Static( s1, s2 ); } );
-    LoadPanelFinancialChart();
-  }
+
 }
 
 StrategyManager_impl::~StrategyManager_impl() {
-  m_pStrategy.reset();
   m_mapSymbolInfo.clear();
   m_mapHdf5Instrument.clear();
 }
 
 void StrategyManager_impl::RunSimulation() {
- // scan hdf5 file for object groups
- // set the group directory in simulator
- // construct strategy with symbols
- //   provide watch & position constructors
-
-  IterateHDF5( [this](const std::string& s1, const std::string& s2 ){ HandleLoadTreeHdf5Object_Sim( s1, s2 ); } );
   BuildProviders_Sim();
 }
 
@@ -78,23 +89,38 @@ bool StrategyManager_impl::BuildProviders_Sim() {
   m_data = m_exec = m_sim;
   //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will post across unsynchronized threads
 
+  // construct the simulation menu, attach the events, and start simulation
+  if ( bOk ) {
+    m_sim->OnConnected.Add( MakeDelegate( this, &StrategyManager_impl::HandleSimConnected ) );
+    m_sim->Connect();
+  }
+
+  return bOk;
+}
+
+bool StrategyManager_impl::ValidateSimFile( const std::string& sDataFileName ) {
+
+  bool bOk( true );
+
+  BOOST_LOG_TRIVIAL(trace) << "validate sim file: " << sDataFileName << ',' << m_sSimulatorGroupDirectory;
+
   try {
-    if ( 0 < m_choices.m_sFileTraining.size() ) {
-      m_sim->SetHdf5FileName( m_choices.m_sFileTraining );
+    if ( 0 < sDataFileName.size() ) {
+      m_sim->SetHdf5FileName( sDataFileName );
     }
     m_sim->SetGroupDirectory( m_sSimulatorGroupDirectory );
   }
   catch( const H5::Exception& e ) {
     // need to look at lib/TFHDF5TimeSeries/HDF5DataManager.cpp line 100 for refinement
-    BOOST_LOG_TRIVIAL(error) << "group open failed (1) " << m_choices.m_sFileTraining << ',' << m_sSimulatorGroupDirectory;
+    BOOST_LOG_TRIVIAL(error) << "group open failed (1) " << sDataFileName << ',' << m_sSimulatorGroupDirectory;
     bOk = false;
   }
   catch( const std::exception& e ) {
-    BOOST_LOG_TRIVIAL(error) << "group open failed (2) " << m_choices.m_sFileTraining << ',' << m_sSimulatorGroupDirectory;
+    BOOST_LOG_TRIVIAL(error) << "group open failed (2) " << sDataFileName << ',' << m_sSimulatorGroupDirectory;
     bOk = false;
   }
   catch( ... ) {
-    BOOST_LOG_TRIVIAL(error) << "group open failed (3) " << m_choices.m_sFileTraining << ',' << m_sSimulatorGroupDirectory;
+    BOOST_LOG_TRIVIAL(error) << "group open failed (3) " << sDataFileName << ',' << m_sSimulatorGroupDirectory;
     bOk = false;
   }
 
@@ -131,54 +157,65 @@ bool StrategyManager_impl::BuildProviders_Sim() {
     //m_sSimulationDateTime = boost::posix_time::to_iso_string( dtUTC );
   }
 
-  // construct the simulation menu, attach the events, and start simulation
-  if ( bOk ) {
-    m_sim->OnConnected.Add( MakeDelegate( this, &StrategyManager_impl::HandleSimConnected ) );
-    m_sim->Connect();
-  }
-
   return bOk;
 }
 
 void StrategyManager_impl::HandleSimConnected( int ) {
   // todo:
-  // * init simulator, run strategy, use model for prediction
   // * save/load models
   m_fQueueTask( [this](){ RunStrategy_build(); } );
 }
 
 void StrategyManager_impl::RunStrategy_build() {
-  // run strategy to build model
+
   BOOST_LOG_TRIVIAL(info) << "model build: started";
-  m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_build ) );
-  m_cdv_build.SetNames( "SPY - build", m_choices.m_sFileTraining );
-  m_fSetChartDataView( m_cdv_build );
-  RunStrategy(
-    m_cdv_build,
-    [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price {
-      m_model.Append( raw, scaled );
-      return m_model.EmptyPrice( raw.dt );
-    } );
+
+  m_mapHdf5Instrument.clear();
+  m_sSimulatorGroupDirectory.clear();
+  ou::tf::HDF5DataManager hdm( ou::tf::HDF5DataManager::RO, m_choices.m_sFileTraining );
+  IterateHDF5( hdm, [this,&hdm](const std::string& s1, const std::string& s2 ){ HandleLoadTreeHdf5Object_Sim( hdm, s1, s2 ); } );
+
+  if ( ValidateSimFile( m_choices.m_sFileTraining ) ) {
+    m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_build ) );
+    m_cdv_build.SetNames( "SPY - build", m_choices.m_sFileTraining );
+    m_fSetChartDataView( &m_cdv_build );
+    RunStrategy(
+      m_startDateUTC,
+      m_cdv_build,
+      [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price {
+        m_model.Append( raw, scaled );
+        return m_model.EmptyPrice( raw.dt );
+      } );
+  }
 }
 
 void StrategyManager_impl::RunStrategy_predict() {
   // run stratgy with built model
   BOOST_LOG_TRIVIAL(info) << "model predict: started";
+
   m_model.Eval();
-  m_sim->Reset();
-  m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_predict ) );
-  m_cdv_build.Clear(); // clear references to strategy being destructed
-  m_cdv_predict.SetNames( "SPY - predict", m_choices.m_sFileTraining );
-  m_fSetChartDataView( m_cdv_predict );
-  RunStrategy(
-    m_cdv_predict,
-    [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price {
-      m_model.Append( raw, scaled );
-      return m_model.Predict( raw.dt );
-    } );
+
+  m_mapHdf5Instrument.clear();
+  m_sSimulatorGroupDirectory.clear();
+  ou::tf::HDF5DataManager hdm( ou::tf::HDF5DataManager::RO, m_choices.m_sFileValidate );
+  IterateHDF5( hdm, [this,&hdm](const std::string& s1, const std::string& s2 ){ HandleLoadTreeHdf5Object_Sim( hdm, s1, s2 ); } );
+
+  if ( ValidateSimFile( m_choices.m_sFileValidate ) ) {
+    m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_predict ) );
+    m_cdv_predict.SetNames( "SPY - predict", m_choices.m_sFileValidate );
+    m_fSetChartDataView( &m_cdv_predict );
+    RunStrategy(
+      m_startDateUTC,
+      m_cdv_predict,
+      [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price {
+        m_model.Append( raw, scaled );
+        return m_model.Predict( raw.dt );
+      } );
+  }
+
 }
 
-void StrategyManager_impl::RunStrategy( ou::ChartDataView& cdv, Strategy::fForward_t&& f ) {
+void StrategyManager_impl::RunStrategy( boost::gregorian::date date, ou::ChartDataView& cdv, Strategy::fForward_t&& f ) {
   using pWatch_t = Strategy::pWatch_t;
   using pPosition_t = Strategy::pPosition_t;
   m_pStrategy = std::make_unique<Strategy>(
@@ -207,12 +244,15 @@ void StrategyManager_impl::RunStrategy( ou::ChartDataView& cdv, Strategy::fForwa
   );
 
   assert( m_pStrategy );
-  m_pStrategy->InitForUSEquityExchanges( m_startDateUTC );
+  BOOST_LOG_TRIVIAL(info) << "simluation date: " << date;
+  m_pStrategy->InitForUSEquityExchanges( date );
   m_pStrategy->InitForNextDay(); // due to also collecting futures which started previous evening
   m_pStrategy->Start();
 }
 
 void StrategyManager_impl::HandleSimComplete_build() {
+
+  m_fSetChartDataView( nullptr );
 
   std::stringstream ss;
   m_sim->EmitStats( ss );
@@ -220,22 +260,36 @@ void StrategyManager_impl::HandleSimComplete_build() {
 
   m_model.Build( m_choices.m_hp );
 
-  // allow the simulation thread to finish
-  m_fQueueTask( [this](){ RunStrategy_predict(); } );
+  m_fQueueTask( [this](){ CleanUp_build(); } );
 
 }
 
+void StrategyManager_impl::CleanUp_build() {
+  m_pStrategy.reset(); // needs to be prior to sim reset
+  m_sim->Reset();
+  m_fQueueTask( [this](){ RunStrategy_predict(); } );
+}
+
 void StrategyManager_impl::HandleSimComplete_predict() {
+
+  m_fSetChartDataView( nullptr );
 
   std::stringstream ss;
   m_sim->EmitStats( ss );
   BOOST_LOG_TRIVIAL(info) << "simulation (predict) results " << ss.str();
 
+  m_fQueueTask( [this](){ CleanUp_predict(); } );
+
 }
 
-void StrategyManager_impl::IterateHDF5( fHandleLoadTreeHdf5Object_t&& f ) {
+void StrategyManager_impl::CleanUp_predict() {
+  m_pStrategy.reset(); // needs to be prior to sim reset
+  m_sim->Reset();
+}
+
+void StrategyManager_impl::IterateHDF5( ou::tf::HDF5DataManager& hdm, fHandleLoadTreeHdf5Object_t&& f ) {
   ou::tf::hdf5::IterateGroups ig(
-    *m_pdm, std::string( "/" ),
+    hdm, std::string( "/" ),
     [this]( const std::string& group,const std::string& name ){ HandleLoadTreeHdf5Group(  group, name ); }, // path
     std::move( f )  // timeseries
     );
@@ -245,7 +299,7 @@ void StrategyManager_impl::HandleLoadTreeHdf5Group( const std::string& sGroup, c
   //BOOST_LOG_TRIVIAL(info) << "1 Group  " << sGroup << ' ' << sName;
 }
 
-void StrategyManager_impl::HandleLoadTreeHdf5Object_Sim( const std::string& sGroup, const std::string& sName ) {
+void StrategyManager_impl::HandleLoadTreeHdf5Object_Sim( ou::tf::HDF5DataManager& hdm, const std::string& sGroup, const std::string& sName ) {
   // for now, confirm all objects in one directory, to be used by simulator
 
   std::string sPrefix;
@@ -284,7 +338,7 @@ void StrategyManager_impl::HandleLoadTreeHdf5Object_Sim( const std::string& sGro
   }
 
   bool bAdded( true );
-  ou::tf::HDF5Attributes attrObject( *m_pdm, sGroup );
+  ou::tf::HDF5Attributes attrObject( hdm, sGroup );
   mapHdf5Instrument_t::iterator iterHdf5Instrument = m_mapHdf5Instrument.find( sName );
   if ( m_mapHdf5Instrument.end() == iterHdf5Instrument ) {
     pInstrument_t pInstrument;
@@ -324,24 +378,25 @@ void StrategyManager_impl::HandleLoadTreeHdf5Object_Sim( const std::string& sGro
 }
 
 // non-sim mode
-void StrategyManager_impl::HandleLoadTreeHdf5Object_Static( const std::string& sGroup, const std::string& sName ) {
+void StrategyManager_impl::HandleLoadTreeHdf5Object_View( ou::tf::HDF5DataManager& hdm, const std::string& sGroup, const std::string& sName ) {
   // select only ones in the list
   ESymbol eSymbol = m_pkwmSymbol->FindMatch( sName );
   if ( ESymbol::UKNWN != eSymbol ) {
-    ou::tf::HDF5Attributes attrObject( *m_pdm, sGroup );
+    ou::tf::HDF5Attributes attrObject( hdm, sGroup );
     BOOST_LOG_TRIVIAL(info)
-      << "3 Object,"
+      << "Object,"
       << sGroup << ',' << sName << ','
       << attrObject.GetSignature() << ','
       << attrObject.GetInstrumentType() << ','
       << attrObject.GetMultiplier() << ','
       << attrObject.GetSignificantDigits()
       ;
+
     mapSymbolInfo_t::iterator iterSymbol = m_mapSymbolInfo.find( eSymbol );
     assert ( m_mapSymbolInfo.end() != iterSymbol );
 
     if ( ou::tf::Trade::Signature() == attrObject.GetSignature() ) {
-      ou::tf::HDF5TimeSeriesContainer<ou::tf::Trade> tsRepository( *m_pdm, sGroup );
+      ou::tf::HDF5TimeSeriesContainer<ou::tf::Trade> tsRepository( hdm, sGroup );
       ou::tf::HDF5TimeSeriesContainer<ou::tf::Trade>::iterator begin, end;
       begin = tsRepository.begin();
       end = tsRepository.end();
@@ -389,7 +444,7 @@ void StrategyManager_impl::HandleLoadTreeHdf5Object_Static( const std::string& s
 
     if ( 1 == iterSymbol->second.ixChart ) {
       if ( ou::tf::Quote::Signature() == attrObject.GetSignature() ) {
-        ou::tf::HDF5TimeSeriesContainer<ou::tf::Quote> tsRepository( *m_pdm, sGroup );
+        ou::tf::HDF5TimeSeriesContainer<ou::tf::Quote> tsRepository( hdm, sGroup );
         ou::tf::HDF5TimeSeriesContainer<ou::tf::Quote>::iterator begin, end;
         begin = tsRepository.begin();
         end = tsRepository.end();
@@ -421,6 +476,8 @@ void StrategyManager_impl::InitStructures( ESymbol eSymbol, const std::string& s
     si.indicatorBid.SetColour( ou::Colour::Blue );
     m_cdv.Add( ixChart, &si.indicatorBid );
   }
+
+  m_fSetChartDataView( &m_cdv );
 }
 
 // non-sim mode
