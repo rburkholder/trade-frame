@@ -230,7 +230,8 @@ private:
   void FilterByTag();
 
   void LoadPanelFinancialChart();
-  void LoadSymbolInfo( const std::string&, ou::tf::TreeItem* );
+  void AddSymbolToTree( const std::string&, ou::tf::TreeItem* );
+  void OnSymbolClick( mapSymbolInfo_t::iterator );
 
   void HandleCheckListBoxEvent( wxCommandEvent& );
 
@@ -308,7 +309,7 @@ private:
             if ( 6 <= version ) {
               ar & result.first->second.m_sNotes;
             }
-            LoadSymbolInfo( sSymbol, m_ptiRoot );
+            AddSymbolToTree( sSymbol, m_ptiRoot );
             --nSymbolInfo;
           }
           m_ptiRoot->SortChildren();
@@ -342,7 +343,7 @@ private:
             if ( 6 <= version ) {
               ar & result.first->second.m_sNotes;
             }
-            LoadSymbolInfo( sSymbol, m_ptiRoot );
+            AddSymbolToTree( sSymbol, m_ptiRoot );
             --nSymbolInfo;
           }
           m_ptiRoot->SortChildren();

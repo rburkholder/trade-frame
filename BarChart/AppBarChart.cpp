@@ -213,7 +213,7 @@ void AppBarChart::LoadPanelFinancialChart() {
     [this]( ou::tf::TreeItem* pti ){
       pti->NewMenu();
       pti->AppendMenuItem(
-        "Add Symbol",
+        "Add/Search Symbol",
         [this]( ou::tf::TreeItem* pti ){
           wxTextEntryDialog dialog( m_pFrameMain, "Symbol Name:", "Add Symbol" );
           //dialog->ForceUpper(); // prints charters in reverse
@@ -223,14 +223,16 @@ void AppBarChart::LoadPanelFinancialChart() {
               mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSymbolName );
               //assert( m_mapSymbolInfo.end() == iterSymbolInfo ); // symbols are unique across groups
               if ( m_mapSymbolInfo.end() != iterSymbolInfo ) {
-                BOOST_LOG_TRIVIAL(warning) << "symbol " << sSymbolName << " already exists" << std::endl;
+                BOOST_LOG_TRIVIAL(warning) << "symbol " << sSymbolName << " exists";
               }
               else {
                 auto result = m_mapSymbolInfo.emplace( sSymbolName, SymbolInfo() );
                 assert( result.second );
-                LoadSymbolInfo( sSymbolName, pti );
+                iterSymbolInfo = result.first;
+                AddSymbolToTree( sSymbolName, pti );
                 m_ptiRoot->SortChildren();
               }
+              OnSymbolClick( iterSymbolInfo );
             }
           }
         } );
@@ -241,10 +243,56 @@ void AppBarChart::LoadPanelFinancialChart() {
         } );
     }
   );
-
 }
 
-void AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::TreeItem* pti ) {
+void AppBarChart::OnSymbolClick( mapSymbolInfo_t::iterator iterSymbolInfo ) {
+  //BOOST_LOG_TRIVIAL(info) << "clicked: " << iterSymbolInfo->first;
+  SymbolFundamentals( iterSymbolInfo );
+  SymbolInfo& si( iterSymbolInfo->second );
+  if ( si.m_bBarsLoaded ) {
+    /*
+    ou::ChartEntryTime::range_t range( si.m_dvChart.GetViewPort() );
+    if ( range.dtBegin == range.dtEnd ) {
+      range = si.m_dvChart.GetExtents();
+      si.m_dvChart.SetViewPort( range );
+    }
+    else {
+      boost::posix_time::time_duration td = range.dtEnd - range.dtBegin;
+      auto ticks( td.ticks() );
+    }
+    */
+    m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
+  }
+  else {
+    m_pBarHistory->Set(
+      [&si]( const ou::tf::Bar& bar ){ // fBar_t&&
+        si.m_cePriceBars.AppendBar( bar );
+        si.m_ceVolume.Append( bar );
+      },
+      [this,&si](){ // fDone_t&&
+        m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
+      } );
+    m_pBarHistory->RequestNEndOfDay( iterSymbolInfo->first, 200 );
+    si.m_bBarsLoaded = true;
+  }
+
+  using setSymbol_t = mmapTagSymbol_t::index<ixSymbol>::type;
+
+  const sSymbol_t& sSymbol( iterSymbolInfo->first );
+  const setSymbol_t& index( m_mmapTagSymbol.get<ixSymbol>() );
+  setSymbol_t::const_iterator iterSymbol = index.find( iterSymbolInfo->first );
+
+  wxArrayString rTag;
+
+  while ( index.end() != iterSymbol ) {
+    if ( sSymbol != iterSymbol->sSymbol ) break;
+    rTag.Add( iterSymbol->sTag );
+    ++iterSymbol;
+  }
+  m_pPanelSymbolInfo->SetTags( rTag );
+}
+
+void AppBarChart::AddSymbolToTree( const std::string& sSecurityName, ou::tf::TreeItem* pti ) {
 
   mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSecurityName );
   assert( m_mapSymbolInfo.end() != iterSymbolInfo );
@@ -258,51 +306,7 @@ void AppBarChart::LoadSymbolInfo( const std::string& sSecurityName, ou::tf::Tree
 
   si.m_pti->SetOnClick(
     [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
-      //BOOST_LOG_TRIVIAL(info) << "clicked: " << iterSymbolInfo->first;
-      SymbolFundamentals( iterSymbolInfo );
-      SymbolInfo& si( iterSymbolInfo->second );
-      if ( si.m_bBarsLoaded ) {
-        /*
-        ou::ChartEntryTime::range_t range( si.m_dvChart.GetViewPort() );
-        if ( range.dtBegin == range.dtEnd ) {
-          range = si.m_dvChart.GetExtents();
-          si.m_dvChart.SetViewPort( range );
-        }
-        else {
-          boost::posix_time::time_duration td = range.dtEnd - range.dtBegin;
-          auto ticks( td.ticks() );
-        }
-        */
-        m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
-      }
-      else {
-        m_pBarHistory->Set(
-          [&si]( const ou::tf::Bar& bar ){ // fBar_t&&
-            si.m_cePriceBars.AppendBar( bar );
-            si.m_ceVolume.Append( bar );
-          },
-          [this,&si](){ // fDone_t&&
-            m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
-          } );
-        m_pBarHistory->RequestNEndOfDay( iterSymbolInfo->first, 200 );
-        si.m_bBarsLoaded = true;
-      }
-
-      using setSymbol_t = mmapTagSymbol_t::index<ixSymbol>::type;
-
-      const sSymbol_t& sSymbol( iterSymbolInfo->first );
-      const setSymbol_t& index( m_mmapTagSymbol.get<ixSymbol>() );
-      setSymbol_t::const_iterator iterSymbol = index.find( iterSymbolInfo->first );
-
-      wxArrayString rTag;
-
-      while ( index.end() != iterSymbol ) {
-        if ( sSymbol != iterSymbol->sSymbol ) break;
-        rTag.Add( iterSymbol->sTag );
-        ++iterSymbol;
-      }
-      m_pPanelSymbolInfo->SetTags( rTag );
-
+      OnSymbolClick( iterSymbolInfo );
     } );
   si.m_pti->SetOnBuildPopUp(
     [this,iterSymbolInfo]( ou::tf::TreeItem* pti ){
@@ -392,7 +396,7 @@ void AppBarChart::FilterByTag() {
 
   if ( 0 == nChecked ) { // show all
     for ( mapSymbolInfo_t::value_type& vt: m_mapSymbolInfo ) {
-      LoadSymbolInfo( vt.first, m_ptiRoot );
+      AddSymbolToTree( vt.first, m_ptiRoot );
     }
   }
   else { // show subset
@@ -417,7 +421,7 @@ void AppBarChart::FilterByTag() {
         BOOST_LOG_TRIVIAL(error) << "FilterByTag symbol " << vt << " not found";
       }
       else {
-        LoadSymbolInfo( vt, m_ptiRoot );
+        AddSymbolToTree( vt, m_ptiRoot );
       }
     }
   }
