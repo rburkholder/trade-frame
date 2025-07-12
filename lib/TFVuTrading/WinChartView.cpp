@@ -489,6 +489,13 @@ void WinChartView::DrawChart() {
                   m_vpDataViewVisual.dtBegin = m_vpDataViewVisual.dtEnd - m_tdViewPortWidth;
                   break;
                 case EState::live_review:
+                  // handle case when data loaded in background, ultimately extents will be available
+                  if ( m_vpDataViewVisual.HasBoth() ) {}
+                  else {
+                    if ( m_vpDataViewExtents.HasBoth() ) {
+                      m_vpDataViewVisual = m_vpDataViewExtents;
+                    }
+                  }
                   break;
                 case EState::sim_trail:
                   m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - m_tdViewPortWidth, m_vpDataViewExtents.dtEnd + one_sec );
