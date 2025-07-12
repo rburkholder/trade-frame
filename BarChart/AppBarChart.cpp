@@ -215,26 +215,7 @@ void AppBarChart::BuildRootMenuTree() {
       pti->AppendMenuItem(
         "Add/Search Symbol",
         [this]( ou::tf::TreeItem* pti ){
-          wxTextEntryDialog dialog( m_pFrameMain, "Symbol Name:", "Add Symbol" );
-          //dialog->ForceUpper(); // prints charters in reverse
-          if ( wxID_OK == dialog.ShowModal() ) {
-            std::string sSymbolName = dialog.GetValue().Upper();
-            if ( 0 < sSymbolName.size() ) {
-              mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSymbolName );
-              //assert( m_mapSymbolInfo.end() == iterSymbolInfo ); // symbols are unique across groups
-              if ( m_mapSymbolInfo.end() != iterSymbolInfo ) {
-                BOOST_LOG_TRIVIAL(warning) << "symbol " << sSymbolName << " exists";
-              }
-              else {
-                auto result = m_mapSymbolInfo.emplace( sSymbolName, SymbolInfo() );
-                assert( result.second );
-                iterSymbolInfo = result.first;
-                AddSymbolToTree( sSymbolName, pti );
-                m_ptiRoot->SortChildren();
-              }
-              OnSymbolClick( iterSymbolInfo );
-            }
-          }
+          OnAddSearchSymbol( pti );
         } );
       pti->AppendMenuItem(
         "Sort",
@@ -243,6 +224,29 @@ void AppBarChart::BuildRootMenuTree() {
         } );
     }
   );
+}
+
+void AppBarChart::OnAddSearchSymbol( ou::tf::TreeItem* pti ) {
+  wxTextEntryDialog dialog( m_pFrameMain, "Symbol Name:", "Add Symbol" );
+  //dialog->ForceUpper(); // prints charters in reverse
+  if ( wxID_OK == dialog.ShowModal() ) {
+    std::string sSymbolName = dialog.GetValue().Upper();
+    if ( 0 < sSymbolName.size() ) {
+      mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSymbolName );
+      //assert( m_mapSymbolInfo.end() == iterSymbolInfo ); // symbols are unique across groups
+      if ( m_mapSymbolInfo.end() != iterSymbolInfo ) {
+        BOOST_LOG_TRIVIAL(warning) << "symbol " << sSymbolName << " exists";
+      }
+      else {
+        auto result = m_mapSymbolInfo.emplace( sSymbolName, SymbolInfo() );
+        assert( result.second );
+        iterSymbolInfo = result.first;
+        AddSymbolToTree( sSymbolName, pti );
+        m_ptiRoot->SortChildren();
+      }
+      OnSymbolClick( iterSymbolInfo );
+    }
+  }
 }
 
 void AppBarChart::OnSymbolClick( mapSymbolInfo_t::iterator iterSymbolInfo ) {
@@ -353,6 +357,11 @@ void AppBarChart::AddSymbolToTree( const std::string& sSecurityName, ou::tf::Tre
                 } );
               }
             }
+          } );
+        pti->AppendMenuItem(
+          "Add/Search Symbol",
+          [this]( ou::tf::TreeItem* pti ){
+            OnAddSearchSymbol( pti );
           } );
         pti->AppendMenuItem(
         "Delete",

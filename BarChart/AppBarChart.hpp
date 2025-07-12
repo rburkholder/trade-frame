@@ -234,6 +234,7 @@ private:
   void FilterByTag();
 
   void BuildRootMenuTree();
+  void OnAddSearchSymbol( ou::tf::TreeItem* pti );
   void AddSymbolToTree( const std::string&, ou::tf::TreeItem* );
   void OnSymbolClick( mapSymbolInfo_t::iterator );
 
