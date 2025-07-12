@@ -103,7 +103,7 @@ bool AppBarChart::OnInit() {
 
   m_pPanelFinancialChart = new ou::tf::PanelFinancialChart( m_pFrameMain );
   sizerFrame->Add( m_pPanelFinancialChart, 1, wxALL | wxEXPAND, 1 );
-  m_pPanelFinancialChart->GetWinChartView()->SetReview();
+  m_pPanelFinancialChart->GetWinChartView()->SetLive_review();
 
   //m_pwcv = new ou::tf::WinChartView( m_pFrameMain );
   //sizerFrame->Add( m_pwcv, 1,wxALL | wxEXPAND, 0 );

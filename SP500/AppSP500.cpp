@@ -120,7 +120,7 @@ bool AppSP500::OnInit() {
 
   m_pwcv = new ou::tf::WinChartView( m_pFrameMain );
   sizerFrame->Add( m_pwcv, 1,wxALL | wxEXPAND, 0 );
-  m_pwcv->SetSim();
+  m_pwcv->SetSim_trail();
 
   /*
   if ( m_choices.m_bRunSim ) {

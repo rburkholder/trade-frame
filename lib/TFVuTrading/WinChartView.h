@@ -64,9 +64,10 @@ public:
   void SetChartDataView( ou::ChartDataView* pChartDataView );
   ou::ChartDataView* GetChartDataView() const { return m_pChartDataView; }
 
-  void SetSim();
-  void SetReview();
-  void SetLive();
+  void SetLive_trail();
+  void SetLive_review();
+  void SetSim_review();
+  void SetSim_trail();
 
 protected:
 

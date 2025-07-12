@@ -54,7 +54,7 @@ WinChartView::~WinChartView() {
 
 void WinChartView::Init() {
 
-  SetLive();
+  SetLive_trail();
 
   m_stateMouse = EMouse::NothingSpecial;
 
@@ -197,7 +197,7 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
               if ( m_vpDataViewVisual.dtEnd >= m_vpDataViewExtents.dtEnd ) {
                 m_vpDataViewVisual.dtEnd = m_vpDataViewExtents.dtEnd;
                 m_tdViewPortWidth = m_vpDataViewVisual.dtEnd - m_vpDataViewVisual.dtBegin;
-                m_state = m_bSim ? EState::sim_trail : EState::live_trail;
+                //m_state = m_bSim ? EState::sim_trail : EState::live_trail;
               }
 
               // Still having problems here
@@ -216,7 +216,7 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
               }
 
               if ( m_vpDataViewVisual.dtEnd < m_vpDataViewExtents.dtEnd ) {
-                m_state = m_bSim ? EState::sim_review : EState::live_review;
+                //m_state = m_bSim ? EState::sim_review : EState::live_review;
                 //m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdNewWidth, m_vpDataViewExtents.dtEnd );
               }
 
@@ -365,7 +365,7 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
         }
 
         if ( m_vpDataViewVisual.dtEnd >= m_vpDataViewExtents.dtEnd ) {
-          m_state = m_bSim ? EState::sim_trail : EState::live_trail;
+          //m_state = m_bSim ? EState::sim_trail : EState::live_trail;
           m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdDeltaNew, m_vpDataViewExtents.dtEnd );
         }
 
@@ -390,7 +390,7 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
         assert ( m_vpDataViewVisual.dtBegin <= m_vpDataViewVisual.dtEnd );
 
         if ( m_vpDataViewVisual.dtEnd < m_vpDataViewExtents.dtEnd ) {
-          m_state = m_bSim ? EState::sim_review : EState::live_review;
+          //m_state = m_bSim ? EState::sim_review : EState::live_review;
         }
 
       }
@@ -442,19 +442,24 @@ void WinChartView::HandleGuiRefresh( wxTimerEvent& event ) {
   DrawChart();
 }
 
-void WinChartView::SetSim() {
-  m_bSim = true;
-  m_state = EState::sim_trail;
+void WinChartView::SetLive_trail() {
+  m_bSim = false;
+  m_state = EState::live_trail;
 }
 
-void WinChartView::SetReview() {
+void WinChartView::SetLive_review() {
   m_bSim = false;
   m_state = EState::live_review;
 }
 
-void WinChartView::SetLive() {
-  m_bSim = false;
-  m_state = EState::live_trail;
+void WinChartView::SetSim_review() {
+  m_bSim = true;
+  m_state = EState::sim_review;
+}
+
+void WinChartView::SetSim_trail() {
+  m_bSim = true;
+  m_state = EState::sim_trail;
 }
 
 // TODO: there may be an issue with cursor & no data, which locks up the gui
