@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    AppSP500.cpp
+ * File:    AppSP500_gui.cpp
  * Author:  raymond@burkholder.net
  * Project: SP500
  * Created: March 30, 2025 13:49:15
@@ -40,7 +40,7 @@
 
 #include <TFVuTrading/FrameMain.h>
 
-#include "AppSP500.hpp"
+#include "AppSP500_gui.hpp"
 
 namespace {
   static const std::string c_sVendorName( "One Unified Net Limited" );

@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    AppSP500.hpp
+ * File:    AppSP500_gui.hpp
  * Author:  raymond@burkholder.net
  * Project: SP500
  * Created: March 30, 2025 13:49:15

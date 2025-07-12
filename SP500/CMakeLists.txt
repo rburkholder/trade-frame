@@ -35,7 +35,7 @@ find_package(Boost ${TF_BOOST_VERSION} CONFIG REQUIRED COMPONENTS system date_ti
 
 set(
   file_h
-    AppSP500.hpp
+    AppSP500_gui.hpp
     Config.hpp
     Features.hpp
     HyperParameters.hpp
@@ -49,7 +49,7 @@ set(
 
 set(
   file_cpp
-    AppSP500.cpp
+    AppSP500_gui.cpp
     Config.cpp
     Features.cpp
     LSTM.cpp
