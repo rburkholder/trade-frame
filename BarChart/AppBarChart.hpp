@@ -205,6 +205,10 @@ private:
       m_dvChart.Add( EChartSlot::Volume, &m_ceVolume );
     }
 
+    void SetNames( const std::string& sDescription, const std::string& sName ) {
+      m_dvChart.SetNames( sDescription, sName );
+    }
+
     ~SymbolInfo() {
       m_pti = nullptr;
       m_pAcquireFundamentals.reset();

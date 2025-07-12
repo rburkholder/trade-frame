@@ -301,6 +301,7 @@ void AppBarChart::AddSymbolToTree( const std::string& sSecurityName, ou::tf::Tre
   //assert( result.second );
   //iterSymbolInfo = result.first;
   SymbolInfo& si( iterSymbolInfo->second );
+  si.SetNames( "", sSecurityName );
 
   si.m_pti = pti->AppendChild( sSecurityName );
 
@@ -433,7 +434,7 @@ void AppBarChart::HandleIQFeedConnected( int ) {
 
 void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo ) {
 
-  auto f =
+  auto fSaveLocalFundamentals =
     [this]( mapSymbolInfo_t::iterator iterSymbolInfo ){
       KeyInfo& ki( iterSymbolInfo->second.m_key_info );
 
@@ -480,7 +481,7 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
 
   SymbolInfo& si( iterSymbolInfo->second );
   if ( si.m_key_info.bLoaded ) {
-    f( iterSymbolInfo );
+    fSaveLocalFundamentals( iterSymbolInfo );
   }
   else {
     if ( si.m_pAcquireFundamentals ) {
@@ -508,7 +509,7 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
       si.m_pAcquireFundamentals
         = ou::tf::AcquireFundamentals::Factory (
           std::move( pWatch ),
-          [this,iterSymbolInfo,f_=std::move(f)]( pWatch_t pWatch ){
+          [this,iterSymbolInfo,f_=std::move(fSaveLocalFundamentals)]( pWatch_t pWatch ){
             SymbolInfo& si( iterSymbolInfo->second );
             KeyInfo& ki( si.m_key_info );
             const Summary& summary( pWatch->GetSummary() );
@@ -520,6 +521,8 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
             ki.dblAmount = fundamentals.dblDividendAmount;
             ki.datePayed = fundamentals.datePayed;
             ki.dateExDividend = fundamentals.dateExDividend;
+
+            si.SetNames( ki.sCompanyName, iterSymbolInfo->first );
 
             f_( iterSymbolInfo );
 
