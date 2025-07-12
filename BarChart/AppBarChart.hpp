@@ -233,7 +233,7 @@ private:
   void DelTag( const sTag_t&, const sSymbol_t& );
   void FilterByTag();
 
-  void LoadPanelFinancialChart();
+  void BuildRootMenuTree();
   void AddSymbolToTree( const std::string&, ou::tf::TreeItem* );
   void OnSymbolClick( mapSymbolInfo_t::iterator );
 

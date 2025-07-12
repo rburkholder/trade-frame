@@ -147,7 +147,7 @@ void AppBarChart::OnFrameMainAutoMove( wxMoveEvent& event ) {
         [this](){
           CallAfter(
             [this](){ // run in gui thread
-              LoadPanelFinancialChart();
+              BuildRootMenuTree();
             } );
 
         } );
@@ -207,7 +207,7 @@ void AppBarChart::DelTag( const sTag_t& sTag, const sSymbol_t& sSymbol ) {
 
 }
 
-void AppBarChart::LoadPanelFinancialChart() {
+void AppBarChart::BuildRootMenuTree() {
 
   m_ptiRoot->SetOnBuildPopUp(
     [this]( ou::tf::TreeItem* pti ){
