@@ -442,6 +442,23 @@ void WinChartView::HandleGuiRefresh( wxTimerEvent& event ) {
   DrawChart();
 }
 
+void WinChartView::Set( EState state ) {
+  switch ( state ) {
+    case EState::live_trail:
+      SetLive_trail();
+      break;
+    case EState::live_review:
+      SetLive_trail();
+      break;
+    case EState::sim_review:
+      SetSim_review();
+      break;
+    case EState::sim_trail:
+      SetSim_trail();
+      break;
+  }
+}
+
 void WinChartView::SetLive_trail() {
   m_bSim = false;
   m_state = EState::live_trail;

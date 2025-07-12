@@ -64,6 +64,14 @@ public:
   void SetChartDataView( ou::ChartDataView* pChartDataView );
   ou::ChartDataView* GetChartDataView() const { return m_pChartDataView; }
 
+  enum class EState {
+    live_trail // original 'follow along' (live mode)
+  , live_review
+  , sim_trail
+  , sim_review
+  };
+
+  void Set( EState state );
   void SetLive_trail();
   void SetLive_review();
   void SetSim_review();
@@ -82,13 +90,6 @@ protected:
   //virtual void LiveY( int nChart, double value ) {}
 
 private:
-
-  enum class EState {
-    live_trail // original 'follow along' (live mode)
-  , live_review
-  , sim_trail
-  , sim_review
-  };
 
   enum class EMouse {
     Drag
