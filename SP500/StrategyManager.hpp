@@ -25,6 +25,8 @@
 
 #include <OUCharting/ChartDataView.h>
 
+#include <TFVuTrading/WinChartView.h>
+
 // need to keep Torch stuff separate from wxWidgets stuff.  Includes negatively interact with each other.
 
 namespace config {
@@ -38,7 +40,7 @@ public:
 
   using fTask_t = std::function<void()>;
   using fQueueTask_t = std::function<void( fTask_t&& )>;
-  using fSetChartDataView_t = std::function<void( ou::ChartDataView* )>;
+  using fSetChartDataView_t = std::function<void( ou::tf::WinChartView::EState, ou::ChartDataView* )>;
 
   StrategyManager( const config::Choices&, fQueueTask_t&&, fSetChartDataView_t&& );
   ~StrategyManager();

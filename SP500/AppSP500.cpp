@@ -153,8 +153,9 @@ void AppSP500::OnFrameMainAutoMove( wxMoveEvent& event ) {
       m_pStrategyManager = std::make_unique<StrategyManager>(
         m_choices
       , [this]( StrategyManager::fTask_t&& f ){ CallAfter( f ); } // fQueueTask_t
-      , [this]( ou::ChartDataView* pcdv ){ // fSetChartDataView_t
+      , [this]( ou::tf::WinChartView::EState state, ou::ChartDataView* pcdv ){ // fSetChartDataView_t
           m_pwcv->SetChartDataView( pcdv );
+          m_pwcv->Set( state );
         }
       );
     }

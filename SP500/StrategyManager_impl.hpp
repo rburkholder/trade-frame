@@ -30,6 +30,8 @@
 
 #include <OUCharting/ChartDataView.h>
 
+#include <TFVuTrading/WinChartView.h>
+
 #include <TFHDF5TimeSeries/HDF5DataManager.h>
 #include <TFHDF5TimeSeries/HDF5TimeSeriesContainer.h>
 
@@ -49,7 +51,7 @@ public:
 
   using fTask_t = std::function<void()>;
   using fQueueTask_t = std::function<void( fTask_t&& )>;
-  using fSetChartDataView_t = std::function<void( ou::ChartDataView* )>;
+  using fSetChartDataView_t = std::function<void( ou::tf::WinChartView::EState, ou::ChartDataView* )>;
 
   StrategyManager_impl(
     const config::Choices&
