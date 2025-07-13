@@ -35,10 +35,12 @@ StrategyManager_impl::StrategyManager_impl(
   const config::Choices& choices
 , fQueueTask_t&& fQueueTask
 , fSetChartDataView_t&& fSetChartDataView
+, fDone_t&& fDone
 )
 : m_choices( choices )
 , m_fQueueTask( std::move( fQueueTask ) )
 , m_fSetChartDataView( std::move( fSetChartDataView ) )
+, m_fDone( std::move( fDone ) )
 {
 
   switch ( m_choices.eMode ) {
@@ -289,6 +291,7 @@ void StrategyManager_impl::HandleSimComplete_predict() {
 void StrategyManager_impl::CleanUp_predict() {
   //m_pStrategy.reset(); // needs to be prior to sim reset
   //m_sim->Reset(); // can't do this without resetting strategy first
+  m_fDone();
 }
 
 void StrategyManager_impl::IterateHDF5( ou::tf::HDF5DataManager& hdm, fHandleLoadTreeHdf5Object_t&& f ) {
@@ -488,9 +491,7 @@ void StrategyManager_impl::InitStructures( ESymbol eSymbol, const std::string& s
 void StrategyManager_impl::LoadPanelFinancialChart() {
 
   m_pkwmSymbol = new ou::KeyWordMatch<ESymbol>( ESymbol::UKNWN, 6 );
-  //InitStructures( ESymbol::SPY,  "SPY",    1, boost::posix_time::time_duration( 0, 15, 0 ) );
   InitStructures( ESymbol::SPY,  "SPY",    1 );
-  //InitStructures( ESymbol::SPY,  "ES-20250620", 1 );
   InitStructures( ESymbol::II6A, "II6A.Z", 2 );
   InitStructures( ESymbol::II6D, "II6D.Z", 3 );
   InitStructures( ESymbol::JT6T, "JT6T.Z", 4 );

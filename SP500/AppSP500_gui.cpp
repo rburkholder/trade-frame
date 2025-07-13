@@ -157,6 +157,7 @@ void AppSP500::OnFrameMainAutoMove( wxMoveEvent& event ) {
           m_pwcv->SetChartDataView( pcdv );
           m_pwcv->Set( state );
         }
+      , [](){} // fDone_t
       );
     }
   );

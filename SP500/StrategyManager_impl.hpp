@@ -52,11 +52,13 @@ public:
   using fTask_t = std::function<void()>;
   using fQueueTask_t = std::function<void( fTask_t&& )>;
   using fSetChartDataView_t = std::function<void( ou::tf::WinChartView::EState, ou::ChartDataView* )>;
+  using fDone_t = std::function<void()>;
 
   StrategyManager_impl(
     const config::Choices&
   , fQueueTask_t&&
   , fSetChartDataView_t&&
+  , fDone_t&&
   );
   ~StrategyManager_impl();
 
@@ -72,6 +74,7 @@ private:
   fSetChartDataView_t m_fSetChartDataView;
 
   fQueueTask_t m_fQueueTask;
+  fDone_t m_fDone;
 
   boost::gregorian::date           m_startDateUTC;
   boost::posix_time::time_duration m_startTimeUTC;
