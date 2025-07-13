@@ -123,7 +123,7 @@ link_directories(
 
 target_link_libraries(
   SP500_gui
-       ${PROJECT_NAME}
+      ${PROJECT_NAME}
       ${TORCH_LIBRARIES}
       TFBitsNPieces
       TFInteractiveBrokers
@@ -152,7 +152,7 @@ target_link_libraries(
 
 target_link_libraries(
   SP500_cli
-       ${PROJECT_NAME}
+      ${PROJECT_NAME}
       ${TORCH_LIBRARIES}
       TFBitsNPieces
       TFInteractiveBrokers
