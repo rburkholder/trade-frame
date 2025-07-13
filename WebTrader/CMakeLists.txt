@@ -1,6 +1,8 @@
 # AppWebTrader(app)
 cmake_minimum_required (VERSION 3.13)
 
+cmake_policy(SET CMP0167 NEW)
+
 project (AppWebTrader)
 
 #set(CMAKE_EXE_LINKER_FLAGS "--trace --verbose")
