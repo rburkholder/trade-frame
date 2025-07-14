@@ -17,7 +17,6 @@
 // processes a series of historical data requests against the IQFeed API
 
 #include <string>
-#include <sstream>
 #include <vector>
 #include <cassert>
 
