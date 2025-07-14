@@ -271,6 +271,7 @@ void AppBarChart::OnSymbolClick( mapSymbolInfo_t::iterator iterSymbolInfo ) {
             si.m_ceVolume.Append( bar );
           },
           [this,&si](){ // fDone_t&&
+            si.m_bBarsLoaded = true;
             m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
             {
               std::scoped_lock<std::mutex> lock( m_mutexBarHistory );
@@ -278,7 +279,6 @@ void AppBarChart::OnSymbolClick( mapSymbolInfo_t::iterator iterSymbolInfo ) {
             }
           } );
         si.m_pBarHistory->RequestNEndOfDay( iterSymbolInfo->first, 200 );
-        si.m_bBarsLoaded = true;
       };
 
     if ( si.m_pBarHistory ) {
