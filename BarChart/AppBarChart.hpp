@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <mutex>
+#include <vector>
 #include <unordered_map>
 
 #include <boost/serialization/version.hpp>
@@ -134,7 +136,11 @@ private:
   using pHDF5DataManager_t = std::unique_ptr<ou::tf::HDF5DataManager>;
   pHDF5DataManager_t m_pdm;
 
-  ou::tf::iqfeed::BarHistory::pBarHistory_t m_pBarHistory;
+  std::mutex m_mutexBarHistory; // protects m_vpBarHistory
+
+  using pBarHistory_t = ou::tf::iqfeed::BarHistory::pBarHistory_t;
+  using vpBarHistory_t =std::vector<pBarHistory_t>;
+  vpBarHistory_t m_vpBarHistory;
 
   using pIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
   pIQFeed_t m_piqfeed;
@@ -172,6 +178,8 @@ private:
 
     bool m_bBarsLoaded;
     std::string m_sNotes;
+
+    pBarHistory_t m_pBarHistory;
 
     ou::ChartEntryBars m_cePriceBars;
     ou::ChartEntryVolume m_ceVolume;

@@ -143,16 +143,7 @@ void AppBarChart::OnFrameMainAutoMove( wxMoveEvent& event ) {
       LoadState();
       m_pFrameMain->Layout();
 
-      m_pBarHistory = ou::tf::iqfeed::BarHistory::Construct(
-        [this](){
-          CallAfter(
-            [this](){ // run in gui thread
-              BuildRootMenuTree();
-            } );
-
-        } );
-      assert( m_pBarHistory );
-      m_pBarHistory->Connect();
+      BuildRootMenuTree();
     }
   );
 
@@ -250,6 +241,7 @@ void AppBarChart::OnAddSearchSymbol( ou::tf::TreeItem* pti ) {
 }
 
 void AppBarChart::OnSymbolClick( mapSymbolInfo_t::iterator iterSymbolInfo ) {
+
   //BOOST_LOG_TRIVIAL(info) << "clicked: " << iterSymbolInfo->first;
   SymbolFundamentals( iterSymbolInfo );
   SymbolInfo& si( iterSymbolInfo->second );
@@ -268,16 +260,49 @@ void AppBarChart::OnSymbolClick( mapSymbolInfo_t::iterator iterSymbolInfo ) {
     m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
   }
   else {
-    m_pBarHistory->Set(
-      [&si]( const ou::tf::Bar& bar ){ // fBar_t&&
-        si.m_cePriceBars.AppendBar( bar );
-        si.m_ceVolume.Append( bar );
-      },
-      [this,&si](){ // fDone_t&&
-        m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
-      } );
-    m_pBarHistory->RequestNEndOfDay( iterSymbolInfo->first, 200 );
-    si.m_bBarsLoaded = true;
+
+    auto f =
+      [this,iterSymbolInfo](){
+        SymbolFundamentals( iterSymbolInfo );
+        SymbolInfo& si( iterSymbolInfo->second );
+        si.m_pBarHistory->Set(
+          [&si]( const ou::tf::Bar& bar ){ // fBar_t&&
+            si.m_cePriceBars.AppendBar( bar );
+            si.m_ceVolume.Append( bar );
+          },
+          [this,&si](){ // fDone_t&&
+            m_pPanelFinancialChart->SetChartDataView( &si.m_dvChart );
+            {
+              std::scoped_lock<std::mutex> lock( m_mutexBarHistory );
+              m_vpBarHistory.emplace_back( std::move( si.m_pBarHistory ) );
+            }
+          } );
+        si.m_pBarHistory->RequestNEndOfDay( iterSymbolInfo->first, 200 );
+        si.m_bBarsLoaded = true;
+      };
+
+    if ( si.m_pBarHistory ) {
+      BOOST_LOG_TRIVIAL(warning) << iterSymbolInfo->first << " bar load already in progress";
+    }
+    else {
+      if ( 0 == m_vpBarHistory.size() ) {
+        si.m_pBarHistory = ou::tf::iqfeed::BarHistory::Construct(
+          [f_=std::move(f)](){
+            f_();
+          }
+        );
+        assert( si.m_pBarHistory );
+        si.m_pBarHistory->Connect();
+      }
+      else {
+        {
+          std::scoped_lock<std::mutex> lock( m_mutexBarHistory );
+          si.m_pBarHistory = std::move( m_vpBarHistory.back() );
+          m_vpBarHistory.pop_back();
+        }
+        f();
+      }
+    }
   }
 
   using setSymbol_t = mmapTagSymbol_t::index<ixSymbol>::type;
@@ -583,9 +608,11 @@ void AppBarChart::OnClose( wxCloseEvent& event ) {
 //  if ( 0 != OnPanelClosing ) OnPanelClosing();
   // event.Veto();  // possible call, if needed
   // event.CanVeto(); // if not a
-  if ( m_pBarHistory ) {
-    m_pBarHistory->Disconnect();
-  }
+
+  for ( vpBarHistory_t::value_type& vt: m_vpBarHistory ) {
+    vt->Disconnect();
+  };
+  m_vpBarHistory.clear();
 
   m_pAcquireFundamentals_burial.reset();
 
