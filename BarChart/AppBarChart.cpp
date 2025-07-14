@@ -265,6 +265,7 @@ void AppBarChart::OnSymbolClick( mapSymbolInfo_t::iterator iterSymbolInfo ) {
       [this,iterSymbolInfo](){
         SymbolFundamentals( iterSymbolInfo );
         SymbolInfo& si( iterSymbolInfo->second );
+        assert( si.m_pBarHistory );
         si.m_pBarHistory->Set(
           [&si]( const ou::tf::Bar& bar ){ // fBar_t&&
             si.m_cePriceBars.AppendBar( bar );
