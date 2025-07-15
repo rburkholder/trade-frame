@@ -95,8 +95,6 @@ private:
   void OnClose( wxCloseEvent& event );
   virtual int OnExit() override;
 
-  void OnFrameMainAutoMove( wxMoveEvent& );
-
   void SaveState();
   void LoadState();
 
