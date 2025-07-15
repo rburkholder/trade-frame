@@ -268,7 +268,7 @@ bool AppIndicatorTrading::OnInit() {
     }
   );
 
-  return 1;
+  return true;
 }
 
 void AppIndicatorTrading::ConstructUnderlying() {
