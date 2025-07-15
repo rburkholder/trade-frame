@@ -128,7 +128,7 @@ void NotebookOptionChains::OnPageChanging( wxBookCtrlEvent& event ) {
     }
     else {
       //iter->second.pWinOptionChain->Stop();
-      assert( false );  // TODO: refer to PanelComboOrder for proper usage - needs wxTimer here
+      assert( false );  // TODO: refer to PanelComboOrder::OnBOOKOptionChainsPageChanging for guidance
       if ( nullptr != m_pgcsGridOptionChain ) {
         iter->second.pWinOptionChain->SaveColumnSizes( *m_pgcsGridOptionChain );
       }
@@ -156,7 +156,7 @@ void NotebookOptionChains::OnPageChanged( wxBookCtrlEvent& event ) {
       iter->second.pWinOptionChain->SetColumnSizes( *m_pgcsGridOptionChain );
     }
     //iter->second.pWinOptionChain->Start();
-    assert( false );   // TODO: refer to PanelComboOrder for proper usage - needs wxTimer here
+    assert( false );   // TODO: refer to PanelComboOrder::OnBOOKOptionChainsPageChanged for guidance
     if ( nullptr != m_fOnPageChanged ) {
       m_fOnPageChanged( iter->first );
     }
