@@ -105,6 +105,8 @@ bool AppBarChart::OnInit() {
   sizerFrame->Add( m_pPanelFinancialChart, 1, wxALL | wxEXPAND, 1 );
   m_pPanelFinancialChart->GetWinChartView()->SetLive_review();
 
+  m_ptiRoot = m_pPanelFinancialChart->SetRoot( "Charts", nullptr );
+
   //m_pwcv = new ou::tf::WinChartView( m_pFrameMain );
   //sizerFrame->Add( m_pwcv, 1,wxALL | wxEXPAND, 0 );
 
@@ -121,7 +123,12 @@ bool AppBarChart::OnInit() {
   m_pFrameSymbolInfo->Show();
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppBarChart::OnClose, this );  // start close of windows and controls
-  m_pFrameMain->Bind( wxEVT_MOVE, &AppBarChart::OnFrameMainAutoMove, this ); // intercept first move
+
+  LoadState();
+
+  BuildRootMenuTree();
+
+  m_pFrameMain->Layout();
   m_pFrameMain->Show( true ); // triggers the auto move
 
   m_piqfeed = ou::tf::iqfeed::Provider::Factory();
@@ -129,27 +136,6 @@ bool AppBarChart::OnInit() {
   m_piqfeed->Connect();
 
   return true;
-
-}
-
-void AppBarChart::OnFrameMainAutoMove( wxMoveEvent& event ) {
-  // load state works properly _after_ first move (library initiated)
-
-  CallAfter(
-    [this](){
-
-      m_ptiRoot = m_pPanelFinancialChart->SetRoot( "Charts", nullptr );
-
-      LoadState();
-      m_pFrameMain->Layout();
-
-      BuildRootMenuTree();
-    }
-  );
-
-  m_pFrameMain->Unbind( wxEVT_MOVE, &AppBarChart::OnFrameMainAutoMove, this );
-
-  event.Skip(); // set to false if we want to ignore auto move
 
 }
 

@@ -232,8 +232,6 @@ private:
 
   ou::ChartDataView m_cdv;
 
-  void OnFrameMainAutoMove( wxMoveEvent& );
-
   void HandleIQFeedConnected( int );
   void SymbolFundamentals( mapSymbolInfo_t::iterator );
 
