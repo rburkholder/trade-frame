@@ -300,13 +300,9 @@ bool AppComboTrading::OnInit() {
     std::cout << "database fault on " << c_sFileName_DataBase << std::endl;
   }
 
-  m_pFrameMain->Move( 100, 500 );
-  m_pFrameMain->Raise();
+  LoadState();
 
-  CallAfter(
-    [this](){
-      LoadState();
-    } );
+  m_pFrameMain->Show();
 
   return 1;
 }
@@ -356,11 +352,6 @@ void AppComboTrading::BuildFrameInteractiveBrokers( void ) {
 
   m_pFInteractiveBrokers->SetAutoLayout( true );
   m_pFInteractiveBrokers->Layout();
-
-  wxPoint point = m_pFCharts->GetPosition();
-  point.x -= 400;
-  point.y -= 200;
-  m_pFInteractiveBrokers->SetPosition( point );
   m_pFInteractiveBrokers->Show();
 }
 
@@ -470,9 +461,6 @@ void AppComboTrading::BuildFrameCharts( void ) {
     pWatch = m_pOptionEngine->FindWatch( pInstrument );
   };
 
-  m_pFCharts->SetAutoLayout( true );
-  m_pFCharts->Layout();
-
   int ixItem;
   // prepended in reverse order
   ixItem = m_pFrameMain->AddFileMenuItem( _( "Load Config" ) );
@@ -481,10 +469,8 @@ void AppComboTrading::BuildFrameCharts( void ) {
   ixItem = m_pFrameMain->AddFileMenuItem( _( "Save Config" ) );
   Bind( wxEVT_COMMAND_MENU_SELECTED, &AppComboTrading::HandleSave, this, ixItem, -1 );
 
-  wxPoint point = m_pFCharts->GetPosition();
-  point.x += 400;
-  point.y += 200;
-  m_pFCharts->SetPosition( point );
+  m_pFCharts->SetAutoLayout( true );
+  m_pFCharts->Layout();
   m_pFCharts->Show();
 
 }
@@ -561,13 +547,9 @@ void AppComboTrading::BuildFramePortfolioPosition( void ) {
   m_sizerScrollPM = new wxBoxSizer(wxVERTICAL);
   m_scrollPM->SetSizer( m_sizerScrollPM );
 
-  wxPoint point = m_pFPP->GetPosition();
-  point.x += 500;
-  point.y += 100;
-  m_pFPP->SetPosition( point );
+  m_pFPP->Layout();
   m_pFPP->Show();
 
-  m_pFPP->Layout();
 
 }
 
@@ -579,8 +561,6 @@ void AppComboTrading::BuildFrameOptionCombo() {
     );
   m_pFOC->SetName( "sandbox" );
   //std::cout << "frame main: sandbox" << std::endl;
-
-  m_pFOC->SetAutoLayout( true );
 
   m_sizerFOC = new wxBoxSizer( wxVERTICAL );
   m_pFOC->SetSizer( m_sizerFOC );
@@ -594,16 +574,11 @@ void AppComboTrading::BuildFrameOptionCombo() {
   m_sizerScrollOC = new wxBoxSizer( wxVERTICAL );
   m_scrollFOC->SetSizer( m_sizerScrollOC );
 
-  wxPoint point = m_pFOC->GetPosition();
-  point.x += 700;
-  point.y += 200;
-  m_pFOC->SetPosition( point );
+  m_pFOC->SetAutoLayout( true );
+  m_pFOC->Layout();
   m_pFOC->Show();
 
   HandleNewPanelOptionCombo( idPortfolio_t( "sandbox" ), "experimenting with option combinations" );
-
-  m_pFOC->Layout();
-
 }
 
 AppComboTrading::pPanelOptionCombo_t AppComboTrading::HandleNewPanelOptionCombo( const idPortfolio_t& idPortfolio, const std::string& sDescription ) {
