@@ -157,15 +157,16 @@ void Watch::EnableWatch() {
   if ( m_bWatchingEnabled && !m_bWatching && m_pDataProvider->Connected() ) {
     // std::cout << "Start Watching " << m_pInstrument->GetInstrumentName() << std::endl;
 
+    // can't do this for all, some requests are not linking with callbacks
     if (
-         ( 0 == OnQuote.Size() )
-      && ( 0 == OnTrade.Size() )
-      && ( 0 == OnDepthByMM.Size() )
-      && ( 0 == OnDepthByOrder.Size() )
-      && ( 0 == OnFundamentals.Size() )
-      && ( 0 == OnSummary.Size() )
+    //     ( 0 == OnQuote.Size() )  // may or may not be set - should this one be forced?
+    //  && ( 0 == OnTrade.Size() )  // may or may not be set
+         ( 0 == OnDepthByMM.Size() )  // force this to have a callback
+      && ( 0 == OnDepthByOrder.Size() )  // force this to have a callback
+    //  && ( 0 == OnFundamentals.Size() ) // automatically set
+    //  && ( 0 == OnSummary.Size() )  // automatically set
     ) {
-      std::cout << m_pInstrument->GetInstrumentName() << ": warning, no OnXXX events assigned" << std::endl;
+      //std::cout << m_pInstrument->GetInstrumentName() << ": warning, no enable watch handler assigned" << std::endl;
     }
 
     m_bWatching = true;
@@ -185,10 +186,10 @@ void Watch::EnableWatch() {
     }
 
     // these two message types come second so that the symbol gets registered in previous statements
-    if ( 0 != OnQuote.Size() ) {
+    //if ( 0 != OnQuote.Size() ) {
       m_pDataProvider->AddQuoteHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleQuote ) );
       m_bAddedQuoteHandler = true;
-    }
+    //}
     m_pDataProvider->AddTradeHandler( m_pInstrument, MakeDelegate( this, &Watch::HandleTrade ) );
     if ( m_pDataProvider->ProvidesDepth() ) {
       if ( 0 != OnDepthByMM.Size() ) {
