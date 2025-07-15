@@ -175,7 +175,8 @@ bool AppCurrencyTrader::OnInit() {
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppCurrencyTrader::OnClose, this );  // start close of windows and controls
 
-  m_pFrameMain->Bind( wxEVT_MOVE, &AppCurrencyTrader::OnFrameMainAutoMove, this ); // intercept first move
+  LoadState();
+  m_pFrameMain->Layout();
   m_pFrameMain->Show( true ); // triggers the auto move
 
   return true;
@@ -1077,22 +1078,6 @@ void AppCurrencyTrader::HandleTimer( wxTimerEvent& event ) {
   }
 
   m_stateSoftwareReset = ESoftwareReset::quiescent;
-
-}
-
-void AppCurrencyTrader::OnFrameMainAutoMove( wxMoveEvent& event ) {
-// load state works properly _after_ first move (library initiated)
-
-  CallAfter(
-    [this](){
-      LoadState();
-      m_pFrameMain->Layout();
-    }
-  );
-
-  m_pFrameMain->Unbind( wxEVT_MOVE, &AppCurrencyTrader::OnFrameMainAutoMove, this );
-
-  event.Skip(); // set to false if we want to ignore auto move
 
 }
 
