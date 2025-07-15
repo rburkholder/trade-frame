@@ -92,7 +92,13 @@ bool AppHdf5Chart::OnInit() {
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppHdf5Chart::OnClose, this );  // start close of windows and controls
 
-  m_pFrameMain->Bind( wxEVT_MOVE, &AppHdf5Chart::OnFrameMainAutoMove, this ); // intercept first move
+  const std::string sOldFileName( m_sHdf5FileName );
+  LoadState();
+  m_pFrameMain->Layout();
+  if ( sOldFileName != m_sHdf5FileName ) {
+    m_pPanelChartHdf5->SetFileName( m_sHdf5FileName );
+  }
+
   m_pFrameMain->Show( true ); // triggers the auto move
 
 //  std::string sTimeZoneSpec( "date_time_zonespec.csv" );
@@ -111,28 +117,8 @@ bool AppHdf5Chart::OnInit() {
 
 //  this->m_pData1Provider->Connect();
 
-  return 1;
+  return true;
 }
-
-void AppHdf5Chart::OnFrameMainAutoMove( wxMoveEvent& event ) {
-  // load state works properly _after_ first move (library initiated)
-
-    CallAfter(
-      [this](){
-        const std::string sOldFileName( m_sHdf5FileName );
-        LoadState();
-        m_pFrameMain->Layout();
-        if ( sOldFileName != m_sHdf5FileName ) {
-          m_pPanelChartHdf5->SetFileName( m_sHdf5FileName );
-        }
-      }
-    );
-
-    m_pFrameMain->Unbind( wxEVT_MOVE, &AppHdf5Chart::OnFrameMainAutoMove, this );
-
-    event.Skip(); // set to false if we want to ignore auto move
-
-  }
 
 void AppHdf5Chart::HandleSelectHdf5File( wxCommandEvent& event ) {
   CallAfter(

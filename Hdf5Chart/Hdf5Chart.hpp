@@ -63,8 +63,6 @@ private:
 
   void HandleSelectHdf5File( wxCommandEvent& event );
 
-  void OnFrameMainAutoMove( wxMoveEvent& );
-
   void SaveState();
   void LoadState();
 
