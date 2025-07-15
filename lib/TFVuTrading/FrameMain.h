@@ -86,6 +86,8 @@ private:
     ID_DYNAMIC_MENU_ACTIONS // must be last in line
   };
 
+  wxPoint m_pointMove;
+
   int m_ixDynamicMenuItem;  // initialized to ID_DYNAMIC_MENU_ACTIONS and incremented with each new menu entry
   wxMenu* m_menuFile;
 
@@ -96,6 +98,8 @@ private:
 
   void Init();
   void CreateControls();
+
+  void OnFrameMainAutoMove( wxMoveEvent& event );
 
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
@@ -148,8 +152,9 @@ private:
 
       ar & x;
       ar & y;
-      wxPoint position( x, y );
-      Move( position );
+      m_pointMove = wxPoint( x, y ); // save until the initial bogus move completes
+      //wxPoint position( x, y );
+      //Move( position );
     }
   }
 
