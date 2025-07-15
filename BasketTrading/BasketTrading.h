@@ -154,8 +154,6 @@ private:
 
   void HandleMenuActionTestSelection();
 
-  void OnFrameMainAutoMove( wxMoveEvent& );
-
   void SaveState();
   void LoadState();
 

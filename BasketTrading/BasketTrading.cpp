@@ -182,7 +182,9 @@ void AppBasketTrading::Init() {
   vItems.push_back( new mi( "a7 Add combo - forced", MakeDelegate( this, &AppBasketTrading::HandleAddComboForced ) ) );
   m_pFrameMain->AddDynamicMenu( "Trade", vItems );
 
-  m_pFrameMain->Bind( wxEVT_MOVE, &AppBasketTrading::OnFrameMainAutoMove, this );
+  LoadState();
+
+  m_pFrameMain->Layout();
   m_pFrameMain->Show( true ); // triggers the auto move
 
 }
@@ -374,22 +376,6 @@ void AppBasketTrading::OnConnected() {
       }
     }
   }
-}
-
-void AppBasketTrading::OnFrameMainAutoMove( wxMoveEvent& event ) {
-
-  CallAfter(
-    [this](){
-      LoadState();
-      //m_pFrameMain->SetAutoLayout( true );
-      m_pFrameMain->Layout();
-    }
-  );
-
-  m_pFrameMain->Unbind( wxEVT_MOVE, &AppBasketTrading::OnFrameMainAutoMove, this );
-
-  event.Skip(); // set to false if we want to ignore auto move
-
 }
 
 void AppBasketTrading::SaveState() {
