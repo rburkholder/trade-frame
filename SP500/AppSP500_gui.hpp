@@ -65,8 +65,6 @@ private:
   using pStrategyManager_t = std::unique_ptr<StrategyManager>;
   pStrategyManager_t m_pStrategyManager;
 
-  void OnFrameMainAutoMove( wxMoveEvent& );
-
   void HandleMenuActionSimStart();
   void HandleMenuActionSimStop();
   void HandleMenuActionSimEmitStats();

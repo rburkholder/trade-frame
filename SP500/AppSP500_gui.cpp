@@ -135,34 +135,22 @@ bool AppSP500::OnInit() {
   */
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppSP500::OnClose, this );  // start close of windows and controls
-  m_pFrameMain->Bind( wxEVT_MOVE, &AppSP500::OnFrameMainAutoMove, this ); // intercept first move
+
+  LoadState();
+  m_pFrameMain->Layout();
   m_pFrameMain->Show( true ); // triggers the auto move
 
-  return true;
-
-}
-
-void AppSP500::OnFrameMainAutoMove( wxMoveEvent& event ) {
-
-  m_pFrameMain->Unbind( wxEVT_MOVE, &AppSP500::OnFrameMainAutoMove, this );
-
-  CallAfter(
-    [this](){
-      LoadState();
-      m_pFrameMain->Layout();
-      m_pStrategyManager = std::make_unique<StrategyManager>(
-        m_choices
-      , [this]( StrategyManager::fTask_t&& f ){ CallAfter( f ); } // fQueueTask_t
-      , [this]( ou::tf::WinChartView::EState state, ou::ChartDataView* pcdv ){ // fSetChartDataView_t
-          m_pwcv->SetChartDataView( pcdv );
-          m_pwcv->Set( state );
-        }
-      , [](){} // fDone_t
-      );
+  m_pStrategyManager = std::make_unique<StrategyManager>(
+    m_choices
+  , [this]( StrategyManager::fTask_t&& f ){ CallAfter( f ); } // fQueueTask_t
+  , [this]( ou::tf::WinChartView::EState state, ou::ChartDataView* pcdv ){ // fSetChartDataView_t
+      m_pwcv->SetChartDataView( pcdv );
+      m_pwcv->Set( state );
     }
+  , [](){} // fDone_t
   );
 
-  event.Skip(); // set to false if we want to ignore auto move
+  return true;
 
 }
 
