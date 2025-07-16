@@ -215,6 +215,37 @@ protected:
 private:
 };
 
+//**** IQFTradeCorrectionMessage - https://www.iqfeed.net/dev/index.cfm?section=docs&page=l1tcor
+// 'C,SPY,X,,,,619.0500,15000,1296380724,,19,'
+// 'C,SPY,I,O,07/16/2025,,619.0500,15000,859256116,198944,24,'
+// 'C,GLD,X,,,,309.3200,52000,859326789,,24,'
+// 'C,SLV,X,,,,34.4200,250,909457745,,19,'
+
+class IQFTradeCorrectionMessage: public IQFBaseMessage<IQFTradeCorrectionMessage> { // C
+public:
+  enum enumFieldIDs {
+    CSymbol = 2,
+    CCorrectionType = 3, // 'I' = trade insert, 'X' = trade delete
+    CTradeType = 4, // Single character: 'C', 'E', 'O' as in the Level 1 fields
+    CTradeDate = 5, // MM/DD/CCYY, date trade inserted/deleted
+    CTradeTime = 6, // HH:MM:SS.ffffff, Time (including microseconds) trade inserted/deleted
+    CTradePrice = 7,
+    CTradeSize = 8,
+    CTickID = 9, // identifier of trade, probably matched update message
+    CTradeConditions = 10, // 2 digit hex,
+    CTradeMarketCenter = 11 // market center
+  };
+
+  IQFTradeCorrectionMessage() {}
+  IQFTradeCorrectionMessage( iterator_t& current, iterator_t& end )
+  : IQFBaseMessage<IQFTradeCorrectionMessage>( current, end ) {}
+  ~IQFTradeCorrectionMessage() {}
+
+
+protected:
+private:
+};
+
 //**** IQFFundamentalMessage
 class IQFFundamentalMessage: public IQFBaseMessage<IQFFundamentalMessage> { // F
 public:

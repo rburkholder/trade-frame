@@ -82,6 +82,10 @@ public:
     this->GiveBackBuffer( p );
     m_reposSystemMessages.CheckInL( msg );
   }
+  void inline TradeCorrectionDone( linebuffer_t* p, IQFTradeCorrectionMessage* msg ) {
+    this->GiveBackBuffer( p );
+    m_reposTradeCorrectionMessages.CheckInL( msg );
+  }
   void inline ErrorDone( linebuffer_t* p, IQFErrorMessage* msg ) {
     this->GiveBackBuffer( p );
     m_reposErrorMessages.CheckInL( msg );
@@ -192,6 +196,7 @@ protected:
   void OnIQFeedNewsMessage( linebuffer_t* pBuffer, IQFNewsMessage* msg) {};
   void OnIQFeedTimeMessage( linebuffer_t* pBuffer, IQFTimeMessage* msg) {};
   void OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMessage* msg) {};
+  void OnIQFeedTradeCorrectionMessage( linebuffer_t* pBuffer, IQFTradeCorrectionMessage* msg) {};
   void OnIQFeedErrorMessage( linebuffer_t* pBuffer, IQFErrorMessage* msg) {};
 
 private:
@@ -204,6 +209,7 @@ private:
   typename ou::BufferRepository<IQFFundamentalMessage> m_reposFundamentalMessages;
   typename ou::BufferRepository<IQFTimeMessage> m_reposTimeMessages;
   typename ou::BufferRepository<IQFSystemMessage> m_reposSystemMessages;
+  typename ou::BufferRepository<IQFTradeCorrectionMessage> m_reposTradeCorrectionMessages;
   typename ou::BufferRepository<IQFErrorMessage> m_reposErrorMessages;
 
   enum Version { v49, v61, v62 };
@@ -399,6 +405,22 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
         }
         else {
           SystemDone( pBuffer, msg );
+        }
+      }
+      break;
+    case 'C':
+      {
+        std::string str( iter, end );
+        std::cout << "IQFeed trade correction message: '" << str << "'" << std::endl;
+
+        IQFTradeCorrectionMessage* msg = m_reposTradeCorrectionMessages.CheckOutL();
+        msg->Assign( iter, end );
+
+        if ( &IQFeed<T>::OnIQFeedTradeCorrectionMessage != &T::OnIQFeedTradeCorrectionMessage ) {
+          static_cast<T*>( this )->OnIQFeedTradeCorrectionMessage( pBuffer, msg);
+        }
+        else {
+          TradeCorrectionDone( pBuffer, msg );
         }
       }
       break;
