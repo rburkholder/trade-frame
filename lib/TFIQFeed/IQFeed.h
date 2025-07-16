@@ -16,16 +16,13 @@
 
 #include <string>
 #include <sstream>
-#include <exception>
-
-#include <boost/assert.hpp>
 
 #include <OUCommon/Debug.h>
 #include <OUCommon/Network.h>
 #include <OUCommon/ReusableBuffers.h>
 
-#include "SymbolLookup.h"
 #include "Messages.h"
+#include "SymbolLookup.h"
 
 // In the future, for auxilliary routines making use of IQFeed,
 //   think about incorporating the following concept:
@@ -256,7 +253,7 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
   typename linebuffer_t::iterator iter = (*pBuffer).begin();
   typename linebuffer_t::iterator end = (*pBuffer).end();
 
-  BOOST_ASSERT( iter != end );
+  assert( iter != end );
 
   //std::string str( iter, end );
   //std::cout << str << std::endl;
