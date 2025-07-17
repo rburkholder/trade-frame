@@ -198,6 +198,7 @@ protected:
   void OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMessage* msg) {};
   void OnIQFeedTradeCorrectionMessage( linebuffer_t* pBuffer, IQFTradeCorrectionMessage* msg) {};
   void OnIQFeedErrorMessage( linebuffer_t* pBuffer, IQFErrorMessage* msg) {};
+  void OnIQFeedSymbolNotFoundMessage( linebuffer_t* pBuffer, IQFErrorMessage* msg) {};
 
 private:
 
@@ -448,8 +449,8 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
         IQFErrorMessage* msg = m_reposErrorMessages.CheckOutL();
         msg->Assign( iter, end );
 
-        if ( &IQFeed<T>::OnIQFeedErrorMessage != &T::OnIQFeedErrorMessage ) {
-          static_cast<T*>( this )->OnIQFeedErrorMessage( pBuffer, msg);
+        if ( &IQFeed<T>::OnIQFeedSymbolNotFoundMessage != &T::OnIQFeedSymbolNotFoundMessage ) {
+          static_cast<T*>( this )->OnIQFeedSymbolNotFoundMessage( pBuffer, msg);
         }
         else {
           ErrorDone( pBuffer, msg );
