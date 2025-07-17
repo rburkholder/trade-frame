@@ -24,9 +24,9 @@ find_package(Boost ${TF_BOOST_VERSION} CONFIG REQUIRED COMPONENTS system date_ti
 set(
   file_h
     Config.hpp
-    TableDividend.hpp
-    TableSymbol.hpp
-    TableTag.hpp
+    #    TableDividend.hpp
+    #TableSymbol.hpp
+    #TableTag.hpp
     Process.hpp
   )
 
@@ -34,9 +34,9 @@ set(
   file_cpp
     main.cpp
     Config.cpp
-    TableDividend.cpp
-    TableSymbol.cpp
-    TableTag.cpp
+    #TableDividend.cpp
+    #TableSymbol.cpp
+    #TableTag.cpp
     Process.cpp
   )
 
@@ -71,6 +71,7 @@ target_link_directories(
 
 target_link_libraries(
   ${PROJECT_NAME}
+      DBDividend
       TFTrading
       TFInteractiveBrokers
       TFHDF5TimeSeries

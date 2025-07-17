@@ -19,13 +19,13 @@
  * Created: April 1, 2022  19:09
  */
 
+#include <DBDividend/TableTag.hpp>
+#include <DBDividend/TableSymbol.hpp>
+#include <DBDividend/TableDividend.hpp>
+
 #include <OUCommon/TimeSource.h>
 
 #include <TFTrading/Database.h>
-
-#include "TableTag.hpp"
-#include "TableSymbol.hpp"
-#include "TableDividend.hpp"
 
 #include "Config.hpp"
 #include "Process.hpp"
