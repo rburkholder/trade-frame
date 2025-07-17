@@ -134,9 +134,15 @@ private:
 class IQFErrorMessage: public IQFBaseMessage<IQFErrorMessage> { // S
 public:
 
-  IQFErrorMessage( void );
+  enum enumFieldIDs {
+    ESymbol = 2 // used with SymbolNotFound for extraction
+  };
+
+  IQFErrorMessage();
   IQFErrorMessage( iterator_t& current, iterator_t& end );
-  ~IQFErrorMessage(void);
+  ~IQFErrorMessage();
+
+  const std::string SymbolNotFound() const { return Field( ESymbol ); }
 
 protected:
 private:

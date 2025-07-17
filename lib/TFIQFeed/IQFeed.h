@@ -427,8 +427,8 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       break;
     case 'E':
       {
-        std::string str( iter, end );
-        std::cout << "IQFeed error message: '" << str << "'" << std::endl;
+        //std::string str( iter, end );
+        //std::cout << "IQFeed error message: '" << str << "'" << std::endl;
 
         IQFErrorMessage* msg = m_reposErrorMessages.CheckOutL();
         msg->Assign( iter, end );

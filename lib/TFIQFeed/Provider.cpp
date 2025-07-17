@@ -325,6 +325,12 @@ void Provider::OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMessage *p
   this->SystemDone( pBuffer, pMsg );
 }
 
+void Provider::OnIQFeedSymbolNotFoundMessage( linebuffer_t* pBuffer, IQFErrorMessage *pMsg ) {
+  std::cout << "iqfeed::provider symbol not found: " << pMsg->SymbolNotFound() << std::endl;
+  // TODO: construct a callback/delegate in provider or provider base
+  this->ErrorDone( pBuffer, pMsg );
+}
+
 void Provider::HandleExecution( Order::idOrder_t orderId, const Execution &exec ) {
   OrderManager::LocalCommonInstance().ReportExecution( orderId, exec );
 }

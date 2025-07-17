@@ -79,6 +79,7 @@ protected:
   void OnIQFeedNewsMessage( linebuffer_t* pBuffer, IQFNewsMessage *pMsg );
   void OnIQFeedTimeMessage( linebuffer_t* pBuffer, IQFTimeMessage *pMsg );
   void OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMessage *pMsg );
+  void OnIQFeedSymbolNotFoundMessage( linebuffer_t* pBuffer, IQFErrorMessage* msg);
 
   void OnIQFeedDisConnected();  // CRTP on IQFeed
   void OnIQFeedConnected(); // CRTP on IQFeed
