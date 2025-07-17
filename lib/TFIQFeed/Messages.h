@@ -86,7 +86,7 @@ public:
   using fielddelimiter_t = std::pair<iterator_t, iterator_t>;
   using ixFields_t = typename linebuffer_t::size_type;
 
-  IQFBaseMessage( void );
+  IQFBaseMessage();
   IQFBaseMessage( iterator_t& current, iterator_t& end );
 
   void Assign( iterator_t& current, iterator_t& end );
@@ -103,7 +103,7 @@ public:
 
 protected:
 
-  ~IQFBaseMessage(void);
+  ~IQFBaseMessage();
 
   std::vector<fielddelimiter_t> m_vFieldDelimiters;
 
@@ -122,9 +122,9 @@ private:
 class IQFSystemMessage: public IQFBaseMessage<IQFSystemMessage> { // S
 public:
 
-  IQFSystemMessage( void );
+  IQFSystemMessage();
   IQFSystemMessage( iterator_t& current, iterator_t& end );
-  ~IQFSystemMessage(void);
+  ~IQFSystemMessage();
 
 protected:
 private:
@@ -152,13 +152,13 @@ private:
 class IQFTimeMessage: public IQFBaseMessage<IQFTimeMessage> { // T
 public:
 
-  IQFTimeMessage( void );
+  IQFTimeMessage();
   IQFTimeMessage( iterator_t& current, iterator_t& end );
-  ~IQFTimeMessage(void);
+  ~IQFTimeMessage();
 
   void Assign( iterator_t& current, iterator_t& end );
 
-  ptime TimeStamp( void ) const { return m_dt; };
+  ptime TimeStamp() const { return m_dt; };
 
 protected:
   ptime m_dt;
@@ -181,37 +181,37 @@ public:
     NHeadLine
   };
 
-  IQFNewsMessage( void );
+  IQFNewsMessage();
   IQFNewsMessage( iterator_t& current, iterator_t& end );
-  ~IQFNewsMessage(void);
+  ~IQFNewsMessage();
 
-  const std::string Distributor( void ) const { return Field( NDistributor ); };
-  const std::string StoryId( void ) const { return Field( NStoryId ); };
-  const std::string SymbolList( void ) const { return Field( NSymbolList ); };
-  const std::string DateTime( void ) const { return Field( NDateTime ); };
-  const std::string Headline( void ) const {
+  const std::string Distributor() const { return Field( NDistributor ); };
+  const std::string StoryId() const { return Field( NStoryId ); };
+  const std::string SymbolList() const { return Field( NSymbolList ); };
+  const std::string DateTime() const { return Field( NDateTime ); };
+  const std::string Headline() const {
     std::string sHeadLine;
     sHeadLine.assign( m_vFieldDelimiters[ NHeadLine ].first, m_vFieldDelimiters[ 0 ].second );
     return sHeadLine;
   };
 
-  fielddelimiter_t Distributor_iter( void ) const {
+  fielddelimiter_t Distributor_iter() const {
     BOOST_ASSERT( NDistributor <= m_vFieldDelimiters.size() - 1 );
     return m_vFieldDelimiters[ NDistributor ];
   }
-  fielddelimiter_t StoryId_iter( void ) const {
+  fielddelimiter_t StoryId_iter() const {
     BOOST_ASSERT( NStoryId <= m_vFieldDelimiters.size() - 1 );
     return m_vFieldDelimiters[ NStoryId ];
   }
-  fielddelimiter_t SymbolList_iter( void ) const {
+  fielddelimiter_t SymbolList_iter() const {
     BOOST_ASSERT( NSymbolList <= m_vFieldDelimiters.size() - 1 );
     return m_vFieldDelimiters[ NSymbolList ];
   }
-  fielddelimiter_t DateTime_iter( void ) const {
+  fielddelimiter_t DateTime_iter() const {
     BOOST_ASSERT( NDateTime <= m_vFieldDelimiters.size() - 1 );
     return m_vFieldDelimiters[ NDateTime ];
   }
-  fielddelimiter_t HeadLine_iter( void ) const {
+  fielddelimiter_t HeadLine_iter() const {
     BOOST_ASSERT( NHeadLine <= m_vFieldDelimiters.size() - 1 );
     fielddelimiter_t fd( m_vFieldDelimiters[ NHeadLine ].first, m_vFieldDelimiters[ 0 ].second ); // necessary to incorporate included commas, and field 0 has end of buffer marker
     return fd;
@@ -315,9 +315,9 @@ public:
     _FLastEntry
   };
 
-  IQFFundamentalMessage( void );
+  IQFFundamentalMessage();
   IQFFundamentalMessage( iterator_t& current, iterator_t& end );
-  ~IQFFundamentalMessage(void);
+  ~IQFFundamentalMessage();
 
 protected:
 private:
@@ -384,13 +384,13 @@ public:
   using iterator_t = typename IQFBaseMessage<IQFPricingMessage<T, charT> >::iterator_t;
   using fielddelimiter_t = typename IQFBaseMessage<IQFPricingMessage<T, charT> >::fielddelimiter_t;
 
-  IQFPricingMessage( void );
+  IQFPricingMessage();
   IQFPricingMessage( iterator_t& current, iterator_t& end );
 
-  ptime LastTradeTime( void ) const;
+  ptime LastTradeTime() const;
 
 protected:
-  ~IQFPricingMessage(void);
+  ~IQFPricingMessage();
 private:
 };
 
@@ -398,9 +398,9 @@ private:
 class IQFUpdateMessage: public IQFPricingMessage<IQFUpdateMessage> { // Q
 public:
 
-  IQFUpdateMessage( void );
+  IQFUpdateMessage();
   IQFUpdateMessage( iterator_t& current, iterator_t& end );
-  ~IQFUpdateMessage(void);
+  ~IQFUpdateMessage();
 
 protected:
 private:
@@ -410,9 +410,9 @@ private:
 class IQFSummaryMessage: public IQFPricingMessage<IQFSummaryMessage> { // P
 public:
 
-  IQFSummaryMessage( void );
+  IQFSummaryMessage();
   IQFSummaryMessage( iterator_t& current, iterator_t& end );
-  ~IQFSummaryMessage(void);
+  ~IQFSummaryMessage();
 
 protected:
 private:
@@ -449,13 +449,13 @@ public:
 
   static const std::string selector;
 
-  IQFDynamicFeedMessage( void )
+  IQFDynamicFeedMessage()
   : IQFBaseMessage<IQFDynamicFeedMessage<T, charT> >() {}
   IQFDynamicFeedMessage( iterator_t& current, iterator_t& end )
   : IQFBaseMessage<IQFDynamicFeedMessage<T, charT> >( current, end ) {}
 
 protected:
-  ~IQFDynamicFeedMessage(void){}
+  ~IQFDynamicFeedMessage(){}
 private:
 };
 
@@ -470,11 +470,11 @@ const std::string IQFDynamicFeedMessage<T, charT>::selector( "Symbol,Total Volum
 class IQFDynamicFeedSummaryMessage: public IQFDynamicFeedMessage<IQFDynamicFeedSummaryMessage> { // P
 public:
 
-  IQFDynamicFeedSummaryMessage( void )
+  IQFDynamicFeedSummaryMessage()
   : IQFDynamicFeedMessage<IQFDynamicFeedSummaryMessage>() {}
   IQFDynamicFeedSummaryMessage( iterator_t& current, iterator_t& end )
   : IQFDynamicFeedMessage<IQFDynamicFeedSummaryMessage>( current, end ) {}
-  ~IQFDynamicFeedSummaryMessage(void){}
+  ~IQFDynamicFeedSummaryMessage() {}
 
 protected:
 private:
@@ -484,11 +484,11 @@ private:
 class IQFDynamicFeedUpdateMessage: public IQFDynamicFeedMessage<IQFDynamicFeedUpdateMessage> { // Q
 public:
 
-  IQFDynamicFeedUpdateMessage( void )
+  IQFDynamicFeedUpdateMessage()
   : IQFDynamicFeedMessage<IQFDynamicFeedUpdateMessage>() {}
   IQFDynamicFeedUpdateMessage( iterator_t& current, iterator_t& end )
   : IQFDynamicFeedMessage<IQFDynamicFeedUpdateMessage>( current, end ) {}
-  ~IQFDynamicFeedUpdateMessage(void){}
+  ~IQFDynamicFeedUpdateMessage() {}
 
 protected:
 private:
@@ -567,7 +567,7 @@ private:
 // *******
 
 template <class T, class charT>
-IQFBaseMessage<T, charT>::IQFBaseMessage( void )
+IQFBaseMessage<T, charT>::IQFBaseMessage()
 {
 }
 
@@ -578,7 +578,7 @@ IQFBaseMessage<T, charT>::IQFBaseMessage( iterator_t& current, iterator_t& end )
 }
 
 template <class T, class charT>
-IQFBaseMessage<T, charT>::~IQFBaseMessage(void) {
+IQFBaseMessage<T, charT>::~IQFBaseMessage() {
 }
 
 template <class T, class charT>
@@ -791,7 +791,7 @@ time IQFBaseMessage<T, charT>::parse_time( fielddelimiter_t fd ) const {
 // resize the vector to accept with out resizing so often?
 
 template <class T, class charT>
-IQFPricingMessage<T, charT>::IQFPricingMessage( void )
+IQFPricingMessage<T, charT>::IQFPricingMessage()
 : IQFBaseMessage<IQFPricingMessage<T> >()
 {
 }
@@ -807,7 +807,7 @@ IQFPricingMessage<T, charT>::~IQFPricingMessage() {
 }
 
 template <class T, class charT>
-ptime IQFPricingMessage<T, charT>::LastTradeTime( void ) const {
+ptime IQFPricingMessage<T, charT>::LastTradeTime() const {
 
   // use CurrencyTrader/Config.cpp as Boost::Spirit mechanism to build ptime
 
