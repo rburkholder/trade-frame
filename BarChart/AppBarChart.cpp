@@ -612,4 +612,3 @@ void AppBarChart::OnClose( wxCloseEvent& event ) {
   SaveState();
   event.Skip();  // auto followed by Destroy();
 }
-
