@@ -27,7 +27,7 @@
 
 #define SYMBOL_OPTIONCHAINVIEW_STYLE wxTAB_TRAVERSAL | wxDV_SINGLE | wxDV_ROW_LINES
 #define SYMBOL_OPTIONCHAINVIEW_TITLE _("Option Chain")
-#define SYMBOL_OPTIONCHAINVIEW_IDNAME ID_OPTIONCHINVIEW
+#define SYMBOL_OPTIONCHAINVIEW_IDNAME ID_OPTIONCHAINVIEW
 #define SYMBOL_OPTIONCHAINVIEW_SIZE wxSize(-1, -1)
 #define SYMBOL_OPTIONCHAINVIEW_POSITION wxDefaultPosition
 
@@ -38,7 +38,7 @@ public:
 
   OptionChainView();
   OptionChainView(
-    wxWindow* parent, wxWindowID id = ID_OPTIONCHINVIEW,
+    wxWindow* parent, wxWindowID id = ID_OPTIONCHAINVIEW,
     const wxPoint& pos = SYMBOL_OPTIONCHAINVIEW_POSITION,
     const wxSize& size = SYMBOL_OPTIONCHAINVIEW_SIZE,
     long style = SYMBOL_OPTIONCHAINVIEW_STYLE,
@@ -46,7 +46,7 @@ public:
   virtual ~OptionChainView();
 
   bool Create( wxWindow* parent,
-    wxWindowID id = ID_OPTIONCHINVIEW,
+    wxWindowID id = ID_OPTIONCHAINVIEW,
     const wxPoint& pos = SYMBOL_OPTIONCHAINVIEW_POSITION,
     const wxSize& size = SYMBOL_OPTIONCHAINVIEW_SIZE,
     long style = SYMBOL_OPTIONCHAINVIEW_STYLE,
@@ -56,7 +56,7 @@ protected:
 private:
 
   enum {
-    ID_Null=wxID_HIGHEST, ID_OPTIONCHINVIEW
+    ID_Null=wxID_HIGHEST, ID_OPTIONCHAINVIEW
   };
 
   void Init();
