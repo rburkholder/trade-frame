@@ -411,7 +411,7 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
     case 'C':
       {
         std::string str( iter, end );
-        std::cout << "IQFeed trade correction message: '" << str << "'" << std::endl;
+        std::cout << "IQFeed trade correction: '" << str << "'" << std::endl;
 
         IQFTradeCorrectionMessage* msg = m_reposTradeCorrectionMessages.CheckOutL();
         msg->Assign( iter, end );
