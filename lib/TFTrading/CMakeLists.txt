@@ -14,7 +14,7 @@ set(
     AccountOwner.h
     AcquireFundamentals.h
     AlternateInstrumentNames.h
-    BuildInstrument.h
+    BuildInstrument.hpp
     CashAccount.h
     CashManager.h
     CashTransaction.h

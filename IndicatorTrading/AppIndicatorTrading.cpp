@@ -43,7 +43,7 @@
 
 #include <TFTrading/Watch.h>
 #include <TFTrading/Position.h>
-#include <TFTrading/BuildInstrument.h>
+#include <TFTrading/BuildInstrument.hpp>
 #include <TFTrading/ComposeInstrument.hpp>
 
 #include <TFOptions/Engine.h>

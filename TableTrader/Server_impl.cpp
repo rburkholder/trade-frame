@@ -28,7 +28,7 @@
 #include <TFTrading/ProviderManager.h>
 #include <TFTrading/InstrumentManager.h>
 
-#include <TFTrading/BuildInstrument.h>
+#include <TFTrading/BuildInstrument.hpp>
 
 #include <TFOptions/Option.h>
 

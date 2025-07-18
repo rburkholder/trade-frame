@@ -44,7 +44,7 @@ TODO:
 
 #include <TFIndicators/RunningStats.h>
 
-#include <TFTrading/BuildInstrument.h>
+#include <TFTrading/BuildInstrument.hpp>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/FrameControls.h>

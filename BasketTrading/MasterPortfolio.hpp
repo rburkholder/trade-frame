@@ -34,7 +34,7 @@
 #include <OUCharting/ChartEntryIndicator.h>
 
 #include <TFTrading/ProviderManager.h>
-#include <TFTrading/BuildInstrument.h>
+#include <TFTrading/BuildInstrument.hpp>
 #include <TFTrading/PortfolioManager.h>
 
 #include <TFIndicators/Pivots.h>

@@ -31,7 +31,7 @@
 
 #include <TFTrading/Watch.h>
 #include <TFTrading/Position.h>
-#include <TFTrading/BuildInstrument.h>
+#include <TFTrading/BuildInstrument.hpp>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>

@@ -26,7 +26,7 @@
 #include <TFTrading/Watch.h>
 #include <TFTrading/InstrumentManager.h>
 
-#include "BuildInstrument.h"
+#include "BuildInstrument.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
