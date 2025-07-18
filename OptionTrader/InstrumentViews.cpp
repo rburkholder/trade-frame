@@ -29,6 +29,7 @@
 #include <TFVuTrading/TreeItem.hpp>
 
 #include "InstrumentViews.hpp"
+#include "OptionChainView.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -48,6 +49,7 @@ InstrumentViews::~InstrumentViews() {
 }
 
 void InstrumentViews::Init() {
+  m_pcurOptionChainView = nullptr;
   m_pTreeCtrl = nullptr;
   m_pRootTreeItem = nullptr;
 }
@@ -160,7 +162,11 @@ void InstrumentViews::AddSymbol( const std::string& sIQFeedSymbolName ) {
             ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
             im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
           }
-          BuildView( pInstrument );
+          CallAfter(
+            [this,p=pInstrument]() mutable { // mutable on p, compiler wants it constant
+              BuildView( p );
+            } );
+
         }
       } );
   }
@@ -179,8 +185,22 @@ void InstrumentViews::BuildView( pInstrument_t& pInstrument ) {
     mapInstrument_t::iterator iterInstrument = result.first;
     Instrument& instrument( iterInstrument->second );
 
-    instrument.pti = m_pRootTreeItem->AppendChild( sNameGeneric );
     instrument.pInstrument = pInstrument;
+    instrument.pti = m_pRootTreeItem->AppendChild(
+      sNameGeneric,
+      [this,&instrument,&sNameGeneric,&sNameIQFeed]( ou::tf::TreeItem* pti ){ // fClick_t
+        if ( nullptr != m_pcurOptionChainView ) { // todo: refactor this and the same below
+          BOOST_LOG_TRIVIAL(trace) << "chain hide2";
+          m_pcurOptionChainView->Hide();
+          m_pcurOptionChainView = nullptr;
+          //GetSizer()->Remove()
+        }
+        BOOST_LOG_TRIVIAL(trace) << "click view: " << sNameGeneric << " (" << sNameIQFeed << ')' ;
+        m_pcurOptionChainView = instrument.pChainView;
+        m_pcurOptionChainView->Show();
+        Layout();
+        GetParent()->Layout();
+      } );
 
     m_pRootTreeItem->Expand();
     wxSize sizeBest = m_pTreeCtrl->GetBestSize();
@@ -189,21 +209,32 @@ void InstrumentViews::BuildView( pInstrument_t& pInstrument ) {
     wxSize sizeSet( sizeVirt.x > sizeBest.x ? sizeVirt.x : sizeBest.x, -1 );
     //m_pTreeCtrl->SetSize( sizeSet );
     m_pTreeCtrl->SetMinSize( sizeSet );
+
+    m_pRootTreeItem->SortChildren();
+
+    if ( nullptr != m_pcurOptionChainView ) {
+      BOOST_LOG_TRIVIAL(trace) << "chain hide1" ;
+      m_pcurOptionChainView->Hide();
+      m_pcurOptionChainView = nullptr;
+      //GetSizer()->Remove()
+    }
+
+    BOOST_LOG_TRIVIAL(trace) << "chain view: " << sNameGeneric << " (" << sNameIQFeed << ')' ;
+
+    m_pcurOptionChainView = instrument.pChainView = new OptionChainView( this );
+    m_pcurOptionChainView->Show();
+    GetSizer()->Add( instrument.pChainView, 1, wxALL | wxEXPAND, 0 );
+
     //GetSizer()->SetSizeHints( this );
     Layout();
     //GetParent()->GetSizer()->SetSizeHints( GetParent() );
     GetParent()->Layout();
 
-    m_pRootTreeItem->SortChildren();
-  }
+}
   else {
     BOOST_LOG_TRIVIAL(error) << "symbol/instrument not found";
   }
 
-
-
-  //OptionChainView* pOptionChainView = new OptionChainView( this );
-  //GetSizer()->Add( pOptionChainView, 1, wxALL | wxEXPAND, 0 );
 }
 
 void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {

@@ -40,6 +40,7 @@
 
 class wxTreeCtrl;
 class wxTreeEvent;
+class OptionChainView;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -96,14 +97,19 @@ private:
 
     ou::tf::TreeItem* pti;
     pInstrument_t pInstrument;
+    OptionChainView* pChainView;
 
-    Instrument() {}
+    Instrument()
+    : pti( nullptr ), pChainView( nullptr )
+    {}
     Instrument( Instrument&& rhs ) {}
     ~Instrument() {}
   };
 
   using mapInstrument_t = std::unordered_map<std::string, Instrument>;
   mapInstrument_t m_mapInstrument;
+
+  OptionChainView* m_pcurOptionChainView;
 
   void Init();
   void CreateControls();
