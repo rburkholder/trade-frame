@@ -89,6 +89,8 @@ bool AppOptionTrader::OnInit() {
 }
 
 void AppOptionTrader::HandleIQFeedConnected( int ) {
+  BOOST_LOG_TRIVIAL(info) << "iqfeed connected";
+  m_pInstrumentViews->Set( m_piqfeed );
 }
 
 //void AppOptionTrader::HandleMenuActionAddSymbol() {

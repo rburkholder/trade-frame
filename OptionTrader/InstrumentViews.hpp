@@ -20,15 +20,18 @@
 
 #pragma once
 
-//#include <boost/date_time/gregorian/greg_date.hpp>
+#include <set>
+#include <unordered_map>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
 #include <wx/panel.h>
 
+#include <TFIQFeed/Provider.h>
+
 #define SYMBOL_INSTRUMENTVIEWS_STYLE wxTAB_TRAVERSAL
-#define SYMBOL_INSTRUMENTVIEWS_TITLE _("Book of Option Chains")
+#define SYMBOL_INSTRUMENTVIEWS_TITLE _("Instrument Views")
 #define SYMBOL_INSTRUMENTVIEWS_IDNAME ID_BOOKOPTIONCHAINS
 #define SYMBOL_INSTRUMENTVIEWS_SIZE wxDefaultSize
 #define SYMBOL_INSTRUMENTVIEWS_POSITION wxDefaultPosition
@@ -63,6 +66,8 @@ public:
     long style = SYMBOL_INSTRUMENTVIEWS_STYLE,
     const wxString& name = SYMBOL_INSTRUMENTVIEWS_TITLE );
 
+  void Set( ou::tf::iqfeed::Provider::pProvider_t& );
+
 protected:
 private:
 
@@ -72,41 +77,53 @@ private:
   , ID_TREECTRL
   };
 
+  ou::tf::iqfeed::Provider::pProvider_t m_piqf;
+
   wxTreeCtrl* m_pTreeCtrl;
   TreeItem* m_pRootTreeItem; // // root of custom tree items
 
-  //using fOnPageEvent_t = std::function<void(boost::gregorian::date)>;
-  using fOnPageEvent_t = std::function<void()>;
-  using fOnNodeEvent_t = std::function<void()>;
+  using setInstrumentName_t = std::set<std::string>;
+  setInstrumentName_t m_setInstrumentName;
 
-  void Set(
-    fOnPageEvent_t&& fOnPageChanging // departing
-  , fOnPageEvent_t&& fOnPageChanged  // arriving
-  , fOnNodeEvent_t&& fOnNodeCollapsed
-  , fOnNodeEvent_t&& fOnNodeExpanded
-  );
+  struct Instrument {
+    Instrument() {}
+    Instrument( Instrument&& rhs ) {}
+    ~Instrument() {}
+  };
 
-  fOnPageEvent_t m_fOnPageChanging; // about to depart page
-  fOnPageEvent_t m_fOnPageChanged;  // new page in place
-  fOnNodeEvent_t m_fOnNodeCollapsed;
-  fOnNodeEvent_t m_fOnNodeExpanded;
+  using mapInstrument_t = std::unordered_map<std::string, Instrument>;
+  mapInstrument_t m_mapInstrument;
 
   void Init();
   void CreateControls();
   void HandleTreeEventItemGetToolTip( wxTreeEvent& );
   void OnDestroy( wxWindowDestroyEvent& event );
 
-  void AddSymbol();
+  void DialogSymbol();
+  void AddSymbol( const std::string& );
+  void BuildInstrument( mapInstrument_t::iterator iter );
 
   wxBitmap GetBitmapResource( const wxString& name );
   static bool ShowToolTips() { return true; };
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
+    ar & m_mapInstrument.size();
+    for ( const mapInstrument_t::value_type& vt: m_mapInstrument ) {
+      ar & vt.first;
+    }
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
+    size_t nNames;
+    ar & nNames;
+    std::string sName;
+    while ( 0 != nNames ) {
+      ar & sName;
+      m_setInstrumentName.insert( sName ); // process once iqfeed connected
+      --nNames;
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()

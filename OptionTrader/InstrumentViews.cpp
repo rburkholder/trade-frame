@@ -18,6 +18,8 @@
  * Created: July 18, 2025 10:26:28
  */
 
+#include <boost/log/trivial.hpp>
+
 #include <wx/sizer.h>
 #include <wx/textdlg.h>
 #include <wx/treectrl.h>
@@ -47,10 +49,6 @@ InstrumentViews::~InstrumentViews() {
 void InstrumentViews::Init() {
   m_pTreeCtrl = nullptr;
   m_pRootTreeItem = nullptr;
-  m_fOnPageChanged = nullptr;
-  m_fOnPageChanging = nullptr;
-  m_fOnNodeCollapsed = nullptr;
-  m_fOnNodeExpanded = nullptr;
 }
 
 bool InstrumentViews::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
@@ -92,7 +90,7 @@ void InstrumentViews::CreateControls() {
       pti->AppendMenuItem(
         "Add Symbol",
         [this]( ou::tf::TreeItem* pti ) {
-          AddSymbol();
+          DialogSymbol();
         }
       );
     }
@@ -111,53 +109,61 @@ void InstrumentViews::HandleTreeEventItemGetToolTip( wxTreeEvent& event ) {
   event.Skip();
 }
 
-void InstrumentViews::AddSymbol() {
+void InstrumentViews::Set( ou::tf::iqfeed::Provider::pProvider_t& piqf ) {
+
+  assert( piqf );
+  assert( piqf->Connected() );
+  m_piqf = piqf;
+
+  for ( const setInstrumentName_t::value_type& vt: m_setInstrumentName ) {
+    AddSymbol( vt );
+  }
+  m_setInstrumentName.clear();
+}
+
+void InstrumentViews::DialogSymbol() {
 
   wxTextEntryDialog dialog( this, "Symbol Name:", "Add Symbol" );
   //dialog->ForceUpper(); // prints charters in reverse
   if ( wxID_OK == dialog.ShowModal() ) {
-    std::string sSymbolName = dialog.GetValue().Upper();
-    if ( 0 < sSymbolName.size() ) {
-      ou::tf::TreeItem* pti = m_pRootTreeItem->AppendChild( sSymbolName );
-
-      m_pRootTreeItem->Expand();
-      wxSize sizeBest = m_pTreeCtrl->GetVirtualSize();
-      //sizeBest.SetHeight( -1 );
-      m_pTreeCtrl->SetSize( sizeBest );
-      GetSizer()->SetSizeHints( this );
-
-      //mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSymbolName );
-      //assert( m_mapSymbolInfo.end() == iterSymbolInfo ); // symbols are unique across groups
-      //if ( m_mapSymbolInfo.end() != iterSymbolInfo ) {
-      //  BOOST_LOG_TRIVIAL(warning) << "symbol " << sSymbolName << " exists";
-      //}
-      //else {
-      //  auto result = m_mapSymbolInfo.emplace( sSymbolName, SymbolInfo() );
-      //  assert( result.second );
-      //  iterSymbolInfo = result.first;
-      //  AddSymbolToTree( sSymbolName, pti );
-      //  m_ptiRoot->SortChildren();
-      //}
-      //OnSymbolClick( iterSymbolInfo );
-
-      OptionChainView* pOptionChainView = new OptionChainView( this );
-      GetSizer()->Add( pOptionChainView, 1, wxALL | wxEXPAND, 0 );
-      GetParent()->Layout();
+    std::string sIQFeedSymbolName = dialog.GetValue().Upper();
+    if ( 0 < sIQFeedSymbolName.size() ) {
+      AddSymbol( sIQFeedSymbolName );
     }
   }
 
 }
 
-void InstrumentViews::Set(
-  fOnPageEvent_t&& fOnPageChanging // departed
-, fOnPageEvent_t&& fOnPageChanged  // arrival
-, fOnNodeEvent_t&& fOnNodeCollapsed
-, fOnNodeEvent_t&& fOnNodeExpanded
-) {
-  m_fOnPageChanging = std::move( fOnPageChanging );
-  m_fOnPageChanged  = std::move( fOnPageChanged );
-  m_fOnNodeCollapsed = std::move( fOnNodeCollapsed );
-  m_fOnNodeExpanded = std::move( fOnNodeExpanded );
+void InstrumentViews::AddSymbol( const std::string& sIQFeedSymbolName ) {
+
+  mapInstrument_t::iterator iterInstrument = m_mapInstrument.find( sIQFeedSymbolName );
+  if ( m_mapInstrument.end() != iterInstrument ) {
+    BOOST_LOG_TRIVIAL(warning) << "symbol " << sIQFeedSymbolName << " exists";
+  }
+  else {
+    ou::tf::TreeItem* pti = m_pRootTreeItem->AppendChild( sIQFeedSymbolName );
+
+    m_pRootTreeItem->Expand();
+    wxSize sizeBest = m_pTreeCtrl->GetVirtualSize();
+    //sizeBest.SetHeight( -1 );
+    m_pTreeCtrl->SetSize( sizeBest );
+    GetSizer()->SetSizeHints( this );
+    GetParent()->Layout();
+
+    m_pRootTreeItem->SortChildren();
+
+    auto result = m_mapInstrument.emplace( sIQFeedSymbolName, Instrument() );
+    assert( result.second );
+    iterInstrument = result.first;
+    BuildInstrument( iterInstrument );
+  }
+
+}
+
+void InstrumentViews::BuildInstrument( mapInstrument_t::iterator iter ) {
+
+  //OptionChainView* pOptionChainView = new OptionChainView( this );
+  //GetSizer()->Add( pOptionChainView, 1, wxALL | wxEXPAND, 0 );
 }
 
 void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
