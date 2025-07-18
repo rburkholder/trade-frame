@@ -18,67 +18,134 @@
  * Created: July 18, 2025 10:26:28
  */
 
+#include <wx/sizer.h>
+#include <wx/textdlg.h>
+#include <wx/treectrl.h>
+
+#include <TFVuTrading/TreeItem.hpp>
+
+#include "OptionChainView.hpp"
 #include "BookOfOptionChains.hpp"
-#include "wx/treebook.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-BookOfOptionChains::BookOfOptionChains(): wxTreebook() {
+BookOfOptionChains::BookOfOptionChains(): wxPanel() {
   Init();
 }
 
 BookOfOptionChains::BookOfOptionChains( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name )
-: wxTreebook()
+: wxPanel()
 {
   Init();
-  Create(parent, id, pos, size, style, name );
+  Create( parent, id, pos, size, style, name );
 }
 
 BookOfOptionChains::~BookOfOptionChains() {
 }
 
 void BookOfOptionChains::Init() {
-  m_bEventsAreBound = false;
+  m_pTreeCtrl = nullptr;
+  m_pRootTreeItem = nullptr;
   m_fOnPageChanged = nullptr;
   m_fOnPageChanging = nullptr;
+  m_fOnNodeCollapsed = nullptr;
+  m_fOnNodeExpanded = nullptr;
 }
 
 bool BookOfOptionChains::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
 
-  wxTreebook::Create(parent, id, pos, size, style, name );
+    SetExtraStyle( wxWS_EX_VALIDATE_RECURSIVELY );
+    wxPanel::Create( parent, id, pos, size, style );
 
-  CreateControls();
+    CreateControls();
+    if ( GetSizer() ) {
+      GetSizer()->SetSizeHints( this );
+    }
 
   return true;
 }
 
 void BookOfOptionChains::CreateControls() {
+
+  BookOfOptionChains* itemPanel1 = this;
+
+  wxBoxSizer* itemBoxSizer1 = new wxBoxSizer(wxHORIZONTAL);
+  itemPanel1->SetSizer( itemBoxSizer1 );
+
+  m_pTreeCtrl = new wxTreeCtrl( itemPanel1, ID_TREECTRL, wxDefaultPosition, wxDefaultSize,
+    wxTR_NO_LINES | wxTR_HAS_BUTTONS /*| wxTR_LINES_AT_ROOT | wxTR_HIDE_ROOT*/ | wxTR_SINGLE /*| wxTR_TWIST_BUTTONS*/ );
+  m_pTreeCtrl->Bind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &BookOfOptionChains::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
+  m_pTreeCtrl->ExpandAll();
+
+  itemBoxSizer1->Add( m_pTreeCtrl, 0, wxGROW|wxALL, 1 );
+
+  ou::tf::TreeItem::Bind( this, m_pTreeCtrl );
+
+  m_pRootTreeItem = new ou::tf::TreeItem( m_pTreeCtrl, "Symbols" );
+  //m_pRootTreeItem->SetOnClick(
+  //  [this]( TreeItem* pti ){
+  //  });
+  m_pRootTreeItem->SetOnBuildPopUp(
+    [this]( ou::tf::TreeItem* pti ) {
+      pti->NewMenu();
+      pti->AppendMenuItem(
+        "Add Symbol",
+        [this]( ou::tf::TreeItem* pti ) {
+          AddSymbol();
+        }
+      );
+    }
+  );
+
+  if ( BookOfOptionChains::ShowToolTips() ) {
+    m_pTreeCtrl->SetToolTip(_( "Symbols / Actions" ) );
+  }
+
   Bind( wxEVT_DESTROY, &BookOfOptionChains::OnDestroy, this );
-  BindBookEvents();
 
 }
 
-void BookOfOptionChains::BindBookEvents() {
-  if ( !m_bEventsAreBound ) {
-    // Page Change events cause issues during OnDestroy
-    Bind( wxEVT_TREEBOOK_PAGE_CHANGING, &BookOfOptionChains::OnPageChanging, this );
-    Bind( wxEVT_TREEBOOK_PAGE_CHANGED, &BookOfOptionChains::OnPageChanged, this );
-    Bind( wxEVT_TREEBOOK_NODE_COLLAPSED, &BookOfOptionChains::OnNodeCollapsed, this );
-    Bind( wxEVT_TREEBOOK_NODE_EXPANDED, &BookOfOptionChains::OnNodeExpanded, this );
-    m_bEventsAreBound = true;
-  }
+void BookOfOptionChains::HandleTreeEventItemGetToolTip( wxTreeEvent& event ) {
+  event.SetToolTip( "to be fixed" );
+  event.Skip();
 }
 
-void BookOfOptionChains::UnbindBookEvents() {
-  if ( m_bEventsAreBound ) {
-    // Note: page change events occur during Deletion of Pages
-    assert( Unbind( wxEVT_TREEBOOK_PAGE_CHANGING, &BookOfOptionChains::OnPageChanging, this ) );
-    assert( Unbind( wxEVT_TREEBOOK_PAGE_CHANGED, &BookOfOptionChains::OnPageChanged, this ) );
-    assert( Unbind( wxEVT_TREEBOOK_NODE_COLLAPSED, &BookOfOptionChains::OnNodeCollapsed, this ) );
-    assert( Unbind( wxEVT_TREEBOOK_NODE_EXPANDED, &BookOfOptionChains::OnNodeExpanded, this ) );
-    m_bEventsAreBound = false;
+void BookOfOptionChains::AddSymbol() {
+
+  wxTextEntryDialog dialog( this, "Symbol Name:", "Add Symbol" );
+  //dialog->ForceUpper(); // prints charters in reverse
+  if ( wxID_OK == dialog.ShowModal() ) {
+    std::string sSymbolName = dialog.GetValue().Upper();
+    if ( 0 < sSymbolName.size() ) {
+      ou::tf::TreeItem* pti = m_pRootTreeItem->AppendChild( sSymbolName );
+
+      m_pRootTreeItem->Expand();
+      wxSize sizeBest = m_pTreeCtrl->GetVirtualSize();
+      //sizeBest.SetHeight( -1 );
+      m_pTreeCtrl->SetSize( sizeBest );
+      GetSizer()->SetSizeHints( this );
+
+      //mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( sSymbolName );
+      //assert( m_mapSymbolInfo.end() == iterSymbolInfo ); // symbols are unique across groups
+      //if ( m_mapSymbolInfo.end() != iterSymbolInfo ) {
+      //  BOOST_LOG_TRIVIAL(warning) << "symbol " << sSymbolName << " exists";
+      //}
+      //else {
+      //  auto result = m_mapSymbolInfo.emplace( sSymbolName, SymbolInfo() );
+      //  assert( result.second );
+      //  iterSymbolInfo = result.first;
+      //  AddSymbolToTree( sSymbolName, pti );
+      //  m_ptiRoot->SortChildren();
+      //}
+      //OnSymbolClick( iterSymbolInfo );
+
+      OptionChainView* pOptionChainView = new OptionChainView( this );
+      GetSizer()->Add( pOptionChainView, 1, wxALL | wxEXPAND, 0 );
+      GetSizer()->SetSizeHints( this );
+    }
   }
+
 }
 
 void BookOfOptionChains::Set(
@@ -93,51 +160,17 @@ void BookOfOptionChains::Set(
   m_fOnNodeExpanded = std::move( fOnNodeExpanded );
 }
 
-// start leaving old page
-void BookOfOptionChains::OnPageChanging( wxBookCtrlEvent& event ) {
-  int ixTab = event.GetOldSelection();
-  if ( -1 != ixTab ) {
-  }
-  event.Skip();
-}
-
-// finishing arriving at new page
-void BookOfOptionChains::OnPageChanged( wxBookCtrlEvent& event ) {
-  int ixTab = event.GetSelection();
-  event.Skip();
-}
-
-void BookOfOptionChains::OnNodeCollapsed( wxBookCtrlEvent& event ) {
-  event.Skip();
-}
-
-void BookOfOptionChains::OnNodeExpanded( wxBookCtrlEvent& event ) {
-  event.Skip();
-}
-
 void BookOfOptionChains::OnDestroy( wxWindowDestroyEvent& event ) {
-
-  UnbindBookEvents();
-
-  //DeleteAllPages();
-  while ( 0 != GetPageCount() ) {
-   //DeletePage( 0 );
-   RemovePage( 0 );
-  }
-
+  //TreeItem::UnBind( this, m_pTree ); // to be fixed
+  m_pTreeCtrl->Unbind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &BookOfOptionChains::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
+  m_pTreeCtrl->DeleteAllItems();
   assert( Unbind( wxEVT_DESTROY, &BookOfOptionChains::OnDestroy, this ) );
-
   event.Skip( true );  // auto followed by Destroy();
 }
 
 wxBitmap BookOfOptionChains::GetBitmapResource( const wxString& name ) {
-    wxUnusedVar(name);
-    return wxNullBitmap;
-}
-
-wxIcon BookOfOptionChains::GetIconResource( const wxString& name ) {
-    wxUnusedVar(name);
-    return wxNullIcon;
+  wxUnusedVar(name);
+  return wxNullBitmap;
 }
 
 } // namespace tf

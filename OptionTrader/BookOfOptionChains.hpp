@@ -25,19 +25,24 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
-#include <wx/treebook.h>
+#include <wx/panel.h>
+
+#define SYMBOL_BOOKOFOPTIONCHAINS_STYLE wxTAB_TRAVERSAL
+#define SYMBOL_BOOKOFOPTIONCHAINS_TITLE _("Book of Option Chains")
+#define SYMBOL_BOOKOFOPTIONCHAINS_IDNAME ID_BOOKOPTIONCHAINS
+#define SYMBOL_BOOKOFOPTIONCHAINS_SIZE wxDefaultSize
+#define SYMBOL_BOOKOFOPTIONCHAINS_POSITION wxDefaultPosition
+
+class wxTreeCtrl;
+class wxTreeEvent;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-#define SYMBOL_BOOKOFOPTIONCHAINS_STYLE wxTAB_TRAVERSAL | wxBK_LEFT
-#define SYMBOL_BOOKOFOPTIONCHAINS_TITLE _("Book of Option Chains")
-#define SYMBOL_BOOKOFOPTIONCHAINS_IDNAME ID_BOOKOPTIONCHAINS
-#define SYMBOL_BOOKOFOPTIONCHAINS_SIZE wxSize(-1, -1)
-#define SYMBOL_BOOKOFOPTIONCHAINS_POSITION wxDefaultPosition
+class TreeItem;
 
-class BookOfOptionChains:
-  public wxTreebook
+class BookOfOptionChains
+: public wxPanel
 {
   friend class boost::serialization::access;
 public:
@@ -58,6 +63,18 @@ public:
     long style = SYMBOL_BOOKOFOPTIONCHAINS_STYLE,
     const wxString& name = SYMBOL_BOOKOFOPTIONCHAINS_TITLE );
 
+protected:
+private:
+
+  enum {
+    ID_Null=wxID_HIGHEST
+  , ID_BOOKOPTIONCHAINS
+  , ID_TREECTRL
+  };
+
+  wxTreeCtrl* m_pTreeCtrl;
+  TreeItem* m_pRootTreeItem; // // root of custom tree items
+
   //using fOnPageEvent_t = std::function<void(boost::gregorian::date)>;
   using fOnPageEvent_t = std::function<void()>;
   using fOnNodeEvent_t = std::function<void()>;
@@ -69,35 +86,20 @@ public:
   , fOnNodeEvent_t&& fOnNodeExpanded
   );
 
-protected:
-private:
-
-  enum {
-    ID_Null=wxID_HIGHEST, ID_BOOKOPTIONCHAINS
-  };
-
-  bool m_bEventsAreBound;
-
   fOnPageEvent_t m_fOnPageChanging; // about to depart page
   fOnPageEvent_t m_fOnPageChanged;  // new page in place
   fOnNodeEvent_t m_fOnNodeCollapsed;
   fOnNodeEvent_t m_fOnNodeExpanded;
 
-  void OnPageChanged( wxBookCtrlEvent& );
-  void OnPageChanging( wxBookCtrlEvent& );
-  void OnNodeCollapsed( wxBookCtrlEvent& );
-  void OnNodeExpanded( wxBookCtrlEvent& );
-
   void Init();
   void CreateControls();
+  void HandleTreeEventItemGetToolTip( wxTreeEvent& );
   void OnDestroy( wxWindowDestroyEvent& event );
 
-  wxBitmap GetBitmapResource( const wxString& name );
-  wxIcon GetIconResource( const wxString& name );
-  static bool ShowToolTips() { return true; };
+  void AddSymbol();
 
-  void BindBookEvents();
-  void UnbindBookEvents();
+  wxBitmap GetBitmapResource( const wxString& name );
+  static bool ShowToolTips() { return true; };
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {

@@ -32,7 +32,6 @@
 
 #include "AppOptionTrader.hpp"
 #include "BookOfOptionChains.hpp"
-#include "OptionChainView.hpp"
 
 namespace {
   static const std::string c_sAppTitle(        "Option Trader" );
@@ -66,20 +65,20 @@ bool AppOptionTrader::OnInit() {
   m_pFrameMain->SetSizer( sizerFrame );
 
   m_pBookOfOptionChains = new ou::tf::BookOfOptionChains( m_pFrameMain );
-  sizerFrame->Add( m_pBookOfOptionChains, 1, wxALL | wxEXPAND, 1 );
-  m_pBookOfOptionChains->Show();
+  sizerFrame->Add( m_pBookOfOptionChains, 1, wxALL | wxEXPAND, 0 );
+  //m_pBookOfOptionChains->Show();
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppOptionTrader::OnClose, this );  // start close of windows and controls
 
-  FrameMain::vpItems_t vItems;
-  typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
-  vItems.push_back( new mi( "Add Symbol", MakeDelegate( this, &AppOptionTrader::HandleMenuActionAddSymbol ) ) );
-  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
+  //FrameMain::vpItems_t vItems;
+  //typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
+  //vItems.push_back( new mi( "Add Symbol", MakeDelegate( this, &AppOptionTrader::HandleMenuActionAddSymbol ) ) );
+  //m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   LoadState();
 
   m_pFrameMain->Layout();
-  m_pFrameMain->Show( true ); // triggers the auto move
+  m_pFrameMain->Show(); // triggers the auto move
 
   m_piqfeed = ou::tf::iqfeed::Provider::Factory();
   m_piqfeed->OnConnected.Add( MakeDelegate( this, &AppOptionTrader::HandleIQFeedConnected ) );
@@ -92,13 +91,8 @@ bool AppOptionTrader::OnInit() {
 void AppOptionTrader::HandleIQFeedConnected( int ) {
 }
 
-void AppOptionTrader::HandleMenuActionAddSymbol() {
-  OptionChainView* pOptionChainView = new OptionChainView( m_pBookOfOptionChains );
-  bool bResult = m_pBookOfOptionChains->AddPage( pOptionChainView, "A Symbol", true /* bSelect */ );
-  assert( bResult );
-  //m_pBookOfOptionChains->Layout();
-  m_pFrameMain->Layout();
-}
+//void AppOptionTrader::HandleMenuActionAddSymbol() {
+//}
 
 void AppOptionTrader::SaveState() {
   std::cout << "Saving Config ..." << std::endl;

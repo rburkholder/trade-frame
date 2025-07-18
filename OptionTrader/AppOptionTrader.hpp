@@ -65,7 +65,7 @@ private:
   pAcquireFundamentals_t m_pAcquireFundamentals_burial;
 
   void HandleIQFeedConnected( int );
-  void HandleMenuActionAddSymbol();
+  //void HandleMenuActionAddSymbol();
 
   virtual bool OnInit();
   virtual int OnExit();
