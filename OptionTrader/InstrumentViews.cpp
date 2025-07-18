@@ -24,9 +24,10 @@
 #include <wx/textdlg.h>
 #include <wx/treectrl.h>
 
+#include <TFTrading/InstrumentManager.h>
+
 #include <TFVuTrading/TreeItem.hpp>
 
-#include "OptionChainView.hpp"
 #include "InstrumentViews.hpp"
 
 namespace ou { // One Unified
@@ -115,10 +116,15 @@ void InstrumentViews::Set( ou::tf::iqfeed::Provider::pProvider_t& piqf ) {
   assert( piqf->Connected() );
   m_piqf = piqf;
 
-  for ( const setInstrumentName_t::value_type& vt: m_setInstrumentName ) {
-    AddSymbol( vt );
-  }
-  m_setInstrumentName.clear();
+  m_pComposeInstrument = std::make_unique<ou::tf::ComposeInstrument>(
+    piqf,
+    [this](){
+      for ( const setInstrumentName_t::value_type& vt: m_setInstrumentName ) {
+        AddSymbol( vt );
+      }
+      m_setInstrumentName.clear();
+    } );
+
 }
 
 void InstrumentViews::DialogSymbol() {
@@ -136,31 +142,65 @@ void InstrumentViews::DialogSymbol() {
 
 void InstrumentViews::AddSymbol( const std::string& sIQFeedSymbolName ) {
 
+  // todo: tool tip shows real symbol name, map is user requested symbol
+
   mapInstrument_t::iterator iterInstrument = m_mapInstrument.find( sIQFeedSymbolName );
   if ( m_mapInstrument.end() != iterInstrument ) {
     BOOST_LOG_TRIVIAL(warning) << "symbol " << sIQFeedSymbolName << " exists";
   }
   else {
-    ou::tf::TreeItem* pti = m_pRootTreeItem->AppendChild( sIQFeedSymbolName );
-
-    m_pRootTreeItem->Expand();
-    wxSize sizeBest = m_pTreeCtrl->GetVirtualSize();
-    //sizeBest.SetHeight( -1 );
-    m_pTreeCtrl->SetSize( sizeBest );
-    GetSizer()->SetSizeHints( this );
-    GetParent()->Layout();
-
-    m_pRootTreeItem->SortChildren();
-
-    auto result = m_mapInstrument.emplace( sIQFeedSymbolName, Instrument() );
-    assert( result.second );
-    iterInstrument = result.first;
-    BuildInstrument( iterInstrument );
+    // need the database here for persistence
+    // need to change bool to tri-state:  constructed, cached, does not exist
+    // don't add to map prior to this, need to determine if instrument exists first
+    m_pComposeInstrument->Compose(
+      sIQFeedSymbolName,
+      [this]( pInstrument_t pInstrument, bool bConstructed ){
+        if ( pInstrument ) {
+          if ( bConstructed ) {
+            ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+            im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+          }
+          BuildView( pInstrument );
+        }
+      } );
   }
 
 }
 
-void InstrumentViews::BuildInstrument( mapInstrument_t::iterator iter ) {
+void InstrumentViews::BuildView( pInstrument_t& pInstrument ) {
+
+  if ( pInstrument ) {
+
+    const std::string& sNameGeneric( pInstrument->GetInstrumentName() );
+    const std::string& sNameIQFeed(  pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
+
+    auto result = m_mapInstrument.emplace( sNameIQFeed, Instrument() );
+    assert( result.second );
+    mapInstrument_t::iterator iterInstrument = result.first;
+    Instrument& instrument( iterInstrument->second );
+
+    instrument.pti = m_pRootTreeItem->AppendChild( sNameGeneric );
+    instrument.pInstrument = pInstrument;
+
+    m_pRootTreeItem->Expand();
+    wxSize sizeBest = m_pTreeCtrl->GetBestSize();
+    wxSize sizeVirt = m_pTreeCtrl->GetVirtualSize();
+    //wxSize sizeWhat = m_pTreeCtrl->GetBestVirtualSize();
+    wxSize sizeSet( sizeVirt.x > sizeBest.x ? sizeVirt.x : sizeBest.x, -1 );
+    //m_pTreeCtrl->SetSize( sizeSet );
+    m_pTreeCtrl->SetMinSize( sizeSet );
+    //GetSizer()->SetSizeHints( this );
+    Layout();
+    //GetParent()->GetSizer()->SetSizeHints( GetParent() );
+    GetParent()->Layout();
+
+    m_pRootTreeItem->SortChildren();
+  }
+  else {
+    BOOST_LOG_TRIVIAL(error) << "symbol/instrument not found";
+  }
+
+
 
   //OptionChainView* pOptionChainView = new OptionChainView( this );
   //GetSizer()->Add( pOptionChainView, 1, wxALL | wxEXPAND, 0 );

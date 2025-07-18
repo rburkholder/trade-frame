@@ -30,6 +30,8 @@
 
 #include <TFIQFeed/Provider.h>
 
+#include <TFTrading/ComposeInstrument.hpp>
+
 #define SYMBOL_INSTRUMENTVIEWS_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_INSTRUMENTVIEWS_TITLE _("Instrument Views")
 #define SYMBOL_INSTRUMENTVIEWS_IDNAME ID_BOOKOPTIONCHAINS
@@ -77,6 +79,8 @@ private:
   , ID_TREECTRL
   };
 
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
   ou::tf::iqfeed::Provider::pProvider_t m_piqf;
 
   wxTreeCtrl* m_pTreeCtrl;
@@ -85,7 +89,14 @@ private:
   using setInstrumentName_t = std::set<std::string>;
   setInstrumentName_t m_setInstrumentName;
 
+  using pComposeInstrument_t = std::unique_ptr<ou::tf::ComposeInstrument>;
+  pComposeInstrument_t m_pComposeInstrument;
+
   struct Instrument {
+
+    ou::tf::TreeItem* pti;
+    pInstrument_t pInstrument;
+
     Instrument() {}
     Instrument( Instrument&& rhs ) {}
     ~Instrument() {}
@@ -101,7 +112,7 @@ private:
 
   void DialogSymbol();
   void AddSymbol( const std::string& );
-  void BuildInstrument( mapInstrument_t::iterator iter );
+  void BuildView( pInstrument_t& );
 
   wxBitmap GetBitmapResource( const wxString& name );
   static bool ShowToolTips() { return true; };
