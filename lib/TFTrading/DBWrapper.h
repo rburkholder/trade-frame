@@ -32,7 +32,7 @@ class db {
 public:
 
   db( const std::string& sFileName );
-  virtual ~db();
+  ~db();
 
 protected:
 private:
