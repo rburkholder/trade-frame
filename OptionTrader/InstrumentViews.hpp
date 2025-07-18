@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 /*
- * File:    BookOfOptionChains.hpp
+ * File:    InstrumentViews.hpp
  * Author:  raymond@burkholder.net
  * Project: OptionTrader
  * Created: July 18, 2025 10:26:28
@@ -27,11 +27,11 @@
 
 #include <wx/panel.h>
 
-#define SYMBOL_BOOKOFOPTIONCHAINS_STYLE wxTAB_TRAVERSAL
-#define SYMBOL_BOOKOFOPTIONCHAINS_TITLE _("Book of Option Chains")
-#define SYMBOL_BOOKOFOPTIONCHAINS_IDNAME ID_BOOKOPTIONCHAINS
-#define SYMBOL_BOOKOFOPTIONCHAINS_SIZE wxDefaultSize
-#define SYMBOL_BOOKOFOPTIONCHAINS_POSITION wxDefaultPosition
+#define SYMBOL_INSTRUMENTVIEWS_STYLE wxTAB_TRAVERSAL
+#define SYMBOL_INSTRUMENTVIEWS_TITLE _("Book of Option Chains")
+#define SYMBOL_INSTRUMENTVIEWS_IDNAME ID_BOOKOPTIONCHAINS
+#define SYMBOL_INSTRUMENTVIEWS_SIZE wxDefaultSize
+#define SYMBOL_INSTRUMENTVIEWS_POSITION wxDefaultPosition
 
 class wxTreeCtrl;
 class wxTreeEvent;
@@ -41,27 +41,27 @@ namespace tf { // TradeFrame
 
 class TreeItem;
 
-class BookOfOptionChains
+class InstrumentViews
 : public wxPanel
 {
   friend class boost::serialization::access;
 public:
 
-  BookOfOptionChains();
-  BookOfOptionChains(
-    wxWindow* parent, wxWindowID id = SYMBOL_BOOKOFOPTIONCHAINS_IDNAME,
-    const wxPoint& pos = SYMBOL_BOOKOFOPTIONCHAINS_POSITION,
-    const wxSize& size = SYMBOL_BOOKOFOPTIONCHAINS_SIZE,
-    long style = SYMBOL_BOOKOFOPTIONCHAINS_STYLE,
-    const wxString& name = SYMBOL_BOOKOFOPTIONCHAINS_TITLE );
-  virtual ~BookOfOptionChains();
+  InstrumentViews();
+  InstrumentViews(
+    wxWindow* parent, wxWindowID id = SYMBOL_INSTRUMENTVIEWS_IDNAME,
+    const wxPoint& pos = SYMBOL_INSTRUMENTVIEWS_POSITION,
+    const wxSize& size = SYMBOL_INSTRUMENTVIEWS_SIZE,
+    long style = SYMBOL_INSTRUMENTVIEWS_STYLE,
+    const wxString& name = SYMBOL_INSTRUMENTVIEWS_TITLE );
+  virtual ~InstrumentViews();
 
   bool Create( wxWindow* parent,
-    wxWindowID id = SYMBOL_BOOKOFOPTIONCHAINS_IDNAME,
-    const wxPoint& pos = SYMBOL_BOOKOFOPTIONCHAINS_POSITION,
-    const wxSize& size = SYMBOL_BOOKOFOPTIONCHAINS_SIZE,
-    long style = SYMBOL_BOOKOFOPTIONCHAINS_STYLE,
-    const wxString& name = SYMBOL_BOOKOFOPTIONCHAINS_TITLE );
+    wxWindowID id = SYMBOL_INSTRUMENTVIEWS_IDNAME,
+    const wxPoint& pos = SYMBOL_INSTRUMENTVIEWS_POSITION,
+    const wxSize& size = SYMBOL_INSTRUMENTVIEWS_SIZE,
+    long style = SYMBOL_INSTRUMENTVIEWS_STYLE,
+    const wxString& name = SYMBOL_INSTRUMENTVIEWS_TITLE );
 
 protected:
 private:
@@ -116,4 +116,4 @@ private:
 } // namespace tf
 } // namespace ou
 
-BOOST_CLASS_VERSION(ou::tf::BookOfOptionChains, 1)
+BOOST_CLASS_VERSION(ou::tf::InstrumentViews, 1)

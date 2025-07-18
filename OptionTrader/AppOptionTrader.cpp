@@ -31,7 +31,7 @@
 #include <TFVuTrading/FrameMain.h>
 
 #include "AppOptionTrader.hpp"
-#include "BookOfOptionChains.hpp"
+#include "InstrumentViews.hpp"
 
 namespace {
   static const std::string c_sAppTitle(        "Option Trader" );
@@ -64,8 +64,8 @@ bool AppOptionTrader::OnInit() {
   sizerFrame = new wxBoxSizer( wxHORIZONTAL );
   m_pFrameMain->SetSizer( sizerFrame );
 
-  m_pBookOfOptionChains = new ou::tf::BookOfOptionChains( m_pFrameMain );
-  sizerFrame->Add( m_pBookOfOptionChains, 1, wxALL | wxEXPAND, 0 );
+  m_pInstrumentViews = new ou::tf::InstrumentViews( m_pFrameMain );
+  sizerFrame->Add( m_pInstrumentViews, 1, wxALL | wxEXPAND, 0 );
   //m_pBookOfOptionChains->Show();
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppOptionTrader::OnClose, this );  // start close of windows and controls

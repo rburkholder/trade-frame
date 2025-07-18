@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 /*
- * File:    BookOfOptionChains.vpp
+ * File:    InstrumentViews.vpp
  * Author:  raymond@burkholder.net
  * Project: OptionTrader
  * Created: July 18, 2025 10:26:28
@@ -25,26 +25,26 @@
 #include <TFVuTrading/TreeItem.hpp>
 
 #include "OptionChainView.hpp"
-#include "BookOfOptionChains.hpp"
+#include "InstrumentViews.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-BookOfOptionChains::BookOfOptionChains(): wxPanel() {
+InstrumentViews::InstrumentViews(): wxPanel() {
   Init();
 }
 
-BookOfOptionChains::BookOfOptionChains( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name )
+InstrumentViews::InstrumentViews( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name )
 : wxPanel()
 {
   Init();
   Create( parent, id, pos, size, style, name );
 }
 
-BookOfOptionChains::~BookOfOptionChains() {
+InstrumentViews::~InstrumentViews() {
 }
 
-void BookOfOptionChains::Init() {
+void InstrumentViews::Init() {
   m_pTreeCtrl = nullptr;
   m_pRootTreeItem = nullptr;
   m_fOnPageChanged = nullptr;
@@ -53,7 +53,7 @@ void BookOfOptionChains::Init() {
   m_fOnNodeExpanded = nullptr;
 }
 
-bool BookOfOptionChains::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
+bool InstrumentViews::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
 
     SetExtraStyle( wxWS_EX_VALIDATE_RECURSIVELY );
     wxPanel::Create( parent, id, pos, size, style );
@@ -66,16 +66,16 @@ bool BookOfOptionChains::Create( wxWindow* parent, wxWindowID id, const wxPoint&
   return true;
 }
 
-void BookOfOptionChains::CreateControls() {
+void InstrumentViews::CreateControls() {
 
-  BookOfOptionChains* itemPanel1 = this;
+  InstrumentViews* itemPanel1 = this;
 
   wxBoxSizer* itemBoxSizer1 = new wxBoxSizer(wxHORIZONTAL);
   itemPanel1->SetSizer( itemBoxSizer1 );
 
   m_pTreeCtrl = new wxTreeCtrl( itemPanel1, ID_TREECTRL, wxDefaultPosition, wxDefaultSize,
     wxTR_NO_LINES | wxTR_HAS_BUTTONS /*| wxTR_LINES_AT_ROOT | wxTR_HIDE_ROOT*/ | wxTR_SINGLE /*| wxTR_TWIST_BUTTONS*/ );
-  m_pTreeCtrl->Bind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &BookOfOptionChains::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
+  m_pTreeCtrl->Bind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &InstrumentViews::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
   m_pTreeCtrl->ExpandAll();
 
   itemBoxSizer1->Add( m_pTreeCtrl, 0, wxGROW|wxALL, 1 );
@@ -98,20 +98,20 @@ void BookOfOptionChains::CreateControls() {
     }
   );
 
-  if ( BookOfOptionChains::ShowToolTips() ) {
+  if ( InstrumentViews::ShowToolTips() ) {
     m_pTreeCtrl->SetToolTip(_( "Symbols / Actions" ) );
   }
 
-  Bind( wxEVT_DESTROY, &BookOfOptionChains::OnDestroy, this );
+  Bind( wxEVT_DESTROY, &InstrumentViews::OnDestroy, this );
 
 }
 
-void BookOfOptionChains::HandleTreeEventItemGetToolTip( wxTreeEvent& event ) {
+void InstrumentViews::HandleTreeEventItemGetToolTip( wxTreeEvent& event ) {
   event.SetToolTip( "to be fixed" );
   event.Skip();
 }
 
-void BookOfOptionChains::AddSymbol() {
+void InstrumentViews::AddSymbol() {
 
   wxTextEntryDialog dialog( this, "Symbol Name:", "Add Symbol" );
   //dialog->ForceUpper(); // prints charters in reverse
@@ -148,7 +148,7 @@ void BookOfOptionChains::AddSymbol() {
 
 }
 
-void BookOfOptionChains::Set(
+void InstrumentViews::Set(
   fOnPageEvent_t&& fOnPageChanging // departed
 , fOnPageEvent_t&& fOnPageChanged  // arrival
 , fOnNodeEvent_t&& fOnNodeCollapsed
@@ -160,15 +160,15 @@ void BookOfOptionChains::Set(
   m_fOnNodeExpanded = std::move( fOnNodeExpanded );
 }
 
-void BookOfOptionChains::OnDestroy( wxWindowDestroyEvent& event ) {
+void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
   //TreeItem::UnBind( this, m_pTree ); // to be fixed
-  m_pTreeCtrl->Unbind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &BookOfOptionChains::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
+  m_pTreeCtrl->Unbind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &InstrumentViews::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
   m_pTreeCtrl->DeleteAllItems();
-  assert( Unbind( wxEVT_DESTROY, &BookOfOptionChains::OnDestroy, this ) );
+  assert( Unbind( wxEVT_DESTROY, &InstrumentViews::OnDestroy, this ) );
   event.Skip( true );  // auto followed by Destroy();
 }
 
-wxBitmap BookOfOptionChains::GetBitmapResource( const wxString& name ) {
+wxBitmap InstrumentViews::GetBitmapResource( const wxString& name ) {
   wxUnusedVar(name);
   return wxNullBitmap;
 }

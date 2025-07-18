@@ -37,7 +37,7 @@ class FrameMain;
 namespace ou {
 namespace tf {
   class AcquireFundamentals;
-  class BookOfOptionChains;
+  class InstrumentViews;
 }
 }
 
@@ -54,7 +54,7 @@ private:
   //config::Choices m_choices;
 
   FrameMain* m_pFrameMain;
-  ou::tf::BookOfOptionChains* m_pBookOfOptionChains;
+  ou::tf::InstrumentViews* m_pInstrumentViews;
 
   ou::ChartDataView m_cdv;
 
@@ -77,13 +77,13 @@ private:
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
-    ar & *m_pBookOfOptionChains;
+    ar & *m_pInstrumentViews;
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
-    ar & *m_pBookOfOptionChains;
+    ar & *m_pInstrumentViews;
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
