@@ -113,8 +113,9 @@ void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, fInstrument_t
           const std::string sBase( sName.substr( 0, sName.size() - 1 ) ); // remove trailing #
           boost::gregorian::date expiry( pInstrument->GetExpiry() ); // will be matching expiry of this continous future
 
+          // todo: auto-calc the year range
           m_pOptionChainQuery->QueryFuturesChain(  // obtain a list of futures
-            sBase, "", "4567" /* 2024, 2025, 2026, 2027 */ , "4" /* 4 months */,
+            sBase, "", "5678" /* 2025, 2026, 2027, 2028 */ , "4" /* 4 months */,
             [this,expiry,iterQuery]( const iqfeed::OptionChainQuery::FuturesList& list ) mutable {
 
               if ( 0 == list.vSymbol.size() ) {
