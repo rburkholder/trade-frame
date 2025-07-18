@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <set>
 #include <map>
 #include <functional>
 
@@ -35,6 +34,8 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 // can be run as shared_ptr, queues are thread safe
+// use ComposeInstrument for automated front month futures determination
+// should have database active to handle cached instruments
 
 class BuildInstrument {
 public:
@@ -58,8 +59,6 @@ protected:
 private:
 
   using pAcquireFundamentals_t = AcquireFundamentals::pAcquireFundamentals_t;
-
-  using setSymbol_t = std::set<std::string>;
 
   using mapSymbol_t = std::map<std::string,fInstrument_t>;
 
