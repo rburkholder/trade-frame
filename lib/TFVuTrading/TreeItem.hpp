@@ -58,6 +58,8 @@ public:
   TreeItem* AppendChild( const std::string&, fOnClick_t&&, fOnBuildPopUp_t&& );  // all tree build operations
   TreeItem* AppendChild( const std::string&, fOnClick_t&&, fOnBuildPopUp_t&&, fCustomItemData_Factory_t&& );  // all tree build operations
 
+  void Expand();
+
   void SortChildren();
 
   void IterateChildren( fIterateChildren_t&& );

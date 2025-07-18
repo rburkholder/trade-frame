@@ -113,6 +113,10 @@ TreeItem* TreeItem::AppendChild(
   return pTreeItemChild;
 }
 
+void TreeItem::Expand() {
+  m_pTreeCtrl->Expand( m_idSelf );
+}
+
 void TreeItem::SortChildren() {
   m_pTreeCtrl->SortChildren( m_idSelf );
 }
