@@ -142,7 +142,7 @@ void BookOfOptionChains::AddSymbol() {
 
       OptionChainView* pOptionChainView = new OptionChainView( this );
       GetSizer()->Add( pOptionChainView, 1, wxALL | wxEXPAND, 0 );
-      GetSizer()->SetSizeHints( this );
+      GetParent()->Layout();
     }
   }
 
