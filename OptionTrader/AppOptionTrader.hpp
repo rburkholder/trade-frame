@@ -28,6 +28,8 @@
 
 #include <OUCharting/ChartDataView.h>
 
+#include <TFTrading/DBWrapper.h>
+
 #include <TFIQFeed/Provider.h>
 
 #include <TFBitsNPieces/FrameWork02.hpp>
@@ -36,7 +38,6 @@ class FrameMain;
 
 namespace ou {
 namespace tf {
-  class AcquireFundamentals;
   class InstrumentViews;
 }
 }
@@ -61,8 +62,7 @@ private:
   using pIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
   pIQFeed_t m_piqfeed;
 
-  using pAcquireFundamentals_t = std::shared_ptr<ou::tf::AcquireFundamentals>;
-  pAcquireFundamentals_t m_pAcquireFundamentals_burial;
+  std::unique_ptr<ou::tf::db> m_pdb;
 
   void HandleIQFeedConnected( int );
   //void HandleMenuActionAddSymbol();

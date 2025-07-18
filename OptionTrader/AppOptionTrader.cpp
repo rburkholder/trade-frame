@@ -26,8 +26,6 @@
 
 #include <wx/sizer.h>
 
-#include <TFTrading/AcquireFundamentals.h>
-
 #include <TFVuTrading/FrameMain.h>
 
 #include "AppOptionTrader.hpp"
@@ -39,7 +37,7 @@ namespace {
   static const std::string c_sChoicesFilename( c_sAppNamePrefix + ".cfg" );
   static const std::string c_sDbName(          c_sAppNamePrefix + ".db" );
   static const std::string c_sStateFileName(   c_sAppNamePrefix + ".state" );
-  static const std::string c_sVendorName( "One Unified Net Limited" );
+  static const std::string c_sVendorName(      "One Unified Net Limited" );
 }
 
 IMPLEMENT_APP(AppOptionTrader)
@@ -84,6 +82,16 @@ bool AppOptionTrader::OnInit() {
   m_piqfeed->OnConnected.Add( MakeDelegate( this, &AppOptionTrader::HandleIQFeedConnected ) );
   m_piqfeed->Connect();
 
+  {
+    // for now, overwrite old database on each start
+    //if ( boost::filesystem::exists( c_sDbName ) ) {
+    //  boost::filesystem::remove( c_sDbName );
+    //}
+
+    // this needs to be placed after the providers are registered
+    m_pdb = std::make_unique<ou::tf::db>( c_sDbName ); // construct database
+  }
+
   return true;
 
 }
@@ -126,8 +134,6 @@ void AppOptionTrader::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
 
   //m_pwcv->SetChartDataView( nullptr, false );
-
-  m_pAcquireFundamentals_burial.reset();
 
   m_piqfeed->Disconnect();
   m_piqfeed.reset();
