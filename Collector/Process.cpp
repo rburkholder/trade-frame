@@ -424,6 +424,8 @@ void Process::OpenDB() {
     //  boost::filesystem::remove( m_sDbName );
     //}
 
+    // until special tables are required by the collector, these aren't required
+    // dbops automatically maintains all the standard tables
     m_db.OnLoad.Add( MakeDelegate( this, &Process::HandleDbOnLoad ) );
     m_db.OnPopulate.Add( MakeDelegate( this, &Process::HandleDbOnPopulate ) );
     m_db.OnRegisterTables.Add( MakeDelegate( this, &Process::HandleRegisterTables ) );
