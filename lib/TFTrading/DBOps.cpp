@@ -11,6 +11,10 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// TFTrading/Managers.h contains:
+//   HandleInitializeManagers
+//   HandleDenitializeManagers
+// these are used to initialize and maintain the tables used by each Provider Manager
 #include <TFTrading/Managers.h>
 
 #include "DBOps.h"

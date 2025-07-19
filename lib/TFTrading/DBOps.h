@@ -13,6 +13,10 @@
 
 #pragma once
 
+// by including TFTrading/Managers.h in the .cpp file
+//   all standard tables are constructed and maintained
+//   by the respective subject matter manager
+
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
