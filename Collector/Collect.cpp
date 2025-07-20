@@ -59,6 +59,9 @@ void Base::SetAttributes( ou::tf::HDF5Attributes& attr, pWatch_t pWatch ) {
         attr.SetOptionAttributes( attributes );
       }
       break;
+    default:
+      assert( true ); // todo: validate
+      break;
   }
 
 }
