@@ -28,7 +28,6 @@ set(
     InstrumentViews.hpp
     OptionChainModel.hpp
     OptionChainView.hpp
-    OptionManager.hpp
   )
 
 set(
@@ -37,7 +36,6 @@ set(
     InstrumentViews.cpp
     OptionChainModel.cpp
     OptionChainView.cpp
-    OptionManager.cpp
   )
 
 add_executable(

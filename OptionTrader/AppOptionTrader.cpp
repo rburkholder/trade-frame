@@ -32,7 +32,6 @@
 
 #include <TFVuTrading/FrameMain.h>
 
-#include "OptionManager.hpp"
 #include "AppOptionTrader.hpp"
 #include "InstrumentViews.hpp"
 
@@ -93,19 +92,23 @@ bool AppOptionTrader::OnInit() {
 }
 
 void AppOptionTrader::ConnectionsStart() {
-  m_piqfeed = ou::tf::iqfeed::Provider::Factory();
-  m_piqfeed->OnConnected.Add( MakeDelegate( this, &AppOptionTrader::HandleIQFeedConnected ) );
-  m_piqfeed->Connect();
+  m_pIQFeed = ou::tf::iqfeed::Provider::Factory();
+  m_pIQFeed->OnConnected.Add( MakeDelegate( this, &AppOptionTrader::HandleIQFeedConnected ) );
+  m_pIQFeed->Connect();
 }
 
 void AppOptionTrader::HandleIQFeedConnected( int ) {
   BOOST_LOG_TRIVIAL(info) << "iqfeed connected";
 
   m_pComposeInstrumentIQFeed = std::make_shared<ou::tf::ComposeInstrument>(
-    m_piqfeed,
+    m_pIQFeed,
     [this](){
-      m_pOptionManager = std::make_unique<OptionManager>( m_piqfeed );
-      m_pInstrumentViews->Set( m_pComposeInstrumentIQFeed );
+      CallAfter( // ensures m_pComposeInstrumentIQFeed is set properly prior to use
+        [this](){
+          m_pInstrumentViews->Set( m_pComposeInstrumentIQFeed );
+          m_fedrate.SetWatchOn( m_pIQFeed );
+          m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
+        } );
     } );
 }
 
@@ -196,12 +199,13 @@ void AppOptionTrader::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
   m_pFrameMain->Unbind( wxEVT_CLOSE_WINDOW, &AppOptionTrader::OnClose, this );
 
-  m_pOptionManager.reset(); // todo:  save series first?
+  m_pOptionEngine.reset();
+  m_fedrate.SetWatchOff();
 
   m_pComposeInstrumentIQFeed.reset();
 
-  m_piqfeed->Disconnect();
-  m_piqfeed.reset();
+  m_pIQFeed->Disconnect();
+  m_pIQFeed.reset();
 
   SaveState();
 

@@ -34,6 +34,9 @@
 #include <TFIQFeed/Provider.h>
 
 #include <TFOptions/Chains.h>
+#include <TFOptions/Option.h>
+#include <TFOptions/Engine.h>
+#include <TFOptions/NoRiskInterestRateSeries.h>
 
 #include <TFBitsNPieces/FrameWork02.hpp>
 
@@ -56,26 +59,29 @@ public:
 protected:
 private:
 
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pOption_t = ou::tf::option::Option::pOption_t;
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
   FrameMain* m_pFrameMain;
   ou::tf::InstrumentViews* m_pInstrumentViews;
 
   ou::ChartDataView m_cdv;
 
   using pIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
-  pIQFeed_t m_piqfeed;
+  pIQFeed_t m_pIQFeed;
 
   ou::tf::DBOps m_db;
 
   using pComposeInstrument_t = std::shared_ptr<ou::tf::ComposeInstrument>;
   pComposeInstrument_t m_pComposeInstrumentIQFeed;
 
-  using pOptionManager_t = std::unique_ptr<OptionManager>;
-  pOptionManager_t m_pOptionManager;
+  ou::tf::FedRateFromIQFeed m_fedrate;
+  std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
 
   void ConnectionsStart();
   void HandleIQFeedConnected( int );
 
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using fInstrumentOption_t = std::function<void(size_t, pInstrument_t /* option */)>; // needs to match CollectATM
   void QueryChains( pInstrument_t, fInstrumentOption_t&& ); // underlying
 
