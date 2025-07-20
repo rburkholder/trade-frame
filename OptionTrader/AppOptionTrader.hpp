@@ -33,8 +33,8 @@
 
 #include <TFIQFeed/Provider.h>
 
-#include <TFOptions/Chains.h>
 #include <TFOptions/Option.h>
+#include <TFOptions/Chains.h>
 #include <TFOptions/Engine.h>
 #include <TFOptions/NoRiskInterestRateSeries.h>
 
@@ -77,7 +77,7 @@ private:
   pComposeInstrument_t m_pComposeInstrumentIQFeed;
 
   ou::tf::FedRateFromIQFeed m_fedrate;
-  std::unique_ptr<ou::tf::option::Engine> m_pOptionEngine;
+  std::shared_ptr<ou::tf::option::Engine> m_pOptionEngine;
 
   void ConnectionsStart();
   void HandleIQFeedConnected( int );

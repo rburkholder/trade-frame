@@ -29,6 +29,8 @@
 
 #include <TFIQFeed/OptionChainQuery.h>
 
+#include <TFOptions/Chains.h>
+
 #include <TFVuTrading/TreeItem.hpp>
 
 #include "InstrumentViews.hpp"
@@ -49,12 +51,20 @@ InstrumentViews::InstrumentViews( wxWindow* parent, wxWindowID id, const wxPoint
 }
 
 InstrumentViews::~InstrumentViews() {
+  m_pcurOptionChainView = nullptr;
+  m_mapInstrument.clear();
+  m_fBuildWatch = nullptr;
+  m_fBuildOption = nullptr;
+  m_pComposeInstrument.reset();
+  m_pOptionEngine.reset();
 }
 
 void InstrumentViews::Init() {
   m_pcurOptionChainView = nullptr;
   m_pTreeCtrl = nullptr;
   m_pRootTreeItem = nullptr;
+  m_fBuildWatch = nullptr;
+  m_fBuildOption = nullptr;
 }
 
 bool InstrumentViews::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
@@ -80,6 +90,7 @@ void InstrumentViews::CreateControls() {
   m_pTreeCtrl = new wxTreeCtrl( itemPanel1, ID_TREECTRL, wxDefaultPosition, wxDefaultSize,
     wxTR_NO_LINES | wxTR_HAS_BUTTONS /*| wxTR_LINES_AT_ROOT | wxTR_HIDE_ROOT*/ | wxTR_SINGLE /*| wxTR_TWIST_BUTTONS*/ );
   m_pTreeCtrl->Bind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &InstrumentViews::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
+  m_pTreeCtrl->Bind( wxEVT_TREE_ITEM_EXPANDED, &InstrumentViews::HandleTreeEventItemExpanded, this, m_pTreeCtrl->GetId() );
   m_pTreeCtrl->ExpandAll();
 
   itemBoxSizer1->Add( m_pTreeCtrl, 0, wxGROW|wxALL, 1 );
@@ -115,8 +126,27 @@ void InstrumentViews::HandleTreeEventItemGetToolTip( wxTreeEvent& event ) {
   event.Skip();
 }
 
-void InstrumentViews::Set( pComposeInstrument_t& pComposeInstrument ) {
-  m_pComposeInstrumentIQFeed = pComposeInstrument;
+void InstrumentViews::HandleTreeEventItemExpanded( wxTreeEvent& event ) {
+  SizeTreeCtrl();
+  event.Skip();
+}
+
+void InstrumentViews::Set(
+  pComposeInstrument_t& pComposeInstrument
+, fBuildWatch_t&& fBuildWatch
+, fBuildOption_t&& fBuildOption
+, pOptionEngine_t& pOptionEngine
+) {
+
+  assert( fBuildWatch );
+  assert( fBuildOption );
+  assert( pOptionEngine );
+
+  m_fBuildWatch = std::move( fBuildWatch );
+  m_fBuildOption = std::move( fBuildOption );
+  m_pOptionEngine = pOptionEngine;
+
+  m_pComposeInstrument = pComposeInstrument;
   for ( const setInstrumentName_t::value_type& vt: m_setInstrumentName ) {
     AddSymbol( vt );
   }
@@ -138,7 +168,7 @@ void InstrumentViews::DialogSymbol() {
 
 void InstrumentViews::AddSymbol( const std::string& sIQFeedSymbolName ) {
 
-  // todo: tool tip shows real symbol name, map is user requested symbol
+  // todo: tool tip shows real symbol name, map is user requested iqfeed symbol
 
   mapInstrument_t::iterator iterInstrument = m_mapInstrument.find( sIQFeedSymbolName );
   if ( m_mapInstrument.end() != iterInstrument ) {
@@ -148,7 +178,7 @@ void InstrumentViews::AddSymbol( const std::string& sIQFeedSymbolName ) {
     // need the database here for persistence
     // need to change bool to tri-state:  constructed, cached, does not exist
     // don't add to map prior to this, need to determine if instrument exists first
-    m_pComposeInstrumentIQFeed->Compose(
+    m_pComposeInstrument->Compose(
       sIQFeedSymbolName,
       [this]( pInstrument_t pInstrument, bool bConstructed ){
         if ( pInstrument ) {
@@ -160,11 +190,9 @@ void InstrumentViews::AddSymbol( const std::string& sIQFeedSymbolName ) {
             [this,p=pInstrument]() mutable { // mutable on p, compiler wants it constant
               BuildView( p );
             } );
-
         }
       } );
   }
-
 }
 
 void InstrumentViews::BuildView( pInstrument_t& pInstrument ) {
@@ -200,18 +228,13 @@ void InstrumentViews::BuildView( pInstrument_t& pInstrument ) {
         pti->AppendMenuItem(
           "option chain",
           [this,iterInstrument]( ou::tf::TreeItem* pti ){
-            BuildOptionChain( iterInstrument );
+            BuildOptionChains( iterInstrument );
           } );
       }
     );
 
     m_pRootTreeItem->Expand();
-    wxSize sizeBest = m_pTreeCtrl->GetBestSize();
-    wxSize sizeVirt = m_pTreeCtrl->GetVirtualSize();
-    //wxSize sizeWhat = m_pTreeCtrl->GetBestVirtualSize();
-    wxSize sizeSet( sizeVirt.x > sizeBest.x ? sizeVirt.x : sizeBest.x, -1 );
-    //m_pTreeCtrl->SetSize( sizeSet );
-    m_pTreeCtrl->SetMinSize( sizeSet );
+    SizeTreeCtrl();
 
     m_pRootTreeItem->SortChildren();
 
@@ -240,27 +263,61 @@ void InstrumentViews::BuildView( pInstrument_t& pInstrument ) {
 
 }
 
-void InstrumentViews::BuildOptionChain( mapInstrument_t::iterator iterInstrument ) {
-  Instrument& instrument( iterInstrument->second );
-  const std::string& sNameGeneric( instrument.pInstrument->GetInstrumentName() );
-  const std::string& sNameIQFeed( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
-  switch ( instrument.pInstrument->GetInstrumentType() ) {
+void InstrumentViews::BuildOptionChains( mapInstrument_t::iterator iterInstrumentUnderlying ) {
+
+  Instrument& instrumentUnderlying( iterInstrumentUnderlying->second );
+  const std::string& sNameGeneric( instrumentUnderlying.pInstrument->GetInstrumentName() );
+  const std::string& sNameIQFeed(  instrumentUnderlying.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
+
+  auto fProcessOptionList =
+    [this,&sNameGeneric,iterInstrumentUnderlying]( const ou::tf::iqfeed::OptionChainQuery::OptionList& list ){
+      auto nDownCount( list.vSymbol.size() );
+      BOOST_LOG_TRIVIAL(info) << "chain request " << sNameGeneric << " has " << nDownCount << " options";
+
+      for ( const std::string& sIQFeedSymbolName: list.vSymbol ) {
+        --nDownCount;
+        const bool bLastOne( 0 == nDownCount );
+        m_pComposeInstrument->Compose(
+          sIQFeedSymbolName,
+          [this, bLastOne, iterInstrumentUnderlying]( pInstrument_t pInstrumentOption, bool bConstructed ){
+            if ( bConstructed ) {
+              ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+              im.Register( pInstrumentOption );  // is a CallAfter required, or can this run in a thread?
+            }
+            Instrument& instrumentUnderlying( iterInstrumentUnderlying->second );
+            mapChains_t::iterator iterChains = ou::tf::option::GetChain( instrumentUnderlying.mapChains, pInstrumentOption );
+            assert( instrumentUnderlying.mapChains.end() != iterChains );
+            chain_t& chain( iterChains->second );
+
+            // update put/call@strike with option
+            Instance* pInstance
+              = ou::tf::option::UpdateOption<chain_t,Instance>( chain, pInstrumentOption );
+            pInstance->pInstrument = pInstrumentOption; // put / call as appropriate
+
+            if ( bLastOne ) {
+              CallAfter(
+                [this,iterInstrumentUnderlying](){
+                  PresentOptionChains( iterInstrumentUnderlying );
+                } );
+            }
+          }
+        );
+      }
+    };
+
+  switch ( instrumentUnderlying.pInstrument->GetInstrumentType() ) {
     case ou::tf::InstrumentType::Future:
-      m_pComposeInstrumentIQFeed->OptionChainQuery()->QueryFuturesOptionChain(
+      m_pComposeInstrument->OptionChainQuery()->QueryFuturesOptionChain(
         sNameIQFeed,
         "pc", "", "", "1", // 1 near month
-        [&sNameGeneric]( const ou::tf::iqfeed::OptionChainQuery::OptionList& list ){
-          BOOST_LOG_TRIVIAL(info) << sNameGeneric << " has " << list.vSymbol.size() << " options";
-        }
+        std::move( fProcessOptionList )
       );
       break;
     case ou::tf::InstrumentType::Stock:
-      m_pComposeInstrumentIQFeed->OptionChainQuery()->QueryEquityOptionChain(
+      m_pComposeInstrument->OptionChainQuery()->QueryEquityOptionChain(
         sNameIQFeed,
         "pc", "", "1", "0","0","0",  // 1 near month
-        [&sNameGeneric]( const ou::tf::iqfeed::OptionChainQuery::OptionList& list ){
-          BOOST_LOG_TRIVIAL(info) << sNameGeneric << " has " << list.vSymbol.size() << " options";
-        }
+        std::move( fProcessOptionList )
       );
       break;
     default:
@@ -273,9 +330,40 @@ void InstrumentViews::BuildOptionChain( mapInstrument_t::iterator iterInstrument
 
 }
 
+void InstrumentViews::PresentOptionChains( mapInstrument_t::iterator iterInstrumentUnderlying ) {
+  Instrument& instrumentUnderlying( iterInstrumentUnderlying->second );
+  for ( mapChains_t::value_type& vtChain: instrumentUnderlying.mapChains ) {
+    const std::string sExpiry( ou::tf::Instrument::BuildDate( vtChain.first ) );
+    ou::tf::TreeItem* ptiExpiry = instrumentUnderlying.pti->AppendChild( sExpiry );
+    vtChain.second.Strikes(
+      [ptiExpiry]( double strike, const chain_t::strike_t& entry ){
+        ptiExpiry->AppendChild( entry.call.pInstrument->GetInstrumentName() );
+        ptiExpiry->AppendChild( entry.put.pInstrument->GetInstrumentName() );
+      } );
+  }
+}
+
+void InstrumentViews::SizeTreeCtrl() {
+  const wxSize sizeClient( m_pTreeCtrl->GetClientSize() );
+  const wxSize sizeCurrent( m_pTreeCtrl->GetSize() );
+  const wxSize sizeBest( m_pTreeCtrl->GetBestSize() );
+  const wxSize sizeVirt( m_pTreeCtrl->GetVirtualSize() );
+  //wxSize sizeWhat = m_pTreeCtrl->GetBestVirtualSize();
+  const wxSize sizeSet( sizeVirt.x > sizeBest.x ? sizeVirt.x : sizeBest.x, -1 );
+  //m_pTreeCtrl->SetSize( sizeSet );
+  m_pTreeCtrl->SetMinSize( sizeSet );
+
+  //GetSizer()->SetSizeHints( this );
+  Layout();
+  //GetParent()->GetSizer()->SetSizeHints( GetParent() );
+  GetParent()->Layout();
+
+}
+
 void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
   //TreeItem::UnBind( this, m_pTree ); // to be fixed
-  m_pTreeCtrl->Unbind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &InstrumentViews::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
+  m_pTreeCtrl->Unbind( wxEVT_TREE_ITEM_EXPANDED, &InstrumentViews::HandleTreeEventItemExpanded, this, m_pTreeCtrl->GetId() );
+  m_pTreeCtrl->Unbind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &InstrumentViews::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() );
   m_pTreeCtrl->DeleteAllItems();
   assert( Unbind( wxEVT_DESTROY, &InstrumentViews::OnDestroy, this ) );
   event.Skip( true );  // auto followed by Destroy();

@@ -100,14 +100,27 @@ void AppOptionTrader::ConnectionsStart() {
 void AppOptionTrader::HandleIQFeedConnected( int ) {
   BOOST_LOG_TRIVIAL(info) << "iqfeed connected";
 
+  m_fedrate.SetWatchOn( m_pIQFeed );
+  m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
+
   m_pComposeInstrumentIQFeed = std::make_shared<ou::tf::ComposeInstrument>(
     m_pIQFeed,
     [this](){
       CallAfter( // ensures m_pComposeInstrumentIQFeed is set properly prior to use
         [this](){
-          m_pInstrumentViews->Set( m_pComposeInstrumentIQFeed );
-          m_fedrate.SetWatchOn( m_pIQFeed );
-          m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
+          m_pInstrumentViews->Set(
+            m_pComposeInstrumentIQFeed,
+            [this]( pInstrument_t pInstrument )->pWatch_t { // fBuildWatch_t
+              pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
+              return pWatch;
+            },
+            [this]( pInstrument_t pInstrument )->pOption_t { // fBuildOption_t
+              pOption_t pOption = std::make_shared<ou::tf::option::Option>( pInstrument, m_pIQFeed );
+              //m_pOptionEngine->RegisterOption( pOption );
+              return pOption;
+            },
+            m_pOptionEngine
+          );
         } );
     } );
 }

@@ -31,6 +31,10 @@
 
 #include <TFTrading/Instrument.h>
 
+#include <TFOptions/Chain.h>
+#include <TFOptions/Option.h>
+#include <TFOptions/Engine.h>
+
 #define SYMBOL_INSTRUMENTVIEWS_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_INSTRUMENTVIEWS_TITLE _("Instrument Views")
 #define SYMBOL_INSTRUMENTVIEWS_IDNAME ID_BOOKOPTIONCHAINS
@@ -70,7 +74,22 @@ public:
     const wxString& name = SYMBOL_INSTRUMENTVIEWS_TITLE );
 
   using pComposeInstrument_t = std::shared_ptr<ComposeInstrument>;
-  void Set( pComposeInstrument_t& );
+
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+  using pOption_t = ou::tf::option::Option::pOption_t;
+
+  using fBuildWatch_t = std::function<pWatch_t( pInstrument_t )>;
+  using fBuildOption_t = std::function<pOption_t( pInstrument_t )>;
+
+  using pOptionEngine_t = std::shared_ptr<ou::tf::option::Engine>;
+
+  void Set(
+    pComposeInstrument_t&
+  , fBuildWatch_t&&
+  , fBuildOption_t&&
+  , pOptionEngine_t&
+  );
 
 protected:
 private:
@@ -81,21 +100,33 @@ private:
   , ID_TREECTRL
   };
 
-  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
-
   wxTreeCtrl* m_pTreeCtrl;
   TreeItem* m_pRootTreeItem; // // root of custom tree items
 
   using setInstrumentName_t = std::set<std::string>;
   setInstrumentName_t m_setInstrumentName;
 
-  pComposeInstrument_t m_pComposeInstrumentIQFeed;
+  pComposeInstrument_t m_pComposeInstrument;  // IQFeed only, or IQFeed & IB
+
+  fBuildWatch_t m_fBuildWatch;
+  fBuildOption_t m_fBuildOption;
+
+  pOptionEngine_t m_pOptionEngine;
+
+  struct Instance: public ou::tf::option::chain::OptionName {
+    pInstrument_t pInstrument; // resident in all Options
+    pOption_t pOption;  // note, includes Watch, just-in-time Watch/Option construction
+  };
+
+  using chain_t = ou::tf::option::Chain<Instance>;
+  using mapChains_t = std::map<boost::gregorian::date, chain_t>;
 
   struct Instrument {
 
     ou::tf::TreeItem* pti;
     pInstrument_t pInstrument;
     OptionChainView* pChainView;
+    mapChains_t mapChains;
 
     Instrument()
     : pti( nullptr ), pChainView( nullptr )
@@ -112,12 +143,16 @@ private:
   void Init();
   void CreateControls();
   void HandleTreeEventItemGetToolTip( wxTreeEvent& );
+  void HandleTreeEventItemExpanded( wxTreeEvent& );
   void OnDestroy( wxWindowDestroyEvent& event );
+
+  void SizeTreeCtrl();
 
   void DialogSymbol();
   void AddSymbol( const std::string& );
   void BuildView( pInstrument_t& );
-  void BuildOptionChain( mapInstrument_t::iterator );
+  void BuildOptionChains( mapInstrument_t::iterator );
+  void PresentOptionChains( mapInstrument_t::iterator );
 
   wxBitmap GetBitmapResource( const wxString& name );
   static bool ShowToolTips() { return true; };
