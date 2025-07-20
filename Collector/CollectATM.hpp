@@ -40,6 +40,7 @@ public:
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pOption_t = ou::tf::option::Option::pOption_t;
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+
   using fBuildOption_t = std::function<pOption_t(pInstrument_t)>;
   using fInstrumentOption_t = std::function<void(std::size_t, pInstrument_t /* option */)>;
   using fGatherOptions_t = std::function<void(pInstrument_t /* underlying */, fInstrumentOption_t&&)>;
