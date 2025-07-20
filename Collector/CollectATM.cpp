@@ -78,9 +78,9 @@ ATM::ATM(
 
       // update put/call@strike with option
       chain_t& chain( iterChains->second );
-      Instance* pEntry
+      Instance* pInstance
         = ou::tf::option::UpdateOption<chain_t,Instance>( chain, pInstrumentOption );
-      pEntry->pInstrument = pInstrumentOption; // put / call as appropriate
+      pInstance->pInstrument = pInstrumentOption; // put / call as appropriate
 
       if ( 0 == zero ) {
         BOOST_LOG_TRIVIAL(info) << "last option entry found";
