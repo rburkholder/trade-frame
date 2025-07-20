@@ -29,10 +29,6 @@ class OptionChainQuery
     friend ou::Network<OptionChainQuery>;
 public:
 
-  enum Month { jan='F', feb='G', mar='H', apr='J', may='K', jun='M',
-               jul='N', aug='Q', sep='U', oct='V', nov='X', dec='Z' };
-  enum Side { put='p', call='c' };
-
   using vSymbol_t = std::vector<std::string>;
 
   struct FuturesList {
@@ -52,6 +48,11 @@ public:
   ~OptionChainQuery();
 
   void Connect();
+
+  // letters to generate sMonthCodes & sSide below
+  enum class Month: char { jan='F', feb='G', mar='H', apr='J', may='K', jun='M',
+                           jul='N', aug='Q', sep='U', oct='V', nov='X', dec='Z' };
+  enum class Side: char { put='p', call='c' };
 
   // list of futures symbols based upon base#: ie, QGC#, @ES#
   void QueryFuturesChain(
