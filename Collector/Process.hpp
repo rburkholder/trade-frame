@@ -87,8 +87,6 @@ private:
 
   ou::tf::DBOps m_db;
 
-  //std::mutex m_mutexScope_ConstructWatch;
-
   using pIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
   pIQFeed_t m_piqfeed;
 
