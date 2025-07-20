@@ -25,6 +25,7 @@
 #include <wx/treectrl.h>
 
 #include <TFTrading/InstrumentManager.h>
+#include <TFTrading/ComposeInstrument.hpp>
 
 #include <TFVuTrading/TreeItem.hpp>
 
@@ -112,21 +113,12 @@ void InstrumentViews::HandleTreeEventItemGetToolTip( wxTreeEvent& event ) {
   event.Skip();
 }
 
-void InstrumentViews::Set( ou::tf::iqfeed::Provider::pProvider_t& piqf ) {
-
-  assert( piqf );
-  assert( piqf->Connected() );
-  m_piqf = piqf;
-
-  m_pComposeInstrument = std::make_unique<ou::tf::ComposeInstrument>(
-    piqf,
-    [this](){
-      for ( const setInstrumentName_t::value_type& vt: m_setInstrumentName ) {
-        AddSymbol( vt );
-      }
-      m_setInstrumentName.clear();
-    } );
-
+void InstrumentViews::Set( pComposeInstrument_t& pComposeInstrument ) {
+  m_pComposeInstrumentIQFeed = pComposeInstrument;
+  for ( const setInstrumentName_t::value_type& vt: m_setInstrumentName ) {
+    AddSymbol( vt );
+  }
+  m_setInstrumentName.clear();
 }
 
 void InstrumentViews::DialogSymbol() {
@@ -154,7 +146,7 @@ void InstrumentViews::AddSymbol( const std::string& sIQFeedSymbolName ) {
     // need the database here for persistence
     // need to change bool to tri-state:  constructed, cached, does not exist
     // don't add to map prior to this, need to determine if instrument exists first
-    m_pComposeInstrument->Compose(
+    m_pComposeInstrumentIQFeed->Compose(
       sIQFeedSymbolName,
       [this]( pInstrument_t pInstrument, bool bConstructed ){
         if ( pInstrument ) {
@@ -190,7 +182,7 @@ void InstrumentViews::BuildView( pInstrument_t& pInstrument ) {
       sNameGeneric,
       [this,&instrument,&sNameGeneric,&sNameIQFeed]( ou::tf::TreeItem* pti ){ // fClick_t
         if ( nullptr != m_pcurOptionChainView ) { // todo: refactor this and the same below
-          BOOST_LOG_TRIVIAL(trace) << "chain hide2";
+          //BOOST_LOG_TRIVIAL(trace) << "chain hide2";
           m_pcurOptionChainView->Hide();
           m_pcurOptionChainView = nullptr;
           //GetSizer()->Remove()
@@ -200,7 +192,16 @@ void InstrumentViews::BuildView( pInstrument_t& pInstrument ) {
         m_pcurOptionChainView->Show();
         Layout();
         GetParent()->Layout();
-      } );
+      },
+      [this,iterInstrument]( ou::tf::TreeItem* pti ){ // fOnBuildPopup_t
+        pti->NewMenu();
+        pti->AppendMenuItem(
+          "option chain",
+          [this,iterInstrument]( ou::tf::TreeItem* pti ){
+            BuildOptionChain( iterInstrument );
+          } );
+      }
+    );
 
     m_pRootTreeItem->Expand();
     wxSize sizeBest = m_pTreeCtrl->GetBestSize();
@@ -213,7 +214,7 @@ void InstrumentViews::BuildView( pInstrument_t& pInstrument ) {
     m_pRootTreeItem->SortChildren();
 
     if ( nullptr != m_pcurOptionChainView ) {
-      BOOST_LOG_TRIVIAL(trace) << "chain hide1" ;
+      //BOOST_LOG_TRIVIAL(trace) << "chain hide1" ;
       m_pcurOptionChainView->Hide();
       m_pcurOptionChainView = nullptr;
       //GetSizer()->Remove()
@@ -235,6 +236,11 @@ void InstrumentViews::BuildView( pInstrument_t& pInstrument ) {
     BOOST_LOG_TRIVIAL(error) << "symbol/instrument not found";
   }
 
+}
+
+void InstrumentViews::BuildOptionChain( mapInstrument_t::iterator iterInstrument ) {
+  Instrument& instrument( iterInstrument->second );
+  const std::string& sNameIQFeed(  instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
 }
 
 void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {

@@ -21,6 +21,7 @@
 #pragma once
 
 #include <set>
+#include <memory>
 #include <unordered_map>
 
 #include <boost/serialization/version.hpp>
@@ -28,9 +29,7 @@
 
 #include <wx/panel.h>
 
-#include <TFIQFeed/Provider.h>
-
-#include <TFTrading/ComposeInstrument.hpp>
+#include <TFTrading/Instrument.h>
 
 #define SYMBOL_INSTRUMENTVIEWS_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_INSTRUMENTVIEWS_TITLE _("Instrument Views")
@@ -46,6 +45,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 class TreeItem;
+class ComposeInstrument;
 
 class InstrumentViews
 : public wxPanel
@@ -69,7 +69,8 @@ public:
     long style = SYMBOL_INSTRUMENTVIEWS_STYLE,
     const wxString& name = SYMBOL_INSTRUMENTVIEWS_TITLE );
 
-  void Set( ou::tf::iqfeed::Provider::pProvider_t& );
+  using pComposeInstrument_t = std::shared_ptr<ComposeInstrument>;
+  void Set( pComposeInstrument_t& );
 
 protected:
 private:
@@ -82,16 +83,13 @@ private:
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
-  ou::tf::iqfeed::Provider::pProvider_t m_piqf;
-
   wxTreeCtrl* m_pTreeCtrl;
   TreeItem* m_pRootTreeItem; // // root of custom tree items
 
   using setInstrumentName_t = std::set<std::string>;
   setInstrumentName_t m_setInstrumentName;
 
-  using pComposeInstrument_t = std::unique_ptr<ou::tf::ComposeInstrument>;
-  pComposeInstrument_t m_pComposeInstrument;
+  pComposeInstrument_t m_pComposeInstrumentIQFeed;
 
   struct Instrument {
 
@@ -119,6 +117,7 @@ private:
   void DialogSymbol();
   void AddSymbol( const std::string& );
   void BuildView( pInstrument_t& );
+  void BuildOptionChain( mapInstrument_t::iterator );
 
   wxBitmap GetBitmapResource( const wxString& name );
   static bool ShowToolTips() { return true; };

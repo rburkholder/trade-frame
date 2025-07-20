@@ -26,8 +26,13 @@
 
 #include <wx/sizer.h>
 
+#include <TFTrading/InstrumentManager.h>
+
+#include <TFIQFeed/OptionChainQuery.h>
+
 #include <TFVuTrading/FrameMain.h>
 
+#include "OptionManager.hpp"
 #include "AppOptionTrader.hpp"
 #include "InstrumentViews.hpp"
 
@@ -51,6 +56,8 @@ bool AppOptionTrader::OnInit() {
   if ( !wxApp::OnInit() ) {
     return false;
   }
+
+  m_bComposeInstrumentIQFeed_ready = false;
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppTitle );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
@@ -78,28 +85,98 @@ bool AppOptionTrader::OnInit() {
   m_pFrameMain->Layout();
   m_pFrameMain->Show(); // triggers the auto move
 
-  m_piqfeed = ou::tf::iqfeed::Provider::Factory();
-  m_piqfeed->OnConnected.Add( MakeDelegate( this, &AppOptionTrader::HandleIQFeedConnected ) );
-  m_piqfeed->Connect();
+  // this needs to be placed after the providers are registered
+  ConnectionsStart();
 
-  {
-    // for now, overwrite old database on each start
-    //if ( boost::filesystem::exists( c_sDbName ) ) {
-    //  boost::filesystem::remove( c_sDbName );
-    //}
-
-    // this needs to be placed after the providers are registered
-    m_pdb = std::make_unique<ou::tf::db>( c_sDbName ); // construct database
-  }
+  m_db.Open( c_sDbName );
 
   return true;
 
 }
 
+void AppOptionTrader::ConnectionsStart() {
+
+  m_piqfeed = ou::tf::iqfeed::Provider::Factory();
+  m_piqfeed->OnConnected.Add( MakeDelegate( this, &AppOptionTrader::HandleIQFeedConnected ) );
+  m_piqfeed->Connect();
+
+  m_pComposeInstrumentIQFeed = std::make_shared<ou::tf::ComposeInstrument>(
+    m_piqfeed,
+    [this](){
+      m_bComposeInstrumentIQFeed_ready = true;
+      ConnectionsReady();
+    } );
+
+}
+
 void AppOptionTrader::HandleIQFeedConnected( int ) {
   BOOST_LOG_TRIVIAL(info) << "iqfeed connected";
-  m_pInstrumentViews->Set( m_piqfeed );
+  ConnectionsReady();
 }
+
+void AppOptionTrader::ConnectionsReady() {
+  if (
+     m_piqfeed->Connected()
+  && m_bComposeInstrumentIQFeed_ready
+  ) {
+    m_pOptionManager = std::make_unique<OptionManager>( m_piqfeed );
+    m_pInstrumentViews->Set( m_pComposeInstrumentIQFeed );
+  }
+}
+
+void AppOptionTrader::QueryChains( pInstrument_t pUnderlying, fInstrumentOption_t&& fIO ) {
+
+  auto f =
+    [this,fIO_ = std::move( fIO )]( const ou::tf::iqfeed::OptionChainQuery::OptionList& list ){
+      BOOST_LOG_TRIVIAL(info)
+        << "chain request " << list.sUnderlying << " has "
+        << list.vSymbol.size() << " options"
+        ;
+
+      ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+
+      size_t zero = list.vSymbol.size(); // signal when done
+      for ( const ou::tf::iqfeed::OptionChainQuery::vSymbol_t::value_type& sSymbol: list.vSymbol ) {
+        zero--;
+        pInstrument_t pInstrument;
+        pInstrument = im.LoadInstrument( ou::tf::keytypes::EProviderIQF, sSymbol );
+        if ( pInstrument ) { // skip the build
+          fIO_( zero, pInstrument );
+        }
+        else {
+          m_pComposeInstrumentIQFeed->Compose(
+            sSymbol,
+            [ zero, fIO_ /* make a copy */]( pInstrument_t pInstrument, bool bConstructed ){ // bConstructed - false for error or loaded from db, true when newly constructed
+              ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+              im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+              fIO_( zero, pInstrument );
+            } );
+        }
+      }
+    };
+
+  const std::string& sIQFeedUnderlying( pUnderlying->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+  switch ( pUnderlying->GetInstrumentType() ) {
+    case ou::tf::InstrumentType::Future:
+      m_pComposeInstrumentIQFeed->OptionChainQuery()->QueryFuturesOptionChain(
+        sIQFeedUnderlying,
+        "pc", "", "", "1", // 1 near month
+        std::move( f )
+      );
+      break;
+    case ou::tf::InstrumentType::Stock:
+      m_pComposeInstrumentIQFeed->OptionChainQuery()->QueryEquityOptionChain(
+        sIQFeedUnderlying,
+        "pc", "", "1", "0","0","0",  // 1 near month
+        std::move( f )
+      );
+      break;
+    default:
+      assert( false );
+      break;
+  }
+}
+
 
 //void AppOptionTrader::HandleMenuActionAddSymbol() {
 //}
@@ -132,15 +209,18 @@ int AppOptionTrader::OnExit() {
 
 void AppOptionTrader::OnClose( wxCloseEvent& event ) {
   // Exit Steps: #2 -> FrameMain::OnClose
+  m_pFrameMain->Unbind( wxEVT_CLOSE_WINDOW, &AppOptionTrader::OnClose, this );
 
-  //m_pwcv->SetChartDataView( nullptr, false );
+  m_pOptionManager.reset(); // todo:  save series first?
+
+  m_pComposeInstrumentIQFeed.reset();
 
   m_piqfeed->Disconnect();
   m_piqfeed.reset();
 
-  m_pFrameMain->Unbind( wxEVT_CLOSE_WINDOW, &AppOptionTrader::OnClose, this );
-
   SaveState();
+
+  m_db.Close();
 
   event.Skip();  // auto followed by Destroy();
 }

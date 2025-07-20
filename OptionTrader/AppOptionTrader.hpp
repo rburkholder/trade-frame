@@ -28,13 +28,17 @@
 
 #include <OUCharting/ChartDataView.h>
 
-#include <TFTrading/DBWrapper.h>
+#include <TFTrading/DBOps.h>
+#include <TFTrading/ComposeInstrument.hpp>
 
 #include <TFIQFeed/Provider.h>
+
+#include <TFOptions/Chains.h>
 
 #include <TFBitsNPieces/FrameWork02.hpp>
 
 class FrameMain;
+class OptionManager;
 
 namespace ou {
 namespace tf {
@@ -52,7 +56,7 @@ public:
 protected:
 private:
 
-  //config::Choices m_choices;
+  bool m_bComposeInstrumentIQFeed_ready;
 
   FrameMain* m_pFrameMain;
   ou::tf::InstrumentViews* m_pInstrumentViews;
@@ -62,10 +66,21 @@ private:
   using pIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
   pIQFeed_t m_piqfeed;
 
-  std::unique_ptr<ou::tf::db> m_pdb;
+  ou::tf::DBOps m_db;
 
+  using pComposeInstrument_t = std::shared_ptr<ou::tf::ComposeInstrument>;
+  pComposeInstrument_t m_pComposeInstrumentIQFeed;
+
+  using pOptionManager_t = std::unique_ptr<OptionManager>;
+  pOptionManager_t m_pOptionManager;
+
+  void ConnectionsStart();
   void HandleIQFeedConnected( int );
-  //void HandleMenuActionAddSymbol();
+  void ConnectionsReady();
+
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using fInstrumentOption_t = std::function<void(size_t, pInstrument_t /* option */)>; // needs to match CollectATM
+  void QueryChains( pInstrument_t, fInstrumentOption_t&& ); // underlying
 
   virtual bool OnInit();
   virtual int OnExit();
