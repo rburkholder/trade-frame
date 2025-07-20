@@ -19,6 +19,7 @@
  */
 
 #include <boost/log/trivial.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <wx/sizer.h>
 #include <wx/textdlg.h>
@@ -51,7 +52,8 @@ InstrumentViews::InstrumentViews( wxWindow* parent, wxWindowID id, const wxPoint
 }
 
 InstrumentViews::~InstrumentViews() {
-  m_pcurOptionChainView = nullptr;
+  m_pcurView = nullptr;
+  m_pOptionChainView = nullptr;
   m_mapInstrument.clear();
   m_fBuildWatch = nullptr;
   m_fBuildOption = nullptr;
@@ -60,7 +62,8 @@ InstrumentViews::~InstrumentViews() {
 }
 
 void InstrumentViews::Init() {
-  m_pcurOptionChainView = nullptr;
+  m_pcurView = nullptr;
+  m_pOptionChainView = nullptr;
   m_pTreeCtrl = nullptr;
   m_pRootTreeItem = nullptr;
   m_fBuildWatch = nullptr;
@@ -117,6 +120,11 @@ void InstrumentViews::CreateControls() {
     m_pTreeCtrl->SetToolTip(_( "Symbols / Actions" ) );
   }
 
+  m_pOptionChainView = new OptionChainView( this );
+  itemBoxSizer1->Add( m_pOptionChainView, 1, wxALL | wxEXPAND, 0 );
+  m_pOptionChainView->Show( false );
+
+
   Bind( wxEVT_DESTROY, &InstrumentViews::OnDestroy, this );
 
 }
@@ -148,7 +156,7 @@ void InstrumentViews::Set(
 
   m_pComposeInstrument = pComposeInstrument;
   for ( const setInstrumentName_t::value_type& vt: m_setInstrumentName ) {
-    AddSymbol( vt );
+    BuildInstrument( vt );
   }
   m_setInstrumentName.clear();
 }
@@ -160,13 +168,13 @@ void InstrumentViews::DialogSymbol() {
   if ( wxID_OK == dialog.ShowModal() ) {
     std::string sIQFeedSymbolName = dialog.GetValue().Upper();
     if ( 0 < sIQFeedSymbolName.size() ) {
-      AddSymbol( sIQFeedSymbolName );
+      BuildInstrument( sIQFeedSymbolName );
     }
   }
 
 }
 
-void InstrumentViews::AddSymbol( const std::string& sIQFeedSymbolName ) {
+void InstrumentViews::BuildInstrument( const std::string& sIQFeedSymbolName ) {
 
   // todo: tool tip shows real symbol name, map is user requested iqfeed symbol
 
@@ -188,14 +196,14 @@ void InstrumentViews::AddSymbol( const std::string& sIQFeedSymbolName ) {
           }
           CallAfter(
             [this,p=pInstrument]() mutable { // mutable on p, compiler wants it constant
-              BuildView( p );
+              AddInstrument( p );
             } );
         }
       } );
   }
 }
 
-void InstrumentViews::BuildView( pInstrument_t& pInstrument ) {
+void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
 
   if ( pInstrument ) {
 
@@ -211,17 +219,7 @@ void InstrumentViews::BuildView( pInstrument_t& pInstrument ) {
     instrument.pti = m_pRootTreeItem->AppendChild(
       sNameGeneric,
       [this,&instrument,&sNameGeneric,&sNameIQFeed]( ou::tf::TreeItem* pti ){ // fClick_t
-        if ( nullptr != m_pcurOptionChainView ) { // todo: refactor this and the same below
-          //BOOST_LOG_TRIVIAL(trace) << "chain hide2";
-          m_pcurOptionChainView->Hide();
-          m_pcurOptionChainView = nullptr;
-          //GetSizer()->Remove()
-        }
-        BOOST_LOG_TRIVIAL(trace) << "click view: " << sNameGeneric << " (" << sNameIQFeed << ')' ;
-        m_pcurOptionChainView = instrument.pChainView;
-        m_pcurOptionChainView->Show();
-        Layout();
-        GetParent()->Layout();
+        // live chart?  bar chart?
       },
       [this,iterInstrument]( ou::tf::TreeItem* pti ){ // fOnBuildPopup_t
         pti->NewMenu();
@@ -238,25 +236,9 @@ void InstrumentViews::BuildView( pInstrument_t& pInstrument ) {
 
     m_pRootTreeItem->SortChildren();
 
-    if ( nullptr != m_pcurOptionChainView ) {
-      //BOOST_LOG_TRIVIAL(trace) << "chain hide1" ;
-      m_pcurOptionChainView->Hide();
-      m_pcurOptionChainView = nullptr;
-      //GetSizer()->Remove()
-    }
+    SizeTreeCtrl();
 
-    BOOST_LOG_TRIVIAL(trace) << "chain view: " << sNameGeneric << " (" << sNameIQFeed << ')' ;
-
-    m_pcurOptionChainView = instrument.pChainView = new OptionChainView( this );
-    m_pcurOptionChainView->Show();
-    GetSizer()->Add( instrument.pChainView, 1, wxALL | wxEXPAND, 0 );
-
-    //GetSizer()->SetSizeHints( this );
-    Layout();
-    //GetParent()->GetSizer()->SetSizeHints( GetParent() );
-    GetParent()->Layout();
-
-}
+  }
   else {
     BOOST_LOG_TRIVIAL(error) << "symbol/instrument not found";
   }
@@ -334,18 +316,40 @@ void InstrumentViews::PresentOptionChains( mapInstrument_t::iterator iterInstrum
   Instrument& instrumentUnderlying( iterInstrumentUnderlying->second );
   for ( mapChains_t::value_type& vtChain: instrumentUnderlying.mapChains ) {
     const std::string sExpiry( ou::tf::Instrument::BuildDate( vtChain.first ) );
-    ou::tf::TreeItem* ptiExpiry = instrumentUnderlying.pti->AppendChild( sExpiry );
+    ou::tf::TreeItem* ptiExpiry = instrumentUnderlying.pti->AppendChild(
+      sExpiry
+    , []( ou::tf::TreeItem* pti ){ // fOnClick_t
+
+    }
+    );
     vtChain.second.Strikes(
       [ptiExpiry]( double strike, const chain_t::strike_t& entry ){
-        ptiExpiry->AppendChild( entry.call.pInstrument->GetInstrumentName() );
-        ptiExpiry->AppendChild( entry.put.pInstrument->GetInstrumentName() );
+        ou::tf::TreeItem* ptiStrike = ptiExpiry->AppendChild( boost::lexical_cast<std::string>( strike ) );
+        ptiStrike->AppendChild( entry.call.pInstrument->GetInstrumentName() );
+        ptiStrike->AppendChild( entry.put.pInstrument->GetInstrumentName() );
       } );
   }
 }
 
+void InstrumentViews::OptionChainView_select() {
+
+  if ( nullptr != m_pcurView ) { // todo: refactor this and the same below
+    //BOOST_LOG_TRIVIAL(trace) << "chain hide2";
+    m_pcurView->Hide();
+    m_pcurView = nullptr;
+    //GetSizer()->Remove()
+  }
+
+  // todo: set associate model
+
+  m_pcurView = m_pOptionChainView;
+  m_pcurView->Show();
+
+}
+
 void InstrumentViews::SizeTreeCtrl() {
-  const wxSize sizeClient( m_pTreeCtrl->GetClientSize() );
-  const wxSize sizeCurrent( m_pTreeCtrl->GetSize() );
+  //const wxSize sizeClient( m_pTreeCtrl->GetClientSize() );
+  //const wxSize sizeCurrent( m_pTreeCtrl->GetSize() );
   const wxSize sizeBest( m_pTreeCtrl->GetBestSize() );
   const wxSize sizeVirt( m_pTreeCtrl->GetVirtualSize() );
   //wxSize sizeWhat = m_pTreeCtrl->GetBestVirtualSize();
@@ -353,11 +357,8 @@ void InstrumentViews::SizeTreeCtrl() {
   //m_pTreeCtrl->SetSize( sizeSet );
   m_pTreeCtrl->SetMinSize( sizeSet );
 
-  //GetSizer()->SetSizeHints( this );
   Layout();
-  //GetParent()->GetSizer()->SetSizeHints( GetParent() );
   GetParent()->Layout();
-
 }
 
 void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {

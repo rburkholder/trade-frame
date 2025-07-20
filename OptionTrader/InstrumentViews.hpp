@@ -138,7 +138,8 @@ private:
   using mapInstrument_t = std::unordered_map<std::string, Instrument>;
   mapInstrument_t m_mapInstrument;
 
-  OptionChainView* m_pcurOptionChainView;
+  wxWindow* m_pcurView; // OptionChainView, LiveView, BarChart, ...
+  OptionChainView* m_pOptionChainView; // only one OptionChainView required, should be able to simply swap models
 
   void Init();
   void CreateControls();
@@ -149,10 +150,11 @@ private:
   void SizeTreeCtrl();
 
   void DialogSymbol();
-  void AddSymbol( const std::string& );
-  void BuildView( pInstrument_t& );
+  void BuildInstrument( const std::string& );
+  void AddInstrument( pInstrument_t& );
   void BuildOptionChains( mapInstrument_t::iterator );
   void PresentOptionChains( mapInstrument_t::iterator );
+  void OptionChainView_select();
 
   wxBitmap GetBitmapResource( const wxString& name );
   static bool ShowToolTips() { return true; };
