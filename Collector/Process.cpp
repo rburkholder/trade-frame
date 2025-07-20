@@ -364,7 +364,7 @@ void Process::Write() {
   }
 }
 
-void Process::QueryChains( pInstrument_t pUnderlying, collect::ATM::fInstrumentOption_t&& fIO ) {
+void Process::QueryChains( pInstrument_t pUnderlying, fInstrumentOption_t&& fIO ) {
 
   using query_t = ou::tf::iqfeed::OptionChainQuery;
   auto f =
