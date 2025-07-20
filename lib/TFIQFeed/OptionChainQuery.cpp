@@ -157,9 +157,9 @@ struct OptionChainParser: qi::grammar<Iterator, OptionList()> {
 OptionChainQuery::OptionChainQuery(
   fConnected_t&& fConnected
 )
-: Network<OptionChainQuery>( "127.0.0.1", 9100 ),
-  m_fConnected( std::move( fConnected ) ),
-  m_state( EState::quiescent )
+: Network<OptionChainQuery>( "127.0.0.1", 9100 )
+, m_fConnected( std::move( fConnected ) )
+, m_state( EState::quiescent )
 {
   assert( m_fConnected );
 }
@@ -382,6 +382,7 @@ void OptionChainQuery::QueryFuturesChain(
     << "CFU-" << sSymbol
     << "\n";
   std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
+  assert( m_mapFutures.end() == m_mapFutures.find( sSymbol ) );
   m_mapFutures.emplace( mapFutures_t::value_type( sSymbol, std::move( fFuturesList ) ) );
   m_state = EState::response;
   this->Send( ss.str().c_str() );
@@ -410,6 +411,7 @@ void OptionChainQuery::QueryFuturesOptionChain(
   std::cout << "request: '" << ss.str() << "'" << std::endl; // for diagnostics
   ss << "\n";
   std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
+  assert( m_mapOptions.end() == m_mapOptions.find( sSymbol ) );
   m_mapOptions.emplace( mapOptions_t::value_type( sSymbol, std::move( fOptionList ) ) );
   m_state = EState::response;
   this->Send( ss.str().c_str() );
@@ -443,11 +445,11 @@ void OptionChainQuery::QueryEquityOptionChain(
   std::cout << "request: '" << ss.str() << "'" << std::endl; // for diagnostics
   ss << "\n";
   std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
+  assert( m_mapOptions.end() == m_mapOptions.find( sSymbol ) );
   m_mapOptions.emplace( mapOptions_t::value_type( sSymbol, std::move( fOptionList ) ) );
   m_state = EState::response;
   this->Send( ss.str().c_str() );
 }
-
 
 } // namespace iqfeed
 } // namespace tf

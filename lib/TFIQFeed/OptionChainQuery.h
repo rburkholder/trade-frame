@@ -44,12 +44,12 @@ public:
     vSymbol_t vSymbol;
   };
 
-  using fConnected_t = std::function<void(void)>;
+  using fConnected_t = std::function<void()>;
   using fFuturesList_t = std::function<void(const FuturesList&)>;
   using fOptionList_t = std::function<void(const OptionList&)>;
 
   OptionChainQuery( fConnected_t&& );
-  ~OptionChainQuery( void );
+  ~OptionChainQuery();
 
   void Connect();
 
