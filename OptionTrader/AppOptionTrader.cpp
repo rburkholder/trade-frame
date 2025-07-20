@@ -57,8 +57,6 @@ bool AppOptionTrader::OnInit() {
     return false;
   }
 
-  m_bComposeInstrumentIQFeed_ready = false;
-
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppTitle );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   m_pFrameMain->SetSize( 800, 500 );
@@ -85,9 +83,9 @@ bool AppOptionTrader::OnInit() {
   m_pFrameMain->Layout();
   m_pFrameMain->Show(); // triggers the auto move
 
-  // this needs to be placed after the providers are registered
   ConnectionsStart();
 
+  // this needs to be placed after the providers are registered
   m_db.Open( c_sDbName );
 
   return true;
@@ -95,33 +93,20 @@ bool AppOptionTrader::OnInit() {
 }
 
 void AppOptionTrader::ConnectionsStart() {
-
   m_piqfeed = ou::tf::iqfeed::Provider::Factory();
   m_piqfeed->OnConnected.Add( MakeDelegate( this, &AppOptionTrader::HandleIQFeedConnected ) );
   m_piqfeed->Connect();
-
-  m_pComposeInstrumentIQFeed = std::make_shared<ou::tf::ComposeInstrument>(
-    m_piqfeed,
-    [this](){
-      m_bComposeInstrumentIQFeed_ready = true;
-      ConnectionsReady();
-    } );
-
 }
 
 void AppOptionTrader::HandleIQFeedConnected( int ) {
   BOOST_LOG_TRIVIAL(info) << "iqfeed connected";
-  ConnectionsReady();
-}
 
-void AppOptionTrader::ConnectionsReady() {
-  if (
-     m_piqfeed->Connected()
-  && m_bComposeInstrumentIQFeed_ready
-  ) {
-    m_pOptionManager = std::make_unique<OptionManager>( m_piqfeed );
-    m_pInstrumentViews->Set( m_pComposeInstrumentIQFeed );
-  }
+  m_pComposeInstrumentIQFeed = std::make_shared<ou::tf::ComposeInstrument>(
+    m_piqfeed,
+    [this](){
+      m_pOptionManager = std::make_unique<OptionManager>( m_piqfeed );
+      m_pInstrumentViews->Set( m_pComposeInstrumentIQFeed );
+    } );
 }
 
 void AppOptionTrader::QueryChains( pInstrument_t pUnderlying, fInstrumentOption_t&& fIO ) {

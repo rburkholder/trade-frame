@@ -56,8 +56,6 @@ public:
 protected:
 private:
 
-  bool m_bComposeInstrumentIQFeed_ready;
-
   FrameMain* m_pFrameMain;
   ou::tf::InstrumentViews* m_pInstrumentViews;
 
@@ -76,7 +74,6 @@ private:
 
   void ConnectionsStart();
   void HandleIQFeedConnected( int );
-  void ConnectionsReady();
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using fInstrumentOption_t = std::function<void(size_t, pInstrument_t /* option */)>; // needs to match CollectATM
