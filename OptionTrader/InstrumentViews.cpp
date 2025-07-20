@@ -27,6 +27,8 @@
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/ComposeInstrument.hpp>
 
+#include <TFIQFeed/OptionChainQuery.h>
+
 #include <TFVuTrading/TreeItem.hpp>
 
 #include "InstrumentViews.hpp"
@@ -240,7 +242,35 @@ void InstrumentViews::BuildView( pInstrument_t& pInstrument ) {
 
 void InstrumentViews::BuildOptionChain( mapInstrument_t::iterator iterInstrument ) {
   Instrument& instrument( iterInstrument->second );
-  const std::string& sNameIQFeed(  instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
+  const std::string& sNameGeneric( instrument.pInstrument->GetInstrumentName() );
+  const std::string& sNameIQFeed( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
+  switch ( instrument.pInstrument->GetInstrumentType() ) {
+    case ou::tf::InstrumentType::Future:
+      m_pComposeInstrumentIQFeed->OptionChainQuery()->QueryFuturesOptionChain(
+        sNameIQFeed,
+        "pc", "", "", "1", // 1 near month
+        [&sNameGeneric]( const ou::tf::iqfeed::OptionChainQuery::OptionList& list ){
+          BOOST_LOG_TRIVIAL(info) << sNameGeneric << " has " << list.vSymbol.size() << " options";
+        }
+      );
+      break;
+    case ou::tf::InstrumentType::Stock:
+      m_pComposeInstrumentIQFeed->OptionChainQuery()->QueryEquityOptionChain(
+        sNameIQFeed,
+        "pc", "", "1", "0","0","0",  // 1 near month
+        [&sNameGeneric]( const ou::tf::iqfeed::OptionChainQuery::OptionList& list ){
+          BOOST_LOG_TRIVIAL(info) << sNameGeneric << " has " << list.vSymbol.size() << " options";
+        }
+      );
+      break;
+    default:
+      BOOST_LOG_TRIVIAL(warning)
+        << "Symbol " << sNameGeneric
+        << " (" << sNameIQFeed
+        << ") is not stock or future, ignored";
+      break;
+  }
+
 }
 
 void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
