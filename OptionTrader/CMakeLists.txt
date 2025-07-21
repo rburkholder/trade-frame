@@ -25,6 +25,7 @@ find_package(Boost ${TF_BOOST_VERSION} CONFIG REQUIRED COMPONENTS system date_ti
 set(
   file_h
     AppOptionTrader.hpp
+    Chains.hpp
     InstrumentViews.hpp
     OptionChainModel.hpp
     OptionChainView.hpp

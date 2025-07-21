@@ -36,6 +36,7 @@
 
 #include "InstrumentViews.hpp"
 #include "OptionChainView.hpp"
+#include "OptionChainModel.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -123,7 +124,6 @@ void InstrumentViews::CreateControls() {
   m_pOptionChainView = new OptionChainView( this );
   itemBoxSizer1->Add( m_pOptionChainView, 1, wxALL | wxEXPAND, 0 );
   m_pOptionChainView->Show( false );
-
 
   Bind( wxEVT_DESTROY, &InstrumentViews::OnDestroy, this );
 
@@ -316,11 +316,16 @@ void InstrumentViews::PresentOptionChains( mapInstrument_t::iterator iterInstrum
   Instrument& instrumentUnderlying( iterInstrumentUnderlying->second );
   for ( mapChains_t::value_type& vtChain: instrumentUnderlying.mapChains ) {
     const std::string sExpiry( ou::tf::Instrument::BuildDate( vtChain.first ) );
+
     ou::tf::TreeItem* ptiExpiry = instrumentUnderlying.pti->AppendChild(
       sExpiry
-    , []( ou::tf::TreeItem* pti ){ // fOnClick_t
-
-    }
+    , [this,&vtChain]( ou::tf::TreeItem* pti ){ // fOnClick_t
+        OptionChainModel* model = new OptionChainModel( vtChain );
+        m_pOptionChainView->AssociateModel( model );
+        model->DecRef();
+        m_pOptionChainView->Show();
+        Layout();
+        GetParent()->Layout();    }
     );
     vtChain.second.Strikes(
       [ptiExpiry]( double strike, const chain_t::strike_t& entry ){

@@ -29,11 +29,7 @@
 
 #include <wx/panel.h>
 
-#include <TFTrading/Instrument.h>
-
-#include <TFOptions/Chain.h>
-#include <TFOptions/Option.h>
-#include <TFOptions/Engine.h>
+#include "Chains.hpp"
 
 #define SYMBOL_INSTRUMENTVIEWS_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_INSTRUMENTVIEWS_TITLE _("Instrument Views")
@@ -112,14 +108,6 @@ private:
   fBuildOption_t m_fBuildOption;
 
   pOptionEngine_t m_pOptionEngine;
-
-  struct Instance: public ou::tf::option::chain::OptionName {
-    pInstrument_t pInstrument; // resident in all Options
-    pOption_t pOption;  // note, includes Watch, just-in-time Watch/Option construction
-  };
-
-  using chain_t = ou::tf::option::Chain<Instance>;
-  using mapChains_t = std::map<boost::gregorian::date, chain_t>;
 
   struct Instrument {
 

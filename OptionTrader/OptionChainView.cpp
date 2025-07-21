@@ -47,7 +47,21 @@ bool OptionChainView::Create( wxWindow* parent, wxWindowID id, const wxPoint& po
 }
 
 void OptionChainView::CreateControls() {
+
   Bind( wxEVT_DESTROY, &OptionChainView::OnDestroy, this );
+
+  {
+    int ix {};
+    assert( AppendColumn( new wxDataViewColumn( "iv",     new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "delta",  new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "bid",    new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "ask",    new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "strike", new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "bid",    new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "ask",    new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "delta",  new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "iv",     new wxDataViewTextRenderer(), ix++ ) ) );
+  }
 }
 
 void OptionChainView::OnDestroy( wxWindowDestroyEvent& event ) {
