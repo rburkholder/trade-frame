@@ -330,8 +330,13 @@ void InstrumentViews::PresentOptionChains( mapInstrument_t::iterator iterInstrum
     vtChain.second.Strikes(
       [ptiExpiry]( double strike, const chain_t::strike_t& entry ){
         ou::tf::TreeItem* ptiStrike = ptiExpiry->AppendChild( boost::lexical_cast<std::string>( strike ) );
-        ptiStrike->AppendChild( entry.call.pInstrument->GetInstrumentName() );
-        ptiStrike->AppendChild( entry.put.pInstrument->GetInstrumentName() );
+        if ( entry.call.pInstrument ) {
+          ptiStrike->AppendChild( entry.call.pInstrument->GetInstrumentName() );
+        }
+        if ( entry.put.pInstrument ) {
+          ptiStrike->AppendChild( entry.put.pInstrument->GetInstrumentName() );
+        }
+
       } );
   }
 }
