@@ -108,25 +108,25 @@ void OptionChainModel::GetValue( wxVariant& value, const wxDataViewItem& item, u
   const vRow2Entry_t::value_type& vt( m_vRow2Entry[ row ] );
   std::string response;
   switch ( col ) {
-    case 3: // call bid
+    case c_bid: // call bid
       if ( vt.options.call.pOption ) {
         response = fmt::format( "{:.{}f}", vt.options.call.pOption->LastQuote().Bid(), 2 );
       }
       break;
-    case 4: // call ask
+    case c_ask: // call ask
       if ( vt.options.call.pOption ) {
         response = fmt::format( "{:.{}f}", vt.options.call.pOption->LastQuote().Ask(), 2 );
       }
       break;
-    case 5:  // strike
+    case strike:  // strike
       response = fmt::format( "{:.{}f}", vt.strike, 2 );
       break;
-    case 6: // put bid
+    case p_bid: // put bid
       if ( vt.options.put.pOption ) {
         response = fmt::format( "{:.{}f}", vt.options.put.pOption->LastQuote().Bid(), 2 );
       }
       break;
-    case 7: // put ask
+    case p_ask: // put ask
       if ( vt.options.put.pOption ) {
         response = fmt::format( "{:.{}f}", vt.options.put.pOption->LastQuote().Ask(), 2 );
       }

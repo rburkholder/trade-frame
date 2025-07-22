@@ -24,6 +24,8 @@
 #include <TFOptions/Option.h>
 #include <TFOptions/Engine.h>
 
+enum EChainColums { c_oi, c_iv, c_dlt, c_bid, c_ask, strike, p_bid, p_ask, p_dlt, p_iv, p_oi };
+
 using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 using pOption_t = ou::tf::option::Option::pOption_t;
 

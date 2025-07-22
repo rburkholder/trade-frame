@@ -18,6 +18,7 @@
  * Created: July 18, 2025 11:30:21
  */
 
+#include "Common.hpp"
 #include "OptionChainView.hpp"
 
 OptionChainView::OptionChainView(): wxDataViewCtrl() {
@@ -57,18 +58,17 @@ void OptionChainView::CreateControls() {
   };
 
   {
-    int ix {};  // todo:  use enums
-    assert( AppendColumn( new wxDataViewColumn( "c oi",   fRendererRight(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "c iv",   fRendererRight(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "c dlt",  fRendererRight(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "c bid",  fRendererRight(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "c ask",  fRendererRight(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "strike", new wxDataViewTextRenderer(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "p bid",  fRendererRight(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "p ask",  fRendererRight(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "p dlt",  fRendererRight(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "p iv",   fRendererRight(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "p oi",   fRendererRight(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "c oi",   fRendererRight(), EChainColums::c_oi ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "c iv",   fRendererRight(), EChainColums::c_iv ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "c dlt",  fRendererRight(), EChainColums::c_dlt ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "c bid",  fRendererRight(), EChainColums::c_bid ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "c ask",  fRendererRight(), EChainColums::c_ask ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "strike", new wxDataViewTextRenderer(), EChainColums::strike ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "p bid",  fRendererRight(), EChainColums::p_bid ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "p ask",  fRendererRight(), EChainColums::p_ask ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "p dlt",  fRendererRight(), EChainColums::p_dlt ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "p iv",   fRendererRight(), EChainColums::p_iv ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "p oi",   fRendererRight(), EChainColums::p_oi ) ) );
   }
 }
 
