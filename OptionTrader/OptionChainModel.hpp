@@ -131,7 +131,7 @@ private:
             }
           }
           if ( options.put.pInstrument ) {
-            if ( !options.put.pOption ) {
+            if ( options.put.pOption ) {
               options.put.pOption->StopWatch();
               options.put.pOption->OnQuote.Remove( MakeDelegate( this, &Strike::HandleQuote ) );
               //options.put.pOption->OnTrade.Remove( MakeDelegate( this, &Strike::HandleTrade ) );
