@@ -54,7 +54,8 @@ void OptionChainModel::HandleTimer( wxDataViewItem dviTopItem, int nRows ) {
     const int ixLast( std::min<int>( ixLast_, m_vRow2Entry.size() - 1 ) );
 
 
-    if ( ( ixFirst != m_ixFirst ) && ( ixLast != m_ixLast ) ) {
+    if ( ( ixFirst != m_ixFirst ) || ( ixLast != m_ixLast ) ) {
+      //BOOST_LOG_TRIVIAL(trace) << "timer " << ixFirst << "," << ixLast;
       // check for start on in view rows - first
       for ( int ix = ixFirst; ix <= ixLast; ++ix ) {
         m_vRow2Entry[ ix ].Start();
