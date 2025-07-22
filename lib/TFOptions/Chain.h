@@ -84,7 +84,8 @@ public:
   using option_t = Option;
   using strike_t = chain::Strike<option_t>;
 
-  using fStrike_t = std::function<void( double, const strike_t& )>;
+  using fStrike_t = std::function<void( double, strike_t& )>;
+  using fStrike_const_t = std::function<void( double, const strike_t& )>;
 
   Chain() {}
   Chain( Chain&& rhs ) {
@@ -129,8 +130,14 @@ public:
   // needs exact match on strikeSource
   int AdjacentStrikes( double strikeSource, double& strikeLower, double& strikeUpper ) const;
 
-  void Strikes( fStrike_t&& fStrike ) const {
+  void Strikes( fStrike_const_t&& fStrike ) const {
     for ( const typename mapChain_t::value_type& vt: m_mapChain ) {
+      fStrike( vt.first, vt.second );
+    }
+  }
+
+  void Strikes( fStrike_t&& fStrike ) {
+    for ( typename mapChain_t::value_type& vt: m_mapChain ) {
       fStrike( vt.first, vt.second );
     }
   }
