@@ -69,6 +69,7 @@ void OptionChainView::CreateControls() {
     assert( AppendColumn( new wxDataViewColumn( "p dlt",  fRendererRight(), EChainColums::p_dlt ) ) );
     assert( AppendColumn( new wxDataViewColumn( "p iv",   fRendererRight(), EChainColums::p_iv ) ) );
     assert( AppendColumn( new wxDataViewColumn( "p oi",   fRendererRight(), EChainColums::p_oi ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "",       fRendererRight(), EChainColums::empty ) ) );
   }
 }
 
