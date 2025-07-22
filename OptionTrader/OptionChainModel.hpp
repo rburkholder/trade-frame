@@ -26,12 +26,21 @@
 
 #include "Chains.hpp"
 
+// todo:
+//   need top row and visible rows from the ctrl
+//   need to obtain option and set watch when visible
+
 class OptionChainModel
 : public wxDataViewVirtualListModel
 {
 public:
 
-  OptionChainModel( mapChains_t::value_type& );
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
+  using pOption_t = ou::tf::option::Option::pOption_t;
+
+  using fBuildOption_t = std::function<pOption_t( pInstrument_t )>;
+
+  OptionChainModel( mapChains_t::value_type&, fBuildOption_t& );
   ~OptionChainModel();
 
   virtual bool IsContainer( const wxDataViewItem& item	) const;
@@ -52,11 +61,51 @@ private:
 
   mapChains_t::value_type& m_vt;
 
+  fBuildOption_t& m_fBuildOption;
+
   struct Strike {
+    bool bWatching;
     double strike;
-    const chain_t::strike_t& options;
-    Strike( double strike_, const chain_t::strike_t& options_ ): strike( strike_ ), options( options_ ) {}
-    Strike( const Strike& rhs ): strike( rhs.strike ), options( rhs.options ) {}
+    chain_t::strike_t& options;
+    fBuildOption_t& fBuildOption;
+
+    Strike( double strike_, chain_t::strike_t& options_, fBuildOption_t& fBuildOption_ )
+    : strike( strike_ ), options( options_ ), bWatching( false ), fBuildOption( fBuildOption_ )
+    {}
+
+    Strike( const Strike& rhs )
+    : strike( rhs.strike ), options( rhs.options ), bWatching( false ), fBuildOption( rhs.fBuildOption )
+    {}
+
+    bool IsWatching() const { return bWatching; }
+
+    void Start() {
+      if ( !bWatching ) {
+        bWatching = true;
+        if ( options.call.pInstrument ) {
+          if ( !options.call.pOption ) {
+            options.call.pOption = fBuildOption( options.call.pInstrument );
+            // todo: start watch, and batched notification
+          }
+        }
+        if ( options.put.pInstrument ) {
+          if ( !options.put.pOption ) {
+            options.put.pOption = fBuildOption( options.put.pInstrument );
+            // todo: start watch, and batched notification
+          }
+        }
+      }
+    }
+
+    void Stop() {
+      if ( bWatching ) {
+        bWatching = false;
+      }
+    }
+
+    ~Strike() {
+      Stop();
+    }
   };
 
   using vRow2Entry_t = std::vector<Strike>;

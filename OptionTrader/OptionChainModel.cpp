@@ -27,14 +27,15 @@
 
 #include "OptionChainModel.hpp"
 
-OptionChainModel::OptionChainModel( mapChains_t::value_type& vt )
+OptionChainModel::OptionChainModel( mapChains_t::value_type& vt, fBuildOption_t& fBuildOption )
 : wxDataViewVirtualListModel( vt.second.Size() )
 , m_vt( vt )
+, m_fBuildOption( fBuildOption )
 {
   BOOST_LOG_TRIVIAL(trace) << "OptionChainModel constructed " << ou::tf::Instrument::BuildDate( m_vt.first );
   m_vt.second.Strikes(
-    [this]( double strike, const chain_t::strike_t& entry ) {
-      m_vRow2Entry.push_back( Strike( strike, entry ) );
+    [this]( double strike, chain_t::strike_t& entry ) {
+      m_vRow2Entry.push_back( Strike( strike, entry, m_fBuildOption ) );
     } );
 }
 
@@ -73,7 +74,7 @@ void OptionChainModel::GetValue( wxVariant& value, const wxDataViewItem& item, u
   }
   wxVariant placeholder(
     response
-  , "name col " + boost::lexical_cast<std::string>( col )
+  , boost::lexical_cast<std::string>( col )
   );
   value = placeholder;
 }

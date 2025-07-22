@@ -320,7 +320,7 @@ void InstrumentViews::PresentOptionChains( mapInstrument_t::iterator iterInstrum
     ou::tf::TreeItem* ptiExpiry = instrumentUnderlying.pti->AppendChild(
       sExpiry
     , [this,&vtChain]( ou::tf::TreeItem* pti ){ // fOnClick_t
-        OptionChainModel* model = new OptionChainModel( vtChain );
+        OptionChainModel* model = new OptionChainModel( vtChain, m_fBuildOption );
         m_pOptionChainView->AssociateModel( model );
         model->DecRef();
         m_pOptionChainView->Show();
