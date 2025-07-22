@@ -27,8 +27,6 @@
 
 // todo:
 //   use EnsureVisible to get strike to closest current price
-//   use GetCountPerPage to track simultaneous watches
-//   use GetTopItem for start of watches
 
 #define SYMBOL_OPTIONCHAINVIEW_STYLE wxTAB_TRAVERSAL | wxDV_SINGLE | wxDV_ROW_LINES
 #define SYMBOL_OPTIONCHAINVIEW_TITLE _("Option Chain")

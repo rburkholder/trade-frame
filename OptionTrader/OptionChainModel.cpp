@@ -24,8 +24,6 @@
 
 #include <fmt/core.h>
 
-#include "Chains.hpp"
-
 #include "OptionChainModel.hpp"
 
 OptionChainModel::OptionChainModel( mapChains_t::value_type& vt, fBuildOption_t& fBuildOption )

@@ -24,11 +24,7 @@
 
 #include <wx/dataview.h>
 
-#include "Chains.hpp"
-
-// todo:
-//   need top row and visible rows from the ctrl
-//   need to obtain option and set watch when visible
+#include "Common.hpp"
 
 class OptionChainModel
 : public wxDataViewVirtualListModel

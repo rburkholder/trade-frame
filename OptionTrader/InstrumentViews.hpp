@@ -30,7 +30,7 @@
 #include <wx/panel.h>
 #include <wx/timer.h>
 
-#include "Chains.hpp"
+#include "Common.hpp"
 
 #define SYMBOL_INSTRUMENTVIEWS_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_INSTRUMENTVIEWS_TITLE _("Instrument Views")
