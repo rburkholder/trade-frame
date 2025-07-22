@@ -28,6 +28,7 @@
 #include <boost/serialization/split_member.hpp>
 
 #include <wx/panel.h>
+#include <wx/timer.h>
 
 #include "Chains.hpp"
 
@@ -40,6 +41,7 @@
 class wxTreeCtrl;
 class wxTreeEvent;
 class OptionChainView;
+class OptionChainModel;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -96,6 +98,8 @@ private:
   , ID_TREECTRL
   };
 
+  wxTimer m_timerRefresh;
+
   wxTreeCtrl* m_pTreeCtrl;
   TreeItem* m_pRootTreeItem; // // root of custom tree items
 
@@ -126,8 +130,9 @@ private:
   using mapInstrument_t = std::unordered_map<std::string, Instrument>;
   mapInstrument_t m_mapInstrument;
 
-  wxWindow* m_pcurView; // OptionChainView, LiveView, BarChart, ...
+  wxWindow* m_pcurView; // OptionChainView, LiveView, BarChart, ... show/hide current
   OptionChainView* m_pOptionChainView; // only one OptionChainView required, should be able to simply swap models
+  OptionChainModel* m_pOptionChainModel; // model switches out for each option chain, ensure retired prior to View
 
   void Init();
   void CreateControls();
@@ -143,6 +148,8 @@ private:
   void BuildOptionChains( mapInstrument_t::iterator );
   void PresentOptionChains( mapInstrument_t::iterator );
   void OptionChainView_select();
+
+  void HandleTimer( wxTimerEvent& );
 
   wxBitmap GetBitmapResource( const wxString& name );
   static bool ShowToolTips() { return true; };

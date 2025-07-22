@@ -51,16 +51,18 @@ void OptionChainView::CreateControls() {
   Bind( wxEVT_DESTROY, &OptionChainView::OnDestroy, this );
 
   {
-    int ix {};
-    assert( AppendColumn( new wxDataViewColumn( "iv",     new wxDataViewTextRenderer(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "delta",  new wxDataViewTextRenderer(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "bid",    new wxDataViewTextRenderer(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "ask",    new wxDataViewTextRenderer(), ix++ ) ) );
+    int ix {};  // todo:  use enums
+    assert( AppendColumn( new wxDataViewColumn( "c oi",   new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "c iv",   new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "c dlt",  new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "c bid",  new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "c ask",  new wxDataViewTextRenderer(), ix++ ) ) );
     assert( AppendColumn( new wxDataViewColumn( "strike", new wxDataViewTextRenderer(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "bid",    new wxDataViewTextRenderer(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "ask",    new wxDataViewTextRenderer(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "delta",  new wxDataViewTextRenderer(), ix++ ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "iv",     new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "p bid",  new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "p ask",  new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "p dlt",  new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "p iv",   new wxDataViewTextRenderer(), ix++ ) ) );
+    assert( AppendColumn( new wxDataViewColumn( "p oi",   new wxDataViewTextRenderer(), ix++ ) ) );
   }
 }
 

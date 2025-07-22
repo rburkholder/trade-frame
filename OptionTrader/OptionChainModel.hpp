@@ -56,6 +56,8 @@ public:
 
   unsigned int GetCount() const;
 
+  void HandleTimer( wxDataViewItem, int );
+
 protected:
 private:
 
@@ -64,49 +66,89 @@ private:
   fBuildOption_t& m_fBuildOption;
 
   struct Strike {
-    bool bWatching;
+    size_t nWatching;
+    bool bUpdated;  // used by timed scan to generate event to control
     double strike;
     chain_t::strike_t& options;
     fBuildOption_t& fBuildOption;
 
     Strike( double strike_, chain_t::strike_t& options_, fBuildOption_t& fBuildOption_ )
-    : strike( strike_ ), options( options_ ), bWatching( false ), fBuildOption( fBuildOption_ )
+    : strike( strike_ ), options( options_ ), fBuildOption( fBuildOption_ )
+    , nWatching( 0 ), bUpdated( false )
     {}
 
     Strike( const Strike& rhs )
-    : strike( rhs.strike ), options( rhs.options ), bWatching( false ), fBuildOption( rhs.fBuildOption )
+    : strike( rhs.strike ), options( rhs.options ), fBuildOption( rhs.fBuildOption )
+    , nWatching( rhs.nWatching ), bUpdated( rhs.bUpdated )
     {}
 
-    bool IsWatching() const { return bWatching; }
+    bool IsWatching() const { return 0 < nWatching; }
 
     void Start() {
-      if ( !bWatching ) {
-        bWatching = true;
+      if ( 0 == nWatching ) {
         if ( options.call.pInstrument ) {
           if ( !options.call.pOption ) {
             options.call.pOption = fBuildOption( options.call.pInstrument );
-            // todo: start watch, and batched notification
           }
+          options.call.pOption->OnQuote.Add( MakeDelegate( this, &Strike::HandleQuote ) );
+          //options.call.pOption->OnTrade.Add( MakeDelegate( this, &Strike::HandleTrade ) );
+          options.call.pOption->StartWatch();
         }
         if ( options.put.pInstrument ) {
           if ( !options.put.pOption ) {
             options.put.pOption = fBuildOption( options.put.pInstrument );
-            // todo: start watch, and batched notification
           }
+          options.put.pOption->OnQuote.Add( MakeDelegate( this, &Strike::HandleQuote ) );
+          //options.put.pOption->OnTrade.Add( MakeDelegate( this, &Strike::HandleTrade ) );
+          options.put.pOption->StartWatch();
         }
       }
+      ++nWatching;
+    }
+
+    void HandleQuote( const ou::tf::Quote& quote ) {
+      bUpdated = true; // todo: confirm with change in value of bid/ask
+    }
+
+    void HandleTrade( const ou::tf::Trade& trade ) {
+    }
+
+    bool Updated() {
+      bool b( bUpdated );
+      bUpdated = false;
+      return b;
     }
 
     void Stop() {
-      if ( bWatching ) {
-        bWatching = false;
+      if ( 0 < nWatching ) {
+        if ( 1 == nWatching ) {
+          bUpdated = false;
+          if ( options.call.pInstrument ) {
+            if ( options.call.pOption ) {
+              options.call.pOption->StopWatch();
+              options.call.pOption->OnQuote.Remove( MakeDelegate( this, &Strike::HandleQuote ) );
+              //options.call.pOption->OnTrade.Remove( MakeDelegate( this, &Strike::HandleTrade ) );
+            }
+          }
+          if ( options.put.pInstrument ) {
+            if ( !options.put.pOption ) {
+              options.put.pOption->StopWatch();
+              options.put.pOption->OnQuote.Remove( MakeDelegate( this, &Strike::HandleQuote ) );
+              //options.put.pOption->OnTrade.Remove( MakeDelegate( this, &Strike::HandleTrade ) );
+            }
+          }
+        }
+        --nWatching;
       }
     }
 
     ~Strike() {
       Stop();
+      assert( 0 == nWatching );
     }
   };
+
+  int m_ixFirst, m_ixLast;
 
   using vRow2Entry_t = std::vector<Strike>;
   vRow2Entry_t m_vRow2Entry;

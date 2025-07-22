@@ -53,8 +53,9 @@ InstrumentViews::InstrumentViews( wxWindow* parent, wxWindowID id, const wxPoint
 }
 
 InstrumentViews::~InstrumentViews() {
-  m_pcurView = nullptr;
+
   m_pOptionChainView = nullptr;
+  m_pOptionChainModel = nullptr;
   m_mapInstrument.clear();
   m_fBuildWatch = nullptr;
   m_fBuildOption = nullptr;
@@ -65,10 +66,12 @@ InstrumentViews::~InstrumentViews() {
 void InstrumentViews::Init() {
   m_pcurView = nullptr;
   m_pOptionChainView = nullptr;
+  m_pOptionChainModel = nullptr;
   m_pTreeCtrl = nullptr;
   m_pRootTreeItem = nullptr;
   m_fBuildWatch = nullptr;
   m_fBuildOption = nullptr;
+
 }
 
 bool InstrumentViews::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
@@ -127,6 +130,17 @@ void InstrumentViews::CreateControls() {
 
   Bind( wxEVT_DESTROY, &InstrumentViews::OnDestroy, this );
 
+  m_timerRefresh.SetOwner( this );
+  Bind( wxEVT_TIMER, &InstrumentViews::HandleTimer, this, m_timerRefresh.GetId() );
+  m_timerRefresh.Start( 500 );
+}
+
+void InstrumentViews::HandleTimer( wxTimerEvent& event ) {
+  if ( ( nullptr != m_pOptionChainView ) && ( nullptr != m_pOptionChainModel ) ) {
+    wxDataViewItem dviTopItem = m_pOptionChainView->GetTopItem();
+    int nRows = m_pOptionChainView->GetCountPerPage();
+    m_pOptionChainModel->HandleTimer( dviTopItem, nRows );
+  }
 }
 
 void InstrumentViews::HandleTreeEventItemGetToolTip( wxTreeEvent& event ) {
@@ -320,9 +334,12 @@ void InstrumentViews::PresentOptionChains( mapInstrument_t::iterator iterInstrum
     ou::tf::TreeItem* ptiExpiry = instrumentUnderlying.pti->AppendChild(
       sExpiry
     , [this,&vtChain]( ou::tf::TreeItem* pti ){ // fOnClick_t
-        OptionChainModel* model = new OptionChainModel( vtChain, m_fBuildOption );
-        m_pOptionChainView->AssociateModel( model );
-        model->DecRef();
+        if ( nullptr != m_pOptionChainModel ) {
+          m_pOptionChainModel->DecRef();
+          m_pOptionChainModel = nullptr;
+        }
+        m_pOptionChainModel = new OptionChainModel( vtChain, m_fBuildOption );
+        m_pOptionChainView->AssociateModel( m_pOptionChainModel );
         m_pOptionChainView->Show();
         Layout();
         GetParent()->Layout();    }
@@ -372,6 +389,21 @@ void InstrumentViews::SizeTreeCtrl() {
 }
 
 void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
+
+  if ( m_timerRefresh.IsRunning() ) {
+    m_timerRefresh.Stop();
+    Unbind( wxEVT_TIMER, &InstrumentViews::HandleTimer, this, m_timerRefresh.GetId() );
+  }
+
+  m_pcurView = nullptr;
+  if ( nullptr != m_pOptionChainView ) {
+    m_pOptionChainView->AssociateModel( nullptr );
+  }
+  if ( nullptr != m_pOptionChainModel ) {
+    m_pOptionChainModel->DecRef();
+    m_pOptionChainModel = nullptr;
+  }
+
   //TreeItem::UnBind( this, m_pTree ); // to be fixed
   m_pTreeCtrl->Unbind( wxEVT_TREE_ITEM_EXPANDED, &InstrumentViews::HandleTreeEventItemExpanded, this, m_pTreeCtrl->GetId() );
   m_pTreeCtrl->Unbind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &InstrumentViews::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() );
