@@ -117,6 +117,7 @@ private:
 
     ou::tf::TreeItem* pti;
     pInstrument_t pInstrument;
+    pWatch_t pWatch;
     OptionChainView* pChainView;
     mapChains_t mapChains;
 
@@ -124,7 +125,21 @@ private:
     : pti( nullptr ), pChainView( nullptr )
     {}
     Instrument( Instrument&& rhs ) {}
-    ~Instrument() {}
+
+    void Set( pWatch_t pWatch_ ) {
+      assert( !pWatch );
+      pWatch = pWatch_;
+      pWatch->StartWatch();
+    }
+
+    ~Instrument() {
+      if ( pWatch ) {
+        pWatch->StopWatch();
+        pWatch.reset();
+      }
+      pInstrument.reset();
+      pChainView = nullptr;
+    }
   };
 
   using mapInstrument_t = std::unordered_map<std::string, Instrument>;

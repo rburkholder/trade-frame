@@ -229,6 +229,8 @@ void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
     Instrument& instrument( iterInstrument->second );
 
     instrument.pInstrument = pInstrument;
+    instrument.Set( m_fBuildWatch( pInstrument ) );
+
     instrument.pti = m_pRootTreeItem->AppendChild(
       sNameGeneric,
       [this,&instrument,&sNameGeneric,&sNameIQFeed]( ou::tf::TreeItem* pti ){ // fClick_t
