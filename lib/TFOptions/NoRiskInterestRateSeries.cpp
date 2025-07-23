@@ -91,6 +91,8 @@ void NoRiskInterestRateSeries::SaveSeries( const std::string& sPrefix ) {
 
 double NoRiskInterestRateSeries::ValueAt( time_duration td ) const {
 
+  assert( m_bWatching );
+
   assert( boost::posix_time::not_a_date_time != td );
   assert( td >= m_vInterestRate[ 0 ].td );
   //assert( m_bWatching );  // don't worry about this as the values don't vary much anyway
