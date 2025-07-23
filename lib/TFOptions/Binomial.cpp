@@ -92,7 +92,7 @@ double CalcImpliedVolatility( const structInput& input_, double option, structOu
 
   // page 163 - 164 provides vega calc
   // page 337 provides newton-raphson method of iv calc
-  size_t cnt = 10;
+  size_t cnt = 12;
   structInput input( input_ );  // copy rather than reference to keep local copy of parameters
 
   ou::tf::option::binomial::CRR( input, output );
