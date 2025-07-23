@@ -183,23 +183,26 @@ void AppOptionTrader::QueryChains( pInstrument_t pUnderlying, fInstrumentOption_
 //}
 
 void AppOptionTrader::SaveState() {
-  std::cout << "Saving Config ..." << std::endl;
+  BOOST_LOG_TRIVIAL(info) << "saving Config ...";
   std::ofstream ofs( c_sStateFileName );
   boost::archive::text_oarchive oa(ofs);
   oa & *this;
-  std::cout << "  done." << std::endl;
+  BOOST_LOG_TRIVIAL(info) << "saving done";
 }
 
 void AppOptionTrader::LoadState() {
   try {
-    std::cout << "Loading Config ..." << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "loading config ...";
     std::ifstream ifs( c_sStateFileName );
     boost::archive::text_iarchive ia(ifs);
     ia & *this;
-    std::cout << "  done." << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "loading done";
+  }
+  catch( const std::runtime_error& e ) {
+    BOOST_LOG_TRIVIAL(error) << "load exception " << e.what();
   }
   catch(...) {
-    std::cout << "load exception" << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "load exception (generic)";
   }
 }
 
