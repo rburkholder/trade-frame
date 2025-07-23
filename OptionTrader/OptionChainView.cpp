@@ -18,7 +18,6 @@
  * Created: July 18, 2025 11:30:21
  */
 
-#include "Common.hpp"
 #include "OptionChainView.hpp"
 
 OptionChainView::OptionChainView(): wxDataViewCtrl() {

@@ -35,7 +35,6 @@
 #include <TFVuTrading/TreeItem.hpp>
 
 #include "InstrumentViews.hpp"
-#include "OptionChainView.hpp"
 #include "OptionChainModel.hpp"
 
 namespace ou { // One Unified

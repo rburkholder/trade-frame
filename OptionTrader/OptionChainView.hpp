@@ -25,6 +25,8 @@
 
 #include <wx/dataview.h>
 
+#include "Common.hpp"
+
 // todo:
 //   use EnsureVisible to get strike to closest current price
 
@@ -37,6 +39,7 @@
 class OptionChainView
 : public wxDataViewCtrl
 {
+  friend class boost::serialization::access;
 public:
 
   OptionChainView();
@@ -72,10 +75,24 @@ private:
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
+    ar & EChainColums::empty;
+    for ( unsigned int ix = 0; ix < EChainColums::empty; ++ix ) {
+      wxDataViewColumn* p = GetColumn( ix );
+      ar & ( p->GetWidth() );
+    }
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
+    unsigned int nColumns;
+    unsigned int width;
+    ar & nColumns;
+
+    for ( unsigned int ix = 0; ix < nColumns; ++ix ) {
+      ar & width;
+      wxDataViewColumn* p = GetColumn( ix );
+      p->SetWidth( width );
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()

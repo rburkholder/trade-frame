@@ -31,6 +31,7 @@
 #include <wx/timer.h>
 
 #include "Common.hpp"
+#include "OptionChainView.hpp"
 
 #define SYMBOL_INSTRUMENTVIEWS_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_INSTRUMENTVIEWS_TITLE _("Instrument Views")
@@ -40,7 +41,6 @@
 
 class wxTreeCtrl;
 class wxTreeEvent;
-class OptionChainView;
 class OptionChainModel;
 
 namespace ou { // One Unified
@@ -160,6 +160,7 @@ private:
     for ( const mapInstrument_t::value_type& vt: m_mapInstrument ) {
       ar & vt.first;
     }
+    ar & *m_pOptionChainView;
   }
 
   template<typename Archive>
@@ -172,6 +173,9 @@ private:
       m_setInstrumentName.insert( sName ); // process once iqfeed connected
       --nNames;
     }
+    if ( 2 <= version ) {
+      ar & *m_pOptionChainView;
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
@@ -181,4 +185,4 @@ private:
 } // namespace tf
 } // namespace ou
 
-BOOST_CLASS_VERSION(ou::tf::InstrumentViews, 1)
+BOOST_CLASS_VERSION(ou::tf::InstrumentViews, 2)
