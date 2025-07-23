@@ -33,10 +33,14 @@ OptionChainModel::OptionChainModel( mapChains_t::value_type& vt, fBuildOption_t&
 , m_ixFirst( -1 ), m_ixLast( -1 )
 {
   BOOST_LOG_TRIVIAL(trace) << "OptionChainModel constructed " << ou::tf::Instrument::BuildDate( m_vt.first );
+  vRow2Entry_t vRow2Entry; // temporary use for strike reversal
   m_vt.second.Strikes(
-    [this]( double strike, chain_t::strike_t& entry ) {
-      m_vRow2Entry.push_back( Strike( strike, entry, m_fBuildOption ) );
+    [this,&vRow2Entry]( double strike, chain_t::strike_t& entry ) {
+      vRow2Entry.push_back( Strike( strike, entry, m_fBuildOption ) );
     } );
+  for ( vRow2Entry_t::reverse_iterator iter = vRow2Entry.rbegin(); iter != vRow2Entry.rend(); ++iter ) {
+    m_vRow2Entry.push_back( *iter );
+  }
 }
 
 OptionChainModel::~OptionChainModel() {
