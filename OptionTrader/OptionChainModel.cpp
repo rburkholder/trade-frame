@@ -126,7 +126,7 @@ void OptionChainModel::GetValue( wxVariant& value, const wxDataViewItem& item, u
       break;
     case c_iv:
       if ( vt.options.call.pOption ) {
-        response = fmt::format( "{:.{}f}", vt.options.call.pOption->LastGreek().ImpliedVolatility(), 3 );
+        response = fmt::format( "{:.{}f}", vt.options.call.pOption->LastGreek().ImpliedVolatility() * 100.0, 3 );
       }
       break;
     case c_dlt:
@@ -164,7 +164,7 @@ void OptionChainModel::GetValue( wxVariant& value, const wxDataViewItem& item, u
       break;
     case p_iv:
       if ( vt.options.put.pOption ) {
-        response = fmt::format( "{:.{}f}", vt.options.put.pOption->LastGreek().ImpliedVolatility(), 3 );
+        response = fmt::format( "{:.{}f}", vt.options.put.pOption->LastGreek().ImpliedVolatility() * 100.0, 3 );
       }
       break;
     case p_oi:
