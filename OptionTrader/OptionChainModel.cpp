@@ -141,7 +141,7 @@ void OptionChainModel::GetValue( wxVariant& value, const wxDataViewItem& item, u
       }
       break;
     case p_oi:
-      if ( vt.options.call.pOption ) {
+      if ( vt.options.put.pOption ) {
         response = fmt::format( "{:d}", vt.options.put.pOption->GetSummary().nOpenInterest );
       }
       break;
