@@ -230,6 +230,7 @@ void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
 
     instrument.pInstrument = pInstrument;
     instrument.Set( m_fBuildWatch( pInstrument ) );
+    m_pOptionEngine->RegisterUnderlying( instrument.pWatch );
 
     instrument.pti = m_pRootTreeItem->AppendChild(
       sNameGeneric,
@@ -328,18 +329,28 @@ void InstrumentViews::BuildOptionChains( mapInstrument_t::iterator iterInstrumen
 }
 
 void InstrumentViews::PresentOptionChains( mapInstrument_t::iterator iterInstrumentUnderlying ) {
-  Instrument& instrumentUnderlying( iterInstrumentUnderlying->second );
-  for ( mapChains_t::value_type& vtChain: instrumentUnderlying.mapChains ) {
+  Instrument& underlying( iterInstrumentUnderlying->second );
+  for ( mapChains_t::value_type& vtChain: underlying.mapChains ) {
     const std::string sExpiry( ou::tf::Instrument::BuildDate( vtChain.first ) );
 
-    ou::tf::TreeItem* ptiExpiry = instrumentUnderlying.pti->AppendChild(
+    ou::tf::TreeItem* ptiExpiry = underlying.pti->AppendChild(
       sExpiry
-    , [this,&vtChain]( ou::tf::TreeItem* pti ){ // fOnClick_t
+    , [this,&vtChain,&underlying]( ou::tf::TreeItem* pti ){ // fOnClick_t
         if ( nullptr != m_pOptionChainModel ) {
           m_pOptionChainModel->DecRef();
           m_pOptionChainModel = nullptr;
         }
-        m_pOptionChainModel = new OptionChainModel( vtChain, m_fBuildOption );
+        m_pOptionChainModel = new OptionChainModel(
+          vtChain, m_fBuildOption
+        , [this,p=underlying.pWatch]( pOption_t pOption ){
+            m_pOptionEngine->RegisterOption( pOption );
+            m_pOptionEngine->Add( pOption, p );
+          }
+        , [this,p=underlying.pWatch]( pOption_t pOption ){
+            m_pOptionEngine->Remove( pOption, p );
+            m_pOptionEngine->DeRegisterOption( pOption );
+          }
+        );
         m_pOptionChainView->AssociateModel( m_pOptionChainModel );
         m_pOptionChainView->Show();
         Layout();

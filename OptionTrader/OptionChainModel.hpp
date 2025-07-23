@@ -35,8 +35,14 @@ public:
   using pOption_t = ou::tf::option::Option::pOption_t;
 
   using fBuildOption_t = std::function<pOption_t( pInstrument_t )>;
+  using fOptionEngineAction_t = std::function<void( pOption_t )>;
 
-  OptionChainModel( mapChains_t::value_type&, fBuildOption_t& );
+  OptionChainModel(
+    mapChains_t::value_type&
+  , fBuildOption_t&
+  , fOptionEngineAction_t&& fOptionEngineStart
+  , fOptionEngineAction_t&& fOptionEngineStop
+  );
   ~OptionChainModel();
 
   virtual bool IsContainer( const wxDataViewItem& item	) const;
@@ -60,6 +66,8 @@ private:
   mapChains_t::value_type& m_vt;
 
   fBuildOption_t& m_fBuildOption;
+  fOptionEngineAction_t m_fOptionEngineStart;
+  fOptionEngineAction_t m_fOptionEngineStop;
 
   struct Strike {
     size_t nWatching;
@@ -67,15 +75,26 @@ private:
     double strike;
     chain_t::strike_t& options;
     fBuildOption_t& fBuildOption;
+    fOptionEngineAction_t& fOptionEngineStart;
+    fOptionEngineAction_t& fOptionEngineStop;
 
-    Strike( double strike_, chain_t::strike_t& options_, fBuildOption_t& fBuildOption_ )
+    Strike(
+      double strike_, chain_t::strike_t& options_
+    , fBuildOption_t& fBuildOption_
+    , fOptionEngineAction_t& fOptionEngineStart_
+    , fOptionEngineAction_t& fOptionEngineStop_
+    )
     : strike( strike_ ), options( options_ ), fBuildOption( fBuildOption_ )
     , nWatching( 0 ), bUpdated( false )
+    , fOptionEngineStart( fOptionEngineStart_ )
+    , fOptionEngineStop( fOptionEngineStop_ )
     {}
 
     Strike( const Strike& rhs )
     : strike( rhs.strike ), options( rhs.options ), fBuildOption( rhs.fBuildOption )
     , nWatching( rhs.nWatching ), bUpdated( rhs.bUpdated )
+    , fOptionEngineStart( rhs.fOptionEngineStart )
+    , fOptionEngineStop( rhs.fOptionEngineStop )
     {}
 
     bool IsWatching() const { return 0 < nWatching; }
@@ -86,17 +105,21 @@ private:
           if ( !options.call.pOption ) {
             options.call.pOption = fBuildOption( options.call.pInstrument );
           }
-          options.call.pOption->OnQuote.Add( MakeDelegate( this, &Strike::HandleQuote ) );
+          pOption_t& pOption( options.call.pOption );
+          pOption->OnQuote.Add( MakeDelegate( this, &Strike::HandleQuote ) );
           //options.call.pOption->OnTrade.Add( MakeDelegate( this, &Strike::HandleTrade ) );
-          options.call.pOption->StartWatch();
+          pOption->StartWatch();
+          fOptionEngineStart( pOption );
         }
         if ( options.put.pInstrument ) {
           if ( !options.put.pOption ) {
             options.put.pOption = fBuildOption( options.put.pInstrument );
           }
-          options.put.pOption->OnQuote.Add( MakeDelegate( this, &Strike::HandleQuote ) );
+          pOption_t& pOption( options.put.pOption );
+          pOption->OnQuote.Add( MakeDelegate( this, &Strike::HandleQuote ) );
           //options.put.pOption->OnTrade.Add( MakeDelegate( this, &Strike::HandleTrade ) );
-          options.put.pOption->StartWatch();
+          pOption->StartWatch();
+          fOptionEngineStart( pOption );
         }
       }
       ++nWatching;
@@ -121,15 +144,19 @@ private:
           bUpdated = false;
           if ( options.call.pInstrument ) {
             if ( options.call.pOption ) {
-              options.call.pOption->StopWatch();
-              options.call.pOption->OnQuote.Remove( MakeDelegate( this, &Strike::HandleQuote ) );
+              pOption_t& pOption( options.call.pOption );
+              fOptionEngineStop( pOption );
+              pOption->StopWatch();
+              pOption->OnQuote.Remove( MakeDelegate( this, &Strike::HandleQuote ) );
               //options.call.pOption->OnTrade.Remove( MakeDelegate( this, &Strike::HandleTrade ) );
             }
           }
           if ( options.put.pInstrument ) {
             if ( options.put.pOption ) {
-              options.put.pOption->StopWatch();
-              options.put.pOption->OnQuote.Remove( MakeDelegate( this, &Strike::HandleQuote ) );
+              pOption_t& pOption( options.put.pOption );
+              fOptionEngineStop( pOption );
+              pOption->StopWatch();
+              pOption->OnQuote.Remove( MakeDelegate( this, &Strike::HandleQuote ) );
               //options.put.pOption->OnTrade.Remove( MakeDelegate( this, &Strike::HandleTrade ) );
             }
           }

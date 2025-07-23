@@ -26,17 +26,24 @@
 
 #include "OptionChainModel.hpp"
 
-OptionChainModel::OptionChainModel( mapChains_t::value_type& vt, fBuildOption_t& fBuildOption )
+OptionChainModel::OptionChainModel(
+  mapChains_t::value_type& vt
+, fBuildOption_t& fBuildOption
+, fOptionEngineAction_t&& fOptionEngineStart
+, fOptionEngineAction_t&& fOptionEngineStop
+)
 : wxDataViewVirtualListModel( vt.second.Size() )
 , m_vt( vt )
 , m_fBuildOption( fBuildOption )
+, m_fOptionEngineStart( std::move( fOptionEngineStart ) )
+, m_fOptionEngineStop( std::move( fOptionEngineStop ) )
 , m_ixFirst( -1 ), m_ixLast( -1 )
 {
   BOOST_LOG_TRIVIAL(trace) << "OptionChainModel constructed " << ou::tf::Instrument::BuildDate( m_vt.first );
   vRow2Entry_t vRow2Entry; // temporary use for strike reversal
   m_vt.second.Strikes(
     [this,&vRow2Entry]( double strike, chain_t::strike_t& entry ) {
-      vRow2Entry.push_back( Strike( strike, entry, m_fBuildOption ) );
+      vRow2Entry.push_back( Strike( strike, entry, m_fBuildOption, m_fOptionEngineStart, m_fOptionEngineStop ) );
     } );
   for ( vRow2Entry_t::reverse_iterator iter = vRow2Entry.rbegin(); iter != vRow2Entry.rend(); ++iter ) {
     m_vRow2Entry.push_back( *iter );
@@ -117,6 +124,16 @@ void OptionChainModel::GetValue( wxVariant& value, const wxDataViewItem& item, u
         response = fmt::format( "{:d}", vt.options.call.pOption->GetSummary().nOpenInterest );
       }
       break;
+    case c_iv:
+      if ( vt.options.call.pOption ) {
+        response = fmt::format( "{:.{}f}", vt.options.call.pOption->LastGreek().ImpliedVolatility(), 3 );
+      }
+      break;
+    case c_dlt:
+      if ( vt.options.call.pOption ) {
+        response = fmt::format( "{:.{}f}", vt.options.call.pOption->LastGreek().Delta(), 3 );
+      }
+      break;
     case c_bid: // call bid
       if ( vt.options.call.pOption ) {
         response = fmt::format( "{:.{}f}", vt.options.call.pOption->LastQuote().Bid(), 2 );
@@ -138,6 +155,16 @@ void OptionChainModel::GetValue( wxVariant& value, const wxDataViewItem& item, u
     case p_ask: // put ask
       if ( vt.options.put.pOption ) {
         response = fmt::format( "{:.{}f}", vt.options.put.pOption->LastQuote().Ask(), 2 );
+      }
+      break;
+    case p_dlt:
+      if ( vt.options.put.pOption ) {
+        response = fmt::format( "{:.{}f}", vt.options.put.pOption->LastGreek().Delta(), 3 );
+      }
+      break;
+    case p_iv:
+      if ( vt.options.put.pOption ) {
+        response = fmt::format( "{:.{}f}", vt.options.put.pOption->LastGreek().ImpliedVolatility(), 3 );
       }
       break;
     case p_oi:
