@@ -135,7 +135,11 @@ void Option::CalcRate( // version 2, calls version 1, uses instrument expiry dat
   CalcRate( input, riskfree, dtUtcNow, dtUtcExpiry );
 }
 
-void Option::CalcGreeks( // TODO: need to not calc if quote is bad
+void Option::CalcGreeks(
+  // TODO: need to not calc if quote is bad
+  //   -> ask seems common, so use that instead of midpoint
+  //   -> maybe skip if ask is 0 (bid as 0 is common for far OTM options)
+
   ou::tf::option::binomial::structInput& input, ptime dtUtcNow, bool bNeedsGuess ) {
   // example caller: void ExpiryBundle::CalcGreeksAtStrike
 
@@ -162,7 +166,8 @@ void Option::CalcGreeks( // TODO: need to not calc if quote is bad
     input.optionSide = m_pInstrument->GetOptionSide();
     input.Check();
     ou::tf::option::binomial::structOutput output;
-    ou::tf::option::binomial::CalcImpliedVolatility( input, LastQuote().Midpoint(), output );
+    // ou::tf::option::binomial::CalcImpliedVolatility( input, LastQuote().Midpoint(), output );
+    ou::tf::option::binomial::CalcImpliedVolatility( input, LastQuote().Ask(), output );
     ou::tf::Greek greek( dtUtcNow, output.iv, output.delta, output.gamma, output.theta, output.vega, output.rho );
     AppendGreek( greek );
   }
