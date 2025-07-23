@@ -342,13 +342,23 @@ void InstrumentViews::PresentOptionChains( mapInstrument_t::iterator iterInstrum
         }
         m_pOptionChainModel = new OptionChainModel(
           vtChain, m_fBuildOption
-        , [this,p=underlying.pWatch]( pOption_t pOption ){
-            m_pOptionEngine->RegisterOption( pOption );
-            m_pOptionEngine->Add( pOption, p );
+        , [this,p=underlying.pWatch]( pOption_t pOption ){ // fOptionEngineStart_t
+            try {
+              m_pOptionEngine->RegisterOption( pOption );
+              m_pOptionEngine->Add( pOption, p );
+            }
+            catch ( const std::runtime_error& e ) {
+              BOOST_LOG_TRIVIAL(error) << "engine start: " << e.what();
+            }
           }
-        , [this,p=underlying.pWatch]( pOption_t pOption ){
-            m_pOptionEngine->Remove( pOption, p );
-            m_pOptionEngine->DeRegisterOption( pOption );
+        , [this,p=underlying.pWatch]( pOption_t pOption ){ // fOptionEngineStop_t
+            try {
+              m_pOptionEngine->Remove( pOption, p );
+              m_pOptionEngine->DeRegisterOption( pOption );
+            }
+            catch ( const std::runtime_error& e ) {
+              BOOST_LOG_TRIVIAL(error) << "engine stop: " << e.what();
+            }
           }
         );
         wxDataViewItem item( m_pOptionChainModel->ClosestStrike( underlying.pWatch->LastQuote().Ask() ) );
