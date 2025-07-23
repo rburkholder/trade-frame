@@ -92,6 +92,20 @@ void OptionChainModel::HandleTimer( wxDataViewItem dviTopItem, int nRows ) {
   }
 }
 
+wxDataViewItem OptionChainModel::ClosestStrike( double price ) const {
+  const double strike = m_vt.second.Atm( price );
+  // todo: brute force this for now, create a comparator later
+  size_t ix {};
+  vRow2Entry_t::const_iterator iter( m_vRow2Entry.begin() );
+  while ( strike < iter->strike ) {
+    if ( m_vRow2Entry.end() == iter ) break;
+    ++ix;
+    ++iter;
+  }
+  wxDataViewItem item = GetItem( ix );
+  return item;
+}
+
 bool OptionChainModel::IsContainer( const wxDataViewItem& item ) const {
   return false; // not called
 }

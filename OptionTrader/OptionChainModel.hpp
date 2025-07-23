@@ -60,6 +60,8 @@ public:
 
   void HandleTimer( wxDataViewItem, int );
 
+  wxDataViewItem ClosestStrike( double ) const;
+
 protected:
 private:
 

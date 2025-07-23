@@ -351,7 +351,9 @@ void InstrumentViews::PresentOptionChains( mapInstrument_t::iterator iterInstrum
             m_pOptionEngine->DeRegisterOption( pOption );
           }
         );
+        wxDataViewItem item( m_pOptionChainModel->ClosestStrike( underlying.pWatch->LastQuote().Ask() ) );
         m_pOptionChainView->AssociateModel( m_pOptionChainModel );
+        m_pOptionChainView->EnsureVisible( item );
         m_pOptionChainView->Show();
         Layout();
         GetParent()->Layout();    }
