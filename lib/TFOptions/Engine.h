@@ -126,6 +126,7 @@ public:
   // these register the underlying, an option, or both [may deprecate the Find functions)
   void RegisterUnderlying( const pWatch_t& ); // register an underlying
   void RegisterOption( const pOption_t& ); // register an option
+  void DeRegisterOption( const pOption_t& ); // deregister an option, keeps the map short
 
   // start the calculation process, the option and underlying need to be pre-registered
   void Add( pOption_t pOption, pWatch_t pUnderlying );  // the option already has a delegate for callback
@@ -142,7 +143,7 @@ public:
 
 private:
 
-  enum Action { Unknown, AddOption, RemoveOption };
+  enum Action { Unknown, AddOption, RemoveOption, RemoveOptionRegistration };
 
   using idInstrument_t = ou::tf::Instrument::idInstrument_t;
 

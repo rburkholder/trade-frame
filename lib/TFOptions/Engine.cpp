@@ -185,7 +185,7 @@ Engine::~Engine( ) {
   }
 
   {
-    std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+    std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
     m_dequeOptionEntryOperation.clear();
   }
 
@@ -200,7 +200,7 @@ Engine::~Engine( ) {
 
 void Engine::RegisterUnderlying( const pWatch_t& pWatch ) {
   assert( pWatch );
-  std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+  std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   const std::string& sInstrumentName( pWatch->GetInstrument()->GetInstrumentName() );
   mapKnownWatches_t::iterator iter = m_mapKnownWatches.find( sInstrumentName );
   if ( m_mapKnownWatches.end() == iter ) {
@@ -213,7 +213,7 @@ void Engine::RegisterUnderlying( const pWatch_t& pWatch ) {
 
 void Engine::RegisterOption( const pOption_t& pOption) {
   assert( pOption );
-  std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+  std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   const std::string& sInstrumentName( pOption->GetInstrument()->GetInstrumentName() );
   mapKnownOptions_t::iterator iter = m_mapKnownOptions.find( sInstrumentName );
   if ( m_mapKnownOptions.end() == iter ) {
@@ -221,6 +221,25 @@ void Engine::RegisterOption( const pOption_t& pOption) {
   }
   else {
     throw std::runtime_error( "Engine::Register Option: already exists - " + sInstrumentName );
+  }
+}
+
+void Engine::DeRegisterOption( const pOption_t& pOption) {
+  assert( pOption );
+  const std::string& sInstrumentName( pOption->GetInstrumentName() );
+
+  std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+  mapKnownOptions_t::iterator iter = m_mapKnownOptions.find( sInstrumentName );
+  if ( m_mapKnownOptions.end() != iter ) {
+    // todo: check that there has been a remove action on the option
+    // todo: check that does not come too soon after Remove( option )
+    //m_mapKnownOptions.erase( iter );
+    OptionEntry oe( nullptr, pOption );
+    //std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+    m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::RemoveOptionRegistration, std::move(oe) ) );
+  }
+  else {
+    throw std::runtime_error( "Engine::DeRegister Option: does not exist - " + sInstrumentName );
   }
 }
 
@@ -235,7 +254,7 @@ ou::tf::Watch::pWatch_t Engine::FindWatch( const pInstrument_t pInstrument ) {
   //std::cout << "Engine::Find Watch: " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
   //std::cout << "Engine::Find Watch: " << pInstrument->GetInstrumentName() << std::endl;
   pWatch_t pWatch;
-  std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+  std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   mapKnownWatches_t::iterator iter = m_mapKnownWatches.find( pInstrument->GetInstrumentName() );
   if ( m_mapKnownWatches.end() == iter ) {
     if ( nullptr != m_fBuildWatch ) {
@@ -259,7 +278,7 @@ Option::pOption_t Engine::FindOption( const pInstrument_t pInstrument ) {
   //std::cout << "Engine::Find Option: " << pOption->GetInstrument()->GetInstrumentName() << std::endl;
   //std::cout << "Engine::Find Option: " << pInstrument->GetInstrumentName() << std::endl;
   pOption_t pOption;
-  std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+  std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   mapKnownOptions_t::iterator iter = m_mapKnownOptions.find( pInstrument->GetInstrumentName() );
   if ( m_mapKnownOptions.end() == iter ) {
     if ( nullptr != m_fBuildOption ) {
@@ -282,7 +301,7 @@ void Engine::Add( pOption_t pOption, pWatch_t pUnderlying ) {
 //  if ( m_srvcWork.owns_work() ) {
     assert( ( 0 != pOption.use_count() ) && ( 0 != pUnderlying.use_count() ) );
     OptionEntry oe( pUnderlying, pOption );
-    std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+    std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
     m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::AddOption, std::move(oe) ) );
 //  }
 }
@@ -328,15 +347,16 @@ void Engine::HandleTimerScan( const boost::system::error_code &ec ) {
 }
 
 void Engine::ProcessOptionEntryOperationQueue() {
-  std::lock_guard<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+  std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   if ( !m_dequeOptionEntryOperation.empty() ) {
     OptionEntryOperation& oe( m_dequeOptionEntryOperation.front() );
-    const std::string& sUnderlying( oe.m_oe.UnderlyingName() );
-    const std::string& sOption( oe.m_oe.OptionName() );
-    std::string MapKey( sUnderlying + "_" + sOption );
 
     switch( oe.m_action ) {
       case Action::AddOption: {
+          const std::string& sUnderlying( oe.m_oe.UnderlyingName() );
+          const std::string& sOption( oe.m_oe.OptionName() );
+          std::string MapKey( sUnderlying + "_" + sOption );
+
           //std::cout << "Engine::AddOption: " << MapKey << " " << oe.m_oe.GetOption().get() << std::endl;
 
           mapKnownWatches_t::iterator iterWatches = m_mapKnownWatches.find( sUnderlying );
@@ -363,6 +383,10 @@ void Engine::ProcessOptionEntryOperationQueue() {
         }
         break;
       case Action::RemoveOption: {
+          const std::string& sUnderlying( oe.m_oe.UnderlyingName() );
+          const std::string& sOption( oe.m_oe.OptionName() );
+          std::string MapKey( sUnderlying + "_" + sOption );
+
           // should option and instrument be removed from m_mapKnownWatches, m_mapKnownOptions?
           // if so, then maps require counters, or use the pOption_t use_count?
           //std::cout << "Engine::RemoveOption: " << MapKey << std::endl;
@@ -378,6 +402,17 @@ void Engine::ProcessOptionEntryOperationQueue() {
           }
           else {
             //std::cout << "Engine::RemoveOption: " << MapKey << " count " << cnt << std::endl;
+          }
+        }
+        break;
+      case Action::RemoveOptionRegistration: {
+          const std::string& sInstrumentName( oe.m_oe.GetOption()->GetInstrumentName() );
+          mapKnownOptions_t::iterator iter = m_mapKnownOptions.find( sInstrumentName );
+          if ( m_mapKnownOptions.end() != iter ) {
+            m_mapKnownOptions.erase( iter );
+          }
+          else {
+            assert( false );
           }
         }
         break;
