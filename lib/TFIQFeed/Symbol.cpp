@@ -103,8 +103,6 @@ template <typename T>
 void IQFeedSymbol::DecodeDynamicFeedMessage( IQFDynamicFeedMessage<T>* pMsg )  {
 
   // http://www.iqfeed.net/dev/api/docs/Level1UpdateSummaryMessage.cfm
-  double dblOpen, dblBid, dblAsk;
-  int nBidSize, nAskSize;
 
   Summary& summary( *m_pSummary );
 
@@ -121,37 +119,58 @@ void IQFeedSymbol::DecodeDynamicFeedMessage( IQFDynamicFeedMessage<T>* pMsg )  {
         summary.bNewTrade = true;
         break;
       case 'a':
-        dblAsk = pMsg->Double( IQFDynamicFeedMessage<T>::DFAsk );
-        if ( summary.dblAsk != dblAsk ) { summary.dblAsk = dblAsk; summary.bNewQuote = true; }
-        nAskSize = pMsg->Integer( IQFDynamicFeedMessage<T>::DFAskSize );
-        if ( summary.nAskSize != nAskSize ) { summary.nAskSize = nAskSize; summary.bNewQuote = true; }
+        {
+          double dblAsk = pMsg->Double( IQFDynamicFeedMessage<T>::DFAsk );
+          if ( summary.dblAsk != dblAsk ) { summary.dblAsk = dblAsk; summary.bNewQuote = true; }
+          int nAskSize = pMsg->Integer( IQFDynamicFeedMessage<T>::DFAskSize );
+          if ( summary.nAskSize != nAskSize ) { summary.nAskSize = nAskSize; summary.bNewQuote = true; }
+        }
         break;
       case 'b':
-        dblBid = pMsg->Double( IQFDynamicFeedMessage<T>::DFBid );
-        if ( summary.dblBid != dblBid ) { summary.dblBid = dblBid; summary.bNewQuote = true; }
-        nBidSize = pMsg->Integer( IQFDynamicFeedMessage<T>::DFBidSize );
-        if ( summary.nBidSize != nBidSize ) { summary.nBidSize = nBidSize; summary.bNewQuote = true; }
+        {
+          double dblBid = pMsg->Double( IQFDynamicFeedMessage<T>::DFBid );
+          if ( summary.dblBid != dblBid ) { summary.dblBid = dblBid; summary.bNewQuote = true; }
+          int nBidSize = pMsg->Integer( IQFDynamicFeedMessage<T>::DFBidSize );
+          if ( summary.nBidSize != nBidSize ) { summary.nBidSize = nBidSize; summary.bNewQuote = true; }
+        }
         break;
-      case 'o':
-        // TODO: may not be using the correct field here.
-        dblOpen = pMsg->Double( IQFDynamicFeedMessage<T>::DFMostRecentTrade );
-        if ( ( summary.dblOpen != dblOpen ) && ( 0 != dblOpen ) ) {
-          summary.dblOpen = dblOpen;
-          summary.bNewOpen = true;
-            //BOOST_LOG_TRIVIAL(info)
-            //  << "IQF new open 1: " << GetId() << "=" << summary.dblOpen;
-        };
+      case 'v': // volume update
+        summary.nOpenInterest = pMsg->Integer( IQFDynamicFeedMessage<T>::DFOpenInterest );
+        break;
+      case 'o': // open
+        {
+          // TODO: may not be using the correct field here.
+          double dblOpen = pMsg->Double( IQFDynamicFeedMessage<T>::DFMostRecentTrade );
+          if ( ( summary.dblOpen != dblOpen ) && ( 0 != dblOpen ) ) {
+            summary.dblOpen = dblOpen;
+            summary.bNewOpen = true;
+              //BOOST_LOG_TRIVIAL(info)
+              //  << "IQF new open 1: " << GetId() << "=" << summary.dblOpen;
+          };
+        }
+        break;
+      case 'h':  // high
+      case 'l':  // low
+      case 'c':  // close
+        break;
+      case 's':  // settlement
         break;
       case 'E':
         // will need to supply fields
         break;
       case 'O': // any non C,E trade
         break;
-      case 'v': // volume update
-        summary.nOpenInterest = pMsg->Integer( IQFDynamicFeedMessage<T>::DFOpenInterest );
+      default: {
+        BOOST_LOG_TRIVIAL(warning) << "iqfeed msg has unknown field type: '" << content << "'";
+        }
         break;
     }
   }
+
+  if ( 0 == content.size() ) {
+    summary.dblOpen = pMsg->Double( IQFDynamicFeedMessage<T>::DFMostRecentTrade );
+  }
+
   if ( m_bWaitForFirstQuote ) {
     if ( summary.bNewQuote ) {
       if ( ( -1 == summary.nBidSize ) || ( -1 == summary.nAskSize ) ) {
