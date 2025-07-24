@@ -63,6 +63,7 @@ void NoRiskInterestRateSeries::SetWatchOn( pProvider_t pProvider ) {
   }
 }
 
+// NOTE: Option Engine needs to be cleared out prior to this call
 void NoRiskInterestRateSeries::SetWatchOff() {
   if ( m_bWatching ) {
     m_bWatching = false;
