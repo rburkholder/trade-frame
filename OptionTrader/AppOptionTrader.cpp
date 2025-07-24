@@ -208,12 +208,6 @@ void AppOptionTrader::LoadState() {
 
 int AppOptionTrader::OnExit() {
   // Exit Steps: #4
-  return wxAppConsole::OnExit();
-}
-
-void AppOptionTrader::OnClose( wxCloseEvent& event ) {
-  // Exit Steps: #2 -> FrameMain::OnClose
-  m_pFrameMain->Unbind( wxEVT_CLOSE_WINDOW, &AppOptionTrader::OnClose, this );
 
   m_pOptionEngine.reset();
   m_fedrate.SetWatchOff();
@@ -223,9 +217,16 @@ void AppOptionTrader::OnClose( wxCloseEvent& event ) {
   m_pIQFeed->Disconnect();
   m_pIQFeed.reset();
 
-  SaveState();
-
   m_db.Close();
+
+  return wxAppConsole::OnExit();
+}
+
+void AppOptionTrader::OnClose( wxCloseEvent& event ) {
+  // Exit Steps: #2 -> FrameMain::OnClose
+  m_pFrameMain->Unbind( wxEVT_CLOSE_WINDOW, &AppOptionTrader::OnClose, this );
+
+  SaveState();
 
   event.Skip();  // auto followed by Destroy();
 }
