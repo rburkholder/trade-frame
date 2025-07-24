@@ -143,7 +143,7 @@ public:
 
 private:
 
-  enum Action { Unknown, AddOption, RemoveOption, RemoveOptionRegistration };
+  enum Action { Unknown, Option_Add, Option_Remove, Option_Register, Option_DeRegister };
 
   using idInstrument_t = ou::tf::Instrument::idInstrument_t;
 

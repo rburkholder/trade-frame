@@ -32,6 +32,7 @@
 #include <algorithm>
 
 #include <boost/bind/bind.hpp>
+#include <boost/log/trivial.hpp>
 
 #include <OUCommon/TimeSource.h>
 
@@ -181,7 +182,7 @@ Engine::~Engine( ) {
   // TODO: perform a deque of all operations?
 
   if ( !m_dequeOptionEntryOperation.empty() ) {
-    std::cout << "Engine::~Engine: operations still remaining in the queue" << std::endl;
+    BOOST_LOG_TRIVIAL(warning) << "Engine::~Engine: operations still remaining in the queue";
   }
 
   {
@@ -213,34 +214,22 @@ void Engine::RegisterUnderlying( const pWatch_t& pWatch ) {
 
 void Engine::RegisterOption( const pOption_t& pOption) {
   assert( pOption );
-  std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   const std::string& sInstrumentName( pOption->GetInstrument()->GetInstrumentName() );
-  mapKnownOptions_t::iterator iter = m_mapKnownOptions.find( sInstrumentName );
-  if ( m_mapKnownOptions.end() == iter ) {
-    m_mapKnownOptions.insert( mapKnownOptions_t::value_type( sInstrumentName, pOption ) );
-  }
-  else {
-    throw std::runtime_error( "Engine::Register Option: already exists - " + sInstrumentName );
-  }
+  //BOOST_LOG_TRIVIAL(trace) << "Engine queue Option_Register " << sInstrumentName;
+
+  OptionEntry oe( nullptr, pOption );
+  std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+  m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::Option_Register, std::move( oe ) ) );
 }
 
 void Engine::DeRegisterOption( const pOption_t& pOption) {
   assert( pOption );
   const std::string& sInstrumentName( pOption->GetInstrumentName() );
+  //BOOST_LOG_TRIVIAL(trace) << "Engine queue Option_DeRegister " << sInstrumentName;
 
+  OptionEntry oe( nullptr, pOption );
   std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
-  mapKnownOptions_t::iterator iter = m_mapKnownOptions.find( sInstrumentName );
-  if ( m_mapKnownOptions.end() != iter ) {
-    // todo: check that there has been a remove action on the option
-    // todo: check that does not come too soon after Remove( option )
-    //m_mapKnownOptions.erase( iter );
-    OptionEntry oe( nullptr, pOption );
-    //std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
-    m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::RemoveOptionRegistration, std::move(oe) ) );
-  }
-  else {
-    throw std::runtime_error( "Engine::DeRegister Option: does not exist - " + sInstrumentName );
-  }
+  m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::Option_DeRegister, std::move( oe ) ) );
 }
 
 // if used, then need to perform a lookup on the underlying first to prevent duplicated effort
@@ -301,8 +290,9 @@ void Engine::Add( pOption_t pOption, pWatch_t pUnderlying ) {
 //  if ( m_srvcWork.owns_work() ) {
     assert( ( 0 != pOption.use_count() ) && ( 0 != pUnderlying.use_count() ) );
     OptionEntry oe( pUnderlying, pOption );
+    //BOOST_LOG_TRIVIAL(trace) << "Engine queue Option_Add " << pOption->GetInstrumentName();
     std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
-    m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::AddOption, std::move(oe) ) );
+    m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::Option_Add, std::move(oe) ) );
 //  }
 }
 
@@ -310,8 +300,9 @@ void Engine::Remove( pOption_t pOption, pWatch_t pUnderlying ) {
 //  if ( m_srvcWork.owns_work() ) {
     assert( ( 0 != pOption.use_count() ) && ( 0 != pUnderlying.use_count() ) );
     OptionEntry oe( pUnderlying, pOption );
+    //BOOST_LOG_TRIVIAL(trace) << "Engine queue Option_Remove " << pOption->GetInstrumentName();
     std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
-    m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::RemoveOption, std::move(oe) ) );
+    m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::Option_Remove, std::move(oe) ) );
 //  }
 }
 
@@ -334,7 +325,7 @@ void Engine::HandleTimerScan( const boost::system::error_code &ec ) {
     // other ways:
       //timer_.expires_at(timer_.expiry() + boost::asio::chrono::seconds(1));
       //m_timerScan.expires_after( boost::asio::chrono::milliseconds(250) );
-      m_timerScan.expires_after( boost::asio::chrono::milliseconds(495) );
+      m_timerScan.expires_after( boost::asio::chrono::milliseconds( 495 ) );
       //m_timerScan.expires_after( boost::asio::chrono::milliseconds(750) );
       m_timerScan.async_wait(
         boost::bind(
@@ -352,12 +343,11 @@ void Engine::ProcessOptionEntryOperationQueue() {
     OptionEntryOperation& oe( m_dequeOptionEntryOperation.front() );
 
     switch( oe.m_action ) {
-      case Action::AddOption: {
+      case Action::Option_Add: {
           const std::string& sUnderlying( oe.m_oe.UnderlyingName() );
           const std::string& sOption( oe.m_oe.OptionName() );
           std::string MapKey( sUnderlying + "_" + sOption );
-
-          //std::cout << "Engine::AddOption: " << MapKey << " " << oe.m_oe.GetOption().get() << std::endl;
+          //BOOST_LOG_TRIVIAL(trace) << "Engine action AddOption " << MapKey;
 
           mapKnownWatches_t::iterator iterWatches = m_mapKnownWatches.find( sUnderlying );
           if ( m_mapKnownWatches.end() == iterWatches ) {
@@ -382,14 +372,14 @@ void Engine::ProcessOptionEntryOperationQueue() {
           iterOption->second.Inc();
         }
         break;
-      case Action::RemoveOption: {
+      case Action::Option_Remove: {
           const std::string& sUnderlying( oe.m_oe.UnderlyingName() );
           const std::string& sOption( oe.m_oe.OptionName() );
           std::string MapKey( sUnderlying + "_" + sOption );
+          //BOOST_LOG_TRIVIAL(trace) << "Engine action RemoveOption " << MapKey;
 
           // should option and instrument be removed from m_mapKnownWatches, m_mapKnownOptions?
           // if so, then maps require counters, or use the pOption_t use_count?
-          //std::cout << "Engine::RemoveOption: " << MapKey << std::endl;
           mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( MapKey );
           if ( m_mapOptionEntry.end() == iterOption ) {
             throw std::runtime_error( "Engine::Remove: can't find option" + MapKey );
@@ -405,14 +395,31 @@ void Engine::ProcessOptionEntryOperationQueue() {
           }
         }
         break;
-      case Action::RemoveOptionRegistration: {
+      case Action::Option_Register: {
           const std::string& sInstrumentName( oe.m_oe.GetOption()->GetInstrumentName() );
+          //BOOST_LOG_TRIVIAL(trace) << "Engine action Option_Register " << sInstrumentName;
+          mapKnownOptions_t::iterator iter = m_mapKnownOptions.find( sInstrumentName );
+          if ( m_mapKnownOptions.end() == iter ) {
+            m_mapKnownOptions.insert( mapKnownOptions_t::value_type( sInstrumentName, oe.m_oe.GetOption() ) );
+          }
+          else {
+            //throw std::runtime_error( "Engine::Register Option: already exists - " + sInstrumentName );
+            BOOST_LOG_TRIVIAL(error) << "Engine action Option_Register " << sInstrumentName << " already exists";
+          }
+        }
+        break;
+      case Action::Option_DeRegister: {
+          const std::string& sInstrumentName( oe.m_oe.GetOption()->GetInstrumentName() );
+          //BOOST_LOG_TRIVIAL(trace) << "Engine action Option_DeRegister " << sInstrumentName;
           mapKnownOptions_t::iterator iter = m_mapKnownOptions.find( sInstrumentName );
           if ( m_mapKnownOptions.end() != iter ) {
+            // todo: check that there has been a remove action on the option
+            // todo: check that does not come too soon after Remove( option )
             m_mapKnownOptions.erase( iter );
           }
           else {
-            assert( false );
+            //throw std::runtime_error( "Engine::DeRegister Option: does not exist - " + sInstrumentName );
+            BOOST_LOG_TRIVIAL(error) << "Engine action Option_DeRegister " << sInstrumentName << " does not exist";
           }
         }
         break;
