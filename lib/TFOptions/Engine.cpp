@@ -168,7 +168,7 @@ Engine::Engine( const ou::tf::NoRiskInterestRateSeries& feed ):
     m_threads.create_thread( boost::bind( &boost::asio::io_context::run, &m_srvc ) ); // add handlers
   }
 
-  m_timerScan.expires_after( boost::asio::chrono::milliseconds(1000) );
+  m_timerScan.expires_after( boost::asio::chrono::milliseconds( 100 ) );
   m_timerScan.async_wait(
     boost::bind(
       &Engine::HandleTimerScan, this,
@@ -325,7 +325,7 @@ void Engine::HandleTimerScan( const boost::system::error_code &ec ) {
     // other ways:
       //timer_.expires_at(timer_.expiry() + boost::asio::chrono::seconds(1));
       //m_timerScan.expires_after( boost::asio::chrono::milliseconds(250) );
-      m_timerScan.expires_after( boost::asio::chrono::milliseconds( 495 ) );
+      m_timerScan.expires_after( boost::asio::chrono::milliseconds( 49 ) );
       //m_timerScan.expires_after( boost::asio::chrono::milliseconds(750) );
       m_timerScan.async_wait(
         boost::bind(
