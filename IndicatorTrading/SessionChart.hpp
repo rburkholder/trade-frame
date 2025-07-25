@@ -29,7 +29,6 @@
 #include <OUCharting/ChartEntryBars.h>
 #include <OUCharting/ChartEntryMark.h>
 #include <OUCharting/ChartEntryVolume.h>
-//#include <OUCharting/ChartEntryIndicator.h>
 
 #include <TFTimeSeries/TimeSeries.h>
 #include <TFTimeSeries/BarFactory.h>
@@ -91,8 +90,6 @@ private:
 
   using pBarHistory_t = std::unique_ptr<ou::tf::iqfeed::BarHistory>;
   pBarHistory_t m_pBarHistory;
-  
-  //ou::tf::Bars m_barsSessionHistory;
 
   ou::ChartEntryBars m_cePriceBars;
   ou::ChartEntryVolume m_ceVolume;

@@ -82,7 +82,6 @@ void SessionChart::SetPosition( pPosition_t pPosition, ou::ChartEntryMark& cem )
       m_pBarHistory->RequestNDaysOfBars( sIQFeedName, 60,  1 );
     },
     [this](const ou::tf::Bar& bar_ ){ // m_fBar
-      //m_barsSessionHistory.Append( bar );
       ptime dtUtc = ou::TimeSource::ConvertEasternToUtc( bar_.DateTime() );
       ou::tf::Bar bar( dtUtc, bar_.Open(), bar_.High(), bar_.Low(), bar_.Close(), bar_.Volume( ) );
       //std::cout << "bar close " << bar.Close() << "@" << dtUtc << std::endl;
