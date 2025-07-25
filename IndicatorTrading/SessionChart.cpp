@@ -78,17 +78,17 @@ void SessionChart::SetPosition( pPosition_t pPosition, ou::ChartEntryMark& cem )
   pWatch_t pWatch = m_pPosition->GetWatch();
   const std::string& sIQFeedName = pWatch->GetInstrument()->GetInstrumentName( ou::tf::keytypes::EProviderIQF );
   m_pBarHistory = std::make_unique<ou::tf::iqfeed::BarHistory>(
-    [this,sIQFeedName](){
+    [this,sIQFeedName](){ // m_fConnected
       m_pBarHistory->RequestNDaysOfBars( sIQFeedName, 60,  1 );
     },
-    [this](const ou::tf::Bar& bar_ ){
+    [this](const ou::tf::Bar& bar_ ){ // m_fBar
       //m_barsSessionHistory.Append( bar );
       ptime dtUtc = ou::TimeSource::ConvertEasternToUtc( bar_.DateTime() );
       ou::tf::Bar bar( dtUtc, bar_.Open(), bar_.High(), bar_.Low(), bar_.Close(), bar_.Volume( ) );
       //std::cout << "bar close " << bar.Close() << "@" << dtUtc << std::endl;
       HandleBarCompletionPrice( bar );
     },
-    [this](){
+    [this](){  // m_fDone
       m_bWatchStarted = true;
       using pWatch_t = ou::tf::Watch::pWatch_t;
       pWatch_t pWatch = m_pPosition->GetWatch();
@@ -128,5 +128,5 @@ void SessionChart::OnDestroy( wxWindowDestroyEvent& event ) {
   }
   SetChartDataView( nullptr );
   UnBindEvents();
-  event.Skip( true );
+  event.Skip();
 }
