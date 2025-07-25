@@ -14,7 +14,7 @@ set(
     CalcExpiry.h
     Chain.h
     Chains.h
-    Engine.h
+    Engine.hpp
     Formula.h
     GatherOptions.h
     IvAtm.h
