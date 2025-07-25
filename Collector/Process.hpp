@@ -33,7 +33,7 @@
 
 #include <TFOptions/Chains.h>
 #include <TFOptions/Option.h>
-#include <TFOptions/Engine.h>
+#include <TFOptions/Engine.hpp>
 #include <TFOptions/NoRiskInterestRateSeries.h>
 
 #include <TFIQFeed/Provider.h>

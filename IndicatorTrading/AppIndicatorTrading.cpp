@@ -46,7 +46,7 @@
 #include <TFTrading/BuildInstrument.hpp>
 #include <TFTrading/ComposeInstrument.hpp>
 
-#include <TFOptions/Engine.h>
+#include <TFOptions/Engine.hpp>
 
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/PanelLogging.h>

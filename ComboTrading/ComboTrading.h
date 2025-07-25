@@ -30,7 +30,7 @@
 #include <TFTrading/DBOps.h>
 #include <TFTrading/PortfolioManager.h>
 
-#include <TFOptions/Engine.h>
+#include <TFOptions/Engine.hpp>
 #include <TFOptions/NoRiskInterestRateSeries.h>
 
 #include <TFVuTrading/FrameMain.h>

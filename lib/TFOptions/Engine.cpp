@@ -36,7 +36,7 @@
 
 #include <OUCommon/TimeSource.h>
 
-#include "Engine.h"
+#include "Engine.hpp"
 #include "Binomial.h"
 
 namespace ou { // One Unified

@@ -29,7 +29,7 @@
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/ComposeInstrument.hpp>
 
-#include <TFOptions/Engine.h>
+#include <TFOptions/Engine.hpp>
 
 #include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/FrameControls.h>
