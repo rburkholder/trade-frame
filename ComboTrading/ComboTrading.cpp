@@ -143,16 +143,16 @@ bool AppComboTrading::OnInit() {
   //m_pPanelOptionCombo = nullptr;
 
   m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
-  m_pOptionEngine->m_fBuildWatch
-    = [this](pInstrument_t pInstrument)->pWatch_t {
+  m_pOptionEngine->Set(
+    [this](pInstrument_t pInstrument)->pWatch_t {
         ou::tf::Watch::pWatch_t pWatch( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
         return pWatch;
-      };
-  m_pOptionEngine->m_fBuildOption
-    = [this](pInstrument_t pInstrument)->pOption_t {
+      },
+    [this](pInstrument_t pInstrument)->pOption_t {
         ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
         return pOption;
-      };
+      }
+  );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sDisplayName_App, wxDefaultPosition, wxSize( 800, 1000 ) );
   m_pFrameMain->SetName( "primary" );

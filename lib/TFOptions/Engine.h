@@ -132,18 +132,20 @@ public:
   void Add( pOption_t pOption, pWatch_t pUnderlying );  // the option already has a delegate for callback
   void Remove( pOption_t pOption, pWatch_t pUnderlying ); // part of the reference counting, will change reference count on associated underlying and auto remove
 
-  // these effectively handle registration of underlying and option, using a callback - deprecated, use Register... above
   using fBuildWatch_t = std::function<pWatch_t(pInstrument_t)>;  // constructed elsewhere as it needs provider
-  fBuildWatch_t m_fBuildWatch;
-  pWatch_t FindWatch( const pInstrument_t pInstrument );  // if Watch not found, construct one.  Then provide the watch.
-
   using fBuildOption_t = std::function<pOption_t(pInstrument_t)>;  // constructed elsewhere as it needs provider
-  fBuildOption_t m_fBuildOption;
+  void Set( fBuildWatch_t&&, fBuildOption_t&& );
+
+  // these effectively handle registration of underlying and option, using a callback - deprecated, use Register... above
+  pWatch_t FindWatch( const pInstrument_t pInstrument );  // if Watch not found, construct one.  Then provide the watch.
   pOption_t FindOption( const pInstrument_t pInstrument );  // if Option not found, construct one.  Then provide the option.
 
 private:
 
   enum Action { Unknown, Option_Add, Option_Remove, Option_Register, Option_DeRegister };
+
+  fBuildWatch_t m_fBuildWatch;
+  fBuildOption_t m_fBuildOption;
 
   using idInstrument_t = ou::tf::Instrument::idInstrument_t;
 

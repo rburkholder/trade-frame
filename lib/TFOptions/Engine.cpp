@@ -238,6 +238,13 @@ void Engine::DeRegisterOption( const pOption_t& pOption) {
 //  Register( pOption );
 //}
 
+void Engine::Set( fBuildWatch_t&& fBuildWatch, fBuildOption_t&& fBuildOption ) {
+  assert( nullptr != fBuildWatch );
+  m_fBuildWatch = std::move( fBuildWatch );
+  assert( nullptr != fBuildOption );
+  m_fBuildOption = std::move( fBuildOption );
+}
+
 // needs to be used to load up underlying watch
 ou::tf::Watch::pWatch_t Engine::FindWatch( const pInstrument_t pInstrument ) {
   //std::cout << "Engine::Find Watch: " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
@@ -246,14 +253,9 @@ ou::tf::Watch::pWatch_t Engine::FindWatch( const pInstrument_t pInstrument ) {
   std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   mapKnownWatches_t::iterator iter = m_mapKnownWatches.find( pInstrument->GetInstrumentName() );
   if ( m_mapKnownWatches.end() == iter ) {
-    if ( nullptr != m_fBuildWatch ) {
-      pWatch = m_fBuildWatch( pInstrument );
-      assert( 0 != pWatch.get() );
-      m_mapKnownWatches.insert( mapKnownWatches_t::value_type( pInstrument->GetInstrumentName(), pWatch ) );
-    }
-    else {
-      throw std::runtime_error( "Engine::m_fBuildWatch is nullptr" );
-    }
+    pWatch = m_fBuildWatch( pInstrument );
+    assert( 0 != pWatch.get() );
+    m_mapKnownWatches.insert( mapKnownWatches_t::value_type( pInstrument->GetInstrumentName(), pWatch ) );
   }
   else {
     pWatch = iter->second;
@@ -270,14 +272,9 @@ Option::pOption_t Engine::FindOption( const pInstrument_t pInstrument ) {
   std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   mapKnownOptions_t::iterator iter = m_mapKnownOptions.find( pInstrument->GetInstrumentName() );
   if ( m_mapKnownOptions.end() == iter ) {
-    if ( nullptr != m_fBuildOption ) {
-      pOption = m_fBuildOption( pInstrument );
-      assert( 0 != pOption.get() );
-      m_mapKnownOptions.insert( mapKnownOptions_t::value_type( pInstrument->GetInstrumentName(), pOption ) );
-    }
-    else {
-      throw std::runtime_error( "Engine::m_fBuildOption is nullptr" );
-    }
+    pOption = m_fBuildOption( pInstrument );
+    assert( 0 != pOption.get() );
+    m_mapKnownOptions.insert( mapKnownOptions_t::value_type( pInstrument->GetInstrumentName(), pOption ) );
   }
   else {
     pOption = iter->second;
