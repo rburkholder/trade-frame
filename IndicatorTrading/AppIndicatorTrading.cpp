@@ -125,7 +125,6 @@ bool AppIndicatorTrading::OnInit() {
   m_pFrameMain = new FrameMain( 0, wxID_ANY, sAppName );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
 
-  m_pFrameMain->SetSize( 800, 500 );
   SetTopWindow( m_pFrameMain );
 
   // Sizer for FrameMain
@@ -176,11 +175,7 @@ bool AppIndicatorTrading::OnInit() {
 
   sizerSplitterRight->Add( m_pInteractiveChart, 1, wxEXPAND | wxALL, 2 );
 
-  m_pFrameMain->SetAutoLayout( true );
-  m_pFrameMain->Layout();
-  m_pFrameMain->Show( true );
-
-  m_pFrameOrderButtons = new ou::tf::FrameControls(  m_pFrameMain, wxID_ANY, "Trading Tools", wxPoint( 10, 10 ) );
+  m_pFrameOrderButtons = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Trading Tools", wxPoint( 10, 10 ) );
   m_pPanelOrderButtons = new ou::tf::PanelOrderButtons( m_pFrameOrderButtons );
   m_pFrameOrderButtons->Attach( m_pPanelOrderButtons );
 
@@ -261,10 +256,11 @@ bool AppIndicatorTrading::OnInit() {
 
   CallAfter(
     [this](){
+      m_pFrameMain->Show();
       LoadState();
+      //m_splitterRow->Layout(); // the sash does not appear to update
+      //m_sizerFrame->Layout(); // seems to make it consistent
       m_pFrameMain->Layout();
-      m_splitterRow->Layout(); // the sash does not appear to update
-      m_sizerFrame->Layout(); // seems to make it consistent
     }
   );
 
