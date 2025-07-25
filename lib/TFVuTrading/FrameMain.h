@@ -19,8 +19,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
