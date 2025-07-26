@@ -97,12 +97,13 @@ int main( int argc, char* argv[] ) {
   m_pdb = std::make_unique<ou::tf::db>( c_sDbName );
   */
 
+  // todo: maybe need a non-visual result baserd constructor
   using pStrategyManager_t = std::unique_ptr<StrategyManager>;
   pStrategyManager_t m_pStrategyManager;
   m_pStrategyManager = std::make_unique<StrategyManager>(
     m_choices
   , []( StrategyManager::fTask_t&& f ){ boost::asio::post( f );  } // fQueueTask_t
-  , []( ou::tf::WinChartView::EState state, ou::ChartDataView* pcdv ){ // fSetChartDataView_t
+  , []( ou::tf::WinChartView::EView state, ou::ChartDataView* pcdv ){ // fSetChartDataView_t
       //m_pwcv->SetChartDataView( pcdv );
       //m_pwcv->Set( state );
     }

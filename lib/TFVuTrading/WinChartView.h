@@ -64,14 +64,14 @@ public:
   void SetChartDataView( ou::ChartDataView* pChartDataView );
   ou::ChartDataView* GetChartDataView() const { return m_pChartDataView; }
 
-  enum class EState {
+  enum class EView {
     live_trail // original 'follow along' (live mode)
   , live_review
   , sim_trail
   , sim_review
   };
 
-  void Set( EState state );
+  void Set( EView );
   void SetLive_trail();
   void SetLive_review();
   void SetSim_review();
@@ -101,7 +101,7 @@ private:
   using ViewPort_t = ChartEntryTime::range_t;
 
   bool m_bSim; // default to false
-  EState m_state; // default to live_trail
+  EView m_stateView; // default to live_trail
 
   wxCoord m_coordXStart;
 

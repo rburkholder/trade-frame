@@ -73,7 +73,7 @@ StrategyManager_impl::StrategyManager_impl(
 }
 
 StrategyManager_impl::~StrategyManager_impl() {
-  m_fSetChartDataView( ou::tf::WinChartView::EState::live_review, nullptr );
+  m_fSetChartDataView( ou::tf::WinChartView::EView::live_review, nullptr );
   m_pStrategy.reset();
   m_sim->Reset();
   m_mapSymbolInfo.clear();
@@ -183,7 +183,7 @@ void StrategyManager_impl::RunStrategy_build() {
   if ( ValidateSimFile( m_choices.m_sFileTraining ) ) {
     m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_build ) );
     m_cdv_build.SetNames( "SPY - build", m_choices.m_sFileTraining );
-    m_fSetChartDataView( ou::tf::WinChartView::EState::sim_trail, &m_cdv_build );
+    m_fSetChartDataView( ou::tf::WinChartView::EView::sim_trail, &m_cdv_build );
     RunStrategy(
       m_startDateUTC,
       m_cdv_build,
@@ -208,7 +208,7 @@ void StrategyManager_impl::RunStrategy_predict() {
   if ( ValidateSimFile( m_choices.m_sFileValidate ) ) {
     m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_predict ) );
     m_cdv_predict.SetNames( "SPY - predict", m_choices.m_sFileValidate );
-    m_fSetChartDataView( ou::tf::WinChartView::EState::sim_trail, &m_cdv_predict );
+    m_fSetChartDataView( ou::tf::WinChartView::EView::sim_trail, &m_cdv_predict );
     RunStrategy(
       m_startDateUTC,
       m_cdv_predict,
@@ -258,7 +258,7 @@ void StrategyManager_impl::RunStrategy( boost::gregorian::date date, ou::ChartDa
 void StrategyManager_impl::HandleSimComplete_build() {
 
   //m_fSetChartDataView( ou::tf::WinChartView::EState::sim_review, &m_cdv_build );
-  m_fSetChartDataView( ou::tf::WinChartView::EState::sim_review, nullptr );
+  m_fSetChartDataView( ou::tf::WinChartView::EView::sim_review, nullptr );
 
   std::stringstream ss;
   m_sim->EmitStats( ss );
@@ -278,7 +278,7 @@ void StrategyManager_impl::CleanUp_build() {
 
 void StrategyManager_impl::HandleSimComplete_predict() {
 
-  m_fSetChartDataView( ou::tf::WinChartView::EState::sim_review, &m_cdv_predict );
+  m_fSetChartDataView( ou::tf::WinChartView::EView::sim_review, &m_cdv_predict );
 
   std::stringstream ss;
   m_sim->EmitStats( ss );
@@ -484,7 +484,7 @@ void StrategyManager_impl::InitStructures( ESymbol eSymbol, const std::string& s
     m_cdv.Add( ixChart, &si.indicatorBid );
   }
 
-  m_fSetChartDataView( ou::tf::WinChartView::EState::live_review, &m_cdv );
+  m_fSetChartDataView( ou::tf::WinChartView::EView::live_review, &m_cdv );
 }
 
 // non-sim mode

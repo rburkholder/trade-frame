@@ -143,7 +143,7 @@ bool AppSP500::OnInit() {
   m_pStrategyManager = std::make_unique<StrategyManager>(
     m_choices
   , [this]( StrategyManager::fTask_t&& f ){ CallAfter( f ); } // fQueueTask_t
-  , [this]( ou::tf::WinChartView::EState state, ou::ChartDataView* pcdv ){ // fSetChartDataView_t
+  , [this]( ou::tf::WinChartView::EView state, ou::ChartDataView* pcdv ){ // fSetChartDataView_t
       m_pwcv->SetChartDataView( pcdv );
       m_pwcv->Set( state );
     }

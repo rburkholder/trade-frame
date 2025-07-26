@@ -51,7 +51,7 @@ public:
 
   using fTask_t = std::function<void()>;
   using fQueueTask_t = std::function<void( fTask_t&& )>;
-  using fSetChartDataView_t = std::function<void( ou::tf::WinChartView::EState, ou::ChartDataView* )>;
+  using fSetChartDataView_t = std::function<void( ou::tf::WinChartView::EView, ou::ChartDataView* )>;
   using fDone_t = std::function<void()>;
 
   StrategyManager_impl(

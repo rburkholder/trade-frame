@@ -442,18 +442,18 @@ void WinChartView::HandleGuiRefresh( wxTimerEvent& event ) {
   DrawChart();
 }
 
-void WinChartView::Set( EState state ) {
+void WinChartView::Set( EView state ) {
   switch ( state ) {
-    case EState::live_trail:
+    case EView::live_trail:
       SetLive_trail();
       break;
-    case EState::live_review:
+    case EView::live_review:
       SetLive_trail();
       break;
-    case EState::sim_review:
+    case EView::sim_review:
       SetSim_review();
       break;
-    case EState::sim_trail:
+    case EView::sim_trail:
       SetSim_trail();
       break;
   }
@@ -461,22 +461,22 @@ void WinChartView::Set( EState state ) {
 
 void WinChartView::SetLive_trail() {
   m_bSim = false;
-  m_state = EState::live_trail;
+  m_stateView = EView::live_trail;
 }
 
 void WinChartView::SetLive_review() {
   m_bSim = false;
-  m_state = EState::live_review;
+  m_stateView = EView::live_review;
 }
 
 void WinChartView::SetSim_review() {
   m_bSim = true;
-  m_state = EState::sim_review;
+  m_stateView = EView::sim_review;
 }
 
 void WinChartView::SetSim_trail() {
   m_bSim = true;
-  m_state = EState::sim_trail;
+  m_stateView = EView::sim_trail;
 }
 
 // TODO: there may be an issue with cursor & no data, which locks up the gui
@@ -500,12 +500,12 @@ void WinChartView::DrawChart() {
 
               m_vpDataViewExtents = m_pChartDataView->GetExtents(); // TODO: obtain just end extent?
 
-              switch ( m_state ) {
-                case EState::live_trail:
+              switch ( m_stateView ) {
+                case EView::live_trail:
                   m_vpDataViewVisual.dtEnd = ou::TimeSource::GlobalInstance().Internal() + one_sec; // works with real vs simulation time
                   m_vpDataViewVisual.dtBegin = m_vpDataViewVisual.dtEnd - m_tdViewPortWidth;
                   break;
-                case EState::live_review:
+                case EView::live_review:
                   // handle case when data loaded in background, ultimately extents will be available
                   if ( m_vpDataViewVisual.HasBoth() ) {}
                   else {
@@ -514,10 +514,10 @@ void WinChartView::DrawChart() {
                     }
                   }
                   break;
-                case EState::sim_trail:
+                case EView::sim_trail:
                   m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - m_tdViewPortWidth, m_vpDataViewExtents.dtEnd + one_sec );
                   break;
-                case EState::sim_review:
+                case EView::sim_review:
                   break;
               }
 
