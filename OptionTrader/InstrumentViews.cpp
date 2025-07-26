@@ -33,6 +33,7 @@
 #include <TFOptions/Chains.h>
 
 #include <TFVuTrading/TreeItem.hpp>
+#include "TFVuTrading/WinChartView.h"
 
 #include "InstrumentViews.hpp"
 #include "OptionChainModel.hpp"
@@ -157,15 +158,22 @@ void InstrumentViews::Set(
 , fBuildWatch_t&& fBuildWatch
 , fBuildOption_t&& fBuildOption
 , pOptionEngine_t& pOptionEngine
+, fHistoryBars_session_t&& fHistoryBars_session
+, ou::tf::WinChartView* pWinChartView_session
 ) {
 
   assert( fBuildWatch );
   assert( fBuildOption );
   assert( pOptionEngine );
+  assert( fHistoryBars_session );
+  assert( pWinChartView_session );
 
   m_fBuildWatch = std::move( fBuildWatch );
   m_fBuildOption = std::move( fBuildOption );
   m_pOptionEngine = pOptionEngine;
+
+  m_fHistoryBars_session = std::move( fHistoryBars_session );
+  m_pWinChartView_session = pWinChartView_session;
 
   m_pComposeInstrument = pComposeInstrument;
   for ( const setInstrumentName_t::value_type& vt: m_setInstrumentName ) {
@@ -235,7 +243,11 @@ void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
     instrument.pti = m_pRootTreeItem->AppendChild(
       sNameGeneric,
       [this,&instrument,&sNameGeneric,&sNameIQFeed]( ou::tf::TreeItem* pti ){ // fClick_t
-        // live chart?  bar chart?
+        m_pWinChartView_session->SetChartDataView( instrument.sbm.GetChartDataView() );
+        if ( instrument.sbm.IsWatching() ) {}
+        else {
+          BuildSessionBarModel( instrument );
+        }
       },
       [this,iterInstrument]( ou::tf::TreeItem* pti ){ // fOnBuildPopup_t
         pti->NewMenu();
@@ -396,6 +408,17 @@ void InstrumentViews::OptionChainView_select() {
   m_pcurView = m_pOptionChainView;
   m_pcurView->Show();
 
+}
+
+void InstrumentViews::BuildSessionBarModel( Instrument& instrument ) {
+  m_fHistoryBars_session(
+    instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ), 60, 2
+  ,[&instrument]( const ou::tf::Bar& bar ){ // fHistory_Bar_t
+    instrument.sbm.OnHistoryBar( bar );
+    }
+  , [&instrument](){ // fHistory_Done_t
+    instrument.sbm.OnHistoryDone();
+  } );
 }
 
 void InstrumentViews::SizeTreeCtrl() {

@@ -26,8 +26,6 @@
 
 #include <wx/app.h>
 
-#include <OUCharting/ChartDataView.h>
-
 #include <TFTrading/DBOps.h>
 #include <TFTrading/ComposeInstrument.hpp>
 
@@ -41,11 +39,15 @@
 #include <TFBitsNPieces/FrameWork02.hpp>
 
 class FrameMain;
-class OptionManager;
 
 namespace ou {
 namespace tf {
+  class WinChartView;
+  class FrameControls;
   class InstrumentViews;
+namespace iqfeed {
+  class BarHistory;
+}
 }
 }
 
@@ -66,7 +68,11 @@ private:
   FrameMain* m_pFrameMain;
   ou::tf::InstrumentViews* m_pInstrumentViews;
 
-  ou::ChartDataView m_cdv;
+  ou::tf::FrameControls* m_pFrameWinChartView_session;
+  ou::tf::WinChartView* m_pWinChartView_session;
+
+  ou::tf::FrameControls* m_pFrameWinChartView_daily;
+  ou::tf::WinChartView* m_pWinChartView_daily;
 
   using pIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
   pIQFeed_t m_pIQFeed;
@@ -79,8 +85,12 @@ private:
   ou::tf::FedRateFromIQFeed m_fedrate;
   std::shared_ptr<ou::tf::option::Engine> m_pOptionEngine;
 
+  using pBarHistory_session_t = std::unique_ptr<ou::tf::iqfeed::BarHistory>;
+  pBarHistory_session_t m_pBarHistory;
+
   void ConnectionsStart();
   void HandleIQFeedConnected( int );
+  void SetComposeInstrument();
 
   using fInstrumentOption_t = std::function<void(size_t, pInstrument_t /* option */)>; // needs to match CollectATM
   void QueryChains( pInstrument_t, fInstrumentOption_t&& ); // underlying
@@ -95,12 +105,23 @@ private:
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
+    ar & *m_pFrameWinChartView_session;
+    ar & *m_pFrameWinChartView_daily;
     ar & *m_pInstrumentViews;
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
+    assert( m_pFrameMain );
     ar & *m_pFrameMain;
+
+    assert( m_pFrameWinChartView_session );
+    ar & *m_pFrameWinChartView_session;
+
+    assert( m_pFrameWinChartView_daily );
+    ar & *m_pFrameWinChartView_daily;
+
+    assert( m_pInstrumentViews );
     ar & *m_pInstrumentViews;
   }
 

@@ -29,6 +29,7 @@ set(
     InstrumentViews.hpp
     OptionChainModel.hpp
     OptionChainView.hpp
+    SessionBarModel.hpp
   )
 
 set(
@@ -37,6 +38,7 @@ set(
     InstrumentViews.cpp
     OptionChainModel.cpp
     OptionChainView.cpp
+    SessionBarModel.cpp
   )
 
 add_executable(

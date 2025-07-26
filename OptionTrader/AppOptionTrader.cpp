@@ -28,9 +28,12 @@
 
 #include <TFTrading/InstrumentManager.h>
 
+#include <TFIQFeed/BarHistory.h>
 #include <TFIQFeed/OptionChainQuery.h>
 
 #include <TFVuTrading/FrameMain.h>
+#include <TFVuTrading/FrameControls.h>
+#include <TFVuTrading/WinChartView.h>
 
 #include "AppOptionTrader.hpp"
 #include "InstrumentViews.hpp"
@@ -56,6 +59,11 @@ bool AppOptionTrader::OnInit() {
     return false;
   }
 
+  m_pFrameMain = nullptr;
+  m_pFrameWinChartView_session = nullptr;
+  m_pFrameWinChartView_daily = nullptr;
+  m_pInstrumentViews = nullptr;
+
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sAppTitle );
   wxWindowID idFrameMain = m_pFrameMain->GetId();
   m_pFrameMain->SetSize( 800, 500 );
@@ -68,7 +76,6 @@ bool AppOptionTrader::OnInit() {
 
   m_pInstrumentViews = new ou::tf::InstrumentViews( m_pFrameMain );
   sizerFrame->Add( m_pInstrumentViews, 1, wxALL | wxEXPAND, 0 );
-  //m_pBookOfOptionChains->Show();
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppOptionTrader::OnClose, this );  // start close of windows and controls
 
@@ -77,15 +84,26 @@ bool AppOptionTrader::OnInit() {
   //vItems.push_back( new mi( "Add Symbol", MakeDelegate( this, &AppOptionTrader::HandleMenuActionAddSymbol ) ) );
   //m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
+  {
+    m_pFrameWinChartView_session = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Session Bars (1min)" );
+    m_pWinChartView_session = new ou::tf::WinChartView( m_pFrameWinChartView_session );
+    m_pFrameWinChartView_session->Attach( m_pWinChartView_session );
+    m_pFrameWinChartView_session->Layout();
+    m_pFrameWinChartView_session->Show();
+
+    m_pFrameWinChartView_daily = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Daily Bars" );
+    m_pWinChartView_daily = new ou::tf::WinChartView( m_pFrameWinChartView_daily );
+    m_pFrameWinChartView_daily->Attach( m_pWinChartView_daily );
+    m_pFrameWinChartView_daily->Layout();
+    m_pFrameWinChartView_daily->Show();
+  }
+
   LoadState();
 
   m_pFrameMain->Layout();
   m_pFrameMain->Show(); // triggers the auto move
 
   ConnectionsStart();
-
-  // this needs to be placed after the providers are registered
-  m_db.Open( c_sDbName );
 
   return true;
 
@@ -98,11 +116,26 @@ void AppOptionTrader::ConnectionsStart() {
 }
 
 void AppOptionTrader::HandleIQFeedConnected( int ) {
-  BOOST_LOG_TRIVIAL(info) << "iqfeed connected";
+  BOOST_LOG_TRIVIAL(info) << "connected: iqfeed";
+
+  // this needs to be placed after the providers are registered
+  m_db.Open( c_sDbName );
 
   m_fedrate.SetWatchOn( m_pIQFeed );
   m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
 
+  m_pBarHistory = std::make_unique<ou::tf::iqfeed::BarHistory>(
+    [this](){ // m_fConnected
+      BOOST_LOG_TRIVIAL(info) << "connected: bar history";
+      SetComposeInstrument();
+    }
+  );
+  m_pBarHistory->Connect();
+}
+
+void AppOptionTrader::SetComposeInstrument() {
+  using fHistory_Bar_t = ou::tf::InstrumentViews::fHistory_Bar_t;
+  using fHistory_Done_t = ou::tf::InstrumentViews::fHistory_Done_t;
   m_pComposeInstrumentIQFeed = std::make_shared<ou::tf::ComposeInstrument>(
     m_pIQFeed,
     [this](){
@@ -119,7 +152,12 @@ void AppOptionTrader::HandleIQFeedConnected( int ) {
               //m_pOptionEngine->RegisterOption( pOption );
               return pOption;
             },
-            m_pOptionEngine
+            m_pOptionEngine,
+            [this]( const std::string& sIQFeedSymbolName, unsigned int sec, unsigned int days, fHistory_Bar_t&& fBar, fHistory_Done_t&& fDone ){
+              m_pBarHistory->Set( std::move( fBar ), std::move( fDone ) );
+              m_pBarHistory->RequestNDaysOfBars( sIQFeedSymbolName, sec, days );
+            },
+            m_pWinChartView_session
           );
         } );
     } );
@@ -208,6 +246,8 @@ void AppOptionTrader::LoadState() {
 
 int AppOptionTrader::OnExit() {
   // Exit Steps: #4
+
+  m_pBarHistory.reset();
 
   m_pOptionEngine.reset();
   m_fedrate.SetWatchOff();

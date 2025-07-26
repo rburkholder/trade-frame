@@ -32,6 +32,7 @@
 
 #include "Common.hpp"
 #include "OptionChainView.hpp"
+#include "SessionBarModel.hpp"
 
 #define SYMBOL_INSTRUMENTVIEWS_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_INSTRUMENTVIEWS_TITLE _("Instrument Views")
@@ -47,6 +48,7 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 class TreeItem;
+class WinChartView;
 class ComposeInstrument;
 
 class InstrumentViews
@@ -82,11 +84,17 @@ public:
 
   using pOptionEngine_t = std::shared_ptr<ou::tf::option::Engine>;
 
+  using fHistory_Bar_t = std::function<void( const ou::tf::Bar& )>;
+  using fHistory_Done_t = std::function<void()>;
+  using fHistoryBars_session_t = std::function<void( const std::string&, unsigned int, unsigned int, fHistory_Bar_t&&, fHistory_Done_t&& )>;
+
   void Set(
     pComposeInstrument_t&
   , fBuildWatch_t&&
   , fBuildOption_t&&
   , pOptionEngine_t&
+  , fHistoryBars_session_t&&
+  , ou::tf::WinChartView* pWinChartView_session
   );
 
 protected:
@@ -113,6 +121,10 @@ private:
 
   pOptionEngine_t m_pOptionEngine;
 
+  fHistoryBars_session_t m_fHistoryBars_session;
+
+  ou::tf::WinChartView* m_pWinChartView_session;
+
   struct Instrument {
 
     ou::tf::TreeItem* pti;
@@ -120,6 +132,7 @@ private:
     pWatch_t pWatch;
     OptionChainView* pChainView;
     mapChains_t mapChains;
+    SessionBarModel sbm;
 
     Instrument()
     : pti( nullptr ), pChainView( nullptr )
@@ -130,6 +143,7 @@ private:
       assert( !pWatch );
       pWatch = pWatch_;
       pWatch->StartWatch();
+      sbm.Set( pWatch );
     }
 
     ~Instrument() {
@@ -163,6 +177,8 @@ private:
   void BuildOptionChains( mapInstrument_t::iterator );
   void PresentOptionChains( mapInstrument_t::iterator );
   void OptionChainView_select();
+
+  void BuildSessionBarModel( Instrument& );
 
   void HandleTimer( wxTimerEvent& );
 
