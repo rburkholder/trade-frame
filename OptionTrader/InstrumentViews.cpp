@@ -252,7 +252,11 @@ void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
     instrument.pti = m_pRootTreeItem->AppendChild(
       sNameGeneric,
       [this,&instrument,&sNameGeneric,&sNameIQFeed]( ou::tf::TreeItem* pti ){ // fClick_t
+        //m_pWinChartView_session->SetLive_trail(); // todo: revert to this after testing
+        m_pWinChartView_session->SetLive_review();
         m_pWinChartView_session->SetChartDataView( instrument.sbm.GetChartDataView() );
+
+        m_pWinChartView_daily->SetLive_review();
         m_pWinChartView_daily->SetChartDataView( instrument.dbm.GetChartDataView() );
 
         if ( instrument.sbm.IsWatching() ) {}
