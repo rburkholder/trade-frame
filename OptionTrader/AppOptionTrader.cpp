@@ -134,8 +134,6 @@ void AppOptionTrader::HandleIQFeedConnected( int ) {
 }
 
 void AppOptionTrader::SetComposeInstrument() {
-  using fHistory_Bar_t = ou::tf::InstrumentViews::fHistory_Bar_t;
-  using fHistory_Done_t = ou::tf::InstrumentViews::fHistory_Done_t;
   m_pComposeInstrumentIQFeed = std::make_shared<ou::tf::ComposeInstrument>(
     m_pIQFeed,
     [this](){
@@ -153,15 +151,8 @@ void AppOptionTrader::SetComposeInstrument() {
               return pOption;
             },
             m_pOptionEngine,
-            [this]( const std::string& sIQFeedSymbolName, unsigned int sec, unsigned int days, fHistory_Bar_t&& fBar, fHistory_Done_t&& fDone ){
-              m_pBarHistory->Set( std::move( fBar ), std::move( fDone ) );
-              m_pBarHistory->RequestNDaysOfBars( sIQFeedSymbolName, sec, days );
-            },
+            std::move( m_pBarHistory ),
             m_pWinChartView_session,
-            [this]( const std::string& sIQFeedSymbolName, unsigned int days, fHistory_Bar_t&& fBar, fHistory_Done_t&& fDone ){
-              m_pBarHistory->Set( std::move( fBar ), std::move( fDone ) );
-              m_pBarHistory->RequestNEndOfDay( sIQFeedSymbolName, days );
-            },
             m_pWinChartView_daily
           );
         } );

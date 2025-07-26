@@ -47,6 +47,9 @@ class OptionChainModel;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+namespace iqfeed {
+  class BarHistory;
+}
 
 class TreeItem;
 class WinChartView;
@@ -85,19 +88,15 @@ public:
 
   using pOptionEngine_t = std::shared_ptr<ou::tf::option::Engine>;
 
-  using fHistory_Bar_t = std::function<void( const ou::tf::Bar& )>;
-  using fHistory_Done_t = std::function<void()>;
-  using fHistoryRequest_session_t = std::function<void( const std::string&, unsigned int, unsigned int, fHistory_Bar_t&&, fHistory_Done_t&& )>;
-  using fHistoryRequest_daily_t = std::function<void( const std::string&, unsigned int, fHistory_Bar_t&&, fHistory_Done_t&& )>;
+  using pBarHistory_t = std::unique_ptr<ou::tf::iqfeed::BarHistory>;
 
   void Set(
     pComposeInstrument_t&
   , fBuildWatch_t&&
   , fBuildOption_t&&
   , pOptionEngine_t&
-  , fHistoryRequest_session_t&&
+  , pBarHistory_t&&
   , ou::tf::WinChartView* pWinChartView_session
-  , fHistoryRequest_daily_t&&
   , ou::tf::WinChartView* pWinChartView_daily
   );
 
@@ -125,10 +124,9 @@ private:
 
   pOptionEngine_t m_pOptionEngine;
 
-  fHistoryRequest_session_t m_fHistoryBars_session;
-  ou::tf::WinChartView* m_pWinChartView_session;
+  pBarHistory_t m_pBarHistory;
 
-  fHistoryRequest_daily_t m_fHistoryBars_daily;
+  ou::tf::WinChartView* m_pWinChartView_session;
   ou::tf::WinChartView* m_pWinChartView_daily;
 
   struct Instrument {

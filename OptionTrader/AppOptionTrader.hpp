@@ -85,8 +85,8 @@ private:
   ou::tf::FedRateFromIQFeed m_fedrate;
   std::shared_ptr<ou::tf::option::Engine> m_pOptionEngine;
 
-  using pBarHistory_session_t = std::unique_ptr<ou::tf::iqfeed::BarHistory>;
-  pBarHistory_session_t m_pBarHistory;
+  using pBarHistory_t = std::unique_ptr<ou::tf::iqfeed::BarHistory>;
+  pBarHistory_t m_pBarHistory;
 
   void ConnectionsStart();
   void HandleIQFeedConnected( int );

@@ -28,6 +28,7 @@
 #include <TFTrading/InstrumentManager.h>
 #include <TFTrading/ComposeInstrument.hpp>
 
+#include <TFIQFeed/BarHistory.h>
 #include <TFIQFeed/OptionChainQuery.h>
 
 #include <TFOptions/Chains.h>
@@ -158,9 +159,8 @@ void InstrumentViews::Set(
 , fBuildWatch_t&& fBuildWatch
 , fBuildOption_t&& fBuildOption
 , pOptionEngine_t& pOptionEngine
-, fHistoryRequest_session_t&& fHistoryBars_session
+, pBarHistory_t&& pBarHistory
 , ou::tf::WinChartView* pWinChartView_session
-, fHistoryRequest_daily_t&& fHistoryBars_daily
 , ou::tf::WinChartView* pWinChartView_daily
 ) {
 
@@ -168,20 +168,18 @@ void InstrumentViews::Set(
   assert( fBuildOption );
   assert( pOptionEngine );
 
-  assert( fHistoryBars_session );
-  assert( pWinChartView_session );
+  assert( pBarHistory );
 
-  assert( fHistoryBars_daily );
+  assert( pWinChartView_session );
   assert( pWinChartView_daily );
 
   m_fBuildWatch = std::move( fBuildWatch );
   m_fBuildOption = std::move( fBuildOption );
   m_pOptionEngine = pOptionEngine;
 
-  m_fHistoryBars_session = std::move( fHistoryBars_session );
-  m_pWinChartView_session = pWinChartView_session;
+  m_pBarHistory = std::move( pBarHistory );
 
-  m_fHistoryBars_daily = std::move( fHistoryBars_daily );
+  m_pWinChartView_session = pWinChartView_session;
   m_pWinChartView_daily = pWinChartView_daily;
 
   m_pComposeInstrument = pComposeInstrument;
@@ -427,27 +425,30 @@ void InstrumentViews::OptionChainView_select() {
 }
 
 void InstrumentViews::BuildSessionBarModel( Instrument& instrument ) {
-  m_fHistoryBars_session(
-    instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ), 60, 2
-  ,[&instrument]( const ou::tf::Bar& bar ){ // fHistory_Bar_t
-    instrument.sbm.OnHistoryBar( bar );
+  const std::string& sIQFeedSymbolName( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
+  m_pBarHistory->Set(
+    [&instrument]( const ou::tf::Bar& bar ){ // fHistory_Bar_t
+      instrument.sbm.OnHistoryBar( bar );
     }
   , [this,&instrument](){ // fHistory_Done_t
-    instrument.sbm.OnHistoryDone();
-    BuildDailyBarModel( instrument );
-  } );
+      instrument.sbm.OnHistoryDone();
+      BuildDailyBarModel( instrument );
+    }
+  );
+  m_pBarHistory->RequestNDaysOfBars( sIQFeedSymbolName, 60, 2 ); // 60 second bars over 2 days
 }
 
-// makes use of sdm.IsWatching to be single entry here
+// note: makes use of sdm.IsWatching to be single entry here
 void InstrumentViews::BuildDailyBarModel( Instrument& instrument ) {
-  m_fHistoryBars_daily(
-    instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ), 20
-  ,[&instrument]( const ou::tf::Bar& bar ){ // fHistory_Bar_t
-    instrument.dbm.OnHistoryBar( bar );
+  const std::string& sIQFeedSymbolName( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
+  m_pBarHistory->Set(
+    [&instrument]( const ou::tf::Bar& bar ){ // fHistory_Bar_t
+      instrument.dbm.OnHistoryBar( bar );
     }
   , [&instrument](){ // fHistory_Done_t
-    instrument.dbm.OnHistoryDone();
+      instrument.dbm.OnHistoryDone();
   } );
+  m_pBarHistory->RequestNEndOfDay( sIQFeedSymbolName, 20 /* days */ );
 }
 
 void InstrumentViews::SizeTreeCtrl() {
