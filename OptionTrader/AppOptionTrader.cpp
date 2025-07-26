@@ -157,7 +157,12 @@ void AppOptionTrader::SetComposeInstrument() {
               m_pBarHistory->Set( std::move( fBar ), std::move( fDone ) );
               m_pBarHistory->RequestNDaysOfBars( sIQFeedSymbolName, sec, days );
             },
-            m_pWinChartView_session
+            m_pWinChartView_session,
+            [this]( const std::string& sIQFeedSymbolName, unsigned int days, fHistory_Bar_t&& fBar, fHistory_Done_t&& fDone ){
+              m_pBarHistory->Set( std::move( fBar ), std::move( fDone ) );
+              m_pBarHistory->RequestNEndOfDay( sIQFeedSymbolName, days );
+            },
+            m_pWinChartView_daily
           );
         } );
     } );

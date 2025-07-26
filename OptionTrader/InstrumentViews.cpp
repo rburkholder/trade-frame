@@ -158,15 +158,21 @@ void InstrumentViews::Set(
 , fBuildWatch_t&& fBuildWatch
 , fBuildOption_t&& fBuildOption
 , pOptionEngine_t& pOptionEngine
-, fHistoryBars_session_t&& fHistoryBars_session
+, fHistoryRequest_session_t&& fHistoryBars_session
 , ou::tf::WinChartView* pWinChartView_session
+, fHistoryRequest_daily_t&& fHistoryBars_daily
+, ou::tf::WinChartView* pWinChartView_daily
 ) {
 
   assert( fBuildWatch );
   assert( fBuildOption );
   assert( pOptionEngine );
+
   assert( fHistoryBars_session );
   assert( pWinChartView_session );
+
+  assert( fHistoryBars_daily );
+  assert( pWinChartView_daily );
 
   m_fBuildWatch = std::move( fBuildWatch );
   m_fBuildOption = std::move( fBuildOption );
@@ -174,6 +180,9 @@ void InstrumentViews::Set(
 
   m_fHistoryBars_session = std::move( fHistoryBars_session );
   m_pWinChartView_session = pWinChartView_session;
+
+  m_fHistoryBars_daily = std::move( fHistoryBars_daily );
+  m_pWinChartView_daily = pWinChartView_daily;
 
   m_pComposeInstrument = pComposeInstrument;
   for ( const setInstrumentName_t::value_type& vt: m_setInstrumentName ) {
@@ -244,9 +253,12 @@ void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
       sNameGeneric,
       [this,&instrument,&sNameGeneric,&sNameIQFeed]( ou::tf::TreeItem* pti ){ // fClick_t
         m_pWinChartView_session->SetChartDataView( instrument.sbm.GetChartDataView() );
+        m_pWinChartView_daily->SetChartDataView( instrument.dbm.GetChartDataView() );
+
         if ( instrument.sbm.IsWatching() ) {}
         else {
           BuildSessionBarModel( instrument );
+          // will then call BuildDailyBarModel
         }
       },
       [this,iterInstrument]( ou::tf::TreeItem* pti ){ // fOnBuildPopup_t
@@ -416,8 +428,21 @@ void InstrumentViews::BuildSessionBarModel( Instrument& instrument ) {
   ,[&instrument]( const ou::tf::Bar& bar ){ // fHistory_Bar_t
     instrument.sbm.OnHistoryBar( bar );
     }
-  , [&instrument](){ // fHistory_Done_t
+  , [this,&instrument](){ // fHistory_Done_t
     instrument.sbm.OnHistoryDone();
+    BuildDailyBarModel( instrument );
+  } );
+}
+
+// makes use of sdm.IsWatching to be single entry here
+void InstrumentViews::BuildDailyBarModel( Instrument& instrument ) {
+  m_fHistoryBars_daily(
+    instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ), 20
+  ,[&instrument]( const ou::tf::Bar& bar ){ // fHistory_Bar_t
+    instrument.dbm.OnHistoryBar( bar );
+    }
+  , [&instrument](){ // fHistory_Done_t
+    instrument.dbm.OnHistoryDone();
   } );
 }
 

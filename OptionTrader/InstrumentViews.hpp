@@ -33,6 +33,7 @@
 #include "Common.hpp"
 #include "OptionChainView.hpp"
 #include "SessionBarModel.hpp"
+#include "DailyBarModel.hpp"
 
 #define SYMBOL_INSTRUMENTVIEWS_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_INSTRUMENTVIEWS_TITLE _("Instrument Views")
@@ -86,15 +87,18 @@ public:
 
   using fHistory_Bar_t = std::function<void( const ou::tf::Bar& )>;
   using fHistory_Done_t = std::function<void()>;
-  using fHistoryBars_session_t = std::function<void( const std::string&, unsigned int, unsigned int, fHistory_Bar_t&&, fHistory_Done_t&& )>;
+  using fHistoryRequest_session_t = std::function<void( const std::string&, unsigned int, unsigned int, fHistory_Bar_t&&, fHistory_Done_t&& )>;
+  using fHistoryRequest_daily_t = std::function<void( const std::string&, unsigned int, fHistory_Bar_t&&, fHistory_Done_t&& )>;
 
   void Set(
     pComposeInstrument_t&
   , fBuildWatch_t&&
   , fBuildOption_t&&
   , pOptionEngine_t&
-  , fHistoryBars_session_t&&
+  , fHistoryRequest_session_t&&
   , ou::tf::WinChartView* pWinChartView_session
+  , fHistoryRequest_daily_t&&
+  , ou::tf::WinChartView* pWinChartView_daily
   );
 
 protected:
@@ -121,9 +125,11 @@ private:
 
   pOptionEngine_t m_pOptionEngine;
 
-  fHistoryBars_session_t m_fHistoryBars_session;
-
+  fHistoryRequest_session_t m_fHistoryBars_session;
   ou::tf::WinChartView* m_pWinChartView_session;
+
+  fHistoryRequest_daily_t m_fHistoryBars_daily;
+  ou::tf::WinChartView* m_pWinChartView_daily;
 
   struct Instrument {
 
@@ -133,6 +139,7 @@ private:
     OptionChainView* pChainView;
     mapChains_t mapChains;
     SessionBarModel sbm;
+    DailyBarModel dbm;
 
     Instrument()
     : pti( nullptr ), pChainView( nullptr )
@@ -179,6 +186,7 @@ private:
   void OptionChainView_select();
 
   void BuildSessionBarModel( Instrument& );
+  void BuildDailyBarModel( Instrument& );
 
   void HandleTimer( wxTimerEvent& );
 
