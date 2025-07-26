@@ -23,23 +23,18 @@
 
 #pragma once
 
-#include <boost/serialization/version.hpp>
-#include <boost/serialization/split_member.hpp>
-
 #include <OUCharting/ChartDataView.h>
 
 #include <OUCharting/ChartEntryBars.h>
 #include <OUCharting/ChartEntryMark.h>
 #include <OUCharting/ChartEntryVolume.h>
 
-#include <TFTimeSeries/TimeSeries.h>
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFTrading/Watch.h>
 
 class SessionBarModel
 {
-  friend class boost::serialization::access;
 public:
 
   SessionBarModel();
@@ -80,16 +75,4 @@ private:
 
   void HandleBarCompletionPrice( const ou::tf::Bar& );
 
-  template<typename Archive>
-  void save( Archive& ar, const unsigned int version ) const {
-  }
-
-  template<typename Archive>
-  void load( Archive& ar, const unsigned int version ) {
-  }
-
-  BOOST_SERIALIZATION_SPLIT_MEMBER()
-
 };
-
-BOOST_CLASS_VERSION(SessionBarModel, 1)
