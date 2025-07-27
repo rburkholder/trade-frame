@@ -47,10 +47,10 @@
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 
 #include <TFVuTrading/FrameMain.h>
+#include <TFVuTrading/PanelDividenNotes.hpp>
 #include <TFVuTrading/PanelFinancialChart.hpp>
 
 #include "AppBarChart.hpp"
-#include "PanelDividenNotes.hpp"
 
 namespace {
   static const std::string c_sAppTitle(        "Daily Bars Review" );
@@ -117,7 +117,7 @@ bool AppBarChart::OnInit() {
     );
   wxBoxSizer* sizerFrameSymbolInfo = new wxBoxSizer( wxHORIZONTAL );
   m_pFrameDividendNotes->SetSizer( sizerFrameSymbolInfo );
-  m_pPanelDividenNotes = new PanelDividenNotes( m_pFrameDividendNotes, wxID_ANY );
+  m_pPanelDividenNotes = new ou::tf::PanelDividenNotes( m_pFrameDividendNotes, wxID_ANY );
   sizerFrameSymbolInfo->Add( m_pPanelDividenNotes, 1, wxGROW|wxALL, 0 );
   m_pFrameDividendNotes->Layout();
   m_pFrameDividendNotes->Show();
@@ -468,7 +468,7 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
       //<< "," << ki.sCompanyName
       //<< std::endl;
 
-      PanelDividenNotes::Fields fields;
+      ou::tf::PanelDividenNotes::Fields fields;
       fields.sYield =  fmt::format( "{:.{}f}", ki.dblYield, 2 );
       fields.sLast =  fmt::format( "{:.{}f}", ki.dblLast, 2 );
       fields.sAmount =  fmt::format( "{:.{}f}", ki.dblAmount, 2 );

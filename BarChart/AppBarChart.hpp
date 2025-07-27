@@ -62,12 +62,12 @@ class wxCheckListBox;
 class wxCommandEvent;
 
 class FrameMain;
-class PanelDividenNotes;
 
 namespace ou {
 namespace tf {
-  class PanelFinancialChart;
   class AcquireFundamentals;
+  class PanelDividenNotes;
+  class PanelFinancialChart;
 }
 }
 
@@ -87,7 +87,7 @@ private:
   ou::tf::PanelFinancialChart* m_pPanelFinancialChart;
 
   wxFrame* m_pFrameDividendNotes;
-  PanelDividenNotes* m_pPanelDividenNotes;
+  ou::tf::PanelDividenNotes* m_pPanelDividenNotes;
 
   wxCheckListBox* m_clbTags;
 

@@ -47,6 +47,7 @@ set(
     NotebookOptionChains.h
     PanelChartHdf5.hpp
     PanelComboOrder.hpp
+    PanelDividenNotes.hpp
     PanelFinancialChart.hpp
     PanelLogging.h
     PanelManualOrder.h
@@ -107,6 +108,7 @@ set(
     NotebookOptionChains.cpp
     PanelChartHdf5.cpp
     PanelComboOrder.cpp
+    PanelDividenNotes.cpp
     PanelFinancialChart.cpp
     PanelLogging.cpp
     PanelManualOrder.cpp

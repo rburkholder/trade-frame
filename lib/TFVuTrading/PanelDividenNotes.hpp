@@ -15,7 +15,7 @@
 /*
  * File:    PanelDividenNotes.hpp
  * Author:  raymond@burkholder.net
- * Project: Dividend
+ * Project: TFVuTrading
  * Created: April 27, 2025 12:47:19
  */
 
@@ -33,6 +33,9 @@ class wxButton;
 class wxListBox;
 class wxTextCtrl;
 class wxStaticText;
+
+namespace ou {
+namespace tf {
 
 class PanelDividenNotes: public wxPanel {
 public:
@@ -154,3 +157,7 @@ private:
   static bool ShowToolTips() { return true; };
 
 };
+
+} // namespace tf
+} // namespace ou
+

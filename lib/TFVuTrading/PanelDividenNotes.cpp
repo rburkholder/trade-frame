@@ -15,7 +15,7 @@
 /*
  * File:    PanelDividenNotes.cpp
  * Author:  raymond@burkholder.net
- * Project: Dividend
+ * Project: TFVuTrading
  * Created: April 27, 2025 12:47:19
  */
 
@@ -27,6 +27,9 @@
 #include <wx/textctrl.h>
 
 #include "PanelDividenNotes.hpp"
+
+namespace ou {
+namespace tf {
 
 PanelDividenNotes::PanelDividenNotes() {
   Init();
@@ -258,4 +261,7 @@ wxIcon PanelDividenNotes::GetIconResource( const wxString& name ) {
   wxUnusedVar(name);
   return wxNullIcon;
 }
+
+} // namespace tf
+} // namespace ou
 
