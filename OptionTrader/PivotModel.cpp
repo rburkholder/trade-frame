@@ -19,6 +19,8 @@
  * Created: July 26, 2025 15:44:33
  */
 
+#include <boost/log/trivial.hpp>
+
 #include <OUCommon/TimeSource.h>
 
 #include <TFIndicators/Pivots.h>
@@ -70,13 +72,13 @@ void PivotModel::OnHistoryDone() {
   m_cePivot.AddMark( ps.GetPivotValue( PS::S1 ), ps.GetPivotColour( PS::S1 ), "s1" );
   m_cePivot.AddMark( ps.GetPivotValue( PS::S2 ), ps.GetPivotColour( PS::S2 ), "s2" );
 
-  std::cout
+  BOOST_LOG_TRIVIAL(info)
     << "pivots"
     <<  " r2=" << ps.GetPivotValue( PS::R2 )
     << ", r1=" << ps.GetPivotValue( PS::R1 )
     << ", pv=" << ps.GetPivotValue( PS::PV )
     << ", s1=" << ps.GetPivotValue( PS::S1 )
     << ", s2=" << ps.GetPivotValue( PS::S2 )
-    << std::endl;
+    ;
 
 }
