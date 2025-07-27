@@ -32,6 +32,7 @@ set(
     OptionChainView.hpp
     PivotModel.hpp
     SessionBarModel.hpp
+    TagSymbolMap.hpp
   )
 
 set(
@@ -43,6 +44,7 @@ set(
     OptionChainView.cpp
     PivotModel.cpp
     SessionBarModel.cpp
+    TagSymbolMap.cpp
   )
 
 add_executable(
