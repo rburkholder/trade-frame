@@ -264,8 +264,9 @@ public:
   void RetrieveNDaysOfDataPoints( const std::string& sSymbol, unsigned int n ); // HTD ticks
   void RetrieveDatedRangeOfDataPoints( const std::string& sSymbol, posix_time::ptime dtStart, posix_time::ptime dtEnd ); // HTT ticks
 
-  void RetrieveNIntervals( const std::string& sSymbol, unsigned int i, unsigned int n );  // HIX i=interval in seconds  (bars)
-  void RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int i, unsigned int n ); // HID i=interval in seconds (bars)
+  void RetrieveNIntervals( const std::string& sSymbol, unsigned int sec, unsigned int n );  // HIX sec=interval in seconds  (bars)
+  void RetrieveNDaysOfIntervals( const std::string& sSymbol, unsigned int sec, unsigned int n ); // HID sec=interval in seconds (bars)
+  void RetrieveDatedRangeOfIntervals( const std::string& sSymbol, unsigned int sec, posix_time::ptime dtStart, posix_time::ptime dtEnd ); // HIT intervals
 
   void RetrieveNEndOfDays( const std::string& sSymbol, unsigned int n );  // HDX  (bars)
 
@@ -487,6 +488,31 @@ void HistoryQuery<T>::RetrieveNDaysOfIntervals( const std::string& sSymbol, unsi
     boost::this_thread::sleep( boost::posix_time::milliseconds( c_nMillisecondsToSleep ) );
     ss << "HID," << sSymbol << "," << i << "," << n << ",,,,1," << c_chRidInterval << "\n";
     //BOOST_LOG_TRIVIAL(trace) << ss.str();
+    this->Send( ss.str().c_str() );
+  }
+}
+
+template <typename T>
+void HistoryQuery<T>::RetrieveDatedRangeOfIntervals( const std::string& sSymbol, unsigned int sec, posix_time::ptime dtStart, posix_time::ptime dtEnd ) {
+  if ( RetrievalState::Idle != m_stateRetrieval ) {
+    throw std::logic_error( "HistoryQuery<T>::RetrieveDatedRangeOfIntervals: not in IDLE");
+  }
+  else {
+    m_stateRetrieval = RetrievalState::RetrieveIntervals;
+
+    // http://rhubbarb.wordpress.com/2009/10/17/boost-datetime-locales-and-facets/#more-944
+    std::stringstream ss;
+    //date_facet* facet( new date_facet( "&Y%m%d %H%M%S" ) );
+    boost::posix_time::time_facet* facet( new boost::posix_time::time_facet );
+    //ss.imbue( std::locale(ss.getloc(), facet ) );
+    //ss.imbue( std::locale(std::locale::classic(), facet ) );
+    std::locale special_locale (std::locale(""), facet);
+    ss.imbue( special_locale );
+    (*facet).format( "%Y%m%d %H%M%S" );
+
+    boost::this_thread::sleep( boost::posix_time::milliseconds( c_nMillisecondsToSleep ) );
+
+    ss << "HIT," << sSymbol << ',' << sec << ',' << dtStart << ',' << dtEnd << ",,,,," << c_chRidInterval << ",,s" << "\n";
     this->Send( ss.str().c_str() );
   }
 }

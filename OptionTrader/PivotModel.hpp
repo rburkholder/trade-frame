@@ -13,66 +13,41 @@
  ************************************************************************/
 
 /*
- * File:    SessionBarModel.hpp
+ * File:    PivotModel.hpp
  * Author:  raymond@burkholder.net
  * Project: OptionTrader
- * Created: July 25, 2025 11:17:40
+ * Created: July 26, 2025 15:44:33
  */
 
-// Inspiration: IndicatorTrading/SessionChart.hpp
+// Review to add: lib/TFBitsNPieces/DailyHistory.cpp
 
 #pragma once
 
-#include <OUCharting/ChartDataView.h>
-
-#include <OUCharting/ChartEntryBars.h>
 #include <OUCharting/ChartEntryMark.h>
-#include <OUCharting/ChartEntryVolume.h>
 
-#include <TFTimeSeries/BarFactory.h>
+#include <TFTimeSeries/DatedDatum.h>
 
-#include <TFTrading/Watch.h>
-
-class SessionBarModel
+class PivotModel
 {
 public:
 
-  SessionBarModel();
-  ~SessionBarModel();
-
-  using pWatch_t = ou::tf::Watch::pWatch_t;
-
-  bool IsWatching() const { return m_bWatchStarted; };
-
-  void Set( pWatch_t&, ou::ChartEntryMark& );
-  //void Set( pWatch_t& );
+  PivotModel();
+  ~PivotModel();
 
   void OnHistoryBar( const ou::tf::Bar& );
   void OnHistoryDone();
 
-  ou::ChartDataView* GetChartDataView() { return &m_dvChart; }
+  ou::ChartEntryMark& Pivots() { return m_cePivot; }
 
 protected:
 private:
 
-  enum EChartSlot { Price, Volume };
+  bool m_bFirstBarProcessed;
 
-  bool m_bWatchStarted;
+  boost::posix_time::ptime m_dtFirstBarUTC, m_dtLastBarUTC;
+  ou::tf::Price::price_t m_open, m_high, m_low, m_close;
+  ou::tf::Trade::volume_t m_volume;
 
-  pWatch_t m_pWatch;
-
-  ou::ChartDataView m_dvChart; // the data
-
-  ou::tf::BarFactory m_bfPrice1Minute;
-
-  ou::ChartEntryBars m_cePriceBars;
-  ou::ChartEntryVolume m_ceVolume;
-
-  void StartWatch();
-  void StopWatch();
-
-  void HandleTrade( const ou::tf::Trade& );
-
-  void HandleBarCompletionPrice( const ou::tf::Bar& );
+  ou::ChartEntryMark m_cePivot;
 
 };

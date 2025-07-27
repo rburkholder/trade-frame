@@ -55,6 +55,7 @@ public:
   void Connect();
   void RequestNBars( const std::string& sSymbol, unsigned int nSeconds, unsigned int nBars );
   void RequestNDaysOfBars( const std::string& sSymbol, unsigned int nSeconds, unsigned int nDays );
+  void RequestDatedRangeOfBars( const std::string& sSymbol, unsigned int nSeconds, posix_time::ptime dtStart, posix_time::ptime dtEnd );
   void RequestNEndOfDay( const std::string& sSymbol, unsigned int nDays );
   void Disconnect();
 

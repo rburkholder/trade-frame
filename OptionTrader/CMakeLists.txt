@@ -30,6 +30,7 @@ set(
     InstrumentViews.hpp
     OptionChainModel.hpp
     OptionChainView.hpp
+    PivotModel.hpp
     SessionBarModel.hpp
   )
 
@@ -40,6 +41,7 @@ set(
     InstrumentViews.cpp
     OptionChainModel.cpp
     OptionChainView.cpp
+    PivotModel.cpp
     SessionBarModel.cpp
   )
 

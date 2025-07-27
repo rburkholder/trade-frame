@@ -259,8 +259,7 @@ void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
 
         if ( instrument.sbm.IsWatching() ) {}
         else {
-          BuildSessionBarModel( instrument );
-          // will then call BuildDailyBarModel
+          BuildDailyBarModel( instrument );
         }
       },
       [this,iterInstrument]( ou::tf::TreeItem* pti ){ // fOnBuildPopup_t
@@ -432,7 +431,6 @@ void InstrumentViews::BuildSessionBarModel( Instrument& instrument ) {
     }
   , [this,&instrument](){ // fHistory_Done_t
       instrument.sbm.OnHistoryDone();
-      BuildDailyBarModel( instrument );
     }
   );
   m_pBarHistory->RequestNDaysOfBars( sIQFeedSymbolName, 60, 2 ); // 60 second bars over 2 days
@@ -443,12 +441,53 @@ void InstrumentViews::BuildDailyBarModel( Instrument& instrument ) {
   const std::string& sIQFeedSymbolName( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
   m_pBarHistory->Set(
     [&instrument]( const ou::tf::Bar& bar ){ // fHistory_Bar_t
+      instrument.dateLastDailyBar = bar.DateTime().date();
       instrument.dbm.OnHistoryBar( bar );
     }
-  , [&instrument](){ // fHistory_Done_t
+  , [this,&instrument](){ // fHistory_Done_t
       instrument.dbm.OnHistoryDone();
+      BuildPivotModel( instrument );
   } );
   m_pBarHistory->RequestNEndOfDay( sIQFeedSymbolName, 20 /* days */ );
+}
+
+void InstrumentViews::BuildPivotModel( Instrument& instrument ) {
+  const std::string& sIQFeedSymbolName( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
+  m_pBarHistory->Set(
+    [&instrument]( const ou::tf::Bar& bar ){ // fHistory_Bar_t
+      instrument.pm.OnHistoryBar( bar );
+    }
+  , [this,&instrument](){ // fHistory_Done_t
+      instrument.pm.OnHistoryDone();
+      BuildSessionBarModel( instrument );
+  } );
+
+  // todo: determine partial days and use previos day bar
+  // todo: work with weekends
+  static const boost::gregorian::date_duration oneday( 1 );
+  static const boost::gregorian::date_duration twoday( 2 );
+  switch ( instrument.pInstrument->GetInstrumentType() ) {
+    case ou::tf::InstrumentType::Future:
+    case ou::tf::InstrumentType::FuturesOption:
+    case ou::tf::InstrumentType::Currency:
+      m_pBarHistory->RequestDatedRangeOfBars(
+        sIQFeedSymbolName, 60,
+        posix_time::ptime( instrument.dateLastDailyBar - twoday, boost::posix_time::time_duration( 18, 0, 0 ) ),
+        posix_time::ptime( instrument.dateLastDailyBar - oneday, boost::posix_time::time_duration( 17, 0, 0 ) )
+      );
+      break;
+    case ou::tf::InstrumentType::Stock:
+    case ou::tf::InstrumentType::Option:
+      m_pBarHistory->RequestDatedRangeOfBars(
+        sIQFeedSymbolName, 60,
+        posix_time::ptime( instrument.dateLastDailyBar - oneday, boost::posix_time::time_duration(  9, 30, 0 ) ),
+        posix_time::ptime( instrument.dateLastDailyBar - oneday, boost::posix_time::time_duration( 16,  0, 0 ) )
+      );
+      break;
+    default:
+      assert( false );  // don't know any others yet
+
+  }
 }
 
 void InstrumentViews::SizeTreeCtrl() {

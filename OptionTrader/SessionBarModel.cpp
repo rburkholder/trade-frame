@@ -33,9 +33,6 @@ SessionBarModel::SessionBarModel()
 {
   m_cePriceBars.SetName( "Trades" );
 
-  m_dvChart.Add( EChartSlot::Price, &m_cePriceBars );
-  m_dvChart.Add( EChartSlot::Volume, &m_ceVolume );
-
   m_bfPrice1Minute.SetOnBarComplete( MakeDelegate( this, &SessionBarModel::HandleBarCompletionPrice ) );
 }
 
@@ -43,15 +40,17 @@ SessionBarModel::~SessionBarModel() {
   StopWatch();
 }
 
-//void SessionBarModel::Set( pWatch_t& pWatch, ou::ChartEntryMark& cem ) {
-void SessionBarModel::Set( pWatch_t& pWatch ) {
+void SessionBarModel::Set( pWatch_t& pWatch, ou::ChartEntryMark& cem ) {
+//void SessionBarModel::Set( pWatch_t& pWatch ) {
 
   assert( pWatch );
   assert( !m_pWatch );
 
   m_pWatch = pWatch;
 
-  //m_dvChart.Add( EChartSlot::Price, &cem );
+  m_dvChart.Add( EChartSlot::Price, &cem );
+  m_dvChart.Add( EChartSlot::Price, &m_cePriceBars );
+  m_dvChart.Add( EChartSlot::Volume, &m_ceVolume );
 
   //const std::string& sIQFeedName = pWatch->GetInstrument()->GetInstrumentName( ou::tf::keytypes::EProviderIQF );
 }

@@ -34,6 +34,7 @@
 #include "OptionChainView.hpp"
 #include "SessionBarModel.hpp"
 #include "DailyBarModel.hpp"
+#include "PivotModel.hpp"
 
 #define SYMBOL_INSTRUMENTVIEWS_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_INSTRUMENTVIEWS_TITLE _("Instrument Views")
@@ -138,6 +139,10 @@ private:
     mapChains_t mapChains;
     SessionBarModel sbm;
     DailyBarModel dbm;
+    PivotModel pm;
+
+    unsigned int counter;
+    boost::gregorian::date dateLastDailyBar;
 
     Instrument()
     : pti( nullptr ), pChainView( nullptr )
@@ -148,7 +153,7 @@ private:
       assert( !pWatch );
       pWatch = pWatch_;
       pWatch->StartWatch();
-      sbm.Set( pWatch );
+      sbm.Set( pWatch, pm.Pivots() );
     }
 
     ~Instrument() {
@@ -185,6 +190,7 @@ private:
 
   void BuildSessionBarModel( Instrument& );
   void BuildDailyBarModel( Instrument& );
+  void BuildPivotModel( Instrument& );
 
   void HandleTimer( wxTimerEvent& );
 

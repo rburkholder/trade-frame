@@ -96,6 +96,10 @@ void BarHistory::RequestNDaysOfBars( const std::string& sSymbol, unsigned int nS
   RetrieveNDaysOfIntervals( sSymbol, nSeconds, nDays );
 }
 
+void BarHistory::RequestDatedRangeOfBars( const std::string& sSymbol, unsigned int nSeconds, posix_time::ptime dtStart, posix_time::ptime dtEnd ) {
+  RetrieveDatedRangeOfIntervals( sSymbol, nSeconds, dtStart, dtEnd );
+}
+
 void BarHistory::RequestNEndOfDay( const std::string& sSymbol, unsigned int nDays ) {
   RetrieveNEndOfDays( sSymbol, nDays );
 }
