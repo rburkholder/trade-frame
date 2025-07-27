@@ -40,15 +40,19 @@ SessionBarModel::~SessionBarModel() {
   StopWatch();
 }
 
-void SessionBarModel::Set( pWatch_t& pWatch, ou::ChartEntryMark& cem ) {
-//void SessionBarModel::Set( pWatch_t& pWatch ) {
+void SessionBarModel::Set( pWatch_t& pWatch ) {
 
   assert( pWatch );
   assert( !m_pWatch );
 
   m_pWatch = pWatch;
 
-  m_dvChart.Add( EChartSlot::Price, &cem );
+}
+
+void SessionBarModel::Set( ou::ChartEntryMark& cem2, ou::ChartEntryMark& cem1 ) {
+
+  m_dvChart.Add( EChartSlot::Price, &cem1 );
+  m_dvChart.Add( EChartSlot::Price, &cem2 );
   m_dvChart.Add( EChartSlot::Price, &m_cePriceBars );
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolume );
 

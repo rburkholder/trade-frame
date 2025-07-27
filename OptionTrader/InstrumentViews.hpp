@@ -153,7 +153,8 @@ private:
       assert( !pWatch );
       pWatch = pWatch_;
       pWatch->StartWatch();
-      sbm.Set( pWatch, pm.Pivots() );
+      sbm.Set( pWatch );
+      sbm.Set( pm.Pivots(), dbm.Statistics() );
     }
 
     ~Instrument() {

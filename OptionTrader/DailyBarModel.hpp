@@ -26,8 +26,10 @@
 #include <OUCharting/ChartDataView.h>
 
 #include <OUCharting/ChartEntryBars.h>
-//#include <OUCharting/ChartEntryMark.h>
+#include <OUCharting/ChartEntryMark.h>
 #include <OUCharting/ChartEntryVolume.h>
+
+#include <TFTimeSeries//TimeSeries.h>
 
 class DailyBarModel
 {
@@ -43,6 +45,8 @@ public:
 
   ou::ChartDataView* GetChartDataView() { return &m_dvChart; }
 
+  ou::ChartEntryMark& Statistics() { return m_ceStatistics; }
+
 protected:
 private:
 
@@ -50,8 +54,12 @@ private:
 
   ou::ChartDataView m_dvChart; // the data
 
+  ou::tf::Bars m_barsHistory;
+
   ou::ChartEntryBars m_cePriceBars;
   ou::ChartEntryVolume m_ceVolume;
+
+  ou::ChartEntryMark m_ceStatistics;
 
   void HandleBarCompletionPrice( const ou::tf::Bar& );
 

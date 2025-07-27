@@ -439,6 +439,7 @@ void InstrumentViews::BuildSessionBarModel( Instrument& instrument ) {
 // note: makes use of sdm.IsWatching to be single entry here
 void InstrumentViews::BuildDailyBarModel( Instrument& instrument ) {
   const std::string& sIQFeedSymbolName( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
+  BOOST_LOG_TRIVIAL(info) << "statistics for " << sIQFeedSymbolName;
   m_pBarHistory->Set(
     [&instrument]( const ou::tf::Bar& bar ){ // fHistory_Bar_t
       instrument.dateLastDailyBar = bar.DateTime().date();
@@ -448,7 +449,7 @@ void InstrumentViews::BuildDailyBarModel( Instrument& instrument ) {
       instrument.dbm.OnHistoryDone();
       BuildPivotModel( instrument );
   } );
-  m_pBarHistory->RequestNEndOfDay( sIQFeedSymbolName, 20 /* days */ );
+  m_pBarHistory->RequestNEndOfDay( sIQFeedSymbolName, 200 /* days */ );
 }
 
 void InstrumentViews::BuildPivotModel( Instrument& instrument ) {
