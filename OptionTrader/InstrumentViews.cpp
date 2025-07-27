@@ -95,6 +95,15 @@ void InstrumentViews::CreateControls() {
   wxBoxSizer* itemBoxSizer1 = new wxBoxSizer(wxHORIZONTAL);
   itemPanel1->SetSizer( itemBoxSizer1 );
 
+  wxArrayString m_lbTagsStrings;
+  m_clbTags = new wxCheckListBox(
+    itemPanel1, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+    m_lbTagsStrings, wxLB_MULTIPLE|wxLB_EXTENDED|wxLB_NEEDED_SB //|wxLB_SORT
+  );
+  itemBoxSizer1->Add( m_clbTags, 0, wxGROW|wxALL, 1 );
+  m_clbTags->SetMinClientSize( wxSize( 150, -1 ) );
+  m_clbTags->Bind( wxEVT_CHECKLISTBOX, &InstrumentViews::HandleCheckListBoxEvent, this );
+
   m_pTreeCtrl = new wxTreeCtrl( itemPanel1, ID_TREECTRL, wxDefaultPosition, wxDefaultSize,
     wxTR_NO_LINES | wxTR_HAS_BUTTONS /*| wxTR_LINES_AT_ROOT | wxTR_HIDE_ROOT*/ | wxTR_SINGLE /*| wxTR_TWIST_BUTTONS*/ );
   m_pTreeCtrl->Bind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &InstrumentViews::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
@@ -247,37 +256,7 @@ void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
     instrument.Set( m_fBuildWatch( pInstrument ) );
     m_pOptionEngine->RegisterUnderlying( instrument.pWatch );
 
-    instrument.pti = m_pRootTreeItem->AppendChild(
-      sNameGeneric,
-      [this,&instrument,&sNameGeneric,&sNameIQFeed]( ou::tf::TreeItem* pti ){ // fClick_t
-        //m_pWinChartView_session->SetLive_trail(); // todo: revert to this after testing
-        m_pWinChartView_session->SetLive_review();
-        m_pWinChartView_session->SetChartDataView( instrument.sbm.GetChartDataView() );
-
-        m_pWinChartView_daily->SetLive_review();
-        m_pWinChartView_daily->SetChartDataView( instrument.dbm.GetChartDataView() );
-
-        if ( instrument.sbm.IsWatching() ) {}
-        else {
-          BuildDailyBarModel( instrument );
-        }
-      },
-      [this,iterInstrument]( ou::tf::TreeItem* pti ){ // fOnBuildPopup_t
-        pti->NewMenu();
-        pti->AppendMenuItem(
-          "option chain",
-          [this,iterInstrument]( ou::tf::TreeItem* pti ){
-            BuildOptionChains( iterInstrument );
-          } );
-      }
-    );
-
-    m_pRootTreeItem->Expand();
-    SizeTreeCtrl();
-
-    m_pRootTreeItem->SortChildren();
-
-    SizeTreeCtrl();
+    AddInstrumentToTree( instrument );
 
   }
   else {
@@ -286,14 +265,116 @@ void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
 
 }
 
-void InstrumentViews::BuildOptionChains( mapInstrument_t::iterator iterInstrumentUnderlying ) {
+void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
 
-  Instrument& instrumentUnderlying( iterInstrumentUnderlying->second );
+  const std::string& sNameGeneric( instrument.pInstrument->GetInstrumentName() );
+
+  instrument.pti = m_pRootTreeItem->AppendChild(
+    sNameGeneric,
+    [this,&instrument,&sNameGeneric]( ou::tf::TreeItem* pti ){ // fClick_t
+      //m_pWinChartView_session->SetLive_trail(); // todo: revert to this after testing
+      m_pWinChartView_session->SetLive_review();
+      m_pWinChartView_session->SetChartDataView( instrument.sbm.GetChartDataView() );
+
+      m_pWinChartView_daily->SetLive_review();
+      m_pWinChartView_daily->SetChartDataView( instrument.dbm.GetChartDataView() );
+
+      if ( instrument.sbm.IsWatching() ) {}
+      else {
+        BuildDailyBarModel( instrument );
+      }
+    },
+    [this,&instrument]( ou::tf::TreeItem* pti ){ // fOnBuildPopup_t
+      pti->NewMenu();
+      pti->AppendMenuItem(
+        "option chain",
+        [this,&instrument]( ou::tf::TreeItem* pti ){
+          BuildOptionChains( instrument );
+        } );
+      pti->AppendMenuItem(
+        "Add Tag",
+        [this,&instrument]( ou::tf::TreeItem* pti ){
+          wxTextEntryDialog dialog( this, "Tag Name:", "Add Tag" );
+          //dialog->ForceUpper(); // prints charters in reverse
+          if ( wxID_OK == dialog.ShowModal() ) {
+            //const std::string& sSymbolName( instrument.pInstrument->GetInstrumentName( ) );
+            const std::string& sNameIQFeed( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
+            std::string sTag = dialog.GetValue().Upper();
+            if ( 0 < sTag.size() ) {
+              AddTag( sTag, sNameIQFeed );
+              //CallAfter(
+              //  [this](){
+              //    FilterByTag();
+              //} );
+            }
+          }
+        } );
+      pti->AppendMenuItem(
+        "Delete Tag",
+        [this,&instrument]( ou::tf::TreeItem* pti ){
+          wxTextEntryDialog dialog( this, "Tag Name:", "Delete Tag" );
+          //dialog->ForceUpper(); // prints charters in reverse
+          if ( wxID_OK == dialog.ShowModal() ) {
+            //const std::string& sSymbolName( instrument.pInstrument->GetInstrumentName( ) );
+            const std::string& sNameIQFeed( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
+            std::string sTag = dialog.GetValue().Upper();
+            if ( 0 < sTag.size() ) {
+              DelTag( sTag, sNameIQFeed );
+              //CallAfter(
+              //  [this](){
+              //    FilterByTag();
+              //} );
+            }
+          }
+        } );
+    }
+  );
+
+  m_pRootTreeItem->Expand();
+  SizeTreeCtrl();
+
+  m_pRootTreeItem->SortChildren();
+
+  //SizeTreeCtrl();
+
+}
+
+void InstrumentViews::AddTag( const TagSymbolMap::sTag_t& sTag, const TagSymbolMap::sSymbol_t& sSymbol ) {
+
+  m_TagSymbolMap.AddTag(
+    sTag, sSymbol,
+    [this]( const TagSymbolMap::sTag_t& sTag ){
+      wxArrayString rTag;
+      rTag.Add( sTag );
+      CallAfter(
+        [this,rTag_=std::move(rTag)](){
+          m_clbTags->InsertItems( rTag_, 0 );
+        } );
+    } );
+
+}
+
+void InstrumentViews::DelTag( const TagSymbolMap::sTag_t& sTag, const TagSymbolMap::sSymbol_t& sSymbol ) {
+
+  m_TagSymbolMap.DelTag(
+    sTag, sSymbol,
+    [this]( const TagSymbolMap::sTag_t& sTag ){
+      CallAfter(
+        [this,sTag](){
+          int n = m_clbTags->FindString( sTag );
+          m_clbTags->Delete( n );
+        } );
+    } );
+
+}
+
+void InstrumentViews::BuildOptionChains( Instrument& instrumentUnderlying ) {
+
   const std::string& sNameGeneric( instrumentUnderlying.pInstrument->GetInstrumentName() );
   const std::string& sNameIQFeed(  instrumentUnderlying.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
 
   auto fProcessOptionList =
-    [this,&sNameGeneric,iterInstrumentUnderlying]( const ou::tf::iqfeed::OptionChainQuery::OptionList& list ){
+    [this,&sNameGeneric,&instrumentUnderlying]( const ou::tf::iqfeed::OptionChainQuery::OptionList& list ){
       auto nDownCount( list.vSymbol.size() );
       BOOST_LOG_TRIVIAL(info) << "chain request " << sNameGeneric << " has " << nDownCount << " options";
 
@@ -302,12 +383,11 @@ void InstrumentViews::BuildOptionChains( mapInstrument_t::iterator iterInstrumen
         const bool bLastOne( 0 == nDownCount );
         m_pComposeInstrument->Compose(
           sIQFeedSymbolName,
-          [this, bLastOne, iterInstrumentUnderlying]( pInstrument_t pInstrumentOption, bool bConstructed ){
+          [this, bLastOne, &instrumentUnderlying]( pInstrument_t pInstrumentOption, bool bConstructed ){
             if ( bConstructed ) {
               ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
               im.Register( pInstrumentOption );  // is a CallAfter required, or can this run in a thread?
             }
-            Instrument& instrumentUnderlying( iterInstrumentUnderlying->second );
             mapChains_t::iterator iterChains = ou::tf::option::GetChain( instrumentUnderlying.mapChains, pInstrumentOption );
             assert( instrumentUnderlying.mapChains.end() != iterChains );
             chain_t& chain( iterChains->second );
@@ -319,8 +399,8 @@ void InstrumentViews::BuildOptionChains( mapInstrument_t::iterator iterInstrumen
 
             if ( bLastOne ) {
               CallAfter(
-                [this,iterInstrumentUnderlying](){
-                  PresentOptionChains( iterInstrumentUnderlying );
+                [this, &instrumentUnderlying](){
+                  PresentOptionChains( instrumentUnderlying );
                 } );
             }
           }
@@ -353,8 +433,7 @@ void InstrumentViews::BuildOptionChains( mapInstrument_t::iterator iterInstrumen
 
 }
 
-void InstrumentViews::PresentOptionChains( mapInstrument_t::iterator iterInstrumentUnderlying ) {
-  Instrument& underlying( iterInstrumentUnderlying->second );
+void InstrumentViews::PresentOptionChains( Instrument& underlying ) {
   for ( mapChains_t::value_type& vtChain: underlying.mapChains ) {
     const std::string sExpiry( ou::tf::Instrument::BuildDate( vtChain.first ) );
 
@@ -505,7 +584,57 @@ void InstrumentViews::SizeTreeCtrl() {
   GetParent()->Layout();
 }
 
+void InstrumentViews::HandleCheckListBoxEvent( wxCommandEvent& event ) {
+  auto id = event.GetSelection();
+  bool b( m_clbTags->IsChecked( id ) );
+  //std::cout << "selection " << id << ',' << b << std::endl;
+  FilterByTag();
+  event.Skip();
+}
+
+void InstrumentViews::FilterByTag() {
+
+  m_pRootTreeItem->DeleteChildren();
+
+  wxArrayInt rChecked;
+  unsigned int nChecked = m_clbTags->GetCheckedItems( rChecked );
+
+  if ( 0 == nChecked ) { // show all
+    for ( mapInstrument_t::value_type& vt: m_mapInstrument ) {
+      //AddSymbolToTree( vt.first, m_pRootTreeItem );
+      AddInstrumentToTree( vt.second );
+    }
+  }
+  else { // show subset
+
+    using sTag_t = TagSymbolMap::sTag_t;
+    using sSymbol_t = TagSymbolMap::sSymbol_t;
+
+    using setTag_t = std::set<sTag_t>;
+    setTag_t setTag;
+
+    for ( wxArrayInt::value_type vt: rChecked ) {
+      const sTag_t sTag( m_clbTags->GetString( vt ) );
+      setTag.insert( sTag );
+    }
+
+    m_TagSymbolMap.SymbolListByTagSet(
+      setTag,
+      [this]( const sSymbol_t& sSymbol ){
+        mapInstrument_t::iterator iterSymbolInfo = m_mapInstrument.find( sSymbol );
+        if ( m_mapInstrument.end() == iterSymbolInfo ) {
+          BOOST_LOG_TRIVIAL(error) << "FilterByTag symbol " << sSymbol << " not found";
+        }
+        else {
+          AddInstrumentToTree( iterSymbolInfo->second );
+        }
+      } );
+  }
+}
+
 void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
+
+  m_clbTags->Unbind( wxEVT_CHECKLISTBOX, &InstrumentViews::HandleCheckListBoxEvent, this );
 
   if ( m_timerRefresh.IsRunning() ) {
     m_timerRefresh.Stop();

@@ -29,12 +29,14 @@
 
 #include <wx/panel.h>
 #include <wx/timer.h>
+#include <wx/checklst.h>
 
 #include "Common.hpp"
 #include "OptionChainView.hpp"
 #include "SessionBarModel.hpp"
 #include "DailyBarModel.hpp"
 #include "PivotModel.hpp"
+#include "TagSymbolMap.hpp"
 
 #define SYMBOL_INSTRUMENTVIEWS_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_INSTRUMENTVIEWS_TITLE _("Instrument Views")
@@ -44,6 +46,9 @@
 
 class wxTreeCtrl;
 class wxTreeEvent;
+
+class wxCommandEvent;
+
 class OptionChainModel;
 
 namespace ou { // One Unified
@@ -112,6 +117,8 @@ private:
 
   wxTimer m_timerRefresh;
 
+  wxCheckListBox* m_clbTags;
+
   wxTreeCtrl* m_pTreeCtrl;
   TreeItem* m_pRootTreeItem; // // root of custom tree items
 
@@ -167,8 +174,11 @@ private:
     }
   };
 
+  // key is sIQFeedSymbolName
   using mapInstrument_t = std::unordered_map<std::string, Instrument>;
   mapInstrument_t m_mapInstrument;
+
+  TagSymbolMap m_TagSymbolMap;
 
   wxWindow* m_pcurView; // OptionChainView, LiveView, BarChart, ... show/hide current
   OptionChainView* m_pOptionChainView; // only one OptionChainView required, should be able to simply swap models
@@ -185,15 +195,22 @@ private:
   void DialogSymbol();
   void BuildInstrument( const std::string& );
   void AddInstrument( pInstrument_t& );
-  void BuildOptionChains( mapInstrument_t::iterator );
-  void PresentOptionChains( mapInstrument_t::iterator );
+  void BuildOptionChains( Instrument& );
+  void PresentOptionChains( Instrument& );
   void OptionChainView_select();
+
+  void AddInstrumentToTree( Instrument& );
 
   void BuildSessionBarModel( Instrument& );
   void BuildDailyBarModel( Instrument& );
   void BuildPivotModel( Instrument& );
 
   void HandleTimer( wxTimerEvent& );
+
+  void AddTag( const TagSymbolMap::sTag_t&, const TagSymbolMap::sSymbol_t& );
+  void DelTag( const TagSymbolMap::sTag_t&, const TagSymbolMap::sSymbol_t& );
+  void FilterByTag();
+  void HandleCheckListBoxEvent( wxCommandEvent& );
 
   wxBitmap GetBitmapResource( const wxString& name );
   static bool ShowToolTips() { return true; };
@@ -205,6 +222,7 @@ private:
       ar & vt.first;
     }
     ar & *m_pOptionChainView;
+    ar & m_TagSymbolMap;
   }
 
   template<typename Archive>
@@ -220,6 +238,17 @@ private:
     if ( 2 <= version ) {
       ar & *m_pOptionChainView;
     }
+    if ( 3 <= version ) {
+      ar & m_TagSymbolMap;
+      wxArrayString rTag;
+      m_TagSymbolMap.TagList(
+        [this,&rTag]( const TagSymbolMap::sTag_t& sTag ){
+          rTag.Add( sTag );
+        } );
+      if ( 0 < rTag.size() ) {
+        m_clbTags->InsertItems( rTag, 0 );
+      }
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
@@ -229,4 +258,4 @@ private:
 } // namespace tf
 } // namespace ou
 
-BOOST_CLASS_VERSION(ou::tf::InstrumentViews, 2)
+BOOST_CLASS_VERSION(ou::tf::InstrumentViews, 3)
