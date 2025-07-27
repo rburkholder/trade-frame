@@ -42,7 +42,7 @@ DailyBarModel::~DailyBarModel() {
 void DailyBarModel::OnHistoryBar( const ou::tf::Bar& bar_ ) {
   ptime dtUtc = ou::TimeSource::ConvertEasternToUtc( bar_.DateTime() );
   ou::tf::Bar bar( dtUtc, bar_.Open(), bar_.High(), bar_.Low(), bar_.Close(), bar_.Volume( ) );
-  std::cout << "bar close " << bar.Close() << "@" << bar_.DateTime() << "(est)/" << dtUtc << "(utc)" << std::endl;
+  //std::cout << "bar close " << bar.Close() << "@" << bar_.DateTime() << "(est)/" << dtUtc << "(utc)" << std::endl;
   HandleBarCompletionPrice( bar );
 }
 
