@@ -116,3 +116,19 @@ void TagSymbolMap::SymbolListByTagSet( const setTag_t& setTag, fSymbol_t&& fSymb
     }
 
 }
+
+void TagSymbolMap::TagList( fTag_t&& fTag ) {
+  sTag_t sTag;
+
+  using setTagSymbol_t = mmapTagSymbol_t::index<ixTagSymbol>::type;
+  const setTagSymbol_t& index( m_mmapTagSymbol.get<ixTagSymbol>() );
+  setTagSymbol_t::iterator iterTagSymbol = index.begin();
+  while ( index.end() != iterTagSymbol ) {
+    if ( sTag != iterTagSymbol->sTag ) {
+      sTag = iterTagSymbol->sTag;
+      fTag( sTag );
+    }
+    ++iterTagSymbol;
+  }
+
+}

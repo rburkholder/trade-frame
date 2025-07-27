@@ -48,13 +48,14 @@ public:
 
   void AddTag( const sTag_t&, const sSymbol_t&, fTag_t&& );
   void DelTag( const sTag_t&, const sSymbol_t&, fTag_t&& );
-  void FilterByTag();
 
   void SymbolListByTag( const sTag_t&, fSymbol_t&& ) const;
   void TagListBySymbol( const sSymbol_t&, fTag_t&& ) const;
 
   using setTag_t = std::set<sTag_t>;
   void SymbolListByTagSet( const setTag_t&, fSymbol_t&& ) const;
+
+  void TagList( fTag_t&& );
 
 protected:
 private:
