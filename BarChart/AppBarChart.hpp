@@ -62,7 +62,7 @@ class wxCheckListBox;
 class wxCommandEvent;
 
 class FrameMain;
-class PanelSymbolInfo;
+class PanelDividenNotes;
 
 namespace ou {
 namespace tf {
@@ -86,8 +86,8 @@ private:
   FrameMain* m_pFrameMain;
   ou::tf::PanelFinancialChart* m_pPanelFinancialChart;
 
-  wxFrame* m_pFrameSymbolInfo;
-  PanelSymbolInfo* m_pPanelSymbolInfo;
+  wxFrame* m_pFrameDividendNotes;
+  PanelDividenNotes* m_pPanelDividenNotes;
 
   wxCheckListBox* m_clbTags;
 
@@ -259,11 +259,11 @@ private:
     ar & *m_pFrameMain;
     ar & *m_pPanelFinancialChart;
 
-    wxSize size = m_pFrameSymbolInfo->GetSize();
+    wxSize size = m_pFrameDividendNotes->GetSize();
     ar & size.x;
     ar & size.y;
 
-    wxPoint point = m_pFrameSymbolInfo->GetPosition();
+    wxPoint point = m_pFrameDividendNotes->GetPosition();
     ar & point.x;
     ar & point.y;
 
@@ -292,12 +292,12 @@ private:
       ar & x;
       ar & y;
       wxSize size( x, y );
-      m_pFrameSymbolInfo->SetSize( size );
+      m_pFrameDividendNotes->SetSize( size );
 
       ar & x;
       ar & y;
       wxPoint point( x, y );
-      m_pFrameSymbolInfo->SetPosition( point );
+      m_pFrameDividendNotes->SetPosition( point );
     }
 
     switch ( version ) {

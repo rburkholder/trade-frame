@@ -50,7 +50,7 @@
 #include <TFVuTrading/PanelFinancialChart.hpp>
 
 #include "AppBarChart.hpp"
-#include "PanelSymbolInfo.hpp"
+#include "PanelDividenNotes.hpp"
 
 namespace {
   static const std::string c_sAppTitle(        "Daily Bars Review" );
@@ -110,17 +110,17 @@ bool AppBarChart::OnInit() {
   //m_pwcv = new ou::tf::WinChartView( m_pFrameMain );
   //sizerFrame->Add( m_pwcv, 1,wxALL | wxEXPAND, 0 );
 
-  m_pFrameSymbolInfo
+  m_pFrameDividendNotes
     = new wxFrame( m_pFrameMain, wxID_ANY, "Symbol Info",
       wxDefaultPosition, wxDefaultSize,
       wxRESIZE_BORDER | wxFRAME_FLOAT_ON_PARENT
     );
   wxBoxSizer* sizerFrameSymbolInfo = new wxBoxSizer( wxHORIZONTAL );
-  m_pFrameSymbolInfo->SetSizer( sizerFrameSymbolInfo );
-  m_pPanelSymbolInfo = new PanelSymbolInfo( m_pFrameSymbolInfo, wxID_ANY );
-  sizerFrameSymbolInfo->Add( m_pPanelSymbolInfo, 1, wxGROW|wxALL, 0 );
-  m_pFrameSymbolInfo->Layout();
-  m_pFrameSymbolInfo->Show();
+  m_pFrameDividendNotes->SetSizer( sizerFrameSymbolInfo );
+  m_pPanelDividenNotes = new PanelDividenNotes( m_pFrameDividendNotes, wxID_ANY );
+  sizerFrameSymbolInfo->Add( m_pPanelDividenNotes, 1, wxGROW|wxALL, 0 );
+  m_pFrameDividendNotes->Layout();
+  m_pFrameDividendNotes->Show();
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppBarChart::OnClose, this );  // start close of windows and controls
 
@@ -305,7 +305,7 @@ void AppBarChart::OnSymbolClick( mapSymbolInfo_t::iterator iterSymbolInfo ) {
     rTag.Add( iterSymbol->sTag );
     ++iterSymbol;
   }
-  m_pPanelSymbolInfo->SetTags( rTag );
+  m_pPanelDividenNotes->SetTags( rTag );
 }
 
 void AppBarChart::AddSymbolToTree( const std::string& sSecurityName, ou::tf::TreeItem* pti ) {
@@ -437,6 +437,7 @@ void AppBarChart::FilterByTag() {
         ++iterTag;
       }
     }
+
     for ( const setSymbol_t::value_type& vt: setSymbol ) {
       mapSymbolInfo_t::iterator iterSymbolInfo = m_mapSymbolInfo.find( vt );
       if ( m_mapSymbolInfo.end() == iterSymbolInfo ) {
@@ -467,7 +468,7 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
       //<< "," << ki.sCompanyName
       //<< std::endl;
 
-      PanelSymbolInfo::Fields fields;
+      PanelDividenNotes::Fields fields;
       fields.sYield =  fmt::format( "{:.{}f}", ki.dblYield, 2 );
       fields.sLast =  fmt::format( "{:.{}f}", ki.dblLast, 2 );
       fields.sAmount =  fmt::format( "{:.{}f}", ki.dblAmount, 2 );
@@ -494,8 +495,8 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
         };
       CallAfter(
         [this,fields_=std::move(fields)]() { // note: the std::move is not being used - CallAfter has a reference parameter
-          m_pFrameSymbolInfo->SetTitle( "Symbol Info - " + fields_.sSymbol );
-          m_pPanelSymbolInfo->SetFields( fields_ );
+          m_pFrameDividendNotes->SetTitle( "Symbol Info - " + fields_.sSymbol );
+          m_pPanelDividenNotes->SetFields( fields_ );
         } );
 
     };

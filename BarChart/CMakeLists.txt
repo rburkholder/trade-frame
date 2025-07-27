@@ -25,14 +25,14 @@ set(
   file_h
     AppBarChart.hpp
     Config.hpp
-    PanelSymbolInfo.hpp
+    PanelDividenNotes.hpp
   )
 
 set(
   file_cpp
     AppBarChart.cpp
     Config.cpp
-    PanelSymbolInfo.cpp
+    PanelDividenNotes.cpp
   )
 
 add_executable(

@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    PanelSymbolInfo.hpp
+ * File:    PanelDividenNotes.hpp
  * Author:  raymond@burkholder.net
  * Project: Dividend
  * Created: April 27, 2025 12:47:19
@@ -34,16 +34,16 @@ class wxListBox;
 class wxTextCtrl;
 class wxStaticText;
 
-class PanelSymbolInfo: public wxPanel {
+class PanelDividenNotes: public wxPanel {
 public:
 
-PanelSymbolInfo();
-PanelSymbolInfo(
+PanelDividenNotes();
+PanelDividenNotes(
     wxWindow* parent, wxWindowID id = SYMBOL_PANEL_SymbolInfo_IDNAME,
     const wxPoint& pos = SYMBOL_PANEL_SymbolInfo_POSITION,
     const wxSize& size = SYMBOL_PANEL_SymbolInfo_SIZE,
     long style = SYMBOL_PANEL_SymbolInfo_STYLE );
-  virtual ~PanelSymbolInfo();
+  virtual ~PanelDividenNotes();
 
   bool Create( wxWindow* parent,
     wxWindowID id = SYMBOL_PANEL_SymbolInfo_IDNAME,
