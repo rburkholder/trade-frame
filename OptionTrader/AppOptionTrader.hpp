@@ -25,6 +25,7 @@
 #include <boost/serialization/split_member.hpp>
 
 #include <wx/app.h>
+#include <wx/frame.h>
 
 #include <TFTrading/DBOps.h>
 #include <TFTrading/ComposeInstrument.hpp>
@@ -42,9 +43,10 @@ class FrameMain;
 
 namespace ou {
 namespace tf {
-  class WinChartView;
   class FrameControls;
   class InstrumentViews;
+  class PanelDividenNotes;
+  class WinChartView;
 namespace iqfeed {
   class BarHistory;
 }
@@ -67,6 +69,9 @@ private:
 
   FrameMain* m_pFrameMain;
   ou::tf::InstrumentViews* m_pInstrumentViews;
+
+  wxFrame* m_pFrameDividendNotes;  // todo:  change to FrameControls
+  ou::tf::PanelDividenNotes* m_pPanelDividenNotes;
 
   ou::tf::FrameControls* m_pFrameWinChartView_session;
   ou::tf::WinChartView* m_pWinChartView_session;
@@ -108,7 +113,15 @@ private:
     ar & *m_pFrameWinChartView_session;
     ar & *m_pFrameWinChartView_daily;
     ar & *m_pInstrumentViews;
-  }
+
+    wxSize size = m_pFrameDividendNotes->GetSize();
+    ar & size.x;
+    ar & size.y;
+
+    wxPoint point = m_pFrameDividendNotes->GetPosition();
+    ar & point.x;
+    ar & point.y;
+}
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
@@ -123,12 +136,26 @@ private:
 
     assert( m_pInstrumentViews );
     ar & *m_pInstrumentViews;
+
+    if ( 2 <= version ) {
+      int x, y;
+
+      ar & x;
+      ar & y;
+      wxSize size( x, y );
+      m_pFrameDividendNotes->SetSize( size );
+
+      ar & x;
+      ar & y;
+      wxPoint point( x, y );
+      m_pFrameDividendNotes->SetPosition( point );
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
-BOOST_CLASS_VERSION(AppOptionTrader, 1)
+BOOST_CLASS_VERSION(AppOptionTrader, 2)
 
 DECLARE_APP(AppOptionTrader)

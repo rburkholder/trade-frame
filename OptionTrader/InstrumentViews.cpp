@@ -21,6 +21,8 @@
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <fmt/core.h>
+
 #include <wx/sizer.h>
 #include <wx/textdlg.h>
 #include <wx/treectrl.h>
@@ -171,6 +173,7 @@ void InstrumentViews::Set(
 , pBarHistory_t&& pBarHistory
 , ou::tf::WinChartView* pWinChartView_session
 , ou::tf::WinChartView* pWinChartView_daily
+, fUpdateDividendFields_t&& fUpdateDividendFields
 ) {
 
   assert( fBuildWatch );
@@ -182,6 +185,8 @@ void InstrumentViews::Set(
   assert( pWinChartView_session );
   assert( pWinChartView_daily );
 
+  assert( fUpdateDividendFields );
+
   m_fBuildWatch = std::move( fBuildWatch );
   m_fBuildOption = std::move( fBuildOption );
   m_pOptionEngine = pOptionEngine;
@@ -191,11 +196,12 @@ void InstrumentViews::Set(
   m_pWinChartView_session = pWinChartView_session;
   m_pWinChartView_daily = pWinChartView_daily;
 
+  m_fUpdateDividendFields = std::move( fUpdateDividendFields );
+
   m_pComposeInstrument = pComposeInstrument;
-  for ( const setInstrumentName_t::value_type& vt: m_setInstrumentName ) {
-    BuildInstrument( vt );
+  for ( const mapStateCache_t::value_type& vt: m_mapStateCache ) {
+    BuildInstrument( vt.first );
   }
-  m_setInstrumentName.clear();
 }
 
 void InstrumentViews::DialogSymbol() {
@@ -252,8 +258,15 @@ void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
     mapInstrument_t::iterator iterInstrument = result.first;
     Instrument& instrument( iterInstrument->second );
 
+    mapStateCache_t::iterator iterCache = m_mapStateCache.find( sNameIQFeed );
+    assert( m_mapStateCache.end() != iterCache );
+    instrument.notesDividend.sNotes = iterCache->second.sDvidendNotes;
+    m_mapStateCache.erase( iterCache );
+
     instrument.pInstrument = pInstrument;
-    instrument.Set( m_fBuildWatch( pInstrument ) );
+    pWatch_t pWatch = m_fBuildWatch( pInstrument );
+    instrument.Set( pWatch );
+
     m_pOptionEngine->RegisterUnderlying( instrument.pWatch );
 
     AddInstrumentToTree( instrument );
@@ -263,6 +276,58 @@ void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
     BOOST_LOG_TRIVIAL(error) << "symbol/instrument not found";
   }
 
+}
+
+void InstrumentViews::UpdateDividendNotes( Instrument& instrument ) {
+
+  const std::string& sNameGeneric( instrument.pInstrument->GetInstrumentName() );
+  const std::string& sNameIQFeed(  instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
+
+  DividendNotes& dn( instrument.notesDividend );
+
+  //std::cout
+  //<< iterSymbolInfo->first
+  //<< ",yld=" << ki.dblYield
+  //<< ",lst=" << ki.dblLast
+  //<< ",rate=" << ki.dblRate
+  //<< "," << ki.sCompanyName
+  //<< std::endl;
+
+  ou::tf::PanelDividenNotes::Fields fields;
+  fields.sYield  = fmt::format( "{:.{}f}", dn.dblYield, 2 );
+  fields.sLast   = fmt::format( "{:.{}f}", dn.dblLast, 2 );
+  fields.sAmount = fmt::format( "{:.{}f}", dn.dblAmount, 2 );
+  fields.sRate   = fmt::format( "{:.{}f}", dn.dblRate, 2 );
+
+  if ( 0.0 < dn.dblYield ) {
+    fields.sExDiv = ou::tf::Instrument::BuildDate( dn.dateExDividend );
+    fields.sPayed = ou::tf::Instrument::BuildDate( dn.datePayed );
+    }
+  else {
+    fields.sExDiv = std::string();
+    fields.sPayed = std::string();
+    }
+  fields.sNotes = dn.sNotes;
+  fields.sSymbol = sNameGeneric;
+  //fields.sName = boost::lexical_cast<std::string>( dn.sCompanyName );
+  fields.sName = dn.sCompanyName;
+  fields.fBtnUndo =
+    [&instrument]()->std::string{
+      return instrument.notesDividend.sNotes;
+    };
+  fields.fBtnSave =
+    [&instrument]( const std::string& sNotes ){
+      instrument.notesDividend.sNotes = sNotes;
+    };
+
+  wxArrayString rTag;
+  m_TagSymbolMap.TagListBySymbol(
+    sNameIQFeed,
+    [this,&rTag]( const TagSymbolMap::sTag_t& sTag ){
+      rTag.Add( sTag );
+    } );
+
+  m_fUpdateDividendFields( fields, rTag );
 }
 
 void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
@@ -278,6 +343,8 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
 
       m_pWinChartView_daily->SetLive_review();
       m_pWinChartView_daily->SetChartDataView( instrument.dbm.GetChartDataView() );
+
+      UpdateDividendNotes( instrument );
 
       if ( instrument.sbm.IsWatching() ) {}
       else {

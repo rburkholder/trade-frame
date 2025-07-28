@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <set>
 #include <memory>
 #include <unordered_map>
 
@@ -30,6 +29,8 @@
 #include <wx/panel.h>
 #include <wx/timer.h>
 #include <wx/checklst.h>
+
+#include <TFVuTrading/PanelDividenNotes.hpp>
 
 #include "Common.hpp"
 #include "OptionChainView.hpp"
@@ -96,6 +97,8 @@ public:
 
   using pBarHistory_t = std::unique_ptr<ou::tf::iqfeed::BarHistory>;
 
+  using fUpdateDividendFields_t = std::function<void( const ou::tf::PanelDividenNotes::Fields&, const wxArrayString& )>;
+
   void Set(
     pComposeInstrument_t&
   , fBuildWatch_t&&
@@ -104,6 +107,7 @@ public:
   , pBarHistory_t&&
   , ou::tf::WinChartView* pWinChartView_session
   , ou::tf::WinChartView* pWinChartView_daily
+  , fUpdateDividendFields_t&&
   );
 
 protected:
@@ -122,8 +126,16 @@ private:
   wxTreeCtrl* m_pTreeCtrl;
   TreeItem* m_pRootTreeItem; // // root of custom tree items
 
-  using setInstrumentName_t = std::set<std::string>;
-  setInstrumentName_t m_setInstrumentName;
+  struct StateCache {
+    //std::string sIQFeedSymbolName;
+    std::string sDvidendNotes;
+    StateCache() {}
+    StateCache( StateCache&& rhs )
+    : sDvidendNotes( std::move( rhs.sDvidendNotes ) )
+    {}
+  };
+  using mapStateCache_t = std::unordered_map<std::string,StateCache>; // key = sIQFeedSymbolName
+  mapStateCache_t m_mapStateCache;
 
   pComposeInstrument_t m_pComposeInstrument;  // IQFeed only, or IQFeed & IB
 
@@ -137,6 +149,49 @@ private:
   ou::tf::WinChartView* m_pWinChartView_session;
   ou::tf::WinChartView* m_pWinChartView_daily;
 
+  fUpdateDividendFields_t m_fUpdateDividendFields;
+
+  struct DividendNotes {
+
+    bool bLoaded;  // todo:  is this necessary?
+
+    double dblLast;
+    double dblRate;
+    double dblYield;
+    double dblAmount;
+
+    std::string sCompanyName;
+    std::string sNotes;
+
+    boost::gregorian::date datePayed;
+    boost::gregorian::date dateExDividend;
+
+    DividendNotes()
+    : bLoaded( false )
+    , dblLast {}
+    , dblRate {}
+    , dblYield {}
+    , dblAmount {}
+    {}
+
+    using Fundamentals = ou::tf::Watch::Fundamentals;
+    void OnFundamentals( const Fundamentals& fundamentals ) {
+      dblRate = fundamentals.dblDividendRate;
+      dblYield = fundamentals.dblDividendYield;
+      dblAmount = fundamentals.dblDividendAmount;
+      sCompanyName = fundamentals.sCompanyName;
+      dateExDividend = fundamentals.dateExDividend;
+      datePayed = fundamentals.datePayed;
+    }
+
+    using Summary = ou::tf::Watch::Summary;
+    void OnSummary( const Summary& summary ) {
+      dblLast = summary.dblTrade;
+      //dblLast = summary.dblOpen;
+    }
+
+  };
+
   struct Instrument {
 
     ou::tf::TreeItem* pti;
@@ -147,6 +202,7 @@ private:
     SessionBarModel sbm;
     DailyBarModel dbm;
     PivotModel pm;
+    DividendNotes notesDividend;
 
     unsigned int counter;
     boost::gregorian::date dateLastDailyBar;
@@ -159,6 +215,8 @@ private:
     void Set( pWatch_t pWatch_ ) {
       assert( !pWatch );
       pWatch = pWatch_;
+      pWatch->OnFundamentals.Add( MakeDelegate( &notesDividend, &DividendNotes::OnFundamentals ) );
+      pWatch->OnSummary.Add( MakeDelegate( &notesDividend, &DividendNotes::OnSummary ) ) ;
       pWatch->StartWatch();
       sbm.Set( pWatch );
       sbm.Set( pm.Pivots(), dbm.Statistics() );
@@ -167,6 +225,8 @@ private:
     ~Instrument() {
       if ( pWatch ) {
         pWatch->StopWatch();
+        pWatch->OnFundamentals.Remove( MakeDelegate( &notesDividend, &DividendNotes::OnFundamentals ) );
+        pWatch->OnSummary.Remove( MakeDelegate( &notesDividend, &DividendNotes::OnSummary ) ) ;
         pWatch.reset();
       }
       pInstrument.reset();
@@ -195,11 +255,12 @@ private:
   void DialogSymbol();
   void BuildInstrument( const std::string& );
   void AddInstrument( pInstrument_t& );
+  void AddInstrumentToTree( Instrument& );
   void BuildOptionChains( Instrument& );
   void PresentOptionChains( Instrument& );
   void OptionChainView_select();
 
-  void AddInstrumentToTree( Instrument& );
+  void UpdateDividendNotes( Instrument& );
 
   void BuildSessionBarModel( Instrument& );
   void BuildDailyBarModel( Instrument& );
@@ -220,6 +281,7 @@ private:
     ar & m_mapInstrument.size();
     for ( const mapInstrument_t::value_type& vt: m_mapInstrument ) {
       ar & vt.first;
+      ar & vt.second.notesDividend.sNotes;
     }
     ar & *m_pOptionChainView;
     ar & m_TagSymbolMap;
@@ -231,8 +293,15 @@ private:
     ar & nNames;
     std::string sName;
     while ( 0 != nNames ) {
-      ar & sName;
-      m_setInstrumentName.insert( sName ); // process once iqfeed connected
+      std::string sIQFeedSymbolName;
+      StateCache sc;
+      ar & sIQFeedSymbolName;
+      if ( 4 <= version ) {
+        ar & sc.sDvidendNotes;
+      }
+      // todo: check for duplicates?
+      auto result = m_mapStateCache.emplace( sIQFeedSymbolName, std::move( sc ) );
+      assert( result.second );
       --nNames;
     }
     if ( 2 <= version ) {
@@ -258,4 +327,4 @@ private:
 } // namespace tf
 } // namespace ou
 
-BOOST_CLASS_VERSION(ou::tf::InstrumentViews, 3)
+BOOST_CLASS_VERSION(ou::tf::InstrumentViews, 4)

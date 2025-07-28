@@ -32,8 +32,9 @@
 #include <TFIQFeed/OptionChainQuery.h>
 
 #include <TFVuTrading/FrameMain.h>
-#include <TFVuTrading/FrameControls.h>
 #include <TFVuTrading/WinChartView.h>
+#include <TFVuTrading/FrameControls.h>
+#include <TFVuTrading/PanelDividenNotes.hpp>
 
 #include "AppOptionTrader.hpp"
 #include "InstrumentViews.hpp"
@@ -76,6 +77,18 @@ bool AppOptionTrader::OnInit() {
 
   m_pInstrumentViews = new ou::tf::InstrumentViews( m_pFrameMain );
   sizerFrame->Add( m_pInstrumentViews, 1, wxALL | wxEXPAND, 0 );
+
+  m_pFrameDividendNotes
+    = new wxFrame( m_pFrameMain, wxID_ANY, "Dividend & Trade Notes",
+      wxDefaultPosition, wxDefaultSize,
+      wxRESIZE_BORDER | wxFRAME_FLOAT_ON_PARENT
+    );
+  wxBoxSizer* sizerFrameSymbolInfo = new wxBoxSizer( wxHORIZONTAL );
+  m_pFrameDividendNotes->SetSizer( sizerFrameSymbolInfo );
+  m_pPanelDividenNotes = new ou::tf::PanelDividenNotes( m_pFrameDividendNotes, wxID_ANY );
+  sizerFrameSymbolInfo->Add( m_pPanelDividenNotes, 1, wxGROW|wxALL, 0 );
+  m_pFrameDividendNotes->Layout();
+  m_pFrameDividendNotes->Show();
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppOptionTrader::OnClose, this );  // start close of windows and controls
 
@@ -153,7 +166,12 @@ void AppOptionTrader::SetComposeInstrument() {
             m_pOptionEngine,
             std::move( m_pBarHistory ),
             m_pWinChartView_session,
-            m_pWinChartView_daily
+            m_pWinChartView_daily,
+            [this]( const ou::tf::PanelDividenNotes::Fields& fields, const wxArrayString& rTag ){
+              m_pFrameDividendNotes->SetTitle( "Symbol Info - " + fields.sSymbol );
+              m_pPanelDividenNotes->SetFields( fields );
+              m_pPanelDividenNotes->SetTags( rTag );
+            }
           );
         } );
     } );
