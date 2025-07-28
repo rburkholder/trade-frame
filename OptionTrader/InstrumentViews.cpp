@@ -293,7 +293,7 @@ void InstrumentViews::UpdateDividendNotes( Instrument& instrument ) {
   //<< "," << ki.sCompanyName
   //<< std::endl;
 
-  ou::tf::PanelDividenNotes::Fields fields;
+  ou::tf::PanelDividendNotes::Fields fields;
   fields.sYield  = fmt::format( "{:.{}f}", dn.dblYield, 2 );
   fields.sLast   = fmt::format( "{:.{}f}", dn.dblLast, 2 );
   fields.sAmount = fmt::format( "{:.{}f}", dn.dblAmount, 2 );

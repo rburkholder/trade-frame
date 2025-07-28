@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    PanelDividenNotes.cpp
+ * File:    PanelDividendNotes.cpp
  * Author:  raymond@burkholder.net
  * Project: TFVuTrading
  * Created: April 27, 2025 12:47:19
@@ -26,24 +26,24 @@
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 
-#include "PanelDividenNotes.hpp"
+#include "PanelDividendNotes.hpp"
 
 namespace ou {
 namespace tf {
 
-PanelDividenNotes::PanelDividenNotes() {
+PanelDividendNotes::PanelDividendNotes() {
   Init();
 }
 
-PanelDividenNotes::PanelDividenNotes( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
+PanelDividendNotes::PanelDividendNotes( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
   Init();
   Create( parent, id, pos, size, style );
 }
 
-PanelDividenNotes::~PanelDividenNotes() {
+PanelDividendNotes::~PanelDividendNotes() {
 }
 
-void PanelDividenNotes::Init() {
+void PanelDividendNotes::Init() {
   m_txtYield = nullptr;
   m_txtLast = nullptr;
   m_txtAmount = nullptr;
@@ -62,7 +62,7 @@ void PanelDividenNotes::Init() {
 
 }
 
-bool PanelDividenNotes::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
+bool PanelDividendNotes::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
 
   SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
   wxPanel::Create( parent, id, pos, size, style );
@@ -75,9 +75,9 @@ bool PanelDividenNotes::Create( wxWindow* parent, wxWindowID id, const wxPoint& 
   return true;
 }
 
-void PanelDividenNotes::CreateControls() {
+void PanelDividendNotes::CreateControls() {
 
-  PanelDividenNotes* itemPanel1 = this;
+  PanelDividendNotes* itemPanel1 = this;
 
   wxBoxSizer* itemBoxSizer2 = new wxBoxSizer(wxVERTICAL);
   itemPanel1->SetSizer(itemBoxSizer2);
@@ -183,16 +183,16 @@ void PanelDividenNotes::CreateControls() {
   itemBoxSizer30->Add(m_btnSave, 0, wxALIGN_CENTER_VERTICAL|wxLEFT|wxRIGHT, 2);
   m_btnDefaultBackground = m_btnSave->GetBackgroundColour();
 
-  m_btnUndo->Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelDividenNotes::OnBTNUndoClick, this );
-  m_btnSave->Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelDividenNotes::OnBTNSaveClick, this );
-  m_txtNotes->Bind( wxEVT_COMMAND_TEXT_UPDATED, &PanelDividenNotes::OnTextUpdated, this );
-  m_txtNotes->Bind( wxEVT_KILL_FOCUS, &PanelDividenNotes::OnTextFocusKilled, this );
+  m_btnUndo->Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelDividendNotes::OnBTNUndoClick, this );
+  m_btnSave->Bind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelDividendNotes::OnBTNSaveClick, this );
+  m_txtNotes->Bind( wxEVT_COMMAND_TEXT_UPDATED, &PanelDividendNotes::OnTextUpdated, this );
+  m_txtNotes->Bind( wxEVT_KILL_FOCUS, &PanelDividendNotes::OnTextFocusKilled, this );
 
-  Bind( wxEVT_CLOSE_WINDOW, &PanelDividenNotes::OnClose, this );
+  Bind( wxEVT_CLOSE_WINDOW, &PanelDividendNotes::OnClose, this );
 
 }
 
-void PanelDividenNotes::SetFields( const Fields& fields ) {
+void PanelDividendNotes::SetFields( const Fields& fields ) {
 
   m_bByFields = true;
 
@@ -210,11 +210,11 @@ void PanelDividenNotes::SetFields( const Fields& fields ) {
   m_bByFields = false;
 }
 
-void PanelDividenNotes::SetTags( const wxArrayString& rTags ) {
+void PanelDividendNotes::SetTags( const wxArrayString& rTags ) {
   m_lbTags->Set( rTags );
 }
 
-void PanelDividenNotes::OnBTNUndoClick( wxCommandEvent& event ) { // wxEVT_COMMAND_BUTTON_CLICKED
+void PanelDividendNotes::OnBTNUndoClick( wxCommandEvent& event ) { // wxEVT_COMMAND_BUTTON_CLICKED
   if ( m_fBtnUndo ) {
     m_txtNotes->SetValue( m_fBtnUndo() );
     m_txtNotes->SetBackgroundColour( m_btnDefaultBackground );
@@ -222,14 +222,14 @@ void PanelDividenNotes::OnBTNUndoClick( wxCommandEvent& event ) { // wxEVT_COMMA
   event.Skip();
 }
 
-void PanelDividenNotes::OnBTNSaveClick( wxCommandEvent& event ) { // wxEVT_COMMAND_BUTTON_CLICKED
+void PanelDividendNotes::OnBTNSaveClick( wxCommandEvent& event ) { // wxEVT_COMMAND_BUTTON_CLICKED
   const std::string sNotes( m_txtNotes->GetValue() );
   if ( m_fBtnSave ) m_fBtnSave( sNotes );
   m_btnSave->SetBackgroundColour( m_btnDefaultBackground );
   event.Skip();
 }
 
-void PanelDividenNotes::OnTextUpdated( wxCommandEvent& event ) { // wxEVT_COMMAND_TEXT_UPDATED
+void PanelDividendNotes::OnTextUpdated( wxCommandEvent& event ) { // wxEVT_COMMAND_TEXT_UPDATED
   if ( m_bByFields ) {
     m_btnSave->SetBackgroundColour( m_btnDefaultBackground );
   }
@@ -239,25 +239,25 @@ void PanelDividenNotes::OnTextUpdated( wxCommandEvent& event ) { // wxEVT_COMMAN
   event.Skip();
 }
 
-void PanelDividenNotes::OnTextFocusKilled( wxFocusEvent& event ) { // wxEVT_KILL_FOCUS
+void PanelDividendNotes::OnTextFocusKilled( wxFocusEvent& event ) { // wxEVT_KILL_FOCUS
   // save the text
   event.Skip();
 }
 
-void PanelDividenNotes::OnClose( wxCloseEvent& event ) {
-  m_btnUndo->Unbind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelDividenNotes::OnBTNUndoClick, this );
-  m_btnSave->Unbind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelDividenNotes::OnBTNSaveClick, this );
-  m_txtNotes->Unbind( wxEVT_COMMAND_TEXT_UPDATED, &PanelDividenNotes::OnTextUpdated, this );
-  m_txtNotes->Unbind( wxEVT_KILL_FOCUS, &PanelDividenNotes::OnTextFocusKilled, this );
-  Unbind( wxEVT_CLOSE_WINDOW, &PanelDividenNotes::OnClose, this );
+void PanelDividendNotes::OnClose( wxCloseEvent& event ) {
+  m_btnUndo->Unbind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelDividendNotes::OnBTNUndoClick, this );
+  m_btnSave->Unbind( wxEVT_COMMAND_BUTTON_CLICKED, &PanelDividendNotes::OnBTNSaveClick, this );
+  m_txtNotes->Unbind( wxEVT_COMMAND_TEXT_UPDATED, &PanelDividendNotes::OnTextUpdated, this );
+  m_txtNotes->Unbind( wxEVT_KILL_FOCUS, &PanelDividendNotes::OnTextFocusKilled, this );
+  Unbind( wxEVT_CLOSE_WINDOW, &PanelDividendNotes::OnClose, this );
 }
 
-wxBitmap PanelDividenNotes::GetBitmapResource( const wxString& name ) {
+wxBitmap PanelDividendNotes::GetBitmapResource( const wxString& name ) {
   wxUnusedVar(name);
   return wxNullBitmap;
 }
 
-wxIcon PanelDividenNotes::GetIconResource( const wxString& name ) {
+wxIcon PanelDividendNotes::GetIconResource( const wxString& name ) {
   wxUnusedVar(name);
   return wxNullIcon;
 }

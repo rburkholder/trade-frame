@@ -30,7 +30,7 @@
 #include <wx/timer.h>
 #include <wx/checklst.h>
 
-#include <TFVuTrading/PanelDividenNotes.hpp>
+#include <TFVuTrading/PanelDividendNotes.hpp>
 
 #include "Common.hpp"
 #include "OptionChainView.hpp"
@@ -97,7 +97,7 @@ public:
 
   using pBarHistory_t = std::unique_ptr<ou::tf::iqfeed::BarHistory>;
 
-  using fUpdateDividendFields_t = std::function<void( const ou::tf::PanelDividenNotes::Fields&, const wxArrayString& )>;
+  using fUpdateDividendFields_t = std::function<void( const ou::tf::PanelDividendNotes::Fields&, const wxArrayString& )>;
 
   void Set(
     pComposeInstrument_t&

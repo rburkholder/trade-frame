@@ -47,7 +47,7 @@
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 
 #include <TFVuTrading/FrameMain.h>
-#include <TFVuTrading/PanelDividenNotes.hpp>
+#include <TFVuTrading/PanelDividendNotes.hpp>
 #include <TFVuTrading/PanelFinancialChart.hpp>
 
 #include "AppBarChart.hpp"
@@ -117,8 +117,8 @@ bool AppBarChart::OnInit() {
     );
   wxBoxSizer* sizerFrameSymbolInfo = new wxBoxSizer( wxHORIZONTAL );
   m_pFrameDividendNotes->SetSizer( sizerFrameSymbolInfo );
-  m_pPanelDividenNotes = new ou::tf::PanelDividenNotes( m_pFrameDividendNotes, wxID_ANY );
-  sizerFrameSymbolInfo->Add( m_pPanelDividenNotes, 1, wxGROW|wxALL, 0 );
+  m_pPanelDividendNotes = new ou::tf::PanelDividendNotes( m_pFrameDividendNotes, wxID_ANY );
+  sizerFrameSymbolInfo->Add( m_pPanelDividendNotes, 1, wxGROW|wxALL, 0 );
   m_pFrameDividendNotes->Layout();
   m_pFrameDividendNotes->Show();
 
@@ -305,7 +305,7 @@ void AppBarChart::OnSymbolClick( mapSymbolInfo_t::iterator iterSymbolInfo ) {
     rTag.Add( iterSymbol->sTag );
     ++iterSymbol;
   }
-  m_pPanelDividenNotes->SetTags( rTag );
+  m_pPanelDividendNotes->SetTags( rTag );
 }
 
 void AppBarChart::AddSymbolToTree( const std::string& sSecurityName, ou::tf::TreeItem* pti ) {
@@ -468,7 +468,7 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
       //<< "," << ki.sCompanyName
       //<< std::endl;
 
-      ou::tf::PanelDividenNotes::Fields fields;
+      ou::tf::PanelDividendNotes::Fields fields;
       fields.sYield =  fmt::format( "{:.{}f}", ki.dblYield, 2 );
       fields.sLast =  fmt::format( "{:.{}f}", ki.dblLast, 2 );
       fields.sAmount =  fmt::format( "{:.{}f}", ki.dblAmount, 2 );
@@ -496,7 +496,7 @@ void AppBarChart::SymbolFundamentals( mapSymbolInfo_t::iterator iterSymbolInfo )
       CallAfter(
         [this,fields_=std::move(fields)]() { // note: the std::move is not being used - CallAfter has a reference parameter
           m_pFrameDividendNotes->SetTitle( "Symbol Info - " + fields_.sSymbol );
-          m_pPanelDividenNotes->SetFields( fields_ );
+          m_pPanelDividendNotes->SetFields( fields_ );
         } );
 
     };

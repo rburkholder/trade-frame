@@ -66,7 +66,7 @@ class FrameMain;
 namespace ou {
 namespace tf {
   class AcquireFundamentals;
-  class PanelDividenNotes;
+  class PanelDividendNotes;
   class PanelFinancialChart;
 }
 }
@@ -87,7 +87,7 @@ private:
   ou::tf::PanelFinancialChart* m_pPanelFinancialChart;
 
   wxFrame* m_pFrameDividendNotes;
-  ou::tf::PanelDividenNotes* m_pPanelDividenNotes;
+  ou::tf::PanelDividendNotes* m_pPanelDividendNotes;
 
   wxCheckListBox* m_clbTags;
 

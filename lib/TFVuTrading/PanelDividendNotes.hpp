@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    PanelDividenNotes.hpp
+ * File:    PanelDividendNotes.hpp
  * Author:  raymond@burkholder.net
  * Project: TFVuTrading
  * Created: April 27, 2025 12:47:19
@@ -37,16 +37,16 @@ class wxStaticText;
 namespace ou {
 namespace tf {
 
-class PanelDividenNotes: public wxPanel {
+class PanelDividendNotes: public wxPanel {
 public:
 
-PanelDividenNotes();
-PanelDividenNotes(
+PanelDividendNotes();
+PanelDividendNotes(
     wxWindow* parent, wxWindowID id = SYMBOL_PANEL_SymbolInfo_IDNAME,
     const wxPoint& pos = SYMBOL_PANEL_SymbolInfo_POSITION,
     const wxSize& size = SYMBOL_PANEL_SymbolInfo_SIZE,
     long style = SYMBOL_PANEL_SymbolInfo_STYLE );
-  virtual ~PanelDividenNotes();
+  virtual ~PanelDividendNotes();
 
   bool Create( wxWindow* parent,
     wxWindowID id = SYMBOL_PANEL_SymbolInfo_IDNAME,

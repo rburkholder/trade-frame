@@ -34,7 +34,7 @@
 #include <TFVuTrading/FrameMain.h>
 #include <TFVuTrading/WinChartView.h>
 #include <TFVuTrading/FrameControls.h>
-#include <TFVuTrading/PanelDividenNotes.hpp>
+#include <TFVuTrading/PanelDividendNotes.hpp>
 
 #include "AppOptionTrader.hpp"
 #include "InstrumentViews.hpp"
@@ -85,8 +85,8 @@ bool AppOptionTrader::OnInit() {
     );
   wxBoxSizer* sizerFrameSymbolInfo = new wxBoxSizer( wxHORIZONTAL );
   m_pFrameDividendNotes->SetSizer( sizerFrameSymbolInfo );
-  m_pPanelDividenNotes = new ou::tf::PanelDividenNotes( m_pFrameDividendNotes, wxID_ANY );
-  sizerFrameSymbolInfo->Add( m_pPanelDividenNotes, 1, wxGROW|wxALL, 0 );
+  m_pPanelDividendNotes = new ou::tf::PanelDividendNotes( m_pFrameDividendNotes, wxID_ANY );
+  sizerFrameSymbolInfo->Add( m_pPanelDividendNotes, 1, wxGROW|wxALL, 0 );
   m_pFrameDividendNotes->Layout();
   m_pFrameDividendNotes->Show();
 
@@ -167,10 +167,10 @@ void AppOptionTrader::SetComposeInstrument() {
             std::move( m_pBarHistory ),
             m_pWinChartView_session,
             m_pWinChartView_daily,
-            [this]( const ou::tf::PanelDividenNotes::Fields& fields, const wxArrayString& rTag ){
+            [this]( const ou::tf::PanelDividendNotes::Fields& fields, const wxArrayString& rTag ){
               m_pFrameDividendNotes->SetTitle( "Symbol Info - " + fields.sSymbol );
-              m_pPanelDividenNotes->SetFields( fields );
-              m_pPanelDividenNotes->SetTags( rTag );
+              m_pPanelDividendNotes->SetFields( fields );
+              m_pPanelDividendNotes->SetTags( rTag );
             }
           );
         } );
