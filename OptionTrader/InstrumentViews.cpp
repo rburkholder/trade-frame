@@ -259,9 +259,10 @@ void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
     Instrument& instrument( iterInstrument->second );
 
     mapStateCache_t::iterator iterCache = m_mapStateCache.find( sNameIQFeed );
-    assert( m_mapStateCache.end() != iterCache );
-    instrument.notesDividend.sNotes = iterCache->second.sDvidendNotes;
-    m_mapStateCache.erase( iterCache );
+    if ( m_mapStateCache.end() != iterCache ) {
+      instrument.notesDividend.sNotes = iterCache->second.sDvidendNotes;
+      m_mapStateCache.erase( iterCache );
+    }
 
     instrument.pInstrument = pInstrument;
     instrument.mdbm.Set( instrument.pInstrument->GetInstrumentType() );
