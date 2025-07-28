@@ -264,6 +264,8 @@ void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
     m_mapStateCache.erase( iterCache );
 
     instrument.pInstrument = pInstrument;
+    instrument.mdbm.Set( instrument.pInstrument->GetInstrumentType() );
+
     pWatch_t pWatch = m_fBuildWatch( pInstrument );
     instrument.Set( pWatch );
 
@@ -342,7 +344,7 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
       m_pWinChartView_session->SetChartDataView( instrument.sbm.GetChartDataView() );
 
       m_pWinChartView_daily->SetLive_review();
-      m_pWinChartView_daily->SetChartDataView( instrument.dbm.GetChartDataView() );
+      m_pWinChartView_daily->SetChartDataView( instrument.mdbm.GetChartDataView() );
 
       UpdateDividendNotes( instrument );
 
@@ -582,24 +584,33 @@ void InstrumentViews::BuildSessionBarModel( Instrument& instrument ) {
   m_pBarHistory->RequestNDaysOfBars( sIQFeedSymbolName, 60, 2 ); // 60 second bars over 2 days
 }
 
+// order of execution, chained together:
+// BuildDailyBarModel
+// BuildPivotModel
+// BuildSessionBarModel
+
 // note: makes use of sdm.IsWatching to be single entry here
 void InstrumentViews::BuildDailyBarModel( Instrument& instrument ) {
   const std::string& sIQFeedSymbolName( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
-  BOOST_LOG_TRIVIAL(info) << "statistics for " << sIQFeedSymbolName;
+  //BOOST_LOG_TRIVIAL(info) << "BuildDailyBarModel " << sIQFeedSymbolName;
   m_pBarHistory->Set(
     [&instrument]( const ou::tf::Bar& bar ){ // fHistory_Bar_t
       instrument.dateLastDailyBar = bar.DateTime().date();
-      instrument.dbm.OnHistoryBar( bar );
+      instrument.mdbm.OnHistoryIntraBar( bar );
     }
   , [this,&instrument](){ // fHistory_Done_t
-      instrument.dbm.OnHistoryDone();
+      instrument.mdbm.OnHistoryDone();
       BuildPivotModel( instrument );
   } );
-  m_pBarHistory->RequestNEndOfDay( sIQFeedSymbolName, 200 /* days */ );
+
+  m_pBarHistory->RequestNDaysOfBars( sIQFeedSymbolName, 30 * 60 /* 30 minutes */, 300 /* days */ ); // provides about 203 days
 }
 
 void InstrumentViews::BuildPivotModel( Instrument& instrument ) {
+
   const std::string& sIQFeedSymbolName( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
+
+  // set the callbacks
   m_pBarHistory->Set(
     [&instrument]( const ou::tf::Bar& bar ){ // fHistory_Bar_t
       instrument.pm.OnHistoryBar( bar );
@@ -609,7 +620,7 @@ void InstrumentViews::BuildPivotModel( Instrument& instrument ) {
       BuildSessionBarModel( instrument );
   } );
 
-  // todo: determine partial days and use previos day bar
+  // todo: determine partial days and use previous day bar
   // todo: work with weekends
   static const boost::gregorian::date_duration oneday( 1 );
   static const boost::gregorian::date_duration twoday( 2 );

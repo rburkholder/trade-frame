@@ -35,7 +35,7 @@
 #include "Common.hpp"
 #include "OptionChainView.hpp"
 #include "SessionBarModel.hpp"
-#include "DailyBarModel.hpp"
+#include "ManualDailyBarModel.hpp"
 #include "PivotModel.hpp"
 #include "TagSymbolMap.hpp"
 
@@ -200,11 +200,10 @@ private:
     OptionChainView* pChainView;
     mapChains_t mapChains;
     SessionBarModel sbm;
-    DailyBarModel dbm;
     PivotModel pm;
+    ManualDailyBarModel mdbm;
     DividendNotes notesDividend;
 
-    unsigned int counter;
     boost::gregorian::date dateLastDailyBar;
 
     Instrument()
@@ -219,7 +218,7 @@ private:
       pWatch->OnSummary.Add( MakeDelegate( &notesDividend, &DividendNotes::OnSummary ) ) ;
       pWatch->StartWatch();
       sbm.Set( pWatch );
-      sbm.Set( pm.Pivots(), dbm.Statistics() );
+      sbm.Set( pm.Pivots(), mdbm.Statistics() );
     }
 
     ~Instrument() {

@@ -26,8 +26,9 @@ set(
   file_h
     AppOptionTrader.hpp
     Common.hpp
-    DailyBarModel.hpp
+    #DailyBarModel.hpp
     InstrumentViews.hpp
+    ManualDailyBarModel.hpp
     OptionChainModel.hpp
     OptionChainView.hpp
     PivotModel.hpp
@@ -38,8 +39,9 @@ set(
 set(
   file_cpp
     AppOptionTrader.cpp
-    DailyBarModel.cpp
+    #DailyBarModel.cpp
     InstrumentViews.cpp
+    ManualDailyBarModel.cpp
     OptionChainModel.cpp
     OptionChainView.cpp
     PivotModel.cpp
