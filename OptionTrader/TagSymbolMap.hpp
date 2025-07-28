@@ -46,8 +46,8 @@ public:
   using fTag_t = std::function<void( const sTag_t& )>;
   using fSymbol_t = std::function<void( const sSymbol_t& )>;
 
-  void AddTag( const sTag_t&, const sSymbol_t&, fTag_t&& );
-  void DelTag( const sTag_t&, const sSymbol_t&, fTag_t&& );
+  void AddTag( const sTag_t&, const sSymbol_t&, fTag_t&& ); // callback if new tag instance
+  void DelTag( const sTag_t&, const sSymbol_t&, fTag_t&& ); // callback if last tag instance
 
   void SymbolListByTag( const sTag_t&, fSymbol_t&& ) const;
   void TagListBySymbol( const sSymbol_t&, fTag_t&& ) const;
