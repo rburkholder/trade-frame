@@ -191,6 +191,13 @@ Bar::Bar( const std::string& dt, const std::string& open,
   m_nVolume = atoi( volume.c_str() );
 }
 
+void Bar::Accumulate( const Bar& bar ) {
+  m_dblHigh = std::max<ou::tf::Price::price_t>( m_dblHigh, bar.High() );
+  m_dblLow = std::min<ou::tf::Price::price_t>( m_dblLow, bar.Low() );
+  m_dblClose = bar.Close();
+  m_nVolume += bar.Volume();
+}
+
 Bar::~Bar() {
 }
 

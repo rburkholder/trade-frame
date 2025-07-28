@@ -165,6 +165,8 @@ public:
   inline void Close( price_t price ) { m_dblClose = price; }
   inline void Volume( volume_t vol ) { m_nVolume = vol; }
 
+  void Accumulate( const Bar& );
+
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
   static uint64_t Signature() { return DatedDatum::Signature() * 100000 + 11113; } // DatedDatum -> Bar
 
