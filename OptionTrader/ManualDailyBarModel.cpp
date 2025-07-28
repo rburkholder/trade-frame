@@ -26,6 +26,8 @@
 #include "OUCommon/Colour.h"
 #include <OUCommon/TimeSource.h>
 
+#include <TFIndicators/Pivots.h>
+
 #include "ManualDailyBarModel.hpp"
 
 namespace {
@@ -210,7 +212,7 @@ void ManualDailyBarModel::OnHistoryDoneStatistics() {
     ]( const ou::tf::Bar& bar ){
     if ( 200 >= ix ) {
       std::string sIx = boost::lexical_cast<std::string>( ix );
-      m_ceStatistics.AddMark( bar.High(), ou::Colour::LightSalmon, "hi-" + sIx );
+      m_ceStatistics.AddMark( bar.High(), ou::Colour::LightGreen,  "hi-" + sIx );
       m_ceStatistics.AddMark( bar.Low(),  ou::Colour::LightSalmon, "lo-" + sIx );
     }
 
@@ -219,23 +221,23 @@ void ManualDailyBarModel::OnHistoryDoneStatistics() {
 
     if ( 200 >= ix ) {
       dblAvg200      += close / 200.0;
-      dblAvgRange200 += range  / 200.0;
+      dblAvgRange200 += range / 200.0;
     }
     if ( 100 >= ix ) {
       dblAvg100      += close / 100.0;
-      dblAvgRange100 += range  / 100.0;
+      dblAvgRange100 += range / 100.0;
     }
     if ( 50 >= ix ) {
       dblAvg50       += close / 50;
-      dblAvgRange50  += range  / 50;
+      dblAvgRange50  += range / 50;
     }
     if ( 21 >= ix ) {
       dblAvg21       += close / 21;
-      dblAvgRange21  += range  / 21;
+      dblAvgRange21  += range / 21;
     }
     if ( 7 >= ix ) {
       dblAvg7        += close / 7;
-      dblAvgRange7   += range  / 7;
+      dblAvgRange7   += range / 7;
     }
     ix++;
   });
@@ -264,5 +266,33 @@ void ManualDailyBarModel::OnHistoryDoneStatistics() {
     << ", 200 day=" << dblAvgRange200
     ;
 
+  Pivots();
+}
+
+void ManualDailyBarModel::Pivots() {
+
+  if ( 0 < m_barsInterDay.Size() ) {
+    const ou::tf::Bar bar( m_barsInterDay.last() );
+
+    using PS = ou::tf::PivotSet;
+    ou::tf::PivotSet ps;
+
+    ps.CalcPivots( bar.High(), bar.Low(), bar.Close() );
+
+    m_ceStatistics.AddMark( ps.GetPivotValue( PS::R2 ), ps.GetPivotColour( PS::R2 ), "r2" );
+    m_ceStatistics.AddMark( ps.GetPivotValue( PS::R1 ), ps.GetPivotColour( PS::R1 ), "r1" );
+    m_ceStatistics.AddMark( ps.GetPivotValue( PS::PV ), ps.GetPivotColour( PS::PV ), "pv" );
+    m_ceStatistics.AddMark( ps.GetPivotValue( PS::S1 ), ps.GetPivotColour( PS::S1 ), "s1" );
+    m_ceStatistics.AddMark( ps.GetPivotValue( PS::S2 ), ps.GetPivotColour( PS::S2 ), "s2" );
+
+    BOOST_LOG_TRIVIAL(info)
+      << "pivots"
+      <<  " r2=" << ps.GetPivotValue( PS::R2 )
+      << ", r1=" << ps.GetPivotValue( PS::R1 )
+      << ", pv=" << ps.GetPivotValue( PS::PV )
+      << ", s1=" << ps.GetPivotValue( PS::S1 )
+      << ", s2=" << ps.GetPivotValue( PS::S2 )
+      ;
   }
 
+}

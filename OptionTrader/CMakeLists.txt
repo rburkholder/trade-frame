@@ -30,7 +30,6 @@ set(
     ManualDailyBarModel.hpp
     OptionChainModel.hpp
     OptionChainView.hpp
-    PivotModel.hpp
     SessionBarModel.hpp
     TagSymbolMap.hpp
   )
@@ -42,7 +41,6 @@ set(
     ManualDailyBarModel.cpp
     OptionChainModel.cpp
     OptionChainView.cpp
-    PivotModel.cpp
     SessionBarModel.cpp
     TagSymbolMap.cpp
   )

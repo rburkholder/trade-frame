@@ -85,4 +85,6 @@ private:
   void OnHistoryDailyBar( const ou::tf::Bar& );
   void OnHistoryDoneStatistics();
 
+  void Pivots();
+
 };

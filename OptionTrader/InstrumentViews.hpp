@@ -36,7 +36,6 @@
 #include "OptionChainView.hpp"
 #include "SessionBarModel.hpp"
 #include "ManualDailyBarModel.hpp"
-#include "PivotModel.hpp"
 #include "TagSymbolMap.hpp"
 
 #define SYMBOL_INSTRUMENTVIEWS_STYLE wxTAB_TRAVERSAL
@@ -200,7 +199,6 @@ private:
     OptionChainView* pChainView;
     mapChains_t mapChains;
     SessionBarModel sbm;
-    PivotModel pm;
     ManualDailyBarModel mdbm;
     DividendNotes notesDividend;
 
@@ -218,7 +216,7 @@ private:
       pWatch->OnSummary.Add( MakeDelegate( &notesDividend, &DividendNotes::OnSummary ) ) ;
       pWatch->StartWatch();
       sbm.Set( pWatch );
-      sbm.Set( pm.Pivots(), mdbm.Statistics() );
+      sbm.Set( mdbm.Statistics() );
     }
 
     ~Instrument() {
@@ -263,7 +261,6 @@ private:
 
   void BuildSessionBarModel( Instrument& );
   void BuildDailyBarModel( Instrument& );
-  void BuildPivotModel( Instrument& );
 
   void HandleTimer( wxTimerEvent& );
 

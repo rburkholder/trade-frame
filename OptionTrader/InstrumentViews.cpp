@@ -600,52 +600,10 @@ void InstrumentViews::BuildDailyBarModel( Instrument& instrument ) {
     }
   , [this,&instrument](){ // fHistory_Done_t
       instrument.mdbm.OnHistoryDone();
-      BuildPivotModel( instrument );
-  } );
-
-  m_pBarHistory->RequestNDaysOfBars( sIQFeedSymbolName, 30 * 60 /* 30 minutes */, 300 /* days */ ); // provides about 203 days
-}
-
-void InstrumentViews::BuildPivotModel( Instrument& instrument ) {
-
-  const std::string& sIQFeedSymbolName( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
-
-  // set the callbacks
-  m_pBarHistory->Set(
-    [&instrument]( const ou::tf::Bar& bar ){ // fHistory_Bar_t
-      instrument.pm.OnHistoryBar( bar );
-    }
-  , [this,&instrument](){ // fHistory_Done_t
-      instrument.pm.OnHistoryDone();
       BuildSessionBarModel( instrument );
   } );
 
-  // todo: determine partial days and use previous day bar
-  // todo: work with weekends
-  static const boost::gregorian::date_duration oneday( 1 );
-  static const boost::gregorian::date_duration twoday( 2 );
-  switch ( instrument.pInstrument->GetInstrumentType() ) {
-    case ou::tf::InstrumentType::Future:
-    case ou::tf::InstrumentType::FuturesOption:
-    case ou::tf::InstrumentType::Currency:
-      m_pBarHistory->RequestDatedRangeOfBars(
-        sIQFeedSymbolName, 60,
-        posix_time::ptime( instrument.dateLastDailyBar - twoday, boost::posix_time::time_duration( 18, 0, 0 ) ),
-        posix_time::ptime( instrument.dateLastDailyBar - oneday, boost::posix_time::time_duration( 17, 0, 0 ) )
-      );
-      break;
-    case ou::tf::InstrumentType::Stock:
-    case ou::tf::InstrumentType::Option:
-      m_pBarHistory->RequestDatedRangeOfBars(
-        sIQFeedSymbolName, 60,
-        posix_time::ptime( instrument.dateLastDailyBar - oneday, boost::posix_time::time_duration(  9, 30, 0 ) ),
-        posix_time::ptime( instrument.dateLastDailyBar - oneday, boost::posix_time::time_duration( 16,  0, 0 ) )
-      );
-      break;
-    default:
-      assert( false );  // don't know any others yet
-
-  }
+  m_pBarHistory->RequestNDaysOfBars( sIQFeedSymbolName, 30 * 60 /* 30 minutes */, 300 /* days */ ); // provides about 203 days
 }
 
 void InstrumentViews::SizeTreeCtrl() {

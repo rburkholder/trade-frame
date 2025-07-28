@@ -49,10 +49,9 @@ void SessionBarModel::Set( pWatch_t& pWatch ) {
 
 }
 
-void SessionBarModel::Set( ou::ChartEntryMark& cem2, ou::ChartEntryMark& cem1 ) {
+void SessionBarModel::Set( ou::ChartEntryMark& cem ) {
 
-  m_dvChart.Add( EChartSlot::Price, &cem1 );
-  m_dvChart.Add( EChartSlot::Price, &cem2 );
+  m_dvChart.Add( EChartSlot::Price, &cem );
   m_dvChart.Add( EChartSlot::Price, &m_cePriceBars );
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolume );
 
