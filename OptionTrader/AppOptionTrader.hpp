@@ -100,6 +100,8 @@ private:
   using fInstrumentOption_t = std::function<void(size_t, pInstrument_t /* option */)>; // needs to match CollectATM
   void QueryChains( pInstrument_t, fInstrumentOption_t&& ); // underlying
 
+  void HandleMenuActionSaveState();
+
   virtual bool OnInit();
   virtual int OnExit();
   void OnClose( wxCloseEvent& event );

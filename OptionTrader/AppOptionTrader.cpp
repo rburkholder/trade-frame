@@ -92,10 +92,10 @@ bool AppOptionTrader::OnInit() {
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppOptionTrader::OnClose, this );  // start close of windows and controls
 
-  //FrameMain::vpItems_t vItems;
-  //typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
-  //vItems.push_back( new mi( "Add Symbol", MakeDelegate( this, &AppOptionTrader::HandleMenuActionAddSymbol ) ) );
-  //m_pFrameMain->AddDynamicMenu( "Actions", vItems );
+  FrameMain::vpItems_t vItems;
+  typedef FrameMain::structMenuItem mi;  // vxWidgets takes ownership of the objects
+  vItems.push_back( new mi( "Save State", MakeDelegate( this, &AppOptionTrader::HandleMenuActionSaveState ) ) );
+  m_pFrameMain->AddDynamicMenu( "Actions", vItems );
 
   {
     m_pFrameWinChartView_session = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Session Bars (1min)" );
@@ -120,6 +120,13 @@ bool AppOptionTrader::OnInit() {
 
   return true;
 
+}
+
+void AppOptionTrader::HandleMenuActionSaveState() {
+  CallAfter(
+    [this](){
+      SaveState();  // TODO: make a backup file
+    } );
 }
 
 void AppOptionTrader::ConnectionsStart() {
