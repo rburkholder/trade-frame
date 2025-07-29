@@ -108,6 +108,7 @@ void ManualDailyBarModel::OnHistoryIntraBar( const ou::tf::Bar& bar ) {
   const auto dateBar = bar.DateTime().date();
 
   switch ( m_type ) {
+    case ou::tf::InstrumentType::Index:
     case ou::tf::InstrumentType::Future:
     case ou::tf::InstrumentType::FuturesOption:
       {
