@@ -56,7 +56,6 @@ InstrumentViews::InstrumentViews( wxWindow* parent, wxWindowID id, const wxPoint
 }
 
 InstrumentViews::~InstrumentViews() {
-
   m_pOptionChainView = nullptr;
   m_pOptionChainModel = nullptr;
   m_mapInstrument.clear();
@@ -74,7 +73,6 @@ void InstrumentViews::Init() {
   m_pRootTreeItem = nullptr;
   m_fBuildWatch = nullptr;
   m_fBuildOption = nullptr;
-
 }
 
 bool InstrumentViews::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
@@ -108,13 +106,12 @@ void InstrumentViews::CreateControls() {
 
   m_pTreeCtrl = new wxTreeCtrl( itemPanel1, ID_TREECTRL, wxDefaultPosition, wxDefaultSize,
     wxTR_NO_LINES | wxTR_HAS_BUTTONS /*| wxTR_LINES_AT_ROOT | wxTR_HIDE_ROOT*/ | wxTR_SINGLE /*| wxTR_TWIST_BUTTONS*/ );
+  ou::tf::TreeItem::Bind( this, m_pTreeCtrl );
   m_pTreeCtrl->Bind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &InstrumentViews::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
   m_pTreeCtrl->Bind( wxEVT_TREE_ITEM_EXPANDED, &InstrumentViews::HandleTreeEventItemExpanded, this, m_pTreeCtrl->GetId() );
   m_pTreeCtrl->ExpandAll();
 
   itemBoxSizer1->Add( m_pTreeCtrl, 0, wxGROW|wxALL, 1 );
-
-  ou::tf::TreeItem::Bind( this, m_pTreeCtrl );
 
   m_pRootTreeItem = new ou::tf::TreeItem( m_pTreeCtrl, "Symbols" );
   //m_pRootTreeItem->SetOnClick(
@@ -136,9 +133,12 @@ void InstrumentViews::CreateControls() {
     m_pTreeCtrl->SetToolTip(_( "Symbols / Actions" ) );
   }
 
-  m_pOptionChainView = new OptionChainView( this );
-  itemBoxSizer1->Add( m_pOptionChainView, 1, wxALL | wxEXPAND, 0 );
-  m_pOptionChainView->Show( false );
+  m_pOptionChainView = new OptionChainView( itemPanel1 );
+  itemBoxSizer1->Add( m_pOptionChainView, 1, wxALL | wxEXPAND, 1 );
+  m_pOptionChainView->Show();
+
+  Layout();
+  GetParent()->Layout();
 
   Bind( wxEVT_DESTROY, &InstrumentViews::OnDestroy, this );
 
@@ -556,6 +556,7 @@ void InstrumentViews::PresentOptionChains( Instrument& underlying ) {
   }
 }
 
+// currently not used
 void InstrumentViews::OptionChainView_select() {
 
   if ( nullptr != m_pcurView ) { // todo: refactor this and the same below
@@ -566,7 +567,6 @@ void InstrumentViews::OptionChainView_select() {
   }
 
   // todo: set associate model
-
   m_pcurView = m_pOptionChainView;
   m_pcurView->Show();
 
@@ -670,12 +670,16 @@ void InstrumentViews::FilterByTag() {
 
 void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
 
+  BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy top";
+
   m_clbTags->Unbind( wxEVT_CHECKLISTBOX, &InstrumentViews::HandleCheckListBoxEvent, this );
 
   if ( m_timerRefresh.IsRunning() ) {
     m_timerRefresh.Stop();
     Unbind( wxEVT_TIMER, &InstrumentViews::HandleTimer, this, m_timerRefresh.GetId() );
   }
+
+  BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy 1";
 
   m_pcurView = nullptr;
   if ( nullptr != m_pOptionChainView ) {
@@ -686,12 +690,16 @@ void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
     m_pOptionChainModel = nullptr;
   }
 
+  BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy 2";
+
   //TreeItem::UnBind( this, m_pTree ); // to be fixed
   m_pTreeCtrl->Unbind( wxEVT_TREE_ITEM_EXPANDED, &InstrumentViews::HandleTreeEventItemExpanded, this, m_pTreeCtrl->GetId() );
   m_pTreeCtrl->Unbind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &InstrumentViews::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() );
-  m_pTreeCtrl->DeleteAllItems();
+  m_pTreeCtrl->DeleteAllItems();  // time consuming with option chains
   assert( Unbind( wxEVT_DESTROY, &InstrumentViews::OnDestroy, this ) );
   event.Skip( true );  // auto followed by Destroy();
+
+  BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy btm";
 }
 
 wxBitmap InstrumentViews::GetBitmapResource( const wxString& name ) {
