@@ -202,8 +202,6 @@ private:
     ManualDailyBarModel mdbm;
     DividendNotes notesDividend;
 
-    boost::gregorian::date dateLastDailyBar;
-
     Instrument()
     : pti( nullptr ), pChainView( nullptr )
     {}

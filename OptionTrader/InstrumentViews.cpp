@@ -596,7 +596,6 @@ void InstrumentViews::BuildDailyBarModel( Instrument& instrument ) {
   //BOOST_LOG_TRIVIAL(info) << "BuildDailyBarModel " << sIQFeedSymbolName;
   m_pBarHistory->Set(
     [&instrument]( const ou::tf::Bar& bar ){ // fHistory_Bar_t
-      instrument.dateLastDailyBar = bar.DateTime().date();
       instrument.mdbm.OnHistoryIntraBar( bar );
     }
   , [this,&instrument](){ // fHistory_Done_t
