@@ -196,14 +196,13 @@ private:
     ou::tf::TreeItem* pti;
     pInstrument_t pInstrument;
     pWatch_t pWatch;
-    OptionChainView* pChainView;
     mapChains_t mapChains;
     SessionBarModel sbm;
     ManualDailyBarModel mdbm;
     DividendNotes notesDividend;
 
     Instrument()
-    : pti( nullptr ), pChainView( nullptr )
+    : pti( nullptr )
     {}
     Instrument( Instrument&& rhs ) {}
 
@@ -225,7 +224,6 @@ private:
         pWatch.reset();
       }
       pInstrument.reset();
-      pChainView = nullptr;
     }
   };
 
