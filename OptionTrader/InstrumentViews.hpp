@@ -270,17 +270,33 @@ private:
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
+    ar & *m_pOptionChainView;
+
+    ar & m_TagSymbolMap;
+
     ar & m_mapInstrument.size();
     for ( const mapInstrument_t::value_type& vt: m_mapInstrument ) {
       ar & vt.first;
       ar & vt.second.notesDividend.sNotes;
     }
-    ar & *m_pOptionChainView;
-    ar & m_TagSymbolMap;
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
+    assert( 5 <= version ); // ordering has been changed
+
+    ar & *m_pOptionChainView;
+
+    ar & m_TagSymbolMap;
+    wxArrayString rTag;
+    m_TagSymbolMap.TagList(
+      [this,&rTag]( const TagSymbolMap::sTag_t& sTag ){
+        rTag.Add( sTag );
+      } );
+    if ( 0 < rTag.size() ) {
+      m_clbTags->InsertItems( rTag, 0 );
+    }
+
     size_t nNames;
     ar & nNames;
     std::string sName;
@@ -288,28 +304,13 @@ private:
       std::string sIQFeedSymbolName;
       StateCache sc;
       ar & sIQFeedSymbolName;
-      if ( 4 <= version ) {
-        ar & sc.sDvidendNotes;
-      }
+      ar & sc.sDvidendNotes;
       // todo: check for duplicates?
       auto result = m_mapStateCache.emplace( sIQFeedSymbolName, std::move( sc ) );
       assert( result.second );
       --nNames;
     }
-    if ( 2 <= version ) {
-      ar & *m_pOptionChainView;
-    }
-    if ( 3 <= version ) {
-      ar & m_TagSymbolMap;
-      wxArrayString rTag;
-      m_TagSymbolMap.TagList(
-        [this,&rTag]( const TagSymbolMap::sTag_t& sTag ){
-          rTag.Add( sTag );
-        } );
-      if ( 0 < rTag.size() ) {
-        m_clbTags->InsertItems( rTag, 0 );
-      }
-    }
+
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
@@ -319,4 +320,4 @@ private:
 } // namespace tf
 } // namespace ou
 
-BOOST_CLASS_VERSION(ou::tf::InstrumentViews, 4)
+BOOST_CLASS_VERSION(ou::tf::InstrumentViews, 5)
