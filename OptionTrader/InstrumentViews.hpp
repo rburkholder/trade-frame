@@ -56,6 +56,9 @@ namespace tf { // TradeFrame
 namespace iqfeed {
   class BarHistory;
 }
+namespace option {
+  class Engine;
+}
 
 class TreeItem;
 class WinChartView;

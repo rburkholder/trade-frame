@@ -34,6 +34,7 @@
 #include <TFIQFeed/OptionChainQuery.h>
 
 #include <TFOptions/Chains.h>
+#include <TFOptions/Engine.hpp>
 
 #include <TFVuTrading/TreeItem.hpp>
 #include "TFVuTrading/WinChartView.h"
