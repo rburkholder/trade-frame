@@ -121,6 +121,9 @@ const std::string MarketSymbol::BuildGenericName( const Fundamentals& fundamenta
       assert( "FXCM" == fundamentals.sExchange );
       sName = fundamentals.sSymbolName.substr( 0, 3 ) + '.' + fundamentals.sSymbolName.substr( 3, 3 );
       break;
+    case ESecurityType::Index:
+      // uses base name
+      break;
     default:
       assert( false );
       break;
