@@ -115,7 +115,7 @@ void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, fInstrument_t
 
           // todo: auto-calc the year range
           m_pOptionChainQuery->QueryFuturesChain(  // obtain a list of futures
-            sBase, "", "5678" /* 2025, 2026, 2027, 2028 */ , "4" /* 4 months */,
+            sBase, "", "5678" /* 2025, 2026, 2027, 2028 */ , "6" /* 6 months */,
             [this,expiry,iterQuery]( const iqfeed::OptionChainQuery::FuturesList& list ) mutable {
 
               if ( 0 == list.vSymbol.size() ) {
