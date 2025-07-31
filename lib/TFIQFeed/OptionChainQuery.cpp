@@ -14,6 +14,8 @@
 
 #include <sstream>
 
+#include <boost/log/trivial.hpp>
+
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_symbols.hpp>
 
@@ -172,7 +174,7 @@ void OptionChainQuery::Connect() {
 }
 
 void OptionChainQuery::OnNetworkConnected() {
-  //std::cout << "OnHistoryConnected" << std::endl;
+  //BOOST_LOG_TRIVIAL(trace) << "OnHistoryConnected";
   this->Send( "S,SET PROTOCOL,6.2\n" );
   m_fConnected();
 };
@@ -201,13 +203,13 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
   const_iterator_t end = (*buffer).end();
 
   //std::string s( iter, end );
-  //std::cout << "chain response: " << s << std::endl;
+  //BOOST_LOG_TRIVIAL(trace) << "chain response: " << s;
 
   bool bOk;
 
   switch ( m_state ) {
     case EState::quiescent:
-      //std::cout << "EState::quiescent" << std::endl;
+      //BOOST_LOG_TRIVIAL(trace) << "EState::quiescent";
       // fall through, simply process all responses
     case EState::response:
       {
@@ -226,12 +228,12 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
 
                     FuturesList list;
 
-                    //std::cout << "EState::reply" << std::endl;
+                    //BOOST_LOG_TRIVIAL(trace) << "EState::reply";
                     FutureChainParser<const_iterator_t> grammarFutureChain;
                     //const_iterator_t bgn = (*buffer).begin();
 
                     //std::string buf( iter, end );
-                    //std::cout << "buf: '" << buf << "'" << std::endl;
+                    //BOOST_LOG_TRIVIAL(trace) << "buf: '" << buf << "'";
 
                     bOk = parse( iter, end, grammarFutureChain, list );
 
@@ -241,12 +243,12 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
                       assert( 0 < preroll.sSymbol.size() );
                     }
                     else {
-                      std::cout
+                      BOOST_LOG_TRIVIAL(error)
                         << "OptionChainQuery::OnNetworkLineBuffer CFU parse error: "
                         << end - iter << ","
                         << preroll.sSymbol
                         << "'," << list.vSymbol.size()
-                        << std::endl;
+                        ;
                     }
 
                     bool bProcess( false );
@@ -267,7 +269,7 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
                       m_mapFutures.erase( citer );
                     }
                     else {
-                      std::cout << "OptionChainQuery::OnNetworkLineBuffer error: can't find CFU key " << preroll.sSymbol << std::endl;
+                      BOOST_LOG_TRIVIAL(error) << "OptionChainQuery::OnNetworkLineBuffer error: can't find CFU key " << preroll.sSymbol;
                     }
                   }
                   break;
@@ -277,12 +279,12 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
 
                     OptionList list;
 
-                    //std::cout << "EState::reply" << std::endl;
+                    //BOOST_LOG_TRIVIAL(trace) << "EState::reply";
                     OptionChainParser<const_iterator_t> grammarOptionChain;
                     //const_iterator_t bgn = (*buffer).begin();
 
                     //std::string buf( iter, end );
-                    //std::cout << "buf: '" << buf << "'" << std::endl;
+                    //BOOST_LOG_TRIVIAL(trace) << "buf: '" << buf << "'";
 
                     bOk = parse( iter, end, grammarOptionChain, list );
 
@@ -293,12 +295,12 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
                       list.sUnderlying = std::move( preroll.sSymbol );
                     }
                     else {
-                      std::cout
+                      BOOST_LOG_TRIVIAL(error)
                         << "OptionChainQuery::OnNetworkLineBuffer CEO/CFO parse error: "
                         << end - iter << ","
                         << preroll.sSymbol
                         << "'," << list.vSymbol.size()
-                        << std::endl;
+                        ;
                     }
 
                     bool bProcess( false );
@@ -319,7 +321,7 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
                       m_mapOptions.erase( citer );
                     }
                     else {
-                      std::cout << "OptionChainQuery::OnNetworkLineBuffer error: can't find CEO key " << list.sUnderlying << std::endl;
+                      BOOST_LOG_TRIVIAL(error) << "OptionChainQuery::OnNetworkLineBuffer error: can't find CEO key " << list.sUnderlying;
                     }
 
                   }
@@ -334,12 +336,12 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
               break;
             case PreRoll::EExtra::BADSYM:
               // TODO: remove from m_mapRequest
-              std::cout << "OptionChainQuery::OnNetworkLineBuffer badsym: " << preroll.sSymbol << std::endl;
+              BOOST_LOG_TRIVIAL(error) << "OptionChainQuery::OnNetworkLineBuffer badsym: " << preroll.sSymbol;
               m_state = EState::quiescent;
               break;
             case PreRoll::EExtra::ERROR:
               // TODO: remove from m_mapRequest
-              std::cout << "OptionChainQuery::OnNetworkLineBuffer error: " << std::string( (*buffer).begin(), (*buffer).end() ) << std::endl;
+              BOOST_LOG_TRIVIAL(error) << "OptionChainQuery::OnNetworkLineBuffer error: " << std::string( (*buffer).begin(), (*buffer).end() );
               m_state = EState::quiescent;
               break;
             case PreRoll::EExtra::ENDMSG:
@@ -348,7 +350,7 @@ void OptionChainQuery::OnNetworkLineBuffer( linebuffer_t* buffer ) {
           }
         }
         else {
-          std::cout << "OptionChainQuery::OnNetworkLineBuffer error: unknown response: " << std::string( (*buffer).begin(), (*buffer).end() ) << std::endl;
+          BOOST_LOG_TRIVIAL(error) << "OptionChainQuery::OnNetworkLineBuffer error: unknown response: " << std::string( (*buffer).begin(), (*buffer).end() );
         }
 
       }
@@ -381,7 +383,7 @@ void OptionChainQuery::QueryFuturesChain(
     << sNearMonths << ","
     << "CFU-" << sSymbol
     ;
-  std::cout << "request: '" << ss.str() << "'" << std::endl; // for diagnostics
+  BOOST_LOG_TRIVIAL(trace) << "request: '" << ss.str() << "'"; // for diagnostics
   ss << "\n";
   std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
   assert( m_mapFutures.end() == m_mapFutures.find( sSymbol ) );
@@ -410,7 +412,7 @@ void OptionChainQuery::QueryFuturesOptionChain(
     << sNearMonths << ","
     << "CFO-" << sSymbol
     ;
-  std::cout << "request: '" << ss.str() << "'" << std::endl; // for diagnostics
+  BOOST_LOG_TRIVIAL(trace) << "request: '" << ss.str() << "'"; // for diagnostics
   ss << "\n";
   std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
   assert( m_mapOptions.end() == m_mapOptions.find( sSymbol ) );
@@ -444,7 +446,7 @@ void OptionChainQuery::QueryEquityOptionChain(
     << "CEO-" << sSymbol << ","
     << "1" // 0 = default, exclude non-standard options, 1 = include
     ;
-  std::cout << "request: '" << ss.str() << "'" << std::endl; // for diagnostics
+  BOOST_LOG_TRIVIAL(trace) << "request: '" << ss.str() << "'"; // for diagnostics
   ss << "\n";
   std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
   assert( m_mapOptions.end() == m_mapOptions.find( sSymbol ) );
