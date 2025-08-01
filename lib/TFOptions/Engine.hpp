@@ -123,6 +123,7 @@ public:
 
   // these register the underlying, an option, or both [may deprecate the Find functions)
   void RegisterUnderlying( const pWatch_t& ); // register an underlying
+  void DeRegisterUnderlying( const pWatch_t& );
   void RegisterOption( const pOption_t& ); // register an option
   void DeRegisterOption( const pOption_t& ); // deregister an option, keeps the map short
 

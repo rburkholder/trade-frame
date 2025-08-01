@@ -201,8 +201,8 @@ Engine::~Engine( ) {
 
 void Engine::RegisterUnderlying( const pWatch_t& pWatch ) {
   assert( pWatch );
+  const std::string& sInstrumentName( pWatch->GetInstrumentName() );
   std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
-  const std::string& sInstrumentName( pWatch->GetInstrument()->GetInstrumentName() );
   mapKnownWatches_t::iterator iter = m_mapKnownWatches.find( sInstrumentName );
   if ( m_mapKnownWatches.end() == iter ) {
     m_mapKnownWatches.insert( mapKnownWatches_t::value_type( sInstrumentName, pWatch ) );
@@ -212,9 +212,22 @@ void Engine::RegisterUnderlying( const pWatch_t& pWatch ) {
   }
 }
 
+void Engine::DeRegisterUnderlying( const pWatch_t& pWatch ) {
+  assert( pWatch );
+  const std::string& sInstrumentName( pWatch->GetInstrumentName() );
+  std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
+  mapKnownWatches_t::iterator iter = m_mapKnownWatches.find( sInstrumentName );
+  if ( m_mapKnownWatches.end() == iter ) {
+    throw std::runtime_error( "Engine::Register Underlying: does not exist - " + sInstrumentName );
+  }
+  else {
+    m_mapKnownWatches.erase( iter );
+  }
+}
+
 void Engine::RegisterOption( const pOption_t& pOption) {
   assert( pOption );
-  const std::string& sInstrumentName( pOption->GetInstrument()->GetInstrumentName() );
+  const std::string& sInstrumentName( pOption->GetInstrumentName() );
   //BOOST_LOG_TRIVIAL(trace) << "Engine queue Option_Register " << sInstrumentName;
 
   OptionEntry oe( nullptr, pOption );
@@ -250,12 +263,14 @@ ou::tf::Watch::pWatch_t Engine::FindWatch( const pInstrument_t pInstrument ) {
   //std::cout << "Engine::Find Watch: " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
   //std::cout << "Engine::Find Watch: " << pInstrument->GetInstrumentName() << std::endl;
   pWatch_t pWatch;
+  const std::string& sInstrumentName( pInstrument->GetInstrumentName() );
+
   std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
-  mapKnownWatches_t::iterator iter = m_mapKnownWatches.find( pInstrument->GetInstrumentName() );
+  mapKnownWatches_t::iterator iter = m_mapKnownWatches.find( sInstrumentName );
   if ( m_mapKnownWatches.end() == iter ) {
     pWatch = m_fBuildWatch( pInstrument );
-    assert( 0 != pWatch.get() );
-    m_mapKnownWatches.insert( mapKnownWatches_t::value_type( pInstrument->GetInstrumentName(), pWatch ) );
+    assert( pWatch );
+    m_mapKnownWatches.insert( mapKnownWatches_t::value_type( sInstrumentName, pWatch ) );
   }
   else {
     pWatch = iter->second;
