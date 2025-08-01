@@ -363,7 +363,7 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
           BuildOptionChains( instrument );
         } );
       pti->AppendMenuItem(
-        "Add Tag",
+        "add tag",
         [this,&instrument]( ou::tf::TreeItem* pti ){
           wxTextEntryDialog dialog( this, "Tag Name:", "Add Tag" );
           //dialog->ForceUpper(); // prints charters in reverse
@@ -381,7 +381,7 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
           }
         } );
       pti->AppendMenuItem(
-        "Delete Tag",
+        "delete tag",
         [this,&instrument]( ou::tf::TreeItem* pti ){
           wxTextEntryDialog dialog( this, "Tag Name:", "Delete Tag" );
           //dialog->ForceUpper(); // prints charters in reverse
@@ -397,6 +397,27 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
               //} );
             }
           }
+        } );
+      pti->AppendMenuItem(
+        "delete symbol",
+        [this,&instrument]( ou::tf::TreeItem* pti ){
+          const std::string& sNameIQFeed( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
+          mapInstrument_t::iterator iterInstrument = m_mapInstrument.find( sNameIQFeed );
+          assert( m_mapInstrument.end() != iterInstrument );
+          CallAfter(
+            [this,&instrument,iterInstrument,&sNameIQFeed](){
+              // todo: need to clear gui chains if exists
+              m_pOptionEngine->DeRegisterUnderlying( instrument.pWatch );
+              m_TagSymbolMap.DelTagsForSymbol(
+                sNameIQFeed,
+                [this]( const TagSymbolMap::sTag_t& sTag ){
+                  int n = m_clbTags->FindString( sTag );
+                  m_clbTags->Delete( n );
+                } );
+              assert( nullptr != instrument.pti );
+              instrument.pti->Delete();
+              m_mapInstrument.erase( iterInstrument );
+            } );
         } );
     }
   );

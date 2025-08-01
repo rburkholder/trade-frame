@@ -226,6 +226,7 @@ private:
         pWatch->OnSummary.Remove( MakeDelegate( &notesDividend, &DividendNotes::OnSummary ) ) ;
         pWatch.reset();
       }
+      mapChains.clear();
       pInstrument.reset();
     }
   };
