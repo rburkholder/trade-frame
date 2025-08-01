@@ -43,7 +43,6 @@ public:
   using pOption_t    = ou::tf::option::Option::pOption_t;
   using pPosition_t  = ou::tf::Position::pPosition_t;
 
-  using fRegisterOption_t = std::function<void(pOption_t&)>;
   using fStartCalc_t = std::function<void(pOption_t,pWatch_t)>; // option, underlying
   using fStopCalc_t =  std::function<void(pOption_t,pWatch_t)>; // option, underlying
 
@@ -51,8 +50,7 @@ public:
   using fSetChartDataView_t = std::function<void(pChartDataView_t)>;
 
   OptionRegistry(
-      fRegisterOption_t&& fRegisterOption
-    , fStartCalc_t&& fStartCalc
+      fStartCalc_t&& fStartCalc
     , fStopCalc_t&& fStopCalc
     , fSetChartDataView_t&& fSetChartDataView
     );
@@ -83,7 +81,6 @@ private:
 
   pWatch_t m_pWatchUnderlying;
 
-  fRegisterOption_t m_fRegisterOption;
   fStartCalc_t m_fStartCalc;
   fStopCalc_t m_fStopCalc;
   fSetChartDataView_t m_fSetChartDataView;

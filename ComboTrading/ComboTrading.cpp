@@ -143,16 +143,6 @@ bool AppComboTrading::OnInit() {
   //m_pPanelOptionCombo = nullptr;
 
   m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
-  m_pOptionEngine->Set(
-    [this](pInstrument_t pInstrument)->pWatch_t {
-        ou::tf::Watch::pWatch_t pWatch( new ou::tf::Watch( pInstrument, m_pData1Provider ) );
-        return pWatch;
-      },
-    [this](pInstrument_t pInstrument)->pOption_t {
-        ou::tf::option::Option::pOption_t pOption( new ou::tf::option::Option( pInstrument, m_pData1Provider ) );
-        return pOption;
-      }
-  );
 
   m_pFrameMain = new FrameMain( 0, wxID_ANY, c_sDisplayName_App, wxDefaultPosition, wxSize( 800, 1000 ) );
   m_pFrameMain->SetName( "primary" );
@@ -315,6 +305,34 @@ bool AppComboTrading::OnInit() {
   //return wxApp::OnExit();
 //}
 
+AppComboTrading::pWatch_t AppComboTrading::BuildWatch( pInstrument_t pInstrument ) {
+  pWatch_t pWatch;
+  const std::string& sInstrumentName( pInstrument->GetInstrumentName() );
+  mapWatch_t::iterator iterWatch = m_mapWatch.find( sInstrumentName );
+  if ( m_mapWatch.end() == iterWatch ) {
+    pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pData1Provider );
+    m_mapWatch.emplace( sInstrumentName, pWatch );
+  }
+  else {
+    pWatch = iterWatch->second;
+  }
+  return pWatch;
+}
+
+AppComboTrading::pOption_t AppComboTrading::BuildOption( pInstrument_t pInstrument ) {
+  pOption_t pOption;
+  const std::string& sInstrumentName( pInstrument->GetInstrumentName() );
+  mapOption_t::iterator iterOption = m_mapOption.find( sInstrumentName );
+  if ( m_mapOption.end() == iterOption ) {
+    pOption = std::make_shared<ou::tf::option::Option>( pInstrument, m_pData1Provider );
+    m_mapOption.emplace( sInstrumentName, pOption );
+  }
+  else {
+    pOption = iterOption->second;
+  }
+  return pOption;
+}
+
 void AppComboTrading::ProvideOptionList( const std::string& sSymbol, ou::tf::PanelCharts::fSymbol_t function ) {
   m_listIQFeedSymbols.SelectOptionsByUnderlying( sSymbol, function );
 }
@@ -455,10 +473,10 @@ void AppComboTrading::BuildFrameCharts( void ) {
     m_pOptionEngine->Remove( pOption, pWatchUnderlying );
   };
   m_pPanelCharts->m_fBuildOption = [this](pInstrument_t pInstrument, pOption_t& pOption){
-    pOption = m_pOptionEngine->FindOption( pInstrument );
+    return BuildOption( pInstrument );
   };
   m_pPanelCharts->m_fBuildWatch = [this](pInstrument_t pInstrument, pWatch_t& pWatch){
-    pWatch = m_pOptionEngine->FindWatch( pInstrument );
+    return BuildWatch( pInstrument );
   };
 
   int ixItem;
@@ -632,14 +650,14 @@ AppComboTrading::pPanelOptionCombo_t AppComboTrading::HandleNewPanelOptionCombo(
     assert( 0 != pUnderlyingInstrument.use_count() );
     assert( 0 != pUnderlyingInstrument.get() );
 
-    pWatch_t pWatch = m_pOptionEngine->FindWatch( pUnderlyingInstrument ); // construct watch from instrument
+    pWatch_t pWatch = BuildWatch( pUnderlyingInstrument );
     assert( 0 != pWatch.use_count() );
     assert( 0 != pWatch.get() );
 
     assert( 0 != pOptionInstrument.use_count() );
     assert( 0 != pOptionInstrument.get() );
 
-    pOption_t pOption = m_pOptionEngine->FindOption( pOptionInstrument );  // construct option from instrument
+    pOption_t pOption = BuildOption( pOptionInstrument );
     assert( 0 != pOption.use_count() );
     assert( 0 != pOption.get() );
 

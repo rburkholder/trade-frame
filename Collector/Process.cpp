@@ -316,7 +316,7 @@ void Process::ConstructCollectorATM( pWatch_t pWatch ) {
   mapCollectATM_t::iterator iterCollectATM = m_mapCollectATM.find( sSymbolName );
   if ( m_mapCollectATM.end() == iterCollectATM ) {
 
-    m_pOptionEngine->RegisterUnderlying( pWatch );
+    //m_pOptionEngine->RegisterUnderlying( pWatch );
 
     auto result = m_mapCollectATM.emplace(
       sSymbolName,
@@ -325,7 +325,7 @@ void Process::ConstructCollectorATM( pWatch_t pWatch ) {
         pWatch,
         [this]( collect::ATM::pInstrument_t pInstrument )->collect::ATM::pOption_t { // fBuildOption_t
           pOption_t pOption = std::make_shared<ou::tf::option::Option>( pInstrument, m_piqfeed );
-          m_pOptionEngine->RegisterOption( pOption );
+          //m_pOptionEngine->RegisterOption( pOption );
           return pOption;
         },
         [this]( pInstrument_t pInstrumentUnderlying, collect::ATM::fInstrumentOption_t&& fIO ){ // fGatherOptions_t

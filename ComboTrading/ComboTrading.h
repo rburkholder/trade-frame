@@ -18,6 +18,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <unordered_map>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -49,7 +50,6 @@
 #include <TFBitsNPieces/FrameWork01.h>
 #include <TFBitsNPieces/IQFeedSymbolListOps.h>
 #include <TFBitsNPieces/IQFeedInstrumentBuild.h>
-
 
 #include "Process.h"
 #include "PanelCharts.h"
@@ -135,6 +135,12 @@ private:
 
   mapPortfoliosTrading_t m_mapPortfoliosTrading;
   mapPortfoliosSandbox_t m_mapPortfoliosSandbox;
+
+  using mapWatch_t = std::unordered_map<std::string, pWatch_t>;
+  mapWatch_t m_mapWatch;
+
+  using mapOption_t = std::unordered_map<std::string, pOption_t>;
+  mapOption_t m_mapOption;
 
   ou::tf::PanelPortfolioPosition* m_pLastPPP;  // helps getting new positions to correct window
 
@@ -245,6 +251,9 @@ private:
 
   void HandlePortfolioLoad( pPortfolio_t& pPortfolio );
   void HandlePositionLoad( pPosition_t& pPosition );
+
+  pWatch_t BuildWatch( pInstrument_t );
+  pOption_t BuildOption( pInstrument_t );
 
   void ProvideOptionList( const std::string& sSymbol, ou::tf::PanelCharts::fSymbol_t );
 

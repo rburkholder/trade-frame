@@ -271,8 +271,6 @@ void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
     pWatch_t pWatch = m_fBuildWatch( pInstrument );
     instrument.Set( pWatch );
 
-    m_pOptionEngine->RegisterUnderlying( instrument.pWatch );
-
     AddInstrumentToTree( instrument );
 
   }
@@ -407,7 +405,6 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
           CallAfter(
             [this,&instrument,iterInstrument,&sNameIQFeed](){
               // todo: need to clear gui chains if exists
-              m_pOptionEngine->DeRegisterUnderlying( instrument.pWatch );
               m_TagSymbolMap.DelTagsForSymbol(
                 sNameIQFeed,
                 [this]( const TagSymbolMap::sTag_t& sTag ){
@@ -540,7 +537,6 @@ void InstrumentViews::PresentOptionChains( Instrument& underlying ) {
           vtChain, m_fBuildOption
         , [this,p=underlying.pWatch]( pOption_t pOption ){ // fOptionEngineStart_t
             try {
-              m_pOptionEngine->RegisterOption( pOption );
               m_pOptionEngine->Add( pOption, p );
             }
             catch ( const std::runtime_error& e ) {
@@ -550,7 +546,6 @@ void InstrumentViews::PresentOptionChains( Instrument& underlying ) {
         , [this,p=underlying.pWatch]( pOption_t pOption ){ // fOptionEngineStop_t
             try {
               m_pOptionEngine->Remove( pOption, p );
-              m_pOptionEngine->DeRegisterOption( pOption );
             }
             catch ( const std::runtime_error& e ) {
               BOOST_LOG_TRIVIAL(error) << "engine stop: " << e.what();

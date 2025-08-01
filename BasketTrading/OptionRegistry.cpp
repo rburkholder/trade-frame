@@ -26,20 +26,17 @@
 #include "OptionRegistry.hpp"
 
 OptionRegistry::OptionRegistry(
-  fRegisterOption_t&& fRegisterOption
-, fStartCalc_t&& fStartCalc
+  fStartCalc_t&& fStartCalc
 , fStopCalc_t&& fStopCalc
 , fSetChartDataView_t&& fSetChartDataView
 )
-: m_fRegisterOption( std::move( fRegisterOption ) )
-, m_fStartCalc( std::move( fStartCalc ) )
+: m_fStartCalc( std::move( fStartCalc ) )
 , m_fStopCalc( std::move( fStopCalc ) )
 , m_fSetChartDataView( std::move( fSetChartDataView ) )
 , m_ptiParent( nullptr )
 {
   assert( nullptr != m_fStartCalc );
   assert( nullptr != m_fStopCalc );
-  assert( nullptr != m_fRegisterOption );
 }
 
 OptionRegistry::~OptionRegistry() {
@@ -60,13 +57,6 @@ OptionRegistry::mapOption_t::iterator OptionRegistry::LookUp( pOption_t pOption 
     mapOptionRegistered_t::iterator iterRegistry = m_mapOptionRegistered.find( sOptionName );
     if ( m_mapOptionRegistered.end() == iterRegistry ) {
       m_mapOptionRegistered.emplace( mapOptionRegistered_t::value_type( sOptionName, pOption ) );
-      try {
-        m_fRegisterOption( pOption );
-      }
-      catch( std::runtime_error& e ) {
-        BOOST_LOG_TRIVIAL(info) << "OptionRegistry::LookUp error: " << e.what();
-        // simply telling us we are already registered, convert from error to status?
-      }
     }
 
     auto pair = m_mapOption.emplace( sOptionName, RegistryEntry( pOption ) );

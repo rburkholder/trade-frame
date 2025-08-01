@@ -218,7 +218,6 @@ void InteractiveChart::SetPosition(
 , pOptionChainQuery_t pOptionChainQuery
 , fBuildOption_t&& fBuildOption
 , fBuildPosition_t&& fBuildPosition
-, fRegisterOption_t&& fRegisterOption
 , fStartCalc_t&& fStartCalc
 , fStopCalc_t&& fStopCalc
 , fClick_t&& fClickLeft
@@ -247,7 +246,6 @@ void InteractiveChart::SetPosition(
   m_fBuildOption = std::move( fBuildOption );
   m_fBuildPosition = std::move( fBuildPosition );
 
-  m_fRegisterOption = std::move( fRegisterOption );
   m_fStartCalc = std::move( fStartCalc );
   m_fStopCalc = std::move( fStopCalc );
 
@@ -745,8 +743,6 @@ void InteractiveChart::UpdateImpliedVolatility( void (InteractiveChart::*f)( con
     if ( m_umapOptionsRegistered.end() == iter ) {
       auto pair = m_umapOptionsRegistered.emplace( idInstrument, pCurrent );
       assert( pair.second );
-      //iter = pair.first;
-      m_fRegisterOption( pCurrent );
     }
     pCurrent->OnGreek.Add( MakeDelegate( this, f ) );
     pCurrent->StartWatch();

@@ -121,35 +121,16 @@ public:
   Engine( const ou::tf::NoRiskInterestRateSeries& );
   virtual ~Engine( );
 
-  // these register the underlying, an option, or both [may deprecate the Find functions)
-  void RegisterUnderlying( const pWatch_t& ); // register an underlying
-  void DeRegisterUnderlying( const pWatch_t& );
-  void RegisterOption( const pOption_t& ); // register an option
-  void DeRegisterOption( const pOption_t& ); // deregister an option, keeps the map short
-
   // start the calculation process, the option and underlying need to be pre-registered
   void Add( pOption_t pOption, pWatch_t pUnderlying );  // the option already has a delegate for callback
   void Remove( pOption_t pOption, pWatch_t pUnderlying ); // part of the reference counting, will change reference count on associated underlying and auto remove
 
-  using fBuildWatch_t = std::function<pWatch_t(pInstrument_t)>;  // constructed elsewhere as it needs provider
-  using fBuildOption_t = std::function<pOption_t(pInstrument_t)>;  // constructed elsewhere as it needs provider
-  void Set( fBuildWatch_t&&, fBuildOption_t&& );
-
-  // these effectively handle registration of underlying and option, using a callback - deprecated, use Register... above
-  pWatch_t FindWatch( const pInstrument_t pInstrument );  // if Watch not found, construct one.  Then provide the watch.
-  pOption_t FindOption( const pInstrument_t pInstrument );  // if Option not found, construct one.  Then provide the option.
-
 private:
 
-  enum Action { Unknown, Option_Add, Option_Remove, Option_Register, Option_DeRegister };
-
-  fBuildWatch_t m_fBuildWatch;
-  fBuildOption_t m_fBuildOption;
+  enum Action { Unknown, Option_Add, Option_Remove };
 
   using idInstrument_t = ou::tf::Instrument::idInstrument_t;
 
-  using mapKnownWatches_t = std::unordered_map<idInstrument_t, pWatch_t>;
-  using mapKnownOptions_t = std::unordered_map<idInstrument_t, pOption_t>;
   using mapOptionEntry_t  = std::unordered_map<idInstrument_t, OptionEntry>;
 
   //std::atomic<size_t> m_cntOptionEntryOperationQueueCount;
@@ -178,8 +159,6 @@ private:
 
   dequeOptionEntryOperation_t m_dequeOptionEntryOperation;
 
-  mapKnownWatches_t m_mapKnownWatches;
-  mapKnownOptions_t m_mapKnownOptions;
   mapOptionEntry_t m_mapOptionEntry;
 
   void HandleTimerScan( const boost::system::error_code &ec );

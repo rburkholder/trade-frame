@@ -509,11 +509,7 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
     assert( result.second );
     UnderlyingWithStrategies& uws( result.first->second );
 
-    namespace ph = std::placeholders;
-
     uws.m_pOptionRegistry = std::make_shared<OptionRegistry>(
-    // ManageStrategy::fRegisterOption_t
-          std::bind( &ou::tf::option::Engine::RegisterOption, m_pOptionEngine.get(), ph::_1 ),
     // ManageStrategy::fStartCalc_t
           [this]( pOption_t pOption, pWatch_t pUnderlying ){
             m_pOptionEngine->Add( pOption, pUnderlying );
@@ -558,8 +554,6 @@ void MasterPortfolio::AddUnderlying( pWatch_t pWatch ) {
           ps.GetPivotValue( PS::PV ),
           ps.GetPivotValue( PS::S1 ), ps.GetPivotValue( PS::S2 )
           );
-
-        m_pOptionEngine->RegisterUnderlying( uws.pUnderlying->GetWatch() );
 
         uws.ptiUnderlying = m_ptiTreeUnderlying->AppendChild(
           sUnderlying,

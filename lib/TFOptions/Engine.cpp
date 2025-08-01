@@ -195,107 +195,6 @@ Engine::~Engine( ) {
 
   m_mapOptionEntry.clear();
 
-  m_mapKnownOptions.clear();
-  m_mapKnownWatches.clear();
-}
-
-void Engine::RegisterUnderlying( const pWatch_t& pWatch ) {
-  assert( pWatch );
-  const std::string& sInstrumentName( pWatch->GetInstrumentName() );
-  std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
-  mapKnownWatches_t::iterator iter = m_mapKnownWatches.find( sInstrumentName );
-  if ( m_mapKnownWatches.end() == iter ) {
-    m_mapKnownWatches.insert( mapKnownWatches_t::value_type( sInstrumentName, pWatch ) );
-  }
-  else {
-    throw std::runtime_error( "Engine::Register Underlying: already exists - " + sInstrumentName );
-  }
-}
-
-void Engine::DeRegisterUnderlying( const pWatch_t& pWatch ) {
-  assert( pWatch );
-  const std::string& sInstrumentName( pWatch->GetInstrumentName() );
-  std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
-  mapKnownWatches_t::iterator iter = m_mapKnownWatches.find( sInstrumentName );
-  if ( m_mapKnownWatches.end() == iter ) {
-    throw std::runtime_error( "Engine::Register Underlying: does not exist - " + sInstrumentName );
-  }
-  else {
-    m_mapKnownWatches.erase( iter );
-  }
-}
-
-void Engine::RegisterOption( const pOption_t& pOption) {
-  assert( pOption );
-  const std::string& sInstrumentName( pOption->GetInstrumentName() );
-  //BOOST_LOG_TRIVIAL(trace) << "Engine queue Option_Register " << sInstrumentName;
-
-  OptionEntry oe( nullptr, pOption );
-  std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
-  m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::Option_Register, std::move( oe ) ) );
-}
-
-void Engine::DeRegisterOption( const pOption_t& pOption) {
-  assert( pOption );
-  const std::string& sInstrumentName( pOption->GetInstrumentName() );
-  //BOOST_LOG_TRIVIAL(trace) << "Engine queue Option_DeRegister " << sInstrumentName;
-
-  OptionEntry oe( nullptr, pOption );
-  std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
-  m_dequeOptionEntryOperation.push_back( OptionEntryOperation( Action::Option_DeRegister, std::move( oe ) ) );
-}
-
-// if used, then need to perform a lookup on the underlying first to prevent duplicated effort
-//void Engine::Register( pOption_t& pOption, pWatch_t& pWatch) {
-//  Register( pWatch );
-//  Register( pOption );
-//}
-
-void Engine::Set( fBuildWatch_t&& fBuildWatch, fBuildOption_t&& fBuildOption ) {
-  assert( nullptr != fBuildWatch );
-  m_fBuildWatch = std::move( fBuildWatch );
-  assert( nullptr != fBuildOption );
-  m_fBuildOption = std::move( fBuildOption );
-}
-
-// needs to be used to load up underlying watch
-ou::tf::Watch::pWatch_t Engine::FindWatch( const pInstrument_t pInstrument ) {
-  //std::cout << "Engine::Find Watch: " << pWatch->GetInstrument()->GetInstrumentName() << std::endl;
-  //std::cout << "Engine::Find Watch: " << pInstrument->GetInstrumentName() << std::endl;
-  pWatch_t pWatch;
-  const std::string& sInstrumentName( pInstrument->GetInstrumentName() );
-
-  std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
-  mapKnownWatches_t::iterator iter = m_mapKnownWatches.find( sInstrumentName );
-  if ( m_mapKnownWatches.end() == iter ) {
-    pWatch = m_fBuildWatch( pInstrument );
-    assert( pWatch );
-    m_mapKnownWatches.insert( mapKnownWatches_t::value_type( sInstrumentName, pWatch ) );
-  }
-  else {
-    pWatch = iter->second;
-  }
-  assert( pWatch );
-  return pWatch;
-}
-
-// needs to be used to load up options
-Option::pOption_t Engine::FindOption( const pInstrument_t pInstrument ) {
-  //std::cout << "Engine::Find Option: " << pOption->GetInstrument()->GetInstrumentName() << std::endl;
-  //std::cout << "Engine::Find Option: " << pInstrument->GetInstrumentName() << std::endl;
-  pOption_t pOption;
-  std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
-  mapKnownOptions_t::iterator iter = m_mapKnownOptions.find( pInstrument->GetInstrumentName() );
-  if ( m_mapKnownOptions.end() == iter ) {
-    pOption = m_fBuildOption( pInstrument );
-    assert( 0 != pOption.get() );
-    m_mapKnownOptions.insert( mapKnownOptions_t::value_type( pInstrument->GetInstrumentName(), pOption ) );
-  }
-  else {
-    pOption = iter->second;
-  }
-  assert( 0 != pOption.get() );
-  return pOption;
 }
 
 void Engine::Add( pOption_t pOption, pWatch_t pUnderlying ) {
@@ -361,18 +260,6 @@ void Engine::ProcessOptionEntryOperationQueue() {
           std::string MapKey( sUnderlying + "_" + sOption );
           //BOOST_LOG_TRIVIAL(trace) << "Engine action AddOption " << MapKey;
 
-          mapKnownWatches_t::iterator iterWatches = m_mapKnownWatches.find( sUnderlying );
-          if ( m_mapKnownWatches.end() == iterWatches ) {
-            //m_mapKnownWatches.insert( mapKnownWatches_t::value_type( sUnderlying, iterOption->second.GetUnderlying() ) );
-            throw  std::runtime_error( "Engine::ProcessOptionEntryOperationQueue doesn't find known watch: " + sUnderlying );
-          }
-
-          mapKnownOptions_t::iterator iterOptions = m_mapKnownOptions.find( sOption );
-          if ( m_mapKnownOptions.end() == iterOptions ) {
-            //m_mapKnownOptions.insert( mapKnownOptions_t::value_type( sOption, iterOption->second.GetOption() ) );
-            throw  std::runtime_error( "Engine::ProcessOptionEntryOperationQueue doesn't find known option " + sOption );
-          }
-
           mapOptionEntry_t::iterator iterOption = m_mapOptionEntry.find( MapKey );
           if ( m_mapOptionEntry.end() == iterOption ) {
             iterOption = m_mapOptionEntry.insert( m_mapOptionEntry.begin(), mapOptionEntry_t::value_type(MapKey, std::move( oe.m_oe ) ) );
@@ -404,34 +291,6 @@ void Engine::ProcessOptionEntryOperationQueue() {
           }
           else {
             //std::cout << "Engine::RemoveOption: " << MapKey << " count " << cnt << std::endl;
-          }
-        }
-        break;
-      case Action::Option_Register: {
-          const std::string& sInstrumentName( oe.m_oe.GetOption()->GetInstrumentName() );
-          //BOOST_LOG_TRIVIAL(trace) << "Engine action Option_Register " << sInstrumentName;
-          mapKnownOptions_t::iterator iter = m_mapKnownOptions.find( sInstrumentName );
-          if ( m_mapKnownOptions.end() == iter ) {
-            m_mapKnownOptions.insert( mapKnownOptions_t::value_type( sInstrumentName, oe.m_oe.GetOption() ) );
-          }
-          else {
-            //throw std::runtime_error( "Engine::Register Option: already exists - " + sInstrumentName );
-            BOOST_LOG_TRIVIAL(error) << "Engine action Option_Register " << sInstrumentName << " already exists";
-          }
-        }
-        break;
-      case Action::Option_DeRegister: {
-          const std::string& sInstrumentName( oe.m_oe.GetOption()->GetInstrumentName() );
-          //BOOST_LOG_TRIVIAL(trace) << "Engine action Option_DeRegister " << sInstrumentName;
-          mapKnownOptions_t::iterator iter = m_mapKnownOptions.find( sInstrumentName );
-          if ( m_mapKnownOptions.end() != iter ) {
-            // todo: check that there has been a remove action on the option
-            // todo: check that does not come too soon after Remove( option )
-            m_mapKnownOptions.erase( iter );
-          }
-          else {
-            //throw std::runtime_error( "Engine::DeRegister Option: does not exist - " + sInstrumentName );
-            BOOST_LOG_TRIVIAL(error) << "Engine action Option_DeRegister " << sInstrumentName << " does not exist";
           }
         }
         break;

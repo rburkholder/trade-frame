@@ -110,7 +110,6 @@ public:
   using fOption_t = std::function<void(pOption_t)>;
   using fBuildOption_t = std::function<void(const std::string&,fOption_t&&)>;
 
-  using fRegisterOption_t = std::function<void(pOption_t&)>;
   using fStartCalc_t = std::function<void(pOption_t,pWatch_t)>; // option, underlying
   using fStopCalc_t =  std::function<void(pOption_t,pWatch_t)>; // option, underlying
 
@@ -132,7 +131,6 @@ public:
    , pOptionChainQuery_t
    , fBuildOption_t&&
    , fBuildPosition_t&&
-   , fRegisterOption_t&&
    , fStartCalc_t&&
    , fStopCalc_t&&
    , fClick_t&& left
@@ -273,7 +271,6 @@ private:
   mapChains_t::const_iterator m_iterChainFront;
   mapChains_t::const_iterator m_iterChainBack;
 
-  fRegisterOption_t m_fRegisterOption;
   fStartCalc_t m_fStartCalc;
   fStopCalc_t m_fStopCalc;
 
