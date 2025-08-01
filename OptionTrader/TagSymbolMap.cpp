@@ -132,3 +132,24 @@ void TagSymbolMap::TagList( fTag_t&& fTag ) {
   }
 
 }
+
+void TagSymbolMap::DelTagsForSymbol( const sSymbol_t& sSymbol, fTag_t&& fTag_ ) {
+
+  using setSymbol_t = mmapTagSymbol_t::index<ixSymbol>::type;
+
+
+
+  setSymbol_t& setSymbol( m_mmapTagSymbol.get<ixSymbol>() );
+  while ( true ) {
+    setSymbol_t::iterator iterSymbol = setSymbol.find( sSymbol );
+    if ( setSymbol.end() == iterSymbol ) break;
+    else {
+      if ( sSymbol != iterSymbol->sSymbol ) break;
+      else {
+        fTag_t fTag = fTag_; // make a copy for repeated use
+        const std::string sTag( iterSymbol->sTag );
+        DelTag( sTag, sSymbol, std::move( fTag ) );
+      }
+    }
+  }
+}

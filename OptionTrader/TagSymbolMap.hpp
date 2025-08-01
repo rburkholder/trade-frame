@@ -57,6 +57,8 @@ public:
 
   void TagList( fTag_t&& );
 
+  void DelTagsForSymbol( const sSymbol_t&, fTag_t&& );
+
 protected:
 private:
 
