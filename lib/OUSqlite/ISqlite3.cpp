@@ -110,6 +110,11 @@ bool ISqlite3::ExecuteStatement( structStatementState& statement ) {
       throw std::runtime_error( sErr );
       }
       break;
+    case SQLITE_CONSTRAINT: {
+      std::string sErr( "ISqlite3::ExecuteStatement: " );
+      sErr += " constraint, record probably exists";
+      throw std::runtime_error( sErr );
+      }
     default: {
       std::string sErr( "ISqlite3::ExecuteStatement: " );
       sErr += " unknown error in execute(";
