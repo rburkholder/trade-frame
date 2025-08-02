@@ -28,6 +28,7 @@
 #include <OUCharting/ChartEntryBars.h>
 #include <OUCharting/ChartEntryMark.h>
 #include <OUCharting/ChartEntryVolume.h>
+#include <OUCharting/ChartEntryIndicator.h>
 
 #include <TFTimeSeries//TimeSeries.h>
 
@@ -76,6 +77,12 @@ private:
   ou::ChartEntryVolume m_ceVolume;
 
   ou::ChartEntryMark m_ceStatistics;
+
+  ou::ChartEntryIndicator m_ceEma007;
+  ou::ChartEntryIndicator m_ceEma021;
+  ou::ChartEntryIndicator m_ceEma050;
+  ou::ChartEntryIndicator m_ceEma100;
+  ou::ChartEntryIndicator m_ceEma200;
 
   void SetTimeFrame_future( boost::posix_time::ptime );
   void SetTimeFrame_equity( boost::posix_time::ptime );

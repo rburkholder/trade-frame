@@ -19,12 +19,12 @@
  * Created: July 28, 2025 09:00:23
  */
 
-#include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "OUCommon/Colour.h"
 #include <OUCommon/TimeSource.h>
+
+#include <TFTrading/Instrument.h>
 
 #include <TFIndicators/Pivots.h>
 
@@ -48,7 +48,24 @@ ManualDailyBarModel::ManualDailyBarModel()
 
   m_dvChart.Add( EChartSlot::Price, &m_cePriceBars );
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolume );
-  //m_dvChart.Add( EChartSlot::Price, &m_ceStatistics );
+
+  m_ceEma007.SetColour( ou::Colour::LightBlue );
+  m_ceEma021.SetColour( ou::Colour::LightSalmon );
+  m_ceEma050.SetColour( ou::Colour::LightPink );
+  m_ceEma100.SetColour( ou::Colour::LightCyan );
+  m_ceEma200.SetColour( ou::Colour::LightGreen );
+
+  m_ceEma007.SetName( "ema 7 day" );
+  m_ceEma021.SetName( "ema 21 day" );
+  m_ceEma050.SetName( "ema 50 day" );
+  m_ceEma100.SetName( "ema 100 day" );
+  m_ceEma200.SetName( "ema 200 day" );
+
+  m_dvChart.Add( EChartSlot::Price, &m_ceEma007 );
+  m_dvChart.Add( EChartSlot::Price, &m_ceEma021 );
+  m_dvChart.Add( EChartSlot::Price, &m_ceEma050 );
+  m_dvChart.Add( EChartSlot::Price, &m_ceEma100 );
+  m_dvChart.Add( EChartSlot::Price, &m_ceEma200 );
 
 }
 
@@ -189,6 +206,14 @@ void ManualDailyBarModel::OnHistoryDone() {
   OnHistoryDoneStatistics();
 }
 
+template<int n>
+double ema( double prev, double cur ) {
+  constexpr double ratio( 1.0 / n );
+  constexpr double remain( 1.0 - ratio );
+  return remain * prev + ratio * cur;
+}
+
+
 void ManualDailyBarModel::OnHistoryDoneStatistics() {
 
   double dblAvg200 {};
@@ -243,6 +268,34 @@ void ManualDailyBarModel::OnHistoryDoneStatistics() {
     ix++;
   });
 
+  double ema007 {};
+  double ema021 {};
+  double ema050 {};
+  double ema100 {};
+  double ema200 {};
+
+  ix = 0;
+  m_barsInterDay.ForEach(
+    [this,&ix,&ema007,&ema021,&ema050,&ema100,&ema200]( const ou::tf::Bar& bar ){
+      const double close( bar.Close() );
+      if ( 0 == ix ) {
+        ema007 = ema021 = ema050 = ema100 = ema200 = close;
+      }
+      else {
+        ema007 =   ema<7>( ema007, close );
+        ema021 =  ema<21>( ema021, close );
+        ema050 =  ema<50>( ema050, close );
+        ema100 = ema<100>( ema100, close );
+        ema200 = ema<200>( ema200, close );
+      }
+      m_ceEma007.Append( ou::tf::Price( bar.DateTime(), ema007 ) );
+      m_ceEma021.Append( ou::tf::Price( bar.DateTime(), ema021 ) );
+      m_ceEma050.Append( ou::tf::Price( bar.DateTime(), ema050 ) );
+      m_ceEma100.Append( ou::tf::Price( bar.DateTime(), ema100 ) );
+      m_ceEma200.Append( ou::tf::Price( bar.DateTime(), ema200 ) );
+      ++ix;
+    } );
+
   BOOST_LOG_TRIVIAL(info)
     << "sma"
     << " 7 day=" << dblAvg7
@@ -287,8 +340,9 @@ void ManualDailyBarModel::Pivots() {
     m_ceStatistics.AddMark( ps.GetPivotValue( PS::S2 ), ps.GetPivotColour( PS::S2 ), "s2" );
 
     BOOST_LOG_TRIVIAL(info)
-      << "pivots"
-      <<  " r2=" << ps.GetPivotValue( PS::R2 )
+      << "pivots for "
+      << ou::tf::Instrument::BuildDate( bar.DateTime().date() ) << '-' << bar.DateTime().time_of_day()
+      << ": r2=" << ps.GetPivotValue( PS::R2 )
       << ", r1=" << ps.GetPivotValue( PS::R1 )
       << ", pv=" << ps.GetPivotValue( PS::PV )
       << ", s1=" << ps.GetPivotValue( PS::S1 )
