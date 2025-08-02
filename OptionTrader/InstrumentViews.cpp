@@ -255,24 +255,28 @@ void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
     const std::string& sNameIQFeed(  pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
 
     auto result = m_mapInstrument.emplace( sNameIQFeed, Instrument() );
-    assert( result.second );
-    mapInstrument_t::iterator iterInstrument = result.first;
-    Instrument& instrument( iterInstrument->second );
-
-    mapStateCache_t::iterator iterCache = m_mapStateCache.find( sNameIQFeed );
-    if ( m_mapStateCache.end() != iterCache ) {
-      instrument.notesDividend.sNotes = iterCache->second.sDvidendNotes;
-      m_mapStateCache.erase( iterCache );
+    if ( !result.second ) {
+      BOOST_LOG_TRIVIAL(warning) << "AddInstrument - already added - " << sNameGeneric << " - " << sNameIQFeed;
     }
+    else {
+      assert( result.second );
+      mapInstrument_t::iterator iterInstrument = result.first;
+      Instrument& instrument( iterInstrument->second );
 
-    instrument.pInstrument = pInstrument;
-    instrument.mdbm.Set( instrument.pInstrument->GetInstrumentType() );
+      mapStateCache_t::iterator iterCache = m_mapStateCache.find( sNameIQFeed );
+      if ( m_mapStateCache.end() != iterCache ) {
+        instrument.notesDividend.sNotes = iterCache->second.sDvidendNotes;
+        m_mapStateCache.erase( iterCache );
+      }
 
-    pWatch_t pWatch = m_fBuildWatch( pInstrument );
-    instrument.Set( pWatch );
+      instrument.pInstrument = pInstrument;
+      instrument.mdbm.Set( instrument.pInstrument->GetInstrumentType() );
 
-    AddInstrumentToTree( instrument );
+      pWatch_t pWatch = m_fBuildWatch( pInstrument );
+      instrument.Set( pWatch );
 
+      AddInstrumentToTree( instrument );
+    }
   }
   else {
     BOOST_LOG_TRIVIAL(error) << "symbol/instrument not found";
