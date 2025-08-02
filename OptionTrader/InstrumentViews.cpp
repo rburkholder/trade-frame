@@ -339,10 +339,11 @@ void InstrumentViews::UpdateDividendNotes( Instrument& instrument ) {
 void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
 
   const std::string& sNameGeneric( instrument.pInstrument->GetInstrumentName() );
+  const std::string& sNameIQFeed( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
 
   instrument.pti = m_pRootTreeItem->AppendChild(
     sNameGeneric,
-    [this,&instrument,&sNameGeneric]( ou::tf::TreeItem* pti ){ // fClick_t
+    [this,&instrument,&sNameGeneric,&sNameIQFeed]( ou::tf::TreeItem* pti ){ // fClick_t
       //m_pWinChartView_session->SetLive_trail(); // todo: revert to this after testing
       m_pWinChartView_session->SetLive_review();
       m_pWinChartView_session->SetChartDataView( instrument.sbm.GetChartDataView() );
@@ -354,6 +355,7 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
 
       if ( instrument.sbm.IsWatching() ) {}
       else {
+        BOOST_LOG_TRIVIAL(info) << "BuildDailyBarModel " << sNameIQFeed << " - " << sNameGeneric;
         BuildDailyBarModel( instrument );
       }
     },
@@ -614,7 +616,7 @@ void InstrumentViews::BuildSessionBarModel( Instrument& instrument ) {
 // note: makes use of sdm.IsWatching to be single entry here
 void InstrumentViews::BuildDailyBarModel( Instrument& instrument ) {
   const std::string& sIQFeedSymbolName( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
-  //BOOST_LOG_TRIVIAL(info) << "BuildDailyBarModel " << sIQFeedSymbolName;
+  //BOOST_LOG_TRIVIAL(info) << "BuildDailyBarModel " << sIQFeedSymbolName << " - " << sNameGeneric;
   m_pBarHistory->Set(
     [&instrument]( const ou::tf::Bar& bar ){ // fHistory_Bar_t
       instrument.mdbm.OnHistoryIntraBar( bar );
