@@ -20,12 +20,14 @@
  */
 
 #include <DBDividend/TableTag.hpp>
+#include <DBDividend/TableDaily.hpp>
 #include <DBDividend/TableSymbol.hpp>
 #include <DBDividend/TableDividend.hpp>
 
 #include <OUCommon/TimeSource.h>
 
 #include <TFTrading/Database.h>
+#include <boost/date_time/gregorian/greg_date.hpp>
 
 #include "Config.hpp"
 #include "Process.hpp"
@@ -34,6 +36,7 @@ void HandleRegisterTables( ou::db::Session& session ) {
   // called when db created
   //std::cout << "HandleRegisterTables placeholder" << std::endl;
   session.RegisterTable<db::table::Tag::TableCreateDef>( db::table::Tag::c_TableName );
+  session.RegisterTable<db::table::Daily::TableCreateDef>( db::table::Daily::c_TableName );
   session.RegisterTable<db::table::Symbol::TableCreateDef>( db::table::Symbol::c_TableName );
   session.RegisterTable<db::table::Dividend::TableCreateDef>( db::table::Dividend::c_TableName );
 }
@@ -42,6 +45,7 @@ void HandleRegisterRows( ou::db::Session& session ) {
   // called when db created and when exists
   //std::cout << "HandleRegisterRows placeholder" << std::endl;
   session.MapRowDefToTableName<db::table::Tag::TableRowDef>( db::table::Tag::c_TableName );
+  session.MapRowDefToTableName<db::table::Daily::TableRowDef>( db::table::Daily::c_TableName );
   session.MapRowDefToTableName<db::table::Symbol::TableRowDef>( db::table::Symbol::c_TableName );
   session.MapRowDefToTableName<db::table::Dividend::TableRowDef>( db::table::Dividend::c_TableName );
 }
@@ -79,6 +83,35 @@ struct UpdateSymbol {
   UpdateSymbol( const std::string& sSymbol_, const boost::gregorian::date dateUpdated_ )
   : sSymbol( sSymbol_ ), dateUpdated( dateUpdated_ ) {}
 };
+
+struct SymbolDateKey {
+  const std::string& sSymbol;
+  boost::gregorian::date date;
+  template<class A>
+  void Fields( A& a ) {
+    ou::db::Field( a, "symbol_name", sSymbol );
+    ou::db::Field( a, "date_exdividend", date );
+  }
+  SymbolDateKey( const std::string& sSymbol_, boost::gregorian::date date_ )
+  : sSymbol( sSymbol_ ), date( date_ ) {}
+};
+
+bool SymbolExDividendExists(
+  ou::db::Session& db
+, const std::string& sSymbol, const boost::gregorian::date date
+, db::table::Dividend::TableRowDef& row )
+{
+  bool bFound( false );
+  SymbolDateKey key( sSymbol, date );
+  ou::db::QueryFields<SymbolDateKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
+    = db.SQL<SymbolDateKey>( "select * from " + db::table::Dividend::c_TableName, key ).Where( "symbol_name=? and date_exdividend=?" ).NoExecute();
+  db.Bind<SymbolDateKey>( pExistsQuery );
+  if ( db.Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
+    db.Columns<SymbolDateKey, db::table::Dividend::TableRowDef>( pExistsQuery, row );
+    bFound = true;
+  }
+  return bFound;
+}
 
 int main( int argc, char* argv[] ) {
 
@@ -143,6 +176,7 @@ int main( int argc, char* argv[] ) {
           << std::endl;
       }
 
+      // Table Symbol
       db::table::Symbol::TableRowDef trdSymbol( // might be overwritten
         vt.sSymbol, vt.sCompanyName, today, today, vt.sState
       );
@@ -159,21 +193,36 @@ int main( int argc, char* argv[] ) {
           = db.Insert<db::table::Symbol::TableRowDef>( trdSymbol );
       }
 
-      db::table::Dividend::TableRowDef trdDividend(
+      // Table Daily
+      db::table::Daily::TableRowDef trdDaily(
         vt.sSymbol
       , today
       , vt.trade
-      , vt.rate
       , vt.yield
-      , vt.amount
       , vt.nAverageVolume
       , vt.nSharesOutstanding
-      , vt.datePayed
-      , vt.dateExDividend
       );
+
+      ou::db::QueryFields<db::table::Daily::TableRowDef>::pQueryFields_t pQuery
+        = db.Insert<db::table::Daily::TableRowDef>( const_cast<db::table::Daily::TableRowDef&>( trdDaily ) );
+
+      // Table Dividend
+      db::table::Dividend::TableRowDef trdDividend_exists;
+      if ( SymbolExDividendExists( db, vt.sSymbol, vt.dateExDividend, trdDividend_exists ) ) {} // do nothing
+      else {
+        db::table::Dividend::TableRowDef trdDividend(
+          vt.sSymbol
+        , today
+        , vt.dateExDividend
+        , vt.amount
+        , vt.datePayed
+        , vt.rate
+        );
 
       ou::db::QueryFields<db::table::Dividend::TableRowDef>::pQueryFields_t pQuery
         = db.Insert<db::table::Dividend::TableRowDef>( const_cast<db::table::Dividend::TableRowDef&>( trdDividend ) );
+
+      }
 
       ++cnt;
     }

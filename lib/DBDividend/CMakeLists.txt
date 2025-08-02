@@ -10,6 +10,7 @@ set(
   file_h
     TableTag.hpp
     TableSymbol.hpp
+    TableDaily.hpp
     TableDividend.hpp
   )
 
@@ -17,6 +18,7 @@ set(
   file_cpp
     TableTag.cpp
     TableSymbol.cpp
+    TableDaily.cpp
     TableDividend.cpp
   )
 

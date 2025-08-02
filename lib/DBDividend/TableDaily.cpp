@@ -13,18 +13,18 @@
  ************************************************************************/
 
 /*
- * File:    TableDividend.cpp
+ * File:    TableDaily.cpp
  * Author:  raymond@burkholder.net
  * Project: DBDividend
- * Created: April 12, 2025  09:00:13
+ * Created: August 2, 2025 15:28:21
  */
 
-#include "TableDividend.hpp"
+#include "TableDaily.hpp"
 
 namespace db {
 namespace table {
 
-  const std::string Dividend::c_TableName( "dividend" );
+  const std::string Daily::c_TableName( "daily" );
 
 } // namespace table
 } // namespace db
