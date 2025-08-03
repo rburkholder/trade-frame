@@ -40,11 +40,12 @@ public:
   Model();
   ~Model();
 
-  void Append( const Features_raw&, Features_scaled& );
-  void Build( const HyperParameters& );
+  void Append( const Features_raw&, Features_scaled& ); // training mode and prediction mode
+
+  void Train( const HyperParameters& ); // train on batch of Append'd values
 
   void SetPredictionMode();
-  ou::tf::Price Predict( boost::posix_time::ptime );
+  ou::tf::Price Predict( boost::posix_time::ptime ); // iteratively called after each Append
 
   ou::tf::Price EmptyPrice( boost::posix_time::ptime ) const; // empty value used during training
 

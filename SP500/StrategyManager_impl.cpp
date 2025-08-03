@@ -267,7 +267,7 @@ void StrategyManager_impl::HandleSimComplete_build() {
   m_sim->EmitStats( ss );
   BOOST_LOG_TRIVIAL(info) << "simulation (build) results " << ss.str();
 
-  m_model.Build( m_choices.m_hp );
+  m_model.Train( m_choices.m_hp );
 
   m_fQueueTask( [this](){ CleanUp_build(); } );
 

@@ -192,7 +192,7 @@ ou::tf::Price Model::Predict( boost::posix_time::ptime dt ) {
   return ou::tf::Price( dt + boost::posix_time::seconds( c_secondsYOffset ), price );
 }
 
-void Model::Build( const HyperParameters& hp ) {
+void Model::Train( const HyperParameters& hp ) {
 
   // use a second layer to reduce the output size?
 
