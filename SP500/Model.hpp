@@ -87,4 +87,7 @@ private:
 
   using pLSTM_t = std::unique_ptr<LSTM>;
   pLSTM_t m_pLSTM;
+
+  static bool Scale( const Features_raw&, Features_scaled& );
+
 };

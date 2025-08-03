@@ -96,7 +96,9 @@ namespace {
   };
 }
 
-void Model::Append( const Features_raw& raw, Features_scaled& scaled ) {
+bool Model::Scale( const Features_raw& raw, Features_scaled& scaled ) {
+
+  bool bScaled( true );
 
   double max;
   double min;
@@ -128,6 +130,19 @@ void Model::Append( const Features_raw& raw, Features_scaled& scaled ) {
 
     scaled.AdvDec = ( raw.dblAdvDecRatio * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 
+  }
+  else {
+    scaled.Zero();
+    bScaled = false;
+  }
+
+  return bScaled;
+
+}
+
+void Model::Append( const Features_raw& raw, Features_scaled& scaled ) {
+  if ( Scale( raw, scaled ) ) {
+
     const fields_t<float> scaled_flt(
       scaled.ema200.flt, scaled.ema050.flt, scaled.ema029.flt, scaled.ema013.flt
     , scaled.price.flt
@@ -136,12 +151,7 @@ void Model::Append( const Features_raw& raw, Features_scaled& scaled ) {
     );
 
     m_vDataScaled.push_back( scaled_flt ); // will need to timestamp each entry
-
   }
-  else {
-    scaled.Zero();
-  }
-
 }
 
 ou::tf::Price Model::EmptyPrice( boost::posix_time::ptime dt ) const {
