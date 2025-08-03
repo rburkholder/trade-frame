@@ -199,7 +199,7 @@ void StrategyManager_impl::RunStrategy_predict() {
   // run stratgy with built model
   BOOST_LOG_TRIVIAL(info) << "model predict: started";
 
-  m_model.Eval();
+  m_model.SetPredictionMode();
 
   m_mapHdf5Instrument.clear();
   m_sSimulatorGroupDirectory.clear();
