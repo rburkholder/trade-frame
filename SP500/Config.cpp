@@ -43,7 +43,14 @@ namespace {
     bool bOk = true;
     if ( 0 < vm.count( name ) ) {
       dest = std::move( vm[name].as<T>() );
-      BOOST_LOG_TRIVIAL(info) << name << " = " << dest;
+      if constexpr( std::is_same<T, config::Choices::vFileTraining_t>::value ) {
+        for ( const auto& item: dest ) {
+          BOOST_LOG_TRIVIAL(info) << name << " = " << item;
+        }
+      }
+      else {
+        BOOST_LOG_TRIVIAL(info) << name << " = " << dest;
+      }
     }
     else {
       if ( bRequired ) {
@@ -73,7 +80,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     config.add_options()
 
     ( sChoice_Mode.c_str(), po::value<std::string>( &sMode ), "mode setting: view_training_data, view_validate_data, train/validate" )
-    ( sChoice_sFileTraining.c_str(), po::value<std::string>( &choices.m_sFileTraining )->default_value( "" ), "training file" )
+    ( sChoice_sFileTraining.c_str(), po::value<Choices::vFileTraining_t>( &choices.m_vFileTraining ), "training file" )
     ( sChoice_sFileValidate.c_str(), po::value<std::string>( &choices.m_sFileValidate )->default_value( "" ), "validation file" )
     ( sChoice_sLearningRate.c_str(), po::value<double>( &choices.m_hp.m_dblLearningRate )->default_value( 0.01 ), "learning rate" )
     ( sChoice_sNumEpochs.c_str(), po::value<int>( &choices.m_hp.m_nEpochs )->default_value( 1000 ), "number of epochs" )
@@ -89,22 +96,10 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       po::store( po::parse_config_file( ifs, config), vm );
 
       bOk &= parse<std::string>( sFileName, vm, sChoice_Mode, false, sMode );
-      bOk &= parse<std::string>( sFileName, vm, sChoice_sFileTraining, false, choices.m_sFileTraining );
-      bOk &= parse<std::string>( sFileName, vm, sChoice_sFileValidate, false, choices.m_sFileValidate );
+      bOk &= parse<Choices::vFileTraining_t>( sFileName, vm, sChoice_sFileTraining, true, choices.m_vFileTraining );
+      bOk &= parse<std::string>( sFileName, vm, sChoice_sFileValidate, true, choices.m_sFileValidate );
       bOk &= parse<double>( sFileName, vm, sChoice_sLearningRate, false, choices.m_hp.m_dblLearningRate );
       bOk &= parse<int>( sFileName, vm, sChoice_sNumEpochs, false, choices.m_hp.m_nEpochs );
-    }
-
-    if ( 0 < choices.m_sFileTraining.size() ) {}
-    else {
-      bOk = false;
-      BOOST_LOG_TRIVIAL(error) << sFileName << ' ' << sChoice_sFileTraining << " required";
-    }
-
-    if ( 0 < choices.m_sFileValidate.size() ) {}
-    else {
-      bOk = false;
-      BOOST_LOG_TRIVIAL(error) << sFileName << ' ' << sChoice_sFileValidate << " required";
     }
 
     if ( 100.0 > choices.m_hp.m_nEpochs ) {

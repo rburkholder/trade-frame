@@ -46,9 +46,10 @@ StrategyManager_impl::StrategyManager_impl(
   switch ( m_choices.eMode ) {
     case config::Choices::EMode::view_training:
       {
-        m_cdv.SetNames( "SPY - training", m_choices.m_sFileTraining );
+        //m_cdv.SetNames( "SPY - training", m_choices.m_sFileTraining );
+        m_cdv.SetNames( "SPY", "training" );
         LoadPanelFinancialChart();
-        ou::tf::HDF5DataManager hdm(  ou::tf::HDF5DataManager::RO, m_choices.m_sFileTraining );
+        ou::tf::HDF5DataManager hdm(  ou::tf::HDF5DataManager::RO, m_choices.m_vFileTraining.front() );
         IterateHDF5( hdm, [this,&hdm]( const std::string& s1, const std::string& s2 ){ HandleLoadTreeHdf5Object_View( hdm, s1, s2 ); } );
       }
       break;
@@ -177,17 +178,17 @@ void StrategyManager_impl::RunStrategy_build() {
 
   m_mapHdf5Instrument.clear();
   m_sSimulatorGroupDirectory.clear();
-  ou::tf::HDF5DataManager hdm( ou::tf::HDF5DataManager::RO, m_choices.m_sFileTraining );
+  ou::tf::HDF5DataManager hdm( ou::tf::HDF5DataManager::RO, m_choices.m_vFileTraining.front() );
   IterateHDF5( hdm, [this,&hdm](const std::string& s1, const std::string& s2 ){ HandleLoadTreeHdf5Object_Sim( hdm, s1, s2 ); } );
 
-  if ( ValidateSimFile( m_choices.m_sFileTraining ) ) {
+  if ( ValidateSimFile( m_choices.m_vFileTraining.front() ) ) {
     m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_build ) );
-    m_cdv_build.SetNames( "SPY - build", m_choices.m_sFileTraining );
+    m_cdv_build.SetNames( "SPY - build", m_choices.m_vFileTraining.front() );
     m_fSetChartDataView( ou::tf::WinChartView::EView::sim_trail, &m_cdv_build );
     RunStrategy(
       m_startDateUTC,
       m_cdv_build,
-      [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price {
+      [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price { // fForward_t
         m_model.Append( raw, scaled );
         return m_model.EmptyPrice( raw.dt );
       } );
@@ -212,7 +213,7 @@ void StrategyManager_impl::RunStrategy_predict() {
     RunStrategy(
       m_startDateUTC,
       m_cdv_predict,
-      [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price {
+      [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price { // fForward_t
         m_model.Append( raw, scaled );
         return m_model.Predict( raw.dt );
       } );
@@ -220,9 +221,11 @@ void StrategyManager_impl::RunStrategy_predict() {
 
 }
 
-void StrategyManager_impl::RunStrategy( boost::gregorian::date date, ou::ChartDataView& cdv, Strategy::fForward_t&& f ) {
+void StrategyManager_impl::RunStrategy( boost::gregorian::date date, ou::ChartDataView& cdv, Strategy::fForward_t&& fForward ) {
+
   using pWatch_t = Strategy::pWatch_t;
   using pPosition_t = Strategy::pPosition_t;
+
   m_pStrategy = std::make_unique<Strategy>(
     cdv,
     [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedWatch_t&& f ){ // fConstructWatch_t
@@ -245,7 +248,7 @@ void StrategyManager_impl::RunStrategy( boost::gregorian::date date, ou::ChartDa
     },
     [this](){ // fStop_t
     },
-    std::move( f ) // fForward_t
+    std::move( fForward ) // fForward_t
   );
 
   assert( m_pStrategy );

@@ -22,6 +22,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "HyperParameters.hpp"
 
@@ -31,8 +32,9 @@ struct Choices {
 
   enum class EMode { view_training, view_validate, train_and_validate, unknown } eMode;
 
-  std::string m_sFileTraining; // required for simulation
-  std::string m_sFileValidate; // required for simulation
+  using vFileTraining_t = std::vector<std::string>;
+  vFileTraining_t m_vFileTraining; // multiple files for training
+  std::string m_sFileValidate; // single file for validation
 
   HyperParameters m_hp;
 

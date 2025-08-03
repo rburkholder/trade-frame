@@ -64,10 +64,12 @@ int main( int argc, char* argv[] ) {
     using EMode = config::Choices::EMode;
 
     if ( ( EMode::train_and_validate == m_choices.eMode ) || ( EMode::view_training == m_choices.eMode ) ) {
-      if ( boost::filesystem::exists( m_choices.m_sFileTraining ) ) {}
-      else {
-        BOOST_LOG_TRIVIAL(error) << "training file " << m_choices.m_sFileTraining << " does not exist";
-        return 1; // EXIT_FAILURE
+      for ( const auto& sFileName: m_choices.m_vFileTraining ) {
+        if ( boost::filesystem::exists( sFileName ) ) {}
+        else {
+          BOOST_LOG_TRIVIAL(error) << "training file " << sFileName << " does not exist";
+          return 1; // EXIT_FAILURE
+        }
       }
     }
 
