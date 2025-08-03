@@ -27,6 +27,7 @@ LSTM::LSTM( int input_size, int hidden_size, int num_layers, int output_size )
 {
   register_module( "lstm", lstm );
   register_module( "linear", linear );
+  train( true );  // training is true by default, set to false by call to eval()
 }
 
 LSTM::lstm_state_t LSTM::init_states( torch::DeviceType device, int batch_size  ) {
