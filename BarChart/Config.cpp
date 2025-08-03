@@ -37,8 +37,14 @@ namespace {
     bool bOk = true;
     if ( 0 < vm.count( name ) ) {
       dest = std::move( vm[name].as<T>() );
-      //BOOST_LOG_TRIVIAL(info) << name << " = " << dest; // can't log a vector?
-    }
+      if constexpr( std::is_same<T, config::Choices::vSecurityName_t>::value ) {
+        for ( const auto& item: dest ) {
+          BOOST_LOG_TRIVIAL(info) << name << " = " << item;
+        }
+      }
+      else {
+        BOOST_LOG_TRIVIAL(info) << name << " = " << dest;
+      }    }
     else {
       if ( bRequired ) {
         BOOST_LOG_TRIVIAL(error) << sFileName << " missing '" << name << "='";
