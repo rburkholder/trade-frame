@@ -12,6 +12,7 @@ set(
     TableSymbol.hpp
     TableDaily.hpp
     TableDividend.hpp
+    TableDividendDaily.hpp
   )
 
 set(
@@ -20,6 +21,7 @@ set(
     TableSymbol.cpp
     TableDaily.cpp
     TableDividend.cpp
+    TableDividendDaily.cpp
   )
 
 add_library(

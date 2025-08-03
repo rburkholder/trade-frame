@@ -23,6 +23,7 @@
 #include <DBDividend/TableDaily.hpp>
 #include <DBDividend/TableSymbol.hpp>
 #include <DBDividend/TableDividend.hpp>
+#include <DBDividend/TableDividendDaily.hpp>
 
 #include <OUCommon/TimeSource.h>
 
@@ -39,6 +40,7 @@ void HandleRegisterTables( ou::db::Session& session ) {
   session.RegisterTable<db::table::Daily::TableCreateDef>( db::table::Daily::c_TableName );
   session.RegisterTable<db::table::Symbol::TableCreateDef>( db::table::Symbol::c_TableName );
   session.RegisterTable<db::table::Dividend::TableCreateDef>( db::table::Dividend::c_TableName );
+  //session.RegisterTable<db::table::DividendDaily::TableCreateDef>( db::table::DividendDaily::c_TableName ); // do not construct - never enabled
 }
 
 void HandleRegisterRows( ou::db::Session& session ) {
@@ -48,6 +50,7 @@ void HandleRegisterRows( ou::db::Session& session ) {
   session.MapRowDefToTableName<db::table::Daily::TableRowDef>( db::table::Daily::c_TableName );
   session.MapRowDefToTableName<db::table::Symbol::TableRowDef>( db::table::Symbol::c_TableName );
   session.MapRowDefToTableName<db::table::Dividend::TableRowDef>( db::table::Dividend::c_TableName );
+  //session.MapRowDefToTableName<db::table::DividendDaily::TableRowDef>( db::table::DividendDaily::c_TableName ); // use only when fix-up is true
 }
 
 struct SymbolKey {
@@ -134,6 +137,66 @@ int main( int argc, char* argv[] ) {
   db.OnRegisterTables.Add( &HandleRegisterTables );
   db.OnRegisterRows.Add( &HandleRegisterRows );
   db.Open( sDbFileName );
+
+  if ( false ) { // migrate old table content into new tables, one time op
+
+    // mnaual changes:
+    /*
+    alter table dividend rename to daily_dividend;
+    CREATE TABLE daily (symbol_name TEXT NOT NULL, date_run TEXT NOT NULL, last_trade DOUBLE NOT NULL, yield DOUBLE NOT NULL, average_volume BIGINT NOT NULL, shares_outstanding BIGINT NOT NULL,  CONSTRAINT PK_daily PRIMARY KEY (symbol_name, date_run));
+    CREATE TABLE dividend (symbol_name TEXT NOT NULL, date_run TEXT NOT NULL, date_exdividend TEXT NOT NULL, amount_payed DOUBLE NOT NULL, date_payed TEXT NOT NULL, rate DOUBLE NOT NULL,  CONSTRAINT PK_dividend PRIMARY KEY (symbol_name, date_exdividend));
+    */
+
+    db::table::DividendDaily::TableRowDef row;
+    ou::db::QueryFields<ou::db::NoBind>::pQueryFields_t pSelect
+      = db.SQL<ou::db::NoBind>( "select * from " + db::table::DividendDaily::c_TableName ).NoExecute();
+    // this doesn't work properly with 0 records being returned
+    while ( db.Execute( pSelect ) ) {
+      db.Columns<ou::db::NoBind,  db::table::DividendDaily::TableRowDef>( pSelect, row );
+      //std::cout << row.sSymbol << ", " << row.dateRun << std::endl;
+
+      db::table::Daily::TableRowDef trdDaily(
+        row.sSymbol
+      , row.dateRun
+      , row.dblLastTrade
+      , row.dblYield
+      , row.nAverageVolume
+      , row.nSharesOutstanding
+      );
+
+      ou::db::QueryFields<db::table::Daily::TableRowDef>::pQueryFields_t pInsertDaily
+        = db.Insert<db::table::Daily::TableRowDef>( const_cast<db::table::Daily::TableRowDef&>( trdDaily ) );
+
+      db::table::Dividend::TableRowDef trdDividend_exists;
+      if ( SymbolExDividendExists( db, row.sSymbol, row.dateExDividend, trdDividend_exists ) ) {} // do nothing
+      else {
+
+        db::table::Dividend::TableRowDef trdDividend(
+          row.sSymbol
+        , row.dateRun
+        , row.dateExDividend
+        , row.dblAmountPayed
+        , row.datePayed
+        , row.dblRate
+        );
+
+        ou::db::QueryFields<db::table::Dividend::TableRowDef>::pQueryFields_t pInsertDividend
+          = db.Insert<db::table::Dividend::TableRowDef>( const_cast<db::table::Dividend::TableRowDef&>( trdDividend ) );
+
+      }
+
+    }
+
+    pSelect.reset();
+
+    db.Close();
+    db.OnRegisterRows.Remove( &HandleRegisterRows );
+    db.OnRegisterTables.Remove( &HandleRegisterTables );
+
+    // force exit when done
+    return EXIT_SUCCESS;
+  }
+
 
   using vSymbols_t = Process::vSymbols_t;
   vSymbols_t vSymbols;
