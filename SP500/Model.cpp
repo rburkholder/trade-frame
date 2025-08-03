@@ -19,8 +19,6 @@
  * Created: July 4, 2025 11:32:42
  */
 
-//#include <algorithm>
-
 #include <boost/log/trivial.hpp>
 
 #include "LSTM.hpp"
@@ -59,14 +57,17 @@ Model::~Model() {
 }
 
 namespace {
-  // from AutoTrade/NeuralNet.cpp
+
+  // activation functions inspired by AutoTrade/NeuralNet.cpp
+  // additional activiation functions:
+  // https://machinelearninggeek.com/activation-functions/
+
   template<int coef>
   inline double binary_sigmoid( double x ) { // 0.0 .. 1.0
     constexpr double k( -coef );
     return 1.0 / ( 1.0 + std::exp( x * k ) );
   }
 
-  // from AutoTrade/NeuralNet.cpp
   template<int coef>
   inline double bipolar_sigmoid( double x ) { // -1.0 .. +1.0 (aka tanh)
     constexpr double k( -coef );
@@ -74,8 +75,6 @@ namespace {
     return ( 1.0 - ex ) / ( 1.0 + ex );
   }
 
-  // additional activiation functions:
-  // https://machinelearninggeek.com/activation-functions/
 }
 
 namespace {
@@ -88,7 +87,7 @@ namespace {
       max = min = init;
     }
 
-    void test( const double value ) {
+    void add( const double value ) {
       if ( max < value ) max = value;
       else {
         if ( min > value ) min = value;
@@ -102,9 +101,9 @@ void Model::Append( const Features_raw& raw, Features_scaled& scaled ) {
   double max;
   double min;
   maxmin mm( max, min, raw.dblEma200 );
-  mm.test( raw.dblEma050 );
-  mm.test( raw.dblEma029 );
-  mm.test( raw.dblEma013 );
+  mm.add( raw.dblEma050 );
+  mm.add( raw.dblEma029 );
+  mm.add( raw.dblEma013 );
   // on purpose: no test on price
 
   if ( max > min ) {
@@ -145,7 +144,7 @@ void Model::Append( const Features_raw& raw, Features_scaled& scaled ) {
 
 }
 
-ou::tf::Price Model::EmptyPrice( boost::posix_time::ptime dt ) {
+ou::tf::Price Model::EmptyPrice( boost::posix_time::ptime dt ) const {
   return ou::tf::Price( dt + boost::posix_time::seconds( c_secondsYOffset ), 0.0 );
 }
 
@@ -283,7 +282,6 @@ void Model::Build( const HyperParameters& hp ) {
     torch::TensorOptions().dtype( torch::kFloat32 )
   ).to( m_torchDevice ); // without .clone(), data source remains in the vector
   BOOST_LOG_TRIVIAL(info) << "batched tensorY sizes: " << tensorY.sizes();
-
 
   // https://github.com/pytorch/pytorch
   // https://docs.pytorch.org/docs/stable/torch.html

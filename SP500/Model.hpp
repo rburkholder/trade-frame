@@ -43,7 +43,7 @@ public:
   void Append( const Features_raw&, Features_scaled& );
   void Build( const HyperParameters& );
 
-  ou::tf::Price EmptyPrice( boost::posix_time::ptime );
+  ou::tf::Price EmptyPrice( boost::posix_time::ptime ) const;
 
   void Eval();
   ou::tf::Price Predict( boost::posix_time::ptime );
