@@ -169,6 +169,7 @@ bool StrategyManager_impl::ValidateSimFile( const std::string& sDataFileName ) {
 void StrategyManager_impl::HandleSimConnected( int ) {
   // todo:
   // * save/load models
+  m_model.Train_Init();
   m_fQueueTask( [this](){ RunStrategy_build(); } );
 }
 
@@ -267,7 +268,8 @@ void StrategyManager_impl::HandleSimComplete_build() {
   m_sim->EmitStats( ss );
   BOOST_LOG_TRIVIAL(info) << "simulation (build) results " << ss.str();
 
-  m_model.Train( m_choices.m_hp );
+  m_model.Train_BuildSamples();
+  m_model.Train_Perform( m_choices.m_hp );
 
   m_fQueueTask( [this](){ CleanUp_build(); } );
 

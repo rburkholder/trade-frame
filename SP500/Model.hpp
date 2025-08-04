@@ -46,8 +46,6 @@ public:
   void Train_BuildSamples();
   void Train_Perform( const HyperParameters& ); // train on batch of Append'd values
 
-  void Train( const HyperParameters& ); // combine all three into one call
-
   void SetPredictionMode();
   ou::tf::Price Predict( boost::posix_time::ptime ); // iteratively called after each Append
 

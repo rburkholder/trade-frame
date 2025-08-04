@@ -369,9 +369,3 @@ void Model::Train_Perform( const HyperParameters& hp ) {
   BOOST_LOG_TRIVIAL(info) << "training done";
 
 }
-
-void Model::Train( const HyperParameters& hp ) {
-  Train_Init();
-  Train_BuildSamples();
-  Train_Perform( hp );
-}
