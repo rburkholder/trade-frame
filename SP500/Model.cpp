@@ -30,6 +30,8 @@ namespace {
   static const size_t c_secondsSampleOffset( 23 );  // offset for each sample
   static const size_t c_secondsSequence( 210 ); // duration of sample sequence
   static const size_t c_secondsYOffset( 30 ); // attempt prediction this far in the future
+
+  static const int c_nOutputFeature( 1 );
 }
 
 Model::Model()
@@ -192,20 +194,26 @@ ou::tf::Price Model::Predict( boost::posix_time::ptime dt ) {
   return ou::tf::Price( dt + boost::posix_time::seconds( c_secondsYOffset ), price );
 }
 
-void Model::Train( const HyperParameters& hp ) {
+void Model::Train_Init() {
 
-  // use a second layer to reduce the output size?
+  BOOST_LOG_TRIVIAL(info)
+           << "size of fields_t<float>: " << sizeof( fields_t<float> )
+    << ',' << "size of fields_t<double>: " << sizeof( fields_t<double> )
+    ;
+
+  m_vSourceForTensorX.clear();
+  m_vSourceForTensorY.clear();
+
+  m_nSamples_actual = 0;
+}
+
+void Model::Train_BuildSamples() {
 
   BOOST_LOG_TRIVIAL(info)
     << "scaled vector size: "
            << m_vDataScaled.size() << "sec"
     << ',' << m_vDataScaled.size() / 60.0 << "min"
     << ',' << m_vDataScaled.size() / 3600.0 << "hr"
-    ;
-
-  BOOST_LOG_TRIVIAL(info)
-           << "size of fields_t<float>: " << sizeof( fields_t<float> )
-    << ',' << "size of fields_t<double>: " << sizeof( fields_t<double> )
     ;
 
   // references:
@@ -222,8 +230,6 @@ void Model::Train( const HyperParameters& hp ) {
 
   static const size_t secondsTotal( c_secondsSequence + c_secondsYOffset ); // training + prediction
 
-  static const int nOutputFeature( 1 );
-
   static const int nInputFeature( nInputFeature_ );
   static const size_t sizeFloat( sizeof( float ) );
 
@@ -232,11 +238,7 @@ void Model::Train( const HyperParameters& hp ) {
 
   const size_t nSamples_theory( m_vDataScaled.size() / c_secondsSampleOffset ); // assumes integer math with truncation
 
-  long nSamples_actual {};
   vValuesFlt_t::size_type ixDataScaled {};
-
-  vValuesFlt_t vSourceForTensorX; // implicit 3 dimensions:  [sample index][sample size in seconds][feature list]
-  std::vector<float> vSourceForTensorY; // [samples match X][1 second for prediction][last index implies 1 feature]
 
   {
     vValuesFlt_t::const_iterator bgnX = m_vDataScaled.begin(); // begin of input
@@ -248,13 +250,13 @@ void Model::Train( const HyperParameters& hp ) {
     while ( m_vDataScaled.size() > ( ixDataScaled + secondsTotal ) ) {
 
       // append X sequence
-      std::copy( bgnX, endX, std::back_inserter( vSourceForTensorX ) );
+      std::copy( bgnX, endX, std::back_inserter( m_vSourceForTensorX ) );
 
       // append Y sequence
       std::for_each(
          bgnY, endY,
-         [&vSourceForTensorY]( auto& entry ){
-          vSourceForTensorY.push_back( entry.fields[ ixTrade ] );
+         [this]( auto& entry ){
+          m_vSourceForTensorY.push_back( entry.fields[ ixTrade ] );
         } );
 
       bgnX += c_secondsSampleOffset;
@@ -262,33 +264,41 @@ void Model::Train( const HyperParameters& hp ) {
       bgnY += c_secondsSampleOffset;
       endY += c_secondsSampleOffset;
       ixDataScaled += c_secondsSampleOffset;
-      ++nSamples_actual;
+      ++m_nSamples_actual;
     }
     // won't match for now:
-    BOOST_LOG_TRIVIAL(info) << "nSamples: " << nSamples_actual << ',' << nSamples_theory;
+    BOOST_LOG_TRIVIAL(info) << "nSamples: " << m_nSamples_actual << ',' << nSamples_theory;
   }
 
   BOOST_LOG_TRIVIAL(info)
     << "data usage: " << ixDataScaled << ',' << m_vDataScaled.size() << ',' << ixDataScaled + secondsTotal;
   BOOST_LOG_TRIVIAL(info)
     << "input samples * (time steps in each sample): "
-    << nSamples_actual
+    << m_nSamples_actual
     << ',' << c_secondsSequence
-    << '=' << '(' << vSourceForTensorX.size()
-    << ','        << vSourceForTensorY.size()
+    << '=' << '(' << m_vSourceForTensorX.size()
+    << ','        << m_vSourceForTensorY.size()
            << ')'
     ;
 
+}
+
+void Model::Train_Perform( const HyperParameters& hp ) {
+
+  // use a second layer to reduce the output size?
+
   // note: from_blob does not manage memory, so underlying needs to be valid during lifetime of tensor
 
+  static const int nInputFeature( nInputFeature_ );
+
   torch::Tensor tensorX = // input
-    torch::from_blob( vSourceForTensorX.data(), { nSamples_actual, c_secondsSequence, nInputFeature },
+    torch::from_blob( m_vSourceForTensorX.data(), { m_nSamples_actual, c_secondsSequence, nInputFeature },
     torch::TensorOptions().dtype( torch::kFloat32 )
   ).to( m_torchDevice ); // without .clone(), data source remains in the vector
   BOOST_LOG_TRIVIAL(info) << "batched tensorX sizes: " << tensorX.sizes();
 
   torch::Tensor tensorY = // output
-    torch::from_blob( vSourceForTensorY.data(), { nSamples_actual, c_secondsSequence, nOutputFeature },
+    torch::from_blob( m_vSourceForTensorY.data(), { m_nSamples_actual, c_secondsSequence, c_nOutputFeature },
     torch::TensorOptions().dtype( torch::kFloat32 )
   ).to( m_torchDevice ); // without .clone(), data source remains in the vector
   BOOST_LOG_TRIVIAL(info) << "batched tensorY sizes: " << tensorY.sizes();
@@ -306,10 +316,10 @@ void Model::Train( const HyperParameters& hp ) {
   //   which usually has a larger dimension than the number of features in the input.
 
   // Hyperparameters
-  const int batch_size( nSamples_actual );
+  const int batch_size( m_nSamples_actual );
   const int input_size( nInputFeature );
   const int hidden_size( nInputFeature * 9 );
-  const int output_size( nOutputFeature );
+  const int output_size( c_nOutputFeature );
   const int sequence_length( c_secondsSequence );
   const int num_layers( 1 );
 
@@ -354,4 +364,10 @@ void Model::Train( const HyperParameters& hp ) {
 
   BOOST_LOG_TRIVIAL(info) << "training done";
 
+}
+
+void Model::Train( const HyperParameters& hp ) {
+  Train_Init();
+  Train_BuildSamples();
+  Train_Perform( hp );
 }

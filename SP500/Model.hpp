@@ -42,7 +42,11 @@ public:
 
   void Append( const Features_raw&, Features_scaled& ); // training mode and prediction mode
 
-  void Train( const HyperParameters& ); // train on batch of Append'd values
+  void Train_Init();
+  void Train_BuildSamples();
+  void Train_Perform( const HyperParameters& ); // train on batch of Append'd values
+
+  void Train( const HyperParameters& ); // combine all three into one call
 
   void SetPredictionMode();
   ou::tf::Price Predict( boost::posix_time::ptime ); // iteratively called after each Append
@@ -85,6 +89,11 @@ private:
   using vValuesFlt_t = std::vector<fields_t<float> >;
   vValuesFlt_t m_vDataScaled; // LSTM prefers float, values are 0.0 to 1.0 anyway
   vValuesFlt_t::const_iterator m_iterDataScaled;
+
+  long m_nSamples_actual {};
+
+  vValuesFlt_t m_vSourceForTensorX; // implicit 3 dimensions:  [sample index][sample size in seconds][feature list]
+  std::vector<float> m_vSourceForTensorY; // [samples match X][1 second for prediction][last index implies 1 feature]
 
   using pLSTM_t = std::unique_ptr<LSTM>;
   pLSTM_t m_pLSTM;
