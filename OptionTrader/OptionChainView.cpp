@@ -72,6 +72,14 @@ void OptionChainView::CreateControls() {
     assert( AppendColumn( new wxDataViewColumn( "p oi",   fRendererRight(), EChainColums::p_oi ) ) );
     assert( AppendColumn( new wxDataViewColumn( "",       fRendererRight(), EChainColums::empty ) ) );
   }
+
+  // the following does not work, will need to use wxGrid to provide column & header colours
+  //wxColourDatabase cdb;
+
+  //wxItemAttr attr1;
+  //wxItemAttr attr2( attr1.GetTextColour(), attr1.GetBackgroundColour(), attr1.GetFont() );
+  //attr2.SetBackgroundColour( cdb.Find( "RED" ) );
+  //SetHeaderAttr( attr2 );
 }
 
 void OptionChainView::OnDestroy( wxWindowDestroyEvent& event ) {
