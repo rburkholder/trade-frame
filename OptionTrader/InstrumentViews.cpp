@@ -364,7 +364,12 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
       pti->AppendMenuItem(
         "option chain",
         [this,&instrument]( ou::tf::TreeItem* pti ){
-          BuildOptionChains( instrument );
+          if ( 0 == instrument.mapChains.size() ) {
+            BuildOptionChains( instrument );
+          }
+          else {
+            PresentOptionChains( instrument );
+          }
         } );
       pti->AppendMenuItem(
         "add tag",
@@ -577,7 +582,6 @@ void InstrumentViews::PresentOptionChains( Instrument& underlying ) {
           if ( entry.put.pInstrument ) {
             ptiStrike->AppendChild( entry.put.pInstrument->GetInstrumentName() );
           }
-
         }
       );
     } // if
