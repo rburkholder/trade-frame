@@ -567,17 +567,20 @@ void InstrumentViews::PresentOptionChains( Instrument& underlying ) {
         GetParent()->Layout();    }
     );
 
-    vtChain.second.Strikes(
-      [ptiExpiry]( double strike, const chain_t::strike_t& entry ){
-        ou::tf::TreeItem* ptiStrike = ptiExpiry->AppendChild( boost::lexical_cast<std::string>( strike ) );
-        if ( entry.call.pInstrument ) {
-          ptiStrike->AppendChild( entry.call.pInstrument->GetInstrumentName() );
-        }
-        if ( entry.put.pInstrument ) {
-          ptiStrike->AppendChild( entry.put.pInstrument->GetInstrumentName() );
-        }
+    if ( false ) { // disable for now, time consuming to build and tear down
+      vtChain.second.Strikes(
+        [ptiExpiry]( double strike, const chain_t::strike_t& entry ){
+          ou::tf::TreeItem* ptiStrike = ptiExpiry->AppendChild( boost::lexical_cast<std::string>( strike ) );
+          if ( entry.call.pInstrument ) {
+            ptiStrike->AppendChild( entry.call.pInstrument->GetInstrumentName() );
+          }
+          if ( entry.put.pInstrument ) {
+            ptiStrike->AppendChild( entry.put.pInstrument->GetInstrumentName() );
+          }
 
-      } );
+        }
+      );
+    } // if
   }
 }
 
