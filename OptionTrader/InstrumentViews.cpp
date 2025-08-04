@@ -490,6 +490,7 @@ void InstrumentViews::BuildOptionChains( Instrument& instrumentUnderlying ) {
             // update put/call@strike with option
             Instance* pInstance
               = ou::tf::option::UpdateOption<chain_t,Instance>( chain, pInstrumentOption );
+            assert( pInstance ); // catch duplication of effort
             pInstance->pInstrument = pInstrumentOption; // put / call as appropriate
 
             if ( bLastOne ) {
@@ -565,6 +566,7 @@ void InstrumentViews::PresentOptionChains( Instrument& underlying ) {
         Layout();
         GetParent()->Layout();    }
     );
+
     vtChain.second.Strikes(
       [ptiExpiry]( double strike, const chain_t::strike_t& entry ){
         ou::tf::TreeItem* ptiStrike = ptiExpiry->AppendChild( boost::lexical_cast<std::string>( strike ) );
