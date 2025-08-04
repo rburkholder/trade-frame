@@ -201,6 +201,8 @@ void Model::Train_Init() {
     << ',' << "size of fields_t<double>: " << sizeof( fields_t<double> )
     ;
 
+  m_vDataScaled.clear();
+
   m_vSourceForTensorX.clear();
   m_vSourceForTensorY.clear();
 
@@ -280,6 +282,8 @@ void Model::Train_BuildSamples() {
     << ','        << m_vSourceForTensorY.size()
            << ')'
     ;
+
+  m_vDataScaled.clear(); // prepare for another set of features
 
 }
 
