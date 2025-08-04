@@ -343,7 +343,15 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
 
   instrument.pti = m_pRootTreeItem->AppendChild(
     sNameGeneric,
-    [this,&instrument,&sNameGeneric,&sNameIQFeed]( ou::tf::TreeItem* pti ){ // fClick_t
+    [this,&instrument,&sNameGeneric,&sNameIQFeed]( ou::tf::TreeItem* pti ){ // fOnClick_t
+
+      // stop current OptionChainModel
+      if ( nullptr != m_pOptionChainModel ) {
+        m_pOptionChainModel->DecRef();
+        m_pOptionChainModel = nullptr;
+      }
+      m_pOptionChainView->AssociateModel( m_pOptionChainModel );
+
       //m_pWinChartView_session->SetLive_trail(); // todo: revert to this after testing
       m_pWinChartView_session->SetLive_review();
       m_pWinChartView_session->SetChartDataView( instrument.sbm.GetChartDataView() );
@@ -362,7 +370,7 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
     [this,&instrument]( ou::tf::TreeItem* pti ){ // fOnBuildPopup_t
       pti->NewMenu();
       pti->AppendMenuItem(
-        "option chain",
+        "option chains",
         [this,&instrument]( ou::tf::TreeItem* pti ){
           if ( 0 == instrument.mapChains.size() ) {
             BuildOptionChains( instrument );
