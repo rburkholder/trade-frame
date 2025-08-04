@@ -507,14 +507,14 @@ void InstrumentViews::BuildOptionChains( Instrument& instrumentUnderlying ) {
     case ou::tf::InstrumentType::Future:
       m_pComposeInstrument->OptionChainQuery()->QueryFuturesOptionChain(
         sNameIQFeed,
-        "pc", "", "", "1", // 1 near month
+        "pc", "", "", "2", // 2 near month
         std::move( fProcessOptionList )
       );
       break;
     case ou::tf::InstrumentType::Stock:
       m_pComposeInstrument->OptionChainQuery()->QueryEquityOptionChain(
         sNameIQFeed,
-        "pc", "", "1", "0","0","0",  // 1 near month
+        "pc", "", "2", "0","0","0",  // 2 near month
         std::move( fProcessOptionList )
       );
       break;
