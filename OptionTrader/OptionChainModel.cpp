@@ -147,6 +147,11 @@ void OptionChainModel::GetValue( wxVariant& value, const wxDataViewItem& item, u
         response = fmt::format( "{:.{}f}", vt.options.call.pOption->LastGreek().Delta(), 3 );
       }
       break;
+    case c_gma:
+      if ( vt.options.call.pOption ) {
+        response = fmt::format( "{:.{}f}", vt.options.call.pOption->LastGreek().Gamma(), 4 );
+      }
+      break;
     case c_bid: // call bid
       if ( vt.options.call.pOption ) {
         response = fmt::format( "{:.{}f}", vt.options.call.pOption->LastQuote().Bid(), 2 );
@@ -173,6 +178,11 @@ void OptionChainModel::GetValue( wxVariant& value, const wxDataViewItem& item, u
     case p_dlt:
       if ( vt.options.put.pOption ) {
         response = fmt::format( "{:.{}f}", vt.options.put.pOption->LastGreek().Delta(), 3 );
+      }
+      break;
+    case p_gma:
+      if ( vt.options.put.pOption ) {
+        response = fmt::format( "{:.{}f}", vt.options.put.pOption->LastGreek().Gamma(), 4 );
       }
       break;
     case p_iv:

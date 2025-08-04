@@ -23,7 +23,7 @@
 #include <TFOptions/Chain.h>
 #include <TFOptions/Option.h>
 
-enum EChainColums { c_oi, c_iv, c_dlt, c_bid, c_ask, strike, p_bid, p_ask, p_dlt, p_iv, p_oi, empty };
+enum EChainColums { c_oi, c_iv, c_bid, c_ask, c_gma, c_dlt, strike, p_dlt, p_gma, p_bid, p_ask, p_iv, p_oi, empty };
 
 using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 using pOption_t = ou::tf::option::Option::pOption_t;
