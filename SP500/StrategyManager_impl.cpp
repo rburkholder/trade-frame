@@ -27,7 +27,6 @@
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
 
-#include "Config.hpp"
 #include "Features.hpp"
 #include "StrategyManager_impl.hpp"
 
@@ -170,6 +169,7 @@ void StrategyManager_impl::HandleSimConnected( int ) {
   // todo:
   // * save/load models
   m_model.Train_Init();
+  m_iterFileTraining = m_choices.m_vFileTraining.begin();
   m_fQueueTask( [this](){ RunStrategy_build(); } );
 }
 
@@ -177,14 +177,15 @@ void StrategyManager_impl::RunStrategy_build() {
 
   BOOST_LOG_TRIVIAL(info) << "model build: started";
 
+  m_cdv_build.Clear();
   m_mapHdf5Instrument.clear();
   m_sSimulatorGroupDirectory.clear();
-  ou::tf::HDF5DataManager hdm( ou::tf::HDF5DataManager::RO, m_choices.m_vFileTraining.front() );
+  ou::tf::HDF5DataManager hdm( ou::tf::HDF5DataManager::RO, *m_iterFileTraining );
   IterateHDF5( hdm, [this,&hdm](const std::string& s1, const std::string& s2 ){ HandleLoadTreeHdf5Object_Sim( hdm, s1, s2 ); } );
 
-  if ( ValidateSimFile( m_choices.m_vFileTraining.front() ) ) {
+  if ( ValidateSimFile( *m_iterFileTraining ) ) {
     m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_build ) );
-    m_cdv_build.SetNames( "SPY - build", m_choices.m_vFileTraining.front() );
+    m_cdv_build.SetNames( "SPY - build", *m_iterFileTraining );
     m_fSetChartDataView( ou::tf::WinChartView::EView::sim_trail, &m_cdv_build );
     RunStrategy(
       m_startDateUTC,
@@ -269,16 +270,28 @@ void StrategyManager_impl::HandleSimComplete_build() {
   BOOST_LOG_TRIVIAL(info) << "simulation (build) results " << ss.str();
 
   m_model.Train_BuildSamples();
-  m_model.Train_Perform( m_choices.m_hp );
 
-  m_fQueueTask( [this](){ CleanUp_build(); } );
+  m_fQueueTask(
+  [this](){
+    m_pStrategy.reset(); // needs to be prior to sim reset
+    m_sim->Reset();
+  });
 
-}
+  ++m_iterFileTraining;
+  if ( m_choices.m_vFileTraining.end() != m_iterFileTraining ) {
+    m_fQueueTask(
+      [this](){
+        RunStrategy_build();
+      });
+  }
+  else {
+    m_fQueueTask(
+      [this](){
+        m_model.Train_Perform( m_choices.m_hp );
+        RunStrategy_predict();
+      } );
+  }
 
-void StrategyManager_impl::CleanUp_build() {
-  m_pStrategy.reset(); // needs to be prior to sim reset
-  m_sim->Reset();
-  m_fQueueTask( [this](){ RunStrategy_predict(); } );
 }
 
 void StrategyManager_impl::HandleSimComplete_predict() {

@@ -40,6 +40,7 @@
 #include <TFSimulation/SimulationProvider.hpp>
 
 #include "Model.hpp"
+#include "Config.hpp"
 #include "Strategy.hpp"
 
 namespace config {
@@ -66,6 +67,7 @@ protected:
 private:
 
   const config::Choices& m_choices;
+  config::Choices::vFileTraining_t::const_iterator m_iterFileTraining;
 
   ou::ChartDataView m_cdv;
   ou::ChartDataView m_cdv_build;
@@ -155,7 +157,6 @@ private:
   bool ValidateSimFile( const std::string& );
   void HandleSimConnected( int );
   void HandleSimComplete_build();
-  void CleanUp_build();
   void HandleSimComplete_predict();
   void CleanUp_predict();
 
