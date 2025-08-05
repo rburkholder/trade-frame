@@ -28,8 +28,8 @@
 
 namespace {
   static const size_t c_secondsSampleOffset( 23 );  // offset for each sample
-  static const size_t c_secondsSequence( 210 ); // duration of sample sequence
-  static const size_t c_secondsYOffset( 30 ); // attempt prediction this far in the future
+  static const size_t c_secondsSequence( 224 ); // duration of sample sequence
+  static const size_t c_secondsYOffset( 32 ); // attempt prediction this far in the future
 
   static const int c_nOutputFeature( 1 );
 }
