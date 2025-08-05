@@ -152,6 +152,7 @@ private:
   void LoadPanelFinancialChart();
 
   void RunSimulation();
+  void TrainAndGoLive();
 
   bool BuildProviders_Sim();
   bool ValidateSimFile( const std::string& );

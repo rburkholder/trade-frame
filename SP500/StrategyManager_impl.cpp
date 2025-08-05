@@ -61,9 +61,10 @@ StrategyManager_impl::StrategyManager_impl(
       }
       break;
     case config::Choices::EMode::train_and_validate:
-      {
-        RunSimulation();
-      }
+      RunSimulation();
+      break;
+    case config::Choices::EMode::train_go_live:
+      TrainAndGoLive();
       break;
     case config::Choices::EMode::unknown:
       assert( false );
@@ -82,6 +83,10 @@ StrategyManager_impl::~StrategyManager_impl() {
 
 void StrategyManager_impl::RunSimulation() {
   BuildProviders_Sim();
+}
+
+void StrategyManager_impl::TrainAndGoLive() {
+  BOOST_LOG_TRIVIAL(warning) << "TrainAndGoLive not implemented";
 }
 
 bool StrategyManager_impl::BuildProviders_Sim() {

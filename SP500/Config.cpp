@@ -73,13 +73,14 @@ bool Load( const std::string& sFileName, Choices& choices ) {
   kwmMode.AddPattern( "view_training_data", config::Choices::EMode::view_training );
   kwmMode.AddPattern( "view_validate_data", config::Choices::EMode::view_validate );
   kwmMode.AddPattern( "train/validate", config::Choices::EMode::train_and_validate );
+  kwmMode.AddPattern( "train/golive", config::Choices::EMode::train_go_live );
 
   try {
 
     po::options_description config( "SP500 config" );
     config.add_options()
 
-    ( sChoice_Mode.c_str(), po::value<std::string>( &sMode ), "mode setting: view_training_data, view_validate_data, train/validate" )
+    ( sChoice_Mode.c_str(), po::value<std::string>( &sMode ), "mode setting: view_training_data, view_validate_data, train/validate, train/golive" )
     ( sChoice_sFileTraining.c_str(), po::value<Choices::vFileTraining_t>( &choices.m_vFileTraining ), "training file" )
     ( sChoice_sFileValidate.c_str(), po::value<std::string>( &choices.m_sFileValidate )->default_value( "" ), "validation file" )
     ( sChoice_sLearningRate.c_str(), po::value<double>( &choices.m_hp.m_dblLearningRate )->default_value( 0.01 ), "learning rate" )
