@@ -424,6 +424,8 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
           CallAfter(
             [this,&instrument,iterInstrument,&sNameIQFeed](){
               // todo: need to clear gui chains if exists
+              m_pWinChartView_session->SetChartDataView( nullptr );
+              m_pWinChartView_daily->SetChartDataView( nullptr );
               m_TagSymbolMap.DelTagsForSymbol(
                 sNameIQFeed,
                 [this]( const TagSymbolMap::sTag_t& sTag ){
