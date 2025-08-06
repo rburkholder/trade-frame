@@ -18,6 +18,8 @@
  * Created: July 18, 2025 11:30:21
  */
 
+// todo: convert to wxgrid, has wider variety of cell & colour choices
+
 #include "OptionChainView.hpp"
 
 OptionChainView::OptionChainView(): wxDataViewCtrl() {
@@ -57,6 +59,9 @@ void OptionChainView::CreateControls() {
   };
 
   {
+    // Todo: add intrinsic value, premium value for call & put, include last price?
+    // Todo: use trades to indicate possible trade opportunities, as they may represent knowlegeable actors
+    //       check if they correspond to peaks/valleys in the underlying
     assert( AppendColumn( new wxDataViewColumn( "c oi",   fRendererRight(), EChainColums::c_oi ) ) );
     assert( AppendColumn( new wxDataViewColumn( "c iv",   fRendererRight(), EChainColums::c_iv ) ) );
     assert( AppendColumn( new wxDataViewColumn( "c bid",  fRendererRight(), EChainColums::c_bid ) ) );
