@@ -415,7 +415,11 @@ void OptionChainQuery::QueryFuturesOptionChain(
   BOOST_LOG_TRIVIAL(trace) << "request: '" << ss.str() << "'"; // for diagnostics
   ss << "\n";
   std::scoped_lock<std::mutex> lock( m_mutexMapRequest );
-  assert( m_mapOptions.end() == m_mapOptions.find( sSymbol ) );
+  mapOptions_t::iterator iterOptions = m_mapOptions.find( sSymbol );
+  if ( m_mapOptions.end() != iterOptions ) {
+    BOOST_LOG_TRIVIAL(trace) << "  " << sSymbol << " already acquired, erasing for new use";
+    m_mapOptions.erase( iterOptions );
+  }
   m_mapOptions.emplace( mapOptions_t::value_type( sSymbol, std::move( fOptionList ) ) );
   m_state = EState::response;
   this->Send( ss.str().c_str() );
