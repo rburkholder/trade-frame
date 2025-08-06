@@ -63,7 +63,7 @@ int main( int argc, char* argv[] ) {
   if ( config::Load( c_sChoicesFilename, m_choices ) ) {
     using EMode = config::Choices::EMode;
 
-    if ( ( EMode::train_and_validate == m_choices.eMode ) || ( EMode::view_training == m_choices.eMode ) ) {
+    if ( ( EMode::train_then_validate == m_choices.eMode ) || ( EMode::view_training == m_choices.eMode ) ) {
       for ( const auto& sFileName: m_choices.m_vFileTraining ) {
         if ( boost::filesystem::exists( sFileName ) ) {}
         else {
@@ -73,7 +73,7 @@ int main( int argc, char* argv[] ) {
       }
     }
 
-    if ( ( EMode::train_and_validate == m_choices.eMode ) || ( EMode::view_validate == m_choices.eMode ) ) {
+    if ( ( EMode::train_then_validate == m_choices.eMode ) || ( EMode::view_validate == m_choices.eMode ) ) {
       if ( boost::filesystem::exists( m_choices.m_sFileValidate ) ) {}
       else {
         BOOST_LOG_TRIVIAL(error) << "validation file " << m_choices.m_sFileValidate << " does not exist";

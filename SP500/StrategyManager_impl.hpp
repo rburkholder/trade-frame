@@ -70,7 +70,7 @@ private:
   config::Choices::vFileTraining_t::const_iterator m_iterFileTraining;
 
   ou::ChartDataView m_cdv;
-  ou::ChartDataView m_cdv_build;
+  ou::ChartDataView m_cdv_train;
   ou::ChartDataView m_cdv_predict; // might reuse the first if Clear() works properly
 
   fSetChartDataView_t m_fSetChartDataView;
@@ -151,13 +151,13 @@ private:
   );
   void LoadPanelFinancialChart();
 
-  void RunSimulation();
-  void TrainAndGoLive();
+  void Phase_train(); // uses sim to train model
+  void Phase_predict(); // uses model to validate or run live
 
-  bool BuildProviders_Sim();
+  void BuildProvider_Sim();
   bool ValidateSimFile( const std::string& );
   void HandleSimConnected( int );
-  void HandleSimComplete_build();
+  void HandleSimComplete_train();
   void HandleSimComplete_predict();
   void CleanUp_predict();
 
@@ -167,7 +167,8 @@ private:
   void HandleLoadTreeHdf5Group( const std::string&, const std::string& );
 
   void RunStrategy( boost::gregorian::date, ou::ChartDataView&, Strategy::fForward_t&& );
-  void RunStrategy_build();
-  void RunStrategy_predict();
+  void RunStrategy_train();
+  void RunStrategy_predict_sim();
+  void RunStrategy_predict_live();
 
 };

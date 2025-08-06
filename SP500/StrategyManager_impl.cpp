@@ -19,6 +19,9 @@
  * Created: June 28, 2025 21:20:51
  */
 
+// todo:
+// * save/load models
+
 #include <sstream>
 
 #include <boost/regex.hpp>
@@ -60,11 +63,11 @@ StrategyManager_impl::StrategyManager_impl(
         IterateHDF5( hdm, [this,&hdm](const std::string& s1, const std::string& s2 ){ HandleLoadTreeHdf5Object_View( hdm, s1, s2 ); } );
       }
       break;
-    case config::Choices::EMode::train_and_validate:
-      RunSimulation();
+    case config::Choices::EMode::train_then_validate:
+      Phase_train();
       break;
-    case config::Choices::EMode::train_go_live:
-      TrainAndGoLive();
+    case config::Choices::EMode::train_then_run_live:
+      Phase_train();
       break;
     case config::Choices::EMode::unknown:
       assert( false );
@@ -81,31 +84,34 @@ StrategyManager_impl::~StrategyManager_impl() {
   m_mapHdf5Instrument.clear();
 }
 
-void StrategyManager_impl::RunSimulation() {
-  BuildProviders_Sim();
+void StrategyManager_impl::Phase_train() {
+  BuildProvider_Sim();
 }
 
-void StrategyManager_impl::TrainAndGoLive() {
-  BOOST_LOG_TRIVIAL(warning) << "TrainAndGoLive not implemented";
+void StrategyManager_impl::Phase_predict() {
+  m_model.SetPredictionMode();
+  switch ( m_choices.eMode ) {
+    case config::Choices::EMode::train_then_validate:
+      RunStrategy_predict_sim();
+      break;
+    case config::Choices::EMode::train_then_run_live:
+      RunStrategy_predict_live();
+      break;
+    default:
+      assert( false );
+      break;
+  }
 }
 
-bool StrategyManager_impl::BuildProviders_Sim() {
+void StrategyManager_impl::BuildProvider_Sim() {
 
-  bool bOk( true );
-
-  // construct m_sim
-  //   does not need to be in PanelProviderControl
   m_sim = ou::tf::SimulationProvider::Factory();
   m_data = m_exec = m_sim;
   //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will post across unsynchronized threads
 
-  // construct the simulation menu, attach the events, and start simulation
-  if ( bOk ) {
-    m_sim->OnConnected.Add( MakeDelegate( this, &StrategyManager_impl::HandleSimConnected ) );
-    m_sim->Connect();
-  }
+  m_sim->OnConnected.Add( MakeDelegate( this, &StrategyManager_impl::HandleSimConnected ) );
+  m_sim->Connect();
 
-  return bOk;
 }
 
 bool StrategyManager_impl::ValidateSimFile( const std::string& sDataFileName ) {
@@ -171,30 +177,28 @@ bool StrategyManager_impl::ValidateSimFile( const std::string& sDataFileName ) {
 }
 
 void StrategyManager_impl::HandleSimConnected( int ) {
-  // todo:
-  // * save/load models
   m_model.Train_Init();
-  m_iterFileTraining = m_choices.m_vFileTraining.begin();
-  m_fQueueTask( [this](){ RunStrategy_build(); } );
+  m_iterFileTraining = m_choices.m_vFileTraining.begin(); // iterate through training files
+  m_fQueueTask( [this](){ RunStrategy_train(); } );
 }
 
-void StrategyManager_impl::RunStrategy_build() {
+void StrategyManager_impl::RunStrategy_train() {
 
-  BOOST_LOG_TRIVIAL(info) << "model build: started";
+  BOOST_LOG_TRIVIAL(info) << "model train: started";
 
-  m_cdv_build.Clear();
+  m_cdv_train.Clear();
   m_mapHdf5Instrument.clear();
   m_sSimulatorGroupDirectory.clear();
   ou::tf::HDF5DataManager hdm( ou::tf::HDF5DataManager::RO, *m_iterFileTraining );
   IterateHDF5( hdm, [this,&hdm](const std::string& s1, const std::string& s2 ){ HandleLoadTreeHdf5Object_Sim( hdm, s1, s2 ); } );
 
   if ( ValidateSimFile( *m_iterFileTraining ) ) {
-    m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_build ) );
-    m_cdv_build.SetNames( "SPY - build", *m_iterFileTraining );
-    m_fSetChartDataView( ou::tf::WinChartView::EView::sim_trail, &m_cdv_build );
+    m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_train ) );
+    m_cdv_train.SetNames( "SPY - train", *m_iterFileTraining );
+    m_fSetChartDataView( ou::tf::WinChartView::EView::sim_trail, &m_cdv_train );
     RunStrategy(
       m_startDateUTC,
-      m_cdv_build,
+      m_cdv_train,
       [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price { // fForward_t
         m_model.Append( raw, scaled );
         return m_model.EmptyPrice( raw.dt );
@@ -202,11 +206,9 @@ void StrategyManager_impl::RunStrategy_build() {
   }
 }
 
-void StrategyManager_impl::RunStrategy_predict() {
-  // run stratgy with built model
+void StrategyManager_impl::RunStrategy_predict_sim() {
+  // run stratgy with built model in simulation mode
   BOOST_LOG_TRIVIAL(info) << "model predict: started";
-
-  m_model.SetPredictionMode();
 
   m_mapHdf5Instrument.clear();
   m_sSimulatorGroupDirectory.clear();
@@ -225,6 +227,33 @@ void StrategyManager_impl::RunStrategy_predict() {
         return m_model.Predict( raw.dt );
       } );
   }
+
+}
+
+// not yet integrated
+void StrategyManager_impl::RunStrategy_predict_live() {
+  // run stratgy with built model in live mode
+  BOOST_LOG_TRIVIAL(info) << "model in live environment: started";
+
+  m_mapHdf5Instrument.clear();
+  m_sSimulatorGroupDirectory.clear();
+  //ou::tf::HDF5DataManager hdm( ou::tf::HDF5DataManager::RO, m_choices.m_sFileValidate );
+  //IterateHDF5( hdm, [this,&hdm](const std::string& s1, const std::string& s2 ){ HandleLoadTreeHdf5Object_Sim( hdm, s1, s2 ); } );
+
+  // need to start watch on symbols
+
+  //if ( ValidateSimFile( m_choices.m_sFileValidate ) ) {
+    //m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_predict ) );
+    m_cdv_predict.SetNames( "SPY - live", m_choices.m_sFileValidate );
+    m_fSetChartDataView( ou::tf::WinChartView::EView::sim_trail, &m_cdv_predict );
+    RunStrategy(
+      m_startDateUTC,
+      m_cdv_predict,
+      [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price { // fForward_t
+        m_model.Append( raw, scaled );
+        return m_model.Predict( raw.dt );
+      } );
+  //}
 
 }
 
@@ -265,14 +294,14 @@ void StrategyManager_impl::RunStrategy( boost::gregorian::date date, ou::ChartDa
   m_pStrategy->Start();
 }
 
-void StrategyManager_impl::HandleSimComplete_build() {
+void StrategyManager_impl::HandleSimComplete_train() {
 
   //m_fSetChartDataView( ou::tf::WinChartView::EState::sim_review, &m_cdv_build );
   m_fSetChartDataView( ou::tf::WinChartView::EView::sim_review, nullptr );
 
   std::stringstream ss;
   m_sim->EmitStats( ss );
-  BOOST_LOG_TRIVIAL(info) << "simulation (build) results " << ss.str();
+  BOOST_LOG_TRIVIAL(info) << "simulation (train) results " << ss.str();
 
   m_model.Train_BuildSamples();
 
@@ -286,14 +315,14 @@ void StrategyManager_impl::HandleSimComplete_build() {
   if ( m_choices.m_vFileTraining.end() != m_iterFileTraining ) {
     m_fQueueTask(
       [this](){
-        RunStrategy_build();
+        RunStrategy_train();
       });
   }
   else {
     m_fQueueTask(
       [this](){
         m_model.Train_Perform( m_choices.m_hp );
-        RunStrategy_predict();
+        Phase_predict();
       } );
   }
 
