@@ -196,13 +196,14 @@ void StrategyManager_impl::RunStrategy_train() {
     m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_train ) );
     m_cdv_train.SetNames( "SPY - train", *m_iterFileTraining );
     m_fSetChartDataView( ou::tf::WinChartView::EView::sim_trail, &m_cdv_train );
-    RunStrategy(
+    BuildStrategy_sim(
       m_startDateUTC,
       m_cdv_train,
       [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price { // fForward_t
         m_model.Append( raw, scaled );
         return m_model.EmptyPrice( raw.dt );
       } );
+    m_pStrategy->Start();
   }
 }
 
@@ -219,15 +220,15 @@ void StrategyManager_impl::RunStrategy_predict_sim() {
     m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_predict ) );
     m_cdv_predict.SetNames( "SPY - predict", m_choices.m_sFileValidate );
     m_fSetChartDataView( ou::tf::WinChartView::EView::sim_trail, &m_cdv_predict );
-    RunStrategy(
+    BuildStrategy_sim(
       m_startDateUTC,
       m_cdv_predict,
       [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price { // fForward_t
         m_model.Append( raw, scaled );
         return m_model.Predict( raw.dt );
       } );
+    m_pStrategy->Start();
   }
-
 }
 
 // not yet integrated
@@ -236,7 +237,7 @@ void StrategyManager_impl::RunStrategy_predict_live() {
   BOOST_LOG_TRIVIAL(info) << "model in live environment: started";
 
   m_mapHdf5Instrument.clear();
-  m_sSimulatorGroupDirectory.clear();
+  //m_sSimulatorGroupDirectory.clear();
   //ou::tf::HDF5DataManager hdm( ou::tf::HDF5DataManager::RO, m_choices.m_sFileValidate );
   //IterateHDF5( hdm, [this,&hdm](const std::string& s1, const std::string& s2 ){ HandleLoadTreeHdf5Object_Sim( hdm, s1, s2 ); } );
 
@@ -245,19 +246,20 @@ void StrategyManager_impl::RunStrategy_predict_live() {
   //if ( ValidateSimFile( m_choices.m_sFileValidate ) ) {
     //m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_predict ) );
     m_cdv_predict.SetNames( "SPY - live", m_choices.m_sFileValidate );
-    m_fSetChartDataView( ou::tf::WinChartView::EView::sim_trail, &m_cdv_predict );
-    RunStrategy(
+    m_fSetChartDataView( ou::tf::WinChartView::EView::live_trail, &m_cdv_predict );
+    BuildStrategy_live(
       m_startDateUTC,
       m_cdv_predict,
       [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price { // fForward_t
         m_model.Append( raw, scaled );
-        return m_model.Predict( raw.dt );
+        return m_model.Predict( raw.dt ); // need to rebuild the indicator each time
       } );
+    m_pStrategy->Start();
   //}
 
 }
 
-void StrategyManager_impl::RunStrategy( boost::gregorian::date date, ou::ChartDataView& cdv, Strategy::fForward_t&& fForward ) {
+void StrategyManager_impl::BuildStrategy_sim( boost::gregorian::date date, ou::ChartDataView& cdv, Strategy::fForward_t&& fForward ) {
 
   using pWatch_t = Strategy::pWatch_t;
   using pPosition_t = Strategy::pPosition_t;
@@ -290,7 +292,44 @@ void StrategyManager_impl::RunStrategy( boost::gregorian::date date, ou::ChartDa
   BOOST_LOG_TRIVIAL(info) << "simulation date: " << date;
   m_pStrategy->InitForUSEquityExchanges( date );
   m_pStrategy->InitForNextDay(); // due to also collecting futures which started previous evening
-  m_pStrategy->Start();
+}
+
+void StrategyManager_impl::BuildStrategy_live( boost::gregorian::date date, ou::ChartDataView& cdv, Strategy::fForward_t&& fForward ) {
+
+  using pWatch_t = Strategy::pWatch_t;
+  using pPosition_t = Strategy::pPosition_t;
+
+  m_pStrategy = std::make_unique<Strategy>(
+    cdv,
+    [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedWatch_t&& f ){ // fConstructWatch_t
+      //mapHdf5Instrument_t::iterator iter = m_mapHdf5Instrument.find( sIQFeedSymbolName );
+      //assert( m_mapHdf5Instrument.end() != iter );
+      pWatch_t pWatch;
+      //pWatch_t pWatch = std::make_shared<ou::tf::Watch>( iter->second, m_data );
+      f( pWatch );
+    },
+    [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedPosition_t&& f ){ // fConstructPosition_t
+      //mapHdf5Instrument_t::iterator iter = m_mapHdf5Instrument.find( sIQFeedSymbolName );
+      //assert( m_mapHdf5Instrument.end() != iter );
+      pWatch_t pWatch;
+      //pWatch_t pWatch = std::make_shared<ou::tf::Watch>( iter->second, m_data );
+      pPosition_t pPosition;
+      //pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_exec );
+      f( pPosition );
+    },
+    [this](){ // fStart_t
+      // does this cross into foreground thread?
+      //m_sim->Run();
+    },
+    [this](){ // fStop_t
+    },
+    std::move( fForward ) // fForward_t
+  );
+
+  assert( m_pStrategy );
+  BOOST_LOG_TRIVIAL(info) << "live date: " << date;
+  m_pStrategy->InitForUSEquityExchanges( date );
+  //m_pStrategy->InitForNextDay(); // due to also collecting futures which started previous evening
 }
 
 void StrategyManager_impl::HandleSimComplete_train() {
