@@ -279,7 +279,6 @@ void StrategyManager_impl::RunStrategy( boost::gregorian::date date, ou::ChartDa
     },
     [this](){ // fStart_t
       // does this cross into foreground thread?
-      BOOST_LOG_TRIVIAL(info) << "strategy: simulation run";
       m_sim->Run();
     },
     [this](){ // fStop_t
@@ -288,7 +287,7 @@ void StrategyManager_impl::RunStrategy( boost::gregorian::date date, ou::ChartDa
   );
 
   assert( m_pStrategy );
-  BOOST_LOG_TRIVIAL(info) << "simluation date: " << date;
+  BOOST_LOG_TRIVIAL(info) << "simulation date: " << date;
   m_pStrategy->InitForUSEquityExchanges( date );
   m_pStrategy->InitForNextDay(); // due to also collecting futures which started previous evening
   m_pStrategy->Start();
