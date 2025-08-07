@@ -12,8 +12,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include <algorithm>
 
 #include "Pivots.h"
@@ -25,18 +23,18 @@ const std::string PivotSet::m_sPivotNames[ PivotSet::PivotCount ]
   = { "R3", "R23", "R2", "R12", "R1", "PVR1", "PV", "PVS1", "S1", "S12", "S2", "S23" "S3" };
 
 const ou::Colour::EColour PivotSet::m_rPivotColours[ PivotSet::PivotCount ]
-  = { ou::Colour::Tomato, ou::Colour::OrangeRed, ou::Colour::Orange, ou::Colour::RosyBrown, ou::Colour::Red, ou::Colour::Pink,
+  = { ou::Colour::Pink, ou::Colour::OrangeRed, ou::Colour::Tomato, ou::Colour::RosyBrown, ou::Colour::DarkMagenta, ou::Colour::Red,
       ou::Colour::DarkRed,
-      ou::Colour::BlueViolet, ou::Colour::Blue, ou::Colour::RoyalBlue, ou::Colour::Purple, ou::Colour::SkyBlue, ou::Colour::Violet };
+      ou::Colour::BlueViolet, ou::Colour::DarkOrchid, ou::Colour::RoyalBlue, ou::Colour::Purple, ou::Colour::SkyBlue, ou::Colour::Violet };
 
-PivotSet::PivotSet(void)
+PivotSet::PivotSet()
  {
    for ( unsigned short ix = 0; ix < PivotCount; ++ix ) {
      m_rPivots[ ix ] = 0;
    }
 }
 
-PivotSet::PivotSet( const std::string &sName, double _S3, double _S2, double _S1, double _PV, double _R1, double _R2, double _R3 ) :
+PivotSet::PivotSet( const std::string& sName, double _S3, double _S2, double _S1, double _PV, double _R1, double _R2, double _R3 ) :
   m_sName( sName )
 {
   m_rPivots[ R3 ] = _R3;
@@ -49,11 +47,11 @@ PivotSet::PivotSet( const std::string &sName, double _S3, double _S2, double _S1
   CalcHalfPivots();
 }
 
-PivotSet::PivotSet( const std::string &sName, const Bar& bar ) {
+PivotSet::PivotSet( const std::string& sName, const Bar& bar ) {
   CalcPivots( sName, bar.High(), bar.Low(), bar.Close() );
 }
 
-PivotSet::PivotSet( const std::string &sName, Bars* bars ) {
+PivotSet::PivotSet( const std::string& sName, Bars* bars ) {
   double hi = 0;
   double lo = 0;
   double cl = 0;
@@ -74,14 +72,14 @@ PivotSet::PivotSet( const std::string &sName, Bars* bars ) {
   CalcPivots( sName, hi, lo, cl );
 }
 
-PivotSet::PivotSet( const std::string &sName, double Hi, double Lo, double Close ) {
+PivotSet::PivotSet( const std::string& sName, double Hi, double Lo, double Close ) {
   CalcPivots( sName, Hi, Lo, Close );
 }
 
 PivotSet::~PivotSet() {
 }
 
-void PivotSet::CalcPivots( const std::string &sName, double Hi, double Lo, double Close ) {
+void PivotSet::CalcPivots( const std::string& sName, double Hi, double Lo, double Close ) {
   m_sName = sName;
   CalcPivots( Hi, Lo, Close );
 }

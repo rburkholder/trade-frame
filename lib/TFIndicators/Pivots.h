@@ -37,22 +37,22 @@ public:
   };
 
   PivotSet();
-  PivotSet( const std::string &sName, double S3, double S2, double S1, double PV, double R1, double R2, double R3 );
-  PivotSet( const std::string &sName, double Hi, double Lo, double Close );
-  PivotSet( const std::string &sName, const Bar& bar );
-  PivotSet( const std::string &sName, Bars* bars );
+  PivotSet( const std::string& sName, double S3, double S2, double S1, double PV, double R1, double R2, double R3 );
+  PivotSet( const std::string& sName, double Hi, double Lo, double Close );
+  PivotSet( const std::string& sName, const Bar& bar );
+  PivotSet( const std::string& sName, Bars* bars );
   // add in  a constructor with bar iterators, can then do pivot for weekly bar set or monthly bar set, etc
 
   virtual ~PivotSet();
 
-  void CalcPivots( const std::string &sName, double Hi, double Lo, double Close );
+  void CalcPivots( const std::string& sName, double Hi, double Lo, double Close );
   void CalcPivots( double Hi, double Lo, double Close );
   void CalcPivots( const Bar& bar );
   void CalcHalfPivots();
 
   using pivot_t = std::pair<double, structPivotInfo>;
 
-  const std::string &Name( void ) const { return m_sName; };
+  const std::string& Name() const { return m_sName; };
 
   pivot_t operator[]( unsigned short ix ) { // this probably copies twice or thrice in succession
     assert( ix >= R3 );
