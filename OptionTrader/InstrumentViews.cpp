@@ -352,8 +352,8 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
       }
       m_pOptionChainView->AssociateModel( m_pOptionChainModel );
 
-      //m_pWinChartView_session->SetLive_trail(); // todo: revert to this after testing
-      m_pWinChartView_session->SetLive_review();
+      m_pWinChartView_session->SetLive_trail(); // todo: revert to this after testing
+      //m_pWinChartView_session->SetLive_review();
       m_pWinChartView_session->SetChartDataView( instrument.sbm.GetChartDataView() );
 
       m_pWinChartView_daily->SetLive_review();
