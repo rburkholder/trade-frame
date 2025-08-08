@@ -423,6 +423,8 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   ou::tf::Price prediction = m_fForward( m_features, scaled );
   m_cePrediction.Append( prediction );
 
+  //BOOST_LOG_TRIVIAL(trace) << "Calc01SecIndicators " << dt << ',' << prediction.DateTime();
+
   m_ceTrade_ratio.Append( dt, scaled.price.dbl );
 
   m_ceEma200_ratio.Append( dt, scaled.ema200.dbl );
