@@ -27,8 +27,12 @@
 #include <boost/regex.hpp>
 #include <boost/log/trivial.hpp>
 
+#include <OUCommon/TimeSource.h>
+
 #include <TFHDF5TimeSeries/HDF5Attribute.h>
 #include <TFHDF5TimeSeries/HDF5IterateGroups.h>
+
+#include <TFTrading/ComposeInstrument.hpp>
 
 #include "Features.hpp"
 #include "StrategyManager_impl.hpp"
@@ -77,6 +81,7 @@ StrategyManager_impl::StrategyManager_impl(
 }
 
 StrategyManager_impl::~StrategyManager_impl() {
+  m_pComposeInstrument.reset();
   m_fSetChartDataView( ou::tf::WinChartView::EView::live_review, nullptr );
   m_pStrategy.reset();
   m_sim->Reset();
@@ -95,7 +100,9 @@ void StrategyManager_impl::Phase_predict() {
       RunStrategy_predict_sim();
       break;
     case config::Choices::EMode::train_then_run_live:
-      RunStrategy_predict_live();
+      m_startDateUTC = ou::TimeSource::GlobalInstance().External().date(); // DailyTradeTimeFrame default constructor format
+      m_startTimeUTC = boost::posix_time::time_duration( 0, 0, 0 );
+      BuildProvider_IQF(); // which will run RunStrategy_predict_live();
       break;
     default:
       assert( false );
@@ -120,6 +127,7 @@ void StrategyManager_impl::BuildProvider_IQF() {
   //m_data = m_exec = m_sim;
   //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will post across unsynchronized threads
 
+  //BOOST_LOG_TRIVIAL(trace) << "BuildProvider_IQF - look at thread id"; // => is thread id of training process
   m_iqf->OnConnected.Add( MakeDelegate( this, &StrategyManager_impl::HandleIQFConnected ) );
   m_iqf->Connect();
 
@@ -194,7 +202,13 @@ void StrategyManager_impl::HandleSimConnected( int ) {
 }
 
 void StrategyManager_impl::HandleIQFConnected( int ) {
-  //m_fQueueTask( [this](){ RunStrategy_train(); } );
+  //BOOST_LOG_TRIVIAL(trace) << "HandleIQFConnected - look at thread id"; // => is iqf network thread
+  //m_fQueueTask( [this](){ RunStrategy_predict_live(); } );
+  m_pComposeInstrument = std::make_unique<ou::tf::ComposeInstrument>(
+    m_iqf
+  , [this](){
+    RunStrategy_predict_live();
+  } );
 }
 
 void StrategyManager_impl::RunStrategy_train() {
@@ -246,31 +260,23 @@ void StrategyManager_impl::RunStrategy_predict_sim() {
   }
 }
 
-// not yet integrated
 void StrategyManager_impl::RunStrategy_predict_live() {
   // run stratgy with built model in live mode
   BOOST_LOG_TRIVIAL(info) << "model in live environment: started";
 
   m_mapHdf5Instrument.clear();
-  //m_sSimulatorGroupDirectory.clear();
-  //ou::tf::HDF5DataManager hdm( ou::tf::HDF5DataManager::RO, m_choices.m_sFileValidate );
-  //IterateHDF5( hdm, [this,&hdm](const std::string& s1, const std::string& s2 ){ HandleLoadTreeHdf5Object_Sim( hdm, s1, s2 ); } );
 
-  // need to start watch on symbols
-
-  //if ( ValidateSimFile( m_choices.m_sFileValidate ) ) {
-    //m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_predict ) );
-    m_cdv_predict.SetNames( "SPY - live", m_choices.m_sFileValidate );
-    m_fSetChartDataView( ou::tf::WinChartView::EView::live_trail, &m_cdv_predict );
-    BuildStrategy_live(
-      m_startDateUTC,
-      m_cdv_predict,
-      [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price { // fForward_t
-        m_model.Append( raw, scaled );
-        return m_model.Predict( raw.dt ); // need to rebuild the indicator each time
-      } );
-    m_pStrategy->Start();
-  //}
+  m_cdv_predict.SetNames( "SPY - live", std::string() );
+  m_fSetChartDataView( ou::tf::WinChartView::EView::live_trail, &m_cdv_predict );
+  BuildStrategy_live(
+    m_startDateUTC, // this may require adjusting
+    m_cdv_predict,
+    [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price { // fForward_t
+      m_model.Append( raw, scaled );
+      // TODO: return a vector of the full prediction
+      return m_model.Predict( raw.dt ); // need to rebuild the indicator each time
+    } );
+  m_pStrategy->Start();
 
 }
 
@@ -316,25 +322,30 @@ void StrategyManager_impl::BuildStrategy_live( boost::gregorian::date date, ou::
 
   m_pStrategy = std::make_unique<Strategy>(
     cdv,
-    [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedWatch_t&& f ){ // fConstructWatch_t
-      //mapHdf5Instrument_t::iterator iter = m_mapHdf5Instrument.find( sIQFeedSymbolName );
-      //assert( m_mapHdf5Instrument.end() != iter );
-      pWatch_t pWatch;
-      //pWatch_t pWatch = std::make_shared<ou::tf::Watch>( iter->second, m_iqf );
-      f( pWatch );
+    [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedWatch_t&& fWatch ){ // fConstructWatch_t
+      m_pComposeInstrument->Compose(
+        sIQFeedSymbolName
+      , [this,fWatch_=std::move(fWatch)]( pInstrument_t pInstrument, bool bConstructed ){
+        assert( pInstrument );
+        assert( bConstructed );  // todo: fix and register later when db is attached
+        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqf );
+        fWatch_( pWatch );
+      }
+      );
     },
-    [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedPosition_t&& f ){ // fConstructPosition_t
-      //mapHdf5Instrument_t::iterator iter = m_mapHdf5Instrument.find( sIQFeedSymbolName );
-      //assert( m_mapHdf5Instrument.end() != iter );
-      pWatch_t pWatch;
-      //pWatch_t pWatch = std::make_shared<ou::tf::Watch>( iter->second, m_iqf );
-      pPosition_t pPosition;
-      //pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_iqf );
-      f( pPosition );
+    [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedPosition_t&& fPosition ){ // fConstructPosition_t
+      m_pComposeInstrument->Compose(
+        sIQFeedSymbolName
+      , [this,fPosition_=std::move(fPosition)]( pInstrument_t pInstrument, bool bConstructed ){
+        assert( pInstrument );
+        assert( bConstructed );  // todo: fix and register later when db is attached
+        pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqf );
+        pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_iqf );
+        fPosition_( pPosition );
+      }
+      );
     },
     [this](){ // fStart_t
-      // does this cross into foreground thread?
-      //m_sim->Run();
     },
     [this](){ // fStop_t
     },
@@ -343,7 +354,7 @@ void StrategyManager_impl::BuildStrategy_live( boost::gregorian::date date, ou::
 
   assert( m_pStrategy );
   BOOST_LOG_TRIVIAL(info) << "live date: " << date;
-  m_pStrategy->InitForUSEquityExchanges( date );
+  //m_pStrategy->InitForUSEquityExchanges( date );
   //m_pStrategy->InitForNextDay(); // due to also collecting futures which started previous evening
 }
 

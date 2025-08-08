@@ -47,6 +47,12 @@ namespace config {
   class Choices;
 } // namespace config
 
+namespace ou {
+namespace tf {
+  class ComposeInstrument;
+} // namespace tf
+} // namespace ou
+
 class StrategyManager_impl {
 public:
 
@@ -98,6 +104,9 @@ private:
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
   using mapHdf5Instrument_t = std::unordered_map<std::string,pInstrument_t>;
   mapHdf5Instrument_t m_mapHdf5Instrument;
+
+  using pComposeInstrument_t = std::unique_ptr<ou::tf::ComposeInstrument>;
+  pComposeInstrument_t m_pComposeInstrument;  // IQFeed only, or IQFeed & IB
 
   /*
   symbol_name_l1=II6A.Z  #S&P 500 ISSUES ADVANCES DTN - sum to 500
