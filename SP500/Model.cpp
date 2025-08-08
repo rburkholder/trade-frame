@@ -160,7 +160,7 @@ ou::tf::Price Model::EmptyPrice( boost::posix_time::ptime dt ) const {
   return ou::tf::Price( dt + boost::posix_time::seconds( c_secondsYOffset ), 0.0 );
 }
 
-void Model::SetPredictionMode() {
+void Model::EnablePredictionMode() {
   // with torch.no_grad()  ?
   m_vDataScaled.clear();
   m_iterDataScaled = m_vDataScaled.begin();

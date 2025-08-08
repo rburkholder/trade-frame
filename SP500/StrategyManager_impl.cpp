@@ -89,7 +89,7 @@ void StrategyManager_impl::Phase_train() {
 }
 
 void StrategyManager_impl::Phase_predict() {
-  m_model.SetPredictionMode();
+  m_model.EnablePredictionMode();
   switch ( m_choices.eMode ) {
     case config::Choices::EMode::train_then_validate:
       RunStrategy_predict_sim();
