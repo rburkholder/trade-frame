@@ -191,7 +191,7 @@ ou::tf::Price Model::Predict( boost::posix_time::ptime dt ) {
 
     ++m_iterDataScaled;
   }
-  return ou::tf::Price( dt + boost::posix_time::seconds( c_secondsYOffset ), price );
+  return ou::tf::Price( dt + boost::posix_time::time_duration( 0, 0, c_secondsYOffset ), price );
 }
 
 void Model::Train_Init() {
