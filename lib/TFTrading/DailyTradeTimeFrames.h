@@ -56,9 +56,9 @@ public:
     return ou::TimeSource::ConvertRegionalToUtc( date, time, zone );
   }
 
-  void InitForUSEquityExchanges( boost::gregorian::date );
-  void InitFor24HourMarkets( boost::gregorian::date );
-  void InitForNextDay();
+  void InitForUSEquityExchanges( boost::gregorian::date ); // date used in Eastern Time calculations
+  void InitFor24HourMarkets( boost::gregorian::date );     // date used in Eastern Time calculations
+  void InitForNextDay();                                   // adds a day (24 hours) to all calculated datetimes
 
   void SetMarketOpen( boost::posix_time::ptime dtMarketOpen ) { m_dtMarketOpen = dtMarketOpen; }
   void SetRegularHoursOpen( boost::posix_time::ptime dtRHOpen ) { m_dtRHOpen = dtRHOpen; }
