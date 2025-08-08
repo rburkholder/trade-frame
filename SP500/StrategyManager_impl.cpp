@@ -106,11 +106,22 @@ void StrategyManager_impl::Phase_predict() {
 void StrategyManager_impl::BuildProvider_Sim() {
 
   m_sim = ou::tf::SimulationProvider::Factory();
-  m_data = m_exec = m_sim;
+  //m_data = m_exec = m_sim;
   //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will post across unsynchronized threads
 
   m_sim->OnConnected.Add( MakeDelegate( this, &StrategyManager_impl::HandleSimConnected ) );
   m_sim->Connect();
+
+}
+
+void StrategyManager_impl::BuildProvider_IQF() {
+
+  m_iqf = ou::tf::iqfeed::Provider::Factory();
+  //m_data = m_exec = m_sim;
+  //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will post across unsynchronized threads
+
+  m_iqf->OnConnected.Add( MakeDelegate( this, &StrategyManager_impl::HandleIQFConnected ) );
+  m_iqf->Connect();
 
 }
 
@@ -180,6 +191,10 @@ void StrategyManager_impl::HandleSimConnected( int ) {
   m_model.Train_Init();
   m_iterFileTraining = m_choices.m_vFileTraining.begin(); // iterate through training files
   m_fQueueTask( [this](){ RunStrategy_train(); } );
+}
+
+void StrategyManager_impl::HandleIQFConnected( int ) {
+  //m_fQueueTask( [this](){ RunStrategy_train(); } );
 }
 
 void StrategyManager_impl::RunStrategy_train() {
@@ -269,14 +284,14 @@ void StrategyManager_impl::BuildStrategy_sim( boost::gregorian::date date, ou::C
     [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedWatch_t&& f ){ // fConstructWatch_t
       mapHdf5Instrument_t::iterator iter = m_mapHdf5Instrument.find( sIQFeedSymbolName );
       assert( m_mapHdf5Instrument.end() != iter );
-      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( iter->second, m_data );
+      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( iter->second, m_sim );
       f( pWatch );
     },
     [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedPosition_t&& f ){ // fConstructPosition_t
       mapHdf5Instrument_t::iterator iter = m_mapHdf5Instrument.find( sIQFeedSymbolName );
       assert( m_mapHdf5Instrument.end() != iter );
-      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( iter->second, m_data );
-      pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_exec );
+      pWatch_t pWatch = std::make_shared<ou::tf::Watch>( iter->second, m_sim );
+      pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_sim );
       f( pPosition );
     },
     [this](){ // fStart_t
@@ -305,16 +320,16 @@ void StrategyManager_impl::BuildStrategy_live( boost::gregorian::date date, ou::
       //mapHdf5Instrument_t::iterator iter = m_mapHdf5Instrument.find( sIQFeedSymbolName );
       //assert( m_mapHdf5Instrument.end() != iter );
       pWatch_t pWatch;
-      //pWatch_t pWatch = std::make_shared<ou::tf::Watch>( iter->second, m_data );
+      //pWatch_t pWatch = std::make_shared<ou::tf::Watch>( iter->second, m_iqf );
       f( pWatch );
     },
     [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedPosition_t&& f ){ // fConstructPosition_t
       //mapHdf5Instrument_t::iterator iter = m_mapHdf5Instrument.find( sIQFeedSymbolName );
       //assert( m_mapHdf5Instrument.end() != iter );
       pWatch_t pWatch;
-      //pWatch_t pWatch = std::make_shared<ou::tf::Watch>( iter->second, m_data );
+      //pWatch_t pWatch = std::make_shared<ou::tf::Watch>( iter->second, m_iqf );
       pPosition_t pPosition;
-      //pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_exec );
+      //pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_iqf );
       f( pPosition );
     },
     [this](){ // fStart_t

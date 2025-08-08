@@ -86,8 +86,8 @@ private:
   using pProviderIQF_t = ou::tf::iqfeed::Provider::pProvider_t;
   using pProviderSim_t = ou::tf::SimulationProvider::pProvider_t;
 
-  pProvider_t m_data;
-  pProvider_t m_exec;
+  //pProvider_t m_data;
+  //pProvider_t m_exec;
 
   pProviderIQF_t m_iqf; // live - [ data ], simulation - [ execution ]
   pProviderIB_t  m_tws; // live - [ execution ]
@@ -160,6 +160,9 @@ private:
   void HandleSimComplete_train();
   void HandleSimComplete_predict();
   void CleanUp_predict();
+
+  void BuildProvider_IQF();
+  void HandleIQFConnected( int );
 
   void HandleLoadTreeHdf5Object_View( ou::tf::HDF5DataManager&, const std::string&, const std::string& );
   void HandleLoadTreeHdf5Object_Sim(   ou::tf::HDF5DataManager&, const std::string&, const std::string& );
