@@ -420,7 +420,7 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   UpdateEma<200>( price_, m_features.dblEma200, m_ceEma200 );
 
   Features_scaled scaled; // receives scaled data
-  ou::tf::Price prediction = m_fForward( m_features, scaled );
+  const ou::tf::Price prediction = m_fForward( m_features, scaled );
   m_cePrediction.Append( prediction );
 
   //BOOST_LOG_TRIVIAL(trace) << "Calc01SecIndicators " << dt << ',' << prediction.DateTime();
