@@ -103,24 +103,25 @@ bool Model::Scale( const Features_raw& raw, Features_scaled& scaled ) {
   bool bScaled( true );
 
   double max;
-  double min;
-  maxmin mm( max, min, raw.dblEma200 );
+  //double min;
+  maxmin mm( max, scaled.min, raw.dblEma200 );
   mm.add( raw.dblEma050 );
   mm.add( raw.dblEma029 );
   mm.add( raw.dblEma013 );
   // on purpose: no test on price
 
-  if ( max > min ) {
+  if ( max > scaled.min ) {
 
-    const double range( max - min );
+    //const double range( max - scaled.min );
+    scaled.range = max - scaled.min;
 
     // detrend timeseries to 0.0 - 1.0
-    scaled.ema200 = ( ( raw.dblEma200 - min ) / range );
-    scaled.ema050 = ( ( raw.dblEma050 - min ) / range );
-    scaled.ema029 = ( ( raw.dblEma029 - min ) / range );
-    scaled.ema013 = ( ( raw.dblEma013 - min ) / range );
+    scaled.ema200 = ( ( raw.dblEma200 - scaled.min ) / scaled.range );
+    scaled.ema050 = ( ( raw.dblEma050 - scaled.min ) / scaled.range );
+    scaled.ema029 = ( ( raw.dblEma029 - scaled.min ) / scaled.range );
+    scaled.ema013 = ( ( raw.dblEma013 - scaled.min ) / scaled.range );
 
-    const double ratioPrice( ( ( raw.dblPrice - min ) / range ) * 2.0 - 1.0 ); // even scaling top and bottom
+    const double ratioPrice( ( ( raw.dblPrice - scaled.min ) / scaled.range ) * 2.0 - 1.0 ); // even scaling top and bottom
     const double sigmoidPrice( bipolar_sigmoid<3>( ratioPrice ) );
     scaled.price = ( sigmoidPrice * 0.5 + 0.5 ); // translate to 0.0 - 1.0
 

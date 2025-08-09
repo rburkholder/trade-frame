@@ -74,6 +74,9 @@ struct Real {
 
 struct Features_scaled {
 
+  double range; // used to reverse the scale (slope)
+  double min;   // used to reverse the scale (offset)
+
   Real price;
 
   Real ema013;
