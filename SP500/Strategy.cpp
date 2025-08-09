@@ -236,10 +236,14 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::AdvDec, &m_cemZero );
   m_cdv.Add( EChartSlot::AdvDec, &m_ceAdvDec );
 
-  m_cePrediction.SetName( "Predict" );
-  m_cePrediction.SetColour( c_colourPrdct );
+  m_cePrediction_scaled.SetName( "Predict" );
+  m_cePrediction_scaled.SetColour( c_colourPrdct );
   m_cdv.Add( EChartSlot::Predict, &m_ceTrade_ratio );
-  m_cdv.Add( EChartSlot::Predict, &m_cePrediction );
+  m_cdv.Add( EChartSlot::Predict, &m_cePrediction_scaled );
+
+  m_cePrediction_descaled.SetName( "Predict" );
+  m_cePrediction_descaled.SetColour( c_colourPrdct );
+  m_cdv.Add( EChartSlot::Price, &m_cePrediction_descaled );
 
   m_ceProfitLoss.SetName( "P/L" );
   //m_cdv.Add( EChartSlot::PL, &m_cemZero );
@@ -420,8 +424,11 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   UpdateEma<200>( price_, m_features.dblEma200, m_ceEma200 );
 
   Features_scaled scaled; // receives scaled data
-  const ou::tf::Price prediction = m_fForward( m_features, scaled );
-  m_cePrediction.Append( prediction );
+  const ou::tf::Price prediction_scaled = m_fForward( m_features, scaled );
+  m_cePrediction_scaled.Append( prediction_scaled );
+
+  const ou::tf::Price prediction_descaled( prediction_scaled.DateTime(), prediction_scaled.Value() * scaled.range + scaled.min );
+  m_cePrediction_descaled.Append( prediction_descaled );
 
   //BOOST_LOG_TRIVIAL(trace) << "Calc01SecIndicators " << dt << ',' << prediction.DateTime();
 
