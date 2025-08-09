@@ -25,6 +25,7 @@
 
 #include <wx/sizer.h>
 #include <wx/textdlg.h>
+#include <wx/statusbr.h>
 #include <wx/treectrl.h>
 
 #include <TFTrading/InstrumentManager.h>
@@ -93,26 +94,28 @@ void InstrumentViews::CreateControls() {
 
   InstrumentViews* itemPanel1 = this;
 
-  wxBoxSizer* itemBoxSizer1 = new wxBoxSizer(wxHORIZONTAL);
+  wxBoxSizer* itemBoxSizer1 = new wxBoxSizer( wxVERTICAL );
   itemPanel1->SetSizer( itemBoxSizer1 );
+
+  wxBoxSizer* sizerTagSymbolGrid = new wxBoxSizer( wxHORIZONTAL );
+  itemBoxSizer1->Add( sizerTagSymbolGrid, 1, wxGROW|wxALL, 0 );
 
   wxArrayString m_lbTagsStrings;
   m_clbTags = new wxCheckListBox(
     itemPanel1, wxID_ANY, wxDefaultPosition, wxDefaultSize,
     m_lbTagsStrings, wxLB_MULTIPLE|wxLB_EXTENDED|wxLB_NEEDED_SB //|wxLB_SORT
   );
-  itemBoxSizer1->Add( m_clbTags, 0, wxGROW|wxALL, 1 );
+  sizerTagSymbolGrid->Add( m_clbTags, 0, wxGROW|wxALL, 1 );
   m_clbTags->SetMinClientSize( wxSize( 150, -1 ) );
   m_clbTags->Bind( wxEVT_CHECKLISTBOX, &InstrumentViews::HandleCheckListBoxEvent, this );
 
   m_pTreeCtrl = new wxTreeCtrl( itemPanel1, ID_TREECTRL, wxDefaultPosition, wxDefaultSize,
     wxTR_NO_LINES | wxTR_HAS_BUTTONS /*| wxTR_LINES_AT_ROOT | wxTR_HIDE_ROOT*/ | wxTR_SINGLE /*| wxTR_TWIST_BUTTONS*/ );
+  sizerTagSymbolGrid->Add( m_pTreeCtrl, 0, wxGROW|wxALL, 2 );
   ou::tf::TreeItem::Bind( this, m_pTreeCtrl );
   m_pTreeCtrl->Bind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &InstrumentViews::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
   m_pTreeCtrl->Bind( wxEVT_TREE_ITEM_EXPANDED, &InstrumentViews::HandleTreeEventItemExpanded, this, m_pTreeCtrl->GetId() );
   m_pTreeCtrl->ExpandAll();
-
-  itemBoxSizer1->Add( m_pTreeCtrl, 0, wxGROW|wxALL, 1 );
 
   m_pRootTreeItem = new ou::tf::TreeItem( m_pTreeCtrl, "Symbols" );
   //m_pRootTreeItem->SetOnClick(
@@ -130,12 +133,27 @@ void InstrumentViews::CreateControls() {
     }
   );
 
+  m_pOptionChainView = new OptionChainView( itemPanel1 );
+  sizerTagSymbolGrid->Add( m_pOptionChainView, 1, wxALL | wxEXPAND, 2 );
+
+  wxBoxSizer* itemBoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
+  itemBoxSizer1->Add(itemBoxSizer6, 0, wxGROW|wxALL, 0);
+
+  // todo: maybe break into multiple bars to size properly
+  m_pStatusBar = new wxStatusBar( itemPanel1, ID_STATUSBAR, wxST_SIZEGRIP|wxSIMPLE_BORDER );
+  itemBoxSizer6->Add( m_pStatusBar, 1, wxGROW|wxALL, 2 );
+  m_pStatusBar->SetFieldsCount( 6 );
+  {
+    const int widths[] = { 50, 75, 50, 50, 50, 50 };
+    m_pStatusBar->SetStatusWidths( 6, widths );
+  }
+  m_pStatusBar->SetStatusText( _("symbol:"), 0 );
+  m_pStatusBar->SetStatusText( _("price:"), 2 );
+
   if ( InstrumentViews::ShowToolTips() ) {
     m_pTreeCtrl->SetToolTip(_( "Symbols / Actions" ) );
   }
 
-  m_pOptionChainView = new OptionChainView( itemPanel1 );
-  itemBoxSizer1->Add( m_pOptionChainView, 1, wxALL | wxEXPAND, 1 );
   m_pOptionChainView->Show();
 
   Layout();
@@ -366,6 +384,8 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
         BOOST_LOG_TRIVIAL(info) << "BuildDailyBarModel " << sNameIQFeed << " - " << sNameGeneric;
         BuildDailyBarModel( instrument );
       }
+
+      m_pStatusBar->SetStatusText( instrument.pInstrument->GetInstrumentName(), 1 );
     },
     [this,&instrument]( ou::tf::TreeItem* pti ){ // fOnBuildPopup_t
       pti->NewMenu();

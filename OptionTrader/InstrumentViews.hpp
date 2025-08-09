@@ -46,6 +46,7 @@
 
 class wxTreeCtrl;
 class wxTreeEvent;
+class wxStatusBar;
 
 class wxCommandEvent;
 
@@ -119,6 +120,7 @@ private:
     ID_Null=wxID_HIGHEST
   , ID_BOOKOPTIONCHAINS
   , ID_TREECTRL
+  , ID_STATUSBAR
   };
 
   wxTimer m_timerRefresh;
@@ -127,6 +129,8 @@ private:
 
   wxTreeCtrl* m_pTreeCtrl;
   TreeItem* m_pRootTreeItem; // // root of custom tree items
+
+  wxStatusBar* m_pStatusBar;
 
   struct StateCache {
     //std::string sIQFeedSymbolName;
