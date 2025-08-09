@@ -124,7 +124,7 @@ void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, fInstrument_t
               }
               else {
                 Query& query( iterQuery->second );
-                query.cntInstrumentsProcessed = list.vSymbol.size();
+                query.cntInstrumentsToProcess = list.vSymbol.size();
                 for ( const iqfeed::OptionChainQuery::vSymbol_t::value_type sSymbol: list.vSymbol ) {
 
                   m_pBuildInstrumentIQFeed->Queue(
@@ -137,8 +137,8 @@ void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, fInstrument_t
                         query.pInstrument = pInstrument;
                         // even when found, need to process all remaining arrivals
                       }
-                      query.cntInstrumentsProcessed--;
-                      if ( 0 == query.cntInstrumentsProcessed ) {
+                      query.cntInstrumentsToProcess--;
+                      if ( 0 == query.cntInstrumentsToProcess ) {
                         assert( query.pInstrument ); // assert we found an instrument
                         Finish( iterQuery );
                       }

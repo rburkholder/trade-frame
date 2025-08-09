@@ -62,19 +62,19 @@ private:
     bool bConstructed;
     fInstrument_t fInstrument;
     pInstrument_t pInstrument;
-    size_t cntInstrumentsProcessed;
+    size_t cntInstrumentsToProcess;
 
     Query( fInstrument_t&& fInstrument_ )
     : bConstructed( false )
     , fInstrument( std::move( fInstrument_ ) )
-    , cntInstrumentsProcessed {}
+    , cntInstrumentsToProcess {}
     {}
 
     Query( Query&& query )
     : bConstructed( false )
     , fInstrument( std::move( query.fInstrument ) )
     , pInstrument( std::move( query.pInstrument ) )
-    , cntInstrumentsProcessed( query.cntInstrumentsProcessed )
+    , cntInstrumentsToProcess( query.cntInstrumentsToProcess )
     {}
   };
 
