@@ -77,12 +77,40 @@ void ComposeInstrument::ConstructChainQuery() { // part of constructor
   else {
     m_pOptionChainQuery = std::make_shared<ou::tf::iqfeed::OptionChainQuery>(
       [this](){
+        assert( m_fInitDone );
         m_fInitDone();
         m_fInitDone = nullptr;
       }
     );
     m_pOptionChainQuery->Connect();
   }
+}
+
+void ComposeInstrument::Discover(
+  const std::string& sIQFeedSymbol
+, fInstrument_t&& fInstrumentPrimary
+, fInstrument_t&& fInstrumentAdditional
+) {
+
+  assert( 0 < sIQFeedSymbol.size() );
+  assert( '#' == sIQFeedSymbol.back() ); // only processing a continuous future
+
+  pMapQuery_t::iterator iterQuery;
+  {
+    std::lock_guard<std::mutex> lock( m_mutexMap );
+    assert( m_pMapQuery.end() == m_pMapQuery.find( sIQFeedSymbol ) );
+    auto result = m_pMapQuery.emplace(
+      sIQFeedSymbol
+    , std::move( Query(
+                  std::move( fInstrumentPrimary )
+                , std::move( fInstrumentAdditional )
+      ) ) );
+    assert( result.second );
+    iterQuery = result.first;
+  }
+
+  Compose( sIQFeedSymbol, iterQuery );
+
 }
 
 void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, fInstrument_t&& fInstrument ) {
@@ -101,55 +129,8 @@ void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, fInstrument_t
       iterQuery = result.first;
     }
 
-    m_pBuildInstrumentIQFeed->Queue( // confirm instrument type is a future
-      sIQFeedSymbol,
-      [this,iterQuery]( pInstrument_t pInstrument, bool bExists ) {
+    Compose( sIQFeedSymbol, iterQuery );
 
-        if ( InstrumentType::Future != pInstrument->GetInstrumentType() ) {
-          assert( false ); // needs to be a future, if something else, process accordingly, maybe case statement
-        }
-        else {
-          const std::string& sName( pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
-          const std::string sBase( sName.substr( 0, sName.size() - 1 ) ); // remove trailing #
-          boost::gregorian::date expiryContinuous( pInstrument->GetExpiry() ); // will be matching expiry of this continous future
-
-          // todo: auto-calc the year range
-          m_pOptionChainQuery->QueryFuturesChain(  // obtain a list of futures
-            sBase, "", "5678" /* 2025, 2026, 2027, 2028 */ , "6" /* 6 months */,
-            [this,expiryContinuous,iterQuery]( const iqfeed::OptionChainQuery::FuturesList& list ) mutable {
-
-              if ( 0 == list.vSymbol.size() ) {
-                assert( false );  // no likely symbols found
-                // TODO: clean up and return something
-              }
-              else {
-                Query& query( iterQuery->second );
-                query.cntInstrumentsToProcess = list.vSymbol.size();
-                for ( const iqfeed::OptionChainQuery::vSymbol_t::value_type sSymbol: list.vSymbol ) {
-
-                  m_pBuildInstrumentIQFeed->Queue(
-                    sSymbol,
-                    [this,expiryContinuous,iterQuery]( pInstrument_t pInstrument, bool bConstructed ){
-                      Query& query( iterQuery->second );
-                      if ( expiryContinuous == pInstrument->GetExpiry() ) {
-                        // over-write continuous instrument
-                        query.bConstructed = bConstructed;
-                        query.pInstrument = pInstrument;
-                        // even when found, need to process all remaining arrivals
-                      }
-                      query.cntInstrumentsToProcess--;
-                      if ( 0 == query.cntInstrumentsToProcess ) {
-                        assert( query.pInstrument ); // assert we found an instrument
-                        Finish( iterQuery );
-                      }
-                    } );
-                }
-              }
-            }
-            );
-        }
-      }
-    );
   }
   else {
     // process as a regular build instrument
@@ -162,6 +143,73 @@ void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, fInstrument_t
   }
 }
 
+void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, pMapQuery_t::iterator iterQuery ) {
+  m_pBuildInstrumentIQFeed->Queue( // confirm instrument type is a future
+    sIQFeedSymbol,
+    [this,iterQuery]( pInstrument_t pInstrument, bool bExists ) {
+
+      if ( InstrumentType::Future != pInstrument->GetInstrumentType() ) {
+        assert( false ); // needs to be a future, if something else, process accordingly, maybe case statement
+      }
+      else {
+        const std::string& sName( pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+        const std::string sBase( sName.substr( 0, sName.size() - 1 ) ); // remove trailing #
+        const boost::gregorian::date expiryContinuous( pInstrument->GetExpiry() ); // will be matching expiry of this continous future
+
+        // todo: auto-calc the year range
+        m_pOptionChainQuery->QueryFuturesChain(  // obtain a list of futures
+          sBase, "", "5678" /* 2025, 2026, 2027, 2028 */ , "6" /* 6 months */,
+          [this,expiryContinuous,iterQuery]( const iqfeed::OptionChainQuery::FuturesList& list ) mutable {
+
+            if ( 0 == list.vSymbol.size() ) {
+              assert( false );  // no likely symbols found
+              // TODO: clean up and return something
+            }
+            else {
+              Query& query( iterQuery->second );
+              query.cntInstrumentsToProcess = list.vSymbol.size();
+              for ( const iqfeed::OptionChainQuery::vSymbol_t::value_type sSymbolIQFeed: list.vSymbol ) {
+
+                m_pBuildInstrumentIQFeed->Queue(
+                  sSymbolIQFeed,
+                  [this,expiryContinuous,iterQuery]( pInstrument_t pInstrument, bool bConstructed ){
+                    Query& query( iterQuery->second );
+                    if ( expiryContinuous == pInstrument->GetExpiry() ) {
+                      // over-write continuous instrument
+                      query.bConstructed = bConstructed;
+                      query.pInstrument = pInstrument;
+                      // even when found, need to process all remaining arrivals
+                    }
+                    else { // other futures in the list may have option chains
+                      if ( iterQuery->second.fInstrumentAdditional ) {
+                        if ( m_pBuildInstrumentBoth ) {
+                          const std::string& sName( query.pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+                          m_pBuildInstrumentBoth->Queue(
+                            sName, // copy the lambda as it may not be around on a Finish()
+                            [fInstrument=iterQuery->second.fInstrumentAdditional]( pInstrument_t pInstrument, bool bConstructed ){
+                              fInstrument( pInstrument, bConstructed );
+                            } );
+                        }
+                        else {
+                          query.fInstrumentAdditional( query.pInstrument, query.bConstructed );
+                        }
+                      }
+                    }
+                    query.cntInstrumentsToProcess--;
+                    if ( 0 == query.cntInstrumentsToProcess ) {
+                      assert( query.pInstrument ); // assert we found an instrument
+                      Finish( iterQuery );
+                    }
+                  } );
+              }
+            }
+          }
+          );
+      }
+    }
+  );
+}
+
 void ComposeInstrument::Finish( pMapQuery_t::iterator iterQuery ) {
 
   Query& query( iterQuery->second );
@@ -170,11 +218,10 @@ void ComposeInstrument::Finish( pMapQuery_t::iterator iterQuery ) {
   if ( m_pBuildInstrumentBoth ) {
     // this does create a double query, first from above, and again here, but only on the final resolved future
     const std::string& sName( query.pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
-    m_pBuildInstrumentBoth->Queue( sName, std::move( query.fInstrument ) );
+    m_pBuildInstrumentBoth->Queue( sName, std::move( query.fInstrumentPrimary ) );
   }
   else {
-    //m_pBuildInstrumentIQFeed->Queue( sName, std::move( query.fInstrument ) );
-    query.fInstrument( query.pInstrument, query.bConstructed );
+    query.fInstrumentPrimary( query.pInstrument, query.bConstructed );
   }
 
   {

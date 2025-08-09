@@ -50,6 +50,7 @@ public:
   ~ComposeInstrument();
 
   void Compose( const std::string& sIQFeedSymbol, fInstrument_t&& );
+  void Discover( const std::string& sIQFeedSymbol, fInstrument_t&&, fInstrument_t&& ); // additional discovered futures
 
   // any threading issues here?
   using pOptionChainQuery_t = std::shared_ptr<ou::tf::iqfeed::OptionChainQuery>;
@@ -60,22 +61,36 @@ private:
 
   struct Query {
     bool bConstructed;
-    fInstrument_t fInstrument;
+    fInstrument_t fInstrumentPrimary;
+    fInstrument_t fInstrumentAdditional;
     pInstrument_t pInstrument;
     size_t cntInstrumentsToProcess;
 
-    Query( fInstrument_t&& fInstrument_ )
+    Query( fInstrument_t&& fInstrument )
     : bConstructed( false )
-    , fInstrument( std::move( fInstrument_ ) )
+    , fInstrumentPrimary( std::move( fInstrument ) )
+    , fInstrumentAdditional( nullptr )
+    , cntInstrumentsToProcess {}
+    {}
+
+    // note: fInstrumentAdditional_ will be copied not moved for each use
+    Query( fInstrument_t&& fInstrumentPrimary_, fInstrument_t&& fInstrumentAdditional_ )
+    : bConstructed( false )
+    , fInstrumentPrimary( std::move( fInstrumentPrimary_ ) )
+    , fInstrumentAdditional( std::move( fInstrumentAdditional_ ) )
     , cntInstrumentsToProcess {}
     {}
 
     Query( Query&& query )
     : bConstructed( false )
-    , fInstrument( std::move( query.fInstrument ) )
+    , fInstrumentPrimary( std::move( query.fInstrumentPrimary ) )
+    , fInstrumentAdditional( std::move( query.fInstrumentAdditional ) )
     , pInstrument( std::move( query.pInstrument ) )
     , cntInstrumentsToProcess( query.cntInstrumentsToProcess )
-    {}
+    {
+      query.fInstrumentPrimary = nullptr;
+      query.fInstrumentAdditional = nullptr;
+    }
   };
 
   std::mutex m_mutexMap;
@@ -97,6 +112,8 @@ private:
 
   void Initialize();
   void ConstructChainQuery();
+  void Compose( const std::string&, pMapQuery_t::iterator );
+
   void Finish( pMapQuery_t::iterator );
 };
 
