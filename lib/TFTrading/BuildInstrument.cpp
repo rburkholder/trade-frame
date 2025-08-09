@@ -166,6 +166,7 @@ void BuildInstrument::Build( mapInProgress_t::iterator iterInProgress ) {
 
           BOOST_LOG_TRIVIAL(info)
             << "BuildInstrument start: "
+            << pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) << ','
             << pInstrument->GetInstrumentName() << ','
             << fundamentals.sOptionRoots << ','
             << fundamentals.sExchangeRoot << ','
