@@ -23,6 +23,7 @@
 
 #include <TFOptions/Chains.h>
 
+#include "CollectL1.hpp"
 #include "CollectATM.hpp"
 
 namespace collect {
@@ -35,11 +36,9 @@ ATM::ATM(
   fEngine_t&& fEngineOptionStart, fEngine_t&& fEngineOptionStop,
   boost::gregorian::date dateStop // use for expiry calculation
 )
+: m_sFilePath( sFilePath )
+, m_sDataFilePrefix( sDataPathPrefix )
 {
-
-  // TODO: watch built elsewhere, needs to be restartable for a new day?
-  //       or, delete and rebuild for a new day?
-  //             this, so that can handle when new front month started
 
   assert( fBuildOption );
   m_fBuildOption = std::move( fBuildOption );
@@ -63,9 +62,6 @@ ATM::ATM(
   assert( fEngineOptionStop );
   m_fEngineOptionStop = std::move( fEngineOptionStop );
 
-  m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ATM::HandleWatchUnderlyingTrade ) );
-  m_pWatchUnderlying->StartWatch(); // maybe use ticks or quotes to trigger recording atm?
-
   m_fGatherOptions = std::move( fGatherOptions ); // keep it local & in scope
   assert( m_fGatherOptions );
   // TODO: convert the lambda to bind so can pass a reference and copies are not made in QueryChains
@@ -83,53 +79,79 @@ ATM::ATM(
       pInstance->pInstrument = pInstrumentOption; // put / call as appropriate
 
       if ( 0 == zero ) {
-        BOOST_LOG_TRIVIAL(info) << "last option entry found";
-        // select, at minimum, one day beyond to ensure non-expiry
-        mapChains_t::iterator iter = ou::tf::option::SelectChain( m_mapChains, dateStop, boost::gregorian::days( 1 ) );
-        assert( m_mapChains.end() != iter );
         // TODO: clean up strikes to ensure complete call/put pairs
 
-        m_pTrackATM = iter->second.Factory_TrackATM(
-          // TODO: track active options & deactiviate on destruction
-          [this]( chain_t::strike_t& strike ){ // fWatch_t&& fWatchOn
+        // select, at minimum, one day beyond to ensure non-expiry
+        mapChains_t::iterator iterOneDay = ou::tf::option::SelectChain( m_mapChains, dateStop, boost::gregorian::days( 1 ) );
+        //mapChains_t::iterator iterTwoDay = ou::tf::option::SelectChain( m_mapChains, dateStop, boost::gregorian::days( 2 ) );
+        assert( m_mapChains.end() != iterOneDay );
 
-            assert( strike.call.pInstrument );
-            if ( !strike.call.pOption ) {
-              strike.call.pOption = m_fBuildOption( strike.call.pInstrument );
-            };
-            MapAddOption( strike.call.pOption );
+        const std::string& sName( m_pWatchUnderlying->GetInstrumentName() );
+        auto dateDiff = iterOneDay->first - dateStop;
+        if ( 7 > dateDiff.days() ) { // process near expiries only
+          BOOST_LOG_TRIVIAL(info) << sName << " has near term option expiry " << ou::tf::Instrument::BuildDate( iterOneDay->first );
 
-            assert( strike.put.pInstrument );
-            if ( !strike.put.pOption ) {
-              strike.put.pOption = m_fBuildOption( strike.put.pInstrument );
-            };
-            MapAddOption( strike.put.pOption );
-            // TODO: enable watches & recording?
-          },
-          [this]( chain_t::strike_t& strike  ){ // fWatch_t&& fWatchOff
+          m_pL1 = std::make_unique<L1>( m_sFilePath, m_sDataFilePrefix, m_pWatchUnderlying );
 
-            assert( strike.call.pOption );
-            MapDelOption( strike.call.pOption );
+          m_pWatchUnderlying->OnTrade.Add( MakeDelegate( this, &ATM::HandleWatchUnderlyingTrade ) );
+          m_pWatchUnderlying->StartWatch(); // maybe use ticks or quotes to trigger recording atm?
 
-            assert( strike.put.pOption );
-            MapDelOption( strike.put.pOption );
-            // TODO: disable watches & recording?
-          },
-          [this]( const ou::tf::PriceIV& iv ){ // fIvATM_t&& fIvATM
-            m_pfwATM->Append( iv );
-          }
-        );
+          m_pTrackATM = iterOneDay->second.Factory_TrackATM(
+            // TODO: track active options & deactiviate on destruction
+            [this]( chain_t::strike_t& strike ){ // fWatch_t&& fWatchOn
+
+              assert( strike.call.pInstrument );
+              if ( !strike.call.pOption ) {
+                strike.call.pOption = m_fBuildOption( strike.call.pInstrument );
+              };
+              MapAddOption( strike.call.pOption );
+
+              assert( strike.put.pInstrument );
+              if ( !strike.put.pOption ) {
+                strike.put.pOption = m_fBuildOption( strike.put.pInstrument );
+              };
+              MapAddOption( strike.put.pOption );
+              // TODO: enable watches & recording?
+            },
+            [this]( chain_t::strike_t& strike  ){ // fWatch_t&& fWatchOff
+
+              assert( strike.call.pOption );
+              MapDelOption( strike.call.pOption );
+
+              assert( strike.put.pOption );
+              MapDelOption( strike.put.pOption );
+              // TODO: disable watches & recording?
+            },
+            [this]( const ou::tf::PriceIV& iv ){ // fIvATM_t&& fIvATM
+              m_pfwATM->Append( iv );
+            }
+          );
+          assert( m_pTrackATM );
+        }
+        else {
+          BOOST_LOG_TRIVIAL(info) << sName << " does not have near term options";
+        }
       }
     } );
 }
 
 ATM::~ATM() {
 
-  m_pWatchUnderlying->StopWatch();
-  m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &ATM::HandleWatchUnderlyingTrade ) );
 
-  m_pfwATM->Write();
-  m_pfwATM.reset();
+  if ( m_pTrackATM ) {
+    m_pWatchUnderlying->StopWatch();
+    m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &ATM::HandleWatchUnderlyingTrade ) );
+
+    m_pfwATM->Write();
+    m_pfwATM.reset();
+  }
+
+  m_pTrackATM.reset();
+
+  if ( m_pL1 ) {
+    m_pL1->Write();
+    m_pL1.reset();
+  }
 
   for ( mapOptionLifeTime_t::value_type& vt: m_mapOptionLifeTime ) {
     m_fEngineOptionStop( vt.second.pOption, m_pWatchUnderlying );
@@ -183,7 +205,12 @@ void ATM::HandleWatchUnderlyingTrade( const ou::tf::Trade& trade ) { // TODO: us
 }
 
 void ATM::Write() {
-  m_pfwATM->Write();
+  if ( m_pL1 ) {
+    m_pL1->Write();
+  }
+  if ( m_pTrackATM ) {
+    m_pfwATM->Write();
+  }
 }
 
 } // namespace collect

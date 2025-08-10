@@ -160,22 +160,40 @@ void Process::ConstructWatches() {
       ConstructWatch( value, pInstrument );
     }
     else {
-      m_pComposeInstrumentIQFeed->Compose(
-        key, // might be a continuous futures front month
-        [ this, &value ]( pInstrument_t pInstrument, bool bConstructed ){
-          ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
-          const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
-          if ( im.Exists( idInstrument ) ) {
-            pInstrument_t pInstrumentLoaded = im.Get( idInstrument );
-            ConstructWatch( value, pInstrumentLoaded );
+      // TODO: improve mechansim of L1/L2/ATM selection for futures: continuous, those with expiries, ...
+      if ( '#' != key.back() ) {
+        m_pComposeInstrumentIQFeed->Compose(
+          key, // might be a continuous futures front month
+          [ this, &value ]( pInstrument_t pInstrument, bool bConstructed ){
+            ConstructWatch( bConstructed, pInstrument, value );
           }
-          else {
-            im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
-            ConstructWatch( value, pInstrument );
+        );
+      }
+      else { // continuous future, submit all futures, selectively process each
+        m_pComposeInstrumentIQFeed->Discover(
+          key, // might be a continuous futures front month
+          [ this, &value ]( pInstrument_t pInstrument, bool bConstructed ){ // fInstrumentPrimary
+            ConstructWatch( bConstructed, pInstrument, value );
+          },
+          [ this, &value ]( pInstrument_t pInstrument, bool bConstructed ){ // fInstrumentAdditional
+            ConstructWatch( bConstructed, pInstrument, value );
           }
-        }
-      );
+        );
+      }
     }
+  }
+}
+
+void Process::ConstructWatch( bool bConstructed, pInstrument_t& pInstrument, mapToCollect_t::value_type::second_type& value ) {
+  ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+  const ou::tf::Instrument::idInstrument_t& idInstrument( pInstrument->GetInstrumentName() );
+  if ( im.Exists( idInstrument ) ) {
+    pInstrument_t pInstrumentLoaded = im.Get( idInstrument );
+    ConstructWatch( value, pInstrumentLoaded );
+  }
+  else {
+    im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+    ConstructWatch( value, pInstrument );
   }
 }
 

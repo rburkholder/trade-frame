@@ -34,6 +34,8 @@
 
 namespace collect {
 
+class L1;
+
 class ATM: public Base {
 public:
 
@@ -60,7 +62,13 @@ public:
 protected:
 private:
 
+  const std::string& m_sFilePath;
+  const std::string& m_sDataFilePrefix;
+
   pWatch_t m_pWatchUnderlying;
+
+  using pL1_t = std::unique_ptr<L1>; // collect underlying if there are options in use
+  pL1_t m_pL1;
 
   fGatherOptions_t m_fGatherOptions;
   fBuildOption_t m_fBuildOption;

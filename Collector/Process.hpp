@@ -141,6 +141,7 @@ private:
   void StartIQFeed();
   void HandleIQFeedConnected( int );
   void InitializeComposeInstrument();
+  void ConstructWatch( bool bConstructed, pInstrument_t&, mapToCollect_t::value_type::second_type& );
   void ConstructWatch( mapToCollect_t::value_type::second_type&, pInstrument_t& );
   void ConstructWatches();
   void ConstructCollectors( const setToCollect_t&, pWatch_t );
