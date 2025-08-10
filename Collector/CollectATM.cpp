@@ -137,7 +137,6 @@ ATM::ATM(
 
 ATM::~ATM() {
 
-
   if ( m_pTrackATM ) {
     m_pWatchUnderlying->StopWatch();
     m_pWatchUnderlying->OnTrade.Remove( MakeDelegate( this, &ATM::HandleWatchUnderlyingTrade ) );
