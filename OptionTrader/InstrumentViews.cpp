@@ -43,6 +43,11 @@
 #include "InstrumentViews.hpp"
 #include "OptionChainModel.hpp"
 
+// todo:  2025/08/10
+//   make use of revised ComposeInstrument to merge all options from all like futures together into one long map
+//   revise mapChains_t to include the underlying future for each expiry
+//   this will require a different view, rather than an instrument specific view, would need a non-dated future name
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
