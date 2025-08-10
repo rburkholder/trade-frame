@@ -38,7 +38,7 @@
 #include <TFOptions/Engine.hpp>
 
 #include <TFVuTrading/TreeItem.hpp>
-#include "TFVuTrading/WinChartView.h"
+#include <TFVuTrading/WinChartView.h>
 
 #include "InstrumentViews.hpp"
 #include "OptionChainModel.hpp"
