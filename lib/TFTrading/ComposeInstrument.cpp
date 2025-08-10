@@ -183,7 +183,7 @@ void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, pMapQuery_t::
                     else { // other futures in the list may have option chains
                       if ( iterQuery->second.fInstrumentAdditional ) {
                         if ( m_pBuildInstrumentBoth ) {
-                          const std::string& sName( query.pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
+                          const std::string& sName( pInstrument->GetInstrumentName( ou::tf::Instrument::eidProvider_t::EProviderIQF ) );
                           m_pBuildInstrumentBoth->Queue(
                             sName, // copy the lambda as it may not be around on a Finish()
                             [fInstrument=iterQuery->second.fInstrumentAdditional]( pInstrument_t pInstrument, bool bConstructed ){
@@ -191,7 +191,7 @@ void ComposeInstrument::Compose( const std::string& sIQFeedSymbol, pMapQuery_t::
                             } );
                         }
                         else {
-                          query.fInstrumentAdditional( query.pInstrument, query.bConstructed );
+                          query.fInstrumentAdditional( pInstrument, query.bConstructed );
                         }
                       }
                     }
