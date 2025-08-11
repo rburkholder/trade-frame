@@ -73,7 +73,11 @@ bool Load( const std::string& sFileName, Choices& choices ) {
   kwmMode.AddPattern( "view_training_data", config::Choices::EMode::view_training );
   kwmMode.AddPattern( "view_validate_data", config::Choices::EMode::view_validate );
   kwmMode.AddPattern( "train/validate", config::Choices::EMode::train_then_validate );
+  kwmMode.AddPattern( "train/save/validate", config::Choices::EMode::train_save_validate );
+  kwmMode.AddPattern( "train/save", config::Choices::EMode::train_then_save );
   kwmMode.AddPattern( "train/runlive", config::Choices::EMode::train_then_run_live );
+  kwmMode.AddPattern( "load/validate", config::Choices::EMode::load_then_validate );
+  kwmMode.AddPattern( "load/runlive", config::Choices::EMode::load_then_run_live );
 
   try {
 

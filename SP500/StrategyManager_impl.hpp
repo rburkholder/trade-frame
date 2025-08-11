@@ -160,7 +160,6 @@ private:
   );
   void LoadPanelFinancialChart();
 
-  void Phase_train(); // uses sim to train model
   void Phase_predict(); // uses model to validate or run live
 
   void BuildProvider_Sim();

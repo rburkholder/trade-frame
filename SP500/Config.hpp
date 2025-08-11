@@ -30,7 +30,13 @@ namespace config {
 
 struct Choices {
 
-  enum class EMode { view_training, view_validate, train_then_validate, train_then_run_live, unknown } eMode;
+  enum class EMode {
+    view_training, view_validate
+  , train_then_validate, train_then_save, train_save_validate
+  , load_then_validate
+  , train_then_run_live, load_then_run_live
+  , unknown
+  } eMode;
 
   using vFileTraining_t = std::vector<std::string>;
   vFileTraining_t m_vFileTraining; // multiple files for training

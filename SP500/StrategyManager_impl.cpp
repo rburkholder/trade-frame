@@ -68,10 +68,20 @@ StrategyManager_impl::StrategyManager_impl(
       }
       break;
     case config::Choices::EMode::train_then_validate:
-      Phase_train();
+    case config::Choices::EMode::train_save_validate:
+    case config::Choices::EMode::train_then_save:
+      BuildProvider_Sim();
       break;
     case config::Choices::EMode::train_then_run_live:
-      Phase_train();
+      BuildProvider_Sim();
+      break;
+    case config::Choices::EMode::load_then_validate:
+      m_model.Load();
+      BuildProvider_Sim();
+      break;
+    case config::Choices::EMode::load_then_run_live:
+      m_model.Load();
+      Phase_predict();
       break;
     case config::Choices::EMode::unknown:
       assert( false );
@@ -89,16 +99,20 @@ StrategyManager_impl::~StrategyManager_impl() {
   m_mapHdf5Instrument.clear();
 }
 
-void StrategyManager_impl::Phase_train() {
-  BuildProvider_Sim();
-}
-
 void StrategyManager_impl::Phase_predict() {
   m_model.EnablePredictionMode();
   switch ( m_choices.eMode ) {
+    case config::Choices::EMode::train_then_save:
+      m_model.Save();
+      break;
+    case config::Choices::EMode::train_save_validate:
+      m_model.Save();
+      // no break, just fall through to train_then_validate
+    case config::Choices::EMode::load_then_validate:
     case config::Choices::EMode::train_then_validate:
       RunStrategy_predict_sim();
       break;
+    case config::Choices::EMode::load_then_run_live:
     case config::Choices::EMode::train_then_run_live:
       m_startDateUTC = ou::TimeSource::GlobalInstance().External().date(); // DailyTradeTimeFrame default constructor format
       m_startTimeUTC = boost::posix_time::time_duration( 0, 0, 0 );
@@ -195,10 +209,25 @@ bool StrategyManager_impl::ValidateSimFile( const std::string& sDataFileName ) {
   return bOk;
 }
 
+
+
 void StrategyManager_impl::HandleSimConnected( int ) {
-  m_model.Train_Init();
-  m_iterFileTraining = m_choices.m_vFileTraining.begin(); // iterate through training files
-  m_fQueueTask( [this](){ RunStrategy_train(); } );
+  switch ( m_choices.eMode ) {
+    case config::Choices::EMode::train_then_validate:
+    case config::Choices::EMode::train_save_validate:
+    case config::Choices::EMode::train_then_save:
+    case config::Choices::EMode::train_then_run_live:
+      m_model.Train_Init();
+      m_iterFileTraining = m_choices.m_vFileTraining.begin(); // iterate through training files
+      m_fQueueTask( [this](){ RunStrategy_train(); } );
+      break;
+    case config::Choices::EMode::load_then_validate:
+      m_fQueueTask( [this](){ Phase_predict(); } );
+      break;
+    default:
+      assert( false );
+      break;
+  }
 }
 
 void StrategyManager_impl::HandleIQFConnected( int ) {
