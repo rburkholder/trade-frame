@@ -41,6 +41,8 @@ struct Choices {
   using vFileTraining_t = std::vector<std::string>;
   vFileTraining_t m_vFileTraining; // multiple files for training
   std::string m_sFileValidate; // single file for validation
+  std::string m_sFileModelLoad;
+  std::string m_sFileModelSave;
 
   HyperParameters m_hp;
 

@@ -76,11 +76,11 @@ StrategyManager_impl::StrategyManager_impl(
       BuildProvider_Sim();
       break;
     case config::Choices::EMode::load_then_validate:
-      m_model.Load();
+      m_model.Load( m_choices.m_sFileModelLoad );
       BuildProvider_Sim();
       break;
     case config::Choices::EMode::load_then_run_live:
-      m_model.Load();
+      m_model.Load( m_choices.m_sFileModelLoad );
       Phase_predict();
       break;
     case config::Choices::EMode::unknown:
@@ -103,10 +103,10 @@ void StrategyManager_impl::Phase_predict() {
   m_model.EnablePredictionMode();
   switch ( m_choices.eMode ) {
     case config::Choices::EMode::train_then_save:
-      m_model.Save();
+      m_model.Save( m_choices.m_sFileModelSave );
       break;
     case config::Choices::EMode::train_save_validate:
-      m_model.Save();
+      m_model.Save( m_choices.m_sFileModelSave );
       // no break, just fall through to train_then_validate
     case config::Choices::EMode::load_then_validate:
     case config::Choices::EMode::train_then_validate:

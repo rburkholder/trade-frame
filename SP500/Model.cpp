@@ -32,8 +32,6 @@ namespace {
   static const size_t c_secondsYOffset( 32 ); // attempt prediction this far in the future
 
   static const int c_nOutputFeature( 1 );
-
-  static const std::string s_ModelFileName( "sp500.pt" );
 }
 
 Model::Model()
@@ -383,16 +381,16 @@ void Model::Train_Perform( const HyperParameters& hp ) {
 
 }
 
-void Model::Save() {
+void Model::Save( const std::string& sFileName ) {
   BOOST_LOG_TRIVIAL(info) << "save " << c10::str( *m_pLSTM );
   torch::serialize::OutputArchive output_archive;
   m_pLSTM->save( output_archive );
-  output_archive.save_to( s_ModelFileName );
+  output_archive.save_to( sFileName );
 }
 
-void Model::Load() {
+void Model::Load( const std::string& sFileName ) {
   torch::serialize::InputArchive archive;
-  archive.load_from( s_ModelFileName );
+  archive.load_from( sFileName );
   m_pLSTM->load( archive );
   BOOST_LOG_TRIVIAL(info) << "load " << c10::str( *m_pLSTM );
 }

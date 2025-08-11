@@ -37,6 +37,8 @@ namespace {
   static const std::string sChoice_sFileValidate( "file_validate" );
   static const std::string sChoice_sLearningRate( "learning_rate" );
   static const std::string sChoice_sNumEpochs( "num_epochs" );
+  static const std::string sChoice_sFileModelLoad( "file_model_load" );
+  static const std::string sChoice_sFileModelSave( "file_model_save" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bRequired, T& dest ) {
@@ -89,6 +91,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     ( sChoice_sFileValidate.c_str(), po::value<std::string>( &choices.m_sFileValidate )->default_value( "" ), "validation file" )
     ( sChoice_sLearningRate.c_str(), po::value<double>( &choices.m_hp.m_dblLearningRate )->default_value( 0.01 ), "learning rate" )
     ( sChoice_sNumEpochs.c_str(), po::value<int>( &choices.m_hp.m_nEpochs )->default_value( 1000 ), "number of epochs" )
+    ( sChoice_sFileModelLoad.c_str(), po::value<std::string>( &choices.m_sFileModelLoad )->default_value( "sp500.pt" ), "model file to be loaded" )
+    ( sChoice_sFileModelSave.c_str(), po::value<std::string>( &choices.m_sFileModelSave )->default_value( "sp500.pt" ), "model file to be saved" )
     ;
     po::variables_map vm;
 
@@ -105,6 +109,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       bOk &= parse<std::string>( sFileName, vm, sChoice_sFileValidate, true, choices.m_sFileValidate );
       bOk &= parse<double>( sFileName, vm, sChoice_sLearningRate, false, choices.m_hp.m_dblLearningRate );
       bOk &= parse<int>( sFileName, vm, sChoice_sNumEpochs, false, choices.m_hp.m_nEpochs );
+      bOk &= parse<std::string>( sFileName, vm, sChoice_sFileModelLoad, true, choices.m_sFileModelLoad );
+      bOk &= parse<std::string>( sFileName, vm, sChoice_sFileModelSave, true, choices.m_sFileModelSave );
     }
 
     if ( 100.0 > choices.m_hp.m_nEpochs ) {

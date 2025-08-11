@@ -51,8 +51,8 @@ public:
 
   ou::tf::Price EmptyPrice( boost::posix_time::ptime ) const; // empty value used during training
 
-  void Save();
-  void Load();
+  void Save( const std::string& );
+  void Load( const std::string& );
 
 protected:
 private:
