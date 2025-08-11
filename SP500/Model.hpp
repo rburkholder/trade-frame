@@ -51,6 +51,9 @@ public:
 
   ou::tf::Price EmptyPrice( boost::posix_time::ptime ) const; // empty value used during training
 
+  void Save();
+  void Load();
+
 protected:
 private:
 
@@ -86,7 +89,7 @@ private:
 
   using vValuesFlt_t = std::vector<fields_t<float> >;
   vValuesFlt_t m_vDataScaled; // LSTM prefers float, values are 0.0 to 1.0 anyway
-  vValuesFlt_t::const_iterator m_iterDataScaled;
+  vValuesFlt_t::size_type m_ixDataScaled;
 
   long m_nSamples_actual {};
 

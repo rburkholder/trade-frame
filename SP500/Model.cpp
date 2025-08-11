@@ -32,10 +32,12 @@ namespace {
   static const size_t c_secondsYOffset( 32 ); // attempt prediction this far in the future
 
   static const int c_nOutputFeature( 1 );
+
+  static const std::string s_ModelFileName( "sp500.pt" );
 }
 
 Model::Model()
-: m_iterDataScaled( m_vDataScaled.begin() )
+: m_ixDataScaled {}
 {
 
   int num_devices = 0;
@@ -52,6 +54,14 @@ Model::Model()
 
   torch::manual_seed( 1 );
   torch::cuda::manual_seed_all( 1 );
+
+  static const int input_size( nInputFeature_ );
+  static const int hidden_size( nInputFeature_ * 9 );
+  static const int num_layers( 1 );
+  static const int output_size( c_nOutputFeature );
+
+  m_pLSTM = std::make_unique<LSTM>( input_size, hidden_size, num_layers, output_size );
+  m_pLSTM->to( m_torchDevice );
 }
 
 Model::~Model() {
@@ -154,6 +164,9 @@ void Model::Append( const Features_raw& raw, Features_scaled& scaled ) {
     );
 
     m_vDataScaled.push_back( scaled_flt ); // will need to timestamp each entry
+    if ( 1 == m_vDataScaled.size() ) {
+      m_ixDataScaled = 0;
+    }
   }
 }
 
@@ -164,7 +177,7 @@ ou::tf::Price Model::EmptyPrice( boost::posix_time::ptime dt ) const {
 void Model::EnablePredictionMode() {
   // with torch.no_grad()  ?
   m_vDataScaled.clear();
-  m_iterDataScaled = m_vDataScaled.begin();
+  m_ixDataScaled = 0;
   m_pLSTM->eval();
 }
 
@@ -177,10 +190,11 @@ ou::tf::Price Model::Predict( boost::posix_time::ptime dt ) {
   torch::NoGradGuard no_grad;
 
   if ( c_secondsSequence <= m_vDataScaled.size() ) {
-    assert( c_secondsSequence == m_vDataScaled.end() - m_iterDataScaled );
+    const auto diff( m_vDataScaled.size() - m_ixDataScaled );
+    assert( c_secondsSequence == diff );
 
     torch::Tensor tensorX = // input
-      torch::from_blob( (void*)(&(*m_iterDataScaled)), { 1, c_secondsSequence, nInputFeature },
+      torch::from_blob( (void*)(&m_vDataScaled[ m_ixDataScaled ]), { 1, c_secondsSequence, nInputFeature },
       torch::TensorOptions().dtype( torch::kFloat32 )
     ).to( m_torchDevice );
 
@@ -190,7 +204,7 @@ ou::tf::Price Model::Predict( boost::posix_time::ptime dt ) {
 
     price = prediction[ 0 ][ c_secondsSequence - 1 ][ 0 ].item<float>();
 
-    ++m_iterDataScaled;
+    ++m_ixDataScaled;
   }
   return ou::tf::Price( dt + boost::posix_time::time_duration( 0, 0, c_secondsYOffset ), price );
 }
@@ -322,11 +336,6 @@ void Model::Train_Perform( const HyperParameters& hp ) {
 
   // Hyperparameters
   const int batch_size( m_nSamples_actual );
-  const int input_size( nInputFeature );
-  const int hidden_size( nInputFeature * 9 );
-  const int output_size( c_nOutputFeature );
-  const int sequence_length( c_secondsSequence );
-  const int num_layers( 1 );
 
   assert( 100 <= hp.m_nEpochs );
 
@@ -334,10 +343,7 @@ void Model::Train_Perform( const HyperParameters& hp ) {
   const int num_epochs( hp.m_nEpochs ); // 10000 is good
   const int epoch_skip( num_epochs / 100 );
 
-    // Instantiate the model
-  m_pLSTM = std::make_unique<LSTM>( input_size, hidden_size, num_layers, output_size );
   m_pLSTM->train();
-  m_pLSTM->to( m_torchDevice );
 
   // Loss, optimizer, state
   torch::nn::MSELoss criterion( torch::nn::MSELossOptions().reduction( torch::kMean ) ); // loss function
@@ -369,4 +375,18 @@ void Model::Train_Perform( const HyperParameters& hp ) {
 
   BOOST_LOG_TRIVIAL(info) << "training done";
 
+}
+
+void Model::Save() {
+  BOOST_LOG_TRIVIAL(info) << "save " << c10::str( *m_pLSTM );
+  torch::serialize::OutputArchive output_archive;
+  m_pLSTM->save( output_archive );
+  output_archive.save_to( s_ModelFileName );
+}
+
+void Model::Load() {
+  torch::serialize::InputArchive archive;
+  archive.load_from( s_ModelFileName );
+  m_pLSTM->load( archive );
+  BOOST_LOG_TRIVIAL(info) << "load " << c10::str( *m_pLSTM );
 }
