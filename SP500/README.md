@@ -31,7 +31,11 @@ the previous evening to facilitate the collection of currencies and overnight fu
 
 Current code:
 * runs a training cycle, then
-* runs a prediction cycle
+* runs a prediction cycle (a prediction cycle can run using validation file or can be run live)
+
+Two executables are built:
+* SP500_gui - used for visual testing and development
+* SP500_cli - used for running training on the console for use with NVidia profiling tools
 
 The configuration file provides key settings (including two hyperparameters):
 
