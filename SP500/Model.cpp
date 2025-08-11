@@ -178,6 +178,10 @@ void Model::EnablePredictionMode() {
   m_pLSTM->eval();
 }
 
+void Model::SetPredictionResult( fPredictionResult_t&& f ) {
+  m_fPredictionResult = std::move( f );
+}
+
 float Model::Predict() {
 
   float price {};
@@ -202,6 +206,7 @@ float Model::Predict() {
       assert( prediction.is_cuda() );
 
       torch::Tensor cpu_tensor = prediction.to( torch::kCPU );
+      assert( prediction.is_cuda() );
       assert( cpu_tensor.is_contiguous() );
 
       const auto nElements( cpu_tensor.numel() );
