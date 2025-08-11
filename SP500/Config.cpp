@@ -71,7 +71,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
   bool bOk( true );
   std::string sMode;
 
-  ou::KeyWordMatch<config::Choices::EMode> kwmMode( config::Choices::EMode::unknown, 3 );
+  ou::KeyWordMatch<config::Choices::EMode> kwmMode( config::Choices::EMode::unknown, 10 );
   kwmMode.AddPattern( "view_training_data", config::Choices::EMode::view_training );
   kwmMode.AddPattern( "view_validate_data", config::Choices::EMode::view_validate );
   kwmMode.AddPattern( "train/validate", config::Choices::EMode::train_then_validate );
