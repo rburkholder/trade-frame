@@ -371,6 +371,12 @@ void Model::Train_Perform( const HyperParameters& hp ) {
       BOOST_LOG_TRIVIAL(info) << "epoch " << ( 1 + epoch ) << '/' << num_epochs << " loss: " << loss.item<float>();
     }
 
+    static const double target( 0.046 );
+    if ( target > loss.item<float>() ) {
+      BOOST_LOG_TRIVIAL(info) << "epoch " << ( 1 + epoch ) << '/' << num_epochs << " loss < " << target << ": " << loss.item<float>();
+      break;
+    }
+
   }
 
   BOOST_LOG_TRIVIAL(info) << "training done";
