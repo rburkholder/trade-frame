@@ -94,9 +94,15 @@ StrategyManager_impl::~StrategyManager_impl() {
   m_pComposeInstrument.reset();
   m_fSetChartDataView( ou::tf::WinChartView::EView::live_review, nullptr );
   m_pStrategy.reset();
-  m_sim->Reset();
+  if ( m_sim ) {
+    m_sim->Reset();
+  }
   m_mapSymbolInfo.clear();
   m_mapHdf5Instrument.clear();
+  m_pComposeInstrument.reset();
+  m_sim.reset();
+  m_tws.reset();
+  m_iqf.reset();
 }
 
 void StrategyManager_impl::Phase_predict() {
