@@ -37,19 +37,25 @@ The configuration file provides key settings (including two hyperparameters):
 
 ```
 $ cat x64/debug/sp500.cfg
-# choose 1 of 3 modes:
+# choose a mode (additional modes listed in SP500/config.cpp source)
 #mode=view_training_data
 #mode=view_validate_data
-mode=train/validate
-# two files for running the train/validate cycle:
-file_training=collector-20250629.hdf5
-file_validate=collector-20250630.hdf5
+mode=train/save/validate
+#mode=load/runlive
+# multiple files can be used for training, be aware of gpu memory limitations:
+file_training=collector-20250804.hdf5
+file_training=collector-20250805.hdf5
+file_validate=collector-20250806.hdf5
 # fine tuning:
 #learning_rate=0.001
 #num_epochs=10000
 # rough testing:
 learning_rate=0.01
 num_epochs=1000
+# save to a file when tuning with training
+file_model_save=sp500_save.pt
+# load a file from a good training session (rename a saved file to protect from overwrite):
+file_model_load=sp500_load.pt
 ```
 
 Symbols and their contribution to signals:
