@@ -25,6 +25,8 @@
 #include <vector>
 #include <cstring>
 
+#include <c10/util/ArrayRef.h>
+
 #include <c10/core/DeviceType.h>
 
 class LSTM;
@@ -51,6 +53,10 @@ public:
 
   void Save( const std::string& );
   void Load( const std::string& );
+
+  using rPrediction_t = c10::ArrayRef<float>;
+  using fPredictionResult_t = std::function<void( const rPrediction_t& )>;
+  void SetPredictionResult( fPredictionResult_t&& );
 
 protected:
 private:
@@ -96,6 +102,8 @@ private:
 
   using pLSTM_t = std::unique_ptr<LSTM>;
   pLSTM_t m_pLSTM;
+
+  fPredictionResult_t m_fPredictionResult;
 
   static bool Scale( const Features_raw&, Features_scaled& );
 

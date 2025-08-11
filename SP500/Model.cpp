@@ -21,8 +21,6 @@
 
 #include <boost/log/trivial.hpp>
 
-#include <c10/util/ArrayRef.h>
-
 #include "LSTM.hpp"
 #include "Model.hpp"
 #include "Features.hpp"
@@ -40,6 +38,7 @@ size_t Model::PredictionDistance() const { return c_secondsYOffset; }
 
 Model::Model()
 : m_ixDataScaled {}
+, m_fPredictionResult( nullptr )
 {
 
   int num_devices = 0;
@@ -199,24 +198,35 @@ float Model::Predict() {
     torch::Tensor prediction = m_pLSTM->forward( tensorX, state );
     //BOOST_LOG_TRIVIAL(info) << "prediction sizes: " << prediction.sizes();
     //assert( prediction.is_contiguous() );
-    assert( prediction.is_cuda() );
+    if ( m_fPredictionResult ) {
+      assert( prediction.is_cuda() );
 
-    torch::Tensor cpu_tensor = prediction.to( torch::kCPU );
-    assert( cpu_tensor.is_contiguous() );
+      torch::Tensor cpu_tensor = prediction.to( torch::kCPU );
+      assert( cpu_tensor.is_contiguous() );
 
-    const auto nElements( cpu_tensor.numel() );
-    assert( c_secondsSequence == nElements );
+      const auto nElements( cpu_tensor.numel() );
+      assert( c_secondsSequence == nElements );
 
-    float* pData = cpu_tensor.data_ptr<float>();
-    c10::ArrayRef<float> rView( pData, nElements );
+      float* pData = cpu_tensor.data_ptr<float>();
+      c10::ArrayRef<float> rView( pData, nElements );
 
-    price = rView.back();
+      m_fPredictionResult( rView );
+
+      price = rView.back();
+    }
+    else {
+      price = prediction[ 0 ][ c_secondsSequence - 1 ][ 0 ].item<float>();
+    }
 
     ++m_ixDataScaled;
   }
 
   return price;
 }
+
+// reference:
+// https://labs.quansight.org/blog/2020/04/pytorch-tensoriterator-internals
+// https://labs.quansight.org/blog/2021/04/pytorch-tensoriterator-internals-update
 
 void Model::Train_Init() {
 
