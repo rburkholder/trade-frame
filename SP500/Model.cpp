@@ -56,7 +56,7 @@ Model::Model()
   torch::cuda::manual_seed_all( 1 );
 
   static const int input_size( nInputFeature_ );
-  static const int hidden_size( nInputFeature_ * 9 );
+  static const int hidden_size( nInputFeature_ * 8 );
   static const int num_layers( 1 );
   static const int output_size( c_nOutputFeature );
 
