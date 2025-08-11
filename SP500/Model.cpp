@@ -21,6 +21,8 @@
 
 #include <boost/log/trivial.hpp>
 
+#include <c10/util/ArrayRef.h>
+
 #include "LSTM.hpp"
 #include "Model.hpp"
 #include "Features.hpp"
@@ -181,7 +183,6 @@ void Model::EnablePredictionMode() {
 
 ou::tf::Price Model::Predict( boost::posix_time::ptime dt ) {
 
-  static const int nInputFeature( nInputFeature_ );
   float price {};
 
   // TODO: need to test with and without
@@ -192,7 +193,7 @@ ou::tf::Price Model::Predict( boost::posix_time::ptime dt ) {
     assert( c_secondsSequence == diff );
 
     torch::Tensor tensorX = // input
-      torch::from_blob( (void*)(&m_vDataScaled[ m_ixDataScaled ]), { 1, c_secondsSequence, nInputFeature },
+      torch::from_blob( (void*)(&m_vDataScaled[ m_ixDataScaled ]), { 1, c_secondsSequence, nInputFeature_ },
       torch::TensorOptions().dtype( torch::kFloat32 )
     ).to( m_torchDevice );
 
@@ -200,7 +201,13 @@ ou::tf::Price Model::Predict( boost::posix_time::ptime dt ) {
     torch::Tensor prediction = m_pLSTM->forward( tensorX, state );
     //BOOST_LOG_TRIVIAL(info) << "prediction sizes: " << prediction.sizes();
 
-    price = prediction[ 0 ][ c_secondsSequence - 1 ][ 0 ].item<float>();
+    const auto nElements( prediction.numel() );
+    assert( c_secondsSequence == nElements );
+    float* pData = prediction.data_ptr<float>();
+    c10::ArrayRef<float> rPrediction( pData, nElements );
+
+    //price = prediction[ 0 ][ c_secondsSequence - 1 ][ 0 ].item<float>();
+    price = rPrediction[ nElements - 1 ];
 
     ++m_ixDataScaled;
   }
