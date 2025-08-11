@@ -414,8 +414,13 @@ void StrategyManager_impl::HandleSimComplete_train() {
   else {
     m_fQueueTask(
       [this](){
-        m_model.Train_Perform( m_choices.m_hp );
-        Phase_predict();
+        try {
+          m_model.Train_Perform( m_choices.m_hp );
+          Phase_predict();
+        }
+        catch( ... ) {
+          BOOST_LOG_TRIVIAL(error) << "training error";
+        }
       } );
   }
 
