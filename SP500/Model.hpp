@@ -27,8 +27,6 @@
 
 #include <c10/core/DeviceType.h>
 
-#include <TFTimeSeries/DatedDatum.h>
-
 class LSTM;
 class Features_raw;
 class Features_scaled;
@@ -47,9 +45,9 @@ public:
   void Train_Perform( const HyperParameters& ); // train on batch of Append'd values
 
   void EnablePredictionMode();
-  ou::tf::Price Predict( boost::posix_time::ptime ); // iteratively called after each Append
+  float Predict();
 
-  ou::tf::Price EmptyPrice( boost::posix_time::ptime ) const; // empty value used during training
+  size_t PredictionDistance() const;
 
   void Save( const std::string& );
   void Load( const std::string& );

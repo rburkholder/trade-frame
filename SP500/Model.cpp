@@ -36,6 +36,8 @@ namespace {
   static const int c_nOutputFeature( 1 );
 }
 
+size_t Model::PredictionDistance() const { return c_secondsYOffset; }
+
 Model::Model()
 : m_ixDataScaled {}
 {
@@ -170,10 +172,6 @@ void Model::Append( const Features_raw& raw, Features_scaled& scaled ) {
   }
 }
 
-ou::tf::Price Model::EmptyPrice( boost::posix_time::ptime dt ) const {
-  return ou::tf::Price( dt + boost::posix_time::seconds( c_secondsYOffset ), 0.0 );
-}
-
 void Model::EnablePredictionMode() {
   // with torch.no_grad()  ?
   m_vDataScaled.clear();
@@ -181,7 +179,7 @@ void Model::EnablePredictionMode() {
   m_pLSTM->eval();
 }
 
-ou::tf::Price Model::Predict( boost::posix_time::ptime dt ) {
+float Model::Predict() {
 
   float price {};
 
@@ -200,18 +198,24 @@ ou::tf::Price Model::Predict( boost::posix_time::ptime dt ) {
     LSTM::lstm_state_t state( m_pLSTM->init_states( m_torchDevice, 1 ) );
     torch::Tensor prediction = m_pLSTM->forward( tensorX, state );
     //BOOST_LOG_TRIVIAL(info) << "prediction sizes: " << prediction.sizes();
+    //assert( prediction.is_contiguous() );
+    assert( prediction.is_cuda() );
 
-    const auto nElements( prediction.numel() );
+    torch::Tensor cpu_tensor = prediction.to( torch::kCPU );
+    assert( cpu_tensor.is_contiguous() );
+
+    const auto nElements( cpu_tensor.numel() );
     assert( c_secondsSequence == nElements );
-    float* pData = prediction.data_ptr<float>();
-    c10::ArrayRef<float> rPrediction( pData, nElements );
 
-    //price = prediction[ 0 ][ c_secondsSequence - 1 ][ 0 ].item<float>();
-    price = rPrediction[ nElements - 1 ];
+    float* pData = cpu_tensor.data_ptr<float>();
+    c10::ArrayRef<float> rView( pData, nElements );
+
+    price = rView.back();
 
     ++m_ixDataScaled;
   }
-  return ou::tf::Price( dt + boost::posix_time::time_duration( 0, 0, c_secondsYOffset ), price );
+
+  return price;
 }
 
 void Model::Train_Init() {

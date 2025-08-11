@@ -259,7 +259,7 @@ void StrategyManager_impl::RunStrategy_train() {
       m_cdv_train,
       [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price { // fForward_t
         m_model.Append( raw, scaled );
-        return m_model.EmptyPrice( raw.dt );
+        return ou::tf::Price( raw.dt + boost::posix_time::time_duration( 0, 0, m_model.PredictionDistance() ), 0.0 );
       } );
     m_pStrategy->Start();
   }
@@ -283,7 +283,8 @@ void StrategyManager_impl::RunStrategy_predict_sim() {
       m_cdv_predict,
       [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price { // fForward_t
         m_model.Append( raw, scaled );
-        return m_model.Predict( raw.dt );
+        const float prediction( m_model.Predict() );
+        return ou::tf::Price( raw.dt + boost::posix_time::time_duration( 0, 0, m_model.PredictionDistance() ), prediction );
       } );
     m_pStrategy->Start();
   }
@@ -303,7 +304,8 @@ void StrategyManager_impl::RunStrategy_predict_live() {
     [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price { // fForward_t
       m_model.Append( raw, scaled );
       // TODO: return a vector of the full prediction
-      return m_model.Predict( raw.dt ); // need to rebuild the indicator each time
+        const float prediction( m_model.Predict() );
+        return ou::tf::Price( raw.dt + boost::posix_time::time_duration( 0, 0, m_model.PredictionDistance() ), prediction );
     } );
   m_pStrategy->Start();
 
