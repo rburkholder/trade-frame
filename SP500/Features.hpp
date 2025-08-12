@@ -63,10 +63,16 @@ struct Real {
   double dbl;
   float flt;
   Real( double val ): dbl( val ), flt( val ) {}
+  Real( float val ): dbl( val ), flt( val ) {}
   Real() {}
   double operator=( double val ) {
     dbl = val;
+    flt = val; // conversion
+    return val;
+  }
+  float operator=( float val ) {
     flt = val;
+    dbl = val; // conversion
     return val;
   }
 
@@ -78,6 +84,9 @@ struct Features_scaled {
   double min;   // used to reverse the scale (offset)
 
   Real price;
+  Real predicted;
+
+  size_t distance; // how far into future
 
   Real ema013;
   Real ema029;
@@ -90,6 +99,7 @@ struct Features_scaled {
 
   void Zero() {
     price = 0.0;
+    predicted = 0.0;
     ema013 = 0.0;
     ema029 = 0.0;
     ema050 = 0.0;
