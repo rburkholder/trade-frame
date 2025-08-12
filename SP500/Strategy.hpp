@@ -63,7 +63,7 @@ public:
   using fStart_t = std::function<void()>;
   using fStop_t = std::function<void()>;
 
-  using fForward_t = std::function<ou::tf::Price( const Features_raw&, Features_scaled& )>;
+  using fForward_t = std::function<void( const Features_raw&, Features_scaled& )>;
 
   Strategy(
     ou::ChartDataView&
@@ -77,10 +77,12 @@ public:
 
   void Start();
 
+  void PredictionVector( const size_t distance, const size_t size, const float* );
+
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, Tick, AdvDec, Ratio, Predict, PL };
+  enum EChartSlot { Price, Volume, Tick, AdvDec, Ratio, Predict, PredVec, PL };
   enum class ETradeState {
     Init,  // initiaize state in current market
     Neutral, // netral state prior to active search
@@ -179,6 +181,7 @@ private:
   ou::ChartEntryIndicator m_ceTrade_ratio;
   ou::ChartEntryIndicator m_cePrediction_scaled;
   ou::ChartEntryIndicator m_cePrediction_descaled;
+  ou::ChartEntryIndicator m_cePrediction_vector;
 
   ou::ChartEntryIndicator m_ceTickJ_sigmoid;
   ou::ChartEntryIndicator m_ceTickL_sigmoid;

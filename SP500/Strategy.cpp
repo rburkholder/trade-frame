@@ -255,6 +255,8 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::Price, &m_ceShortEntry );
   m_cdv.Add( EChartSlot::Price, &m_ceShortFill );
   m_cdv.Add( EChartSlot::Price, &m_ceShortExit );
+
+  m_cdv.Add( EChartSlot::PredVec, &m_cePrediction_vector );
 }
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
@@ -424,11 +426,10 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   UpdateEma<200>( price_, m_features.dblEma200, m_ceEma200 );
 
   Features_scaled scaled; // receives scaled data
-  const ou::tf::Price prediction_scaled = m_fForward( m_features, scaled );
-  m_cePrediction_scaled.Append( prediction_scaled );
-
-  const ou::tf::Price prediction_descaled( prediction_scaled.DateTime(), prediction_scaled.Value() * scaled.range + scaled.min );
-  m_cePrediction_descaled.Append( prediction_descaled );
+  m_fForward( m_features, scaled ); // may call PredictionVector for a live strategy
+  const boost::posix_time::ptime dtPrediction( dt + boost::posix_time::time_duration( 0, 0, scaled.distance ) );
+  m_cePrediction_scaled.Append( dtPrediction, scaled.predicted.dbl );
+  m_cePrediction_descaled.Append( dtPrediction, scaled.predicted.dbl * scaled.range + scaled.min );
 
   //BOOST_LOG_TRIVIAL(trace) << "Calc01SecIndicators " << dt << ',' << prediction.DateTime();
 
@@ -444,6 +445,19 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
 
   m_ceAdvDec_ratio.Append( dt, scaled.AdvDec.dbl );
 
+}
+
+void Strategy::PredictionVector( const size_t distance, const size_t size, const float* r  ) {
+  m_cePrediction_vector.Clear(); // will this clear prior to appending?
+  static const boost::posix_time::time_duration one_sec( 0, 0, 1 );
+  boost::posix_time::ptime dt( m_features.dt - boost::posix_time::time_duration( 0, 0, size - distance) );
+  size_t counter( distance );
+  while ( 0 < counter ) {
+    m_cePrediction_vector.Append( dt, *r );
+    ++r;
+    dt += one_sec;
+    --counter;
+  }
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
