@@ -18,8 +18,7 @@
  * Created on May 6, 2017, 7:03 PM
  */
 
-#include <boost/phoenix/core.hpp>
-#include <boost/phoenix/bind/bind_member_function.hpp>
+#include <functional>
 
 #include "ChartEntryPrice.h"
 
@@ -44,6 +43,7 @@ void ChartEntryPrice::Reserve( size_type nSize ) {
 }
 
 void ChartEntryPrice::Clear() {
+  ClearQueue();
   m_vDouble.clear();
   ChartEntryTime::Clear();
 }
@@ -57,8 +57,9 @@ void ChartEntryPrice::Append( const boost::posix_time::ptime &dt, double price )
 }
 
 void ChartEntryPrice::ClearQueue() {
-  namespace args = boost::phoenix::placeholders;
-  m_queue.Sync( boost::phoenix::bind( &ChartEntryPrice::Pop, this, args::arg1 ) );
+  namespace ph = std::placeholders;
+  m_queue.Sync( std::bind( &ChartEntryPrice::Pop, this, ph::_1 ) );
+  ChartEntryTime::ClearQueue();
 }
 
 void ChartEntryPrice::Pop( const ou::tf::Price& price ) {
