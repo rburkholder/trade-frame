@@ -450,8 +450,8 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
 void Strategy::PredictionVector( const size_t distance, const size_t size, const float* r  ) {
   m_cePrediction_vector.Clear(); // will this clear prior to appending?
   static const boost::posix_time::time_duration one_sec( 0, 0, 1 );
-  boost::posix_time::ptime dt( m_features.dt - boost::posix_time::time_duration( 0, 0, size - distance) );
-  size_t counter( distance );
+  boost::posix_time::ptime dt( m_features.dt - boost::posix_time::time_duration( 0, 0, size - distance + 60 ) ); // 60 provides offset to see whole prediction
+  size_t counter( size );
   while ( 0 < counter ) {
     m_cePrediction_vector.Append( dt, *r );
     ++r;
