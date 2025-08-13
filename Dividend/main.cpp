@@ -87,30 +87,32 @@ struct UpdateSymbol {
   : sSymbol( sSymbol_ ), dateUpdated( dateUpdated_ ) {}
 };
 
-struct SymbolDateKey {
+struct SymbolDatesSearch {
   const std::string& sSymbol;
-  boost::gregorian::date date;
+  boost::gregorian::date dateExDividend;
+  boost::gregorian::date datePayed;
   template<class A>
   void Fields( A& a ) {
     ou::db::Field( a, "symbol_name", sSymbol );
-    ou::db::Field( a, "date_exdividend", date );
+    ou::db::Field( a, "date_exdividend", dateExDividend );
+    ou::db::Field( a, "date_payed", datePayed );
   }
-  SymbolDateKey( const std::string& sSymbol_, boost::gregorian::date date_ )
-  : sSymbol( sSymbol_ ), date( date_ ) {}
+  SymbolDatesSearch( const std::string& sSymbol_, boost::gregorian::date dateEx_, boost::gregorian::date datePayed_ )
+  : sSymbol( sSymbol_ ), dateExDividend( dateEx_ ), datePayed( datePayed_ ) {}
 };
 
 bool SymbolExDividendExists(
   ou::db::Session& db
-, const std::string& sSymbol, const boost::gregorian::date date
+, const std::string& sSymbol, const boost::gregorian::date dateExDividend, const boost::gregorian::date datePayed
 , db::table::Dividend::TableRowDef& row )
 {
   bool bFound( false );
-  SymbolDateKey key( sSymbol, date );
-  ou::db::QueryFields<SymbolDateKey>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
-    = db.SQL<SymbolDateKey>( "select * from " + db::table::Dividend::c_TableName, key ).Where( "symbol_name=? and date_exdividend=?" ).NoExecute();
-  db.Bind<SymbolDateKey>( pExistsQuery );
+  SymbolDatesSearch key( sSymbol, dateExDividend, datePayed );
+  ou::db::QueryFields<SymbolDatesSearch>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
+    = db.SQL<SymbolDatesSearch>( "select * from " + db::table::Dividend::c_TableName, key ).Where( "symbol_name=? and date_exdividend=? and date_payed=?" ).NoExecute();
+  db.Bind<SymbolDatesSearch>( pExistsQuery );
   if ( db.Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
-    db.Columns<SymbolDateKey, db::table::Dividend::TableRowDef>( pExistsQuery, row );
+    db.Columns<SymbolDatesSearch, db::table::Dividend::TableRowDef>( pExistsQuery, row );
     bFound = true;
   }
   return bFound;
@@ -118,8 +120,9 @@ bool SymbolExDividendExists(
 
 int main( int argc, char* argv[] ) {
 
-  const static std::string sConfigFileName( "dividend.cfg" );
-  const static std::string sDbFileName(     "dividend.db"  );
+  const static std::string sBaseName(       "dividend" );
+  const static std::string sConfigFileName( sBaseName + ".cfg" );
+  const static std::string sDbFileName(     sBaseName + ".db"  );
 
   config::Choices choices;
 
@@ -168,7 +171,7 @@ int main( int argc, char* argv[] ) {
         = db.Insert<db::table::Daily::TableRowDef>( const_cast<db::table::Daily::TableRowDef&>( trdDaily ) );
 
       db::table::Dividend::TableRowDef trdDividend_exists;
-      if ( SymbolExDividendExists( db, row.sSymbol, row.dateExDividend, trdDividend_exists ) ) {} // do nothing
+      if ( SymbolExDividendExists( db, row.sSymbol, row.dateExDividend, row.datePayed, trdDividend_exists ) ) {} // do nothing
       else {
 
         db::table::Dividend::TableRowDef trdDividend(
@@ -184,7 +187,6 @@ int main( int argc, char* argv[] ) {
           = db.Insert<db::table::Dividend::TableRowDef>( const_cast<db::table::Dividend::TableRowDef&>( trdDividend ) );
 
       }
-
     }
 
     pSelect.reset();
@@ -271,7 +273,7 @@ int main( int argc, char* argv[] ) {
 
       // Table Dividend
       db::table::Dividend::TableRowDef trdDividend_exists;
-      if ( SymbolExDividendExists( db, vt.sSymbol, vt.dateExDividend, trdDividend_exists ) ) {} // do nothing
+      if ( SymbolExDividendExists( db, vt.sSymbol, vt.dateExDividend, vt.datePayed, trdDividend_exists ) ) {} // do nothing
       else {
         db::table::Dividend::TableRowDef trdDividend(
           vt.sSymbol
