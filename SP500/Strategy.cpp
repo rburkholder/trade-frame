@@ -33,6 +33,9 @@ namespace {
   static const ou::Colour::EColour c_colourTickL(  ou::Colour::MediumPurple );
   static const ou::Colour::EColour c_colourAdvDec( ou::Colour::Maroon );
   static const ou::Colour::EColour c_colourPrdct(  ou::Colour::Blue );
+
+  static const double c_tickHi( +1.0 );
+  static const double c_tickLo( -1.0 );
 }
 
 Strategy::Strategy(
@@ -60,6 +63,8 @@ Strategy::Strategy(
 , m_bfQuotes01Sec(  1 )
 , m_dblMid {}
 , m_stateTickHi( ETickHi::Neutral ), m_stateTickLo( ETickLo::Neutral )
+, m_stateTickJ_cur( ETick::zero ), m_stateTickL_cur( ETick::zero )
+, m_stateTickJ_prv( ETick::zero ), m_stateTickL_prv( ETick::zero )
 , m_nEnterLong {}, m_nEnterShort {}
 {
   SetupChart();
@@ -273,11 +278,39 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   TimeTick( trade );
 }
 
+Strategy::ETick Strategy::PigeonHole( double v ) {
+  if ( 0.0 == v ) {
+    return ETick::zero;
+  }
+  else {
+    if ( 0.0 < v ) {
+      if ( c_tickHi < v ) {
+        return ETick::hi_max;
+      }
+      else {
+        return ETick::hi;
+      }
+    }
+    else {
+      if ( c_tickLo > v ) {
+        return ETick::lo_max;
+      }
+      else {
+        return ETick::lo;
+      }
+    }
+  }
+  assert( false );
+}
+
 void Strategy::HandleTickJ( const ou::tf::Trade& tick ) {
   if ( RHTrading() ) {
     const auto dt( tick.DateTime() );
     m_features.dblTickJ = tick.Price() / 100.0;
-    m_ceTickJ.Append( dt,m_features. dblTickJ );  // approx normalization
+    m_ceTickJ.Append( dt, m_features.dblTickJ );  // approx normalization
+
+    m_stateTickJ_prv = m_stateTickJ_cur;
+    m_stateTickJ_cur = PigeonHole( m_features.dblTickJ );
   }
 }
 
@@ -287,37 +320,36 @@ void Strategy::HandleTickL( const ou::tf::Trade& tick ) {
     m_features.dblTickL = tick.Price() / 200.0;
     m_ceTickL.Append( dt, m_features.dblTickL );  // approx normalization
 
-    static const double hi( +1.0 );
+    m_stateTickL_prv = m_stateTickL_cur;
+    m_stateTickL_cur = PigeonHole( m_features.dblTickL );
 
     switch ( m_stateTickHi ) {
       case ETickHi::Neutral:
-        if ( hi <= m_features.dblTickL ) {
+        if ( c_tickHi <= m_features.dblTickL ) {
           m_stateTickHi = ETickHi::UpOvr;
         }
         break;
       case ETickHi::UpOvr:
       case ETickHi::Up:
-        m_stateTickHi = ( hi < m_features.dblTickL ) ? ETickHi::Up : ETickHi::DnOvr;
+        m_stateTickHi = ( c_tickHi < m_features.dblTickL ) ? ETickHi::Up : ETickHi::DnOvr;
         break;
       case ETickHi::DnOvr:
-        m_stateTickHi = ( hi > m_features.dblTickL ) ? ETickHi::Neutral : ETickHi::UpOvr;
+        m_stateTickHi = ( c_tickHi > m_features.dblTickL ) ? ETickHi::Neutral : ETickHi::UpOvr;
         break;
     }
 
-    static const double lo( -1.0 );
-
     switch ( m_stateTickLo ) {
       case ETickLo::Neutral:
-        if ( lo >= m_features.dblTickL ) {
+        if ( c_tickLo >= m_features.dblTickL ) {
           m_stateTickLo = ETickLo::DnOvr;
         }
         break;
       case ETickLo::DnOvr:
       case ETickLo::Dn:
-        m_stateTickLo = ( lo > m_features.dblTickL ) ? ETickLo::Dn : ETickLo::UpOvr;
+        m_stateTickLo = ( c_tickLo > m_features.dblTickL ) ? ETickLo::Dn : ETickLo::UpOvr;
         break;
       case ETickLo::UpOvr:
-        m_stateTickLo = ( lo < m_features.dblTickL ) ? ETickLo::Neutral : ETickLo::DnOvr;
+        m_stateTickLo = ( c_tickLo < m_features.dblTickL ) ? ETickLo::Neutral : ETickLo::DnOvr;
         break;
     }
   }

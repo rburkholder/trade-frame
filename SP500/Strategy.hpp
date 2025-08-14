@@ -112,6 +112,11 @@ private:
   ETickHi m_stateTickHi;
   ETickLo m_stateTickLo;
 
+  enum class ETick { lo_max, lo, zero, hi, hi_max };
+  ETick m_stateTickJ_cur, m_stateTickL_cur;
+  ETick m_stateTickJ_prv, m_stateTickL_prv;
+  ETick PigeonHole( double );
+
   pPosition_t m_pPosition;
   pWatch_t m_pTickJ;
   pWatch_t m_pTickL;
