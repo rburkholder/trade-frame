@@ -62,7 +62,6 @@ Strategy::Strategy(
 , m_ceLongExit( ou::ChartEntryShape::EShape::LongStop, ou::Colour::Blue )
 , m_bfQuotes01Sec(  1 )
 , m_dblMid {}
-, m_stateTickHi( ETickHi::Neutral ), m_stateTickLo( ETickLo::Neutral )
 , m_stateTickJ_cur( ETick::zero ), m_stateTickL_cur( ETick::zero )
 , m_stateTickJ_prv( ETick::zero ), m_stateTickL_prv( ETick::zero )
 , m_nEnterLong {}, m_nEnterShort {}
@@ -322,36 +321,6 @@ void Strategy::HandleTickL( const ou::tf::Trade& tick ) {
 
     m_stateTickL_prv = m_stateTickL_cur;
     m_stateTickL_cur = PigeonHole( m_features.dblTickL );
-
-    switch ( m_stateTickHi ) {
-      case ETickHi::Neutral:
-        if ( c_tickHi <= m_features.dblTickL ) {
-          m_stateTickHi = ETickHi::UpOvr;
-        }
-        break;
-      case ETickHi::UpOvr:
-      case ETickHi::Up:
-        m_stateTickHi = ( c_tickHi < m_features.dblTickL ) ? ETickHi::Up : ETickHi::DnOvr;
-        break;
-      case ETickHi::DnOvr:
-        m_stateTickHi = ( c_tickHi > m_features.dblTickL ) ? ETickHi::Neutral : ETickHi::UpOvr;
-        break;
-    }
-
-    switch ( m_stateTickLo ) {
-      case ETickLo::Neutral:
-        if ( c_tickLo >= m_features.dblTickL ) {
-          m_stateTickLo = ETickLo::DnOvr;
-        }
-        break;
-      case ETickLo::DnOvr:
-      case ETickLo::Dn:
-        m_stateTickLo = ( c_tickLo > m_features.dblTickL ) ? ETickLo::Dn : ETickLo::UpOvr;
-        break;
-      case ETickLo::UpOvr:
-        m_stateTickLo = ( c_tickLo < m_features.dblTickL ) ? ETickLo::Neutral : ETickLo::DnOvr;
-        break;
-    }
   }
 }
 
@@ -384,34 +353,41 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   TimeTick( bar );
 }
 
+/*
+  conditions:
+    * if big step already in progress after signal, delay entry
+    * trailing stop on entry, which follows the moving average line
+    * yields more of a scalping strategy
+*/
+
 void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   const auto dt( trade.DateTime() );
   const auto price( trade.Price() );
   switch ( m_stateTrade ) {
     case ETradeState::Search:
-      if ( ETickHi::DnOvr == m_stateTickHi ) {
-        //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
-        m_ceShortEntry.AddLabel( dt, price, "short" );
-        ++m_nEnterShort;
-        m_stateTrade = ETradeState::ShortSubmitted;
+      if ( ( ETick::lo == m_stateTickL_prv ) && ( ETick::hi == m_stateTickL_cur ) ) {
+        //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
+        m_ceLongEntry.AddLabel( dt, price, "long" );
+        ++m_nEnterLong;
+        m_stateTrade = ETradeState::LongSubmitted;
       }
       else {
-        if ( ETickLo::UpOvr == m_stateTickLo ) {
-          //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
-          m_ceLongEntry.AddLabel( dt, price, "long" );
-          ++m_nEnterLong;
-          m_stateTrade = ETradeState::LongSubmitted;
+        if ( ( ETick::hi == m_stateTickL_prv ) && ( ETick::lo == m_stateTickL_cur ) ) {
+          //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
+          m_ceShortEntry.AddLabel( dt, price, "short" );
+          ++m_nEnterShort;
+          m_stateTrade = ETradeState::ShortSubmitted;
         }
       }
       break;
     case ETradeState::LongSubmitted:
-      if ( ETickLo::Neutral == m_stateTickLo ) {
+      if ( m_stateTickL_prv == m_stateTickL_cur ) {
         //BOOST_LOG_TRIVIAL(trace) << "ETickLo::Neutral exit";
         m_stateTrade = ETradeState::Search;
       }
       break;
     case ETradeState::ShortSubmitted:
-      if ( ETickHi::Neutral == m_stateTickHi ) {
+      if ( m_stateTickL_prv == m_stateTickL_cur ) {
         //BOOST_LOG_TRIVIAL(trace) << "ETickHi::Neutral exit";
         m_stateTrade = ETradeState::Search;
       }

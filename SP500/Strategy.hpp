@@ -98,9 +98,6 @@ private:
     Done // no more action
   };
 
-  enum class ETickHi { Neutral, UpOvr, Up, DnOvr };
-  enum class ETickLo { Neutral, DnOvr, Dn, UpOvr };
-
   using pOrder_t = ou::tf::Order::pOrder_t;
 
   fConstructWatch_t m_fConstructWatch;
@@ -109,8 +106,6 @@ private:
   fStop_t m_fStop;
 
   ETradeState m_stateTrade;
-  ETickHi m_stateTickHi;
-  ETickLo m_stateTickLo;
 
   enum class ETick { lo_max, lo, zero, hi, hi_max };
   ETick m_stateTickJ_cur, m_stateTickL_cur;
