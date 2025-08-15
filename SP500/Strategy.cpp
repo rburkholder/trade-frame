@@ -31,6 +31,7 @@ namespace {
   static const ou::Colour::EColour c_colourPrice(  ou::Colour::DarkGreen );
   static const ou::Colour::EColour c_colourTickJ(  ou::Colour::Chocolate );
   static const ou::Colour::EColour c_colourTickL(  ou::Colour::MediumPurple );
+  static const ou::Colour::EColour c_colourTickRegime( ou::Colour::DarkOrchid );
   static const ou::Colour::EColour c_colourAdvDec( ou::Colour::Maroon );
   static const ou::Colour::EColour c_colourPrdct(  ou::Colour::Blue );
 
@@ -65,6 +66,8 @@ Strategy::Strategy(
 , m_stateTickJ_cur( ETick::zero ), m_stateTickL_cur( ETick::zero )
 , m_stateTickJ_prv( ETick::zero ), m_stateTickL_prv( ETick::zero )
 , m_nEnterLong {}, m_nEnterShort {}
+, m_dblTickJ {}, m_dblTickL {}, m_dblTickRegime {}
+, m_dblPrvPrice {}, m_dblPrvAdvDec {}
 {
   SetupChart();
 
@@ -240,6 +243,18 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::AdvDec, &m_cemZero );
   m_cdv.Add( EChartSlot::AdvDec, &m_ceAdvDec );
 
+  m_ceRtnPrice.SetName( "Price Returns" );
+  m_cdv.Add( EChartSlot::rtnPrice, &m_ceRtnPrice );
+
+  m_cdv.Add( EChartSlot::TickRegime, &m_cemZero );
+
+  m_ceTickRegime.SetName( "Tick Regime" );
+  m_ceTickRegime.SetColour( c_colourTickRegime );
+  m_cdv.Add( EChartSlot::TickRegime, &m_ceTickRegime );
+
+  //m_ceRtnAdvDec.SetName( "AdvDec Returns" );
+  //m_cdv.Add( EChartSlot::rtnAdvDec, &m_ceRtnAdvDec );
+
   //m_cePrediction_scaled.SetName( "Predict" );
   //m_cePrediction_scaled.SetColour( c_colourPrdct );
   //m_cdv.Add( EChartSlot::Predict, &m_ceTrade_ratio );
@@ -271,9 +286,20 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
 void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   m_trade = trade;
-  m_vwp.Add( trade.Price(), trade.Volume() );
-  m_ceTrade.Append( trade.DateTime(), trade.Price() );
-  m_ceVolume.Append( trade.DateTime(), trade.Volume() );
+  const ou::tf::Price::dt_t         dt( trade.DateTime() );
+  const ou::tf::Price::price_t   price( trade.Price() );
+  const ou::tf::Price::volume_t volume( trade.Volume() );
+  m_vwp.Add( price, volume );
+  m_ceTrade.Append(  dt, price );
+  m_ceVolume.Append( dt, volume );
+
+  if ( ( 0.0 == m_dblPrvPrice ) ) {}
+  else {
+    const double rtn = std::log( price / m_dblPrvPrice ); // natural log, ie ln
+    m_ceRtnPrice.Append( dt, rtn );
+  }
+  m_dblPrvPrice = price;
+
   TimeTick( trade );
 }
 
@@ -304,9 +330,15 @@ Strategy::ETick Strategy::PigeonHole( double v ) {
 
 void Strategy::HandleTickJ( const ou::tf::Trade& tick ) {
   if ( RHTrading() ) {
-    const auto dt( tick.DateTime() );
-    m_features.dblTickJ = tick.Price() / 100.0;
+    const ou::tf::Price::dt_t       dt( tick.DateTime() );
+    const ou::tf::Price::price_t price( tick.Price() );
+
+    m_features.dblTickJ = price / 100.0;
     m_ceTickJ.Append( dt, m_features.dblTickJ );  // approx normalization
+
+    m_dblTickRegime = m_features.dblTickJ * m_dblTickL;
+    m_ceTickRegime.Append( dt, m_dblTickRegime );
+    m_dblTickJ = m_features.dblTickJ;
 
     m_stateTickJ_prv = m_stateTickJ_cur;
     m_stateTickJ_cur = PigeonHole( m_features.dblTickJ );
@@ -315,9 +347,15 @@ void Strategy::HandleTickJ( const ou::tf::Trade& tick ) {
 
 void Strategy::HandleTickL( const ou::tf::Trade& tick ) {
   if ( RHTrading() ) {
-    const auto dt( tick.DateTime() );
-    m_features.dblTickL = tick.Price() / 200.0;
+    const ou::tf::Price::dt_t       dt( tick.DateTime() );
+    const ou::tf::Price::price_t price( tick.Price() );
+
+    m_features.dblTickL = price / 200.0;
     m_ceTickL.Append( dt, m_features.dblTickL );  // approx normalization
+
+    m_dblTickRegime = m_dblTickJ * m_features.dblTickL;
+    m_ceTickRegime.Append( dt, m_dblTickRegime );
+    m_dblTickL = m_features.dblTickL;
 
     m_stateTickL_prv = m_stateTickL_cur;
     m_stateTickL_cur = PigeonHole( m_features.dblTickL );
@@ -343,6 +381,14 @@ void Strategy::CalcAdvDec( boost::posix_time::ptime dt ) {
   const double diff( m_features.dblAdv - m_features.dblDec );
   const double ratio( diff / sum );
   m_features.dblAdvDecRatio = ratio;
+
+  //if ( ( 0.0 == m_dblPrvAdvDec ) ) {}
+  //else {
+  //  const double rtn = std::log( ratio / m_dblPrvAdvDec ); // natural log, ie ln
+  //  m_ceRtnAdvDec.Append( dt, rtn );
+  //}
+  //m_dblPrvAdvDec = ratio;
+
   m_ceAdvDec.Append( dt, ratio );
 }
 
@@ -358,18 +404,20 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   const auto price( trade.Price() );
   switch ( m_stateTrade ) {
     case ETradeState::Search:
-      if ( ( ETick::lo == m_stateTickL_prv ) && ( ETick::hi == m_stateTickL_cur ) ) {
-        //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
-        m_ceLongEntry.AddLabel( dt, price, "long" );
-        ++m_nEnterLong;
-        m_stateTrade = ETradeState::LongSubmitted;
-      }
-      else {
-        if ( ( ETick::hi == m_stateTickL_prv ) && ( ETick::lo == m_stateTickL_cur ) ) {
-          //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
-          m_ceShortEntry.AddLabel( dt, price, "short" );
-          ++m_nEnterShort;
-          m_stateTrade = ETradeState::ShortSubmitted;
+      if ( 0.1 < m_dblTickRegime ) {
+        if ( ( ETick::lo == m_stateTickL_prv ) && ( ETick::hi == m_stateTickL_cur ) ) {
+          //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
+          m_ceLongEntry.AddLabel( dt, price, "long" );
+          ++m_nEnterLong;
+          m_stateTrade = ETradeState::LongSubmitted;
+        }
+        else {
+          if ( ( ETick::hi == m_stateTickL_prv ) && ( ETick::lo == m_stateTickL_cur ) ) {
+            //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
+            m_ceShortEntry.AddLabel( dt, price, "short" );
+            ++m_nEnterShort;
+            m_stateTrade = ETradeState::ShortSubmitted;
+          }
         }
       }
       break;

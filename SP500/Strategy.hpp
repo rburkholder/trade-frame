@@ -82,7 +82,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, Tick, AdvDec, Ratio, Predict, PredVec, PL };
+  enum EChartSlot { Price, Volume, rtnPrice, Tick, TickRegime, AdvDec, rtnAdvDec, Ratio, Predict, PredVec, PL };
   enum class ETradeState {
     Init,  // initiaize state in current market
     Neutral, // netral state prior to active search
@@ -199,6 +199,15 @@ private:
   //ou::ChartEntryIndicator m_ceTrin;
 
   ou::ChartEntryIndicator m_ceAdvDec;
+
+  double m_dblPrvPrice;
+  ou::ChartEntryIndicator m_ceRtnPrice;
+  double m_dblTickJ;
+  double m_dblTickL;
+  double m_dblTickRegime;
+  ou::ChartEntryIndicator m_ceTickRegime;
+  double m_dblPrvAdvDec;
+  ou::ChartEntryIndicator m_ceRtnAdvDec;
 
   ou::ChartEntryIndicator m_ceProfitLoss;
 
