@@ -240,14 +240,14 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::AdvDec, &m_cemZero );
   m_cdv.Add( EChartSlot::AdvDec, &m_ceAdvDec );
 
-  m_cePrediction_scaled.SetName( "Predict" );
-  m_cePrediction_scaled.SetColour( c_colourPrdct );
-  m_cdv.Add( EChartSlot::Predict, &m_ceTrade_ratio );
-  m_cdv.Add( EChartSlot::Predict, &m_cePrediction_scaled );
+  //m_cePrediction_scaled.SetName( "Predict" );
+  //m_cePrediction_scaled.SetColour( c_colourPrdct );
+  //m_cdv.Add( EChartSlot::Predict, &m_ceTrade_ratio );
+  //m_cdv.Add( EChartSlot::Predict, &m_cePrediction_scaled );
 
-  m_cePrediction_descaled.SetName( "Predict" );
-  m_cePrediction_descaled.SetColour( c_colourPrdct );
-  m_cdv.Add( EChartSlot::Price, &m_cePrediction_descaled );
+  //m_cePrediction_descaled.SetName( "Predict" );
+  //m_cePrediction_descaled.SetColour( c_colourPrdct );
+  //m_cdv.Add( EChartSlot::Price, &m_cePrediction_descaled );
 
   m_ceProfitLoss.SetName( "P/L" );
   //m_cdv.Add( EChartSlot::PL, &m_cemZero );
@@ -260,7 +260,7 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::Price, &m_ceShortFill );
   m_cdv.Add( EChartSlot::Price, &m_ceShortExit );
 
-  m_cdv.Add( EChartSlot::PredVec, &m_cePrediction_vector );
+  //m_cdv.Add( EChartSlot::PredVec, &m_cePrediction_vector );
 }
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
@@ -353,13 +353,6 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   TimeTick( bar );
 }
 
-/*
-  conditions:
-    * if big step already in progress after signal, delay entry
-    * trailing stop on entry, which follows the moving average line
-    * yields more of a scalping strategy
-*/
-
 void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   const auto dt( trade.DateTime() );
   const auto price( trade.Price() );
@@ -436,8 +429,8 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   Features_scaled scaled; // receives scaled data
   m_fForward( m_features, scaled ); // may call PredictionVector for a live strategy
   const boost::posix_time::ptime dtPrediction( dt + boost::posix_time::time_duration( 0, 0, scaled.distance ) );
-  m_cePrediction_scaled.Append( dtPrediction, scaled.predicted.dbl );
-  m_cePrediction_descaled.Append( dtPrediction, scaled.predicted.dbl * scaled.range + scaled.min );
+  //m_cePrediction_scaled.Append( dtPrediction, scaled.predicted.dbl );
+  //m_cePrediction_descaled.Append( dtPrediction, scaled.predicted.dbl * scaled.range + scaled.min );
 
   //BOOST_LOG_TRIVIAL(trace) << "Calc01SecIndicators " << dt << ',' << prediction.DateTime();
 

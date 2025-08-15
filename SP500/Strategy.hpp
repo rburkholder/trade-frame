@@ -179,8 +179,8 @@ private:
   ou::ChartEntryIndicator m_ceEma050_ratio;
   ou::ChartEntryIndicator m_ceEma200_ratio;
   ou::ChartEntryIndicator m_ceTrade_ratio;
-  ou::ChartEntryIndicator m_cePrediction_scaled;
-  ou::ChartEntryIndicator m_cePrediction_descaled;
+  //ou::ChartEntryIndicator m_cePrediction_scaled;
+  //ou::ChartEntryIndicator m_cePrediction_descaled;
   ou::ChartEntryIndicator m_cePrediction_vector;
 
   ou::ChartEntryIndicator m_ceTickJ_sigmoid;

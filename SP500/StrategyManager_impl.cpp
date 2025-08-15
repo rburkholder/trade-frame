@@ -304,10 +304,10 @@ void StrategyManager_impl::RunStrategy_predict_live() {
   m_mapHdf5Instrument.clear();
 
   const auto distance( m_model.PredictionDistance() ); // cache the static value
-  m_model.SetPredictionResult(
-    [this,distance]( const Model::rPrediction_t& r ){
-      m_pStrategy->PredictionVector( distance, r.size(), r.data() );
-    } );
+  //m_model.SetPredictionResult(
+  //  [this,distance]( const Model::rPrediction_t& r ){
+  //    m_pStrategy->PredictionVector( distance, r.size(), r.data() );
+  //  } );
 
   m_cdv_predict.SetNames( "SPY", "live" );
   m_fSetChartDataView( ou::tf::WinChartView::EView::live_trail, &m_cdv_predict );
