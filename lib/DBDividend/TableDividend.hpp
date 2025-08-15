@@ -84,6 +84,7 @@ public:
       TableRowDef::Fields( a );
       ou::db::Key( a, "symbol_name" );
       ou::db::Key( a, "date_exdividend" );
+      ou::db::Key( a, "date_payed" );
     }
   };
 
