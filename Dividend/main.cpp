@@ -19,16 +19,17 @@
  * Created: April 1, 2022  19:09
  */
 
+#include <boost/log/trivial.hpp>
+
+#include <OUCommon/TimeSource.h>
+
 #include <DBDividend/TableTag.hpp>
 #include <DBDividend/TableDaily.hpp>
 #include <DBDividend/TableSymbol.hpp>
 #include <DBDividend/TableDividend.hpp>
 #include <DBDividend/TableDividendDaily.hpp>
 
-#include <OUCommon/TimeSource.h>
-
 #include <TFTrading/Database.h>
-#include <boost/date_time/gregorian/greg_date.hpp>
 
 #include "Config.hpp"
 #include "Process.hpp"
@@ -99,6 +100,8 @@ struct SymbolDatesSearch {
   }
   SymbolDatesSearch( const std::string& sSymbol_, boost::gregorian::date dateEx_, boost::gregorian::date datePayed_ )
   : sSymbol( sSymbol_ ), dateExDividend( dateEx_ ), datePayed( datePayed_ ) {}
+  //SymbolDatesSearch( const std::string& sSymbol_, boost::gregorian::date dateEx_ )
+  //: sSymbol( sSymbol_ ), dateExDividend( dateEx_ ) {}
 };
 
 bool SymbolExDividendExists(
@@ -108,8 +111,12 @@ bool SymbolExDividendExists(
 {
   bool bFound( false );
   SymbolDatesSearch key( sSymbol, dateExDividend, datePayed );
+  //SymbolDatesSearch key( sSymbol, dateExDividend );
+  //BOOST_LOG_TRIVIAL(trace) << "SymbolExDividendExists: " << sSymbol << ",ex=" << dateExDividend << ",dp=" << datePayed;
   ou::db::QueryFields<SymbolDatesSearch>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
     = db.SQL<SymbolDatesSearch>( "select * from " + db::table::Dividend::c_TableName, key ).Where( "symbol_name=? and date_exdividend=? and date_payed=?" ).NoExecute();
+  //ou::db::QueryFields<SymbolDatesSearch>::pQueryFields_t pExistsQuery // shouldn't do a * as fields may change order
+  //  = db.SQL<SymbolDatesSearch>( "select * from " + db::table::Dividend::c_TableName, key ).Where( "symbol_name=? and date_exdividend=?" ).NoExecute();
   db.Bind<SymbolDatesSearch>( pExistsQuery );
   if ( db.Execute( pExistsQuery ) ) {  // <- need to be able to execute on query pointer, since there is session pointer in every query
     db.Columns<SymbolDatesSearch, db::table::Dividend::TableRowDef>( pExistsQuery, row );
@@ -258,6 +265,13 @@ int main( int argc, char* argv[] ) {
           = db.Insert<db::table::Symbol::TableRowDef>( trdSymbol );
       }
 
+      //BOOST_LOG_TRIVIAL(trace)
+      //  << "trdDaily: "
+      //  << vt.sSymbol
+      //   << ",dr=" << today
+      //   << ','
+      //  ;
+
       // Table Daily
       db::table::Daily::TableRowDef trdDaily(
         vt.sSymbol
@@ -275,6 +289,15 @@ int main( int argc, char* argv[] ) {
       db::table::Dividend::TableRowDef trdDividend_exists;
       if ( SymbolExDividendExists( db, vt.sSymbol, vt.dateExDividend, vt.datePayed, trdDividend_exists ) ) {} // do nothing
       else {
+
+        //BOOST_LOG_TRIVIAL(trace)
+        //  << "trdDividend: "
+        //  << vt.sSymbol
+        //  << ",dr=" << today
+        //  << ",ex=" << vt.dateExDividend
+        //  << ",dp=" << vt.datePayed
+        //  ;
+
         db::table::Dividend::TableRowDef trdDividend(
           vt.sSymbol
         , today
@@ -284,9 +307,8 @@ int main( int argc, char* argv[] ) {
         , vt.rate
         );
 
-      ou::db::QueryFields<db::table::Dividend::TableRowDef>::pQueryFields_t pQuery
-        = db.Insert<db::table::Dividend::TableRowDef>( const_cast<db::table::Dividend::TableRowDef&>( trdDividend ) );
-
+        ou::db::QueryFields<db::table::Dividend::TableRowDef>::pQueryFields_t pQuery
+          = db.Insert<db::table::Dividend::TableRowDef>( const_cast<db::table::Dividend::TableRowDef&>( trdDividend ) );
       }
 
       ++cnt;
