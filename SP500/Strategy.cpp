@@ -170,6 +170,7 @@ void Strategy::SetupChart() {
   m_cemPosOne.AddMark( +1.0, ou::Colour::Black,   "+1" );
     m_cemZero.AddMark(  0.0, ou::Colour::Black, "zero" );
   m_cemNegOne.AddMark( -1.0, ou::Colour::Black,   "-1" );
+  m_cemZeroPtOne.AddMark( 0.1, ou::Colour::Red,   "0.1" );
 
   m_ceTrade.SetName( "Trade" );
   m_ceTrade.SetColour( c_colourPrice );
@@ -247,6 +248,7 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::rtnPrice, &m_ceRtnPrice );
 
   m_cdv.Add( EChartSlot::TickRegime, &m_cemZero );
+  m_cdv.Add( EChartSlot::TickRegime, &m_cemZeroPtOne );
 
   m_ceTickRegime.SetName( "Tick Regime" );
   m_ceTickRegime.SetColour( c_colourTickRegime );

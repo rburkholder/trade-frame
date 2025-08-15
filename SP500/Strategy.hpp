@@ -165,6 +165,7 @@ private:
   ou::ChartEntryMark m_cemPosOne;
   ou::ChartEntryMark m_cemZero;
   ou::ChartEntryMark m_cemNegOne;
+  ou::ChartEntryMark m_cemZeroPtOne;
 
   ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryVolume m_ceVolume;
