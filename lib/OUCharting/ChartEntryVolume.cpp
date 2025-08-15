@@ -11,8 +11,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-//#include "StdAfx.h"
-
 #include "ChartEntryVolume.h"
 
 namespace ou { // One Unified
@@ -21,24 +19,24 @@ namespace ou { // One Unified
 // CChartEntryVolume
 //
 
-ChartEntryVolume::ChartEntryVolume(void)
+ChartEntryVolume::ChartEntryVolume()
 : ChartEntryPrice()
 {
 }
 
-//ChartEntryVolume::ChartEntryVolume(size_type nSize) 
+//ChartEntryVolume::ChartEntryVolume(size_type nSize)
 //: ChartEntryPrice(nSize)
 //{
 //}
 
-ChartEntryVolume::~ChartEntryVolume(void) {
+ChartEntryVolume::~ChartEntryVolume() {
 }
 
-void ChartEntryVolume::Reserve(size_type nSize ) {
+void ChartEntryVolume::Reserve( size_type nSize ) {
   ChartEntryPrice::Reserve( nSize );
 }
 
-void ChartEntryVolume::Append( boost::posix_time::ptime dt, int volume) {
+void ChartEntryVolume::Append( boost::posix_time::ptime dt, int volume ) {
   ChartEntryPrice::Append( dt, (double) volume );
 }
 
@@ -53,7 +51,7 @@ bool ChartEntryVolume::AddEntryToChart( XYChart *pXY, structChartAttributes *pAt
     DoubleArray daXData = ChartEntryTime::GetDateTimes();
     if ( 0 != daXData.len ) {
       BarLayer *bl = pXY->addBarLayer( this->GetPrices() );
-    
+
       bl->setXData( daXData );
       pAttributes->dblXMin = daXData[0];
       pAttributes->dblXMax = daXData[ daXData.len - 1 ];

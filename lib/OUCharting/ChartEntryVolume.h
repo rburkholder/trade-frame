@@ -28,7 +28,7 @@ public:
 
   ChartEntryVolume(void);
   //ChartEntryVolume(size_type nSize);
-  virtual ~ChartEntryVolume(void);
+  virtual ~ChartEntryVolume();
   virtual void Reserve( size_type );
   void Append( ptime dt, int volume );
   void Append( const ou::tf::Bar& bar );
