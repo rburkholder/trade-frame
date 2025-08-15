@@ -251,7 +251,7 @@ void Strategy::SetupChart() {
 
   m_ceProfitLoss.SetName( "P/L" );
   //m_cdv.Add( EChartSlot::PL, &m_cemZero );
-  m_cdv.Add( EChartSlot::PL, &m_ceProfitLoss );
+  //m_cdv.Add( EChartSlot::PL, &m_ceProfitLoss );
 
   m_cdv.Add( EChartSlot::Price, &m_ceLongEntry );
   m_cdv.Add( EChartSlot::Price, &m_ceLongFill );
@@ -465,7 +465,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
   double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
   m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
-  m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
+  //m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 }
 
 void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
