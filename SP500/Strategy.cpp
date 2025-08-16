@@ -65,10 +65,9 @@ Strategy::Strategy(
 , m_ceLongExit( ou::ChartEntryShape::EShape::LongStop, ou::Colour::Blue )
 , m_bfQuotes01Sec(  1 )
 , m_dblMid {}
-, m_stateTickJ_cur( ETick::zero ), m_stateTickL_cur( ETick::zero )
-, m_stateTickJ_prv( ETick::zero ), m_stateTickL_prv( ETick::zero )
 , m_nEnterLong {}, m_nEnterShort {}
-, m_dblTickJ {}, m_dblTickL {}, m_dblTickRegime {}
+, m_dblTickRegime {}, m_bTickRegimeIncreased( false )
+, m_TickRegime( ETickRegime::congestion )
 , m_dblPrvPrice {}, m_dblPrvAdvDec {}
 {
   SetupChart();
@@ -317,45 +316,15 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   TimeTick( trade );
 }
 
-Strategy::ETick Strategy::PigeonHole( double v ) {
-  if ( 0.0 == v ) {
-    return ETick::zero;
-  }
-  else {
-    if ( 0.0 < v ) {
-      if ( c_tickHi < v ) {
-        return ETick::hi_max;
-      }
-      else {
-        return ETick::hi;
-      }
-    }
-    else {
-      if ( c_tickLo > v ) {
-        return ETick::lo_max;
-      }
-      else {
-        return ETick::lo;
-      }
-    }
-  }
-  assert( false );
-}
-
 void Strategy::HandleTickJ( const ou::tf::Trade& tick ) {
   if ( RHTrading() ) {
     const ou::tf::Price::dt_t       dt( tick.DateTime() );
     const ou::tf::Price::price_t price( tick.Price() );
 
-    m_features.dblTickJ = price / 100.0;
-    m_ceTickJ.Append( dt, m_features.dblTickJ );  // approx normalization
+    m_features.dblTickJ = price / 100.0;  // approx normalization
+    m_ceTickJ.Append( dt, m_features.dblTickJ );
 
-    m_dblTickRegime = m_features.dblTickJ * m_dblTickL;
-    m_ceTickRegime.Append( dt, m_dblTickRegime );
-    m_dblTickJ = m_features.dblTickJ;
-
-    m_stateTickJ_prv = m_stateTickJ_cur;
-    m_stateTickJ_cur = PigeonHole( m_features.dblTickJ );
+    m_ceTickRegime.Append( dt, CalcTickRegime() );
   }
 }
 
@@ -364,16 +333,39 @@ void Strategy::HandleTickL( const ou::tf::Trade& tick ) {
     const ou::tf::Price::dt_t       dt( tick.DateTime() );
     const ou::tf::Price::price_t price( tick.Price() );
 
-    m_features.dblTickL = price / 200.0;
-    m_ceTickL.Append( dt, m_features.dblTickL );  // approx normalization
+    m_features.dblTickL = price / 200.0;  // approx normalization
+    m_ceTickL.Append( dt, m_features.dblTickL );
 
-    m_dblTickRegime = m_dblTickJ * m_features.dblTickL;
-    m_ceTickRegime.Append( dt, m_dblTickRegime );
-    m_dblTickL = m_features.dblTickL;
-
-    m_stateTickL_prv = m_stateTickL_cur;
-    m_stateTickL_cur = PigeonHole( m_features.dblTickL );
+    m_ceTickRegime.Append( dt, CalcTickRegime() );
   }
+}
+
+double Strategy::CalcTickRegime() {
+  const double dblTickRegime = m_features.dblTickJ * m_features.dblTickL;
+  m_bTickRegimeIncreased = m_dblTickRegime < dblTickRegime;
+  if (  0.1 >= dblTickRegime ) {
+    m_TickRegime = ETickRegime::congestion;
+  }
+  else {
+    if ( 0.0 <= m_features.dblTickJ ) {
+      if ( 0.0 <= m_features.dblTickL ) {
+        m_TickRegime = ETickRegime::advance;
+      }
+      else { // 0.0 > m_features.dblTickL
+        m_TickRegime = ETickRegime::diverge;
+      }
+    }
+    else { // 0.0 > m_features.dblTickJ
+      if ( 0.0 <= m_features.dblTickL ) {
+        m_TickRegime = ETickRegime::diverge;
+      }
+      else { // 0.0 > m_features.dblTickL
+        m_TickRegime = ETickRegime::decline;
+      }
+    }
+  }
+  m_dblTickRegime = dblTickRegime;
+  return dblTickRegime;
 }
 
 void Strategy::HandleAdv( const ou::tf::Trade& tick ) {
@@ -418,31 +410,37 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   const auto price( trade.Price() );
   switch ( m_stateTrade ) {
     case ETradeState::Search:
-      if ( 0.1 < m_dblTickRegime ) {
-        if ( ( ETick::lo == m_stateTickL_prv ) && ( ETick::hi == m_stateTickL_cur ) ) {
-          //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
-          m_ceLongEntry.AddLabel( dt, price, "long" );
-          ++m_nEnterLong;
-          m_stateTrade = ETradeState::LongSubmitted;
-        }
-        else {
-          if ( ( ETick::hi == m_stateTickL_prv ) && ( ETick::lo == m_stateTickL_cur ) ) {
+      switch ( m_TickRegime ) {
+        case ETickRegime::advance:
+          if ( m_bTickRegimeIncreased ) {
+            //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
+            m_ceLongEntry.AddLabel( dt, price, "long" );
+            ++m_nEnterLong;
+            m_stateTrade = ETradeState::LongSubmitted;
+          }
+          break;
+        case ETickRegime::decline:
+          if ( m_bTickRegimeIncreased ) {
             //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
             m_ceShortEntry.AddLabel( dt, price, "short" );
             ++m_nEnterShort;
             m_stateTrade = ETradeState::ShortSubmitted;
           }
-        }
+          break;
+        case ETickRegime::congestion:
+          break;
+        case ETickRegime::diverge:
+          break;
       }
       break;
     case ETradeState::LongSubmitted:
-      if ( m_stateTickL_prv == m_stateTickL_cur ) {
+      if ( !m_bTickRegimeIncreased ) {
         //BOOST_LOG_TRIVIAL(trace) << "ETickLo::Neutral exit";
         m_stateTrade = ETradeState::Search;
       }
       break;
     case ETradeState::ShortSubmitted:
-      if ( m_stateTickL_prv == m_stateTickL_cur ) {
+      if ( !m_bTickRegimeIncreased ) {
         //BOOST_LOG_TRIVIAL(trace) << "ETickHi::Neutral exit";
         m_stateTrade = ETradeState::Search;
       }

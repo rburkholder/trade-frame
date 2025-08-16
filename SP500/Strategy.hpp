@@ -107,11 +107,6 @@ private:
 
   ETradeState m_stateTrade;
 
-  enum class ETick { lo_max, lo, zero, hi, hi_max };
-  ETick m_stateTickJ_cur, m_stateTickL_cur;
-  ETick m_stateTickJ_prv, m_stateTickL_prv;
-  ETick PigeonHole( double );
-
   pPosition_t m_pPosition;
   pWatch_t m_pTickJ;
   pWatch_t m_pTickL;
@@ -206,12 +201,15 @@ private:
 
   double m_dblPrvPrice;
   ou::ChartEntryIndicator m_ceRtnPrice;
-  double m_dblTickJ;
-  double m_dblTickL;
   double m_dblTickRegime;
   ou::ChartEntryIndicator m_ceTickRegime;
   double m_dblPrvAdvDec;
   ou::ChartEntryIndicator m_ceRtnAdvDec;
+
+  bool m_bTickRegimeIncreased;
+  enum class ETickRegime { diverge, congestion, decline, advance };
+  ETickRegime m_TickRegime;
+  double CalcTickRegime();
 
   ou::ChartEntryIndicator m_ceProfitLoss;
 
