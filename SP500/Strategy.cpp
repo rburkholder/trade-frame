@@ -29,6 +29,8 @@ namespace {
   static const ou::Colour::EColour c_colourEma29(  ou::Colour::DarkTurquoise );
   static const ou::Colour::EColour c_colourEma13(  ou::Colour::Purple );
   static const ou::Colour::EColour c_colourPrice(  ou::Colour::DarkGreen );
+  static const ou::Colour::EColour c_colourAsk(    ou::Colour::Blue );
+  static const ou::Colour::EColour c_colourBid(    ou::Colour::Red );
   static const ou::Colour::EColour c_colourTickJ(  ou::Colour::Chocolate );
   static const ou::Colour::EColour c_colourTickL(  ou::Colour::MediumPurple );
   static const ou::Colour::EColour c_colourTickRegime( ou::Colour::DarkOrchid );
@@ -176,6 +178,14 @@ void Strategy::SetupChart() {
   m_ceTrade.SetColour( c_colourPrice );
   m_cdv.Add( EChartSlot::Price, &m_ceTrade );
 
+  //m_ceAsk.SetName( "Ask" );
+  //m_ceAsk.SetColour( c_colourAsk );
+  //m_cdv.Add( EChartSlot::Price, &m_ceAsk );
+
+  //m_ceBid.SetName( "Bid" );
+  //m_ceBid.SetColour( c_colourBid );
+  //m_cdv.Add( EChartSlot::Price, &m_ceBid );
+
   m_ceEma013.SetName( "13s ema" );
   m_ceEma013.SetColour( c_colourEma13 );
   m_cdv.Add( EChartSlot::Price, &m_ceEma013 );
@@ -247,8 +257,8 @@ void Strategy::SetupChart() {
   m_ceRtnPrice.SetName( "Price Returns" );
   m_cdv.Add( EChartSlot::rtnPrice, &m_ceRtnPrice );
 
-  m_cdv.Add( EChartSlot::TickRegime, &m_cemZero );
   m_cdv.Add( EChartSlot::TickRegime, &m_cemZeroPtOne );
+  m_cdv.Add( EChartSlot::TickRegime, &m_cemZero );
 
   m_ceTickRegime.SetName( "Tick Regime" );
   m_ceTickRegime.SetColour( c_colourTickRegime );
@@ -283,6 +293,8 @@ void Strategy::SetupChart() {
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   m_quote = quote;
   const auto dt( quote.DateTime() );
+  //m_ceAsk.Append( dt, quote.Ask() );
+  //m_ceBid.Append( dt, quote.Bid() );
   m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
 }
 
