@@ -405,7 +405,7 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   TimeTick( bar );
 }
 
-void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
+void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) { // update trades
   const auto dt( trade.DateTime() );
   const auto price( trade.Price() );
   switch ( m_stateTrade ) {
@@ -453,14 +453,14 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
       break;
     case ETradeState::ShortExitSubmitted:
       break;
-    case ETradeState::Neutral:
+    case ETradeState::Neutral: // todo:  dead end for now, state changes should use ::search
       BOOST_LOG_TRIVIAL(trace) << "neutral," << m_nEnterLong << ',' << m_nEnterShort;
       break;
-    case ETradeState::EndOfDayCancel:
-      BOOST_LOG_TRIVIAL(trace) << "eod cancel," << m_nEnterLong << ',' << m_nEnterShort;
+    case ETradeState::EndOfDayCancel: // not in HandleRHTrading, set in one shot HandleCancel
+      //BOOST_LOG_TRIVIAL(trace) << "eod cancel," << m_nEnterLong << ',' << m_nEnterShort;
       break;
-    case ETradeState::EndOfDayNeutral:
-      BOOST_LOG_TRIVIAL(trace) << "eod neutral," << m_nEnterLong << ',' << m_nEnterShort;
+    case ETradeState::EndOfDayNeutral: // not in HandleRHTrading, set in one shot HandleGoNeutral
+      //BOOST_LOG_TRIVIAL(trace) << "eod neutral," << m_nEnterLong << ',' << m_nEnterShort;
       break;
     case ETradeState::Done:
       break;
@@ -521,7 +521,7 @@ void Strategy::PredictionVector( const size_t distance, const size_t size, const
   }
 }
 
-void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
+void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second, update statistics
 
   double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
   m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
@@ -583,7 +583,7 @@ void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
 }
 
 void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration td ) { // one shot
-  BOOST_LOG_TRIVIAL(trace) << "event HandleCancel," << td << ',' << m_nEnterLong << ',' << m_nEnterShort;
+  BOOST_LOG_TRIVIAL(trace) << "HandleCancel," << td << ',' << m_nEnterLong << ',' << m_nEnterShort;
   m_stateTrade = ETradeState::EndOfDayCancel;
   if ( m_pPosition ) {
     m_pPosition->CancelOrders();
@@ -591,7 +591,7 @@ void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_dur
 }
 
 void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration td ) { // one shot
-  BOOST_LOG_TRIVIAL(trace) << "event HandleGoNeutral," << td << ',' << m_nEnterLong << ',' << m_nEnterShort;
+  BOOST_LOG_TRIVIAL(trace) << "HandleGoNeutral," << td << ',' << m_nEnterLong << ',' << m_nEnterShort;
   m_stateTrade = ETradeState::EndOfDayNeutral;
   if ( m_pPosition ) {
     m_pPosition->ClosePosition();
