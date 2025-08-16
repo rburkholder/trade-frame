@@ -308,8 +308,8 @@ void DailyTradeTimeFrame<T>::TimeTick( const DD& dd ) {  // DD is DatedDatum
       m_stateTimeFrame = TimeFrame::GoNeutral;
       boost::gregorian::date date( dt.date() );
       boost::posix_time::time_duration time( dt.time_of_day() );
-      static_cast<T*>(this)->HandleGoNeutral( date, time );  // one shot
       m_stateTimeFrame = TimeFrame::GoingNeutral;
+      static_cast<T*>(this)->HandleGoNeutral( date, time );  // one shot
       // https://gcc.gnu.org/legacy-ml/gcc-help/2006-04/msg00023.html doesn't fix this
       //if ( &DailyTradeTimeFrame<T>::template HandleGoingNeutral<DD> != &T::template HandleGoingNeutral<DD> ) { // need to figure out comparison to bar|quote|trade|etc (DD)
         static_cast<T*>(this)->HandleGoingNeutral( dd );
