@@ -85,7 +85,7 @@ CONY         2025-07-26  8.99        134.32  2025-07-24       0.7951        2025
 ...
 ```
 
-For additional research, use the ![OptionTrader](../OptionTrader) project to look at historical daily bars and current session 1 minute bars for historical context.
+For additional research, use the [OptionTrader](../OptionTrader) project to look at historical daily bars and current session 1 minute bars for historical context.
 
 
 Something to consider for calculations:
