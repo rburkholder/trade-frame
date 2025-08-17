@@ -19,6 +19,8 @@
  * Created: April 14, 2025 20:32:29
  */
 
+//#include <cmath>
+
 #include <boost/log/trivial.hpp>
 
 #include "Strategy.hpp"
@@ -39,6 +41,8 @@ namespace {
 
   static const double c_tickHi( +1.0 );
   static const double c_tickLo( -1.0 );
+
+  static const double c_regimeMinimum( 0.001 );
 }
 
 Strategy::Strategy(
@@ -69,6 +73,8 @@ Strategy::Strategy(
 , m_dblTickRegime {}, m_bTickRegimeIncreased( false )
 , m_TickRegime( ETickRegime::congestion )
 , m_dblPrvPrice {}, m_dblPrvAdvDec {}
+, m_statsReturns( m_returns, boost::posix_time::time_duration( 0, 0, 60 ) )
+, m_ePrice( EPrice::neutral )
 {
   SetupChart();
 
@@ -171,7 +177,7 @@ void Strategy::SetupChart() {
   m_cemPosOne.AddMark( +1.0, ou::Colour::Black,   "+1" );
     m_cemZero.AddMark(  0.0, ou::Colour::Black, "zero" );
   m_cemNegOne.AddMark( -1.0, ou::Colour::Black,   "-1" );
-  m_cemZeroPtOne.AddMark( 0.1, ou::Colour::Red,   "0.1" );
+  m_cemRegimMin.AddMark( c_regimeMinimum, ou::Colour::Red,   "min" );
 
   m_ceTrade.SetName( "Trade" );
   m_ceTrade.SetColour( c_colourPrice );
@@ -253,10 +259,25 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::AdvDec, &m_cemZero );
   m_cdv.Add( EChartSlot::AdvDec, &m_ceAdvDec );
 
-  m_ceRtnPrice.SetName( "Price Returns" );
-  m_cdv.Add( EChartSlot::rtnPrice, &m_ceRtnPrice );
+  //m_statsReturns.SetBBMultiplier( 2.0 );
 
-  m_cdv.Add( EChartSlot::TickRegime, &m_cemZeroPtOne );
+  //m_ceRtnPrice.SetName( "Price Returns" );
+  //m_cdv.Add( EChartSlot::Price, &m_ceRtnPrice_bbu );
+  //m_cdv.Add( EChartSlot::rtnPrice, &m_ceRtnPrice );
+  //m_cdv.Add( EChartSlot::Price, &m_ceRtnPrice_bbl );
+
+  m_cdv.Add( EChartSlot::rtnPriceAvg, &m_cemZero );
+  m_ceRtnPrice_avg.SetName( "Returns - Average" );
+  m_cdv.Add( EChartSlot::rtnPriceAvg, &m_ceRtnPrice_avg );
+
+  m_cdv.Add( EChartSlot::rtnPriceSlp, &m_cemZero );
+  m_ceRtnPrice_slope.SetName( "Returns - Slope" );
+  m_cdv.Add( EChartSlot::rtnPriceSlp, &m_ceRtnPrice_slope );
+
+  //m_ceRtnPrice_sd.SetName( "Returns - SD" );
+  //m_cdv.Add( EChartSlot::rtnPriceSD, &m_ceRtnPrice_sd );
+
+  m_cdv.Add( EChartSlot::TickRegime, &m_cemRegimMin );
   m_cdv.Add( EChartSlot::TickRegime, &m_cemZero );
 
   m_ceTickRegime.SetName( "Tick Regime" );
@@ -292,8 +313,10 @@ void Strategy::SetupChart() {
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   m_quote = quote;
   const auto dt( quote.DateTime() );
-  //m_ceAsk.Append( dt, quote.Ask() );
-  //m_ceBid.Append( dt, quote.Bid() );
+  //if ( TimeFrame::RHTrading == CurrentTimeFrame() ) {
+  //  m_ceAsk.Append( dt, quote.Ask() );
+  //  m_ceBid.Append( dt, quote.Bid() );
+  //}
   m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
 }
 
@@ -309,7 +332,36 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   if ( ( 0.0 == m_dblPrvPrice ) ) {}
   else {
     const double rtn = std::log( price / m_dblPrvPrice ); // natural log, ie ln
-    m_ceRtnPrice.Append( dt, rtn );
+    //m_ceRtnPrice.Append( dt, rtn );
+    m_returns.Append( ou::tf::Price( dt, rtn ) );
+    //static const double sigma( 1.5 );
+    //const double sig_std( sigma * m_statsReturns.SD() );
+    //const double hi( std::exp( m_statsReturns.MeanY() + sig_std ) );
+    //const double lo( std::exp( m_statsReturns.MeanY() - sig_std ) );
+
+    const double mean( m_statsReturns.MeanY() );
+    const double slope( m_statsReturns.Slope() );
+
+    if ( 0.0 <= mean ) {
+      if ( 0.0 <= slope ) {
+        m_ePrice = EPrice::buy;
+      }
+      else { // 0.0 > slope
+        m_ePrice = EPrice::stop_sell;
+      }
+    }
+    else { // 0.0 > mean
+      if ( 0.0 <= slope ) {
+        m_ePrice = EPrice::stop_buy;
+      }
+      else { // 0.0 > slope
+        m_ePrice = EPrice::sell;
+      }
+    }
+
+    m_ceRtnPrice_avg.Append( dt, mean ); // todo, run ema, use running_stats n
+    m_ceRtnPrice_slope.Append( dt, slope ); // todo, run ema, use running_stats n
+    //m_ceRtnPrice_sd.Append( dt, m_statsReturns.SD() );
   }
   m_dblPrvPrice = price;
 
@@ -343,7 +395,7 @@ void Strategy::HandleTickL( const ou::tf::Trade& tick ) {
 double Strategy::CalcTickRegime() {
   const double dblTickRegime = m_features.dblTickJ * m_features.dblTickL;
   m_bTickRegimeIncreased = m_dblTickRegime < dblTickRegime;
-  if (  0.1 >= dblTickRegime ) {
+  if ( c_regimeMinimum >= dblTickRegime ) {
     m_TickRegime = ETickRegime::congestion;
   }
   else {
@@ -405,14 +457,12 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   TimeTick( bar );
 }
 
-void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) { // update trades
-  const auto dt( trade.DateTime() );
-  const auto price( trade.Price() );
-  switch ( m_stateTrade ) {
-    case ETradeState::Search:
+/*
       switch ( m_TickRegime ) {
         case ETickRegime::advance:
-          if ( m_bTickRegimeIncreased ) {
+          //if ( m_bTickRegimeIncreased ) {
+          //if ( ( 0.0 < m_statsReturns.MeanY() ) && ( 0.0 < m_statsReturns.Slope() ) ) {
+          if ( ( 0.0 < m_statsReturns.Slope() ) ) {
             //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
             m_ceLongEntry.AddLabel( dt, price, "long" );
             ++m_nEnterLong;
@@ -420,7 +470,9 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) { // update trades
           }
           break;
         case ETickRegime::decline:
-          if ( m_bTickRegimeIncreased ) {
+          //if ( m_bTickRegimeIncreased ) {
+          //if ( ( 0.0 > m_statsReturns.MeanY() ) && ( 0.0 > m_statsReturns.Slope() ) ) {
+          if ( ( 0.0 > m_statsReturns.Slope() ) ) {
             //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
             m_ceShortEntry.AddLabel( dt, price, "short" );
             ++m_nEnterShort;
@@ -430,6 +482,41 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) { // update trades
         case ETickRegime::congestion:
           break;
         case ETickRegime::diverge:
+          break;
+      }
+*/
+
+void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) { // update trades
+  const auto dt( trade.DateTime() );
+  const auto price( trade.Price() );
+  switch ( m_stateTrade ) {
+    case ETradeState::Search:
+      switch ( m_ePrice ) {
+        case EPrice::buy:
+          //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
+          m_ceLongEntry.AddLabel( dt, price, "long" );
+          ++m_nEnterLong;
+          m_stateTrade = ETradeState::LongSubmitted;
+          break;
+        case EPrice::sell:
+          //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
+          m_ceShortEntry.AddLabel( dt, price, "short" );
+          ++m_nEnterShort;
+          m_stateTrade = ETradeState::ShortSubmitted;
+          break;
+        case EPrice::stop_sell:
+          //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
+          //m_ceShortEntry.AddLabel( dt, price, "short" );
+          //++m_nEnterShort;
+          //m_stateTrade = ETradeState::ShortSubmitted;
+          break;
+        case EPrice::stop_buy:
+          //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
+          //m_ceLongEntry.AddLabel( dt, price, "long" );
+          //++m_nEnterLong;
+          //m_stateTrade = ETradeState::LongSubmitted;
+          break;
+        case EPrice::neutral:
           break;
       }
       break;
@@ -598,3 +685,17 @@ void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_
   }
 }
 
+/*
+https://medium.com/@jatinnavani/predicting-stock-prices-using-log-returns-and-exponential-moving-averages-147634412a59
+Log returns are preferred over simple percentage returns for several reasons:
+
+  * Statistical Properties: Log returns are more statistically stable than simple returns. They can be modeled
+    using a normal distribution, making them suitable for various statistical techniques.
+  * Time Additivity: Log returns are time-additive, meaning that the total return over multiple periods
+    can be calculated by simply summing the log returns of each period. This property simplifies the
+    mathematical modeling of returns over time.
+  * Handling Small Values: For small percentage changes, log returns provide a more accurate representation
+    of the growth rate than simple returns, as they do not exaggerate the effects of small fluctuations.
+  * Volatility Analysis: Log returns provide a better basis for volatility analysis, allowing us to
+    understand how much the price is expected to fluctuate based on historical data.
+*/

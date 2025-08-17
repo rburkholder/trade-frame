@@ -32,9 +32,9 @@
 
 #include <OUCharting/ChartDataView.h>
 
-//#include <TFIndicators/TSEMA.h>
-
 #include <TFTimeSeries/BarFactory.h>
+
+#include <TFIndicators/TSSWStats.h>
 
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
@@ -82,7 +82,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, rtnPrice, Tick, TickRegime, AdvDec, rtnAdvDec, Ratio, Predict, PredVec, PL };
+  enum EChartSlot { Price, Volume, rtnPrice, rtnPriceAvg, rtnPriceSlp, rtnPriceSD, TickRegime, AdvDec, Tick, rtnAdvDec, Ratio, Predict, PredVec, PL };
   enum class ETradeState {
     Init,  // initiaize state in current market
     Neutral, // netral state prior to active search
@@ -160,7 +160,7 @@ private:
   ou::ChartEntryMark m_cemPosOne;
   ou::ChartEntryMark m_cemZero;
   ou::ChartEntryMark m_cemNegOne;
-  ou::ChartEntryMark m_cemZeroPtOne;
+  ou::ChartEntryMark m_cemRegimMin;
 
   ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryVolume m_ceVolume;
@@ -199,8 +199,21 @@ private:
 
   ou::ChartEntryIndicator m_ceAdvDec;
 
+  ou::tf::Prices m_returns;
+  ou::tf::TSSWStatsPrice m_statsReturns;
+
   double m_dblPrvPrice;
-  ou::ChartEntryIndicator m_ceRtnPrice;
+  //ou::ChartEntryIndicator m_ceRtnPrice_bbu;
+  //ou::ChartEntryIndicator m_ceRtnPrice;
+  //ou::ChartEntryIndicator m_ceRtnPrice_bbl;
+
+  ou::ChartEntryIndicator m_ceRtnPrice_avg;
+  ou::ChartEntryIndicator m_ceRtnPrice_slope;
+  //ou::ChartEntryIndicator m_ceRtnPrice_sd;
+
+  enum class EPrice { buy, sell, stop_sell, stop_buy, neutral };
+  EPrice m_ePrice;
+
   double m_dblTickRegime;
   ou::ChartEntryIndicator m_ceTickRegime;
   double m_dblPrvAdvDec;
