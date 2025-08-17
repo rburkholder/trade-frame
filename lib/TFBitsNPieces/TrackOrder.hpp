@@ -19,6 +19,9 @@
  * Created: April 28, 2024 10:39:16
  */
 
+// TODO:  fTransferFunds_t, m_curQuote, m_curBase, m_quantityBaseCurrency are currency specific.
+//   factor this out into TrackCurrencyOrder and inherit from TrackOrder as CRTP
+
 #pragma once
 
 #include <OUCharting/ChartDataView.h>
@@ -123,8 +126,8 @@ private:
   ou::ChartEntryShape m_ceExitSubmit;
   ou::ChartEntryShape m_ceExitFill;
 
-  ou::tf::Order::quantity_t m_quantityBaseCurrency;
-  fTransferFunds_t m_fTransferFunds;
+  ou::tf::Order::quantity_t m_quantityBaseCurrency; // amount, in base currency to trade for each order
+  fTransferFunds_t m_fTransferFunds; // used to update results of currency transaction
 
   fFillPrice_t m_fFillPrice;
   fCancel_t m_fCancelled;
