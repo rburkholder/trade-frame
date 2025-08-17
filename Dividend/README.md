@@ -32,6 +32,61 @@ minimum_yield=8.0
 minimum_volume=5000
 max_in_transit=40
 ```
+Data is placed into a sqlite3 database.  Sample query for dividends paid:
+
+```
+sqlite> .headers on
+sqlite> .mode column
+sqlite> .param set :symbol "GDXY"
+sqlite> select
+  a.symbol_name, a.date_run, b.last_trade, b.yield, a.date_exdividend, a.amount_payed, a.date_payed
+        from
+  dividend as a
+inner join
+  daily as b
+on
+  a.symbol_name=b.symbol_name and a.date_run=b.date_run
+where
+  a.symbol_name = :symbol
+order by
+  a.date_run desc
+;
+symbol_name  date_run    last_trade  yield  date_exdividend  amount_payed  date_payed
+-----------  ----------  ----------  -----  ---------------  ------------  ----------
+GDXY         2025-08-15  15.15       50.36  2025-08-14       0.6098        2025-08-15
+GDXY         2025-07-19  14.48       53.53  2025-07-17       0.3321        2025-07-18
+GDXY         2025-06-24  15.02       49.82  2025-06-20       0.8449        2025-06-23
+GDXY         2025-05-24  15.21       44.0   2025-05-22       0.3739        2025-05-23
+GDXY         2025-04-26  15.47       39.41  2025-04-24       0.7284        2025-04-25
+GDXY         2025-04-12  16.67       32.82  2025-03-27       0.6394        2025-03-28
+```
+
+Sample query for highest yielding instruments (trade at your own risk & assessment):
+
+```
+sqlite> .mode column
+sqlite> .headers on
+sqlite> select daily.symbol_name, daily.date_run, daily.last_trade, daily.yield, dividend.date_exdividend, dividend.amount_payed, dividend.date_payed
+from daily
+inner join dividend
+on daily.symbol_name = dividend.symbol_name and daily.date_run = dividend.date_run
+where daily.yield>50 and dividend.date_exdividend > "2025-07-01" and daily.date_run > "2025-07-01"
+group by daily.symbol_name
+order by daily.yield desc
+;
+symbol_name  date_run    last_trade  yield   date_exdividend  amount_payed  date_payed
+-----------  ----------  ----------  ------  ---------------  ------------  ----------
+FIAT         2025-07-26  2.94        363.91  2025-07-24       0.1381        2025-07-25
+MRNY         2025-07-19  2.38        165.68  2025-07-17       0.2004        2025-07-18
+CRSH         2025-07-12  4.51        164.46  2025-07-10       0.2156        2025-07-11
+TSLY         2025-07-12  7.71        143.44  2025-07-10       0.3873        2025-07-11
+MSTY         2025-07-05  20.89       143.25  2025-07-03       1.2382        2025-07-07
+CONY         2025-07-26  8.99        134.32  2025-07-24       0.7951        2025-07-25
+...
+```
+
+For additional research, use the ![OptionTrader](../OptionTrader) project to look at historical daily bars and current session 1 minute bars for historical context.
+
 
 Something to consider for calculations:
 * highest-yielding monthly dividend stocks with market capitalizations of at least $1 billion and payout ratios below 100%, meaning they are paying out less in dividends per share than they are bringing in in earnings per share (EPS)
