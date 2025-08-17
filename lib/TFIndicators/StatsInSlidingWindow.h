@@ -27,8 +27,8 @@ namespace tf { // TradeFrame
 template<class T> class StatsInSlidingWindow :  public SlidingWindow<T> {
 public:
   StatsInSlidingWindow<T>(std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount = 0);
-  virtual ~StatsInSlidingWindow<T>(void);
-  void CalcStats( void );
+  virtual ~StatsInSlidingWindow<T>();
+  void CalcStats();
   RunningStats m_stats;
 protected:
   virtual void Add( ptime dt, double val );
@@ -44,7 +44,7 @@ template<class T> StatsInSlidingWindow<T>::StatsInSlidingWindow(
   m_sName = sName;
 }
 
-template<class T> StatsInSlidingWindow<T>::~StatsInSlidingWindow(void) {
+template<class T> StatsInSlidingWindow<T>::~StatsInSlidingWindow() {
   //SlidingWindow<T>::~SlidingWindow();
 }
 
@@ -73,7 +73,7 @@ template<class T> void StatsInSlidingWindow<T>::CalcStats() {
 class TradeStats: StatsInSlidingWindow<Trade> {
 public:
   TradeStats(std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount = 0);
-  virtual ~TradeStats(void);
+  virtual ~TradeStats();
   Trade* Add( ptime dt, Trade *trade );
   Trade* Remove();
 protected:

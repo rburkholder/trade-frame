@@ -12,14 +12,12 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include "StatsInSlidingWindow.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-TradeStats::TradeStats( std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount ): 
+TradeStats::TradeStats( std::string sName, unsigned int WindowSizeSeconds, unsigned int WindowSizeCount ):
   StatsInSlidingWindow( sName, WindowSizeSeconds, WindowSizeCount  ) {
 }
 
