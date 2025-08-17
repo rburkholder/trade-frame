@@ -39,7 +39,7 @@
 #include <TFTrading/Portfolio.h>
 #include <TFTrading/DailyTradeTimeFrames.h>
 
-#include <TFBitsNPieces/TrackOrder.hpp>
+#include <TFBitsNPieces/TrackCurrencyOrder.hpp>
 
 #include "Ind_Ema.hpp"
 //#include "Ind_UltSmth.hpp"

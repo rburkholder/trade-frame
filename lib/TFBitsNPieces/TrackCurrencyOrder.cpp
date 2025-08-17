@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    TrackOrder.cpp
+ * File:    TrackCurrencyOrder.cpp
  * Author:  raymond@burkholder.net
  * Project: TFBitsNPieces
  * Created: April 28, 2024 10:39:16
@@ -27,7 +27,7 @@
 
 #include <TFInteractiveBrokers/IBTWS.h>
 
-#include "TrackOrder.hpp"
+#include "TrackCurrencyOrder.hpp"
 
 TrackOrder::TrackOrder()
 : m_quantityBaseCurrency {}
