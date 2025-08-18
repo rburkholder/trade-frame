@@ -24,6 +24,8 @@ set(
     ReadCboeWeeklyOptionsCsv.h
     ReadCboeWeeklyOptionsXls.h
     Stochastic.hpp
+    TrackOrderBase.hpp
+    TrackOrder.hpp
     TrackCurrencyOrder.hpp
     TradeState.hpp
     TreeOps.h
@@ -44,6 +46,8 @@ set(
     ReadCboeWeeklyOptionsCsv.cpp
     ReadCboeWeeklyOptionsXls.cpp
     Stochastic.cpp
+    TrackOrderBase.cpp
+    TrackOrder.cpp
     TrackCurrencyOrder.cpp
     TradeState.cpp
     TreeOps.cpp

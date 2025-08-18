@@ -68,7 +68,7 @@ public:
   using fResetSoftware_t = std::function<bool()>;
   using fConstructPosition_t = std::function<pPosition_t(pWatch_t,const std::string&)>;
 
-  using fTransferFunds_t = TrackOrder::fTransferFunds_t;
+  using fTransferFunds_t = ou::tf::TrackCurrencyOrder::fTransferFunds_t;
 
   Strategy( const config::Strategy& );
   ~Strategy();
@@ -170,7 +170,7 @@ private:
   pWatch_t m_pWatch;
   pPortfolio_t m_pPortfolio;
 
-  TrackOrder m_to;
+  ou::tf::TrackCurrencyOrder m_to;
 
   using pSmoother_t = std::unique_ptr<ou::tf::indicator::Ema>;
   using vSmoother_t = std::vector<pSmoother_t>;
@@ -333,6 +333,6 @@ private:
   void HandleBarQuotes01Sec( const ou::tf::Bar& );
   void HandleMinuteBar( const ou::tf::Bar& );
 
-  void RunState( TrackOrder& );
+  void RunState( ou::tf::TrackCurrencyOrder& );
 
 };

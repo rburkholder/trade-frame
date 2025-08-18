@@ -152,7 +152,7 @@ Strategy::~Strategy() {
 void Strategy::SetTransaction( ou::tf::Order::quantity_t quantity, fTransferFunds_t&& f ) {
 
   m_quantityToOrder = quantity;
-  m_to.Set( quantity, f ); // make a copy of f
+  m_to.Set( f ); // make a copy of f
 
 }
 
@@ -318,7 +318,8 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
   m_state.swing = State::Swing::none;
 }
 
-void Strategy::RunState( TrackOrder& to ) {
+void Strategy::RunState( ou::tf::TrackCurrencyOrder& to ) {
+  using OrderArgs = ou::tf::TrackCurrencyOrder::OrderArgs;
   switch ( to.m_stateTrade() ) {
     case ETradeState::Init: // Strategy starts in this state
       to.m_stateTrade.Set( ETradeState::Search, m_pWatch->GetInstrumentName(), __FUNCTION__, __LINE__ );
@@ -348,7 +349,7 @@ void Strategy::RunState( TrackOrder& to ) {
                     // cancel other stuff
                   } );
                 const double limit( fill_price + 2.0 * m_tick );
-                to.ExitShortLmt( TrackOrder::OrderArgs( m_quote.DateTime(), fill_price, limit ) );
+                to.ExitShortLmt( OrderArgs( m_quote.DateTime(), m_quantityToOrder, fill_price, limit ) );
                 BOOST_LOG_TRIVIAL(info)
                   << m_pWatch->GetInstrumentName() << ','
                   << "up,fill=" << fill_price << ",short_limit=" << limit << ",stop.trail=" << m_stop.trail;
@@ -367,7 +368,7 @@ void Strategy::RunState( TrackOrder& to ) {
               ;
             assert( 0.0 < m_stop.diff );
             //to.EnterLongLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Ask(), m_quote.Bid(), 57 ) );
-            to.EnterLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Ask() ) );
+            to.EnterLongMkt( OrderArgs( m_quote.DateTime(), m_quantityToOrder, m_quote.Ask() ) );
           }
           break;
         case State::Swing::none:
@@ -397,7 +398,7 @@ void Strategy::RunState( TrackOrder& to ) {
                     // cancel other stuff
                   } );
                 const double limit( fill_price - 2.0 * m_tick );
-                to.ExitLongLmt( TrackOrder::OrderArgs( m_quote.DateTime(), fill_price, limit ) );
+                to.ExitLongLmt( OrderArgs( m_quote.DateTime(), m_quantityToOrder, fill_price, limit ) );
                 BOOST_LOG_TRIVIAL(info)
                   << m_pWatch->GetInstrumentName() << ','
                   << "dn,fill=" << fill_price << ",long_limit=" << limit << ",stop.trail=" << m_stop.trail;
@@ -416,7 +417,7 @@ void Strategy::RunState( TrackOrder& to ) {
               ;
             assert( 0.0 < m_stop.diff );
             //to.EnterShortLmt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Bid(), m_quote.Ask(), 57 ) );
-            to.EnterShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), m_quote.Bid() ) );
+            to.EnterShortMkt( OrderArgs( m_quote.DateTime(), m_quantityToOrder, m_quote.Bid() ) );
           }
           break;
       }
@@ -435,7 +436,7 @@ void Strategy::RunState( TrackOrder& to ) {
                 << m_pWatch->GetInstrumentName() << ','
                 << "up mkt stop on lmt cancel"
                 ;
-              to.ExitLongMkt( TrackOrder::OrderArgs( m_quote.DateTime(), bid ) );
+              to.ExitLongMkt( OrderArgs( m_quote.DateTime(), m_quantityToOrder, bid ) );
             } );
         }
         else {
@@ -457,7 +458,7 @@ void Strategy::RunState( TrackOrder& to ) {
                 << m_pWatch->GetInstrumentName() << ','
                 << "dn mkt stop on lmt cancel"
                 ;
-              to.ExitShortMkt( TrackOrder::OrderArgs( m_quote.DateTime(), ask ) );
+              to.ExitShortMkt( OrderArgs( m_quote.DateTime(), m_quantityToOrder, ask ) );
             } );
         }
         else {

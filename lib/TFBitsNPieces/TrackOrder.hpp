@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright(c) 2024, One Unified. All rights reserved.                 *
+ * Copyright(c) 2025, One Unified. All rights reserved.                 *
  * email: info@oneunified.net                                           *
  *                                                                      *
  * This file is provided as is WITHOUT ANY WARRANTY                     *
@@ -13,50 +13,21 @@
  ************************************************************************/
 
 /*
- * File:    TrackCurrencyOrder.hpp
+ * File:    TrackOrder.hpp
  * Author:  raymond@burkholder.net
  * Project: TFBitsNPieces
- * Created: April 28, 2024 10:39:16
+ * Created: August 17, 2025 16:45:42
  */
-
-// TODO:  fTransferFunds_t, m_curQuote, m_curBase, m_quantityBaseCurrency are currency specific.
-//   factor this out into TrackCurrencyOrder and inherit from TrackOrder as CRTP
-
-#pragma once
-
-#include "TrackOrderBase.hpp"
 
 namespace ou { // namespace oneunified
 namespace tf { // namespace tradeframe
 
-class TrackCurrencyOrder: public TrackOrderBase {
+class TrackOrder {
 public:
-
-  using fTransferFunds_t = std::function<void(
-    ou::tf::Currency::ECurrency, double debit,
-    ou::tf::Currency::ECurrency, double credit,
-    double commission
-    )>;
-
-  TrackCurrencyOrder();
-  virtual ~TrackCurrencyOrder();
-
-  void Set( fTransferFunds_t& );
-  virtual void Set( pPosition_t, ou::ChartDataView&, int slot ) override;
-  void Set( fFillPrice_t&& f );
-
 protected:
 private:
-
-  fFillPrice_t m_fFillPrice;
-  fTransferFunds_t m_fTransferFunds; // used to update results of currency transaction
-
-  ou::tf::Currency::ECurrency m_curBase;
-  ou::tf::Currency::ECurrency m_curQuote;
-
-  virtual void HandleOrderFilled( const ou::tf::Order& ) override;
-
 };
 
 } // namespace tradeframe
 } // namespace oneunified
+
