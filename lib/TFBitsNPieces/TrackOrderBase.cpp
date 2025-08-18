@@ -36,7 +36,6 @@ TrackOrderBase::TrackOrderBase()
 
 TrackOrderBase::~TrackOrderBase() {}
 
-
 void TrackOrderBase::Set( pPosition_t pPosition, ou::ChartDataView& cdv, int slot ) {
 
   assert( pPosition );

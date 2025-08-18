@@ -320,9 +320,9 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 
 void Strategy::RunState( ou::tf::TrackCurrencyOrder& to ) {
   using OrderArgs = ou::tf::TrackCurrencyOrder::OrderArgs;
-  switch ( to.m_stateTrade() ) {
+  switch ( to.State()() ) {
     case ETradeState::Init: // Strategy starts in this state
-      to.m_stateTrade.Set( ETradeState::Search, m_pWatch->GetInstrumentName(), __FUNCTION__, __LINE__ );
+      to.State().Set( ETradeState::Search, m_pWatch->GetInstrumentName(), __FUNCTION__, __LINE__ );
       break;
     case ETradeState::Search:
       switch ( m_state.swing ) {
@@ -648,7 +648,7 @@ void Strategy::SaveWatch( const std::string& sPrefix ) {
 }
 
 void Strategy::CloseAndDone() {
-  switch ( m_to.m_stateTrade() ) {
+  switch ( m_to.State()() ) {
     case ETradeState::Search:
       // nothing
       break;

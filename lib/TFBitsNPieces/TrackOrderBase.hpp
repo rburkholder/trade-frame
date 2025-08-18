@@ -37,7 +37,6 @@ public:
 
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  using fFillPrice_t = std::function<void(double,double)>; // exchange rate, commission
   using fCancel_t = std::function<void()>;
   using fClose_t = std::function<void()>;
 
@@ -86,12 +85,12 @@ public:
     }
   };
 
-  ETradeState m_stateTrade;  // todo: move to protected
-
   TrackOrderBase();
   virtual ~TrackOrderBase();
 
   virtual void Set( pPosition_t, ou::ChartDataView&, int slot );
+
+  ETradeState& State() { return m_stateTrade; }
 
   double PriceInterval( double price ) const;
 
@@ -118,8 +117,9 @@ public:
 
 protected:
 
-  using pOrder_t = ou::tf::Order::pOrder_t;
+  ETradeState m_stateTrade;  // todo: move to protected
 
+  using pOrder_t = ou::tf::Order::pOrder_t;
   pOrder_t m_pOrderPending;
 
   pPosition_t m_pPosition;

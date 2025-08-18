@@ -19,9 +19,6 @@
  * Created: April 28, 2024 10:39:16
  */
 
-// TODO:  fTransferFunds_t, m_curQuote, m_curBase, m_quantityBaseCurrency are currency specific.
-//   factor this out into TrackCurrencyOrder and inherit from TrackOrder as CRTP
-
 #pragma once
 
 #include "TrackOrderBase.hpp"
@@ -32,6 +29,8 @@ namespace tf { // namespace tradeframe
 class TrackCurrencyOrder: public TrackOrderBase {
 public:
 
+  using fFillPrice_t = std::function<void(double,double)>; // exchange rate, commission
+
   using fTransferFunds_t = std::function<void(
     ou::tf::Currency::ECurrency, double debit,
     ou::tf::Currency::ECurrency, double credit,
@@ -41,9 +40,9 @@ public:
   TrackCurrencyOrder();
   virtual ~TrackCurrencyOrder();
 
+  void Set( fFillPrice_t&& f );
   void Set( fTransferFunds_t& );
   virtual void Set( pPosition_t, ou::ChartDataView&, int slot ) override;
-  void Set( fFillPrice_t&& f );
 
 protected:
 private:
