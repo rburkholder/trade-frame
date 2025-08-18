@@ -124,14 +124,6 @@ protected:
 
   pPosition_t m_pPosition;
 
-  ou::ChartEntryShape m_ceEntrySubmit;
-  ou::ChartEntryShape m_ceEntryFill;
-  ou::ChartEntryShape m_ceExitSubmit;
-  ou::ChartEntryShape m_ceExitFill;
-
-  fCancel_t m_fCancelled;
-  fClose_t m_fClosed;
-
   void Common( const OrderArgs&, pOrder_t& );
   void EnterCommon( const OrderArgs&, pOrder_t& );
   void ExitCommon( const OrderArgs&, pOrder_t& );
@@ -147,10 +139,19 @@ protected:
 
 private:
 
-  std::string m_sProfitDescription;
   double m_dblProfitMax;
   double m_dblUnRealized;
   double m_dblProfitMin;
+
+  std::string m_sProfitDescription;
+
+  ou::ChartEntryShape m_ceEntrySubmit;
+  ou::ChartEntryShape m_ceEntryFill;
+  ou::ChartEntryShape m_ceExitSubmit;
+  ou::ChartEntryShape m_ceExitFill;
+
+  fCancel_t m_fCancelled;
+  fClose_t m_fClosed;
 
   void HandleExitOrderCancelled( const ou::tf::Order& ); // unused
   void HandleExitOrderFilled( const ou::tf::Order& ); // unused

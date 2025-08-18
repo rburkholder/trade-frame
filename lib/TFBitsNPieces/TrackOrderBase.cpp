@@ -281,13 +281,6 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
 
   const double price = order.GetAverageFillPrice();
   const auto quantity = order.GetQuanFilled();
-  //double quantity_converted = quantity_base / exchange_rate; // is this correct?
-
-  // Forex quotes show two currencies,
-  //   the base currency, which appears first and
-  //   the quote currency or variable currency, which appears last.
-  // The price of the first currency is always reflected in units of the second currency.
-  // An order is for a 'buy' or a 'sell' of the first currency (base currency)
 
   const auto commission = order.GetIncrementalCommission();
 
@@ -338,6 +331,7 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
     default:
        assert( false ); // TODO: unravel the state mess if we get here
   }
+
   m_pOrderPending.reset();
 
 }

@@ -57,13 +57,13 @@ void TrackCurrencyOrder::Set( fTransferFunds_t& f ) {
 
 void TrackCurrencyOrder::HandleOrderFilled( const ou::tf::Order& order ) {
 
-  m_pOrderPending->OnOrderCancelled.Remove( MakeDelegate( this, &TrackCurrencyOrder::HandleOrderCancelled ) );
-  m_pOrderPending->OnOrderFilled.Remove( MakeDelegate( this, &TrackCurrencyOrder::HandleOrderFilled ) );
-
   assert( m_fTransferFunds );
-  const double exchange_rate = order.GetAverageFillPrice();
 
+  const double exchange_rate = order.GetAverageFillPrice();
   const auto quantity_base = order.GetQuanFilled();
+  const auto commission = order.GetIncrementalCommission();
+  const double quantity_converted = quantity_base * exchange_rate;
+
   //double quantity_converted = quantity_base / exchange_rate; // is this correct?
 
   // Forex quotes show two currencies,
@@ -71,9 +71,6 @@ void TrackCurrencyOrder::HandleOrderFilled( const ou::tf::Order& order ) {
   //   the quote currency or variable currency, which appears last.
   // The price of the first currency is always reflected in units of the second currency.
   // An order is for a 'buy' or a 'sell' of the first currency (base currency)
-
-  const double quantity_converted = quantity_base * exchange_rate;
-  const auto commission = order.GetIncrementalCommission();
 
   switch( order.GetOrderSide() ) {
     case ou::tf::OrderSide::Buy:
@@ -108,35 +105,13 @@ void TrackCurrencyOrder::HandleOrderFilled( const ou::tf::Order& order ) {
       assert( false );
   }
 
-  switch ( m_stateTrade() ) {
-    case ETradeState::EntrySubmittedUp:
-      m_ceEntryFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Entry Fill" );
-      m_stateTrade.Set( ETradeState::ExitSignalUp, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
-      break;
-    case ETradeState::EntrySubmittedDn:
-      m_ceEntryFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Entry Fill" );
-      m_stateTrade.Set( ETradeState::ExitSignalDn, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
-      break;
-    case ETradeState::ExitSubmitted:
-      m_ceExitFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Exit Fill" );
-      m_stateTrade.Set( ETradeState::Search, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
-      break;
-    case ETradeState::EndOfDayCancel:
-    case ETradeState::EndOfDayNeutral:
-      // figure out what labels to apply
-      break;
-    case ETradeState::Done:
-      break;
-    default:
-       assert( false ); // TODO: unravel the state mess if we get here
-  }
-  m_pOrderPending.reset();
-
   if ( m_fFillPrice ) {
     fFillPrice_t fFillPrice( std::move ( m_fFillPrice ) );
     m_fFillPrice = nullptr;
     fFillPrice( exchange_rate, commission );
   }
+
+  TrackOrderBase::HandleOrderFilled( order );
 
 }
 
