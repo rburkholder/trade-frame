@@ -142,14 +142,8 @@ protected:
 
   void ShowOrder( pOrder_t& );
 
-  void HandleOrderCancelled( const ou::tf::Order& );
-
+  virtual void HandleOrderCancelled( const ou::tf::Order& );
   virtual void HandleOrderFilled( const ou::tf::Order& );
-
-  void HandleExitOrderCancelled( const ou::tf::Order& ); // unused
-  void HandleExitOrderFilled( const ou::tf::Order& ); // unused
-
-  void ExitPosition( const ou::tf::Quote& ); // unused
 
 private:
 
@@ -157,6 +151,11 @@ private:
   double m_dblProfitMax;
   double m_dblUnRealized;
   double m_dblProfitMin;
+
+  void HandleExitOrderCancelled( const ou::tf::Order& ); // unused
+  void HandleExitOrderFilled( const ou::tf::Order& ); // unused
+
+  void ExitPosition( const ou::tf::Quote& ); // unused
 
 };
 
