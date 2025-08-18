@@ -55,7 +55,6 @@ Strategy::Strategy(
 )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
 , m_cdv( cdv )
-, m_stateTrade( ETradeState::Init )
 , m_fConstructWatch( std::move( fConstructWatch ) )
 , m_fConstructPosition( std::move( fConstructPosition ) )
 , m_fStart( std::move( fStart ) )
@@ -489,20 +488,20 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) { // update trades
   const auto dt( trade.DateTime() );
   const auto price( trade.Price() );
-  switch ( m_stateTrade ) {
+  switch ( m_to.State()() ) {
     case ETradeState::Search:
       switch ( m_ePrice ) {
         case EPrice::buy:
           //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
           m_ceLongEntry.AddLabel( dt, price, "long" );
           ++m_nEnterLong;
-          m_stateTrade = ETradeState::LongSubmitted;
+          m_to.State().Set( ETradeState::EntrySubmittedUp );
           break;
         case EPrice::sell:
           //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
           m_ceShortEntry.AddLabel( dt, price, "short" );
           ++m_nEnterShort;
-          m_stateTrade = ETradeState::ShortSubmitted;
+          m_to.State().Set( ETradeState::EntrySubmittedDn );
           break;
         case EPrice::stop_sell:
           //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
@@ -520,28 +519,19 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) { // update trades
           break;
       }
       break;
-    case ETradeState::LongSubmitted:
+    case ETradeState::EntrySubmittedUp:
       if ( !m_bTickRegimeIncreased ) {
         //BOOST_LOG_TRIVIAL(trace) << "ETickLo::Neutral exit";
-        m_stateTrade = ETradeState::Search;
+        m_to.State().Set( ETradeState::Search );
       }
       break;
-    case ETradeState::ShortSubmitted:
+    case ETradeState::EntrySubmittedDn:
       if ( !m_bTickRegimeIncreased ) {
         //BOOST_LOG_TRIVIAL(trace) << "ETickHi::Neutral exit";
-        m_stateTrade = ETradeState::Search;
+        m_to.State().Set( ETradeState::Search );
       }
       break;
-    case ETradeState::LongExit:
-      break;
-    case ETradeState::ShortExit:
-      break;
-    case ETradeState::LongExitSubmitted:
-      break;
-    case ETradeState::ShortExitSubmitted:
-      break;
-    case ETradeState::Neutral: // todo:  dead end for now, state changes should use ::search
-      BOOST_LOG_TRIVIAL(trace) << "neutral," << m_nEnterLong << ',' << m_nEnterShort;
+    case ETradeState::ExitSubmitted:
       break;
     case ETradeState::EndOfDayCancel: // not in HandleRHTrading, set in one shot HandleCancel
       //BOOST_LOG_TRIVIAL(trace) << "eod cancel," << m_nEnterLong << ',' << m_nEnterShort;
@@ -552,7 +542,10 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) { // update trades
     case ETradeState::Done:
       break;
     case ETradeState::Init:
-      m_stateTrade = ETradeState::Search;
+      m_to.State().Set( ETradeState::Search );
+      break;
+    default:
+      // todo: track unused states
       break;
   }
 }
@@ -615,71 +608,19 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second, upd
   //m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 }
 
-void Strategy::HandleOrderCancelled( const ou::tf::Order& order ) {
-  m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-  m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  switch ( m_stateTrade ) {
-    case ETradeState::EndOfDayCancel:
-    case ETradeState::EndOfDayNeutral:
-      BOOST_LOG_TRIVIAL(info) << "order " << order.GetOrderId() << " cancelled - end of day";
-      break;
-    case ETradeState::LongExitSubmitted:
-    case ETradeState::ShortExitSubmitted:
-      //assert( false );  // TODO: need to figure out a plan to retry exit
-      BOOST_LOG_TRIVIAL(warning) << "order " << order.GetOrderId() << " cancelled - state machine needs fixes";
-      break;
-    default:
-      //m_stateTrade = ETradeState::Search;
-      m_stateTrade = ETradeState::Neutral;
-  }
-  m_pOrder.reset();
-}
-
-void Strategy::HandleOrderFilled( const ou::tf::Order& order ) {
-  m_pOrder->OnOrderCancelled.Remove( MakeDelegate( this, &Strategy::HandleOrderCancelled ) );
-  m_pOrder->OnOrderFilled.Remove( MakeDelegate( this, &Strategy::HandleOrderFilled ) );
-  switch ( m_stateTrade ) {
-    case ETradeState::LongSubmitted:
-      m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Long Fill" );
-      m_stateTrade = ETradeState::LongExit;
-      break;
-    case ETradeState::ShortSubmitted:
-      m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Fill" );
-      m_stateTrade = ETradeState::ShortExit;
-      break;
-    case ETradeState::LongExitSubmitted:
-      m_ceShortFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Long Exit Fill" );
-      //m_stateTrade = ETradeState::Search;
-      m_stateTrade = ETradeState::Neutral;
-      break;
-    case ETradeState::ShortExitSubmitted:
-      m_ceLongFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Short Exit Fill" );
-      //m_stateTrade = ETradeState::Search;
-      m_stateTrade = ETradeState::Neutral;
-      break;
-    case ETradeState::EndOfDayCancel:
-    case ETradeState::EndOfDayNeutral:
-      // figure out what labels to apply
-      break;
-    case ETradeState::Done:
-      break;
-    default:
-      assert( false ); // TODO: unravel the state mess if we get here
-  }
-  m_pOrder.reset();
-}
-
+// review interaction with TradeState, TrackOrder
 void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration td ) { // one shot
   BOOST_LOG_TRIVIAL(trace) << "HandleCancel," << td << ',' << m_nEnterLong << ',' << m_nEnterShort;
-  m_stateTrade = ETradeState::EndOfDayCancel;
+  m_to.State().Set( ETradeState::EndOfDayCancel );
   if ( m_pPosition ) {
     m_pPosition->CancelOrders();
   }
 }
 
+// review interaction with TradeState, TrackOrder
 void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration td ) { // one shot
   BOOST_LOG_TRIVIAL(trace) << "HandleGoNeutral," << td << ',' << m_nEnterLong << ',' << m_nEnterShort;
-  m_stateTrade = ETradeState::EndOfDayNeutral;
+  m_to.State().Set( ETradeState::EndOfDayNeutral );
   if ( m_pPosition ) {
     m_pPosition->ClosePosition();
   }

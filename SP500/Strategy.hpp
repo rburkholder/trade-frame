@@ -83,20 +83,6 @@ protected:
 private:
 
   enum EChartSlot { Price, Volume, rtnPrice, rtnPriceAvg, rtnPriceSlp, rtnPriceSD, TickRegime, AdvDec, Tick, rtnAdvDec, Ratio, Predict, PredVec, PL };
-  enum class ETradeState {
-    Init,  // initiaize state in current market
-    Neutral, // netral state prior to active search
-    Search,  // looking for long or short enter
-    LongSubmitted, // order has been submitted, waiting for confirmation
-    LongExit,  // position exists, looking for exit
-    ShortSubmitted,  // order has been submitted, waiting for confirmtaion
-    ShortExit,  // position exists, looking for exit
-    LongExitSubmitted, // wait for exit to complete
-    ShortExitSubmitted, // wait for exit to complete
-    EndOfDayCancel,
-    EndOfDayNeutral,
-    Done // no more action
-  };
 
   using pOrder_t = ou::tf::Order::pOrder_t;
 
@@ -105,7 +91,7 @@ private:
   fStart_t m_fStart;
   fStop_t m_fStop;
 
-  ETradeState m_stateTrade;
+  ou::tf::TrackOrder m_to;
 
   pPosition_t m_pPosition;
   pWatch_t m_pTickJ;
@@ -149,8 +135,6 @@ private:
   ou::tf::Trade m_trade;
 
   fForward_t m_fForward;
-
-  pOrder_t m_pOrder;
 
   size_t m_nEnterLong;
   size_t m_nEnterShort;
@@ -269,9 +253,6 @@ private:
 
   void ExitLong( const ptime dt, const double tag );
   void ExitShort( const ptime dt, const double tag );
-
-  void HandleOrderCancelled( const ou::tf::Order& );
-  void HandleOrderFilled( const ou::tf::Order& );
 
   void SetupChart();
   void ValidateAndStart();
