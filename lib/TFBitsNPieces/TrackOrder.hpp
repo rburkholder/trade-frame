@@ -19,11 +19,15 @@
  * Created: August 17, 2025 16:45:42
  */
 
+#include "TrackOrderBase.hpp"
+
 namespace ou { // namespace oneunified
 namespace tf { // namespace tradeframe
 
-class TrackOrder {
+class TrackOrder: public TrackOrderBase {
 public:
+  TrackOrder();
+  virtual ~TrackOrder();
 protected:
 private:
 };

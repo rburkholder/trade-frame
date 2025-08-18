@@ -19,9 +19,16 @@
  * Created: August 17, 2025 16:45:42
  */
 
+#include "TrackOrder.hpp"
+
 namespace ou { // namespace oneunified
 namespace tf { // namespace tradeframe
 
+TrackOrder::TrackOrder()
+: TrackOrderBase()
+{}
+
+TrackOrder::~TrackOrder() {}
 
 } // namespace tradeframe
 } // namespace oneunified
