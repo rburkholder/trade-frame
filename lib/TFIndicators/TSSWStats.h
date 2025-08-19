@@ -35,18 +35,19 @@ public:
   virtual ~TimeSeriesSlidingWindowStats<T,D>();
 
 //  double Accel( void ) const { return m_stats.B2(); };
-  double Slope() const { return m_stats.Slope(); };
-  double Offset() const { return m_stats.Offset(); };
-  double MeanY() const { return m_stats.MeanY(); };
-  double RR() const { return m_stats.RR(); };
-  double R() const { return m_stats.R(); };
-  double SD() const { return m_stats.SD(); };
-  double BBOffset() const { return m_stats.BBOffset(); };
-  double BBUpper() const { return m_stats.BBUpper(); };
-  double BBLower() const { return m_stats.BBLower(); };
+  double Slope() const { return m_stats.Slope(); }
+  double Offset() const { return m_stats.Offset(); }
+  double MeanY() const { return m_stats.MeanY(); }
+  double RR() const { return m_stats.RR(); }
+  double R() const { return m_stats.R(); }
+  double SD() const { return m_stats.SD(); }
+  double BBOffset() const { return m_stats.BBOffset(); }
+  double BBUpper() const { return m_stats.BBUpper(); }
+  double BBLower() const { return m_stats.BBLower(); }
+  double SumY() const { return m_stats.SumY(); }
 
-  void SetBBMultiplier( double mult ) { m_stats.SetBBMultiplier( mult ); };
-  double GetBBMultiplier() const { return m_stats.GetBBMultiplier(); };
+  void SetBBMultiplier( double mult ) { m_stats.SetBBMultiplier( mult ); }
+  double GetBBMultiplier() const { return m_stats.GetBBMultiplier(); }
 
   void Reset() {
     TimeSeriesSlidingWindow<T,D>::Reset();
