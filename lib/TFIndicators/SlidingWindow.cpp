@@ -12,14 +12,12 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include "SlidingWindow.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-SlidingWindowBars::SlidingWindowBars(unsigned int WindowSizeSeconds, unsigned int WindowSizeCount) : 
+SlidingWindowBars::SlidingWindowBars( size_t WindowSizeSeconds, size_t WindowSizeCount) :
   SlidingWindow<Bar>( WindowSizeSeconds, WindowSizeCount ) {
 }
 
@@ -32,7 +30,7 @@ SlidingWindowBars::~SlidingWindowBars() {
   }
 }
 
-Bar* SlidingWindowBars::Remove( void ) {
+Bar* SlidingWindowBars::Remove() {
   // default deleter so it doesn't end up no where
   Bar *pBar = SlidingWindow::Remove();
   delete pBar;

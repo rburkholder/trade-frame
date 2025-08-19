@@ -15,11 +15,6 @@
 #pragma once
 
 #include <deque>
-#include <stdexcept>
-
-#include <boost/date_time/posix_time/posix_time.hpp>
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 #include <TFTimeSeries/DatedDatum.h>
 
@@ -31,25 +26,28 @@ namespace tf { // TradeFrame
 // Has a time reference, and holds an object related to the time reference
 //
 
-template<class T> class ObjectAtTime {
+template<typename T>
+class ObjectAtTime {
 public:
   ObjectAtTime<T>( ptime dt, T* object );
-  virtual ~ObjectAtTime<T>(void);
-  ptime getDateTime(void) { return m_dt; };
-  T* getObject(void) { return m_object; };
+  virtual ~ObjectAtTime<T>();
+  ptime getDateTime() { return m_dt; }
+  T* getObject() { return m_object; }
 protected:
   ptime m_dt;
   T* m_object;
 private:
 };
 
-template<class T> ObjectAtTime<T>::ObjectAtTime(boost::posix_time::ptime dt, T* object) {
+template<typename T>
+ObjectAtTime<T>::ObjectAtTime( boost::posix_time::ptime dt, T* object ) {
   m_dt = dt;
   m_object = object;
 }
 
-template<class T> ObjectAtTime<T>::~ObjectAtTime(void) {
-  m_object = NULL;
+template<typename T>
+ObjectAtTime<T>::~ObjectAtTime() {
+  m_object = nullptr;
   // held object is released elsewhere
 }
 
@@ -60,22 +58,22 @@ template<class T> ObjectAtTime<T>::~ObjectAtTime(void) {
 // Assumes objects are added in forward chronological order
 //
 
-template<class T> 
+template<typename T>
 class SlidingWindow {
 public:
   // when both are zero, then do no windowing, should actually raise an exception
-  SlidingWindow<T>(long WindowSizeSeconds = 0, long WindowSizeCount = 0);
+  SlidingWindow<T>(size_t WindowSizeSeconds = 0, size_t WindowSizeCount = 0);
   virtual ~SlidingWindow<T>(void);
 
   // Which ever makes the shortest window takes precedence, both can be non-zero simultaneously
-  void SetSlidingWindowSeconds( long );
-  long GetSlidingWindowSeconds( void ) { return m_nWindowSizeSeconds; };
-  void SetSlidingWindowCount( long );
-  long GetSlidingWindowCount( void ) { return m_nWindowSizeCount; };
+  void SetSlidingWindowSeconds( size_t );
+  size_t GetSlidingWindowSeconds() { return m_nWindowSizeSeconds; };
+  void SetSlidingWindowCount( size_t );
+  size_t GetSlidingWindowCount() { return m_nWindowSizeCount; };
 
   T* Add( ptime t, T* object );
-  T* UndoPush( void );
-  virtual T* Remove( void );  // inheritor needs to ensure destruction of held object
+  T* UndoPush();
+  virtual T* Remove();  // inheritor needs to ensure destruction of held object
   void UpdateWindow();
   size_t Count();
 
@@ -85,8 +83,8 @@ public:
 protected:
   // put in lock variable, method?
 
-  long m_nWindowSizeCount;
-  long m_nWindowSizeSeconds;
+  size_t m_nWindowSizeCount;
+  size_t m_nWindowSizeSeconds;
   time_duration m_tdWindowWidth;
   ptime m_dtLast;
 
@@ -96,18 +94,19 @@ protected:
 private:
 };
 
-template<class T> 
-SlidingWindow<T>::SlidingWindow(long nWindowSizeSeconds, long nWindowSizeCount) {
+template<typename T>
+SlidingWindow<T>::SlidingWindow( size_t nWindowSizeSeconds, size_t nWindowSizeCount)
+: m_nWindowSizeCount( nWindowSizeCount )
+, m_nWindowSizeSeconds( nWindowSizeSeconds )
+, m_tdWindowWidth( seconds( nWindowSizeSeconds ) )
+{
   //if ( ( 0 == nWindowSizeSeconds ) && ( 0 == nWindowSizeCount ) ) {
   //  throw std::runtime_error( "WindowSize (seconds) and WindowSize (count) cannot both be zero" );
   //}  // can't do this as many things construct with 0 window then set parameters later
-  m_nWindowSizeCount = nWindowSizeCount;
-  m_nWindowSizeSeconds = nWindowSizeSeconds;
-  m_tdWindowWidth = seconds(nWindowSizeSeconds);
 }
 
-template<class T> 
-SlidingWindow<T>::~SlidingWindow(void) {
+template<typename T>
+SlidingWindow<T>::~SlidingWindow() {
   while ( !m_qT.empty() ) {
     //delete m_qT.front();
     //m_qT.pop_front();
@@ -115,42 +114,43 @@ SlidingWindow<T>::~SlidingWindow(void) {
   }
 }
 
-template<class T> size_t SlidingWindow<T>::Count() {
+template<typename T>
+size_t SlidingWindow<T>::Count() {
   return m_qT.size();
 }
 
-template<class T> 
-void SlidingWindow<T>::SetSlidingWindowSeconds(long nWindowSizeSeconds) {
+template<typename T>
+void SlidingWindow<T>::SetSlidingWindowSeconds( size_t nWindowSizeSeconds) {
   m_nWindowSizeSeconds = nWindowSizeSeconds;
   m_tdWindowWidth = seconds(nWindowSizeSeconds);
 }
 
-template<class T> 
-void SlidingWindow<T>::SetSlidingWindowCount(long nWindowSizeCount) {
+template<typename T>
+void SlidingWindow<T>::SetSlidingWindowCount( size_t nWindowSizeCount) {
   m_nWindowSizeCount = nWindowSizeCount;
 }
 
-template<class T> 
+template<typename T>
 T* SlidingWindow<T>::First() {
   iter = m_qT.begin();
   return ( m_qT.end() == iter ) ? NULL : (*iter)->getObject();
 }
 
-template<class T> 
+template<typename T>
 T* SlidingWindow<T>::Next() {
   iter++;
   return ( m_qT.end() == iter ) ? NULL : (*iter)->getObject();
 }
 
-template<class T> 
+template<typename T>
 T* SlidingWindow<T>::Add(boost::posix_time::ptime dt, T *object) {
   m_qT.push_back( new ObjectAtTime<T>( dt, object ) );
   m_dtLast = dt;
   return object;
 }
 
-template<class T> 
-T* SlidingWindow<T>::UndoPush(void) {
+template<typename T>
+T* SlidingWindow<T>::UndoPush() {
   ObjectAtTime<T> *oat = NULL;
   T* object = NULL;
   if ( !m_qT.empty() ) {
@@ -163,7 +163,7 @@ T* SlidingWindow<T>::UndoPush(void) {
   return object;
 }
 
-template<class T> 
+template<typename T>
 T* SlidingWindow<T>::Remove() {
   ObjectAtTime<T> *oat = NULL;
   T* object = NULL;
@@ -176,7 +176,7 @@ T* SlidingWindow<T>::Remove() {
   return object;
 }
 
-template<class T> 
+template<typename T>
 void SlidingWindow<T>::UpdateWindow() {
   if ( !m_qT.empty() ) {
     // Time Based Decimation
@@ -198,7 +198,7 @@ void SlidingWindow<T>::UpdateWindow() {
     }
     // Size Based Decimation
     if ( 0 != m_nWindowSizeCount ) {
-      while ( m_nWindowSizeCount < (long) m_qT.size() ) {
+      while ( m_nWindowSizeCount < m_qT.size() ) {
         Remove();
       }
     }
@@ -209,9 +209,9 @@ void SlidingWindow<T>::UpdateWindow() {
 
 class SlidingWindowBars: public SlidingWindow<Bar> {
 public:
-  SlidingWindowBars(unsigned int WindowSizeSeconds = 0, unsigned int WindowSizeCount = 0);
+  SlidingWindowBars( size_t WindowSizeSeconds = 0, size_t WindowSizeCount = 0 );
   virtual ~SlidingWindowBars();
-  virtual Bar* Remove( void );
+  virtual Bar* Remove();
 protected:
 private:
 };
