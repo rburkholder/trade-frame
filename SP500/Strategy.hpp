@@ -35,6 +35,7 @@
 #include <TFTimeSeries/BarFactory.h>
 
 #include <TFIndicators/TSSWStats.h>
+#include <TFIndicators/TSSWMinMax.hpp>
 
 #include <TFTrading/Order.h>
 #include <TFTrading/Position.h>
@@ -82,7 +83,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, rtnPrice, rtnPriceAvg, rtnPriceSlp, rtnPriceSD, TickRegime, AdvDec, Tick, rtnAdvDec, Ratio, Predict, PredVec, PL };
+  enum EChartSlot { Price, Volume, Visual, rtnPrice, rtnPriceAvg, rtnPriceSlp, rtnPriceSD, TickRegime, AdvDec, Tick, rtnAdvDec, Ratio, Predict, PredVec, PL };
 
   using pOrder_t = ou::tf::Order::pOrder_t;
 
@@ -157,6 +158,8 @@ private:
   ou::ChartEntryIndicator m_ceEma050;
   ou::ChartEntryIndicator m_ceEma200;
 
+  ou::ChartEntryIndicator m_ceVisualize;  // temporary general purpose investigation
+
   ou::ChartEntryIndicator m_ceEma013_ratio;
   ou::ChartEntryIndicator m_ceEma029_ratio;
   ou::ChartEntryIndicator m_ceEma050_ratio;
@@ -185,6 +188,9 @@ private:
 
   ou::tf::Prices m_returns;
   ou::tf::TSSWStatsPrice m_statsReturns;
+
+  ou::tf::Prices m_prices; // might use the underlying directly?
+  ou::tf::TSSWMinMax m_minmaxPrices; // ATR style volatility indicator
 
   double m_dblPrvPrice;
   //ou::ChartEntryIndicator m_ceRtnPrice_bbu;

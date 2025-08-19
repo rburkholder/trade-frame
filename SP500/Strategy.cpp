@@ -73,6 +73,7 @@ Strategy::Strategy(
 , m_TickRegime( ETickRegime::congestion )
 , m_dblPrvPrice {}, m_dblPrvAdvDec {}
 , m_statsReturns( m_returns, boost::posix_time::time_duration( 0, 0, 60 ) )
+, m_minmaxPrices( m_prices,  boost::posix_time::time_duration( 0, 0, 60 ) )
 , m_ePrice( EPrice::neutral )
 {
   SetupChart();
@@ -265,6 +266,9 @@ void Strategy::SetupChart() {
   //m_cdv.Add( EChartSlot::rtnPrice, &m_ceRtnPrice );
   //m_cdv.Add( EChartSlot::Price, &m_ceRtnPrice_bbl );
 
+  m_ceVisualize.SetName( "Visual Check" );
+  m_cdv.Add( EChartSlot::Visual, &m_ceVisualize );
+
   m_cdv.Add( EChartSlot::rtnPriceAvg, &m_cemZero );
   m_ceRtnPrice_avg.SetName( "Returns - Average" );
   m_cdv.Add( EChartSlot::rtnPriceAvg, &m_ceRtnPrice_avg );
@@ -361,6 +365,9 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
     m_ceRtnPrice_avg.Append( dt, mean ); // todo, run ema, use running_stats n
     m_ceRtnPrice_slope.Append( dt, slope ); // todo, run ema, use running_stats n
     //m_ceRtnPrice_sd.Append( dt, m_statsReturns.SD() );
+
+    m_prices.Append( ou::tf::Price( dt, price ) );
+    m_ceVisualize.Append( dt, m_minmaxPrices.Diff() );
   }
   m_dblPrvPrice = price;
 
