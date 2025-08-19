@@ -323,15 +323,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
 }
 
-void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
-  m_trade = trade;
-  const ou::tf::Price::dt_t         dt( trade.DateTime() );
-  const ou::tf::Price::price_t   price( trade.Price() );
-  const ou::tf::Price::volume_t volume( trade.Volume() );
-  m_vwp.Add( price, volume );
-  m_ceTrade.Append(  dt, price );
-  m_ceVolume.Append( dt, volume );
-
+void Strategy::CalcPriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t price ) {
   if ( ( 0.0 == m_dblPrvPrice ) ) {}
   else {
     const double rtn = std::log( price / m_dblPrvPrice ); // natural log, ie ln
@@ -370,6 +362,18 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
     m_ceVisualize.Append( dt, m_minmaxPrices.Diff() );
   }
   m_dblPrvPrice = price;
+}
+
+void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
+  m_trade = trade;
+  const ou::tf::Price::dt_t         dt( trade.DateTime() );
+  const ou::tf::Price::price_t   price( trade.Price() );
+  const ou::tf::Price::volume_t volume( trade.Volume() );
+  m_vwp.Add( price, volume );
+  m_ceTrade.Append(  dt, price );
+  m_ceVolume.Append( dt, volume );
+
+  CalcPriceReturn( dt, price );
 
   TimeTick( trade );
 }

@@ -233,6 +233,8 @@ private:
     cei.Append( price_.DateTime(), ema );
     };
 
+  void CalcPriceReturn( ou::tf::Price::dt_t, ou::tf::Price::price_t );
+
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
 
