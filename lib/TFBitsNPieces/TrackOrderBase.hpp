@@ -44,45 +44,50 @@ public:
 
     using quantity_t = ou::tf::Order::quantity_t;
 
-    boost::posix_time::ptime dt;
+    boost::posix_time::ptime dt; // used to mark the order
     quantity_t quantity;
     double signal;
     double limit;
-    double profit;
-    double stop;
+    double profit; // only used in bracket at present
+    double stop; // only used in bracket at present
     unsigned int duration; // limit order duration seconds
 
     OrderArgs(): quantity {}, signal {}, limit {}, profit {}, stop {}, duration {} {}
 
+    // market
     explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_ )
     : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit {}, profit {}, stop {}, duration {}
     {
       assert( 0 < quantity );
     }
 
+    // limit
     explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_ )
     : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), profit {}, stop {}, duration {}
     {
       assert( 0 < quantity );
     }
 
-    explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_, double stop_ )
-    : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), profit {}, stop( stop_ ), duration {}
-    {
-      assert( 0 < quantity );
-    }
+    // limit, stop
+    //explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_, double stop_ )
+    //: dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), profit {}, stop( stop_ ), duration {}
+    //{
+    //  assert( 0 < quantity );
+    //}
 
+    // limit time limit
     explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_, int duration_ )
     : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), profit {}, stop {}, duration( duration_ )
     {
       assert( 0 < quantity );
     }
 
-    explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_, double stop_, int duration_ )
-    : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), profit {}, stop( stop_ ), duration( duration_ )
-    {
-      assert( 0 < quantity );
-    }
+    // limit time limit, stop
+    //explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_, double stop_, int duration_ )
+    //: dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), profit {}, stop( stop_ ), duration( duration_ )
+    //{
+    //  assert( 0 < quantity );
+    //}
   };
 
   TrackOrderBase();
@@ -98,7 +103,6 @@ public:
 
   void EnterLongLmt( const OrderArgs& ); // enter with Long limit
   void EnterLongMkt( const OrderArgs& ); // enter with long market
-  void EnterLongBracket( const OrderArgs& );
 
   void EnterShortLmt( const OrderArgs& ); // enter with short limit
   void EnterShortMkt( const OrderArgs& ); // enter with short market
@@ -132,6 +136,8 @@ protected:
 
   void SetGoodTill( const OrderArgs&, pOrder_t& );
 
+  void EnterLongBracket( const OrderArgs& );  // not useable at present
+
   void ShowOrder( pOrder_t& );
 
   virtual void HandleOrderCancelled( const ou::tf::Order& );
@@ -139,9 +145,9 @@ protected:
 
 private:
 
-  double m_dblProfitMax;
-  double m_dblUnRealized;
-  double m_dblProfitMin;
+  double m_dblProfitMax;  // not used, only referenced in bracket
+  double m_dblUnRealized; // not used, only referenced in bracket
+  double m_dblProfitMin;  // not used, only referenced in bracket
 
   std::string m_sProfitDescription;
 
