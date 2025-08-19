@@ -45,8 +45,8 @@ public:
   RunningStats( const RunningStats&& );
   virtual ~RunningStats();
 
-  void SetBBMultiplier( double dbl ) { m_BBMultiplier = dbl; };
-  double GetBBMultiplier() const { return m_BBMultiplier; };
+  void SetBBMultiplier( double dbl ) { m_BBMultiplier = dbl; }
+  double GetBBMultiplier() const { return m_BBMultiplier; }
 
   void Add( double x, double y );
   void Remove( double x, double y );
@@ -56,19 +56,20 @@ public:
 
   const linear::Stats& Get() const { return m_stats; }
 
-  double Slope() const { return m_stats.b1; }; // slope  B1  termios.h has this as #define
-  double Offset() const { return m_stats.b0; }; // offset B0
+  double Slope() const { return m_stats.b1; } // slope  B1  termios.h has this as #define
+  double Offset() const { return m_stats.b0; } // offset B0
 
-  double MeanY() const { return m_stats.meanY; };
+  double SumY() const { return m_SumY; }
+  double MeanY() const { return m_stats.meanY; }
 
-  double RR() const { return m_stats.rr; };
-  double R() const { return m_stats.r; };
+  double RR() const { return m_stats.rr; }
+  double R() const { return m_stats.r; }
 
-  double SD() const { return m_stats.sd; };
+  double SD() const { return m_stats.sd; }
 
-  double BBOffset() const { return m_stats.sd * m_BBMultiplier; };
-  double BBUpper() const { return m_stats.meanY + m_stats.sd * m_BBMultiplier; };
-  double BBLower() const { return  m_stats.meanY - m_stats.sd * m_BBMultiplier; };
+  double BBOffset() const { return m_stats.sd * m_BBMultiplier; }
+  double BBUpper() const { return m_stats.meanY + m_stats.sd * m_BBMultiplier; }
+  double BBLower() const { return  m_stats.meanY - m_stats.sd * m_BBMultiplier; }
 
 protected:
 private:
