@@ -26,6 +26,7 @@ set(
     TSReturns.h
     TSSWDonchianChannel.h
     TSSWEfficiencyRatio.h
+    TSSWMinMax.hpp
     TSSWRateOfChange.h
     TSSWRealizedVolatility.h
     TSSWRunningTally.h
@@ -55,6 +56,7 @@ set(
     TSReturns.cpp
     TSSWDonchianChannel.cpp
     TSSWEfficiencyRatio.cpp
+    TSSWMinMax.cpp
     TSSWRateOfChange.cpp
     TSSWRealizedVolatility.cpp
     TSSWRunningTally.cpp
