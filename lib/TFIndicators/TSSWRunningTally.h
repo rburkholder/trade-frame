@@ -12,22 +12,26 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
+// operation:
+//     Add: m_net += price.Value();
+//  Expire: m_net -= price.Value();
+
 #pragma once
 
 #include "TimeSeriesSlidingWindow.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
-  
+
 class TSSWRunningTally: public TimeSeriesSlidingWindow<TSSWRunningTally, Price> {
   friend TimeSeriesSlidingWindow<TSSWRunningTally, Price>;
 public:
 
   TSSWRunningTally( Prices&, time_duration tdWindowWidth );
   TSSWRunningTally( const TSSWRunningTally& );
-  ~TSSWRunningTally( void );
+  ~TSSWRunningTally();
 
-  double Net( void ) const { return m_net; };
+  double Net() const { return m_net; };
 
 protected:
   void Add( const Price& );

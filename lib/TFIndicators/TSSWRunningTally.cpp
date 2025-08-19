@@ -12,26 +12,24 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-#include "stdafx.h"
-
 #include "TSSWRunningTally.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-TSSWRunningTally::TSSWRunningTally( Prices& prices, time_duration tdWindowWidth ) 
+TSSWRunningTally::TSSWRunningTally( Prices& prices, time_duration tdWindowWidth )
   : TimeSeriesSlidingWindow<TSSWRunningTally, Price>( prices, tdWindowWidth ),
   m_net( 0.0 )
 {
 }
 
-TSSWRunningTally::TSSWRunningTally( const TSSWRunningTally& rhs ) 
+TSSWRunningTally::TSSWRunningTally( const TSSWRunningTally& rhs )
   : TimeSeriesSlidingWindow<TSSWRunningTally, Price>( rhs ),
   m_net( rhs.m_net )
 {
 }
 
-TSSWRunningTally::~TSSWRunningTally(void) {
+TSSWRunningTally::~TSSWRunningTally() {
 }
 
 void TSSWRunningTally::Add( const Price& price ) {
@@ -42,7 +40,7 @@ void TSSWRunningTally::Expire( const Price& price ) {
   m_net -= price.Value();
 }
 
-void TSSWRunningTally::PostUpdate( void ) {
+void TSSWRunningTally::PostUpdate() {
 }
 
 } // namespace tf
