@@ -221,132 +221,170 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
 
   if ( !m_mapAsks.empty() ) {
     mapOrderBook_ask_t::iterator iterOrderBook( m_mapAsks.begin() );
-    //mapOrderBook_t::value_type& entry( *m_mapAsks.begin() );
-    mapOrderBook_ask_t::value_type& entry( *iterOrderBook );
-    const double bid( quote.Bid() );
-    if ( bid >= entry.first ) {
-      if ( 0 < quote.BidSize() ) {
+    const auto [ obKey, obValue ] = *iterOrderBook;
+    const boost::posix_time::ptime dt( quote.DateTime() );
+    ou::tf::Order& order( *obValue );
 
+    if ( ETimeInForce::GoodTillDate == order.GetTimeInForce() ) {
+      if ( dt > order.GetGoodTillDate() ) {
+        BOOST_LOG_TRIVIAL(trace)
+          << "simulate,gtd,expired"
+          << ",lmit_ask"
+          << ",quote dt=" << dt
+          << ",order gtd=" << order.GetGoodTillDate()
+          << "," << order.GetInstrument()->GetInstrumentName()
+          ;
+        if ( nullptr != OnOrderCancelled ) OnOrderCancelled( order.GetOrderId() );
+        m_mapAsks.erase( iterOrderBook );
+        MigrateActiveToArchive( order.GetOrderId() );
         bProcessed = true;
+      }
+    }
 
-        ou::tf::Order& order( *entry.second );
-        ou::tf::Order::idOrder_t idOrder( order.GetOrderId() );
-        int nId( m_nExecId );  // before it gets incremented in next function
-        std::string id = GetExecId();
+    if ( !bProcessed ) {
+      const double bid( quote.Bid() );
+      if ( bid >= obKey ) {
+        if ( 0 < quote.BidSize() ) {
 
-        nOrderQuanRemaining = order.GetQuanRemaining();
-        if ( 0 == nOrderQuanRemaining ) {
+          bProcessed = true;
+
+          ou::tf::Order::idOrder_t idOrder( order.GetOrderId() );
+          int nId( m_nExecId );  // before it gets incremented in next function
+          std::string id = GetExecId();
+
+          nOrderQuanRemaining = order.GetQuanRemaining();
+          if ( 0 == nOrderQuanRemaining ) {
+            BOOST_LOG_TRIVIAL(info)
+              << "simulate,error"
+              << ",lmt_ask"
+              << ",size_map=" << m_mapAsks.size()
+              << ",order_id=" << idOrder
+              << ",exec_id=" << id
+              << "," << nOrderQuanRemaining
+              << "," << order.GetInstrument()->GetInstrumentName()
+              ;
+            assert( false );
+          }
+
+          Trade::tradesize_t quanApplied = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.BidSize() );
+
           BOOST_LOG_TRIVIAL(info)
-            << "simulate,error"
+            << "simulate"
             << ",lmt_ask"
             << ",size_map=" << m_mapAsks.size()
             << ",order_id=" << idOrder
             << ",exec_id=" << id
-            << "," << nOrderQuanRemaining
+            << "," << nOrderQuanRemaining << "-" << quanApplied << "," << bid
             << "," << order.GetInstrument()->GetInstrumentName()
             ;
-          assert( false );
-        }
+          nOrderQuanRemaining -= quanApplied;
 
-        Trade::tradesize_t quanApplied = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.BidSize() );
+          if ( nullptr != OnOrderFill ) {
+            Execution exec( nId, idOrder, bid, quanApplied, OrderSide::Sell, "SIMLmtSell", id );
+            OnOrderFill( idOrder, exec );
+          }
+          else {
+            // OrderManager should be calling Order::ReportExecution to update
+          }
 
-        BOOST_LOG_TRIVIAL(info)
-          << "simulate"
-          << ",lmt_ask"
-          << ",size_map=" << m_mapAsks.size()
-          << ",order_id=" << idOrder
-          << ",exec_id=" << id
-          << "," << nOrderQuanRemaining << "-" << quanApplied << "," << bid
-          << "," << order.GetInstrument()->GetInstrumentName()
-          ;
-        nOrderQuanRemaining -= quanApplied;
+          CalculateCommission( order, quanApplied );
 
-        if ( nullptr != OnOrderFill ) {
-          Execution exec( nId, idOrder, bid, quanApplied, OrderSide::Sell, "SIMLmtSell", id );
-          OnOrderFill( idOrder, exec );
-        }
-        else {
-          // OrderManager should be calling Order::ReportExecution to update
-        }
+          if ( 0 == nOrderQuanRemaining ) {
+            BOOST_LOG_TRIVIAL(info)
+              << "simulate,lmt_ask,erase=("
+              << idOrder << "," << id << ")"
+              ;
+            m_mapAsks.erase( iterOrderBook );
+            MigrateActiveToArchive( idOrder );
+          }
 
-        CalculateCommission( order, quanApplied );
-
-        if ( 0 == nOrderQuanRemaining ) {
-          BOOST_LOG_TRIVIAL(info)
-            << "simulate,lmt_ask,erase=("
-            << idOrder << "," << id << ")"
-            ;
-          m_mapAsks.erase( iterOrderBook );
-          MigrateActiveToArchive( idOrder );
-        }
-
-      }
-    }
+        } // 0 < quote.BidSize()
+      } // d >= obKey
+    } // bProcessed
   }
 
   if ( !m_mapBids.empty() && !bProcessed) {
     mapOrderBook_bid_t::iterator iterOrderBook( m_mapBids.begin() );
-    //mapOrderBook_t::value_type& entry( *m_mapBids.rbegin() );
-    mapOrderBook_bid_t::value_type& entry( *iterOrderBook );
-    const double ask( quote.Ask() );
-    if ( ask <= entry.first ) {
-      if ( 0 < quote.AskSize() ) {
+    const auto [ obKey, obValue ] = *iterOrderBook;
+    const boost::posix_time::ptime dt( quote.DateTime() );
+    ou::tf::Order& order( *obValue );
 
+    if ( ETimeInForce::GoodTillDate == order.GetTimeInForce() ) {
+      if ( dt > order.GetGoodTillDate() ) {
+        BOOST_LOG_TRIVIAL(trace)
+          << "simulate,gtd,expired"
+          << ",lmit_bid"
+          << ",quote dt=" << dt
+          << ",order gtd=" << order.GetGoodTillDate()
+          << "," << order.GetInstrument()->GetInstrumentName()
+          ;
+        if ( nullptr != OnOrderCancelled ) OnOrderCancelled( order.GetOrderId() );
+        m_mapBids.erase( iterOrderBook );
+        MigrateActiveToArchive( order.GetOrderId() );
         bProcessed = true;
+      }
+    }
 
-        ou::tf::Order& order( *entry.second );
-        ou::tf::Order::idOrder_t idOrder( order.GetOrderId() );
-        int nId( m_nExecId );  // before it gets incremented in next function
-        std::string id = GetExecId();
+    if ( !bProcessed ) {
+      const double ask( quote.Ask() );
+      if ( ask <= obKey ) {
+        if ( 0 < quote.AskSize() ) {
 
-        nOrderQuanRemaining = order.GetQuanRemaining();
-        if ( 0 == nOrderQuanRemaining ) {
+          bProcessed = true;
+
+          ou::tf::Order::idOrder_t idOrder( order.GetOrderId() );
+          int nId( m_nExecId );  // before it gets incremented in next function
+          std::string id = GetExecId();
+
+          nOrderQuanRemaining = order.GetQuanRemaining();
+          if ( 0 == nOrderQuanRemaining ) {
+            BOOST_LOG_TRIVIAL(info)
+              << "simulate,error"
+              << ",lmt_bid"
+              << ",size_map=" << m_mapBids.size()
+              << ",order_id=" << idOrder
+              << ",exec_id=" << id
+              << "," << nOrderQuanRemaining
+              << "," << order.GetInstrument()->GetInstrumentName()
+              ;
+            assert( false );
+          }
+
+          Trade::tradesize_t quanApplied = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.AskSize() );
+
           BOOST_LOG_TRIVIAL(info)
-            << "simulate,error"
+            << "simulate"
             << ",lmt_bid"
             << ",size_map=" << m_mapBids.size()
             << ",order_id=" << idOrder
             << ",exec_id=" << id
-            << "," << nOrderQuanRemaining
+            << "," << nOrderQuanRemaining << "-" << quanApplied << "," << ask
             << "," << order.GetInstrument()->GetInstrumentName()
             ;
-          assert( false );
-        }
+          nOrderQuanRemaining -= quanApplied;
 
-        Trade::tradesize_t quanApplied = std::min<Trade::tradesize_t>( nOrderQuanRemaining, quote.AskSize() );
+          if ( nullptr != OnOrderFill ) {
+            Execution exec( nId, idOrder, ask, quanApplied, OrderSide::Buy, "SIMLmtBuy", id );
+            OnOrderFill( idOrder, exec );
+          }
+          else {
+            // OrderManager should be calling Order::ReportExecution to update
+          }
 
-        BOOST_LOG_TRIVIAL(info)
-          << "simulate"
-          << ",lmt_bid"
-          << ",size_map=" << m_mapBids.size()
-          << ",order_id=" << idOrder
-          << ",exec_id=" << id
-          << "," << nOrderQuanRemaining << "-" << quanApplied << "," << ask
-          << "," << order.GetInstrument()->GetInstrumentName()
-          ;
-        nOrderQuanRemaining -= quanApplied;
+          CalculateCommission( order, quanApplied );
 
-        if ( nullptr != OnOrderFill ) {
-          Execution exec( nId, idOrder, ask, quanApplied, OrderSide::Buy, "SIMLmtBuy", id );
-          OnOrderFill( idOrder, exec );
-        }
-        else {
-          // OrderManager should be calling Order::ReportExecution to update
-        }
-
-        CalculateCommission( order, quanApplied );
-
-        if ( 0 == nOrderQuanRemaining ) {
-          BOOST_LOG_TRIVIAL(info)
-            << "simulate,lmt_bid,erase=("
-            << idOrder << "," << id << ")"
-            ;
-          // https://stackoverflow.com/questions/1830158/how-to-call-erase-with-a-reverse-iterator
-          m_mapBids.erase( iterOrderBook );
-          MigrateActiveToArchive( idOrder );
-        }
-      }
-    }
+          if ( 0 == nOrderQuanRemaining ) {
+            BOOST_LOG_TRIVIAL(info)
+              << "simulate,lmt_bid,erase=("
+              << idOrder << "," << id << ")"
+              ;
+            // https://stackoverflow.com/questions/1830158/how-to-call-erase-with-a-reverse-iterator
+            m_mapBids.erase( iterOrderBook );
+            MigrateActiveToArchive( idOrder );
+          }
+        } // 0 < quote.AskSize()
+      } // ask <= obKey
+    } // bProcessed
   }
 
   return bProcessed;
