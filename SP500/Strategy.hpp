@@ -92,7 +92,8 @@ private:
   fStart_t m_fStart;
   fStop_t m_fStop;
 
-  ou::tf::TrackOrder m_to;
+  using pTrackOrder_t = std::unique_ptr<ou::tf::TrackOrder>;
+  pTrackOrder_t m_pTrackOrder;
 
   pPosition_t m_pPosition;
   pWatch_t m_pTickJ;
@@ -139,6 +140,12 @@ private:
 
   size_t m_nEnterLong;
   size_t m_nEnterShort;
+
+  double m_atr; // average tru range
+
+  double m_stopInitial;
+  double m_stopDelta;
+  double m_stopTrail;
 
   ou::ChartDataView& m_cdv;
 
@@ -233,7 +240,9 @@ private:
     cei.Append( price_.DateTime(), ema );
     };
 
-  void CalcPriceReturn( ou::tf::Price::dt_t, ou::tf::Price::price_t );
+  void UpdatePriceReturn( ou::tf::Price::dt_t, ou::tf::Price::price_t );
+  void UpdatePositionProgressUp( const ou::tf::Trade& );
+  void UpdatePositionProgressDn( const ou::tf::Trade& );
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );

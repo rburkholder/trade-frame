@@ -75,6 +75,7 @@ Strategy::Strategy(
 , m_statsReturns( m_returns, boost::posix_time::time_duration( 0, 0, 60 ) )
 , m_minmaxPrices( m_prices,  boost::posix_time::time_duration( 0, 0, 60 ) )
 , m_ePrice( EPrice::neutral )
+, m_atr {}, m_stopInitial {}, m_stopDelta {}, m_stopTrail {}
 {
   SetupChart();
 
@@ -107,6 +108,7 @@ Strategy::~Strategy() {
   }
   m_bfQuotes01Sec.SetOnBarComplete( nullptr );
   m_cdv.Clear();
+  m_pTrackOrder.reset();
 }
 
 void Strategy::Start() {
@@ -115,6 +117,7 @@ void Strategy::Start() {
     "SPY",
     [this]( pPosition_t pPosition ){
       m_pPosition = pPosition;
+      m_pTrackOrder = std::make_unique<ou::tf::TrackOrder>( m_pPosition, m_cdv, EChartSlot::Price );
       pWatch_t pWatch = pPosition->GetWatch();
       pWatch->OnQuote.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleQuote ) );
       pWatch->OnTrade.Add( fastdelegate::MakeDelegate( this, &Strategy::HandleTrade ) );
@@ -300,8 +303,8 @@ void Strategy::SetupChart() {
   //m_cdv.Add( EChartSlot::Price, &m_cePrediction_descaled );
 
   m_ceProfitLoss.SetName( "P/L" );
-  //m_cdv.Add( EChartSlot::PL, &m_cemZero );
-  //m_cdv.Add( EChartSlot::PL, &m_ceProfitLoss );
+  m_cdv.Add( EChartSlot::PL, &m_cemZero );
+  m_cdv.Add( EChartSlot::PL, &m_ceProfitLoss );
 
   m_cdv.Add( EChartSlot::Price, &m_ceLongEntry );
   m_cdv.Add( EChartSlot::Price, &m_ceLongFill );
@@ -323,7 +326,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
 }
 
-void Strategy::CalcPriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t price ) {
+void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t price ) {
   if ( ( 0.0 == m_dblPrvPrice ) ) {}
   else {
     const double rtn = std::log( price / m_dblPrvPrice ); // natural log, ie ln
@@ -356,10 +359,7 @@ void Strategy::CalcPriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t p
 
     m_ceRtnPrice_avg.Append( dt, mean ); // todo, run ema, use running_stats n
     m_ceRtnPrice_slope.Append( dt, slope ); // todo, run ema, use running_stats n
-    //m_ceRtnPrice_sd.Append( dt, m_statsReturns.SD() );
 
-    m_prices.Append( ou::tf::Price( dt, price ) );
-    m_ceVisualize.Append( dt, m_minmaxPrices.Diff() );
   }
   m_dblPrvPrice = price;
 }
@@ -373,7 +373,11 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   m_ceTrade.Append(  dt, price );
   m_ceVolume.Append( dt, volume );
 
-  CalcPriceReturn( dt, price );
+  UpdatePriceReturn( dt, price );
+
+  m_prices.Append( ou::tf::Price( dt, price ) );
+  m_atr = m_minmaxPrices.Diff();
+  m_ceVisualize.Append( dt, m_atr );
 
   TimeTick( trade );
 }
@@ -496,23 +500,29 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
       }
 */
 
-void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) { // update trades
+void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   const auto dt( trade.DateTime() );
   const auto price( trade.Price() );
-  switch ( m_to.State()() ) {
+  switch ( m_pTrackOrder->State()() ) {
     case ETradeState::Search:
       switch ( m_ePrice ) {
         case EPrice::buy:
           //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
-          m_ceLongEntry.AddLabel( dt, price, "long" );
+          //m_ceLongEntry.AddLabel( dt, price, "long" );
           ++m_nEnterLong;
-          m_to.State().Set( ETradeState::EntrySubmittedUp );
+          //m_to.State().Set( ETradeState::EntrySubmittedUp );
+          m_stopDelta = m_atr;
+          m_stopTrail = m_stopInitial = m_quote.Bid() - m_stopDelta;
+          m_pTrackOrder->EnterLongLmt( ou::tf::TrackOrder::OrderArgs( dt, 100, price, m_quote.Bid(), 5 ) );
           break;
         case EPrice::sell:
           //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
-          m_ceShortEntry.AddLabel( dt, price, "short" );
+          //m_ceShortEntry.AddLabel( dt, price, "short" );
           ++m_nEnterShort;
-          m_to.State().Set( ETradeState::EntrySubmittedDn );
+          //m_to.State().Set( ETradeState::EntrySubmittedDn );
+          m_stopDelta = m_atr;
+          m_stopTrail = m_stopInitial = m_quote.Ask() + m_stopDelta;
+          m_pTrackOrder->EnterShortLmt( ou::tf::TrackOrder::OrderArgs( dt, 100, price, m_quote.Ask(), 5 ) );
           break;
         case EPrice::stop_sell:
           //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
@@ -533,14 +543,20 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) { // update trades
     case ETradeState::EntrySubmittedUp:
       if ( !m_bTickRegimeIncreased ) {
         //BOOST_LOG_TRIVIAL(trace) << "ETickLo::Neutral exit";
-        m_to.State().Set( ETradeState::Search );
+        //m_pTrackOrder->State().Set( ETradeState::Search );
       }
       break;
     case ETradeState::EntrySubmittedDn:
       if ( !m_bTickRegimeIncreased ) {
         //BOOST_LOG_TRIVIAL(trace) << "ETickHi::Neutral exit";
-        m_to.State().Set( ETradeState::Search );
+        //m_pTrackOrder->State().Set( ETradeState::Search );
       }
+      break;
+    case ETradeState::ExitSignalUp:
+      UpdatePositionProgressUp( trade );
+      break;
+    case ETradeState::ExitSignalDn:
+      UpdatePositionProgressDn( trade );
       break;
     case ETradeState::ExitSubmitted:
       break;
@@ -553,11 +569,39 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) { // update trades
     case ETradeState::Done:
       break;
     case ETradeState::Init:
-      m_to.State().Set( ETradeState::Search );
+      m_pTrackOrder->State().Set( ETradeState::Search );
       break;
     default:
       // todo: track unused states
       break;
+  }
+}
+
+void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
+  const auto price( trade.Price() );
+  if ( m_stopTrail > price ) {
+    const auto dt( trade.DateTime() );
+    m_pTrackOrder->ExitLongMkt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_stopTrail ) );
+  }
+  else {
+    const double stop( price - m_stopDelta );
+    if ( m_stopTrail < stop ) {
+      m_stopTrail = stop;
+    }
+  }
+}
+
+void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
+  const auto price( trade.Price() );
+  if ( m_stopTrail < price ) {
+    const auto dt( trade.DateTime() );
+    m_pTrackOrder->ExitShortMkt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_stopTrail ) );
+  }
+  else {
+    const double stop( price + m_stopDelta );
+    if ( m_stopTrail > stop ) {
+      m_stopTrail = stop;
+    }
   }
 }
 
@@ -613,16 +657,15 @@ void Strategy::PredictionVector( const size_t distance, const size_t size, const
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second, update statistics
-
   double dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal;
   m_pPosition->QueryStats( dblUnRealized, dblRealized, dblCommissionsPaid, dblTotal );
-  //m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
+  m_ceProfitLoss.Append( bar.DateTime(), dblTotal );
 }
 
 // review interaction with TradeState, TrackOrder
 void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration td ) { // one shot
   BOOST_LOG_TRIVIAL(trace) << "HandleCancel," << td << ',' << m_nEnterLong << ',' << m_nEnterShort;
-  m_to.State().Set( ETradeState::EndOfDayCancel );
+  m_pTrackOrder->State().Set( ETradeState::EndOfDayCancel );
   if ( m_pPosition ) {
     m_pPosition->CancelOrders();
   }
@@ -631,7 +674,7 @@ void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_dur
 // review interaction with TradeState, TrackOrder
 void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration td ) { // one shot
   BOOST_LOG_TRIVIAL(trace) << "HandleGoNeutral," << td << ',' << m_nEnterLong << ',' << m_nEnterShort;
-  m_to.State().Set( ETradeState::EndOfDayNeutral );
+  m_pTrackOrder->State().Set( ETradeState::EndOfDayNeutral );
   if ( m_pPosition ) {
     m_pPosition->ClosePosition();
   }
