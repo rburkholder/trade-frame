@@ -91,6 +91,7 @@ public:
   };
 
   TrackOrderBase();
+  TrackOrderBase( pPosition_t, ou::ChartDataView&, int slot );
   virtual ~TrackOrderBase();
 
   virtual void Set( pPosition_t, ou::ChartDataView&, int slot );
@@ -121,8 +122,6 @@ public:
 
 protected:
 
-  ETradeState m_stateTrade;  // todo: move to protected
-
   using pOrder_t = ou::tf::Order::pOrder_t;
   pOrder_t m_pOrderPending;
 
@@ -144,6 +143,8 @@ protected:
   virtual void HandleOrderFilled( const ou::tf::Order& );
 
 private:
+
+  ETradeState m_stateTrade;
 
   double m_dblProfitMax;  // not used, only referenced in bracket
   double m_dblUnRealized; // not used, only referenced in bracket

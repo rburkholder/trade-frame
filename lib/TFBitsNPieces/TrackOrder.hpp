@@ -26,8 +26,13 @@ namespace tf { // namespace tradeframe
 
 class TrackOrder: public TrackOrderBase {
 public:
+
+  using pPosition_t = ou::tf::Position::pPosition_t;
+
   TrackOrder();
+  TrackOrder( pPosition_t, ou::ChartDataView&, int slot );
   virtual ~TrackOrder();
+
 protected:
 private:
 };

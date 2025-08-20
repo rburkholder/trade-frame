@@ -28,6 +28,10 @@ TrackOrder::TrackOrder()
 : TrackOrderBase()
 {}
 
+TrackOrder::TrackOrder( pPosition_t pPosition, ou::ChartDataView& cdv, int slot )
+: TrackOrderBase( pPosition, cdv, slot )
+{}
+
 TrackOrder::~TrackOrder() {}
 
 } // namespace tradeframe

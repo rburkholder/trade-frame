@@ -31,8 +31,14 @@ namespace ou { // namespace oneunified
 namespace tf { // namespace tradeframe
 
 TrackOrderBase::TrackOrderBase()
-: m_fCancelled( nullptr )
+: m_fCancelled( nullptr ), m_fClosed( nullptr )
 {}
+
+TrackOrderBase::TrackOrderBase( pPosition_t pPosition, ou::ChartDataView& cdv, int slot )
+: m_fCancelled( nullptr ), m_fClosed( nullptr )
+{
+  Set( pPosition, cdv, slot );
+}
 
 TrackOrderBase::~TrackOrderBase() {}
 
@@ -57,6 +63,7 @@ void TrackOrderBase::QueryStats( double& unrealized, double& realized, double& c
 
 // see TFTrading/MonitorOrder.cpp
 double TrackOrderBase::PriceInterval( double price ) const {
+  assert( m_pPosition );
   double interval {};
   auto pProvider( m_pPosition->GetExecutionProvider() );
   if ( ou::tf::keytypes::EProviderIB == pProvider->ID() ) {
@@ -81,15 +88,20 @@ double TrackOrderBase::Normalize( double price ) const {
 
 void TrackOrderBase::SetGoodTill( const OrderArgs& args, pOrder_t& pOrder ) {
   // submit GTC limit order (for Interactive Brokers)
-
   if ( 0 < args.duration ) {
     // strip off fractional seconds
-    boost::posix_time::ptime dt
+    const boost::posix_time::ptime dtNormalized
       = args.dt
       - boost::posix_time::time_duration( 0, 0, 0, args.dt.time_of_day().fractional_seconds() );
 
-    pOrder->SetGoodTillDate( dt + boost::posix_time::seconds( args.duration ) );
+    const boost::posix_time::ptime dtGTD( dtNormalized + boost::posix_time::time_duration( 0, 0, args.duration ) );
+    pOrder->SetGoodTillDate( dtGTD );
     pOrder->SetTimeInForce( ou::tf::ETimeInForce::GoodTillDate );
+    //BOOST_LOG_TRIVIAL(trace)
+    //  << "SetGoodTill:"
+    //  << " normal=" << dtNormalized
+    //  << ",adjusted=" << dtGTD
+    //  ;
   }
 }
 
@@ -97,7 +109,7 @@ void TrackOrderBase::Common( const OrderArgs& args, pOrder_t& pOrder ) {
   pOrder->SetSignalPrice( args.signal );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrderBase::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackOrderBase::HandleOrderFilled ) );
-  assert( !m_pOrderPending );
+  //assert( !m_pOrderPending );
   m_pOrderPending = pOrder;
   m_pPosition->PlaceOrder( pOrder );
   //ShowOrder( pOrder );
@@ -236,6 +248,7 @@ void TrackOrderBase::ShowOrder( pOrder_t& pOrder ) {
 }
 
 void TrackOrderBase::HandleOrderCancelled( const ou::tf::Order& order ) {
+  assert( m_pOrderPending );
   m_pOrderPending->OnOrderCancelled.Remove( MakeDelegate( this, &TrackOrderBase::HandleOrderCancelled ) );
   m_pOrderPending->OnOrderFilled.Remove( MakeDelegate( this, &TrackOrderBase::HandleOrderFilled ) );
   switch ( m_stateTrade() ) {
@@ -274,7 +287,7 @@ void TrackOrderBase::HandleOrderCancelled( const ou::tf::Order& order ) {
 }
 
 void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
-
+  assert( m_pOrderPending );
   m_pOrderPending->OnOrderCancelled.Remove( MakeDelegate( this, &TrackOrderBase::HandleOrderCancelled ) );
   m_pOrderPending->OnOrderFilled.Remove( MakeDelegate( this, &TrackOrderBase::HandleOrderFilled ) );
 
