@@ -161,8 +161,10 @@ private:
   mapOptionEntry_t m_mapOptionEntry;
 
   void HandleTimerScan( const boost::system::error_code &ec );
-  void ProcessOptionEntryOperationQueue();
   void ScanOptionEntryQueue();
+
+  void OptionEntryOperationQueue_loop();
+  void OptionEntryOperationQueue_pop();
 
 };
 

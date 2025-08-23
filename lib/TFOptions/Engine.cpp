@@ -178,10 +178,11 @@ Engine::~Engine( ) {
   // TODO: perform a deque of all operations?
 
   if ( !m_dequeOptionEntryOperation.empty() ) {
-    BOOST_LOG_TRIVIAL(warning) << "Engine::~Engine: operations still remaining in the queue";
+    BOOST_LOG_TRIVIAL(warning) << "Engine::~Engine: operations still remaining in the queue, clearing";
+    OptionEntryOperationQueue_loop();
   }
 
-  {
+  { // this should be redundant and unnecessary
     std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
     m_dequeOptionEntryOperation.clear();
   }
@@ -244,7 +245,13 @@ void Engine::HandleTimerScan( const boost::system::error_code &ec ) {
   }
 }
 
-void Engine::ProcessOptionEntryOperationQueue() {
+void Engine::OptionEntryOperationQueue_loop() {
+  while ( !m_dequeOptionEntryOperation.empty() ) {
+    OptionEntryOperationQueue_pop(); // should be all deletion entries
+  }
+}
+
+void Engine::OptionEntryOperationQueue_pop() {
   std::scoped_lock<std::mutex> lock(m_mutexOptionEntryOperationQueue);
   if ( !m_dequeOptionEntryOperation.empty() ) {
     OptionEntryOperation& oe( m_dequeOptionEntryOperation.front() );
@@ -300,7 +307,7 @@ void Engine::ProcessOptionEntryOperationQueue() {
 // TODO: sort map by expiry?  // then Option::CalcRate is required less often
 void Engine::ScanOptionEntryQueue() {
 
-  ProcessOptionEntryOperationQueue();
+  OptionEntryOperationQueue_loop();
 
   // dtUtcNow needs to be passed by value
   boost::posix_time::ptime dtUtcNow = ou::TimeSource::GlobalInstance().External();
