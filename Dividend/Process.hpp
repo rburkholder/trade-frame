@@ -78,11 +78,11 @@ private:
 
   using pAcquireFundamentals_t = std::shared_ptr<ou::tf::AcquireFundamentals>;
 
-  boost::posix_time::time_duration m_tdMaxInProgress;
+  boost::posix_time::time_duration m_tdMaxInProgress; // no longer required, keep for stats
 
   struct InProgress {
 
-    boost::posix_time::ptime dtStart;
+    boost::posix_time::ptime dtStart; // no longer required, but keep anyway
     vSymbols_iter iterSymbols;
     pAcquireFundamentals_t pAcquireFundamentals;
 

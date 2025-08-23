@@ -46,6 +46,7 @@ Process::~Process() {
     }
   }
 
+  m_piqfeed->Set( nullptr );
   m_piqfeed->Disconnect();
   m_piqfeed.reset();
 
@@ -98,6 +99,14 @@ void Process::HandleConnected( int ) {
   }
 
   std::cout << "symbol retrieval started ..." << std::endl;
+
+  m_piqfeed->Set(
+    [this]( const std::string& sSymbolNotFound ){
+      std::cout << "lookup not found, ignore: " << sSymbolNotFound << std::endl;
+      mapInProgress_t::iterator iter = m_mapInProgress.find( sSymbolNotFound );
+      assert( m_mapInProgress.end() != iter );
+      m_mapInProgress.erase( iter );
+    } );
 
   m_piqfeed->SymbolList(
     setListedMarket, setSecurityType,
@@ -186,29 +195,6 @@ void Process::Lookup() {
             m_cvWait.notify_one();
           }
           else {
-            { // indirectly determine & purge unknown symbols - those that have not returned anything
-              const boost::posix_time::time_duration tdLimit
-                = m_tdMaxInProgress + m_tdMaxInProgress + m_tdMaxInProgress + m_tdMaxInProgress;
-              boost::posix_time::ptime now( ou::TimeSource::GlobalInstance().External() );
-
-              using vInProgress_t = std::vector<mapInProgress_t::iterator>;
-              vInProgress_t vInProgress;
-
-              mapInProgress_t::iterator iterInProgress = m_mapInProgress.begin();
-              while ( m_mapInProgress.end() != iterInProgress ) {
-                auto diff = now - iterInProgress->second.dtStart;
-                if ( tdLimit < diff ) {
-                  vInProgress.push_back( iterInProgress );
-                }
-                ++iterInProgress;
-              }
-              for ( vInProgress_t::value_type& vt: vInProgress ) {
-                //m_pAcquireFundamentals_burial = std::move( vt->second.pAcquireFundamentals ); // seg fault
-                m_mapInProgress.erase( vt );
-                std::cout << "erased: " << vt->first << std::endl;
-              }
-            }
-
             //std::cout << "waiting on: ";
             for ( mapInProgress_t::value_type& vt: m_mapInProgress ) {
               //std::cout << vt.first << ",";

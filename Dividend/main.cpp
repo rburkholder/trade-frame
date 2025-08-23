@@ -206,7 +206,6 @@ int main( int argc, char* argv[] ) {
     return EXIT_SUCCESS;
   }
 
-
   using vSymbols_t = Process::vSymbols_t;
   vSymbols_t vSymbols;
 
