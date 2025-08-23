@@ -70,7 +70,6 @@ private:
 public:
 
   OptionEntry(): m_cntInstances( 0 ) {};
-  //OptionEntry( pOption_t pOption);  // used for storing deletion aspect
   OptionEntry( const OptionEntry& rhs ) = delete;
   OptionEntry( OptionEntry&& rhs );
 

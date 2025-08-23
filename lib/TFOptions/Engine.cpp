@@ -51,6 +51,7 @@ OptionEntry::OptionEntry( OptionEntry&& rhs ) {
   m_pOption = std::move( rhs.m_pOption );
   m_pUnderlying = std::move( rhs.m_pUnderlying );
   m_fGreek = std::move( rhs.m_fGreek );
+  m_quoteLastUnderlying = rhs.m_quoteLastUnderlying;
   //m_bStartedWatch = rhs.m_bStartedWatch;
   //rhs.m_bStartedWatch = false;
   rhs.m_cntInstances = 0; // can this be set, what happens on delete?  what happens when tied to m_bStartedWatch?
@@ -61,15 +62,10 @@ OptionEntry::OptionEntry( OptionEntry&& rhs ) {
   //PrintState( "OptionEntry::OptionEntry(0)" );
 }
 
-//OptionEntry::OptionEntry( pOption_t pOption_): m_pOption( pOption_ ), /*m_bStartedWatch( false ),*/ m_cntInstances( 0 ) {
-//  std::cout << "*** should not be here, does nothing ***" << std::endl;
-  //PrintState( "OptionEntry::OptionEntry(1)" );
-//}  // can't start with out an underlying
-
 OptionEntry::OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_, fCallbackWithGreek_t&& fGreek_ ):
   m_pUnderlying( pUnderlying_ ), m_pOption( pOption_ ), m_fGreek( std::move( fGreek_ ) ),
   //m_bStartedWatch( false ),
-  m_cntInstances( 0 ) // handled by Inc, Dec
+  m_cntInstances {} // handled by Inc, Dec
 {
   //m_pUnderlying->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote) );
   //m_pUnderlying->StartWatch();
@@ -82,7 +78,7 @@ OptionEntry::OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_, fCallbackWi
 OptionEntry::OptionEntry( pWatch_t pUnderlying_, pOption_t pOption_ ):
   m_pUnderlying( pUnderlying_ ), m_pOption( pOption_ ),
   //m_bStartedWatch( false ),
-  m_cntInstances( 0 )
+  m_cntInstances {}
 {
   //m_pUnderlying->OnQuote.Add( MakeDelegate( this, &OptionEntry::HandleUnderlyingQuote) );
   //m_pUnderlying->StartWatch();
@@ -99,7 +95,7 @@ OptionEntry::~OptionEntry() {
   //if ( m_bStartedWatch ) {
 
   if ( 0 < m_cntInstances ) {
-    std::cout << "OptionEntry::~OptionEntry m_cntInstances was not zero: " << m_cntInstances << "," << m_pOption->GetInstrument()->GetInstrumentName() << std::endl;
+    BOOST_LOG_TRIVIAL(warning) << "OptionEntry::~OptionEntry m_cntInstances was not zero: " << m_cntInstances << "," << m_pOption->GetInstrumentName();
     m_cntInstances = 1;
     Dec();
     //m_pUnderlying->StopWatch();
@@ -129,6 +125,7 @@ void OptionEntry::Inc() {
     m_pOption->StartWatch();  }
   m_cntInstances++;
 }
+
 size_t OptionEntry::Dec() {
   assert( 0 < m_cntInstances );
   m_cntInstances--;
@@ -139,7 +136,6 @@ size_t OptionEntry::Dec() {
   }
   return m_cntInstances;
 }
-
 
 void OptionEntry::HandleUnderlyingQuote(const ou::tf::Quote& quote_) {
   m_quoteLastUnderlying = quote_;
