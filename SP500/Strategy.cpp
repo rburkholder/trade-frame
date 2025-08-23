@@ -584,6 +584,7 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
     m_pTrackOrder->ExitLongMkt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_stopTrail ) );
   }
   else {
+    if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
     const double stop( price - m_stopDelta );
     if ( m_stopTrail < stop ) {
       m_stopTrail = stop;
@@ -598,6 +599,7 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
     m_pTrackOrder->ExitShortMkt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_stopTrail ) );
   }
   else {
+    if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
     const double stop( price + m_stopDelta );
     if ( m_stopTrail > stop ) {
       m_stopTrail = stop;

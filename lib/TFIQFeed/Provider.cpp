@@ -26,6 +26,7 @@ namespace iqfeed { // IQFeed
 Provider::Provider()
 : ou::tf::sim::SimulationInterface<Provider,IQFeedSymbol>()
 , IQFeed<Provider>()
+, m_fSymbolNotFound( nullptr )
 {
   m_sName = "IQFeed";
   m_nID = keytypes::EProviderIQF;
@@ -82,6 +83,10 @@ Provider::pSymbol_t Provider::NewCSymbol( pInstrument_t pInstrument ) {
   pSymbol_t pSymbol( new IQFeedSymbol( pInstrument->GetInstrumentName( ID() ), pInstrument ) );
   inherited_t::AddCSymbol( pSymbol );
   return pSymbol;
+}
+
+void Provider::Set( fSymbolNotFound_t&& f ) {
+  m_fSymbolNotFound = std::move( f );
 }
 
 namespace {
@@ -326,8 +331,15 @@ void Provider::OnIQFeedSystemMessage( linebuffer_t* pBuffer, IQFSystemMessage *p
 }
 
 void Provider::OnIQFeedSymbolNotFoundMessage( linebuffer_t* pBuffer, IQFErrorMessage *pMsg ) {
-  std::cout << "iqfeed::provider symbol not found: " << pMsg->SymbolNotFound() << std::endl;
-  // TODO: construct a callback/delegate in provider or provider base
+
+  // TODO: construct a callback/delegate in provider base for generic use across providers
+  if ( m_fSymbolNotFound ) {
+    m_fSymbolNotFound( pMsg->SymbolNotFound() );
+  }
+  else {
+    std::cout << "iqfeed::provider symbol not found: " << pMsg->SymbolNotFound() << std::endl;
+  }
+
   this->ErrorDone( pBuffer, pMsg );
 }
 

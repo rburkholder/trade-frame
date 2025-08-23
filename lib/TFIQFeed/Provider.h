@@ -60,6 +60,9 @@ public:
 
   std::string ListedMarket( key_t nListedMarket ) const { return LookupListedMarket( nListedMarket ); }
 
+  using fSymbolNotFound_t = std::function<void( const std::string& )>;
+  void Set( fSymbolNotFound_t&& );
+
 protected:
 
   // overridden from ProviderInterface, called when application adds/removes watches
@@ -86,6 +89,8 @@ protected:
   void OnIQFeedError( size_t );
 
 private:
+
+  fSymbolNotFound_t m_fSymbolNotFound;
 
   void UpdateQuoteTradeWatch( char command, IQFeedSymbol::WatchState next, IQFeedSymbol *pSymbol );
 

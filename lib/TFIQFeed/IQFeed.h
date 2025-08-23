@@ -443,8 +443,8 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
       break;
     case 'n':
       {
-        std::string str( iter, end );
-        std::cout << "IQFeed symbol not found: '" << str << "'" << std::endl;
+        //std::string str( iter, end );
+        //std::cout << "IQFeed symbol not found: '" << str << "'" << std::endl;
 
         IQFErrorMessage* msg = m_reposErrorMessages.CheckOutL();
         msg->Assign( iter, end );
