@@ -323,15 +323,15 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
 
   switch ( m_stateTrade() ) {
     case ETradeState::EntrySubmittedUp:
-      m_ceEntryFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Entry Fill" );
+      //m_ceEntryFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Entry Fill" );
       m_stateTrade.Set( ETradeState::ExitSignalUp, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
       break;
     case ETradeState::EntrySubmittedDn:
-      m_ceEntryFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Entry Fill" );
+      //m_ceEntryFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Entry Fill" );
       m_stateTrade.Set( ETradeState::ExitSignalDn, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
       break;
     case ETradeState::ExitSubmitted:
-      m_ceExitFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Exit Fill" );
+      //m_ceExitFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Exit Fill" );
       m_stateTrade.Set( ETradeState::Search, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
       break;
     case ETradeState::EndOfDayCancel:
