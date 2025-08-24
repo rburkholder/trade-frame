@@ -186,13 +186,13 @@ void Strategy::SetupChart() {
   m_ceTrade.SetColour( c_colourPrice );
   m_cdv.Add( EChartSlot::Price, &m_ceTrade );
 
-  //m_ceAsk.SetName( "Ask" );
-  //m_ceAsk.SetColour( c_colourAsk );
-  //m_cdv.Add( EChartSlot::Price, &m_ceAsk );
+  m_ceAsk.SetName( "Ask" );
+  m_ceAsk.SetColour( c_colourAsk );
+  m_cdv.Add( EChartSlot::Price, &m_ceAsk );
 
-  //m_ceBid.SetName( "Bid" );
-  //m_ceBid.SetColour( c_colourBid );
-  //m_cdv.Add( EChartSlot::Price, &m_ceBid );
+  m_ceBid.SetName( "Bid" );
+  m_ceBid.SetColour( c_colourBid );
+  m_cdv.Add( EChartSlot::Price, &m_ceBid );
 
   m_ceEma013.SetName( "13s ema" );
   m_ceEma013.SetColour( c_colourEma13 );
@@ -319,10 +319,17 @@ void Strategy::SetupChart() {
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   m_quote = quote;
   const auto dt( quote.DateTime() );
-  //if ( TimeFrame::RHTrading == CurrentTimeFrame() ) {
-  //  m_ceAsk.Append( dt, quote.Ask() );
-  //  m_ceBid.Append( dt, quote.Bid() );
-  //}
+
+  switch ( CurrentTimeFrame() ) {
+    case TimeFrame::RHTrading:
+    case TimeFrame::Cancelling:
+    case TimeFrame::GoingNeutral:
+    case TimeFrame::WaitForRHClose:
+      m_ceAsk.Append( dt, quote.Ask() );
+      m_ceBid.Append( dt, quote.Bid() );
+      break;
+  }
+
   m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
 }
 
@@ -449,19 +456,19 @@ void Strategy::HandleDec( const ou::tf::Trade& tick ) {
 }
 
 void Strategy::CalcAdvDec( boost::posix_time::ptime dt ) {
-  const double sum( m_features.dblAdv + m_features.dblDec );
   const double diff( m_features.dblAdv - m_features.dblDec );
+  const double sum( m_features.dblAdv + m_features.dblDec );
   const double ratio( diff / sum );
   m_features.dblAdvDecRatio = ratio;
 
+  m_ceAdvDec.Append( dt, diff - m_dblPrvAdvDec );
   //if ( ( 0.0 == m_dblPrvAdvDec ) ) {}
   //else {
-  //  const double rtn = std::log( ratio / m_dblPrvAdvDec ); // natural log, ie ln
-  //  m_ceRtnAdvDec.Append( dt, rtn );
+  //  m_ceAdvDec.Append( dt, ratio );
   //}
+  m_dblPrvAdvDec = diff;
   //m_dblPrvAdvDec = ratio;
 
-  m_ceAdvDec.Append( dt, ratio );
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
@@ -584,7 +591,7 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
     m_pTrackOrder->ExitLongMkt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_stopTrail ) );
   }
   else {
-    if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
+    //if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
     const double stop( price - m_stopDelta );
     if ( m_stopTrail < stop ) {
       m_stopTrail = stop;
@@ -599,7 +606,7 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
     m_pTrackOrder->ExitShortMkt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_stopTrail ) );
   }
   else {
-    if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
+    //if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
     const double stop( price + m_stopDelta );
     if ( m_stopTrail > stop ) {
       m_stopTrail = stop;

@@ -157,8 +157,8 @@ private:
   ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryVolume m_ceVolume;
 
-  //ou::ChartEntryIndicator m_ceAsk;
-  //ou::ChartEntryIndicator m_ceBid;
+  ou::ChartEntryIndicator m_ceAsk;
+  ou::ChartEntryIndicator m_ceBid;
 
   ou::ChartEntryIndicator m_ceEma013;
   ou::ChartEntryIndicator m_ceEma029;
@@ -191,7 +191,7 @@ private:
   ou::ChartEntryIndicator m_ceTickL;
   //ou::ChartEntryIndicator m_ceTrin;
 
-  ou::ChartEntryIndicator m_ceAdvDec;
+  ou::ChartEntryVolume m_ceAdvDec;
 
   ou::tf::Prices m_returns;
   ou::tf::TSSWStatsPrice m_statsReturns;
