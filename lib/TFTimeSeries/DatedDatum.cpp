@@ -110,6 +110,13 @@ bool Quote::IsNonZero() const {
   return bOk;
 };
 
+double Quote::Imbalance() const {
+  const auto diff( m_nBidSize - m_nAskSize );
+  const auto sum(  m_nBidSize + m_nAskSize );
+  const double imbalance( (double) diff / (double) sum );
+  return imbalance;
+}
+
 H5::CompType* Quote::DefineDataType( H5::CompType* pComp ) {
   if ( NULL == pComp ) pComp = new H5::CompType( sizeof( Quote ) );
   DatedDatum::DefineDataType( pComp );

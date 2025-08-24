@@ -101,6 +101,8 @@ public:
   price_t LogarithmicMidPointA() const { return ( std::log( m_dblBid ) + std::log( m_dblAsk ) ) / 2.0; } // eq 3.4 pg 39, Intro HF Finance
   price_t LogarithmicMidPointB() const { return std::log( std::sqrt( m_dblBid * m_dblAsk ) ); } // eq 3.4 pg 39, Intro HF Finance
 
+  double Imbalance() const;  // Positive (negative) imbalance indicates an order book that is heavier on the bid (ask) side
+
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
   static uint64_t Signature() { return DatedDatum::Signature() * 10000 + 1133; } // DatedDatum -> Quote
 
