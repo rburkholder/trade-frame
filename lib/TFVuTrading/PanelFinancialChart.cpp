@@ -99,6 +99,11 @@ void PanelFinancialChart::CreateControls() {
   Bind( wxEVT_DESTROY, &PanelFinancialChart::OnDestroy, this );
 }
 
+void PanelFinancialChart::Set( ou::tf::WinChartView::EView view ) {
+  assert( m_pWinChartView );
+  m_pWinChartView->Set( view );
+}
+
 TreeItem* PanelFinancialChart::SetRoot_Common( const std::string& sName, pChartDataView_t pChartDataView, fTreeItem_Factory_t&& f ) {
 
   wxTreeItemId id =  m_pTree->GetRootItem();

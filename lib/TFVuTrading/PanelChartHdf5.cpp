@@ -24,21 +24,21 @@ namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 PanelChartHdf5::PanelChartHdf5()
-: PanelFinancialChart(),
-  m_pChartDataView( nullptr ), m_pdm( nullptr )
+: PanelFinancialChart()
+, m_pChartDataView( nullptr ), m_pdm( nullptr )
 {
 }
 
 PanelChartHdf5::PanelChartHdf5( const std::string& sFileName )
-: PanelFinancialChart(),
-  m_pChartDataView( nullptr ), m_pdm( nullptr )
+: PanelFinancialChart()
+, m_pChartDataView( nullptr ), m_pdm( nullptr )
 {
   m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO, sFileName );
 }
 
 PanelChartHdf5::PanelChartHdf5( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style )
-: PanelFinancialChart(),
-  m_pChartDataView( nullptr ), m_pdm( nullptr )
+: PanelFinancialChart()
+, m_pChartDataView( nullptr ), m_pdm( nullptr )
 {
   Create( parent, id, pos, size, style );
 }
@@ -72,6 +72,8 @@ void PanelChartHdf5::CreateControls() {
   if ( nullptr == m_pdm ) {
     m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO );
   }
+
+  Set( ou::tf::WinChartView::EView::sim_review );
 
   IterateObjects();
 
