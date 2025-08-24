@@ -19,8 +19,6 @@
  * Created: April 14, 2025 20:32:29
  */
 
-//#include <cmath>
-
 #include <boost/log/trivial.hpp>
 
 #include "Strategy.hpp"
@@ -43,6 +41,8 @@ namespace {
   static const double c_tickLo( -1.0 );
 
   static const double c_regimeMinimum( 0.001 );
+
+  static const size_t c_window( 45 );
 }
 
 Strategy::Strategy(
@@ -72,8 +72,9 @@ Strategy::Strategy(
 , m_dblTickRegime {}, m_bTickRegimeIncreased( false )
 , m_TickRegime( ETickRegime::congestion )
 , m_dblPrvPrice {}, m_dblPrvAdvDec {}
-, m_statsReturns( m_returns, boost::posix_time::time_duration( 0, 0, 60 ) )
-, m_minmaxPrices( m_prices,  boost::posix_time::time_duration( 0, 0, 60 ) )
+, m_statsReturns( m_returns, boost::posix_time::time_duration( 0, 0, c_window ) )
+, m_minmaxPrices( m_prices,  boost::posix_time::time_duration( 0, 0, c_window ) )
+, m_statsPrices(  m_prices,  boost::posix_time::time_duration( 0, 0, c_window ) )
 , m_ePrice( EPrice::neutral )
 , m_atr {}, m_stopInitial {}, m_stopDelta {}, m_stopTrail {}
 {
@@ -182,17 +183,23 @@ void Strategy::SetupChart() {
   m_cemNegOne.AddMark( -1.0, ou::Colour::Black,   "-1" );
   m_cemRegimMin.AddMark( c_regimeMinimum, ou::Colour::Red,   "min" );
 
-  m_ceTrade.SetName( "Trade" );
-  m_ceTrade.SetColour( c_colourPrice );
-  m_cdv.Add( EChartSlot::Price, &m_ceTrade );
+  m_ceTradePrice.SetName( "Trade" );
+  m_ceTradePrice.SetColour( c_colourPrice );
+  m_cdv.Add( EChartSlot::Price, &m_ceTradePrice );
 
-  m_ceAsk.SetName( "Ask" );
-  m_ceAsk.SetColour( c_colourAsk );
-  m_cdv.Add( EChartSlot::Price, &m_ceAsk );
+  m_ceTradeBBU.SetName( "BBU" );
+  m_cdv.Add( EChartSlot::Price, &m_ceTradeBBU );
 
-  m_ceBid.SetName( "Bid" );
-  m_ceBid.SetColour( c_colourBid );
-  m_cdv.Add( EChartSlot::Price, &m_ceBid );
+  m_ceTradeBBL.SetName( "BBL" );
+  m_cdv.Add( EChartSlot::Price, &m_ceTradeBBL );
+
+  //m_ceAskPrice.SetName( "Ask" );
+  //m_ceAskPrice.SetColour( c_colourAsk );
+  //m_cdv.Add( EChartSlot::Price, &m_ceAskPrice );
+
+  //m_ceBidPrice.SetName( "Bid" );
+  //m_ceBidPrice.SetColour( c_colourBid );
+  //m_cdv.Add( EChartSlot::Price, &m_ceBidPrice );
 
   m_ceEma013.SetName( "13s ema" );
   m_ceEma013.SetColour( c_colourEma13 );
@@ -210,52 +217,60 @@ void Strategy::SetupChart() {
   m_ceEma200.SetColour( c_colourEma200 );
   m_cdv.Add( EChartSlot::Price, &m_ceEma200 );
 
-  m_cdv.Add( EChartSlot::Ratio, &m_cemZero );
+  //m_cdv.Add( EChartSlot::Ratio, &m_cemZero );
 
-  m_ceTrade_ratio.SetName( "Trade" );
-  m_ceTrade_ratio.SetColour( c_colourPrice );
-  m_cdv.Add( EChartSlot::Ratio, &m_ceTrade_ratio );
+  //m_ceTrade_ratio.SetName( "Trade" );
+  //m_ceTrade_ratio.SetColour( c_colourPrice );
+  //m_cdv.Add( EChartSlot::Ratio, &m_ceTrade_ratio );
 
-  m_ceEma013_ratio.SetName( "13s ema" );
-  m_ceEma013_ratio.SetColour( c_colourEma13 );
-  m_cdv.Add( EChartSlot::Ratio, &m_ceEma013_ratio );
+  //m_ceEma013_ratio.SetName( "13s ema" );
+  //m_ceEma013_ratio.SetColour( c_colourEma13 );
+  //m_cdv.Add( EChartSlot::Ratio, &m_ceEma013_ratio );
 
-  m_ceEma029_ratio.SetName( "29s ema" );
-  m_ceEma029_ratio.SetColour( c_colourEma29 );
-  m_cdv.Add( EChartSlot::Ratio, &m_ceEma029_ratio );
+  //m_ceEma029_ratio.SetName( "29s ema" );
+  //m_ceEma029_ratio.SetColour( c_colourEma29 );
+  //m_cdv.Add( EChartSlot::Ratio, &m_ceEma029_ratio );
 
-  m_ceEma050_ratio.SetName( "50s ema" );
-  m_ceEma050_ratio.SetColour( c_colourEma50 );
-  m_cdv.Add( EChartSlot::Ratio, &m_ceEma050_ratio );
+  //m_ceEma050_ratio.SetName( "50s ema" );
+  //m_ceEma050_ratio.SetColour( c_colourEma50 );
+  //m_cdv.Add( EChartSlot::Ratio, &m_ceEma050_ratio );
 
-  m_ceEma200_ratio.SetName( "200s ema" );
-  m_ceEma200_ratio.SetColour( c_colourEma200 );
-  m_cdv.Add( EChartSlot::Ratio, &m_ceEma200_ratio );
+  //m_ceEma200_ratio.SetName( "200s ema" );
+  //m_ceEma200_ratio.SetColour( c_colourEma200 );
+  //m_cdv.Add( EChartSlot::Ratio, &m_ceEma200_ratio );
 
-  m_ceTickJ_sigmoid.SetName( "TickJ" );
-  m_ceTickJ_sigmoid.SetColour( c_colourTickJ );
-  m_cdv.Add( EChartSlot::Ratio, &m_ceTickJ_sigmoid );
+  //m_ceTickJ_sigmoid.SetName( "TickJ" );
+  //m_ceTickJ_sigmoid.SetColour( c_colourTickJ );
+  //m_cdv.Add( EChartSlot::Ratio, &m_ceTickJ_sigmoid );
 
-  m_ceTickL_sigmoid.SetName( "TickL" );
-  m_ceTickL_sigmoid.SetColour( c_colourTickL );
-  m_cdv.Add( EChartSlot::Ratio, &m_ceTickL_sigmoid );
+  //m_ceTickL_sigmoid.SetName( "TickL" );
+  //m_ceTickL_sigmoid.SetColour( c_colourTickL );
+  //m_cdv.Add( EChartSlot::Ratio, &m_ceTickL_sigmoid );
 
-  m_ceAdvDec_ratio.SetName( "AdvDec" );
-  m_ceAdvDec_ratio.SetColour( c_colourAdvDec );
-  m_cdv.Add( EChartSlot::Ratio, &m_ceAdvDec_ratio );
+  //m_ceAdvDec_ratio.SetName( "AdvDec" );
+  //m_ceAdvDec_ratio.SetColour( c_colourAdvDec );
+  //m_cdv.Add( EChartSlot::Ratio, &m_ceAdvDec_ratio );
 
-  m_ceVolume.SetName( "Volume" );
-  m_cdv.Add( EChartSlot::Volume, &m_ceVolume );
+  m_ceTradeVolume.SetName( "Tick Volume" );
+  m_cdv.Add( EChartSlot::TickVolume, &m_ceTradeVolume );
 
-  m_cdv.Add( EChartSlot::Tick, &m_cemZero );
+  //m_ceAskVolume.SetName( "Ask" );
+  //m_ceAskVolume.SetColour( ou::Colour::Red );
+  //m_cdv.Add( EChartSlot::QuoteVolume, &m_ceAskVolume );
+
+  //m_ceBidVolume.SetName( "Bid" );
+  //m_ceBidVolume.SetColour( ou::Colour::Blue );
+  //m_cdv.Add( EChartSlot::QuoteVolume, &m_ceBidVolume );
+
+  m_cdv.Add( EChartSlot::TickStat, &m_cemZero );
 
   m_ceTickJ.SetName( "TickJ" );
   m_ceTickJ.SetColour( c_colourTickJ );
-  m_cdv.Add( EChartSlot::Tick, &m_ceTickJ );
+  m_cdv.Add( EChartSlot::TickStat, &m_ceTickJ );
 
   m_ceTickL.SetName( "TickL" );
   m_ceTickL.SetColour( c_colourTickL );
-  m_cdv.Add( EChartSlot::Tick, &m_ceTickL );
+  m_cdv.Add( EChartSlot::TickStat, &m_ceTickL );
 
   m_ceAdvDec.SetName( "AdvDec" );
   m_ceAdvDec.SetColour( c_colourAdvDec );
@@ -269,8 +284,13 @@ void Strategy::SetupChart() {
   //m_cdv.Add( EChartSlot::rtnPrice, &m_ceRtnPrice );
   //m_cdv.Add( EChartSlot::Price, &m_ceRtnPrice_bbl );
 
-  m_ceVisualize.SetName( "Visual Check" );
+  m_ceVisualize.SetName( "ATR" );
+  m_ceVisualize.SetColour( ou::Colour::Purple );
   m_cdv.Add( EChartSlot::Visual, &m_ceVisualize );
+
+  m_ceTradeBBDiff.SetName( "BB Diff" );
+  m_ceTradeBBDiff.SetColour( ou::Colour::Green );
+  m_cdv.Add( EChartSlot::Visual, &m_ceTradeBBDiff );
 
   m_cdv.Add( EChartSlot::rtnPriceAvg, &m_cemZero );
   m_ceRtnPrice_avg.SetName( "Returns - Average" );
@@ -317,6 +337,7 @@ void Strategy::SetupChart() {
 }
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
+
   m_quote = quote;
   const auto dt( quote.DateTime() );
 
@@ -325,10 +346,14 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
     case TimeFrame::Cancelling:
     case TimeFrame::GoingNeutral:
     case TimeFrame::WaitForRHClose:
-      m_ceAsk.Append( dt, quote.Ask() );
-      m_ceBid.Append( dt, quote.Bid() );
+      //m_ceAskPrice.Append( dt, quote.Ask() );
+      //m_ceAskVolume.Append( dt, quote.AskSize() );
+      //m_ceBidPrice.Append( dt, quote.Bid() );
+      //m_ceBidVolume.Append( dt, -quote.BidSize() );
       break;
   }
+
+  TimeTick( quote );
 
   m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
 }
@@ -340,6 +365,7 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
     //m_ceRtnPrice.Append( dt, rtn );
     m_returns.Append( ou::tf::Price( dt, rtn ) );
     //static const double sigma( 1.5 );
+    const double sd( m_statsReturns.SD() );
     //const double sig_std( sigma * m_statsReturns.SD() );
     //const double hi( std::exp( m_statsReturns.MeanY() + sig_std ) );
     //const double lo( std::exp( m_statsReturns.MeanY() - sig_std ) );
@@ -364,8 +390,8 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
       }
     }
 
-    m_ceRtnPrice_avg.Append( dt, mean ); // todo, run ema, use running_stats n
-    m_ceRtnPrice_slope.Append( dt, slope ); // todo, run ema, use running_stats n
+    m_ceRtnPrice_avg.Append( dt, mean / sd ); // todo, run ema, use running_stats n
+    m_ceRtnPrice_slope.Append( dt, slope / sd ); // todo, run ema, use running_stats n
 
   }
   m_dblPrvPrice = price;
@@ -377,14 +403,18 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   const ou::tf::Price::price_t   price( trade.Price() );
   const ou::tf::Price::volume_t volume( trade.Volume() );
   m_vwp.Add( price, volume );
-  m_ceTrade.Append(  dt, price );
-  m_ceVolume.Append( dt, volume );
+  m_ceTradePrice.Append(  dt, price );
+  m_ceTradeVolume.Append( dt, volume );
 
   UpdatePriceReturn( dt, price );
 
   m_prices.Append( ou::tf::Price( dt, price ) );
   m_atr = m_minmaxPrices.Diff();
   m_ceVisualize.Append( dt, m_atr );
+
+  m_ceTradeBBU.Append( dt, m_statsPrices.BBUpper() );
+  m_ceTradeBBL.Append( dt, m_statsPrices.BBLower() );
+  m_ceTradeBBDiff.Append( dt, m_statsPrices.BBOffset() );
 
   TimeTick( trade );
 }
@@ -510,6 +540,11 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   const auto dt( trade.DateTime() );
   const auto price( trade.Price() );
+}
+
+void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
+  const auto dt( quote.DateTime() );
+  //const auto price( trade.Price() );
   switch ( m_pTrackOrder->State()() ) {
     case ETradeState::Search:
       switch ( m_ePrice ) {
@@ -520,7 +555,7 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
           //m_to.State().Set( ETradeState::EntrySubmittedUp );
           m_stopDelta = m_atr;
           m_stopTrail = m_stopInitial = m_quote.Bid() - m_stopDelta;
-          m_pTrackOrder->EnterLongLmt( ou::tf::TrackOrder::OrderArgs( dt, 100, price, m_quote.Bid(), 5 ) );
+          m_pTrackOrder->EnterLongLmt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_trade.Price(), m_quote.Ask(), 5 ) );
           break;
         case EPrice::sell:
           //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
@@ -529,7 +564,7 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
           //m_to.State().Set( ETradeState::EntrySubmittedDn );
           m_stopDelta = m_atr;
           m_stopTrail = m_stopInitial = m_quote.Ask() + m_stopDelta;
-          m_pTrackOrder->EnterShortLmt( ou::tf::TrackOrder::OrderArgs( dt, 100, price, m_quote.Ask(), 5 ) );
+          m_pTrackOrder->EnterShortLmt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_trade.Price(), m_quote.Bid(), 5 ) );
           break;
         case EPrice::stop_sell:
           //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
@@ -560,10 +595,10 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
       }
       break;
     case ETradeState::ExitSignalUp:
-      UpdatePositionProgressUp( trade );
+      UpdatePositionProgressUp( quote );
       break;
     case ETradeState::ExitSignalDn:
-      UpdatePositionProgressDn( trade );
+      UpdatePositionProgressDn( quote );
       break;
     case ETradeState::ExitSubmitted:
       break;
@@ -608,6 +643,36 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
   else {
     //if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
     const double stop( price + m_stopDelta );
+    if ( m_stopTrail > stop ) {
+      m_stopTrail = stop;
+    }
+  }
+}
+
+void Strategy::UpdatePositionProgressUp( const ou::tf::Quote& quote ) {
+  const auto ask( quote.Ask() );
+  if ( m_stopTrail > ask ) {
+    const auto dt( quote.DateTime() );
+    m_pTrackOrder->ExitLongMkt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_stopTrail ) );
+  }
+  else {
+    //if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
+    const double stop( ask - m_stopDelta );
+    if ( m_stopTrail < stop ) {
+      m_stopTrail = stop;
+    }
+  }
+}
+
+void Strategy::UpdatePositionProgressDn( const ou::tf::Quote& quote ) {
+  const auto bid( quote.Bid() );
+  if ( m_stopTrail < bid ) {
+    const auto dt( quote.DateTime() );
+    m_pTrackOrder->ExitShortMkt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_stopTrail ) );
+  }
+  else {
+    //if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
+    const double stop( bid + m_stopDelta );
     if ( m_stopTrail > stop ) {
       m_stopTrail = stop;
     }

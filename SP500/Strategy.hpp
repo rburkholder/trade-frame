@@ -83,7 +83,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, Volume, Visual, rtnPrice, rtnPriceAvg, rtnPriceSlp, rtnPriceSD, TickRegime, AdvDec, Tick, rtnAdvDec, Ratio, Predict, PredVec, PL };
+  enum EChartSlot { Price, TickVolume, QuoteVolume, Visual, rtnPrice, rtnPriceAvg, rtnPriceSlp, rtnPriceSD, TickRegime, AdvDec, TickStat, rtnAdvDec, Ratio, Predict, PredVec, PL };
 
   using pOrder_t = ou::tf::Order::pOrder_t;
 
@@ -154,11 +154,18 @@ private:
   ou::ChartEntryMark m_cemNegOne;
   ou::ChartEntryMark m_cemRegimMin;
 
-  ou::ChartEntryIndicator m_ceTrade;
-  ou::ChartEntryVolume m_ceVolume;
+  ou::ChartEntryIndicator m_ceTradePrice;
+  ou::ChartEntryVolume    m_ceTradeVolume;
 
-  ou::ChartEntryIndicator m_ceAsk;
-  ou::ChartEntryIndicator m_ceBid;
+  ou::ChartEntryIndicator m_ceTradeBBU;
+  ou::ChartEntryIndicator m_ceTradeBBL;
+  ou::ChartEntryIndicator m_ceTradeBBDiff;
+
+  ou::ChartEntryIndicator m_ceAskPrice;
+  ou::ChartEntryIndicator m_ceBidPrice;
+
+  ou::ChartEntryVolume m_ceAskVolume;
+  ou::ChartEntryVolume m_ceBidVolume;
 
   ou::ChartEntryIndicator m_ceEma013;
   ou::ChartEntryIndicator m_ceEma029;
@@ -198,6 +205,8 @@ private:
 
   ou::tf::Prices m_prices; // might use the underlying directly?
   ou::tf::TSSWMinMax m_minmaxPrices; // ATR style volatility indicator
+  ou::tf::TSSWStatsPrice m_statsPrices;
+
 
   double m_dblPrvPrice;
   //ou::ChartEntryIndicator m_ceRtnPrice_bbu;
@@ -244,6 +253,9 @@ private:
   void UpdatePositionProgressUp( const ou::tf::Trade& );
   void UpdatePositionProgressDn( const ou::tf::Trade& );
 
+  void UpdatePositionProgressUp( const ou::tf::Quote& );
+  void UpdatePositionProgressDn( const ou::tf::Quote& );
+
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
 
@@ -259,6 +271,7 @@ private:
   void HandleBarQuotes01Sec( const ou::tf::Bar& );
   void Calc01SecIndicators( const ou::tf::Bar& );
 
+  void HandleRHTrading( const ou::tf::Quote& );
   void HandleRHTrading( const ou::tf::Trade& );
 
   void HandleRHTrading( const ou::tf::Bar& );
