@@ -737,7 +737,7 @@ void InstrumentViews::FilterByTag() {
 
 void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
 
-  BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy top";
+  //BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy top";
 
   m_clbTags->Unbind( wxEVT_CHECKLISTBOX, &InstrumentViews::HandleCheckListBoxEvent, this );
 
@@ -746,7 +746,7 @@ void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
     Unbind( wxEVT_TIMER, &InstrumentViews::HandleTimer, this, m_timerRefresh.GetId() );
   }
 
-  BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy 1";
+  //BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy 1";
 
   m_pcurView = nullptr;
   if ( nullptr != m_pOptionChainView ) {
@@ -757,7 +757,7 @@ void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
     m_pOptionChainModel = nullptr;
   }
 
-  BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy 2";
+  //BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy 2";
 
   //TreeItem::UnBind( this, m_pTree ); // to be fixed
   m_pTreeCtrl->Unbind( wxEVT_TREE_ITEM_EXPANDED, &InstrumentViews::HandleTreeEventItemExpanded, this, m_pTreeCtrl->GetId() );
@@ -766,7 +766,7 @@ void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
   assert( Unbind( wxEVT_DESTROY, &InstrumentViews::OnDestroy, this ) );
   event.Skip( true );  // auto followed by Destroy();
 
-  BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy btm";
+  //BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy btm";
 }
 
 wxBitmap InstrumentViews::GetBitmapResource( const wxString& name ) {
