@@ -128,6 +128,8 @@ void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView ) {
   m_pChartDataView = pChartDataView; // TODO: need some additional tender loving care with this for the mutex
   if ( m_pChartDataView ) {
     m_vpDataViewVisual = m_vpDataViewExtents = m_pChartDataView->GetExtents(); // TODO: may not want this if to maintain continuity across charts
+    //std::cout << "chart assignment extents: " << m_vpDataViewExtents.dtBegin << ',' << m_vpDataViewExtents.dtEnd << std::endl;
+    //std::cout << "chart assignment visual: " << m_vpDataViewVisual.dtBegin << ',' << m_vpDataViewVisual.dtEnd << std::endl;
   }
   else { // nullptr
     m_vpDataViewVisual = m_vpDataViewExtents = ViewPort_t();
@@ -329,6 +331,8 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
     boost::posix_time::time_duration tdCursorNew; // offset from left
     boost::posix_time::ptime dtCursor;
 
+    //std::cout << "mouse wheel visual: " << m_vpDataViewVisual.dtBegin << ',' << m_vpDataViewVisual.dtEnd << std::endl;
+
     bool bBegin = m_vpDataViewVisual.HasBegin();
     bool bEnd = m_vpDataViewVisual.HasEnd();
 
@@ -506,6 +510,7 @@ void WinChartView::DrawChart() {
                   m_vpDataViewVisual.dtBegin = m_vpDataViewVisual.dtEnd - m_tdViewPortWidth;
                   break;
                 case EView::live_review:
+                case EView::sim_review:
                   // handle case when data loaded in background, ultimately extents will be available
                   if ( m_vpDataViewVisual.HasBoth() ) {}
                   else {
@@ -516,8 +521,6 @@ void WinChartView::DrawChart() {
                   break;
                 case EView::sim_trail:
                   m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - m_tdViewPortWidth, m_vpDataViewExtents.dtEnd + one_sec );
-                  break;
-                case EView::sim_review:
                   break;
               }
 
