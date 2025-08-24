@@ -165,29 +165,31 @@ ChartDataView::ViewPort_t ChartDataView::GetExtents_NoLock() const {
   ViewPort_t view;
   std::for_each(
     m_vChartEntryCarrier.begin(), m_vChartEntryCarrier.end(),
-    [&view](const ChartEntryCarrier& cec ){
+    [&view]( const ChartEntryCarrier& cec ){
       try {
         const ChartEntryTime* p = dynamic_cast<const ChartEntryTime*>( cec.GetChartEntry() );
         if ( p ) {
           ViewPort_t extent = p->GetExtents();
 
-          if ( boost::posix_time::not_a_date_time != view.dtBegin ) {
-            if ( boost::posix_time::not_a_date_time != extent.dtBegin ) {
+          if ( boost::posix_time::not_a_date_time != view.dtBegin ) { // will default with extent assignment
+            if ( boost::posix_time::not_a_date_time != extent.dtBegin ) { // no default assignment
               if ( extent.dtBegin < view.dtBegin ) {
                 view.dtBegin = extent.dtBegin;
               }
             }
+            else {}
           }
           else {
             view.dtBegin = extent.dtBegin;
           }
 
-          if ( boost::posix_time::not_a_date_time != view.dtEnd ) {
-            if ( boost::posix_time::not_a_date_time != extent.dtEnd ) {
+          if ( boost::posix_time::not_a_date_time != view.dtEnd ) { // will default with extent assignment
+            if ( boost::posix_time::not_a_date_time != extent.dtEnd ) { // no default assignment
               if ( extent.dtEnd > view.dtEnd ) {
                 view.dtEnd = extent.dtEnd;
               }
             }
+            else {}
           }
           else {
             view.dtEnd = extent.dtEnd;
