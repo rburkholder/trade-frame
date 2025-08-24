@@ -242,12 +242,12 @@ boost::posix_time::ptime ChartEntryTime::GetExtentEnd() const {
 }
 
 // there are out-of-order issues or loss-of-data issues if m_bUseThreadSafety is changed while something is in the Queue
-void ChartEntryTime::ClearQueue( void ) {
+void ChartEntryTime::ClearQueue() {
   namespace args = std::placeholders;
   m_queue.Sync( std::bind( &ChartEntryTime::AppendFg, this, args::_1 ) );
 }
 
-void ChartEntryTime::Clear( void ) {
+void ChartEntryTime::Clear() {
   //ChartEntryBase::Clear();
   m_vDateTime.clear();
   m_vChartTime.clear();
