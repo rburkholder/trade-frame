@@ -161,18 +161,18 @@ private:
   ou::ChartEntryIndicator m_ceTradeBBL;
   ou::ChartEntryIndicator m_ceTradeBBDiff;
 
-  ou::ChartEntryIndicator m_ceAskPrice;
-  ou::ChartEntryIndicator m_ceBidPrice;
+  //ou::ChartEntryIndicator m_ceAskPrice;
+  //ou::ChartEntryIndicator m_ceBidPrice;
 
-  ou::ChartEntryVolume m_ceAskVolume;
-  ou::ChartEntryVolume m_ceBidVolume;
+  //ou::ChartEntryVolume m_ceAskVolume;
+  //ou::ChartEntryVolume m_ceBidVolume;
 
   ou::ChartEntryIndicator m_ceEma013;
   ou::ChartEntryIndicator m_ceEma029;
   ou::ChartEntryIndicator m_ceEma050;
   ou::ChartEntryIndicator m_ceEma200;
 
-  ou::ChartEntryIndicator m_ceImbalance;  // temporary general purpose investigation
+  //ou::ChartEntryIndicator m_ceImbalance;  // temporary general purpose investigation
 
   ou::ChartEntryIndicator m_ceEma013_ratio;
   ou::ChartEntryIndicator m_ceEma029_ratio;

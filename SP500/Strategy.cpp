@@ -194,13 +194,13 @@ void Strategy::SetupChart() {
   m_ceTradeBBL.SetName( "BBL" );
   m_cdv.Add( EChartSlot::Price, &m_ceTradeBBL );
 
-  m_ceAskPrice.SetName( "Ask" );
-  m_ceAskPrice.SetColour( c_colourAsk );
-  m_cdv.Add( EChartSlot::Price, &m_ceAskPrice );
+  //m_ceAskPrice.SetName( "Ask" );
+  //m_ceAskPrice.SetColour( c_colourAsk );
+  //m_cdv.Add( EChartSlot::Price, &m_ceAskPrice );
 
-  m_ceBidPrice.SetName( "Bid" );
-  m_ceBidPrice.SetColour( c_colourBid );
-  m_cdv.Add( EChartSlot::Price, &m_ceBidPrice );
+  //m_ceBidPrice.SetName( "Bid" );
+  //m_ceBidPrice.SetColour( c_colourBid );
+  //m_cdv.Add( EChartSlot::Price, &m_ceBidPrice );
 
   m_ceEma013.SetName( "13s ema" );
   m_ceEma013.SetColour( c_colourEma13 );
@@ -285,11 +285,11 @@ void Strategy::SetupChart() {
   //m_cdv.Add( EChartSlot::rtnPrice, &m_ceRtnPrice );
   //m_cdv.Add( EChartSlot::Price, &m_ceRtnPrice_bbl );
 
-  m_cdv.Add( EChartSlot::Imbalance, &m_cemZero );
+  //m_cdv.Add( EChartSlot::Imbalance, &m_cemZero );
 
-  m_ceImbalance.SetName( "Imbalance" );
-  m_ceImbalance.SetColour( ou::Colour::Purple );
-  m_cdv.Add( EChartSlot::Imbalance, &m_ceImbalance );
+  //m_ceImbalance.SetName( "Imbalance" );
+  //m_ceImbalance.SetColour( ou::Colour::Purple );
+  //m_cdv.Add( EChartSlot::Imbalance, &m_ceImbalance );
 
   m_ceTradeBBDiff.SetName( "BB Diff" );
   m_ceTradeBBDiff.SetColour( ou::Colour::Green );
@@ -349,11 +349,11 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
     case TimeFrame::Cancelling:
     case TimeFrame::GoingNeutral:
     case TimeFrame::WaitForRHClose:
-      m_ceAskPrice.Append( dt, quote.Ask() );
+      //m_ceAskPrice.Append( dt, quote.Ask() );
       //m_ceAskVolume.Append( dt, quote.AskSize() );
-      m_ceBidPrice.Append( dt, quote.Bid() );
+      //m_ceBidPrice.Append( dt, quote.Bid() );
       //m_ceBidVolume.Append( dt, -quote.BidSize() );
-      m_ceImbalance.Append( dt, quote.Imbalance() );
+      //m_ceImbalance.Append( dt, quote.Imbalance() );
       break;
   }
 
