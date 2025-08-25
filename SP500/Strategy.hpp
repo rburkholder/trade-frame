@@ -83,7 +83,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, TickVolume, QuoteVolume, Visual, rtnPrice, rtnPriceAvg, rtnPriceSlp, rtnPriceSD, TickRegime, AdvDec, TickStat, rtnAdvDec, Ratio, Predict, PredVec, PL };
+  enum EChartSlot { Price, TickVolume, Imbalance, sd, rtnPrice, rtnPriceAvg, rtnPriceSlp, rtnPriceSD, TickRegime, AdvDec, TickStat, rtnAdvDec, Ratio, Predict, PredVec, PL };
 
   using pOrder_t = ou::tf::Order::pOrder_t;
 
@@ -141,7 +141,7 @@ private:
   size_t m_nEnterLong;
   size_t m_nEnterShort;
 
-  double m_atr; // average tru range
+  //double m_atr; // average tru range
 
   double m_stopInitial;
   double m_stopDelta;
@@ -172,7 +172,7 @@ private:
   ou::ChartEntryIndicator m_ceEma050;
   ou::ChartEntryIndicator m_ceEma200;
 
-  ou::ChartEntryIndicator m_ceVisualize;  // temporary general purpose investigation
+  ou::ChartEntryIndicator m_ceImbalance;  // temporary general purpose investigation
 
   ou::ChartEntryIndicator m_ceEma013_ratio;
   ou::ChartEntryIndicator m_ceEma029_ratio;
