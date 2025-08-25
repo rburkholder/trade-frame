@@ -111,9 +111,11 @@ bool Quote::IsNonZero() const {
 };
 
 double Quote::Imbalance() const {
-  const auto diff( m_nBidSize - m_nAskSize );
-  const auto sum(  m_nBidSize + m_nAskSize );
-  const double imbalance( (double) diff / (double) sum );
+  const double nAskSize( m_nAskSize );
+  const double nBidSize( m_nBidSize );
+  const double diff( nBidSize - nAskSize );
+  const double sum(  nBidSize + nAskSize );
+  const double imbalance( diff / sum );
   return imbalance;
 }
 
