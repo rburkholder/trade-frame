@@ -43,6 +43,7 @@
 
 #include <TFBitsNPieces/TrackOrder.hpp>
 
+#include "Flags.hpp"
 #include "Features.hpp"
 
 class Strategy
@@ -68,6 +69,7 @@ public:
 
   Strategy(
     ou::ChartDataView&
+  , const Flags& // needs to be non-transient
   , fConstructWatch_t&&
   , fConstructPosition_t&&
   , fStart_t&&
@@ -83,7 +85,9 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, TickVolume, Imbalance, sd, rtnPrice, rtnPriceAvg, rtnPriceSlp, rtnPriceSD, TickRegime, AdvDec, TickStat, rtnAdvDec, Ratio, Predict, PredVec, PL };
+  enum EChartSlot { Price, TickVolume, QuoteVolume, Imbalance, sd, rtnPrice, rtnPriceAvg, rtnPriceSlp, rtnPriceSD, TickRegime, AdvDec, TickStat, rtnAdvDec, Ratio, Predict, PredVec, PL };
+
+  const Flags& m_flags;
 
   using pOrder_t = ou::tf::Order::pOrder_t;
 
@@ -161,26 +165,26 @@ private:
   ou::ChartEntryIndicator m_ceTradeBBL;
   ou::ChartEntryIndicator m_ceTradeBBDiff;
 
-  //ou::ChartEntryIndicator m_ceAskPrice;
-  //ou::ChartEntryIndicator m_ceBidPrice;
+  ou::ChartEntryIndicator m_ceAskPrice;
+  ou::ChartEntryIndicator m_ceBidPrice;
 
-  //ou::ChartEntryVolume m_ceAskVolume;
-  //ou::ChartEntryVolume m_ceBidVolume;
+  ou::ChartEntryVolume m_ceAskVolume;
+  ou::ChartEntryVolume m_ceBidVolume;
 
   ou::ChartEntryIndicator m_ceEma013;
   ou::ChartEntryIndicator m_ceEma029;
   ou::ChartEntryIndicator m_ceEma050;
   ou::ChartEntryIndicator m_ceEma200;
 
-  //ou::ChartEntryIndicator m_ceImbalance;  // temporary general purpose investigation
+  ou::ChartEntryIndicator m_ceImbalance;  // temporary general purpose investigation
 
   ou::ChartEntryIndicator m_ceEma013_ratio;
   ou::ChartEntryIndicator m_ceEma029_ratio;
   ou::ChartEntryIndicator m_ceEma050_ratio;
   ou::ChartEntryIndicator m_ceEma200_ratio;
   ou::ChartEntryIndicator m_ceTrade_ratio;
-  //ou::ChartEntryIndicator m_cePrediction_scaled;
-  //ou::ChartEntryIndicator m_cePrediction_descaled;
+  ou::ChartEntryIndicator m_cePrediction_scaled;
+  ou::ChartEntryIndicator m_cePrediction_descaled;
   ou::ChartEntryIndicator m_cePrediction_vector;
 
   ou::ChartEntryIndicator m_ceTickJ_sigmoid;

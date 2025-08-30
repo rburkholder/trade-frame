@@ -330,6 +330,7 @@ void StrategyManager_impl::BuildStrategy_sim( boost::gregorian::date date, ou::C
 
   m_pStrategy = std::make_unique<Strategy>(
     cdv,
+    m_choices.m_flags,
     [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedWatch_t&& f ){ // fConstructWatch_t
       mapHdf5Instrument_t::iterator iter = m_mapHdf5Instrument.find( sIQFeedSymbolName );
       assert( m_mapHdf5Instrument.end() != iter );
@@ -365,6 +366,7 @@ void StrategyManager_impl::BuildStrategy_live( boost::gregorian::date date, ou::
 
   m_pStrategy = std::make_unique<Strategy>(
     cdv,
+    m_choices.m_flags,
     [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedWatch_t&& fWatch ){ // fConstructWatch_t
       m_pComposeInstrument->Compose(
         sIQFeedSymbolName

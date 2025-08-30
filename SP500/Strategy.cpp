@@ -42,11 +42,12 @@ namespace {
 
   static const double c_regimeMinimum( 0.001 );
 
-  static const size_t c_window( 45 );
+  static const size_t c_window( 60 );
 }
 
 Strategy::Strategy(
   ou::ChartDataView& cdv
+, const Flags& flags
 , fConstructWatch_t&& fConstructWatch
 , fConstructPosition_t&& fConstructPosition
 , fStart_t&& fStart
@@ -55,6 +56,7 @@ Strategy::Strategy(
 )
 : ou::tf::DailyTradeTimeFrame<Strategy>()
 , m_cdv( cdv )
+, m_flags( flags )
 , m_fConstructWatch( std::move( fConstructWatch ) )
 , m_fConstructPosition( std::move( fConstructPosition ) )
 , m_fStart( std::move( fStart ) )
@@ -194,13 +196,15 @@ void Strategy::SetupChart() {
   m_ceTradeBBL.SetName( "BBL" );
   m_cdv.Add( EChartSlot::Price, &m_ceTradeBBL );
 
-  //m_ceAskPrice.SetName( "Ask" );
-  //m_ceAskPrice.SetColour( c_colourAsk );
-  //m_cdv.Add( EChartSlot::Price, &m_ceAskPrice );
+  if ( m_flags.bEnableBidAskPrice ) {
+    m_ceAskPrice.SetName( "Ask" );
+    m_ceAskPrice.SetColour( c_colourAsk );
+    m_cdv.Add( EChartSlot::Price, &m_ceAskPrice );
 
-  //m_ceBidPrice.SetName( "Bid" );
-  //m_ceBidPrice.SetColour( c_colourBid );
-  //m_cdv.Add( EChartSlot::Price, &m_ceBidPrice );
+    m_ceBidPrice.SetName( "Bid" );
+    m_ceBidPrice.SetColour( c_colourBid );
+    m_cdv.Add( EChartSlot::Price, &m_ceBidPrice );
+  }
 
   m_ceEma013.SetName( "13s ema" );
   m_ceEma013.SetColour( c_colourEma13 );
@@ -218,50 +222,54 @@ void Strategy::SetupChart() {
   m_ceEma200.SetColour( c_colourEma200 );
   m_cdv.Add( EChartSlot::Price, &m_ceEma200 );
 
-  //m_cdv.Add( EChartSlot::Ratio, &m_cemZero );
+  if ( m_flags.bEnablePrediction ) {
+    m_cdv.Add( EChartSlot::Ratio, &m_cemZero );
 
-  //m_ceTrade_ratio.SetName( "Trade" );
-  //m_ceTrade_ratio.SetColour( c_colourPrice );
-  //m_cdv.Add( EChartSlot::Ratio, &m_ceTrade_ratio );
+    m_ceTrade_ratio.SetName( "Trade" );
+    m_ceTrade_ratio.SetColour( c_colourPrice );
+    m_cdv.Add( EChartSlot::Ratio, &m_ceTrade_ratio );
 
-  //m_ceEma013_ratio.SetName( "13s ema" );
-  //m_ceEma013_ratio.SetColour( c_colourEma13 );
-  //m_cdv.Add( EChartSlot::Ratio, &m_ceEma013_ratio );
+    m_ceEma013_ratio.SetName( "13s ema" );
+    m_ceEma013_ratio.SetColour( c_colourEma13 );
+    m_cdv.Add( EChartSlot::Ratio, &m_ceEma013_ratio );
 
-  //m_ceEma029_ratio.SetName( "29s ema" );
-  //m_ceEma029_ratio.SetColour( c_colourEma29 );
-  //m_cdv.Add( EChartSlot::Ratio, &m_ceEma029_ratio );
+    m_ceEma029_ratio.SetName( "29s ema" );
+    m_ceEma029_ratio.SetColour( c_colourEma29 );
+    m_cdv.Add( EChartSlot::Ratio, &m_ceEma029_ratio );
 
-  //m_ceEma050_ratio.SetName( "50s ema" );
-  //m_ceEma050_ratio.SetColour( c_colourEma50 );
-  //m_cdv.Add( EChartSlot::Ratio, &m_ceEma050_ratio );
+    m_ceEma050_ratio.SetName( "50s ema" );
+    m_ceEma050_ratio.SetColour( c_colourEma50 );
+    m_cdv.Add( EChartSlot::Ratio, &m_ceEma050_ratio );
 
-  //m_ceEma200_ratio.SetName( "200s ema" );
-  //m_ceEma200_ratio.SetColour( c_colourEma200 );
-  //m_cdv.Add( EChartSlot::Ratio, &m_ceEma200_ratio );
+    m_ceEma200_ratio.SetName( "200s ema" );
+    m_ceEma200_ratio.SetColour( c_colourEma200 );
+    m_cdv.Add( EChartSlot::Ratio, &m_ceEma200_ratio );
 
-  //m_ceTickJ_sigmoid.SetName( "TickJ" );
-  //m_ceTickJ_sigmoid.SetColour( c_colourTickJ );
-  //m_cdv.Add( EChartSlot::Ratio, &m_ceTickJ_sigmoid );
+    m_ceTickJ_sigmoid.SetName( "TickJ" );
+    m_ceTickJ_sigmoid.SetColour( c_colourTickJ );
+    m_cdv.Add( EChartSlot::Ratio, &m_ceTickJ_sigmoid );
 
-  //m_ceTickL_sigmoid.SetName( "TickL" );
-  //m_ceTickL_sigmoid.SetColour( c_colourTickL );
-  //m_cdv.Add( EChartSlot::Ratio, &m_ceTickL_sigmoid );
+    m_ceTickL_sigmoid.SetName( "TickL" );
+    m_ceTickL_sigmoid.SetColour( c_colourTickL );
+    m_cdv.Add( EChartSlot::Ratio, &m_ceTickL_sigmoid );
 
-  //m_ceAdvDec_ratio.SetName( "AdvDec" );
-  //m_ceAdvDec_ratio.SetColour( c_colourAdvDec );
-  //m_cdv.Add( EChartSlot::Ratio, &m_ceAdvDec_ratio );
+    m_ceAdvDec_ratio.SetName( "AdvDec" );
+    m_ceAdvDec_ratio.SetColour( c_colourAdvDec );
+    m_cdv.Add( EChartSlot::Ratio, &m_ceAdvDec_ratio );
+  }
 
   m_ceTradeVolume.SetName( "Tick Volume" );
   m_cdv.Add( EChartSlot::TickVolume, &m_ceTradeVolume );
 
-  //m_ceAskVolume.SetName( "Ask" );
-  //m_ceAskVolume.SetColour( ou::Colour::Red );
-  //m_cdv.Add( EChartSlot::QuoteVolume, &m_ceAskVolume );
+  if ( m_flags.bEnableBidAskVolume ) {
+    m_ceAskVolume.SetName( "Ask" );
+    m_ceAskVolume.SetColour( ou::Colour::Red );
+    m_cdv.Add( EChartSlot::QuoteVolume, &m_ceAskVolume );
 
-  //m_ceBidVolume.SetName( "Bid" );
-  //m_ceBidVolume.SetColour( ou::Colour::Blue );
-  //m_cdv.Add( EChartSlot::QuoteVolume, &m_ceBidVolume );
+    m_ceBidVolume.SetName( "Bid" );
+    m_ceBidVolume.SetColour( ou::Colour::Blue );
+    m_cdv.Add( EChartSlot::QuoteVolume, &m_ceBidVolume );
+  }
 
   m_cdv.Add( EChartSlot::TickStat, &m_cemZero );
 
@@ -285,13 +293,15 @@ void Strategy::SetupChart() {
   //m_cdv.Add( EChartSlot::rtnPrice, &m_ceRtnPrice );
   //m_cdv.Add( EChartSlot::Price, &m_ceRtnPrice_bbl );
 
-  //m_cdv.Add( EChartSlot::Imbalance, &m_cemZero );
+  if ( m_flags.bEnableImbalance ) {
+    m_cdv.Add( EChartSlot::Imbalance, &m_cemZero );
 
-  //m_ceImbalance.SetName( "Imbalance" );
-  //m_ceImbalance.SetColour( ou::Colour::Purple );
-  //m_cdv.Add( EChartSlot::Imbalance, &m_ceImbalance );
+    m_ceImbalance.SetName( "Imbalance" );
+    m_ceImbalance.SetColour( ou::Colour::Purple );
+    m_cdv.Add( EChartSlot::Imbalance, &m_ceImbalance );
+  }
 
-  m_ceTradeBBDiff.SetName( "BB Diff" );
+  m_ceTradeBBDiff.SetName( "price sd" );
   m_ceTradeBBDiff.SetColour( ou::Colour::Green );
   m_cdv.Add( EChartSlot::sd, &m_ceTradeBBDiff );
 
@@ -316,14 +326,16 @@ void Strategy::SetupChart() {
   //m_ceRtnAdvDec.SetName( "AdvDec Returns" );
   //m_cdv.Add( EChartSlot::rtnAdvDec, &m_ceRtnAdvDec );
 
-  //m_cePrediction_scaled.SetName( "Predict" );
-  //m_cePrediction_scaled.SetColour( c_colourPrdct );
-  //m_cdv.Add( EChartSlot::Predict, &m_ceTrade_ratio );
-  //m_cdv.Add( EChartSlot::Predict, &m_cePrediction_scaled );
+  if ( m_flags.bEnablePrediction ) {
+    m_cePrediction_scaled.SetName( "Predict" );
+    m_cePrediction_scaled.SetColour( c_colourPrdct );
+    m_cdv.Add( EChartSlot::Predict, &m_ceTrade_ratio );
+    m_cdv.Add( EChartSlot::Predict, &m_cePrediction_scaled );
 
-  //m_cePrediction_descaled.SetName( "Predict" );
-  //m_cePrediction_descaled.SetColour( c_colourPrdct );
-  //m_cdv.Add( EChartSlot::Price, &m_cePrediction_descaled );
+    m_cePrediction_descaled.SetName( "Predict" );
+    m_cePrediction_descaled.SetColour( c_colourPrdct );
+    m_cdv.Add( EChartSlot::Price, &m_cePrediction_descaled );
+  }
 
   m_ceProfitLoss.SetName( "P/L" );
   m_cdv.Add( EChartSlot::PL, &m_cemZero );
@@ -349,11 +361,17 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
     case TimeFrame::Cancelling:
     case TimeFrame::GoingNeutral:
     case TimeFrame::WaitForRHClose:
-      //m_ceAskPrice.Append( dt, quote.Ask() );
-      //m_ceAskVolume.Append( dt, quote.AskSize() );
-      //m_ceBidPrice.Append( dt, quote.Bid() );
-      //m_ceBidVolume.Append( dt, -quote.BidSize() );
-      //m_ceImbalance.Append( dt, quote.Imbalance() );
+      if ( m_flags.bEnableBidAskPrice ) {
+        m_ceAskPrice.Append( dt, quote.Ask() );
+        m_ceBidPrice.Append( dt, quote.Bid() );
+      }
+      if ( m_flags.bEnableBidAskVolume ) {
+        m_ceAskVolume.Append( dt, quote.AskSize() );
+        m_ceBidVolume.Append( dt, -quote.BidSize() );
+      }
+      if ( m_flags.bEnableImbalance ) {
+        m_ceImbalance.Append( dt, quote.Imbalance() );
+      }
       break;
   }
 
@@ -403,9 +421,11 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
 
 void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   m_trade = trade;
+
   const ou::tf::Price::dt_t         dt( trade.DateTime() );
   const ou::tf::Price::price_t   price( trade.Price() );
   const ou::tf::Price::volume_t volume( trade.Volume() );
+
   m_vwp.Add( price, volume );
   m_ceTradePrice.Append(  dt, price );
   m_ceTradeVolume.Append( dt, volume );
@@ -702,8 +722,10 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   Features_scaled scaled; // receives scaled data
   m_fForward( m_features, scaled ); // may call PredictionVector for a live strategy
   const boost::posix_time::ptime dtPrediction( dt + boost::posix_time::time_duration( 0, 0, scaled.distance ) );
-  //m_cePrediction_scaled.Append( dtPrediction, scaled.predicted.dbl );
-  //m_cePrediction_descaled.Append( dtPrediction, scaled.predicted.dbl * scaled.range + scaled.min );
+  if ( m_flags.bEnablePrediction ) {
+    m_cePrediction_scaled.Append( dtPrediction, scaled.predicted.dbl );
+    m_cePrediction_descaled.Append( dtPrediction, scaled.predicted.dbl * scaled.range + scaled.min );
+  }
 
   //BOOST_LOG_TRIVIAL(trace) << "Calc01SecIndicators " << dt << ',' << prediction.DateTime();
 
