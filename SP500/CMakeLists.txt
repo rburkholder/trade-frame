@@ -38,6 +38,7 @@ set(
   file_h
     Config.hpp
     Features.hpp
+    Flags.hpp
     HyperParameters.hpp
     LSTM.hpp
     Model.hpp

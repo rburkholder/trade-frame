@@ -13,43 +13,24 @@
  ************************************************************************/
 
 /*
- * File:    Config.hpp
+ * File:    Flags.hpp
  * Author:  raymond@burkholder.net
  * Project: SP500
- * Created: March 30, 2025 17:59:23
+ * Created: 2025 August 25 10:15:40
  */
 
 #pragma once
 
-#include <string>
-#include <vector>
+struct Flags {
+  bool bEnableBidAskPrice;
+  bool bEnableBidAskVolume;
+  bool bEnableImbalance;
+  bool bEnablePrediction;
 
-#include "Flags.hpp"
-#include "HyperParameters.hpp"
-
-namespace config {
-
-struct Choices {
-
-  enum class EMode {
-    view_training, view_validate
-  , train_then_validate, train_then_save, train_save_validate
-  , load_then_validate
-  , train_then_run_live, load_then_run_live
-  , unknown
-  } eMode;
-
-  using vFileTraining_t = std::vector<std::string>;
-  vFileTraining_t m_vFileTraining; // multiple files for training
-  std::string m_sFileValidate; // single file for validation
-  std::string m_sFileModelLoad;
-  std::string m_sFileModelSave;
-
-  Flags m_flags;
-  HyperParameters m_hp;
-
+  Flags()
+  : bEnableBidAskPrice( false )
+  , bEnableBidAskVolume( false )
+  , bEnableImbalance( false )
+  , bEnablePrediction( false )
+  {}
 };
-
-bool Load( const std::string& sFileName, Choices& );
-
-} // namespace config
