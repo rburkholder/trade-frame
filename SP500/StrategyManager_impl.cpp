@@ -323,7 +323,7 @@ void StrategyManager_impl::RunStrategy_predict_live() {
 
 }
 
-void StrategyManager_impl::BuildStrategy_sim( boost::gregorian::date date, ou::ChartDataView& cdv, Strategy::fForward_t&& fForward ) {
+void StrategyManager_impl::BuildStrategy_sim( const boost::gregorian::date date, ou::ChartDataView& cdv, Strategy::fForward_t&& fForward ) {
 
   using pWatch_t = Strategy::pWatch_t;
   using pPosition_t = Strategy::pPosition_t;
@@ -356,10 +356,12 @@ void StrategyManager_impl::BuildStrategy_sim( boost::gregorian::date date, ou::C
   assert( m_pStrategy );
   BOOST_LOG_TRIVIAL(info) << "simulation date: " << date;
   m_pStrategy->InitForUSEquityExchanges( date );
+  //BOOST_LOG_TRIVIAL(trace) << "market open: " << m_pStrategy->GetRegularHoursOpen();
   m_pStrategy->InitForNextDay(); // due to also collecting futures which started previous evening
+  BOOST_LOG_TRIVIAL(trace) << "market open: " << m_pStrategy->GetRegularHoursOpen();
 }
 
-void StrategyManager_impl::BuildStrategy_live( boost::gregorian::date date, ou::ChartDataView& cdv, Strategy::fForward_t&& fForward ) {
+void StrategyManager_impl::BuildStrategy_live( const boost::gregorian::date date, ou::ChartDataView& cdv, Strategy::fForward_t&& fForward ) {
 
   using pWatch_t = Strategy::pWatch_t;
   using pPosition_t = Strategy::pPosition_t;

@@ -177,8 +177,8 @@ private:
 
   void HandleLoadTreeHdf5Group( const std::string&, const std::string& );
 
-  void BuildStrategy_sim( boost::gregorian::date, ou::ChartDataView&, Strategy::fForward_t&& );
-  void BuildStrategy_live( boost::gregorian::date, ou::ChartDataView&, Strategy::fForward_t&& );
+  void BuildStrategy_sim( const boost::gregorian::date, ou::ChartDataView&, Strategy::fForward_t&& );
+  void BuildStrategy_live( const boost::gregorian::date, ou::ChartDataView&, Strategy::fForward_t&& );
   void RunStrategy_train();
   void RunStrategy_predict_sim();
   void RunStrategy_predict_live();
