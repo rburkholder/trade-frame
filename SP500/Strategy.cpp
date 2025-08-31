@@ -383,17 +383,13 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t price ) {
   if ( ( 0.0 == m_dblPrvPrice ) ) {}
   else {
+
     const double rtn = std::log( price / m_dblPrvPrice ); // natural log, ie ln
-    //m_ceRtnPrice.Append( dt, rtn );
     m_returns.Append( ou::tf::Price( dt, rtn ) );
-    //static const double sigma( 1.5 );
-    const double sd( m_statsReturns.SD() );
-    //const double sig_std( sigma * m_statsReturns.SD() );
-    //const double hi( std::exp( m_statsReturns.MeanY() + sig_std ) );
-    //const double lo( std::exp( m_statsReturns.MeanY() - sig_std ) );
 
     const double mean( m_statsReturns.MeanY() );
     const double slope( m_statsReturns.Slope() );
+    const double sd( m_statsReturns.SD() );
 
     if ( 0.0 <= mean ) {
       if ( 0.0 <= slope ) {
@@ -412,8 +408,8 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
       }
     }
 
-    m_ceRtnPrice_avg.Append( dt, mean / sd ); // todo, run ema, use running_stats n
-    m_ceRtnPrice_slope.Append( dt, slope / sd ); // todo, run ema, use running_stats n
+    m_ceRtnPrice_avg.Append( dt, mean / sd );
+    m_ceRtnPrice_slope.Append( dt, slope / sd );
 
   }
   m_dblPrvPrice = price;
