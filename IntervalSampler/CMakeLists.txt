@@ -62,10 +62,11 @@ target_link_libraries(
   ${PROJECT_NAME}
       TFBitsNPieces
       TFIQFeed
-      TFTimeSeries
+      TFSimulation
       TFVuTrading
       TFTrading
       TFHDF5TimeSeries
+      TFTimeSeries
       OUCommon
       ${Boost_LIBRARIES}
 #      wx_gtk3u_adv-3.1
