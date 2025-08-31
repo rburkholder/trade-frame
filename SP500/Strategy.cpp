@@ -40,7 +40,7 @@ namespace {
   static const double c_tickHi( +1.0 );
   static const double c_tickLo( -1.0 );
 
-  static const double c_regimeMinimum( 0.001 );
+  static const double c_regimeMinimum( 0.05 );
 
   static const size_t c_window( 60 );
 }
@@ -356,28 +356,42 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   m_quote = quote;
   const auto dt( quote.DateTime() );
 
-  switch ( CurrentTimeFrame() ) {
-    case TimeFrame::RHTrading:
-    case TimeFrame::Cancelling:
-    case TimeFrame::GoingNeutral:
-    case TimeFrame::WaitForRHClose:
-      if ( m_flags.bEnableBidAskPrice ) {
-        m_ceAskPrice.Append( dt, quote.Ask() );
-        m_ceBidPrice.Append( dt, quote.Bid() );
-      }
-      if ( m_flags.bEnableBidAskVolume ) {
-        m_ceAskVolume.Append( dt, quote.AskSize() );
-        m_ceBidVolume.Append( dt, -quote.BidSize() );
-      }
-      if ( m_flags.bEnableImbalance ) {
-        m_ceImbalance.Append( dt, quote.Imbalance() );
-      }
-      break;
+  if ( ( 0 == quote.AskSize() ) || ( 0 == quote.BidSize() ) ) { // only a couple are zero
+  //  BOOST_LOG_TRIVIAL(debug)
+  //    << "quote"
+  //    << ',' << quote.BidSize()
+  //    << '@' << quote.Bid()
+  //    << ',' << quote.AskSize()
+  //    << '@' << quote.Ask()
+  //    ;
+
+    switch ( CurrentTimeFrame() ) {
+      case TimeFrame::RHTrading:
+      case TimeFrame::Cancelling:
+      case TimeFrame::GoingNeutral:
+      case TimeFrame::WaitForRHClose:
+        if ( m_flags.bEnableBidAskPrice ) {
+          m_ceAskPrice.Append( dt, quote.Ask() );
+          m_ceBidPrice.Append( dt, quote.Bid() );
+        }
+        if ( m_flags.bEnableBidAskVolume ) {
+          m_ceAskVolume.Append( dt, quote.AskSize() );
+          m_ceBidVolume.Append( dt, -quote.BidSize() );
+        }
+        if ( m_flags.bEnableImbalance ) {
+          m_ceImbalance.Append( dt, quote.Imbalance() );
+        }
+        break;
+      default:
+        break;
+    }
+
+    TimeTick( quote );
+
+    m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
+
   }
 
-  TimeTick( quote );
-
-  m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
 }
 
 void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t price ) {
