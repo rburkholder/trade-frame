@@ -26,11 +26,13 @@ struct Flags {
   bool bEnableBidAskVolume;
   bool bEnableImbalance;
   bool bEnablePrediction;
+  bool bEnableAdvDec;
 
   Flags()
   : bEnableBidAskPrice( false )
   , bEnableBidAskVolume( false )
   , bEnableImbalance( false )
   , bEnablePrediction( false )
+  , bEnableAdvDec( false )
   {}
 };

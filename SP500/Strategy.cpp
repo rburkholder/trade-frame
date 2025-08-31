@@ -253,9 +253,11 @@ void Strategy::SetupChart() {
     m_ceTickL_sigmoid.SetColour( c_colourTickL );
     m_cdv.Add( EChartSlot::Ratio, &m_ceTickL_sigmoid );
 
-    m_ceAdvDec_ratio.SetName( "AdvDec" );
-    m_ceAdvDec_ratio.SetColour( c_colourAdvDec );
-    m_cdv.Add( EChartSlot::Ratio, &m_ceAdvDec_ratio );
+    if ( m_flags.bEnableAdvDec ) {
+      m_ceAdvDec_ratio.SetName( "AdvDec" );
+      m_ceAdvDec_ratio.SetColour( c_colourAdvDec );
+      m_cdv.Add( EChartSlot::Ratio, &m_ceAdvDec_ratio );
+    }
   }
 
   m_ceTradeVolume.SetName( "Tick Volume" );
@@ -281,10 +283,12 @@ void Strategy::SetupChart() {
   m_ceTickL.SetColour( c_colourTickL );
   m_cdv.Add( EChartSlot::TickStat, &m_ceTickL );
 
-  m_ceAdvDec.SetName( "AdvDec" );
-  m_ceAdvDec.SetColour( c_colourAdvDec );
-  m_cdv.Add( EChartSlot::AdvDec, &m_cemZero );
-  m_cdv.Add( EChartSlot::AdvDec, &m_ceAdvDec );
+  if ( m_flags.bEnableAdvDec ) {
+    m_ceAdvDec.SetName( "AdvDec" );
+    m_ceAdvDec.SetColour( c_colourAdvDec );
+    m_cdv.Add( EChartSlot::AdvDec, &m_cemZero );
+    m_cdv.Add( EChartSlot::AdvDec, &m_ceAdvDec );
+  }
 
   //m_statsReturns.SetBBMultiplier( 2.0 );
 
@@ -322,9 +326,6 @@ void Strategy::SetupChart() {
   m_ceTickRegime.SetName( "Tick Regime" );
   m_ceTickRegime.SetColour( c_colourTickRegime );
   m_cdv.Add( EChartSlot::TickRegime, &m_ceTickRegime );
-
-  //m_ceRtnAdvDec.SetName( "AdvDec Returns" );
-  //m_cdv.Add( EChartSlot::rtnAdvDec, &m_ceRtnAdvDec );
 
   if ( m_flags.bEnablePrediction ) {
     m_cePrediction_scaled.SetName( "Predict" );
@@ -506,16 +507,20 @@ double Strategy::CalcTickRegime() {
 }
 
 void Strategy::HandleAdv( const ou::tf::Trade& tick ) {
-  if ( RHTrading() ) {
-    m_features.dblAdv = tick.Price();
-    CalcAdvDec( tick.DateTime() );
+  if ( m_flags.bEnableAdvDec ) {
+    if ( RHTrading() ) {
+      m_features.dblAdv = tick.Price();
+      CalcAdvDec( tick.DateTime() );
+    }
   }
 }
 
 void Strategy::HandleDec( const ou::tf::Trade& tick ) {
-  if ( RHTrading() ) {
-    m_features.dblDec = tick.Price();
-    CalcAdvDec( tick.DateTime() );
+  if ( m_flags.bEnableAdvDec ) {
+    if ( RHTrading() ) {
+      m_features.dblDec = tick.Price();
+      CalcAdvDec( tick.DateTime() );
+    }
   }
 }
 

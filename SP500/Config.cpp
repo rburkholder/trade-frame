@@ -43,6 +43,7 @@ namespace {
   static const std::string sChoice_sFlagEnableBidAskVolume( "flag_enable_bid_ask_volume" );
   static const std::string sChoice_sFlagEnableImbalance( "flag_enable_imbalance" );
   static const std::string sChoice_sFlagEnablePrediction( "flag_enable_prediction" );
+  static const std::string sChoice_sFlagEnableAdvDec( "flag_enable_advdec" );
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bRequired, T& dest ) {
@@ -101,6 +102,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     ( sChoice_sFlagEnableBidAskVolume.c_str(), po::value<bool>( & choices.m_flags.bEnableBidAskVolume )->default_value( false ), "enalbe bid/ask volume on chart" )
     ( sChoice_sFlagEnableImbalance.c_str(), po::value<bool>( &choices.m_flags.bEnableImbalance )->default_value( false ), "enable imbalance indicator" )
     ( sChoice_sFlagEnablePrediction.c_str(), po::value<bool>( &choices.m_flags.bEnablePrediction )->default_value( false ), "enable prediction" )
+    ( sChoice_sFlagEnableAdvDec.c_str(), po::value<bool>( &choices.m_flags.bEnableAdvDec )->default_value( false ), "enable adv/dec" )
     ;
     po::variables_map vm;
 
@@ -123,6 +125,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       bOk &= parse<bool>( sFileName, vm, sChoice_sFlagEnableBidAskVolume, false, choices.m_flags.bEnableBidAskVolume );
       bOk &= parse<bool>( sFileName, vm, sChoice_sFlagEnableImbalance, false, choices.m_flags.bEnableImbalance );
       bOk &= parse<bool>( sFileName, vm, sChoice_sFlagEnablePrediction, false, choices.m_flags.bEnablePrediction );
+      bOk &= parse<bool>( sFileName, vm, sChoice_sFlagEnableAdvDec, false, choices.m_flags.bEnableAdvDec );
     }
 
     if ( 100.0 > choices.m_hp.m_nEpochs ) {
