@@ -34,6 +34,14 @@ namespace OptionSide {  // this doesn't work well with the existing enumerations
   const char* ShortName[] = { "U", "P", "C" };
 }
 
+namespace OrderSide {
+  const char* Name[] = { "UNKN", "BUY", "SELL", "SSHORT" }; // for IB
+}
+
+namespace TimeInForce {
+  const char* Name[] = { "UNKN", "DAY", "GTC", "ATO", "IOC", "FOK", "GTC", "GTD", "GAC", "ATC", "AUC", "OPG" };
+}
+
 namespace Currency {
 
   namespace qi = boost::spirit::qi;
@@ -118,14 +126,6 @@ namespace Currency {
     return currency;
   }
 
-}
-
-namespace OrderSide {
-  const char* Name[] = { "UNKN", "BUY", "SELL", "SSHORT" }; // for IB
-}
-
-namespace TimeInForce {
-  const char* Name[] = { "UNKN", "DAY", "GTC", "ATO", "IOC", "FOK", "GTC", "GTD", "GAC", "ATC", "AUC", "OPG" };
 }
 
 } // namespace tf
