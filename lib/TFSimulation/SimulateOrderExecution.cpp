@@ -182,7 +182,7 @@ bool OrderExecution::ProcessMarketOrders( const Quote& quote ) {
       << idOrder
       << ",mkt"
       << "," << nId
-      << "," << orderSide
+      << "," << ou::tf::OrderSide::Name[ orderSide ]
       << "," << nOrderQuanRemaining << "-" << quanApplied << "," << dblPrice
       ;
 
@@ -229,7 +229,7 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
       if ( dt > order.GetGoodTillDate() ) {
         BOOST_LOG_TRIVIAL(trace)
           << "simulate,gtd,expired"
-          << ",lmit_ask"
+          << ",lmt_ask"
           << ",quote dt=" << dt
           << ",order gtd=" << order.GetGoodTillDate()
           << "," << order.GetInstrument()->GetInstrumentName()
@@ -313,7 +313,7 @@ bool OrderExecution::ProcessLimitOrders( const Quote& quote ) {
       if ( dt > order.GetGoodTillDate() ) {
         BOOST_LOG_TRIVIAL(trace)
           << "simulate,gtd,expired"
-          << ",lmit_bid"
+          << ",lmt_bid"
           << ",quote dt=" << dt
           << ",order gtd=" << order.GetGoodTillDate()
           << "," << order.GetInstrument()->GetInstrumentName()
