@@ -88,6 +88,7 @@ Strategy::Strategy(
 , m_ePrice( EPrice::neutral )
 //, m_atr {}
 , m_stopInitial {}, m_stopDelta {}, m_stopTrail {}
+, m_dblQuoteImbalance {}
 {
   SetupChart();
 
@@ -396,7 +397,8 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
           m_ceBidVolume.Append( dt, -quote.BidSize() );
         }
         if ( m_flags.bEnableImbalance ) {
-          m_ceImbalance.Append( dt, quote.Imbalance() );
+          m_dblQuoteImbalance = quote.Imbalance();
+          m_ceImbalance.Append( dt, m_dblQuoteImbalance );
         }
         break;
       default:
@@ -405,10 +407,10 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
     TimeTick( quote );
 
-    m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 ); // provides a 1 sec pulse for checking the algorithm
+    // provides a 1 sec pulse for checking the algorithm after tick activities
+    m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 );
 
   }
-
 }
 
 void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t price ) {
@@ -439,7 +441,10 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
       }
     }
 
+    //m_ceRtnPrice_avg.Append( dt, mean );
     m_ceRtnPrice_avg.Append( dt, mean / sd );
+
+    //m_ceRtnPrice_slope.Append( dt, slope );
     m_ceRtnPrice_slope.Append( dt, slope / sd );
 
   }

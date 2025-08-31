@@ -151,6 +151,8 @@ private:
   double m_stopDelta;
   double m_stopTrail;
 
+  double m_dblQuoteImbalance;
+
   ou::ChartDataView& m_cdv;
 
   ou::ChartEntryMark m_cemPosOne;
