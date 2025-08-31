@@ -31,7 +31,7 @@ public:
   DoubleBufferRef( TS& tsBackground, TS& tsForeground );
   virtual ~DoubleBufferRef();
   void Append( const datum_t& );
-  void Sync( void );
+  void Sync();
 protected:
 private:
   std::mutex m_mutex;
@@ -52,7 +52,7 @@ void DoubleBufferRef<TS>::Append( const datum_t& datum ) {
 }
 
 template<typename TS>
-void DoubleBufferRef<TS>::Sync( void ) {
+void DoubleBufferRef<TS>::Sync() {
   std::scoped_lock<std::mutex> guard(m_mutex);
   while ( m_tsInbound.Size() > m_tsBatched.Size() ) {
     m_tsBatched.Append( m_tsInbound[ m_tsBatched.Size() ] );
@@ -68,18 +68,18 @@ class DoubleBuffer {
 public:
   typedef std::vector<datum_t> vDatum_t;
   typedef typename vDatum_t::size_type size_type;
-  DoubleBuffer( void );
+  DoubleBuffer();
   virtual ~DoubleBuffer() {}
 
   void Append( const datum_t& ); // sync'd
-  size_type Sync( void ); // uses lock
+  size_type Sync(); // uses lock
   void Reserve( size_type nSize ); // sync'd
-  void Clear( void ); // sync'd
-  size_type Size( void ); // sync'd
+  void Clear(); // sync'd
+  size_type Size(); // sync'd
 
-  const datum_t* GetRef( void ) const;  // not sync'd
+  const datum_t* GetRef() const;  // not sync'd
   const datum_t* operator[]( size_type ix ) const; // not sync'd
-  const vDatum_t& GetVector( void ) const { return m_tsBatched; } // not sync'd
+  const vDatum_t& GetVector() const { return m_tsBatched; } // not sync'd
 protected:
 private:
   std::mutex m_mutex;
@@ -88,7 +88,7 @@ private:
 };
 
 template<typename datum_t>
-DoubleBuffer<datum_t>::DoubleBuffer( void ) {}
+DoubleBuffer<datum_t>::DoubleBuffer() {}
 
 template<typename datum_t>
 void DoubleBuffer<datum_t>::Append( const datum_t& datum ) {
@@ -97,14 +97,14 @@ void DoubleBuffer<datum_t>::Append( const datum_t& datum ) {
 }
 
 template<typename datum_t>
-void DoubleBuffer<datum_t>::Clear( void ) {
+void DoubleBuffer<datum_t>::Clear() {
   std::scoped_lock<std::mutex> guard(m_mutex);
   m_tsInbound.clear();
   m_tsBatched.clear();
 }
 
 template<typename datum_t>
-typename DoubleBuffer<datum_t>::size_type DoubleBuffer<datum_t>::Sync( void ) {
+typename DoubleBuffer<datum_t>::size_type DoubleBuffer<datum_t>::Sync() {
   std::scoped_lock<std::mutex> guard(m_mutex);
   while ( m_tsInbound.size() > m_tsBatched.size() ) {
     m_tsBatched.push_back( m_tsInbound[ m_tsBatched.size() ] );
@@ -113,12 +113,12 @@ typename DoubleBuffer<datum_t>::size_type DoubleBuffer<datum_t>::Sync( void ) {
 }
 
 template<typename datum_t>
-typename DoubleBuffer<datum_t>::size_type DoubleBuffer<datum_t>::Size( void ) {
+typename DoubleBuffer<datum_t>::size_type DoubleBuffer<datum_t>::Size() {
   return Sync();
 }
 
 template<typename datum_t>
-const datum_t* DoubleBuffer<datum_t>::GetRef( void ) const {
+const datum_t* DoubleBuffer<datum_t>::GetRef() const {
   //Sync();
   return &m_tsBatched[0];
 }
