@@ -357,7 +357,8 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   m_quote = quote;
   const auto dt( quote.DateTime() );
 
-  if ( ( 0 == quote.AskSize() ) || ( 0 == quote.BidSize() ) ) { // only a couple are zero
+  if ( ( 0 == quote.AskSize() ) || ( 0 == quote.BidSize() ) ) {} // only a couple are zero
+  else {
   //  BOOST_LOG_TRIVIAL(debug)
   //    << "quote"
   //    << ',' << quote.BidSize()
