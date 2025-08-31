@@ -63,14 +63,12 @@ target_link_libraries(
   ${PROJECT_NAME}
       TFBitsNPieces
       TFInteractiveBrokers
-      TFSimulation
       TFVuTrading
-      TFTrading
       TFOptions
-      TFTrading
       TFIQFeed
-      TFHDF5TimeSeries
+      TFSimulation
       TFTrading
+      TFHDF5TimeSeries
       OUCommon
       OUSQL
       OUSqlite
