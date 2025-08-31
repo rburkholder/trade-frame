@@ -21,6 +21,11 @@
 
 #include <boost/log/trivial.hpp>
 
+// this define is required to prevent interference with libtorch
+//   but may have been fixed now with https://github.com/pytorch/kineto/pull/1106/commits
+#define FMT_HEADER_ONLY 1
+#include <fmt/core.h>
+
 #include "Strategy.hpp"
 
 namespace {
@@ -43,6 +48,9 @@ namespace {
   static const double c_regimeMinimum( 0.05 );
 
   static const size_t c_window( 60 );
+
+  static const double c_ImbalanceMarker( 0.7 );
+
 }
 
 Strategy::Strategy(
@@ -181,9 +189,10 @@ void Strategy::ValidateAndStart() {
 
 void Strategy::SetupChart() {
 
-  m_cemPosOne.AddMark( +1.0, ou::Colour::Black,   "+1" );
+  m_cemPosOne.AddMark( +1.0, ou::Colour::Black, "+1" );
     m_cemZero.AddMark(  0.0, ou::Colour::Black, "zero" );
-  m_cemNegOne.AddMark( -1.0, ou::Colour::Black,   "-1" );
+  m_cemNegOne.AddMark( -1.0, ou::Colour::Black, "-1" );
+
   m_cemRegimMin.AddMark( c_regimeMinimum, ou::Colour::Red,   "min" );
 
   m_ceTradePrice.SetName( "Trade" );
@@ -290,15 +299,21 @@ void Strategy::SetupChart() {
     m_cdv.Add( EChartSlot::AdvDec, &m_ceAdvDec );
   }
 
-  //m_statsReturns.SetBBMultiplier( 2.0 );
-
   //m_ceRtnPrice.SetName( "Price Returns" );
   //m_cdv.Add( EChartSlot::Price, &m_ceRtnPrice_bbu );
   //m_cdv.Add( EChartSlot::rtnPrice, &m_ceRtnPrice );
   //m_cdv.Add( EChartSlot::Price, &m_ceRtnPrice_bbl );
 
   if ( m_flags.bEnableImbalance ) {
+
+    static const std::string sMarker( fmt::format( "{:.{}f}", -c_ImbalanceMarker, 1 ) );
+
+    m_cemImbalanceUpper.AddMark( +c_ImbalanceMarker, ou::Colour::Black, '+' + sMarker );
+    m_cemImbalanceLower.AddMark( -c_ImbalanceMarker, ou::Colour::Black, '-' + sMarker );
+
+    m_cdv.Add( EChartSlot::Imbalance, &m_cemImbalanceUpper );
     m_cdv.Add( EChartSlot::Imbalance, &m_cemZero );
+    m_cdv.Add( EChartSlot::Imbalance, &m_cemImbalanceLower );
 
     m_ceImbalance.SetName( "Imbalance" );
     m_ceImbalance.SetColour( ou::Colour::Purple );

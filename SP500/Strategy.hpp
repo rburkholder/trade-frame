@@ -176,7 +176,9 @@ private:
   ou::ChartEntryIndicator m_ceEma050;
   ou::ChartEntryIndicator m_ceEma200;
 
-  ou::ChartEntryIndicator m_ceImbalance;  // temporary general purpose investigation
+  ou::ChartEntryMark m_cemImbalanceUpper;
+  ou::ChartEntryIndicator m_ceImbalance;
+  ou::ChartEntryMark m_cemImbalanceLower;
 
   ou::ChartEntryIndicator m_ceEma013_ratio;
   ou::ChartEntryIndicator m_ceEma029_ratio;
@@ -254,6 +256,7 @@ private:
     };
 
   void UpdatePriceReturn( ou::tf::Price::dt_t, ou::tf::Price::price_t );
+
   void UpdatePositionProgressUp( const ou::tf::Trade& );
   void UpdatePositionProgressDn( const ou::tf::Trade& );
 
