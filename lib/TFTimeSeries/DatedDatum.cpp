@@ -110,6 +110,9 @@ bool Quote::IsNonZero() const {
   return bOk;
 };
 
+// Some background on imbalance from bid/ask/midpoint view:
+//  Bias in the Effective Bid-Ask Spread
+//  https://www.hec.edu/sites/default/files/documents/overestEspr-v12.pdf
 double Quote::Imbalance() const {
   const double nAskSize( m_nAskSize );
   const double nBidSize( m_nBidSize );
