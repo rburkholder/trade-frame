@@ -113,11 +113,11 @@ public:
 
   using dt_t = typename datum_t::dt_t;
 
-  TimeSeries<T>();
-  TimeSeries<T>( size_type nSize );
-  TimeSeries<T>( const std::string& sName, size_type nSize = 0 );
-  TimeSeries<T>( const TimeSeries<T>& );
-  virtual ~TimeSeries<T>();
+  TimeSeries();
+  TimeSeries( size_type nSize );
+  TimeSeries( const std::string& sName, size_type nSize = 0 );
+  TimeSeries( const TimeSeries<T>& );
+  virtual ~TimeSeries();
 
   size_type Size() const { return m_vSeries.size(); }
 
