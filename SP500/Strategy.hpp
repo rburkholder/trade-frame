@@ -161,7 +161,8 @@ private:
   ou::ChartEntryMark m_cemRegimMin;
 
   ou::ChartEntryIndicator m_ceTradePrice;
-  ou::ChartEntryVolume    m_ceTradeVolume;
+  ou::ChartEntryVolume    m_ceTradeVolumeUp;
+  ou::ChartEntryVolume    m_ceTradeVolumeDn;
 
   ou::ChartEntryIndicator m_ceTradeBBU;
   ou::ChartEntryIndicator m_ceTradeBBL;
@@ -213,7 +214,6 @@ private:
   ou::tf::Prices m_prices; // might use the underlying directly?
   ou::tf::TSSWMinMax m_minmaxPrices; // ATR style volatility indicator
   ou::tf::TSSWStatsPrice m_statsPrices;
-
 
   double m_dblPrvPrice;
   //ou::ChartEntryIndicator m_ceRtnPrice_bbu;

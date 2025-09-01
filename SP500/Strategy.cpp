@@ -273,8 +273,12 @@ void Strategy::SetupChart() {
     }
   }
 
-  m_ceTradeVolume.SetName( "Tick Volume" );
-  m_cdv.Add( EChartSlot::TickVolume, &m_ceTradeVolume );
+  m_ceTradeVolumeUp.SetName( "Volume - Buy" );
+  m_ceTradeVolumeUp.SetColour( ou::Colour::Green );
+  m_cdv.Add( EChartSlot::TickVolume, &m_ceTradeVolumeUp );
+  m_ceTradeVolumeDn.SetName( "Volume - Sell" );
+  m_ceTradeVolumeDn.SetColour( ou::Colour::Red );
+  m_cdv.Add( EChartSlot::TickVolume, &m_ceTradeVolumeDn );
 
   if ( m_flags.bEnableBidAskVolume ) {
     m_ceAskVolume.SetName( "Ask" );
@@ -472,6 +476,9 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
 }
 
 void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
+
+  const bool direction( m_quote.LeeReady( m_trade.Price(), trade.Price() ) );
+
   m_trade = trade;
 
   const ou::tf::Price::dt_t         dt( trade.DateTime() );
@@ -480,7 +487,14 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
   m_vwp.Add( price, volume );
   m_ceTradePrice.Append(  dt, price );
-  m_ceTradeVolume.Append( dt, volume );
+
+  // more information might be available if this can be matched to walking the quotes/order book
+  if ( direction ) {
+    m_ceTradeVolumeUp.Append( dt, volume );
+  }
+  else {
+    m_ceTradeVolumeDn.Append( dt, -volume );
+  }
 
   UpdatePriceReturn( dt, price );
 
