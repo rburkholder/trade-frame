@@ -103,6 +103,8 @@ public:
 
   double Imbalance() const;  // Positive (negative) imbalance indicates an order book that is heavier on the bid (ask) side
 
+  bool LeeReady( double, double ) const; // false sell, true buy
+
   static H5::CompType* DefineDataType( H5::CompType* pType = NULL );
   static uint64_t Signature() { return DatedDatum::Signature() * 10000 + 1133; } // DatedDatum -> Quote
 

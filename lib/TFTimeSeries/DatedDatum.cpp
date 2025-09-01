@@ -119,6 +119,39 @@ double Quote::Imbalance() const {
   return imbalance;
 }
 
+// Trade Direction
+//   example: Lee and Ready (1991) algorithm,
+//   in theory:
+//     Inferring Trade Directions in Fast Markets
+//     https://dauphine.psl.eu/fileadmin/mediatheque/chaires/fintech/articles/1_UPDATE_Simon_Jurkatis_YFS2019.pdf
+//     "The idea is that a trade executed against the ask
+//      must leave its foot-print on the ask-side,
+//      while a trade against the bid must leave its footprint on the bid-side. "
+
+/*
+  LR algorithm (Lee and Ready, 1991) is the most popular choice to classify trade
+  data into the orders of the liquidity demanding and supplying sides. It compares the
+  transaction price to the mid-point of the ask and bid quote at the time the trade took
+  place. If the transaction price is greater (smaller) than the mid-point the liquidity
+  demanding side is the buyer (seller), i.e. the trade is buyer-(seller-)initiated. If the
+  transaction price is equal to the mid-point, the trade initiator is assigned according
+  to the tick-test. That is, if the transaction price is greater (smaller) than the last
+  price that is not equal to the current transaction price, the trade was buyer-(seller-
+  )initiated.
+*/
+
+bool Quote::LeeReady( double prv, double cur ) const {
+  bool b( false );  //
+  const double mid( Midpoint() );
+  if ( mid == cur ) {
+    b = ( prv < cur );
+  }
+  else {
+    b = ( cur > mid );
+  }
+  return b;
+}
+
 H5::CompType* Quote::DefineDataType( H5::CompType* pComp ) {
   if ( NULL == pComp ) pComp = new H5::CompType( sizeof( Quote ) );
   DatedDatum::DefineDataType( pComp );
