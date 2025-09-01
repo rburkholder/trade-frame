@@ -178,9 +178,8 @@ private:
   ou::ChartEntryIndicator m_ceEma050;
   ou::ChartEntryIndicator m_ceEma200;
 
-  ou::ChartEntryMark m_cemImbalanceUpper;
+  ou::ChartEntryMark m_cemImbalanceMarker;
   ou::ChartEntryIndicator m_ceImbalance;
-  ou::ChartEntryMark m_cemImbalanceLower;
 
   ou::ChartEntryIndicator m_ceEma013_ratio;
   ou::ChartEntryIndicator m_ceEma029_ratio;
@@ -221,9 +220,10 @@ private:
   //ou::ChartEntryIndicator m_ceRtnPrice;
   //ou::ChartEntryIndicator m_ceRtnPrice_bbl;
 
+  ou::ChartEntryMark m_cemRtnPriceAvgMarkers;
   ou::ChartEntryIndicator m_ceRtnPrice_avg;
+  ou::ChartEntryMark m_cemRtnPriceSlopeMarkers;
   ou::ChartEntryIndicator m_ceRtnPrice_slope;
-  //ou::ChartEntryIndicator m_ceRtnPrice_sd;
 
   enum class EPrice { buy, sell, stop_sell, stop_buy, neutral };
   EPrice m_ePrice;

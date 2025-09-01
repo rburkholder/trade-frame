@@ -51,6 +51,9 @@ namespace {
 
   static const double c_ImbalanceMarker( 0.7 );
 
+  static const double c_ReturnsAverageMarker( 0.045 );
+  static const double c_ReturnsSlopeMarker( 0.0000045 );
+
 }
 
 Strategy::Strategy(
@@ -307,14 +310,13 @@ void Strategy::SetupChart() {
 
   if ( m_flags.bEnableImbalance ) {
 
-    static const std::string sMarker( fmt::format( "{:.{}f}", -c_ImbalanceMarker, 1 ) );
+    static const std::string sMarker( fmt::format( "{:.{}f}", c_ImbalanceMarker, 1 ) );
 
-    m_cemImbalanceUpper.AddMark( +c_ImbalanceMarker, ou::Colour::Black, '+' + sMarker );
-    m_cemImbalanceLower.AddMark( -c_ImbalanceMarker, ou::Colour::Black, '-' + sMarker );
+    m_cemImbalanceMarker.AddMark( +c_ImbalanceMarker, ou::Colour::Black, '+' + sMarker );
+    m_cemImbalanceMarker.AddMark( -c_ImbalanceMarker, ou::Colour::Black, '-' + sMarker );
 
-    m_cdv.Add( EChartSlot::Imbalance, &m_cemImbalanceUpper );
+    m_cdv.Add( EChartSlot::Imbalance, &m_cemImbalanceMarker );
     m_cdv.Add( EChartSlot::Imbalance, &m_cemZero );
-    m_cdv.Add( EChartSlot::Imbalance, &m_cemImbalanceLower );
 
     m_ceImbalance.SetName( "Imbalance" );
     m_ceImbalance.SetColour( ou::Colour::Purple );
@@ -325,9 +327,27 @@ void Strategy::SetupChart() {
   m_ceTradeBBDiff.SetColour( ou::Colour::Green );
   m_cdv.Add( EChartSlot::sd, &m_ceTradeBBDiff );
 
+  {
+    static const std::string sMarker( fmt::format( "{:.{}f}", c_ReturnsAverageMarker, 3 ) );
+
+    m_cemRtnPriceAvgMarkers.AddMark( +c_ReturnsAverageMarker, ou::Colour::Black, '+' + sMarker );
+    m_cemRtnPriceAvgMarkers.AddMark( -c_ReturnsAverageMarker, ou::Colour::Black, '-' + sMarker );
+
+    m_cdv.Add( EChartSlot::rtnPriceAvg, &m_cemRtnPriceAvgMarkers );
+  }
+
   m_cdv.Add( EChartSlot::rtnPriceAvg, &m_cemZero );
   m_ceRtnPrice_avg.SetName( "Returns - Average" );
   m_cdv.Add( EChartSlot::rtnPriceAvg, &m_ceRtnPrice_avg );
+
+  {
+    static const std::string sMarker( fmt::format( "{:.{}f}", c_ReturnsSlopeMarker, 7 ) );
+
+    m_cemRtnPriceSlopeMarkers.AddMark( +c_ReturnsSlopeMarker, ou::Colour::Black, '+' + sMarker );
+    m_cemRtnPriceSlopeMarkers.AddMark( -c_ReturnsSlopeMarker, ou::Colour::Black, '-' + sMarker );
+
+    m_cdv.Add( EChartSlot::rtnPriceSlp, &m_cemRtnPriceSlopeMarkers );
+  }
 
   m_cdv.Add( EChartSlot::rtnPriceSlp, &m_cemZero );
   m_ceRtnPrice_slope.SetName( "Returns - Slope" );
