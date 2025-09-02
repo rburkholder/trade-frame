@@ -147,7 +147,7 @@ bool Quote::LeeReady( double prv, double cur ) const {
   bool b( false );  //
   const double mid( Midpoint() );
   if ( mid == cur ) {
-    b = ( prv < cur );
+    b = ( prv <= cur ); // bias on the buy side
   }
   else {
     b = ( cur > mid );
