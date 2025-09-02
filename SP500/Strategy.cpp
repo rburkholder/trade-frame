@@ -484,8 +484,8 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
     const double mean(  m_statsReturns.MeanY() / sd  );
     const double slope( m_statsReturns.Slope() / sd );
 
-    m_ixprvCrossing = ( m_ixprvCrossing + 1 ) % 1;
-    m_ixcurCrossing = ( m_ixcurCrossing + 1 ) % 1;
+    m_ixprvCrossing = ( m_ixprvCrossing + 1 ) % 2;
+    m_ixcurCrossing = ( m_ixcurCrossing + 1 ) % 2;
 
     rCross_t& rcs( m_crossing[ m_ixcurCrossing ] );
 
