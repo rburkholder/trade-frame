@@ -88,10 +88,10 @@ Strategy::Strategy(
 , m_statsReturns( m_returns, boost::posix_time::time_duration( 0, 0, c_window ) )
 , m_minmaxPrices( m_prices,  boost::posix_time::time_duration( 0, 0, c_window ) )
 , m_statsPrices(  m_prices,  boost::posix_time::time_duration( 0, 0, c_window ) )
-, m_ePrice( EPrice::neutral )
 //, m_atr {}
 , m_stopInitial {}, m_stopDelta {}, m_stopTrail {}
 , m_dblQuoteImbalance {}
+, m_ixcurCrossing( 0 ), m_ixprvCrossing( 1 )
 {
   SetupChart();
 
@@ -422,6 +422,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
         }
         if ( m_flags.bEnableImbalance ) {
           m_dblQuoteImbalance = quote.Imbalance();
+          UpdateECross( m_ECross_imbalance, c_ImbalanceMarker, m_dblQuoteImbalance );
           m_ceImbalance.Append( dt, m_dblQuoteImbalance );
         }
         break;
@@ -437,39 +438,68 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   }
 }
 
+void Strategy::UpdateECross( ECross& ec, const double mark, const double value ) {
+  if ( 0.0 == value ) {
+    ec = ECross::zero;
+  }
+  else {
+    if ( 0.0 < value ) {
+      if ( +mark == value ) {
+        ec = ECross::uppermk;
+      }
+      else {
+        if ( +mark > value ) {
+          ec = ECross::upperlo;
+        }
+        else { // +mark < value
+          ec = ECross::upperhi;
+        }
+      }
+    }
+    else { // 0.0 > mean
+      if ( -mark == value ) {
+        ec = ECross::lowermk;
+      }
+      else {
+        if ( -mark > value ) {
+          ec = ECross::lowerlo;
+        }
+        else { // -mark < value
+          ec = ECross::lowerhi;
+        }
+      }
+    }
+  }
+}
+
 void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t price ) {
+
   if ( ( 0.0 == m_dblPrvPrice ) ) {}
   else {
 
     const double rtn = std::log( price / m_dblPrvPrice ); // natural log, ie ln
     m_returns.Append( ou::tf::Price( dt, rtn ) );
 
-    const double mean( m_statsReturns.MeanY() );
-    const double slope( m_statsReturns.Slope() );
-    const double sd( m_statsReturns.SD() );
+    const double sd(    m_statsReturns.SD() );
+    const double mean(  m_statsReturns.MeanY() / sd  );
+    const double slope( m_statsReturns.Slope() / sd );
 
-    if ( 0.0 <= mean ) {
-      if ( 0.0 <= slope ) {
-        m_ePrice = EPrice::buy;
-      }
-      else { // 0.0 > slope
-        m_ePrice = EPrice::stop_sell;
-      }
+    m_ixprvCrossing = ( m_ixprvCrossing + 1 ) % 1;
+    m_ixcurCrossing = ( m_ixcurCrossing + 1 ) % 1;
+
+    rCross_t& rcs( m_crossing[ m_ixcurCrossing ] );
+
+    {
+      ECross& ec( rcs[ rtn_mean ].cross );
+      UpdateECross( ec, c_ReturnsAverageMarker, mean );
     }
-    else { // 0.0 > mean
-      if ( 0.0 <= slope ) {
-        m_ePrice = EPrice::stop_buy;
-      }
-      else { // 0.0 > slope
-        m_ePrice = EPrice::sell;
-      }
+    m_ceRtnPrice_avg.Append( dt, mean );
+
+    {
+      ECross& ec( rcs[ rtn_slope ].cross );
+      UpdateECross( ec, c_ReturnsSlopeMarker, slope );
     }
-
-    //m_ceRtnPrice_avg.Append( dt, mean );
-    m_ceRtnPrice_avg.Append( dt, mean / sd );
-
-    //m_ceRtnPrice_slope.Append( dt, slope );
-    m_ceRtnPrice_slope.Append( dt, slope / sd );
+    m_ceRtnPrice_slope.Append( dt, slope );
 
   }
   m_dblPrvPrice = price;
@@ -641,6 +671,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   //const auto price( trade.Price() );
   switch ( m_pTrackOrder->State()() ) {
     case ETradeState::Search:
+      /*
       switch ( m_ePrice ) {
         case EPrice::buy:
           //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
@@ -675,6 +706,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
         case EPrice::neutral:
           break;
       }
+      */
       break;
     case ETradeState::EntrySubmittedUp:
       if ( !m_bTickRegimeIncreased ) {

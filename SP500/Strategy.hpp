@@ -225,9 +225,6 @@ private:
   ou::ChartEntryMark m_cemRtnPriceSlopeMarkers;
   ou::ChartEntryIndicator m_ceRtnPrice_slope;
 
-  enum class EPrice { buy, sell, stop_sell, stop_buy, neutral };
-  EPrice m_ePrice;
-
   double m_dblTickRegime;
   ou::ChartEntryIndicator m_ceTickRegime;
   double m_dblPrvAdvDec;
@@ -241,6 +238,31 @@ private:
   ou::ChartEntryIndicator m_ceProfitLoss;
 
   ou::tf::BarFactory m_bfQuotes01Sec;
+
+  // use a sequence of ECross to maintain history and imply direction
+  // use matrix with probabilities to suggest next state?
+  // how much history is required? start with prv & cur
+  enum class ECross { lowerlo, lowermk, lowerhi, zero, upperlo, uppermk, upperhi }; // fuzzy touch? (how to measure fuzzy?)
+  enum EIndicator { // used as index into rCross_t[n][ix]
+    rtn_mean
+  , rtn_slope
+  , _count
+  };
+
+  struct CrossState {
+    ECross cross;
+    double value;
+    CrossState(): cross( ECross::zero ), value {} {}
+  };
+
+  using rCross_t = std::array<CrossState, (size_t)EIndicator::_count>;
+  rCross_t m_crossing[ 2 ]; // current switches  0 -> 1 -> 0 via mod ( % 1 )
+  size_t m_ixprvCrossing;
+  size_t m_ixcurCrossing;
+
+  ECross m_ECross_imbalance;
+
+  void UpdateECross( ECross&, const double mark, const double value );
 
   template<unsigned int n>
   void UpdateEma( const ou::tf::Price& price_, double& ema, ou::ChartEntryIndicator& cei ) {
