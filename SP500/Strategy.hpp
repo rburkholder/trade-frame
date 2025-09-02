@@ -161,6 +161,7 @@ private:
   ou::ChartEntryMark m_cemRegimMin;
 
   ou::ChartEntryIndicator m_ceTradePrice;
+  ou::ChartEntryVolume    m_ceTradeVolume;
   ou::ChartEntryVolume    m_ceTradeVolumeUp;
   ou::ChartEntryVolume    m_ceTradeVolumeDn;
 
