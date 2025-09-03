@@ -333,13 +333,13 @@ void Strategy::SetupChart() {
 
   m_ceTradeBBDiff.SetName( "price sd" );
   m_ceTradeBBDiff.SetColour( ou::Colour::Green );
-  m_cdv.Add( EChartSlot::sd, &m_ceTradeBBDiff );
+  m_cdv.Add( EChartSlot::rtnPriceSD, &m_ceTradeBBDiff );
 
   {
     static const std::string sMarker( fmt::format( "{:.{}f}", c_ReturnsAverageMarker, 3 ) );
 
-    m_cemRtnPriceAvgMarkers.AddMark( +c_ReturnsAverageMarker, ou::Colour::Black, '+' + sMarker );
-    m_cemRtnPriceAvgMarkers.AddMark( -c_ReturnsAverageMarker, ou::Colour::Black, '-' + sMarker );
+    m_cemRtnPriceAvgMarkers.AddMark( +c_ReturnsAverageMarker, ou::Colour::Green, '+' + sMarker );
+    m_cemRtnPriceAvgMarkers.AddMark( -c_ReturnsAverageMarker, ou::Colour::Red,   '-' + sMarker );
 
     m_cdv.Add( EChartSlot::rtnPriceAvg, &m_cemRtnPriceAvgMarkers );
   }
@@ -351,8 +351,8 @@ void Strategy::SetupChart() {
   {
     static const std::string sMarker( fmt::format( "{:.{}f}", c_ReturnsSlopeMarker, 7 ) );
 
-    m_cemRtnPriceSlopeMarkers.AddMark( +c_ReturnsSlopeMarker, ou::Colour::Black, '+' + sMarker );
-    m_cemRtnPriceSlopeMarkers.AddMark( -c_ReturnsSlopeMarker, ou::Colour::Black, '-' + sMarker );
+    m_cemRtnPriceSlopeMarkers.AddMark( +c_ReturnsSlopeMarker, ou::Colour::Green, '+' + sMarker );
+    m_cemRtnPriceSlopeMarkers.AddMark( -c_ReturnsSlopeMarker, ou::Colour::Red,   '-' + sMarker );
 
     m_cdv.Add( EChartSlot::rtnPriceSlp, &m_cemRtnPriceSlopeMarkers );
   }
@@ -360,9 +360,6 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::rtnPriceSlp, &m_cemZero );
   m_ceRtnPrice_slope.SetName( "Returns - Slope" );
   m_cdv.Add( EChartSlot::rtnPriceSlp, &m_ceRtnPrice_slope );
-
-  //m_ceRtnPrice_sd.SetName( "Returns - SD" );
-  //m_cdv.Add( EChartSlot::rtnPriceSD, &m_ceRtnPrice_sd );
 
   m_cdv.Add( EChartSlot::TickRegime, &m_cemRegimMin );
   m_cdv.Add( EChartSlot::TickRegime, &m_cemZero );
@@ -511,7 +508,7 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
 
 void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
-  //const bool direction( m_quote.LeeReady( m_trade.Price(), trade.Price() ) );
+  const bool direction( m_quote.LeeReady( m_trade.Price(), trade.Price() ) );
 
   m_trade = trade;
 
