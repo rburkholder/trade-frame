@@ -225,6 +225,9 @@ private:
   ou::ChartEntryIndicator m_ceRtnPrice_avg;
   ou::ChartEntryMark m_cemRtnPriceSlopeMarkers;
   ou::ChartEntryIndicator m_ceRtnPrice_slope;
+  //ou::ChartEntryIndicator m_ceRtnPrice_slope_ema;
+
+  //double m_dblRtnPrice_slope_ema;
 
   double m_dblTickRegime;
   ou::ChartEntryIndicator m_ceTickRegime;

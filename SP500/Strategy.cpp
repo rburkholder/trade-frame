@@ -19,6 +19,8 @@
  * Created: April 14, 2025 20:32:29
  */
 
+//#include <cmath>
+
 #include <boost/log/trivial.hpp>
 
 // this define is required to prevent interference with libtorch
@@ -92,6 +94,7 @@ Strategy::Strategy(
 , m_stopInitial {}, m_stopDelta {}, m_stopTrail {}
 , m_dblQuoteImbalance {}
 , m_ixcurCrossing( 0 ), m_ixprvCrossing( 1 )
+//, m_dblRtnPrice_slope_ema {}
 {
   SetupChart();
 
@@ -361,6 +364,10 @@ void Strategy::SetupChart() {
   m_ceRtnPrice_slope.SetName( "Returns - Slope" );
   m_cdv.Add( EChartSlot::rtnPriceSlp, &m_ceRtnPrice_slope );
 
+  //m_ceRtnPrice_slope_ema.SetName( "Returns - ema" );
+  //m_ceRtnPrice_slope_ema.SetColour( ou::Colour::Purple );
+  //m_cdv.Add( EChartSlot::rtnPriceSlp, &m_ceRtnPrice_slope_ema );
+
   m_cdv.Add( EChartSlot::TickRegime, &m_cemRegimMin );
   m_cdv.Add( EChartSlot::TickRegime, &m_cemZero );
 
@@ -501,6 +508,14 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
       UpdateECross( ec, c_ReturnsSlopeMarker, slope );
     }
     m_ceRtnPrice_slope.Append( dt, slope );
+
+    //static const double multiplier( 3.0 );
+    //static const double multiplier_prv( ( multiplier - 1.0 ) / multiplier );
+    //static const double multiplier_cur( 1.0 - multiplier_prv );
+    //if ( !std::isnan( slope ) ) {
+    //  m_dblRtnPrice_slope_ema = ( multiplier_prv * m_dblRtnPrice_slope_ema ) + ( multiplier_cur * slope );
+    //  m_ceRtnPrice_slope_ema.Append( dt, m_dblRtnPrice_slope_ema );
+    //}
 
   }
   m_dblPrvPrice = price;
