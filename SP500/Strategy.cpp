@@ -509,6 +509,11 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
     }
     m_ceRtnPrice_slope.Append( dt, slope );
 
+    // rather than an ema, use a linear regression, or a second order polynomial to get some curve?
+    // then use this near the bollinger band with some idea of jitter
+    // to determine when the envelope has been broken for change in direction
+    // but will probably still get faked out?  but how often?
+
     //static const double multiplier( 3.0 );
     //static const double multiplier_prv( ( multiplier - 1.0 ) / multiplier );
     //static const double multiplier_cur( 1.0 - multiplier_prv );
@@ -681,11 +686,47 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   const auto dt( trade.DateTime() );
   const auto price( trade.Price() );
+  // run state machine here as the bollinger bands are updated only with incoming trades?
+  // using limit orders at the bollinger band is independent of quotes
+  // however once quotes get near the edge, then important to rapidly update
+  // or make decisions based upon movement and nbbo changes
+  // might be able to see order book being walked
+  // which is the intent of the imbalance if it could be made sense of
+  // for the time being, just put in limit orders to track as a simulated bracket order
+  // make use of the sd direction to confirm direction
+  // break bb width into thirds for hysteresis
+  // possibly use the 'bollinger outside of long ema' as a signal
+  switch ( m_pTrackOrder->State()() ) {
+    case ETradeState::Search:
+      break;
+    case ETradeState::EntrySubmittedUp:
+      break;
+    case ETradeState::EntrySubmittedDn:
+      break;
+    case ETradeState::ExitSignalUp:
+      break;
+    case ETradeState::ExitSignalDn:
+      break;
+    case ETradeState::ExitSubmitted:
+      break;
+    case ETradeState::EndOfDayCancel: // not in HandleRHTrading, set in one shot HandleCancel
+      break;
+    case ETradeState::EndOfDayNeutral: // not in HandleRHTrading, set in one shot HandleGoNeutral
+      break;
+    case ETradeState::Done:
+      break;
+    case ETradeState::Init:
+      m_pTrackOrder->State().Set( ETradeState::Search );
+      break;
+    default:
+      // todo: track unused states
+      break;
+  }
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   const auto dt( quote.DateTime() );
-  //const auto price( trade.Price() );
+
   switch ( m_pTrackOrder->State()() ) {
     case ETradeState::Search:
       /*
