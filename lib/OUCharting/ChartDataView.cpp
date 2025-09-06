@@ -51,8 +51,9 @@ ChartEntryCarrier::~ChartEntryCarrier() {
 //
 
 ChartDataView::ChartDataView()
-  : m_dtViewPortBegin( boost::posix_time::not_a_date_time ),
-    m_dtViewPortEnd( boost::posix_time::not_a_date_time )
+: m_dtViewPortBegin( boost::posix_time::not_a_date_time )
+, m_dtViewPortEnd( boost::posix_time::not_a_date_time )
+, m_fCursorDateTime( nullptr )
 {
 }
 
@@ -268,6 +269,10 @@ boost::posix_time::ptime ChartDataView::GetExtentEnd_NoLock() const {
       }
     });
   return end;
+}
+
+void ChartDataView::NotifyCursorDateTime( const boost::posix_time::ptime dt ) {
+  if ( m_fCursorDateTime ) m_fCursorDateTime( dt );
 }
 
 } // namespace ou

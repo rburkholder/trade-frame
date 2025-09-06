@@ -103,6 +103,7 @@ Strategy::Strategy(
 }
 
 Strategy::~Strategy() {
+  m_cdv.SetNotifyCursorDateTime( nullptr );
   if ( m_pDec ) {
     m_pDec->StopWatch();
     m_pDec->OnTrade.Remove( fastdelegate::MakeDelegate( this, &Strategy::HandleDec ) );
@@ -190,6 +191,10 @@ void Strategy::ValidateAndStart() {
   bOkToStart &= nullptr != m_pAdv.get();
   bOkToStart &= nullptr != m_pDec.get();
   if ( bOkToStart ) {
+    m_cdv.SetNotifyCursorDateTime(
+      []( const boost::posix_time::ptime dt ){
+        // gui thread
+      } );
     m_fStart();
   }
 }

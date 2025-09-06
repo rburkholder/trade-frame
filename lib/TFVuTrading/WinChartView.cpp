@@ -250,6 +250,7 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
       //std::string sTime = boost::posix_time::to_simple_string( td );
       std::string sDT = boost::posix_time::to_simple_string( dtCursor );
       m_chartMaster.SetCrossHairTime( sDT );
+      m_pChartDataView->NotifyCursorDateTime( dtCursor );
     }
 
   }
@@ -405,6 +406,7 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
       //std::string sTime = boost::posix_time::to_simple_string( td );
       std::string sDT = boost::posix_time::to_simple_string( dtCursor );
       m_chartMaster.SetCrossHairTime( sDT );
+      m_pChartDataView->NotifyCursorDateTime( dtCursor );
 
       DrawChart();
     }

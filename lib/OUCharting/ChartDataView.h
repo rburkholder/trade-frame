@@ -93,6 +93,10 @@ public:
     }
   }
 
+  using fCursorDateTime_t = std::function<void( const boost::posix_time::ptime )>;
+  void SetNotifyCursorDateTime( fCursorDateTime_t&& f ) { m_fCursorDateTime = std::move( f ); }
+  void NotifyCursorDateTime( const boost::posix_time::ptime );
+
 protected:
 private:
 
@@ -112,6 +116,8 @@ private:
 
   std::string m_sName;
   std::string m_sDescription;
+
+  fCursorDateTime_t m_fCursorDateTime;
 
   boost::posix_time::ptime m_dtViewPortBegin;
   boost::posix_time::ptime m_dtViewPortEnd;
