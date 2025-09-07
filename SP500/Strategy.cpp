@@ -192,8 +192,10 @@ void Strategy::ValidateAndStart() {
   bOkToStart &= nullptr != m_pDec.get();
   if ( bOkToStart ) {
     m_cdv.SetNotifyCursorDateTime(
+      // change this to be set from caller when a graphical user element is available
+      // for displaying 'time & sales' datum from datetime supplied by cursor
       []( const boost::posix_time::ptime dt ){
-        // gui thread
+        // arrives in gui thread
       } );
     m_fStart();
   }
@@ -346,23 +348,23 @@ void Strategy::SetupChart() {
   {
     static const std::string sMarker( fmt::format( "{:.{}f}", c_ReturnsAverageMarker, 3 ) );
 
-    m_cemRtnPriceAvgMarkers.AddMark( +c_ReturnsAverageMarker, ou::Colour::Green, '+' + sMarker );
-    m_cemRtnPriceAvgMarkers.AddMark( -c_ReturnsAverageMarker, ou::Colour::Red,   '-' + sMarker );
+    m_cemRtnPriceMarkers_mean.AddMark( +c_ReturnsAverageMarker, ou::Colour::Green, '+' + sMarker );
+    m_cemRtnPriceMarkers_mean.AddMark( -c_ReturnsAverageMarker, ou::Colour::Red,   '-' + sMarker );
 
-    m_cdv.Add( EChartSlot::rtnPriceAvg, &m_cemRtnPriceAvgMarkers );
+    m_cdv.Add( EChartSlot::rtnPriceAvg, &m_cemRtnPriceMarkers_mean );
   }
 
   m_cdv.Add( EChartSlot::rtnPriceAvg, &m_cemZero );
-  m_ceRtnPrice_avg.SetName( "Returns - Average" );
-  m_cdv.Add( EChartSlot::rtnPriceAvg, &m_ceRtnPrice_avg );
+  m_ceRtnPrice_mean.SetName( "Returns - Average" );
+  m_cdv.Add( EChartSlot::rtnPriceAvg, &m_ceRtnPrice_mean );
 
   {
     static const std::string sMarker( fmt::format( "{:.{}f}", c_ReturnsSlopeMarker, 7 ) );
 
-    m_cemRtnPriceSlopeMarkers.AddMark( +c_ReturnsSlopeMarker, ou::Colour::Green, '+' + sMarker );
-    m_cemRtnPriceSlopeMarkers.AddMark( -c_ReturnsSlopeMarker, ou::Colour::Red,   '-' + sMarker );
+    m_cemRtnPriceMarkers_slope.AddMark( +c_ReturnsSlopeMarker, ou::Colour::Green, '+' + sMarker );
+    m_cemRtnPriceMarkers_slope.AddMark( -c_ReturnsSlopeMarker, ou::Colour::Red,   '-' + sMarker );
 
-    m_cdv.Add( EChartSlot::rtnPriceSlp, &m_cemRtnPriceSlopeMarkers );
+    m_cdv.Add( EChartSlot::rtnPriceSlp, &m_cemRtnPriceMarkers_slope );
   }
 
   m_cdv.Add( EChartSlot::rtnPriceSlp, &m_cemZero );
@@ -496,6 +498,7 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
     const double sd(    m_statsReturns.SD() );
     const double mean(  m_statsReturns.MeanY() / sd  );
     const double slope( m_statsReturns.Slope() / sd );
+    // todo: consider multi-time frame sd estimation
 
     m_ixprvCrossing = ( m_ixprvCrossing + 1 ) % 2;
     m_ixcurCrossing = ( m_ixcurCrossing + 1 ) % 2;
@@ -503,16 +506,26 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
     rCross_t& rcs( m_crossing[ m_ixcurCrossing ] );
 
     {
-      ECross& ec( rcs[ rtn_mean ].cross );
+      CrossState& cs( rcs[ rtn_mean ] );
+      ECross& ec( cs.cross );
       UpdateECross( ec, c_ReturnsAverageMarker, mean );
+      cs.value = mean;
+
     }
-    m_ceRtnPrice_avg.Append( dt, mean );
+    m_ceRtnPrice_mean.Append( dt, mean );
 
     {
-      ECross& ec( rcs[ rtn_slope ].cross );
+      CrossState& cs( rcs[ rtn_slope ] );
+      ECross& ec( cs.cross );
       UpdateECross( ec, c_ReturnsSlopeMarker, slope );
+      cs.value = slope;
     }
     m_ceRtnPrice_slope.Append( dt, slope );
+
+    rcs[ rtn_sd ].value = sd;
+
+    // relate price, mean, slope, sd to momentum/trend?
+    // predict the volatility (via garch?) might be the solution
 
     // rather than an ema, use a linear regression, or a second order polynomial to get some curve?
     // then use this near the bollinger band with some idea of jitter
@@ -701,6 +714,10 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
   // make use of the sd direction to confirm direction
   // break bb width into thirds for hysteresis
   // possibly use the 'bollinger outside of long ema' as a signal
+
+  // todo split bb into three parts for hysteresis when supplying liquidity
+  //   to be used by quote section
+
   switch ( m_pTrackOrder->State()() ) {
     case ETradeState::Search:
       break;
@@ -731,45 +748,58 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
 
 void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   const auto dt( quote.DateTime() );
+  // might be better here, the trade will provide bollinger bands, but we need to watch
+  // the progression of quotes.  bid/ask will set the range of 'current' trades/returns.
+  // if the desire is to provide liquidity, then bid/ask will be need to lead or track
+  // to current top of bid/ask order book
+  // based upon mean/slope, can the a prediction be made on how far this will go?
+  // how much is predicted by order book imbalance/change?
+
+  static const double c_nd( 3.0 );
+
+  const rCross_t& rcp( m_crossing[ m_ixprvCrossing ] );
+  const rCross_t& rcc( m_crossing[ m_ixcurCrossing ] );
 
   switch ( m_pTrackOrder->State()() ) {
     case ETradeState::Search:
-      /*
-      switch ( m_ePrice ) {
-        case EPrice::buy:
-          //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
-          //m_ceLongEntry.AddLabel( dt, price, "long" );
-          ++m_nEnterLong;
-          //m_to.State().Set( ETradeState::EntrySubmittedUp );
-          m_stopDelta = 3.0 * m_statsPrices.SD();
-          m_stopTrail = m_stopInitial = m_quote.Bid() - m_stopDelta;
-          m_pTrackOrder->EnterLongLmt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_trade.Price(), m_quote.Ask(), 5 ) );
+      switch ( rcc[ rtn_slope ].cross ) {
+        case ECross::upperhi:
           break;
-        case EPrice::sell:
-          //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
-          //m_ceShortEntry.AddLabel( dt, price, "short" );
-          ++m_nEnterShort;
-          //m_to.State().Set( ETradeState::EntrySubmittedDn );
-          m_stopDelta = 3.0 * m_statsPrices.SD();
-          m_stopTrail = m_stopInitial = m_quote.Ask() + m_stopDelta;
-          m_pTrackOrder->EnterShortLmt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_trade.Price(), m_quote.Bid(), 5 ) );
+        case ECross::uppermk:
           break;
-        case EPrice::stop_sell:
-          //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
-          //m_ceShortEntry.AddLabel( dt, price, "short" );
-          //++m_nEnterShort;
-          //m_stateTrade = ETradeState::ShortSubmitted;
+        case ECross::upperlo:
+          if ( ( ECross::upperhi == rcp[ rtn_slope ].cross )
+            && ( ECross::upperhi == rcp[ rtn_mean ].cross )
+          ) {
+            //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
+            //m_ceShortEntry.AddLabel( dt, price, "short" );
+            ++m_nEnterShort;
+            //m_to.State().Set( ETradeState::EntrySubmittedDn );
+            m_stopDelta = c_nd * m_statsPrices.SD();;
+            m_stopTrail = m_stopInitial = m_quote.Ask() + m_stopDelta;
+            m_pTrackOrder->EnterShortLmt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_trade.Price(), m_quote.Bid(), 5 ) );
+          }
           break;
-        case EPrice::stop_buy:
-          //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
-          //m_ceLongEntry.AddLabel( dt, price, "long" );
-          //++m_nEnterLong;
-          //m_stateTrade = ETradeState::LongSubmitted;
+        case ECross::zero:
           break;
-        case EPrice::neutral:
+        case ECross::lowerhi:
+          if ( ( ECross::lowerlo == rcp[ rtn_slope ].cross )
+            && ( ECross::lowerlo == rcp[ rtn_mean ].cross )
+          ) {
+            //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
+            //m_ceLongEntry.AddLabel( dt, price, "long" );
+            ++m_nEnterLong;
+            //m_to.State().Set( ETradeState::EntrySubmittedUp );
+            m_stopDelta = c_nd * m_statsPrices.SD();;
+            m_stopTrail = m_stopInitial = m_quote.Bid() - m_stopDelta;
+            m_pTrackOrder->EnterLongLmt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_trade.Price(), m_quote.Ask(), 5 ) );
+          }
+          break;
+        case ECross::lowermk:
+          break;
+        case ECross::lowerlo:
           break;
       }
-      */
       break;
     case ETradeState::EntrySubmittedUp:
       if ( !m_bTickRegimeIncreased ) {

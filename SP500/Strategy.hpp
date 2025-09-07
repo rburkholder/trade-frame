@@ -221,9 +221,9 @@ private:
   //ou::ChartEntryIndicator m_ceRtnPrice;
   //ou::ChartEntryIndicator m_ceRtnPrice_bbl;
 
-  ou::ChartEntryMark m_cemRtnPriceAvgMarkers;
-  ou::ChartEntryIndicator m_ceRtnPrice_avg;
-  ou::ChartEntryMark m_cemRtnPriceSlopeMarkers;
+  ou::ChartEntryMark m_cemRtnPriceMarkers_mean;
+  ou::ChartEntryIndicator m_ceRtnPrice_mean;
+  ou::ChartEntryMark m_cemRtnPriceMarkers_slope;
   ou::ChartEntryIndicator m_ceRtnPrice_slope;
   //ou::ChartEntryIndicator m_ceRtnPrice_slope_ema;
 
@@ -250,6 +250,7 @@ private:
   enum EIndicator { // used as index into rCross_t[n][ix]
     rtn_mean
   , rtn_slope
+  , rtn_sd
   , _count
   };
 
