@@ -51,3 +51,6 @@ torch::Tensor LSTM::forward( torch::Tensor x, lstm_state_t& state ) {
   //torch::Tensor prediction = linear->forward( out.reshape( { -1, lstm->options.hidden_size() } ) ).to( x.device() );
   return prediction;
 }
+
+// expanded model definition to investigate:
+// https://github.com/jinglescode/time-series-forecasting-pytorch/blob/main/step_by_step_code_blocks/define_lstm_model.py
