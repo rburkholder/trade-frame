@@ -167,7 +167,7 @@ private:
 
   ou::ChartEntryIndicator m_ceTradeBBU;
   ou::ChartEntryIndicator m_ceTradeBBL;
-  ou::ChartEntryIndicator m_ceTradeBBDiff;
+  ou::ChartEntryVolume m_ceTradeBBDiff;
 
   ou::ChartEntryIndicator m_ceAskPrice;
   ou::ChartEntryIndicator m_ceBidPrice;
@@ -217,6 +217,7 @@ private:
   ou::tf::TSSWStatsPrice m_statsPrices;
 
   double m_dblPrvPrice;
+  double m_dblPrvSD;
   //ou::ChartEntryIndicator m_ceRtnPrice_bbu;
   //ou::ChartEntryIndicator m_ceRtnPrice;
   //ou::ChartEntryIndicator m_ceRtnPrice_bbl;

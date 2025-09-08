@@ -87,6 +87,7 @@ Strategy::Strategy(
 , m_dblTickRegime {}, m_bTickRegimeIncreased( false )
 , m_TickRegime( ETickRegime::congestion )
 , m_dblPrvPrice {}, m_dblPrvAdvDec {}
+, m_dblPrvSD {}
 , m_statsReturns( m_returns, boost::posix_time::time_duration( 0, 0, c_window ) )
 , m_minmaxPrices( m_prices,  boost::posix_time::time_duration( 0, 0, c_window ) )
 , m_statsPrices(  m_prices,  boost::posix_time::time_duration( 0, 0, c_window ) )
@@ -341,8 +342,10 @@ void Strategy::SetupChart() {
     m_cdv.Add( EChartSlot::Imbalance, &m_ceImbalance );
   }
 
-  m_ceTradeBBDiff.SetName( "price sd" );
-  m_ceTradeBBDiff.SetColour( ou::Colour::Green );
+  m_cdv.Add( EChartSlot::rtnPriceSD, &m_cemZero );
+
+  m_ceTradeBBDiff.SetName( "price sd direction" );
+  m_ceTradeBBDiff.SetColour( ou::Colour::Purple );
   m_cdv.Add( EChartSlot::rtnPriceSD, &m_ceTradeBBDiff );
 
   {
@@ -576,7 +579,10 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
   m_ceTradeBBU.Append( dt, m_statsPrices.BBUpper() );
   m_ceTradeBBL.Append( dt, m_statsPrices.BBLower() );
-  m_ceTradeBBDiff.Append( dt, m_statsPrices.BBOffset() );
+
+  const double bboffset( m_statsPrices.BBOffset() );
+  m_ceTradeBBDiff.Append( dt, ( bboffset >= m_dblPrvSD ) ? 1.0 : -1.0 ); // tracking rising/falling rather than value
+  m_dblPrvSD = bboffset;
 
   TimeTick( trade );
 }
