@@ -53,7 +53,7 @@ namespace {
 
   static const double c_ImbalanceMarker( 0.7 );
 
-  static const double c_ReturnsAverageMarker( 0.045 );
+  static const double c_ReturnsMeanMarker( 0.045 );
   static const double c_ReturnsSlopeMarker( 0.0000045 );
 
 }
@@ -346,17 +346,17 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::rtnPriceSD, &m_ceTradeBBDiff );
 
   {
-    static const std::string sMarker( fmt::format( "{:.{}f}", c_ReturnsAverageMarker, 3 ) );
+    static const std::string sMarker( fmt::format( "{:.{}f}", c_ReturnsMeanMarker, 3 ) );
 
-    m_cemRtnPriceMarkers_mean.AddMark( +c_ReturnsAverageMarker, ou::Colour::Green, '+' + sMarker );
-    m_cemRtnPriceMarkers_mean.AddMark( -c_ReturnsAverageMarker, ou::Colour::Red,   '-' + sMarker );
+    m_cemRtnPriceMarkers_mean.AddMark( +c_ReturnsMeanMarker, ou::Colour::Green, '+' + sMarker );
+    m_cemRtnPriceMarkers_mean.AddMark( -c_ReturnsMeanMarker, ou::Colour::Red,   '-' + sMarker );
 
-    m_cdv.Add( EChartSlot::rtnPriceAvg, &m_cemRtnPriceMarkers_mean );
+    m_cdv.Add( EChartSlot::rtnPriceMean, &m_cemRtnPriceMarkers_mean );
   }
 
-  m_cdv.Add( EChartSlot::rtnPriceAvg, &m_cemZero );
+  m_cdv.Add( EChartSlot::rtnPriceMean, &m_cemZero );
   m_ceRtnPrice_mean.SetName( "Returns - Average" );
-  m_cdv.Add( EChartSlot::rtnPriceAvg, &m_ceRtnPrice_mean );
+  m_cdv.Add( EChartSlot::rtnPriceMean, &m_ceRtnPrice_mean );
 
   {
     static const std::string sMarker( fmt::format( "{:.{}f}", c_ReturnsSlopeMarker, 7 ) );
@@ -364,12 +364,12 @@ void Strategy::SetupChart() {
     m_cemRtnPriceMarkers_slope.AddMark( +c_ReturnsSlopeMarker, ou::Colour::Green, '+' + sMarker );
     m_cemRtnPriceMarkers_slope.AddMark( -c_ReturnsSlopeMarker, ou::Colour::Red,   '-' + sMarker );
 
-    m_cdv.Add( EChartSlot::rtnPriceSlp, &m_cemRtnPriceMarkers_slope );
+    m_cdv.Add( EChartSlot::rtnPriceSlope, &m_cemRtnPriceMarkers_slope );
   }
 
-  m_cdv.Add( EChartSlot::rtnPriceSlp, &m_cemZero );
+  m_cdv.Add( EChartSlot::rtnPriceSlope, &m_cemZero );
   m_ceRtnPrice_slope.SetName( "Returns - Slope" );
-  m_cdv.Add( EChartSlot::rtnPriceSlp, &m_ceRtnPrice_slope );
+  m_cdv.Add( EChartSlot::rtnPriceSlope, &m_ceRtnPrice_slope );
 
   //m_ceRtnPrice_slope_ema.SetName( "Returns - ema" );
   //m_ceRtnPrice_slope_ema.SetColour( ou::Colour::Purple );
@@ -508,10 +508,11 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
     {
       CrossState& cs( rcs[ rtn_mean ] );
       ECross& ec( cs.cross );
-      UpdateECross( ec, c_ReturnsAverageMarker, mean );
+      UpdateECross( ec, c_ReturnsMeanMarker, mean );
       cs.value = mean;
 
     }
+    //m_ceRtnPrice_mean.Append( dt, mean / c_ReturnsMeanMarker ); // possible normalization, try sigmoid
     m_ceRtnPrice_mean.Append( dt, mean );
 
     {
@@ -520,6 +521,7 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
       UpdateECross( ec, c_ReturnsSlopeMarker, slope );
       cs.value = slope;
     }
+    //m_ceRtnPrice_slope.Append( dt, slope / c_ReturnsSlopeMarker ); // possible normalization, try sigmoid
     m_ceRtnPrice_slope.Append( dt, slope );
 
     rcs[ rtn_sd ].value = sd;
@@ -755,7 +757,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   // based upon mean/slope, can the a prediction be made on how far this will go?
   // how much is predicted by order book imbalance/change?
 
-  static const double c_nd( 3.0 );
+  static const double c_nd( 2.0 );
 
   const rCross_t& rcp( m_crossing[ m_ixprvCrossing ] );
   const rCross_t& rcc( m_crossing[ m_ixcurCrossing ] );

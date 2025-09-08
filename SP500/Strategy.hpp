@@ -85,7 +85,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, TickVolume, QuoteVolume, rtnPrice, rtnPriceAvg, rtnPriceSlp, rtnPriceSD, TickRegime, AdvDec, TickStat, Imbalance, Ratio, Predict, PredVec, PL };
+  enum EChartSlot { Price, TickVolume, QuoteVolume, rtnPrice, rtnPriceMean, rtnPriceSlope, rtnPriceSD, TickRegime, AdvDec, TickStat, Imbalance, Ratio, Predict, PredVec, PL };
 
   const Flags& m_flags;
 
