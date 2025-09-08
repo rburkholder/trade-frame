@@ -114,8 +114,8 @@ public:
   void ExitShortLmt( const OrderArgs& ); // exit long with short limit
   void ExitShortMkt( const OrderArgs& ); // exit long with short market
 
-  void Cancel( fCancel_t&& );
-  void Close( fClose_t&& );
+  void Cancel( fCancel_t&& ); // used by CurrencyTrader
+  void Close( fClose_t&& );   // used by CurrencyTrader
 
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
