@@ -35,14 +35,17 @@ namespace tf { // namespace tradeframe
 class TrackOrderBase {
 public:
 
+  using quantity_t = ou::tf::Order::quantity_t;
+
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   using fCancel_t = std::function<void()>;
   using fClose_t = std::function<void()>;
 
-  struct OrderArgs {
+  using fCancelled_t = std::function<void()>;
+  using fFilled_t = std::function<void( quantity_t, double )>;
 
-    using quantity_t = ou::tf::Order::quantity_t;
+  struct OrderArgs {
 
     boost::posix_time::ptime dt; // used to mark the order
     quantity_t quantity;
@@ -52,11 +55,15 @@ public:
     double stop; // only used in bracket at present
     unsigned int duration; // limit order duration seconds
 
+    fCancelled_t fCancelled;
+    fFilled_t fFilled;
+
     OrderArgs(): quantity {}, signal {}, limit {}, profit {}, stop {}, duration {} {}
 
     // market
     explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_ )
     : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit {}, profit {}, stop {}, duration {}
+    , fCancelled( nullptr ), fFilled( nullptr )
     {
       assert( 0 < quantity );
     }
@@ -64,6 +71,7 @@ public:
     // limit
     explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_ )
     : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), profit {}, stop {}, duration {}
+    , fCancelled( nullptr ), fFilled( nullptr )
     {
       assert( 0 < quantity );
     }
@@ -78,6 +86,7 @@ public:
     // limit time limit
     explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_, int duration_ )
     : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), profit {}, stop {}, duration( duration_ )
+    , fCancelled( nullptr ), fFilled( nullptr )
     {
       assert( 0 < quantity );
     }

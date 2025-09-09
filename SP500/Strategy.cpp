@@ -785,7 +785,9 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
             //m_to.State().Set( ETradeState::EntrySubmittedDn );
             m_stopDelta = c_nd * m_statsPrices.SD();;
             m_stopTrail = m_stopInitial = m_quote.Ask() + m_stopDelta;
-            m_pTrackOrder->EnterShortLmt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_trade.Price(), m_quote.Bid(), 5 ) );
+            ou::tf::TrackOrder::OrderArgs oa( dt, 100, m_trade.Price(), m_quote.Bid(), 5 );
+            // todo: set fCancelled, fFilled
+            m_pTrackOrder->EnterShortLmt( oa );
           }
           break;
         case ECross::zero:
@@ -800,7 +802,9 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
             //m_to.State().Set( ETradeState::EntrySubmittedUp );
             m_stopDelta = c_nd * m_statsPrices.SD();;
             m_stopTrail = m_stopInitial = m_quote.Bid() - m_stopDelta;
-            m_pTrackOrder->EnterLongLmt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_trade.Price(), m_quote.Ask(), 5 ) );
+            ou::tf::TrackOrder::OrderArgs oa( dt, 100, m_trade.Price(), m_quote.Ask(), 5 );
+            // todo: set fCancelled, fFilled
+            m_pTrackOrder->EnterLongLmt( oa );
           }
           break;
         case ECross::lowermk:
@@ -850,7 +854,9 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
   const auto price( trade.Price() );
   if ( m_stopTrail > price ) {
     const auto dt( trade.DateTime() );
-    m_pTrackOrder->ExitLongMkt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_stopTrail ) );
+    ou::tf::TrackOrder::OrderArgs oa( dt, 100, m_stopTrail );
+    // todo: set fCancelled, fFilled
+    m_pTrackOrder->ExitLongMkt( oa );
   }
   else {
     //if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
@@ -865,7 +871,9 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
   const auto price( trade.Price() );
   if ( m_stopTrail < price ) {
     const auto dt( trade.DateTime() );
-    m_pTrackOrder->ExitShortMkt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_stopTrail ) );
+    ou::tf::TrackOrder::OrderArgs oa( dt, 100, m_stopTrail );
+    // todo: set fCancelled, fFilled
+    m_pTrackOrder->ExitShortMkt( oa );
   }
   else {
     //if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
@@ -880,7 +888,9 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Quote& quote ) {
   const auto ask( quote.Ask() );
   if ( m_stopTrail > ask ) {
     const auto dt( quote.DateTime() );
-    m_pTrackOrder->ExitLongMkt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_stopTrail ) );
+    ou::tf::TrackOrder::OrderArgs oa( dt, 100, m_stopTrail );
+    // todo: set fCancelled, fFilled
+    m_pTrackOrder->ExitLongMkt( oa );
   }
   else {
     //if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
@@ -895,7 +905,9 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Quote& quote ) {
   const auto bid( quote.Bid() );
   if ( m_stopTrail < bid ) {
     const auto dt( quote.DateTime() );
-    m_pTrackOrder->ExitShortMkt( ou::tf::TrackOrder::OrderArgs( dt, 100, m_stopTrail ) );
+    ou::tf::TrackOrder::OrderArgs oa( dt, 100, m_stopTrail );
+    //if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
+    m_pTrackOrder->ExitShortMkt( oa );
   }
   else {
     //if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
