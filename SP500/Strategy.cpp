@@ -581,7 +581,8 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   m_ceTradeBBL.Append( dt, m_statsPrices.BBLower() );
 
   const double bboffset( m_statsPrices.BBOffset() );
-  m_ceTradeBBDiff.Append( dt, ( bboffset >= m_dblPrvSD ) ? 1.0 : -1.0 ); // tracking rising/falling rather than value
+  //m_ceTradeBBDiff.Append( dt, bboffset );
+  m_ceTradeBBDiff.Append( dt, ( bboffset >= m_dblPrvSD ) ? 1.0 : -1.0 ); // track rise/fall rather than value
   m_dblPrvSD = bboffset;
 
   TimeTick( trade );

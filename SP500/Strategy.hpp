@@ -168,6 +168,7 @@ private:
   ou::ChartEntryIndicator m_ceTradeBBU;
   ou::ChartEntryIndicator m_ceTradeBBL;
   ou::ChartEntryVolume m_ceTradeBBDiff;
+  //ou::ChartEntryIndicator m_ceTradeBBDiff;
 
   ou::ChartEntryIndicator m_ceAskPrice;
   ou::ChartEntryIndicator m_ceBidPrice;
