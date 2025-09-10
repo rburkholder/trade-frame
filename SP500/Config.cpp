@@ -85,6 +85,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
   kwmMode.AddPattern( "train/runlive", config::Choices::EMode::train_then_run_live );
   kwmMode.AddPattern( "load/validate", config::Choices::EMode::load_then_validate );
   kwmMode.AddPattern( "load/runlive", config::Choices::EMode::load_then_run_live );
+  kwmMode.AddPattern( "mo_model_validate", config::Choices::EMode::no_model_validate );
+  kwmMode.AddPattern( "no_model_runlive", config::Choices::EMode::no_model_run_live );
 
   try {
 

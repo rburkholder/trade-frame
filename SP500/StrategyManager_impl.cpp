@@ -34,6 +34,7 @@
 
 #include <TFTrading/ComposeInstrument.hpp>
 
+#include "Config.hpp"
 #include "Features.hpp"
 #include "StrategyManager_impl.hpp"
 
@@ -70,6 +71,7 @@ StrategyManager_impl::StrategyManager_impl(
     case config::Choices::EMode::train_then_validate:
     case config::Choices::EMode::train_save_validate:
     case config::Choices::EMode::train_then_save:
+    case config::Choices::EMode::no_model_validate:
       BuildProvider_Sim();
       break;
     case config::Choices::EMode::train_then_run_live:
@@ -82,6 +84,9 @@ StrategyManager_impl::StrategyManager_impl(
     case config::Choices::EMode::load_then_run_live:
       m_model.Load( m_choices.m_sFileModelLoad );
       Phase_predict();
+      break;
+    case config::Choices::EMode::no_model_run_live:
+      BuildProvider_IQF(); // todo:  validate flow
       break;
     case config::Choices::EMode::unknown:
       assert( false );
@@ -229,6 +234,9 @@ void StrategyManager_impl::HandleSimConnected( int ) {
       break;
     case config::Choices::EMode::load_then_validate:
       m_fQueueTask( [this](){ Phase_predict(); } );
+      break;
+    case config::Choices::EMode::no_model_validate:
+      m_fQueueTask( [this](){ RunStrategy_predict_sim(); } );
       break;
     default:
       assert( false );

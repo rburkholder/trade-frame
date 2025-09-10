@@ -36,6 +36,7 @@ struct Choices {
   , train_then_validate, train_then_save, train_save_validate
   , load_then_validate
   , train_then_run_live, load_then_run_live
+  , no_model_validate, no_model_run_live // todo:  roughed in, require testing
   , unknown
   } eMode;
 
