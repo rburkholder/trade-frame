@@ -95,7 +95,6 @@ Strategy::Strategy(
 , m_stopInitial {}, m_stopDelta {}, m_stopTrail {}
 , m_dblQuoteImbalance {}
 , m_ixcurCrossing( 0 ), m_ixprvCrossing( 1 )
-//, m_dblRtnPrice_slope_ema {}
 {
   SetupChart();
 
@@ -326,11 +325,6 @@ void Strategy::SetupChart() {
     m_cdv.Add( EChartSlot::AdvDec, &m_ceAdvDec );
   }
 
-  //m_ceRtnPrice.SetName( "Price Returns" );
-  //m_cdv.Add( EChartSlot::Price, &m_ceRtnPrice_bbu );
-  //m_cdv.Add( EChartSlot::rtnPrice, &m_ceRtnPrice );
-  //m_cdv.Add( EChartSlot::Price, &m_ceRtnPrice_bbl );
-
   if ( m_flags.bEnableImbalance ) {
 
     static const std::string sMarker( fmt::format( "{:.{}f}", c_ImbalanceMarker, 1 ) );
@@ -362,7 +356,7 @@ void Strategy::SetupChart() {
   }
 
   m_cdv.Add( EChartSlot::rtnPriceMean, &m_cemZero );
-  m_ceRtnPrice_mean.SetName( "Returns - Average" );
+  m_ceRtnPrice_mean.SetName( "Returns - Mean" );
   m_cdv.Add( EChartSlot::rtnPriceMean, &m_ceRtnPrice_mean );
 
   {
@@ -377,10 +371,6 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::rtnPriceSlope, &m_cemZero );
   m_ceRtnPrice_slope.SetName( "Returns - Slope" );
   m_cdv.Add( EChartSlot::rtnPriceSlope, &m_ceRtnPrice_slope );
-
-  //m_ceRtnPrice_slope_ema.SetName( "Returns - ema" );
-  //m_ceRtnPrice_slope_ema.SetColour( ou::Colour::Purple );
-  //m_cdv.Add( EChartSlot::rtnPriceSlp, &m_ceRtnPrice_slope_ema );
 
   m_cdv.Add( EChartSlot::TickRegime, &m_cemRegimMin );
   m_cdv.Add( EChartSlot::TickRegime, &m_cemZero );
@@ -540,14 +530,6 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
     // then use this near the bollinger band with some idea of jitter
     // to determine when the envelope has been broken for change in direction
     // but will probably still get faked out?  but how often?
-
-    //static const double multiplier( 3.0 );
-    //static const double multiplier_prv( ( multiplier - 1.0 ) / multiplier );
-    //static const double multiplier_cur( 1.0 - multiplier_prv );
-    //if ( !std::isnan( slope ) ) {
-    //  m_dblRtnPrice_slope_ema = ( multiplier_prv * m_dblRtnPrice_slope_ema ) + ( multiplier_cur * slope );
-    //  m_ceRtnPrice_slope_ema.Append( dt, m_dblRtnPrice_slope_ema );
-    //}
 
   }
   m_dblPrvPrice = price;

@@ -221,17 +221,11 @@ private:
 
   double m_dblPrvPrice;
   double m_dblPrvSD;
-  //ou::ChartEntryIndicator m_ceRtnPrice_bbu;
-  //ou::ChartEntryIndicator m_ceRtnPrice;
-  //ou::ChartEntryIndicator m_ceRtnPrice_bbl;
 
   ou::ChartEntryMark m_cemRtnPriceMarkers_mean;
   ou::ChartEntryIndicator m_ceRtnPrice_mean;
   ou::ChartEntryMark m_cemRtnPriceMarkers_slope;
   ou::ChartEntryIndicator m_ceRtnPrice_slope;
-  //ou::ChartEntryIndicator m_ceRtnPrice_slope_ema;
-
-  //double m_dblRtnPrice_slope_ema;
 
   double m_dblTickRegime;
   ou::ChartEntryIndicator m_ceTickRegime;
