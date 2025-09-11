@@ -222,10 +222,14 @@ private:
   double m_dblPrvPrice;
   double m_dblPrvSD;
 
-  ou::ChartEntryMark m_cemRtnPriceMarkers_mean;
   ou::ChartEntryIndicator m_ceRtnPrice_mean;
-  ou::ChartEntryMark m_cemRtnPriceMarkers_slope;
   ou::ChartEntryIndicator m_ceRtnPrice_slope;
+
+  ou::tf::Prices m_returns_mean;
+  ou::tf::TSSWStatsPrice m_statsReturns_mean;
+
+  ou::tf::Prices m_returns_slope;
+  ou::tf::TSSWStatsPrice m_statsReturns_slope;
 
   double m_dblTickRegime;
   ou::ChartEntryIndicator m_ceTickRegime;

@@ -19,7 +19,7 @@
  * Created: April 14, 2025 20:32:29
  */
 
-//#include <cmath>
+#include <cmath>
 
 #include <boost/log/trivial.hpp>
 
@@ -52,10 +52,6 @@ namespace {
   static const size_t c_window( 60 );
 
   static const double c_ImbalanceMarker( 0.7 );
-
-  static const double c_ReturnsMeanMarker( 0.045 );
-  static const double c_ReturnsSlopeMarker( 0.0000045 );
-
 }
 
 Strategy::Strategy(
@@ -88,9 +84,11 @@ Strategy::Strategy(
 , m_TickRegime( ETickRegime::congestion )
 , m_dblPrvPrice {}, m_dblPrvAdvDec {}
 , m_dblPrvSD {}
+, m_statsPrices( m_prices, boost::posix_time::time_duration( 0, 0, c_window ) )
 , m_statsReturns( m_returns, boost::posix_time::time_duration( 0, 0, c_window ) )
-//, m_minmaxPrices( m_prices,  boost::posix_time::time_duration( 0, 0, c_window ) )
-, m_statsPrices(  m_prices,  boost::posix_time::time_duration( 0, 0, c_window ) )
+, m_statsReturns_mean( m_returns_mean, boost::posix_time::time_duration( 0, 0, c_window ) )
+, m_statsReturns_slope( m_returns_slope, boost::posix_time::time_duration( 0, 0, c_window ) )
+//, m_minmaxPrices( m_prices, boost::posix_time::time_duration( 0, 0, c_window ) )
 //, m_atr {}
 , m_stopInitial {}, m_stopDelta {}, m_stopTrail {}
 , m_dblQuoteImbalance {}
@@ -283,6 +281,9 @@ void Strategy::SetupChart() {
     }
   }
 
+  m_cdv.Add( EChartSlot::Ratio, &m_cemPosOne );
+  //m_cdv.Add( EChartSlot::Ratio, &m_cemZero );
+  m_cdv.Add( EChartSlot::Ratio, &m_cemNegOne );
   m_ceTradePrice_bb_ratio.SetName( "price / bb" );
   m_ceTradePrice_bb_ratio.SetColour( c_colourPrice );
   m_cdv.Add( EChartSlot::Ratio, &m_ceTradePrice_bb_ratio );
@@ -346,29 +347,15 @@ void Strategy::SetupChart() {
   m_ceTradeBBDiff.SetColour( ou::Colour::Purple );
   m_cdv.Add( EChartSlot::rtnPriceSD, &m_ceTradeBBDiff );
 
-  {
-    static const std::string sMarker( fmt::format( "{:.{}f}", c_ReturnsMeanMarker, 3 ) );
-
-    m_cemRtnPriceMarkers_mean.AddMark( +c_ReturnsMeanMarker, ou::Colour::Green, '+' + sMarker );
-    m_cemRtnPriceMarkers_mean.AddMark( -c_ReturnsMeanMarker, ou::Colour::Red,   '-' + sMarker );
-
-    m_cdv.Add( EChartSlot::rtnPriceMean, &m_cemRtnPriceMarkers_mean );
-  }
-
-  m_cdv.Add( EChartSlot::rtnPriceMean, &m_cemZero );
+  m_cdv.Add( EChartSlot::rtnPriceMean, &m_cemPosOne );
+  //m_cdv.Add( EChartSlot::rtnPriceMean, &m_cemZero );
+  m_cdv.Add( EChartSlot::rtnPriceMean, &m_cemNegOne );
   m_ceRtnPrice_mean.SetName( "Returns - Mean" );
   m_cdv.Add( EChartSlot::rtnPriceMean, &m_ceRtnPrice_mean );
 
-  {
-    static const std::string sMarker( fmt::format( "{:.{}f}", c_ReturnsSlopeMarker, 7 ) );
-
-    m_cemRtnPriceMarkers_slope.AddMark( +c_ReturnsSlopeMarker, ou::Colour::Green, '+' + sMarker );
-    m_cemRtnPriceMarkers_slope.AddMark( -c_ReturnsSlopeMarker, ou::Colour::Red,   '-' + sMarker );
-
-    m_cdv.Add( EChartSlot::rtnPriceSlope, &m_cemRtnPriceMarkers_slope );
-  }
-
-  m_cdv.Add( EChartSlot::rtnPriceSlope, &m_cemZero );
+  m_cdv.Add( EChartSlot::rtnPriceSlope, &m_cemPosOne );
+  //m_cdv.Add( EChartSlot::rtnPriceSlope, &m_cemZero );
+  m_cdv.Add( EChartSlot::rtnPriceSlope, &m_cemNegOne );
   m_ceRtnPrice_slope.SetName( "Returns - Slope" );
   m_cdv.Add( EChartSlot::rtnPriceSlope, &m_ceRtnPrice_slope );
 
@@ -502,24 +489,33 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
 
     rCross_t& rcs( m_crossing[ m_ixcurCrossing ] );
 
-    {
+    if ( std::isnan( mean ) ) {}
+    else {
+      m_returns_mean.Append( ou::tf::Price( dt, mean ) );
+      const double bb_mean( m_statsReturns_mean.MeanY() );
+      const double bb_offset( m_statsReturns_mean.BBOffset() );
+      const double normalized( ( mean - bb_mean ) / bb_offset );
+      m_ceRtnPrice_mean.Append( dt, normalized );
+
       CrossState& cs( rcs[ rtn_mean ] );
       ECross& ec( cs.cross );
-      UpdateECross( ec, c_ReturnsMeanMarker, mean );
-      cs.value = mean;
-
+      UpdateECross( ec, 1.0, normalized );
+      cs.value = normalized;
     }
-    //m_ceRtnPrice_mean.Append( dt, mean / c_ReturnsMeanMarker ); // possible normalization, try sigmoid
-    m_ceRtnPrice_mean.Append( dt, mean );
 
-    {
+    if ( std::isnan( slope ) ) {}
+    else {
+      m_returns_slope.Append( ou::tf::Price( dt, slope ) );
+      const double bb_mean( m_statsReturns_slope.MeanY() );
+      const double bb_offset( m_statsReturns_slope.BBOffset() );
+      const double normalized( ( slope - bb_mean ) / bb_offset );
+      m_ceRtnPrice_slope.Append( dt, normalized );
+
       CrossState& cs( rcs[ rtn_slope ] );
       ECross& ec( cs.cross );
-      UpdateECross( ec, c_ReturnsSlopeMarker, slope );
-      cs.value = slope;
+      UpdateECross( ec, 1.0, normalized );
+      cs.value = normalized;
     }
-    //m_ceRtnPrice_slope.Append( dt, slope / c_ReturnsSlopeMarker ); // possible normalization, try sigmoid
-    m_ceRtnPrice_slope.Append( dt, slope );
 
     rcs[ rtn_sd ].value = sd;
 
