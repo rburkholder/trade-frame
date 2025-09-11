@@ -216,7 +216,7 @@ private:
   ou::tf::TSSWStatsPrice m_statsReturns;
 
   ou::tf::Prices m_prices; // might use the underlying directly?
-  ou::tf::TSSWMinMax m_minmaxPrices; // ATR style volatility indicator
+  //ou::tf::TSSWMinMax m_minmaxPrices; // ATR style volatility indicator
   ou::tf::TSSWStatsPrice m_statsPrices;
 
   double m_dblPrvPrice;

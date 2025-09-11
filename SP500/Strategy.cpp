@@ -89,7 +89,7 @@ Strategy::Strategy(
 , m_dblPrvPrice {}, m_dblPrvAdvDec {}
 , m_dblPrvSD {}
 , m_statsReturns( m_returns, boost::posix_time::time_duration( 0, 0, c_window ) )
-, m_minmaxPrices( m_prices,  boost::posix_time::time_duration( 0, 0, c_window ) )
+//, m_minmaxPrices( m_prices,  boost::posix_time::time_duration( 0, 0, c_window ) )
 , m_statsPrices(  m_prices,  boost::posix_time::time_duration( 0, 0, c_window ) )
 //, m_atr {}
 , m_stopInitial {}, m_stopDelta {}, m_stopTrail {}
