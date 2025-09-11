@@ -170,6 +170,8 @@ private:
   ou::ChartEntryVolume m_ceTradeBBDiff;
   //ou::ChartEntryIndicator m_ceTradeBBDiff;
 
+  ou::ChartEntryIndicator m_ceTradePrice_bb_ratio;
+
   ou::ChartEntryIndicator m_ceAskPrice;
   ou::ChartEntryIndicator m_ceBidPrice;
 

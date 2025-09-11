@@ -284,6 +284,10 @@ void Strategy::SetupChart() {
     }
   }
 
+  m_ceTradePrice_bb_ratio.SetName( "price / bb" );
+  m_ceTradePrice_bb_ratio.SetColour( c_colourPrice );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceTradePrice_bb_ratio );
+
   m_ceTradeVolume.SetName( "Volume" );
   m_ceTradeVolume.SetColour( ou::Colour::Green );
   m_cdv.Add( EChartSlot::TickVolume, &m_ceTradeVolume );
@@ -577,13 +581,20 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   //m_atr = m_minmaxPrices.Diff();
   //m_ceVisualize.Append( dt, m_atr );
 
-  m_ceTradeBBU.Append( dt, m_statsPrices.BBUpper() );
-  m_ceTradeBBL.Append( dt, m_statsPrices.BBLower() );
+  const double bb_upper( m_statsPrices.BBUpper() );
+  const double bb_lower( m_statsPrices.BBLower() );
 
-  const double bboffset( m_statsPrices.BBOffset() );
+  m_ceTradeBBU.Append( dt, bb_upper );
+  m_ceTradeBBL.Append( dt, bb_lower );
+
+  const double bb_offset( m_statsPrices.BBOffset() );
   //m_ceTradeBBDiff.Append( dt, bboffset );
-  m_ceTradeBBDiff.Append( dt, ( bboffset >= m_dblPrvSD ) ? 1.0 : -1.0 ); // track rise/fall rather than value
-  m_dblPrvSD = bboffset;
+  m_ceTradeBBDiff.Append( dt, ( bb_offset >= m_dblPrvSD ) ? 1.0 : -1.0 ); // track rise/fall rather than value
+  m_dblPrvSD = bb_offset;
+
+  const double bb_mean( m_statsPrices.MeanY() );
+  const double normalized( ( price - bb_mean ) / bb_offset );
+  m_ceTradePrice_bb_ratio.Append( dt, normalized );
 
   TimeTick( trade );
 }
