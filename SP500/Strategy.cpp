@@ -88,8 +88,6 @@ Strategy::Strategy(
 , m_statsReturns( m_returns, boost::posix_time::time_duration( 0, 0, c_window ) )
 , m_statsReturns_mean( m_returns_mean, boost::posix_time::time_duration( 0, 0, c_window ) )
 , m_statsReturns_slope( m_returns_slope, boost::posix_time::time_duration( 0, 0, c_window ) )
-//, m_minmaxPrices( m_prices, boost::posix_time::time_duration( 0, 0, c_window ) )
-//, m_atr {}
 , m_stopInitial {}, m_stopDelta {}, m_stopTrail {}
 , m_dblQuoteImbalance {}
 , m_ixcurCrossing( 0 ), m_ixprvCrossing( 1 )
@@ -281,12 +279,16 @@ void Strategy::SetupChart() {
     }
   }
 
-  m_cdv.Add( EChartSlot::Ratio, &m_cemPosOne );
+  m_cdv.Add( EChartSlot::PriceBB, &m_cemPosOne );
   //m_cdv.Add( EChartSlot::Ratio, &m_cemZero );
-  m_cdv.Add( EChartSlot::Ratio, &m_cemNegOne );
+  m_cdv.Add( EChartSlot::PriceBB, &m_cemNegOne );
   m_ceTradePrice_bb_ratio.SetName( "price / bb" );
   m_ceTradePrice_bb_ratio.SetColour( c_colourPrice );
-  m_cdv.Add( EChartSlot::Ratio, &m_ceTradePrice_bb_ratio );
+  m_cdv.Add( EChartSlot::PriceBB, &m_ceTradePrice_bb_ratio );
+
+  m_ceTradePrice_ema_bb_ratio.SetName( "price ema13 / bb " );
+  m_ceTradePrice_ema_bb_ratio.SetColour( c_colourEma13 );
+  m_cdv.Add( EChartSlot::PriceBB, &m_ceTradePrice_ema_bb_ratio );
 
   m_ceTradeVolume.SetName( "Volume" );
   m_ceTradeVolume.SetColour( ou::Colour::Green );
@@ -541,8 +543,10 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   const ou::tf::Price::price_t   price( trade.Price() );
   const ou::tf::Price::volume_t volume( trade.Volume() );
 
+  const ou::tf::Price price_( dt, price );
+
   m_vwp.Add( price, volume );
-  m_ceTradePrice.Append(  dt, price );
+  m_ceTradePrice.Append( price_ );
 
   // more information might be available if this can be matched to walking the quotes/order book
   //if ( direction ) {
@@ -555,24 +559,21 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
   UpdatePriceReturn( dt, price );
 
-  m_prices.Append( ou::tf::Price( dt, price ) );
-  //m_atr = m_minmaxPrices.Diff();
-  //m_ceVisualize.Append( dt, m_atr );
+  m_prices.Append( price_ );
 
   const double bb_upper( m_statsPrices.BBUpper() );
-  const double bb_lower( m_statsPrices.BBLower() );
-
   m_ceTradeBBU.Append( dt, bb_upper );
+
+  const double bb_lower( m_statsPrices.BBLower() );
   m_ceTradeBBL.Append( dt, bb_lower );
 
   const double bb_offset( m_statsPrices.BBOffset() );
-  //m_ceTradeBBDiff.Append( dt, bboffset );
   m_ceTradeBBDiff.Append( dt, ( bb_offset >= m_dblPrvSD ) ? 1.0 : -1.0 ); // track rise/fall rather than value
   m_dblPrvSD = bb_offset;
 
   const double bb_mean( m_statsPrices.MeanY() );
-  const double normalized( ( price - bb_mean ) / bb_offset );
-  m_ceTradePrice_bb_ratio.Append( dt, normalized );
+  const double price_normalized( ( price - bb_mean ) / bb_offset );
+  m_ceTradePrice_bb_ratio.Append( dt, price_normalized );
 
   TimeTick( trade );
 }
@@ -849,7 +850,6 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
     m_pTrackOrder->ExitLongMkt( oa );
   }
   else {
-    //if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
     const double stop( price - m_stopDelta );
     if ( m_stopTrail < stop ) {
       m_stopTrail = stop;
@@ -866,7 +866,6 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
     m_pTrackOrder->ExitShortMkt( oa );
   }
   else {
-    //if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
     const double stop( price + m_stopDelta );
     if ( m_stopTrail > stop ) {
       m_stopTrail = stop;
@@ -883,7 +882,6 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Quote& quote ) {
     m_pTrackOrder->ExitLongMkt( oa );
   }
   else {
-    //if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
     const double stop( ask - m_stopDelta );
     if ( m_stopTrail < stop ) {
       m_stopTrail = stop;
@@ -896,11 +894,9 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Quote& quote ) {
   if ( m_stopTrail < bid ) {
     const auto dt( quote.DateTime() );
     ou::tf::TrackOrder::OrderArgs oa( dt, 100, m_stopTrail );
-    //if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
     m_pTrackOrder->ExitShortMkt( oa );
   }
   else {
-    //if ( m_atr < m_stopDelta ) m_stopDelta = m_atr;
     const double stop( bid + m_stopDelta );
     if ( m_stopTrail > stop ) {
       m_stopTrail = stop;
@@ -919,10 +915,15 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
 
   m_features.dblPrice = price;
 
-  UpdateEma< 13>( price_, m_features.dblEma013, m_ceEma013  );
-  UpdateEma< 29>( price_, m_features.dblEma029, m_ceEma029  );
-  UpdateEma< 50>( price_, m_features.dblEma050, m_ceEma050  );
+  UpdateEma< 13>( price_, m_features.dblEma013, m_ceEma013 );
+  UpdateEma< 29>( price_, m_features.dblEma029, m_ceEma029 );
+  UpdateEma< 50>( price_, m_features.dblEma050, m_ceEma050 );
   UpdateEma<200>( price_, m_features.dblEma200, m_ceEma200 );
+
+  const double bb_offset( m_statsPrices.BBOffset() );
+  const double bb_mean( m_statsPrices.MeanY() );
+  const double ema13_normalized( ( m_features.dblEma013 - bb_mean ) / bb_offset );
+  m_ceTradePrice_ema_bb_ratio.Append( dt, ema13_normalized );
 
   Features_scaled scaled; // receives scaled data
   m_fForward( m_features, scaled ); // may call PredictionVector for a live strategy

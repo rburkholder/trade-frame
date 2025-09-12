@@ -85,7 +85,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, TickVolume, QuoteVolume, rtnPrice, rtnPriceMean, rtnPriceSlope, rtnPriceSD, TickRegime, AdvDec, TickStat, Imbalance, Ratio, Predict, PredVec, PL };
+  enum EChartSlot { Price, TickVolume, QuoteVolume, PriceBB, rtnPrice, rtnPriceMean, rtnPriceSlope, rtnPriceSD, TickRegime, AdvDec, TickStat, Imbalance, Ratio, Predict, PredVec, PL };
 
   const Flags& m_flags;
 
@@ -145,8 +145,6 @@ private:
   size_t m_nEnterLong;
   size_t m_nEnterShort;
 
-  //double m_atr; // average tru range
-
   double m_stopInitial;
   double m_stopDelta;
   double m_stopTrail;
@@ -171,6 +169,7 @@ private:
   //ou::ChartEntryIndicator m_ceTradeBBDiff;
 
   ou::ChartEntryIndicator m_ceTradePrice_bb_ratio;
+  ou::ChartEntryIndicator m_ceTradePrice_ema_bb_ratio;
 
   ou::ChartEntryIndicator m_ceAskPrice;
   ou::ChartEntryIndicator m_ceBidPrice;
@@ -216,7 +215,6 @@ private:
   ou::tf::TSSWStatsPrice m_statsReturns;
 
   ou::tf::Prices m_prices; // might use the underlying directly?
-  //ou::tf::TSSWMinMax m_minmaxPrices; // ATR style volatility indicator
   ou::tf::TSSWStatsPrice m_statsPrices;
 
   double m_dblPrvPrice;
@@ -272,17 +270,12 @@ private:
   void UpdateECross( ECross&, const double mark, const double value );
 
   template<unsigned int n>
-  void UpdateEma( const ou::tf::Price& price_, double& ema, ou::ChartEntryIndicator& cei ) {
+  void UpdateEma( const ou::tf::Price& price_, double& ema, ou::ChartEntryIndicator& cei ) const {
     constexpr double seconds( n );
     constexpr double cur( 1.0 / seconds );
     constexpr double prv( 1.0 - cur );
     const double price( price_.Value() );
-    if ( 0.0 == ema ) {
-      ema = price;
-    }
-    else {
-      ema = prv * ema + cur * price;
-    }
+    ema = ( 0.0 == ema ) ? price : prv * ema + cur * price;
     cei.Append( price_.DateTime(), ema );
     };
 
