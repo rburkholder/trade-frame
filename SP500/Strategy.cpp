@@ -489,7 +489,7 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
 
     rCross_t& rcs( m_crossing[ m_ixcurCrossing ] );
 
-    if ( std::isnan( mean ) ) {}
+    if ( std::isnan( mean ) || std::isinf( mean ) ) {}
     else {
       m_returns_mean.Append( ou::tf::Price( dt, mean ) );
       const double bb_mean( m_statsReturns_mean.MeanY() );
@@ -503,7 +503,7 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
       cs.value = normalized;
     }
 
-    if ( std::isnan( slope ) ) {}
+    if ( std::isnan( slope ) || std::isinf( slope ) ) {}
     else {
       m_returns_slope.Append( ou::tf::Price( dt, slope ) );
       const double bb_mean( m_statsReturns_slope.MeanY() );
