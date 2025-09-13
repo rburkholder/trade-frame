@@ -32,6 +32,7 @@
 namespace ou { // namespace oneunified
 namespace tf { // namespace tradeframe
 
+// inherited by lib/TFBitsNPieces/TrackCurrencyOrder.cpp
 class TrackOrderBase {
 public:
 
@@ -39,15 +40,15 @@ public:
 
   using pPosition_t = ou::tf::Position::pPosition_t;
 
-  using fCancel_t = std::function<void()>;
-  using fClose_t = std::function<void()>;
+  using fCancelled_t = std::function<void()>; // may recurse back into TrackOrder
+  using fClosed_t = std::function<void()>;    // may recurse back into TrackOrder
 
-  using fCancelled_t = std::function<void()>;
-  using fFilled_t = std::function<void( quantity_t, double )>;
+  using fOrderCancelled_t = std::function<void( quantity_t, double )>;
+  using fOrderFilled_t = std::function<void( quantity_t, double )>;
 
   struct OrderArgs {
 
-    boost::posix_time::ptime dt; // used to mark the order
+    boost::posix_time::ptime dt; // mark the order on the chart
     quantity_t quantity;
     double signal;
     double limit;
@@ -55,15 +56,15 @@ public:
     double stop; // only used in bracket at present
     unsigned int duration; // limit order duration seconds
 
-    fCancelled_t fCancelled;
-    fFilled_t fFilled;
+    fOrderCancelled_t fOrderCancelled;
+    fOrderFilled_t    fOrderFilled;
 
     OrderArgs(): quantity {}, signal {}, limit {}, profit {}, stop {}, duration {} {}
 
     // market
     explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_ )
     : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit {}, profit {}, stop {}, duration {}
-    , fCancelled( nullptr ), fFilled( nullptr )
+    , fOrderCancelled( nullptr ), fOrderFilled( nullptr )
     {
       assert( 0 < quantity );
     }
@@ -71,7 +72,7 @@ public:
     // limit
     explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_ )
     : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), profit {}, stop {}, duration {}
-    , fCancelled( nullptr ), fFilled( nullptr )
+    , fOrderCancelled( nullptr ), fOrderFilled( nullptr )
     {
       assert( 0 < quantity );
     }
@@ -86,7 +87,7 @@ public:
     // limit time limit
     explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_, int duration_ )
     : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), profit {}, stop {}, duration( duration_ )
-    , fCancelled( nullptr ), fFilled( nullptr )
+    , fOrderCancelled( nullptr ), fOrderFilled( nullptr )
     {
       assert( 0 < quantity );
     }
@@ -107,9 +108,9 @@ public:
 
   ETradeState& State() { return m_stateTrade; }
 
-  double PriceInterval( double price ) const;
+  double PriceInterval( const double price ) const;
 
-  void QueryStats( double& unrealized, double& realized, double& commission, double& total );
+  void QueryStats( double& unrealized, double& realized, double& commission, double& total ) const;
 
   void EnterLongLmt( const OrderArgs& ); // enter with Long limit
   void EnterLongMkt( const OrderArgs& ); // enter with long market
@@ -123,8 +124,8 @@ public:
   void ExitShortLmt( const OrderArgs& ); // exit long with short limit
   void ExitShortMkt( const OrderArgs& ); // exit long with short market
 
-  void Cancel( fCancel_t&& ); // used by CurrencyTrader
-  void Close( fClose_t&& );   // used by CurrencyTrader
+  void Cancel( fCancelled_t&& ); // used by CurrencyTrader, refactor?
+  void Close(  fClosed_t&& );    // used by CurrencyTrader, refactor?
 
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
@@ -144,10 +145,6 @@ protected:
 
   void SetGoodTill( const OrderArgs&, pOrder_t& );
 
-  void EnterLongBracket( const OrderArgs& );  // not useable at present
-
-  void ShowOrder( pOrder_t& );
-
   virtual void HandleOrderCancelled( const ou::tf::Order& );
   virtual void HandleOrderFilled( const ou::tf::Order& );
 
@@ -155,24 +152,30 @@ private:
 
   ETradeState m_stateTrade;
 
-  double m_dblProfitMax;  // not used, only referenced in bracket
-  double m_dblUnRealized; // not used, only referenced in bracket
-  double m_dblProfitMin;  // not used, only referenced in bracket
-
-  std::string m_sProfitDescription;
-
   ou::ChartEntryShape m_ceEntrySubmit;
   ou::ChartEntryShape m_ceEntryFill;
   ou::ChartEntryShape m_ceExitSubmit;
   ou::ChartEntryShape m_ceExitFill;
 
-  fCancel_t m_fCancelled;
-  fClose_t m_fClosed;
+  fCancelled_t m_fCancelled;
+  fClosed_t m_fClosed;
+
+  // unused
+
+  double m_dblProfitMax;  // not used, only referenced in bracket
+  double m_dblUnRealized; // not used, only referenced in bracket
+  double m_dblProfitMin;  // not used, only referenced in bracket
+
+  std::string m_sProfitDescription; // doesn't appear to be set, referenced in ExitPosition
 
   void HandleExitOrderCancelled( const ou::tf::Order& ); // unused
   void HandleExitOrderFilled( const ou::tf::Order& ); // unused
 
   void ExitPosition( const ou::tf::Quote& ); // unused
+
+  void ShowOrder( pOrder_t& ); // unused
+
+  void EnterLongBracket( const OrderArgs& );  // not useable at present
 
 };
 

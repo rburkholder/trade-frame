@@ -57,12 +57,12 @@ void TrackOrderBase::Set( pPosition_t pPosition, ou::ChartDataView& cdv, int slo
 
 }
 
-void TrackOrderBase::QueryStats( double& unrealized, double& realized, double& commission, double& total ) {
+void TrackOrderBase::QueryStats( double& unrealized, double& realized, double& commission, double& total ) const {
   m_pPosition->QueryStats( unrealized, realized, commission, total );
 }
 
 // see TFTrading/MonitorOrder.cpp
-double TrackOrderBase::PriceInterval( double price ) const {
+double TrackOrderBase::PriceInterval( const double price ) const {
   assert( m_pPosition );
   double interval {};
   auto pProvider( m_pPosition->GetExecutionProvider() );
@@ -146,42 +146,6 @@ void TrackOrderBase::EnterLongMkt( const OrderArgs& args ) { // enter with long 
   EnterCommon( args, pOrder );
 }
 
-void TrackOrderBase::EnterLongBracket( const OrderArgs& args ) {
-  // unused, as Position has counters which don't support a set of orders with multiple directions and times
-  // will need to simulate equivalent of Bracket Order in the state machine
-  assert( 0 < args.quantity );
-  m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
-  m_stateTrade.Set( ETradeState::EntrySubmittedUp, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
-
-  assert( 0.0 < args.limit );
-  pOrder_t pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, args.quantity, Normalize( args.limit ) );
-  assert( pOrderEntry );
-  SetGoodTill( args, pOrderEntry );
-  pOrderEntry->SetTransmit( false );
-  pOrderEntry->SetSignalPrice( args.signal );
-  pOrderEntry->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrderBase::HandleOrderCancelled ) );
-  pOrderEntry->OnOrderFilled.Add( MakeDelegate( this, &TrackOrderBase::HandleOrderFilled ) );
-  assert( !m_pOrderPending );
-  m_pOrderPending = pOrderEntry;
-  m_pPosition->PlaceOrder( pOrderEntry );
-
-  assert( 0.0 < args.profit );
-  pOrder_t pOrderProfit = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, args.quantity, Normalize( args.profit ) );
-  assert( pOrderProfit );
-  pOrderProfit->SetTransmit( false );
-  pOrderProfit->SetParentOrderId( pOrderEntry->GetOrderId() );
-  m_pPosition->PlaceOrder( pOrderProfit );
-
-  assert( 0.0 < args.stop );
-  pOrder_t pOrderStop = m_pPosition->ConstructOrder( ou::tf::OrderType::Trail, ou::tf::OrderSide::Sell, args.quantity, Normalize( args.stop ) );
-  assert( pOrderStop );
-  pOrderStop->SetParentOrderId( pOrderEntry->GetOrderId() );
-  m_pPosition->PlaceOrder( pOrderStop );
-
-  // this won't track in the order manager or the position
-  //std::dynamic_pointer_cast<ou::tf::ib::TWS>( m_pPosition->GetExecutionProvider() )->PlaceBracketOrder( pOrderEntry, pOrderProfit, pOrderStop );
-}
-
 void TrackOrderBase::EnterShortLmt( const OrderArgs& args ) { // enter with short limit
   assert( 0 < args.quantity );
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, args.quantity, Normalize( args.limit ) );
@@ -238,13 +202,6 @@ void TrackOrderBase::ExitShortMkt( const OrderArgs& args ) { // exit long with s
   assert( pOrder );
   m_ceExitSubmit.AddLabel( args.dt, args.signal, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
   ExitCommon( args, pOrder );
-}
-
-void TrackOrderBase::ShowOrder( pOrder_t& pOrder ) {
-  //m_pTreeItemOrder = m_pTreeItemSymbol->AppendChild(
-  //    "Order "
-  //  + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() )
-  //  );
 }
 
 void TrackOrderBase::HandleOrderCancelled( const ou::tf::Order& order ) {
@@ -348,7 +305,7 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
 
 }
 
-void TrackOrderBase::Cancel( fCancel_t&& fCancelled ) { // may need something if nothing to cancel
+void TrackOrderBase::Cancel( fCancelled_t&& fCancelled ) { // may need something if nothing to cancel
   assert( nullptr == m_fCancelled );
   if ( m_pPosition ) {
     m_stateTrade.Set( ETradeState::Cancelling, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
@@ -361,7 +318,7 @@ void TrackOrderBase::Cancel( fCancel_t&& fCancelled ) { // may need something if
   }
 }
 
-void TrackOrderBase::Close( fClose_t&& fClosed ) {
+void TrackOrderBase::Close( fClosed_t&& fClosed ) {
   assert( nullptr == m_fClosed );
   if ( m_pPosition ) {
     m_stateTrade.Set( ETradeState::EndOfDayNeutral, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
@@ -392,6 +349,51 @@ void TrackOrderBase::HandleGoNeutral( boost::gregorian::date, boost::posix_time:
       }
       break;
   }
+}
+
+// unused
+void TrackOrderBase::EnterLongBracket( const OrderArgs& args ) {
+  // unused, as Position has counters which don't support a set of orders with multiple directions and times
+  // will need to simulate equivalent of Bracket Order in the state machine
+  assert( 0 < args.quantity );
+  m_dblProfitMax = m_dblUnRealized = m_dblProfitMin = 0.0;
+  m_stateTrade.Set( ETradeState::EntrySubmittedUp, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
+
+  assert( 0.0 < args.limit );
+  pOrder_t pOrderEntry = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Buy, args.quantity, Normalize( args.limit ) );
+  assert( pOrderEntry );
+  SetGoodTill( args, pOrderEntry );
+  pOrderEntry->SetTransmit( false );
+  pOrderEntry->SetSignalPrice( args.signal );
+  pOrderEntry->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrderBase::HandleOrderCancelled ) );
+  pOrderEntry->OnOrderFilled.Add( MakeDelegate( this, &TrackOrderBase::HandleOrderFilled ) );
+  assert( !m_pOrderPending );
+  m_pOrderPending = pOrderEntry;
+  m_pPosition->PlaceOrder( pOrderEntry );
+
+  assert( 0.0 < args.profit );
+  pOrder_t pOrderProfit = m_pPosition->ConstructOrder( ou::tf::OrderType::Limit, ou::tf::OrderSide::Sell, args.quantity, Normalize( args.profit ) );
+  assert( pOrderProfit );
+  pOrderProfit->SetTransmit( false );
+  pOrderProfit->SetParentOrderId( pOrderEntry->GetOrderId() );
+  m_pPosition->PlaceOrder( pOrderProfit );
+
+  assert( 0.0 < args.stop );
+  pOrder_t pOrderStop = m_pPosition->ConstructOrder( ou::tf::OrderType::Trail, ou::tf::OrderSide::Sell, args.quantity, Normalize( args.stop ) );
+  assert( pOrderStop );
+  pOrderStop->SetParentOrderId( pOrderEntry->GetOrderId() );
+  m_pPosition->PlaceOrder( pOrderStop );
+
+  // this won't track in the order manager or the position
+  //std::dynamic_pointer_cast<ou::tf::ib::TWS>( m_pPosition->GetExecutionProvider() )->PlaceBracketOrder( pOrderEntry, pOrderProfit, pOrderStop );
+}
+
+// unused
+void TrackOrderBase::ShowOrder( pOrder_t& pOrder ) {
+  //m_pTreeItemOrder = m_pTreeItemSymbol->AppendChild(
+  //    "Order "
+  //  + boost::lexical_cast<std::string>( m_pOrder->GetOrderId() )
+  //  );
 }
 
 // unused
