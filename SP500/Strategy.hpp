@@ -275,7 +275,8 @@ private:
     constexpr double cur( 1.0 / seconds );
     constexpr double prv( 1.0 - cur );
     const double price( price_.Value() );
-    ema = ( 0.0 == ema ) ? price : prv * ema + cur * price;
+    const double ema_ = prv * ema + cur * price; // pre-compute
+    ema = ( 0.0 == ema ) ? price : ema_; // uses conditional move instruction?
     cei.Append( price_.DateTime(), ema );
     };
 
