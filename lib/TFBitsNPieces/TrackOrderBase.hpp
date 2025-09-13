@@ -32,8 +32,13 @@
 namespace ou { // namespace oneunified
 namespace tf { // namespace tradeframe
 
-// inherited by lib/TFBitsNPieces/TrackCurrencyOrder.cpp
+class TrackBracketOrder;
+
+// inherited by lib/TFBitsNPieces/TrackOrder.hpp
+// inherited by lib/TFBitsNPieces/TrackCurrencyOrder.hpp
+// inherited by lib/TFBitsNPieces/TrackBracketOrder.hpp
 class TrackOrderBase {
+  friend TrackBracketOrder;
 public:
 
   using quantity_t = ou::tf::Order::quantity_t;
@@ -52,18 +57,17 @@ public:
     quantity_t quantity;
     double signal;
     double limit;
-    double profit; // only used in bracket at present
-    double stop; // only used in bracket at present
+    // double stop; // not used here as order tracked outside of order submission
     unsigned int duration; // limit order duration seconds
 
     fOrderCancelled_t fOrderCancelled;
     fOrderFilled_t    fOrderFilled;
 
-    OrderArgs(): quantity {}, signal {}, limit {}, profit {}, stop {}, duration {} {}
+    OrderArgs(): quantity {}, signal {}, limit {}, duration {} {}
 
     // market
     explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_ )
-    : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit {}, profit {}, stop {}, duration {}
+    : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit {}, duration {}
     , fOrderCancelled( nullptr ), fOrderFilled( nullptr )
     {
       assert( 0 < quantity );
@@ -71,33 +75,20 @@ public:
 
     // limit
     explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_ )
-    : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), profit {}, stop {}, duration {}
+    : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), duration {}
     , fOrderCancelled( nullptr ), fOrderFilled( nullptr )
     {
       assert( 0 < quantity );
     }
-
-    // limit, stop
-    //explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_, double stop_ )
-    //: dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), profit {}, stop( stop_ ), duration {}
-    //{
-    //  assert( 0 < quantity );
-    //}
 
     // limit time limit
     explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_, int duration_ )
-    : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), profit {}, stop {}, duration( duration_ )
+    : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), duration( duration_ )
     , fOrderCancelled( nullptr ), fOrderFilled( nullptr )
     {
       assert( 0 < quantity );
     }
 
-    // limit time limit, stop
-    //explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_, double stop_, int duration_ )
-    //: dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), profit {}, stop( stop_ ), duration( duration_ )
-    //{
-    //  assert( 0 < quantity );
-    //}
   };
 
   TrackOrderBase();
@@ -148,8 +139,6 @@ protected:
   virtual void HandleOrderCancelled( const ou::tf::Order& );
   virtual void HandleOrderFilled( const ou::tf::Order& );
 
-private:
-
   ETradeState m_stateTrade;
 
   ou::ChartEntryShape m_ceEntrySubmit;
@@ -157,25 +146,10 @@ private:
   ou::ChartEntryShape m_ceExitSubmit;
   ou::ChartEntryShape m_ceExitFill;
 
+private:
+
   fCancelled_t m_fCancelled;
   fClosed_t m_fClosed;
-
-  // unused
-
-  double m_dblProfitMax;  // not used, only referenced in bracket
-  double m_dblUnRealized; // not used, only referenced in bracket
-  double m_dblProfitMin;  // not used, only referenced in bracket
-
-  std::string m_sProfitDescription; // doesn't appear to be set, referenced in ExitPosition
-
-  void HandleExitOrderCancelled( const ou::tf::Order& ); // unused
-  void HandleExitOrderFilled( const ou::tf::Order& ); // unused
-
-  void ExitPosition( const ou::tf::Quote& ); // unused
-
-  void ShowOrder( pOrder_t& ); // unused
-
-  void EnterLongBracket( const OrderArgs& );  // not useable at present
 
 };
 

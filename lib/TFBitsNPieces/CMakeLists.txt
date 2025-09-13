@@ -26,6 +26,7 @@ set(
     Stochastic.hpp
     TrackOrderBase.hpp
     TrackOrder.hpp
+    TrackBracketOrder.hpp
     TrackCurrencyOrder.hpp
     TradeState.hpp
     TreeOps.h
@@ -48,6 +49,7 @@ set(
     Stochastic.cpp
     TrackOrderBase.cpp
     TrackOrder.cpp
+    TrackBracketOrder.cpp
     TrackCurrencyOrder.cpp
     TradeState.cpp
     TreeOps.cpp
