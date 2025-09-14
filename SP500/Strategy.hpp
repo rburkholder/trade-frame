@@ -251,6 +251,7 @@ private:
     rtn_mean
   , rtn_slope
   , rtn_sd
+  , prc_norm // normalized price
   , _count
   };
 
@@ -262,12 +263,12 @@ private:
 
   using rCross_t = std::array<CrossState, (size_t)EIndicator::_count>;
   rCross_t m_crossing[ 2 ]; // current switches  0 -> 1 -> 0 via mod ( % 1 )
-  size_t m_ixprvCrossing;
-  size_t m_ixcurCrossing;
+  rCross_t::size_type m_ixprvCrossing;
+  rCross_t::size_type m_ixcurCrossing;
 
   ECross m_ECross_imbalance;
 
-  void UpdateECross( ECross&, const double mark, const double value );
+  void UpdateECross( ECross&, const double mark, const double value ) const;
 
   template<unsigned int n>
   void UpdateEma( const ou::tf::Price& price_, double& ema, ou::ChartEntryIndicator& cei ) const {
@@ -310,11 +311,10 @@ private:
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
 
-  void EnterLong( const ptime dt, const double tag );
-  void EnterShort( const ptime dt, const double tag );
-
-  void ExitLong( const ptime dt, const double tag );
-  void ExitShort( const ptime dt, const double tag );
+  using fEnterTrade_t = std::function<void(const ou::tf::Trade&)>;
+  bool Search(     const ou::tf::Trade&, fEnterTrade_t&& buy, fEnterTrade_t&& sell ) const;
+  void EnterLong(  const ou::tf::Trade& );
+  void EnterShort( const ou::tf::Trade& );
 
   void SetupChart();
   void ValidateAndStart();

@@ -439,7 +439,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   }
 }
 
-void Strategy::UpdateECross( ECross& ec, const double mark, const double value ) {
+void Strategy::UpdateECross( ECross& ec, const double mark, const double value ) const {
   if ( 0.0 == value ) {
     ec = ECross::zero;
   }
@@ -535,18 +535,19 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
 
 void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
-  const bool direction( m_quote.LeeReady( m_trade.Price(), trade.Price() ) );
-
-  m_trade = trade;
-
   const ou::tf::Price::dt_t         dt( trade.DateTime() );
   const ou::tf::Price::price_t   price( trade.Price() );
   const ou::tf::Price::volume_t volume( trade.Volume() );
 
-  const ou::tf::Price price_( dt, price );
+  const ou::tf::Price dt_price( dt, price );
+
+  // needs to be constructed prior to the m_trade assignment
+  // const bool direction( m_quote.LeeReady( m_trade.Price(), trade.Price() ) );
+
+  m_trade = trade;
 
   m_vwp.Add( price, volume );
-  m_ceTradePrice.Append( price_ );
+  m_ceTradePrice.Append( dt_price );
 
   // more information might be available if this can be matched to walking the quotes/order book
   //if ( direction ) {
@@ -557,9 +558,9 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   //}
   m_ceTradeVolume.Append( dt, volume );
 
-  UpdatePriceReturn( dt, price );
+  UpdatePriceReturn( dt, price );  // updates m_crossing, m_ixprvCrossing, m_ixcurCrossing
 
-  m_prices.Append( price_ );
+  m_prices.Append( dt_price );
 
   const double bb_upper( m_statsPrices.BBUpper() );
   m_ceTradeBBU.Append( dt, bb_upper );
@@ -567,6 +568,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   const double bb_lower( m_statsPrices.BBLower() );
   m_ceTradeBBL.Append( dt, bb_lower );
 
+  // todo: consider using a 2 or 3 degree polynomial to smooth (similar to CurrencyTrader/CubicRegression.cpp)
   const double bb_offset( m_statsPrices.BBOffset() );
   m_ceTradeBBDiff.Append( dt, ( bb_offset >= m_dblPrvSD ) ? 1.0 : -1.0 ); // track rise/fall rather than value
   m_dblPrvSD = bb_offset;
@@ -574,6 +576,12 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   const double bb_mean( m_statsPrices.MeanY() );
   const double price_normalized( ( price - bb_mean ) / bb_offset );
   m_ceTradePrice_bb_ratio.Append( dt, price_normalized );
+
+  rCross_t& rcs( m_crossing[ m_ixcurCrossing ] );
+  CrossState& cs( rcs[ prc_norm ] );
+  ECross& ec( cs.cross );
+  UpdateECross( ec, 1.0, price_normalized );
+  cs.value = price_normalized;
 
   TimeTick( trade );
 }
@@ -701,8 +709,7 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
 */
 
 void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
-  const auto dt( trade.DateTime() );
-  const auto price( trade.Price() );
+
   // run state machine here as the bollinger bands are updated only with incoming trades?
   // using limit orders at the bollinger band is independent of quotes
   // however once quotes get near the edge, then important to rapidly update
@@ -719,14 +726,21 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
 
   switch ( m_pTrackOrder->State()() ) {
     case ETradeState::Search:
+      Search(
+        trade
+      , std::bind( &Strategy::EnterLong, this, std::placeholders::_1 )
+      , std::bind( &Strategy::EnterShort, this, std::placeholders::_1 )
+     );
       break;
     case ETradeState::EntrySubmittedUp:
       break;
     case ETradeState::EntrySubmittedDn:
       break;
     case ETradeState::ExitSignalUp:
+      UpdatePositionProgressUp( trade );
       break;
     case ETradeState::ExitSignalDn:
+      UpdatePositionProgressDn( trade );
       break;
     case ETradeState::ExitSubmitted:
       break;
@@ -754,6 +768,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   // based upon mean/slope, can the a prediction be made on how far this will go?
   // how much is predicted by order book imbalance/change?
 
+  /*
   static const double c_nd( 2.0 );
 
   const rCross_t& rcp( m_crossing[ m_ixprvCrossing ] );
@@ -770,15 +785,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
           if ( ( ECross::upperhi == rcp[ rtn_slope ].cross )
             && ( ECross::upperhi == rcp[ rtn_mean ].cross )
           ) {
-            //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
-            //m_ceShortEntry.AddLabel( dt, price, "short" );
-            ++m_nEnterShort;
-            //m_to.State().Set( ETradeState::EntrySubmittedDn );
-            m_stopDelta = c_nd * m_statsPrices.SD();;
-            m_stopTrail = m_stopInitial = m_quote.Ask() + m_stopDelta;
-            ou::tf::TrackOrder::OrderArgs oa( dt, 100, m_trade.Price(), m_quote.Bid(), 5 );
-            // todo: set fCancelled, fFilled
-            m_pTrackOrder->EnterShortLmt( oa );
+            EnterShort( trade );
           }
           break;
         case ECross::zero:
@@ -787,15 +794,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
           if ( ( ECross::lowerlo == rcp[ rtn_slope ].cross )
             && ( ECross::lowerlo == rcp[ rtn_mean ].cross )
           ) {
-            //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
-            //m_ceLongEntry.AddLabel( dt, price, "long" );
-            ++m_nEnterLong;
-            //m_to.State().Set( ETradeState::EntrySubmittedUp );
-            m_stopDelta = c_nd * m_statsPrices.SD();;
-            m_stopTrail = m_stopInitial = m_quote.Bid() - m_stopDelta;
-            ou::tf::TrackOrder::OrderArgs oa( dt, 100, m_trade.Price(), m_quote.Ask(), 5 );
-            // todo: set fCancelled, fFilled
-            m_pTrackOrder->EnterLongLmt( oa );
+            EnterLong( trade );
           }
           break;
         case ECross::lowermk:
@@ -839,36 +838,146 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       // todo: track unused states
       break;
   }
+  */
+}
+
+bool Strategy::Search( const ou::tf::Trade& trade, fEnterTrade_t&& fBuy, fEnterTrade_t&& fSell ) const {
+
+  bool bOrderEntered( false );
+
+  const rCross_t& rcp( m_crossing[ m_ixprvCrossing ] );
+  const ECross prvCross( rcp[ prc_norm ].cross );
+
+  const rCross_t& rcc( m_crossing[ m_ixcurCrossing ] );
+  const ECross curCross( rcc[ prc_norm ].cross );
+
+  switch ( curCross ) {
+    case ECross::upperlo:
+      if ( ( ECross::uppermk == prvCross ) || ( ECross::upperhi == prvCross ) ) {
+        bOrderEntered = true;
+        fSell( trade );
+      }
+      break;
+    case ECross::lowerhi:
+      if ( ( ECross::lowermk == prvCross ) || ( ECross::lowerlo == prvCross ) ) {
+        bOrderEntered = true;
+        fBuy( trade );
+      }
+      break;
+    default:
+      break;
+  }
+  return bOrderEntered;
+}
+
+void Strategy::EnterLong( const ou::tf::Trade& trade ) {
+  const auto nd( m_statsPrices.GetBBMultiplier() );
+  const auto dt( trade.DateTime() );
+  const auto price( trade.Price() );
+  //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
+  //m_ceLongEntry.AddLabel( dt, price, "long" );
+  ++m_nEnterLong;
+  //m_to.State().Set( ETradeState::EntrySubmittedUp );
+  m_stopDelta = nd * m_statsPrices.SD();;
+  m_stopTrail = m_stopInitial = m_quote.Bid() - m_stopDelta;
+  ou::tf::TrackOrder::OrderArgs oa( dt, 100, price, m_quote.Ask(), 5 );
+  // todo: set fCancelled, fFilled ? - no, not on initial order
+  m_pTrackOrder->EnterLongLmt( oa );
+}
+
+void Strategy::EnterShort( const ou::tf::Trade& trade ) {
+  const auto nd( m_statsPrices.GetBBMultiplier() );
+  const auto dt( trade.DateTime() );
+  const auto price( trade.Price() );
+  //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
+  //m_ceShortEntry.AddLabel( dt, price, "short" );
+  ++m_nEnterShort;
+  //m_to.State().Set( ETradeState::EntrySubmittedDn );
+  m_stopDelta = nd * m_statsPrices.SD();;
+  m_stopTrail = m_stopInitial = m_quote.Ask() + m_stopDelta;
+  ou::tf::TrackOrder::OrderArgs oa( dt, 100, price, m_quote.Bid(), 5 );
+  // todo: set fCancelled, fFilled ? - no, not on initial order
+  m_pTrackOrder->EnterShortLmt( oa );
 }
 
 void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
-  const auto price( trade.Price() );
-  if ( m_stopTrail > price ) {
-    const auto dt( trade.DateTime() );
-    ou::tf::TrackOrder::OrderArgs oa( dt, 100, m_stopTrail );
-    // todo: set fCancelled, fFilled
-    m_pTrackOrder->ExitLongMkt( oa );
-  }
-  else {
-    const double stop( price - m_stopDelta );
-    if ( m_stopTrail < stop ) {
-      m_stopTrail = stop;
+
+  bool bTestStop( true );
+
+  if ( Search(
+    trade
+  , []( const ou::tf::Trade& ){
+      // ignore, still long
+    }
+  , [this,&trade,&bTestStop]( const ou::tf::Trade& ){
+      // exit then enter short
+      const auto dt( trade.DateTime() );
+      const auto price( trade.Price() );
+      ou::tf::TrackOrder::OrderArgs oa_mkt( dt, 100, price );
+      oa_mkt.Set(
+        [](){ // fOrderCancelled_t
+          // go back to search
+        }
+      , [this](){ // fOrderFilled_t
+          EnterShort( m_trade );
+        } );
+      m_pTrackOrder->ExitLongMkt( oa_mkt );
+      bTestStop = false;
+  } )) {}
+
+  if ( bTestStop ) {
+    const auto price( trade.Price() ); // todo: test the stops with quotes?
+    if ( m_stopTrail > price ) {
+      const auto dt( trade.DateTime() );
+      ou::tf::TrackOrder::OrderArgs oa_mkt( dt, 100, m_stopTrail );
+      m_pTrackOrder->ExitLongMkt( oa_mkt );
+    }
+    else {
+      const double stop( price - m_stopDelta );
+      if ( m_stopTrail < stop ) {
+        m_stopTrail = stop;
+      }
     }
   }
 }
 
 void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
-  const auto price( trade.Price() );
-  if ( m_stopTrail < price ) {
-    const auto dt( trade.DateTime() );
-    ou::tf::TrackOrder::OrderArgs oa( dt, 100, m_stopTrail );
-    // todo: set fCancelled, fFilled
-    m_pTrackOrder->ExitShortMkt( oa );
-  }
-  else {
-    const double stop( price + m_stopDelta );
-    if ( m_stopTrail > stop ) {
-      m_stopTrail = stop;
+
+  bool bTestStop( true );
+
+  if ( Search(
+    trade
+  , [this,&trade,&bTestStop]( const ou::tf::Trade& ){
+      // exit then enter long
+      const auto dt( trade.DateTime() );
+      const auto price( trade.Price() );
+      ou::tf::TrackOrder::OrderArgs oa_mkt( dt, 100, price );
+      oa_mkt.Set(
+        [](){ // fOrderCancelled_t
+          // go back to search
+        }
+      , [this](){ // fOrderFilled_t
+          EnterLong( m_trade );
+        } );
+      m_pTrackOrder->ExitShortMkt( oa_mkt );
+      bTestStop = false;
+    }
+  , []( const ou::tf::Trade& ){
+      // ignore, still short
+  } )) {}
+
+  if ( bTestStop ) {
+    const auto price( trade.Price() ); // todo: test the stops with quotes?
+    if ( m_stopTrail < price ) {
+      const auto dt( trade.DateTime() );
+      ou::tf::TrackOrder::OrderArgs oa_mkt( dt, 100, m_stopTrail );
+      m_pTrackOrder->ExitShortMkt( oa_mkt );
+    }
+    else {
+      const double stop( price + m_stopDelta );
+      if ( m_stopTrail > stop ) {
+        m_stopTrail = stop;
+      }
     }
   }
 }
