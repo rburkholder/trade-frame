@@ -46,10 +46,9 @@ public:
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   using fCancelled_t = std::function<void()>; // may recurse back into TrackOrder
-  using fClosed_t = std::function<void()>;    // may recurse back into TrackOrder
 
-  using fOrderCancelled_t = std::function<void( quantity_t, double )>;
-  using fOrderFilled_t = std::function<void( quantity_t, double )>;
+  using fOrderCancelled_t = std::function<void( quantity_t, double )>; // filled, if any at price
+  using fOrderFilled_t = std::function<void( quantity_t, double )>; // filled, if any at price, no commission
 
   struct OrderArgs {
 
@@ -89,6 +88,11 @@ public:
       assert( 0 < quantity );
     }
 
+    void Set( fOrderCancelled_t&& fOrderCancelled_, fOrderFilled_t&& fOrderFilled_ ) {
+      fOrderCancelled = std::move( fOrderCancelled_ );
+      fOrderFilled = std::move( fOrderFilled );
+    }
+
   };
 
   TrackOrderBase();
@@ -116,7 +120,7 @@ public:
   void ExitShortMkt( const OrderArgs& ); // exit long with short market
 
   void Cancel( fCancelled_t&& ); // used by CurrencyTrader, refactor?
-  void Close(  fClosed_t&& );    // used by CurrencyTrader, refactor?
+  void Close();                  // used by CurrencyTrader, refactor?
 
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
@@ -149,7 +153,9 @@ protected:
 private:
 
   fCancelled_t m_fCancelled;
-  fClosed_t m_fClosed;
+
+  fOrderCancelled_t m_fOrderCancelled;
+  fOrderFilled_t m_fOrderFilled;
 
 };
 

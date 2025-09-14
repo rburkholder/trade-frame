@@ -31,11 +31,13 @@ namespace ou { // namespace oneunified
 namespace tf { // namespace tradeframe
 
 TrackOrderBase::TrackOrderBase()
-: m_fCancelled( nullptr ), m_fClosed( nullptr )
+: m_fCancelled( nullptr )
+, m_fOrderCancelled( nullptr ), m_fOrderFilled( nullptr )
 {}
 
 TrackOrderBase::TrackOrderBase( pPosition_t pPosition, ou::ChartDataView& cdv, int slot )
-: m_fCancelled( nullptr ), m_fClosed( nullptr )
+: m_fCancelled( nullptr )
+, m_fOrderCancelled( nullptr ), m_fOrderFilled( nullptr )
 {
   Set( pPosition, cdv, slot );
 }
@@ -106,6 +108,10 @@ void TrackOrderBase::SetGoodTill( const OrderArgs& args, pOrder_t& pOrder ) {
 }
 
 void TrackOrderBase::Common( const OrderArgs& args, pOrder_t& pOrder ) {
+
+  m_fOrderCancelled = std::move( args.fOrderCancelled );
+  m_fOrderFilled = std::move( args.fOrderFilled );
+
   pOrder->SetSignalPrice( args.signal );
   pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackOrderBase::HandleOrderCancelled ) );
   pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackOrderBase::HandleOrderFilled ) );
@@ -239,6 +245,14 @@ void TrackOrderBase::HandleOrderCancelled( const ou::tf::Order& order ) {
     default:
       m_stateTrade.Set( ETradeState::Search, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   }
+
+  if ( m_fOrderCancelled ) {
+    m_fOrderCancelled( m_pOrderPending->GetQuanFilled(), m_pOrderPending->GetAverageFillPrice() );
+  }
+  m_fCancelled = nullptr;
+  m_fOrderCancelled = nullptr;
+  m_fOrderFilled = nullptr;
+
   m_pOrderPending.reset();
 }
 
@@ -300,6 +314,13 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
        assert( false ); // TODO: unravel the state mess if we get here
   }
 
+  if ( m_fOrderFilled ) {
+    m_fOrderFilled( m_pOrderPending->GetQuanFilled(), m_pOrderPending->GetAverageFillPrice() );
+  }
+  m_fCancelled = nullptr;
+  m_fOrderCancelled = nullptr;
+  m_fOrderFilled = nullptr;
+
   m_pOrderPending.reset();
 
 }
@@ -317,11 +338,9 @@ void TrackOrderBase::Cancel( fCancelled_t&& fCancelled ) { // may need something
   }
 }
 
-void TrackOrderBase::Close( fClosed_t&& fClosed ) {
-  assert( nullptr == m_fClosed );
+void TrackOrderBase::Close() {
   if ( m_pPosition ) {
     m_stateTrade.Set( ETradeState::EndOfDayNeutral, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
-    m_fClosed = std::move( fClosed );
     m_pPosition->ClosePosition();
   }
   else {

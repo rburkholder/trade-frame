@@ -657,10 +657,7 @@ void Strategy::CloseAndDone() {
     case ETradeState::ExitSubmitted:
       m_to.Cancel(
         [this](){
-          m_to.Close(
-            [](){
-              // TrackOrder: to be implemented
-            } );
+          m_to.Close();
         } );
       break;
     case ETradeState::ExitSignalUp:
