@@ -730,7 +730,7 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
         trade
       , std::bind( &Strategy::EnterLong, this, std::placeholders::_1 )
       , std::bind( &Strategy::EnterShort, this, std::placeholders::_1 )
-     );
+      );
       break;
     case ETradeState::EntrySubmittedUp:
       break;
@@ -776,32 +776,11 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
 
   switch ( m_pTrackOrder->State()() ) {
     case ETradeState::Search:
-      switch ( rcc[ rtn_slope ].cross ) {
-        case ECross::upperhi:
-          break;
-        case ECross::uppermk:
-          break;
-        case ECross::upperlo:
-          if ( ( ECross::upperhi == rcp[ rtn_slope ].cross )
-            && ( ECross::upperhi == rcp[ rtn_mean ].cross )
-          ) {
-            EnterShort( trade );
-          }
-          break;
-        case ECross::zero:
-          break;
-        case ECross::lowerhi:
-          if ( ( ECross::lowerlo == rcp[ rtn_slope ].cross )
-            && ( ECross::lowerlo == rcp[ rtn_mean ].cross )
-          ) {
-            EnterLong( trade );
-          }
-          break;
-        case ECross::lowermk:
-          break;
-        case ECross::lowerlo:
-          break;
-      }
+      Search(
+        trade // will need to be quote, or convert to ou::tf::Price
+      , std::bind( &Strategy::EnterLong, this, std::placeholders::_1 )
+      , std::bind( &Strategy::EnterShort, this, std::placeholders::_1 )
+      );
       break;
     case ETradeState::EntrySubmittedUp:
       if ( !m_bTickRegimeIncreased ) {
