@@ -21,6 +21,8 @@
 
 #pragma once
 
+// TODO: fix to prevent partial fills
+
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryShape.h>
 
@@ -47,8 +49,8 @@ public:
 
   using fCancelled_t = std::function<void()>; // may recurse back into TrackOrder
 
-  using fOrderCancelled_t = std::function<void( quantity_t, double )>; // filled, if any at price
-  using fOrderFilled_t = std::function<void( quantity_t, double )>; // filled, if any at price, no commission
+  using fOrderCancelled_t = std::function<void()>;
+  using fOrderFilled_t = std::function<void()>;
 
   struct OrderArgs {
 
@@ -56,7 +58,7 @@ public:
     quantity_t quantity;
     double signal;
     double limit;
-    // double stop; // not used here as order tracked outside of order submission
+    // double stop; // not used here as order tracked outside of order submission, unless use pWatch from pPosition
     unsigned int duration; // limit order duration seconds
 
     fOrderCancelled_t fOrderCancelled;
@@ -80,7 +82,7 @@ public:
       assert( 0 < quantity );
     }
 
-    // limit time limit
+    // limit with duration
     explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_, int duration_ )
     : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), duration( duration_ )
     , fOrderCancelled( nullptr ), fOrderFilled( nullptr )
@@ -127,10 +129,17 @@ public:
 
 protected:
 
+  ETradeState m_stateTrade;
+
+  pPosition_t m_pPosition;
+
   using pOrder_t = ou::tf::Order::pOrder_t;
   pOrder_t m_pOrderPending;
 
-  pPosition_t m_pPosition;
+  ou::ChartEntryShape m_ceEntrySubmit;
+  ou::ChartEntryShape m_ceEntryFill;
+  ou::ChartEntryShape m_ceExitSubmit;
+  ou::ChartEntryShape m_ceExitFill;
 
   void Common( const OrderArgs&, pOrder_t& );
   void EnterCommon( const OrderArgs&, pOrder_t& );
@@ -142,13 +151,6 @@ protected:
 
   virtual void HandleOrderCancelled( const ou::tf::Order& );
   virtual void HandleOrderFilled( const ou::tf::Order& );
-
-  ETradeState m_stateTrade;
-
-  ou::ChartEntryShape m_ceEntrySubmit;
-  ou::ChartEntryShape m_ceEntryFill;
-  ou::ChartEntryShape m_ceExitSubmit;
-  ou::ChartEntryShape m_ceExitFill;
 
 private:
 

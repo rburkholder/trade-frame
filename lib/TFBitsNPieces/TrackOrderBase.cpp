@@ -246,14 +246,19 @@ void TrackOrderBase::HandleOrderCancelled( const ou::tf::Order& order ) {
       m_stateTrade.Set( ETradeState::Search, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   }
 
+  fOrderCancelled_t fOrderCancelled( nullptr );
   if ( m_fOrderCancelled ) {
-    m_fOrderCancelled( m_pOrderPending->GetQuanFilled(), m_pOrderPending->GetAverageFillPrice() );
+    fOrderCancelled = std::move( m_fOrderCancelled );
   }
+
   m_fCancelled = nullptr;
   m_fOrderCancelled = nullptr;
   m_fOrderFilled = nullptr;
-
   m_pOrderPending.reset();
+
+  if ( fOrderCancelled ) {
+    fOrderCancelled();
+  }
 }
 
 void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
@@ -314,15 +319,19 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
        assert( false ); // TODO: unravel the state mess if we get here
   }
 
+  fOrderFilled_t fOrderFilled( nullptr );
   if ( m_fOrderFilled ) {
-    m_fOrderFilled( m_pOrderPending->GetQuanFilled(), m_pOrderPending->GetAverageFillPrice() );
+    fOrderFilled = std::move( m_fOrderFilled );
   }
+
   m_fCancelled = nullptr;
   m_fOrderCancelled = nullptr;
   m_fOrderFilled = nullptr;
-
   m_pOrderPending.reset();
 
+  if ( fOrderFilled ) {
+    fOrderFilled();
+  }
 }
 
 void TrackOrderBase::Cancel( fCancelled_t&& fCancelled ) { // may need something if nothing to cancel
