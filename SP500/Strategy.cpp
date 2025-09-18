@@ -728,9 +728,12 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
     case ETradeState::Search:
       Search(
         trade
-      , std::bind( &Strategy::EnterLong, this, std::placeholders::_1 )
-      , std::bind( &Strategy::EnterShort, this, std::placeholders::_1 )
-      );
+      , [this]( const ou::tf::Trade& trade ) {
+        EnterLong( trade );
+      }
+      , [this]( const ou::tf::Trade& trade ) {
+        EnterShort( trade );
+      });
       break;
     case ETradeState::EntrySubmittedUp:
       break;
@@ -881,14 +884,16 @@ void Strategy::EnterShort( const ou::tf::Trade& trade ) {
 
 void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
 
+  using quantity_t = ou::tf::Order::quantity_t;
+
   bool bTestStop( true );
 
   if ( Search(
     trade
-  , []( const ou::tf::Trade& ){
+  , []( const ou::tf::Trade& ){ // fEnterTrade_t long
       // ignore, still long
     }
-  , [this,&trade,&bTestStop]( const ou::tf::Trade& ){
+  , [this,&trade,&bTestStop]( const ou::tf::Trade& ){ // fEnterTrade_t short
       // exit then enter short
       const auto dt( trade.DateTime() );
       const auto price( trade.Price() );
@@ -897,7 +902,7 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
         [](){ // fOrderCancelled_t
           // go back to search
         }
-      , [this](){ // fOrderFilled_t
+      , [this]( quantity_t quantity, double price, double commission ){ // fOrderFilled_t
           EnterShort( m_trade );
         } );
       m_pTrackOrder->ExitLongMkt( oa_mkt );
@@ -922,11 +927,13 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
 
 void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
 
+  using quantity_t = ou::tf::Order::quantity_t;
+
   bool bTestStop( true );
 
   if ( Search(
     trade
-  , [this,&trade,&bTestStop]( const ou::tf::Trade& ){
+  , [this,&trade,&bTestStop]( const ou::tf::Trade& ){ // fEnterTrade_t long
       // exit then enter long
       const auto dt( trade.DateTime() );
       const auto price( trade.Price() );
@@ -935,13 +942,13 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
         [](){ // fOrderCancelled_t
           // go back to search
         }
-      , [this](){ // fOrderFilled_t
+      , [this]( quantity_t quantity, double price, double commission ){ // fOrderFilled_t
           EnterLong( m_trade );
         } );
       m_pTrackOrder->ExitShortMkt( oa_mkt );
       bTestStop = false;
     }
-  , []( const ou::tf::Trade& ){
+  , []( const ou::tf::Trade& ){ // fEnterTrade_t short
       // ignore, still short
   } )) {}
 

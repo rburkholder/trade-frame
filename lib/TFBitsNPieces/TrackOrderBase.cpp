@@ -266,9 +266,8 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
   m_pOrderPending->OnOrderCancelled.Remove( MakeDelegate( this, &TrackOrderBase::HandleOrderCancelled ) );
   m_pOrderPending->OnOrderFilled.Remove( MakeDelegate( this, &TrackOrderBase::HandleOrderFilled ) );
 
-  const double price = order.GetAverageFillPrice();
   const auto quantity = order.GetQuanFilled();
-
+  const double price = order.GetAverageFillPrice();
   const auto commission = order.GetIncrementalCommission();
 
   switch( order.GetOrderSide() ) {
@@ -330,7 +329,7 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
   m_pOrderPending.reset();
 
   if ( fOrderFilled ) {
-    fOrderFilled();
+    fOrderFilled( quantity, price, commission );
   }
 }
 

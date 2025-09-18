@@ -50,7 +50,7 @@ public:
   using fCancelled_t = std::function<void()>; // may recurse back into TrackOrder
 
   using fOrderCancelled_t = std::function<void()>;
-  using fOrderFilled_t = std::function<void()>;
+  using fOrderFilled_t = std::function<void( quantity_t, double, double )>; // quantity, price, commission
 
   struct OrderArgs {
 
