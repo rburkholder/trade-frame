@@ -75,7 +75,7 @@ public:
 
   void Set( fOrderCancelled_t&& fOrderCancelled_, fOrderFilled_t&& fOrderFilled_ ) {
     fOrderCancelled = std::move( fOrderCancelled_ );
-    fOrderFilled = std::move( fOrderFilled );
+    fOrderFilled = std::move( fOrderFilled_ );
   }
 
 protected:

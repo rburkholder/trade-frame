@@ -258,6 +258,7 @@ void TrackOrderBase::HandleOrderCancelled( const ou::tf::Order& order ) {
 
   if ( fOrderCancelled ) {
     fOrderCancelled();
+    fOrderCancelled = nullptr;
   }
 }
 
@@ -275,7 +276,7 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
       // TODO: confirm against gui
       BOOST_LOG_TRIVIAL(info)
         << m_pPosition->GetInstrument()->GetInstrumentName()
-        << ",order=" << order.GetOrderId()
+        << ",order#=" << order.GetOrderId()
         << ",buy,de,"
         << "," << quantity << "@" << price
         << "+" << commission
@@ -285,7 +286,7 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
       // TODO: confirm against gui
       BOOST_LOG_TRIVIAL(info)
         << m_pPosition->GetInstrument()->GetInstrumentName()
-        << ",order=" << order.GetOrderId()
+        << ",order#=" << order.GetOrderId()
         << ",sell,de,"
         << "," << quantity << "@" << price
         << "+" << commission
@@ -330,6 +331,7 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
 
   if ( fOrderFilled ) {
     fOrderFilled( quantity, price, commission );
+    fOrderFilled = nullptr;
   }
 }
 
