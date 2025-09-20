@@ -35,7 +35,7 @@ TrackBracketOrder::TrackBracketOrder( pPosition_t pPosition, ou::ChartDataView& 
 TrackBracketOrder::~TrackBracketOrder() {}
 
 // unused
-void TrackBracketOrder::EnterLongBracket( const OrderArgs& args ) {
+void TrackBracketOrder::EnterLongBracket( const BracketOrderArgs& args ) {
   // unused, as Position has counters which don't support a set of orders with multiple directions and times
   // will need to simulate equivalent of Bracket Order in the state machine
   assert( 0 < args.quantity );

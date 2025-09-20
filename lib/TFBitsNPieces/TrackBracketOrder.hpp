@@ -31,10 +31,10 @@ namespace tf { // namespace tradeframe
 class TrackBracketOrder: public TrackOrderBase {
 public:
 
-  struct OrderArgs: public TrackOrderBase::OrderArgs {
+  struct BracketOrderArgs: public OrderArgs {
     double profit;
     double stop;
-    OrderArgs(): profit {}, stop {} {}
+    BracketOrderArgs(): OrderArgs{}, profit {}, stop {} {}
 
     // limit, stop
     //explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_, double stop_ )
@@ -59,7 +59,7 @@ public:
   TrackBracketOrder( pPosition_t, ou::ChartDataView&, int slot );
   virtual ~TrackBracketOrder();
 
-  void EnterLongBracket( const OrderArgs& ); // not useable at present
+  void EnterLongBracket( const BracketOrderArgs& ); // not useable at present
 
 protected:
 private:

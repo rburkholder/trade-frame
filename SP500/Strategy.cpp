@@ -730,10 +730,10 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
         trade
       , [this]( const ou::tf::Trade& trade ) {
         EnterLong( trade );
-      }
+        }
       , [this]( const ou::tf::Trade& trade ) {
         EnterShort( trade );
-      });
+        });
       break;
     case ETradeState::EntrySubmittedUp:
       break;
@@ -862,8 +862,8 @@ void Strategy::EnterLong( const ou::tf::Trade& trade ) {
   //m_to.State().Set( ETradeState::EntrySubmittedUp );
   m_stopDelta = nd * m_statsPrices.SD();;
   m_stopTrail = m_stopInitial = m_quote.Bid() - m_stopDelta;
-  ou::tf::TrackOrder::OrderArgs oa( dt, 100, price, m_quote.Ask(), 5 );
-  // todo: set fCancelled, fFilled ? - no, not on initial order
+  ou::tf::OrderArgs oa( dt, 100, price, m_quote.Ask(), 5 );
+  // todo: set fFilled to track min max range
   m_pTrackOrder->EnterLongLmt( oa );
 }
 
@@ -877,8 +877,8 @@ void Strategy::EnterShort( const ou::tf::Trade& trade ) {
   //m_to.State().Set( ETradeState::EntrySubmittedDn );
   m_stopDelta = nd * m_statsPrices.SD();;
   m_stopTrail = m_stopInitial = m_quote.Ask() + m_stopDelta;
-  ou::tf::TrackOrder::OrderArgs oa( dt, 100, price, m_quote.Bid(), 5 );
-  // todo: set fCancelled, fFilled ? - no, not on initial order
+  ou::tf::OrderArgs oa( dt, 100, price, m_quote.Bid(), 5 );
+  // todo: set fFilled to track min max range
   m_pTrackOrder->EnterShortLmt( oa );
 }
 
@@ -897,7 +897,7 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
       // exit then enter short
       const auto dt( trade.DateTime() );
       const auto price( trade.Price() );
-      ou::tf::TrackOrder::OrderArgs oa_mkt( dt, 100, price );
+      ou::tf::OrderArgs oa_mkt( dt, 100, price );
       oa_mkt.Set(
         [](){ // fOrderCancelled_t
           // go back to search
@@ -913,7 +913,7 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
     const auto price( trade.Price() ); // todo: test the stops with quotes?
     if ( m_stopTrail > price ) {
       const auto dt( trade.DateTime() );
-      ou::tf::TrackOrder::OrderArgs oa_mkt( dt, 100, m_stopTrail );
+      ou::tf::OrderArgs oa_mkt( dt, 100, m_stopTrail );
       m_pTrackOrder->ExitLongMkt( oa_mkt );
     }
     else {
@@ -937,7 +937,7 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
       // exit then enter long
       const auto dt( trade.DateTime() );
       const auto price( trade.Price() );
-      ou::tf::TrackOrder::OrderArgs oa_mkt( dt, 100, price );
+      ou::tf::OrderArgs oa_mkt( dt, 100, price );
       oa_mkt.Set(
         [](){ // fOrderCancelled_t
           // go back to search
@@ -956,7 +956,7 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
     const auto price( trade.Price() ); // todo: test the stops with quotes?
     if ( m_stopTrail < price ) {
       const auto dt( trade.DateTime() );
-      ou::tf::TrackOrder::OrderArgs oa_mkt( dt, 100, m_stopTrail );
+      ou::tf::OrderArgs oa_mkt( dt, 100, m_stopTrail );
       m_pTrackOrder->ExitShortMkt( oa_mkt );
     }
     else {
@@ -972,7 +972,7 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Quote& quote ) {
   const auto ask( quote.Ask() );
   if ( m_stopTrail > ask ) {
     const auto dt( quote.DateTime() );
-    ou::tf::TrackOrder::OrderArgs oa( dt, 100, m_stopTrail );
+    ou::tf::OrderArgs oa( dt, 100, m_stopTrail );
     // todo: set fCancelled, fFilled
     m_pTrackOrder->ExitLongMkt( oa );
   }
@@ -988,7 +988,7 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Quote& quote ) {
   const auto bid( quote.Bid() );
   if ( m_stopTrail < bid ) {
     const auto dt( quote.DateTime() );
-    ou::tf::TrackOrder::OrderArgs oa( dt, 100, m_stopTrail );
+    ou::tf::OrderArgs oa( dt, 100, m_stopTrail );
     m_pTrackOrder->ExitShortMkt( oa );
   }
   else {

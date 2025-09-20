@@ -246,7 +246,7 @@ void TrackOrderBase::HandleOrderCancelled( const ou::tf::Order& order ) {
       m_stateTrade.Set( ETradeState::Search, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   }
 
-  fOrderCancelled_t fOrderCancelled( nullptr );
+  OrderArgs::fOrderCancelled_t fOrderCancelled( nullptr );
   if ( m_fOrderCancelled ) {
     fOrderCancelled = std::move( m_fOrderCancelled );
   }
@@ -318,7 +318,7 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
        assert( false ); // TODO: unravel the state mess if we get here
   }
 
-  fOrderFilled_t fOrderFilled( nullptr );
+  OrderArgs::fOrderFilled_t fOrderFilled( nullptr );
   if ( m_fOrderFilled ) {
     fOrderFilled = std::move( m_fOrderFilled );
   }

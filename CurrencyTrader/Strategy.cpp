@@ -319,7 +319,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second
 }
 
 void Strategy::RunState( ou::tf::TrackCurrencyOrder& to ) {
-  using OrderArgs = ou::tf::TrackCurrencyOrder::OrderArgs;
+  using OrderArgs = ou::tf::OrderArgs;
   switch ( to.State()() ) {
     case ETradeState::Init: // Strategy starts in this state
       to.State().Set( ETradeState::Search, m_pWatch->GetInstrumentName(), __FUNCTION__, __LINE__ );

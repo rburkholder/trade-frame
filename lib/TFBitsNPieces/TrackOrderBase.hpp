@@ -34,7 +34,64 @@
 namespace ou { // namespace oneunified
 namespace tf { // namespace tradeframe
 
+class TrackOrderBase;
 class TrackBracketOrder;
+
+class OrderArgs {
+  friend class TrackOrderBase;
+  friend class TrackBracketOrder;
+public:
+
+  using quantity_t = ou::tf::Order::quantity_t;
+
+  using fOrderCancelled_t = std::function<void()>;
+  using fOrderFilled_t = std::function<void( quantity_t, double, double )>; // quantity, price, commission
+
+  OrderArgs(): quantity {}, signal {}, limit {}, duration {} {}
+
+  // market
+  explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_ )
+  : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit {}, duration {}
+  , fOrderCancelled( nullptr ), fOrderFilled( nullptr )
+  {
+    assert( 0 < quantity );
+  }
+
+  // limit
+  explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_ )
+  : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), duration {}
+  , fOrderCancelled( nullptr ), fOrderFilled( nullptr )
+  {
+    assert( 0 < quantity );
+  }
+
+  // limit with duration
+  explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_, int duration_ )
+  : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), duration( duration_ )
+  , fOrderCancelled( nullptr ), fOrderFilled( nullptr )
+  {
+    assert( 0 < quantity );
+  }
+
+  void Set( fOrderCancelled_t&& fOrderCancelled_, fOrderFilled_t&& fOrderFilled_ ) {
+    fOrderCancelled = std::move( fOrderCancelled_ );
+    fOrderFilled = std::move( fOrderFilled );
+  }
+
+protected:
+private:
+
+  boost::posix_time::ptime dt; // mark the order on the chart
+  quantity_t quantity;
+  double signal;
+  double limit;
+  // double stop; // not used here as order tracked outside of order submission, unless use pWatch from pPosition
+  unsigned int duration; // limit order duration seconds
+
+  fOrderCancelled_t fOrderCancelled;
+  fOrderFilled_t    fOrderFilled;
+
+};
 
 // inherited by lib/TFBitsNPieces/TrackOrder.hpp
 // inherited by lib/TFBitsNPieces/TrackCurrencyOrder.hpp
@@ -43,59 +100,10 @@ class TrackOrderBase {
   friend TrackBracketOrder;
 public:
 
-  using quantity_t = ou::tf::Order::quantity_t;
 
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   using fCancelled_t = std::function<void()>; // may recurse back into TrackOrder
-
-  using fOrderCancelled_t = std::function<void()>;
-  using fOrderFilled_t = std::function<void( quantity_t, double, double )>; // quantity, price, commission
-
-  struct OrderArgs {
-
-    boost::posix_time::ptime dt; // mark the order on the chart
-    quantity_t quantity;
-    double signal;
-    double limit;
-    // double stop; // not used here as order tracked outside of order submission, unless use pWatch from pPosition
-    unsigned int duration; // limit order duration seconds
-
-    fOrderCancelled_t fOrderCancelled;
-    fOrderFilled_t    fOrderFilled;
-
-    OrderArgs(): quantity {}, signal {}, limit {}, duration {} {}
-
-    // market
-    explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_ )
-    : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit {}, duration {}
-    , fOrderCancelled( nullptr ), fOrderFilled( nullptr )
-    {
-      assert( 0 < quantity );
-    }
-
-    // limit
-    explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_ )
-    : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), duration {}
-    , fOrderCancelled( nullptr ), fOrderFilled( nullptr )
-    {
-      assert( 0 < quantity );
-    }
-
-    // limit with duration
-    explicit OrderArgs( boost::posix_time::ptime dt_, quantity_t quantity_, double signal_, double limit_, int duration_ )
-    : dt( dt_ ), quantity( quantity_ ), signal( signal_ ), limit( limit_ ), duration( duration_ )
-    , fOrderCancelled( nullptr ), fOrderFilled( nullptr )
-    {
-      assert( 0 < quantity );
-    }
-
-    void Set( fOrderCancelled_t&& fOrderCancelled_, fOrderFilled_t&& fOrderFilled_ ) {
-      fOrderCancelled = std::move( fOrderCancelled_ );
-      fOrderFilled = std::move( fOrderFilled );
-    }
-
-  };
 
   TrackOrderBase();
   TrackOrderBase( pPosition_t, ou::ChartDataView&, int slot );
@@ -156,8 +164,8 @@ private:
 
   fCancelled_t m_fCancelled;
 
-  fOrderCancelled_t m_fOrderCancelled;
-  fOrderFilled_t m_fOrderFilled;
+  OrderArgs::fOrderCancelled_t m_fOrderCancelled;
+  OrderArgs::fOrderFilled_t m_fOrderFilled;
 
 };
 
