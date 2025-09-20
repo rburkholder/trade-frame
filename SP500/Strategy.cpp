@@ -91,6 +91,9 @@ Strategy::Strategy(
 , m_stopInitial {}, m_stopDelta {}, m_stopTrail {}
 , m_dblQuoteImbalance {}
 , m_ixcurCrossing( 0 ), m_ixprvCrossing( 1 )
+, m_dblPrice_hi {}, m_dblPrice_start {}, m_dblPrice_lo {}
+, m_dblPrice_sum_max_profit {}, m_dblPrice_sum_win {}, m_dblPrice_sum_loss {}, m_dblPrice_sum_max_loss {}
+, m_nMaxProfit {}, m_nWin {}, m_nLoss {}, m_nMaxLoss {}
 {
   SetupChart();
 
@@ -400,6 +403,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
   if ( ( 0 == quote.AskSize() ) || ( 0 == quote.BidSize() ) ) {} // only a couple are zero
   else {
+
   //  BOOST_LOG_TRIVIAL(debug)
   //    << "quote"
   //    << ',' << quote.BidSize()
@@ -407,6 +411,43 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   //    << ',' << quote.AskSize()
   //    << '@' << quote.Ask()
   //    ;
+
+    switch ( m_pTrackOrder->State()() ) {
+      case ETradeState::Init:
+        // not really necessary?
+        //assert( 0.0 < quote.Ask() );
+        //assert( 0.0 < quote.Bid() );
+        //m_dblPrice_hi = m_dblPrice_lo = quote.Midpoint();
+        break;
+      case ETradeState::ExitSignalUp:
+        {
+          const double bid( quote.Bid() ); // sell to close position
+          if ( bid > m_dblPrice_hi ) {
+            m_dblPrice_hi = bid;
+          }
+          else {
+            if ( bid < m_dblPrice_lo ) {
+              m_dblPrice_lo = bid;
+            }
+          }
+        }
+        break;
+      case ETradeState::ExitSignalDn:
+        {
+          const double ask( quote.Ask() ); // buy to close position
+          if ( ask > m_dblPrice_hi ) {
+            m_dblPrice_hi = ask;
+          }
+          else {
+            if ( ask < m_dblPrice_lo ) {
+              m_dblPrice_lo = ask;
+            }
+          }
+        }
+        break;
+      default:
+        break;
+    }
 
     switch ( CurrentTimeFrame() ) {
       case TimeFrame::RHTrading:
@@ -763,7 +804,6 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
-  const auto dt( quote.DateTime() );
   // might be better here, the trade will provide bollinger bands, but we need to watch
   // the progression of quotes.  bid/ask will set the range of 'current' trades/returns.
   // if the desire is to provide liquidity, then bid/ask will be need to lead or track
@@ -772,6 +812,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   // how much is predicted by order book imbalance/change?
 
   /*
+  const auto dt( quote.DateTime() );
   static const double c_nd( 2.0 );
 
   const rCross_t& rcp( m_crossing[ m_ixprvCrossing ] );
@@ -863,7 +904,11 @@ void Strategy::EnterLong( const ou::tf::Trade& trade ) {
   m_stopDelta = nd * m_statsPrices.SD();;
   m_stopTrail = m_stopInitial = m_quote.Bid() - m_stopDelta;
   ou::tf::OrderArgs oa( dt, 100, price, m_quote.Ask(), 5 );
-  // todo: set fFilled to track min max range
+  oa.Set(
+    nullptr // fOrderCancelled_t
+  , [this]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ // fOrderFilled_t
+      m_dblPrice_hi = m_dblPrice_start = m_dblPrice_lo = price;
+    } );
   m_pTrackOrder->EnterLongLmt( oa );
 }
 
@@ -878,14 +923,15 @@ void Strategy::EnterShort( const ou::tf::Trade& trade ) {
   m_stopDelta = nd * m_statsPrices.SD();;
   m_stopTrail = m_stopInitial = m_quote.Ask() + m_stopDelta;
   ou::tf::OrderArgs oa( dt, 100, price, m_quote.Bid(), 5 );
-  // todo: set fFilled to track min max range
+  oa.Set(
+    nullptr // fOrderCancelled_t
+  , [this]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ // fOrderFilled_t
+      m_dblPrice_hi = m_dblPrice_start = m_dblPrice_lo = price;
+    } );
   m_pTrackOrder->EnterShortLmt( oa );
 }
 
 void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
-
-  using quantity_t = ou::tf::Order::quantity_t;
-
   bool bTestStop( true );
 
   if ( Search(
@@ -898,14 +944,7 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
       const auto dt( trade.DateTime() );
       const auto price( trade.Price() );
       ou::tf::OrderArgs oa_mkt( dt, 100, price );
-      oa_mkt.Set(
-        [](){ // fOrderCancelled_t
-          // go back to search
-        }
-      , [this]( quantity_t quantity, double price, double commission ){ // fOrderFilled_t
-          EnterShort( m_trade );
-        } );
-      m_pTrackOrder->ExitLongMkt( oa_mkt );
+      UpdatePositionProgressUp_order( oa_mkt );
       bTestStop = false;
   } )) {}
 
@@ -914,7 +953,7 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
     if ( m_stopTrail > price ) {
       const auto dt( trade.DateTime() );
       ou::tf::OrderArgs oa_mkt( dt, 100, m_stopTrail );
-      m_pTrackOrder->ExitLongMkt( oa_mkt );
+      UpdatePositionProgressUp_order( oa_mkt );
     }
     else {
       const double stop( price - m_stopDelta );
@@ -925,10 +964,38 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
   }
 }
 
-void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
-
+void Strategy::UpdatePositionProgressUp_order( ou::tf::OrderArgs& oa ) {
   using quantity_t = ou::tf::Order::quantity_t;
+  oa.Set(
+    [](){ // fOrderCancelled_t
+      // go back to search
+    }
+  , [this]( quantity_t quantity, double price, double commission ){ // fOrderFilled_t, long closed
+      if ( m_dblPrice_start < price ) {
+        m_nWin++;
+        m_dblPrice_sum_win += ( price - m_dblPrice_start );
+      }
+      else {
+        m_nLoss++;
+        m_dblPrice_sum_loss += ( m_dblPrice_start - price );
+      }
 
+      if ( m_dblPrice_start < m_dblPrice_hi ) {
+        m_nMaxProfit++;
+        m_dblPrice_sum_max_profit += ( m_dblPrice_hi - m_dblPrice_start );
+      }
+
+      if ( m_dblPrice_start > m_dblPrice_lo ) {
+        m_nMaxLoss++;
+        m_dblPrice_sum_max_loss += ( m_dblPrice_start - m_dblPrice_lo );
+      }
+
+      EnterShort( m_trade );
+    } );
+  m_pTrackOrder->ExitLongMkt( oa );
+}
+
+void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
   bool bTestStop( true );
 
   if ( Search(
@@ -938,14 +1005,7 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
       const auto dt( trade.DateTime() );
       const auto price( trade.Price() );
       ou::tf::OrderArgs oa_mkt( dt, 100, price );
-      oa_mkt.Set(
-        [](){ // fOrderCancelled_t
-          // go back to search
-        }
-      , [this]( quantity_t quantity, double price, double commission ){ // fOrderFilled_t
-          EnterLong( m_trade );
-        } );
-      m_pTrackOrder->ExitShortMkt( oa_mkt );
+      UpdatePositionProgressDn_order( oa_mkt );
       bTestStop = false;
     }
   , []( const ou::tf::Trade& ){ // fEnterTrade_t short
@@ -957,7 +1017,7 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
     if ( m_stopTrail < price ) {
       const auto dt( trade.DateTime() );
       ou::tf::OrderArgs oa_mkt( dt, 100, m_stopTrail );
-      m_pTrackOrder->ExitShortMkt( oa_mkt );
+      UpdatePositionProgressDn_order( oa_mkt );
     }
     else {
       const double stop( price + m_stopDelta );
@@ -966,6 +1026,37 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
       }
     }
   }
+}
+
+void Strategy::UpdatePositionProgressDn_order( ou::tf::OrderArgs& oa ) {
+  using quantity_t = ou::tf::Order::quantity_t;
+  oa.Set(
+    [](){ // fOrderCancelled_t
+      // go back to search
+    }
+  , [this]( quantity_t quantity, double price, double commission ){ // fOrderFilled_t, short closed
+      if ( m_dblPrice_start > price ) {
+        m_nWin++;
+        m_dblPrice_sum_win += ( m_dblPrice_start - price );
+      }
+      else {
+        m_nLoss++;
+        m_dblPrice_sum_loss += ( price - m_dblPrice_start );
+      }
+
+      if ( m_dblPrice_start < m_dblPrice_hi ) {
+        m_nMaxLoss++;
+        m_dblPrice_sum_max_loss += ( m_dblPrice_hi - m_dblPrice_start );
+      }
+
+      if ( m_dblPrice_start > m_dblPrice_lo ) {
+        m_nMaxProfit++;
+        m_dblPrice_sum_max_profit += ( m_dblPrice_start - m_dblPrice_lo );
+      }
+
+      EnterLong( m_trade );
+    } );
+  m_pTrackOrder->ExitShortMkt( oa );
 }
 
 void Strategy::UpdatePositionProgressUp( const ou::tf::Quote& quote ) {
@@ -1065,7 +1156,7 @@ void Strategy::HandleRHTrading( const ou::tf::Bar& bar ) { // once a second, upd
 
 // review interaction with TradeState, TrackOrder
 void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_duration td ) { // one shot
-  BOOST_LOG_TRIVIAL(trace) << "HandleCancel," << td << ',' << m_nEnterLong << ',' << m_nEnterShort;
+  //BOOST_LOG_TRIVIAL(trace) << "HandleCancel," << td << ',' << m_nEnterLong << ',' << m_nEnterShort;
   m_pTrackOrder->State().Set( ETradeState::EndOfDayCancel );
   if ( m_pPosition ) {
     m_pPosition->CancelOrders();
@@ -1074,11 +1165,25 @@ void Strategy::HandleCancel( boost::gregorian::date, boost::posix_time::time_dur
 
 // review interaction with TradeState, TrackOrder
 void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration td ) { // one shot
-  BOOST_LOG_TRIVIAL(trace) << "HandleGoNeutral," << td << ',' << m_nEnterLong << ',' << m_nEnterShort;
+  //BOOST_LOG_TRIVIAL(trace) << "HandleGoNeutral," << td << ',' << m_nEnterLong << ',' << m_nEnterShort;
   m_pTrackOrder->State().Set( ETradeState::EndOfDayNeutral );
   if ( m_pPosition ) {
     m_pPosition->ClosePosition();
   }
+}
+
+void Strategy::HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration td ) {
+  BOOST_LOG_TRIVIAL(trace) << "HandleAtRHClose," << td << ',' << m_nEnterLong << ',' << m_nEnterShort;
+  const double actual_profit( m_dblPrice_sum_win / m_nWin );
+  BOOST_LOG_TRIVIAL(info) << "profit: " << m_dblPrice_sum_win << '/' << m_nWin << '=' << actual_profit;
+  const double acutal_loss( m_dblPrice_sum_loss / m_nLoss );
+  BOOST_LOG_TRIVIAL(info) << "  loss: " << m_dblPrice_sum_loss << '/' << m_nLoss << '=' << acutal_loss;
+  BOOST_LOG_TRIVIAL(info) << "   net: " << m_dblPrice_sum_win - m_dblPrice_sum_loss;
+  const double possible_profit( m_dblPrice_sum_max_profit / m_nMaxProfit );
+  BOOST_LOG_TRIVIAL(info) << "max missed profit: " << m_dblPrice_sum_max_profit << '/' << m_nMaxProfit << '=' << possible_profit;
+  const double possible_loss( m_dblPrice_sum_max_loss / m_nMaxLoss );
+  BOOST_LOG_TRIVIAL(info) << "max missed   loss: " << m_dblPrice_sum_max_loss << '/' << m_nMaxLoss << '=' << possible_loss;
+  BOOST_LOG_TRIVIAL(info) << "              net: " << m_dblPrice_sum_max_profit - m_dblPrice_sum_max_loss;
 }
 
 /*

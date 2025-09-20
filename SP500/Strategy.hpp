@@ -268,6 +268,20 @@ private:
 
   ECross m_ECross_imbalance;
 
+  double m_dblPrice_hi;
+  double m_dblPrice_start;
+  double m_dblPrice_lo;
+
+  double m_dblPrice_sum_max_profit; // max possible profit during trade
+  double m_dblPrice_sum_win; // actual profit, if any
+  double m_dblPrice_sum_loss; // actual loss, if any
+  double m_dblPrice_sum_max_loss; // max possible loss during trade
+
+  unsigned int m_nMaxProfit;  // based on max, then do histogram of maxes found
+  unsigned int m_nWin;
+  unsigned int m_nLoss; // based upon stop, not min/max
+  unsigned int m_nMaxLoss;
+
   void UpdateECross( ECross&, const double mark, const double value ) const;
 
   template<unsigned int n>
@@ -284,7 +298,9 @@ private:
   void UpdatePriceReturn( ou::tf::Price::dt_t, ou::tf::Price::price_t );
 
   void UpdatePositionProgressUp( const ou::tf::Trade& );
+  void UpdatePositionProgressUp_order( ou::tf::OrderArgs& );
   void UpdatePositionProgressDn( const ou::tf::Trade& );
+  void UpdatePositionProgressDn_order( ou::tf::OrderArgs& );
 
   void UpdatePositionProgressUp( const ou::tf::Quote& );
   void UpdatePositionProgressDn( const ou::tf::Quote& );
@@ -310,6 +326,8 @@ private:
   void HandleRHTrading( const ou::tf::Bar& );
   void HandleCancel( boost::gregorian::date, boost::posix_time::time_duration );
   void HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_duration );
+
+  void HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration );
 
   using fEnterTrade_t = std::function<void(const ou::tf::Trade&)>;
   bool Search(     const ou::tf::Trade&, fEnterTrade_t&& buy, fEnterTrade_t&& sell ) const;
