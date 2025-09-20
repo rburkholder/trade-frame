@@ -496,12 +496,12 @@ void Position::HandleExecution( const std::pair<const Order&, const Execution&>&
   // should be able to calculate position cost basis as position is updated (with and without commissions)
   // will need market feed in order to calculate profit/loss  -- handled in the OnQuote method
 
-  const Order& order = status.first;
-  const Execution& exec = status.second;
-  Order::idOrder_t orderId = order.GetOrderId();
+  const Order& order( status.first );
+  const Execution& exec( status.second );
+  const Order::idOrder_t orderId( order.GetOrderId() );
 
-  double dblOldRealizedPL = m_row.dblRealizedPL;
-  double dblOldUnRealizedPL = m_row.dblUnRealizedPL;
+  const double dblOldRealizedPL = m_row.dblRealizedPL;
+  const double dblOldUnRealizedPL = m_row.dblUnRealizedPL;
 
   //std::cout << "Position Exec: " << exec.GetSize() << "," << exec.GetPrice() << std::endl;
 
