@@ -836,14 +836,16 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
 
   switch ( m_pTrackOrder->State()() ) {
     case ETradeState::Search:
-      Search(
-        trade
-      , [this]( const ou::tf::Trade& trade ) {
-        EnterLong( trade );
-        }
-      , [this]( const ou::tf::Trade& trade ) {
-        EnterShort( trade );
-        });
+      switch ( Search( trade ) ) {
+        case ESearchResult::buy:
+          EnterLong( trade );
+          break;
+        case ESearchResult::none:
+          break;
+        case ESearchResult::sell:
+          EnterShort( trade );
+          break;
+      }
       break;
     case ETradeState::EntrySubmittedUp:
       break;
@@ -933,11 +935,9 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   */
 }
 
-bool Strategy::Search( const ou::tf::Trade& trade, fEnterTrade_t&& fBuy, fEnterTrade_t&& fSell ) const {
-  // TODO: inefficient to pass heap based lambdas on each call
-  //   probably return an enumeration instead
+Strategy::ESearchResult Strategy::Search( const ou::tf::Trade& trade ) const {
 
-  bool bOrderEntered( false );
+  ESearchResult sr( ESearchResult::none );
 
   const rCross_t& rcp( m_crossing[ m_ixprvCrossing ] );
   const ECross prvCross( rcp[ prc_norm ].cross );
@@ -948,20 +948,18 @@ bool Strategy::Search( const ou::tf::Trade& trade, fEnterTrade_t&& fBuy, fEnterT
   switch ( curCross ) {
     case ECross::upperlo:
       if ( ( ECross::uppermk == prvCross ) || ( ECross::upperhi == prvCross ) ) {
-        bOrderEntered = true;
-        fSell( trade );
+        sr = ESearchResult::sell;
       }
       break;
     case ECross::lowerhi:
       if ( ( ECross::lowermk == prvCross ) || ( ECross::lowerlo == prvCross ) ) {
-        bOrderEntered = true;
-        fBuy( trade );
+        sr = ESearchResult::buy;
       }
       break;
     default:
       break;
   }
-  return bOrderEntered;
+  return sr;
 }
 
 void Strategy::EnterLong( const ou::tf::Trade& trade ) {
@@ -1005,19 +1003,23 @@ void Strategy::EnterShort( const ou::tf::Trade& trade ) {
 void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
   bool bTestStop( true );
 
-  if ( Search(
-    trade
-  , []( const ou::tf::Trade& ){ // fEnterTrade_t long
+    switch ( Search( trade ) ) {
+    case ESearchResult::buy:
       // ignore, still long
-    }
-  , [this,&trade,&bTestStop]( const ou::tf::Trade& ){ // fEnterTrade_t short
-      // exit then enter short
-      const auto dt( trade.DateTime() );
-      const auto price( trade.Price() );
-      ou::tf::OrderArgs oa_mkt( dt, 100, price );
-      UpdatePositionProgressUp_order( oa_mkt );
-      bTestStop = false;
-  } )) {}
+      break;
+    case ESearchResult::none:
+      break;
+    case ESearchResult::sell:
+      {
+        // exit then enter short
+        const auto dt( trade.DateTime() );
+        const auto price( trade.Price() );
+        ou::tf::OrderArgs oa_mkt( dt, 100, price );
+        UpdatePositionProgressUp_order( oa_mkt );
+        bTestStop = false;
+      }
+      break;
+  }
 
   if ( bTestStop ) {
     const auto price( trade.Price() ); // todo: test the stops with quotes?
@@ -1069,19 +1071,23 @@ void Strategy::UpdatePositionProgressUp_order( ou::tf::OrderArgs& oa ) {
 void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
   bool bTestStop( true );
 
-  if ( Search(
-    trade
-  , [this,&trade,&bTestStop]( const ou::tf::Trade& ){ // fEnterTrade_t long
-      // exit then enter long
-      const auto dt( trade.DateTime() );
-      const auto price( trade.Price() );
-      ou::tf::OrderArgs oa_mkt( dt, 100, price );
-      UpdatePositionProgressDn_order( oa_mkt );
-      bTestStop = false;
-    }
-  , []( const ou::tf::Trade& ){ // fEnterTrade_t short
+  switch ( Search( trade ) ) {
+    case ESearchResult::buy:
+      {
+        // exit then enter long
+        const auto dt( trade.DateTime() );
+        const auto price( trade.Price() );
+        ou::tf::OrderArgs oa_mkt( dt, 100, price );
+        UpdatePositionProgressDn_order( oa_mkt );
+        bTestStop = false;
+      }
+      break;
+    case ESearchResult::none:
+      break;
+    case ESearchResult::sell:
       // ignore, still short
-  } )) {}
+      break;
+  }
 
   if ( bTestStop ) {
     const auto price( trade.Price() ); // todo: test the stops with quotes?

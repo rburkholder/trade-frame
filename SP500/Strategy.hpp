@@ -338,8 +338,9 @@ private:
 
   void HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration );
 
-  using fEnterTrade_t = std::function<void(const ou::tf::Trade&)>;
-  bool Search(     const ou::tf::Trade&, fEnterTrade_t&& buy, fEnterTrade_t&& sell ) const;
+  enum class ESearchResult { none, sell, buy };
+  ESearchResult Search( const ou::tf::Trade& ) const;
+
   void EnterLong(  const ou::tf::Trade& );
   void EnterShort( const ou::tf::Trade& );
 
