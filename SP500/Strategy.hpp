@@ -168,6 +168,8 @@ private:
   ou::ChartEntryVolume m_ceTradeBBDiff;
   //ou::ChartEntryIndicator m_ceTradeBBDiff;
 
+  ou::ChartEntryIndicator m_ceTradeZigZag;
+
   ou::ChartEntryIndicator m_ceTradePrice_bb_ratio;
   ou::ChartEntryIndicator m_ceTradePrice_ema_bb_ratio;
 
@@ -281,6 +283,13 @@ private:
   unsigned int m_nWin;
   unsigned int m_nLoss; // based upon stop, not min/max
   unsigned int m_nMaxLoss;
+
+  enum class EZigZag { init, tracklower, trackupper } m_eZigZag;
+  boost::posix_time::ptime m_dtZigZag;
+  double m_dblZigHi;
+  double m_dblZigLo;
+  unsigned int m_nZigZags;
+  double m_dblSumZigZags;
 
   void UpdateECross( ECross&, const double mark, const double value ) const;
 
