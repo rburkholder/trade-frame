@@ -250,8 +250,9 @@ void Strategy::SetupChart() {
   m_ceEma200.SetColour( c_colourEma200 );
   m_cdv.Add( EChartSlot::Price, &m_ceEma200 );
 
+  m_cdv.Add( EChartSlot::Ratio, &m_cemZero );
+
   if ( m_flags.bEnablePrediction ) {
-    m_cdv.Add( EChartSlot::Ratio, &m_cemZero );
 
     m_ceTrade_ratio.SetName( "Trade" );
     m_ceTrade_ratio.SetColour( c_colourPrice );
@@ -288,16 +289,18 @@ void Strategy::SetupChart() {
     }
   }
 
-  m_cdv.Add( EChartSlot::PriceBB, &m_cemPosOne );
+  //m_cdv.Add( EChartSlot::PriceBB, &m_cemPosOne );
   //m_cdv.Add( EChartSlot::Ratio, &m_cemZero );
-  m_cdv.Add( EChartSlot::PriceBB, &m_cemNegOne );
+  //m_cdv.Add( EChartSlot::PriceBB, &m_cemNegOne );
   m_ceTradePrice_bb_ratio.SetName( "price / bb" );
   m_ceTradePrice_bb_ratio.SetColour( c_colourPrice );
-  m_cdv.Add( EChartSlot::PriceBB, &m_ceTradePrice_bb_ratio );
+  //m_cdv.Add( EChartSlot::PriceBB, &m_ceTradePrice_bb_ratio );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceTradePrice_bb_ratio );
 
   m_ceTradePrice_ema_bb_ratio.SetName( "price ema13 / bb " );
   m_ceTradePrice_ema_bb_ratio.SetColour( c_colourEma13 );
-  m_cdv.Add( EChartSlot::PriceBB, &m_ceTradePrice_ema_bb_ratio );
+  //m_cdv.Add( EChartSlot::PriceBB, &m_ceTradePrice_ema_bb_ratio );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceTradePrice_ema_bb_ratio );
 
   m_ceTradeVolume.SetName( "Volume" );
   m_ceTradeVolume.SetColour( ou::Colour::Green );
@@ -320,15 +323,17 @@ void Strategy::SetupChart() {
     m_cdv.Add( EChartSlot::QuoteVolume, &m_ceBidVolume );
   }
 
-  m_cdv.Add( EChartSlot::TickStat, &m_cemZero );
+  //m_cdv.Add( EChartSlot::TickStat, &m_cemZero );
 
   m_ceTickJ.SetName( "TickJ" );
   m_ceTickJ.SetColour( c_colourTickJ );
-  m_cdv.Add( EChartSlot::TickStat, &m_ceTickJ );
+  //m_cdv.Add( EChartSlot::TickStat, &m_ceTickJ );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceTickJ );
 
   m_ceTickL.SetName( "TickL" );
   m_ceTickL.SetColour( c_colourTickL );
-  m_cdv.Add( EChartSlot::TickStat, &m_ceTickL );
+  //m_cdv.Add( EChartSlot::TickStat, &m_ceTickL );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceTickL );
 
   if ( m_flags.bEnableAdvDec ) {
     m_ceAdvDec.SetName( "AdvDec" );
@@ -358,17 +363,21 @@ void Strategy::SetupChart() {
   m_ceTradeBBDiff.SetColour( ou::Colour::Purple );
   m_cdv.Add( EChartSlot::rtnPriceSD, &m_ceTradeBBDiff );
 
-  m_cdv.Add( EChartSlot::rtnPriceMean, &m_cemPosOne );
+  //m_cdv.Add( EChartSlot::rtnPriceMean, &m_cemPosOne );
   //m_cdv.Add( EChartSlot::rtnPriceMean, &m_cemZero );
-  m_cdv.Add( EChartSlot::rtnPriceMean, &m_cemNegOne );
+  //m_cdv.Add( EChartSlot::rtnPriceMean, &m_cemNegOne );
+  m_ceRtnPrice_mean.SetColour( ou::Colour::Blue );
   m_ceRtnPrice_mean.SetName( "Returns - Mean" );
-  m_cdv.Add( EChartSlot::rtnPriceMean, &m_ceRtnPrice_mean );
+  //m_cdv.Add( EChartSlot::rtnPriceMean, &m_ceRtnPrice_mean );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceRtnPrice_mean );
 
-  m_cdv.Add( EChartSlot::rtnPriceSlope, &m_cemPosOne );
+  //m_cdv.Add( EChartSlot::rtnPriceSlope, &m_cemPosOne );
   //m_cdv.Add( EChartSlot::rtnPriceSlope, &m_cemZero );
-  m_cdv.Add( EChartSlot::rtnPriceSlope, &m_cemNegOne );
+  //m_cdv.Add( EChartSlot::rtnPriceSlope, &m_cemNegOne );
+  m_ceRtnPrice_slope.SetColour( ou::Colour::Red );
   m_ceRtnPrice_slope.SetName( "Returns - Slope" );
-  m_cdv.Add( EChartSlot::rtnPriceSlope, &m_ceRtnPrice_slope );
+  //m_cdv.Add( EChartSlot::rtnPriceSlope, &m_ceRtnPrice_slope );
+  m_cdv.Add( EChartSlot::Ratio, &m_ceRtnPrice_slope );
 
   m_cdv.Add( EChartSlot::TickRegime, &m_cemRegimMin );
   m_cdv.Add( EChartSlot::TickRegime, &m_cemZero );
