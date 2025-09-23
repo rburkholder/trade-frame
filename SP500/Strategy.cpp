@@ -1024,7 +1024,7 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
         const auto dt( trade.DateTime() );
         const auto price( trade.Price() );
         ou::tf::OrderArgs oa_mkt( dt, 100, price );
-        UpdatePositionProgressUp_order( oa_mkt );
+        UpdatePositionProgressUp_order( oa_mkt, true );
         bTestStop = false;
       }
       break;
@@ -1032,10 +1032,10 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
 
   if ( bTestStop ) {
     const auto price( trade.Price() ); // todo: test the stops with quotes?
-    if ( m_stopTrail > price ) {
+    if ( m_stopTrail > price ) { // if stopped out, don't enter, wait for signal, worse though, paradoxically
       const auto dt( trade.DateTime() );
       ou::tf::OrderArgs oa_mkt( dt, 100, m_stopTrail );
-      UpdatePositionProgressUp_order( oa_mkt );
+      UpdatePositionProgressUp_order( oa_mkt, false );
     }
     else {
       const double stop( price - m_stopDelta );
@@ -1046,13 +1046,13 @@ void Strategy::UpdatePositionProgressUp( const ou::tf::Trade& trade ) {
   }
 }
 
-void Strategy::UpdatePositionProgressUp_order( ou::tf::OrderArgs& oa ) {
+void Strategy::UpdatePositionProgressUp_order( ou::tf::OrderArgs& oa, bool reenter ) {
   using quantity_t = ou::tf::Order::quantity_t;
   oa.Set(
     [](){ // fOrderCancelled_t
       // go back to search
     }
-  , [this]( quantity_t quantity, double price, double commission ){ // fOrderFilled_t, long closed
+  , [this,reenter]( quantity_t quantity, double price, double commission ){ // fOrderFilled_t, long closed
       if ( m_dblPrice_start < price ) {
         m_nWin++;
         m_dblPrice_sum_win += ( price - m_dblPrice_start );
@@ -1072,7 +1072,10 @@ void Strategy::UpdatePositionProgressUp_order( ou::tf::OrderArgs& oa ) {
         m_dblPrice_sum_max_loss += ( m_dblPrice_start - m_dblPrice_lo );
       }
 
-      EnterShort( m_trade );
+      if ( reenter ) {
+        EnterShort( m_trade );
+      }
+
     } );
   m_pTrackOrder->ExitLongMkt( oa );
 }
@@ -1087,7 +1090,7 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
         const auto dt( trade.DateTime() );
         const auto price( trade.Price() );
         ou::tf::OrderArgs oa_mkt( dt, 100, price );
-        UpdatePositionProgressDn_order( oa_mkt );
+        UpdatePositionProgressDn_order( oa_mkt, true );
         bTestStop = false;
       }
       break;
@@ -1100,10 +1103,10 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
 
   if ( bTestStop ) {
     const auto price( trade.Price() ); // todo: test the stops with quotes?
-    if ( m_stopTrail < price ) {
+    if ( m_stopTrail < price ) { // if stopped out, don't enter, wait for signal, worse though, paradoxically
       const auto dt( trade.DateTime() );
       ou::tf::OrderArgs oa_mkt( dt, 100, m_stopTrail );
-      UpdatePositionProgressDn_order( oa_mkt );
+      UpdatePositionProgressDn_order( oa_mkt, false );
     }
     else {
       const double stop( price + m_stopDelta );
@@ -1114,13 +1117,13 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Trade& trade ) {
   }
 }
 
-void Strategy::UpdatePositionProgressDn_order( ou::tf::OrderArgs& oa ) {
+void Strategy::UpdatePositionProgressDn_order( ou::tf::OrderArgs& oa, bool reenter ) {
   using quantity_t = ou::tf::Order::quantity_t;
   oa.Set(
     [](){ // fOrderCancelled_t
       // go back to search
     }
-  , [this]( quantity_t quantity, double price, double commission ){ // fOrderFilled_t, short closed
+  , [this,reenter]( quantity_t quantity, double price, double commission ){ // fOrderFilled_t, short closed
       if ( m_dblPrice_start > price ) {
         m_nWin++;
         m_dblPrice_sum_win += ( m_dblPrice_start - price );
@@ -1140,7 +1143,10 @@ void Strategy::UpdatePositionProgressDn_order( ou::tf::OrderArgs& oa ) {
         m_dblPrice_sum_max_profit += ( m_dblPrice_start - m_dblPrice_lo );
       }
 
-      EnterLong( m_trade );
+      if ( reenter ) {
+        EnterLong( m_trade );
+      }
+
     } );
   m_pTrackOrder->ExitShortMkt( oa );
 }

@@ -307,9 +307,9 @@ private:
   void UpdatePriceReturn( ou::tf::Price::dt_t, ou::tf::Price::price_t );
 
   void UpdatePositionProgressUp( const ou::tf::Trade& );
-  void UpdatePositionProgressUp_order( ou::tf::OrderArgs& );
+  void UpdatePositionProgressUp_order( ou::tf::OrderArgs&, bool reenter );
   void UpdatePositionProgressDn( const ou::tf::Trade& );
-  void UpdatePositionProgressDn_order( ou::tf::OrderArgs& );
+  void UpdatePositionProgressDn_order( ou::tf::OrderArgs&, bool reenter );
 
   void UpdatePositionProgressUp( const ou::tf::Quote& );
   void UpdatePositionProgressDn( const ou::tf::Quote& );
