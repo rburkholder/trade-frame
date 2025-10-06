@@ -37,6 +37,7 @@ find_package(Boost ${TF_BOOST_VERSION} CONFIG REQUIRED COMPONENTS system date_ti
 set(
   file_h
     Config.hpp
+    CubicRegression.hpp
     Features.hpp
     Flags.hpp
     HyperParameters.hpp
@@ -51,6 +52,7 @@ set(
 set(
   file_cpp
     Config.cpp
+    CubicRegression.cpp
     Features.cpp
     LSTM.cpp
     Model.cpp

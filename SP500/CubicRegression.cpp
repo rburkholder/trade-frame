@@ -19,8 +19,6 @@
  * Created: November 15, 2024 22:58:52
  */
 
-// see SP500 for variable length version
-
 #include <algorithm>
 
 #include <boost/log/trivial.hpp>
