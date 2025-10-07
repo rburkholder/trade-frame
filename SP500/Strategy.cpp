@@ -96,6 +96,7 @@ Strategy::Strategy(
 , m_nMaxProfit {}, m_nWin {}, m_nLoss {}, m_nMaxLoss {}
 , m_dblZigHi {}, m_dblZigLo {}
 , m_nZigZags {}, m_dblSumZigZags {}, m_eZigZag( EZigZag::init )
+, m_cntQuotePriceChanged {}, m_cntQuotePriceUnchanged {}
 {
   SetupChart();
 
@@ -419,14 +420,21 @@ void Strategy::SetupChart() {
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
-  m_quote = quote;
-  const auto dt( quote.DateTime() );
-
   if ( ( 0 == quote.AskSize() ) || ( 0 == quote.BidSize() ) ) {} // only a couple are zero
   else {
 
+    const auto dt( quote.DateTime() );
+
     const double ask( quote.Ask() );
     const double bid( quote.Bid() );
+
+    if ( ( ask == m_quote.Ask() ) && ( bid == m_quote.Bid() ) ) {
+      m_cntQuotePriceUnchanged++;
+    }
+    else {
+      m_cntQuotePriceChanged ++;
+
+      m_quote = quote;
 
   //  BOOST_LOG_TRIVIAL(debug)
   //    << "quote"
@@ -436,130 +444,132 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
   //    << '@' << quote.Ask()
   //    ;
 
-    // track maximum excursions for profit potential
-    switch ( m_pTrackOrder->State()() ) {
-      case ETradeState::Init:
-        break;
-      case ETradeState::ExitSignalUp:
-        {
-          // sell to close position (uses bid)
-          if ( bid > m_dblPrice_hi ) {
-            m_dblPrice_hi = bid;
-          }
-          else {
-            if ( bid < m_dblPrice_lo ) {
-              m_dblPrice_lo = bid;
-            }
-          }
-        }
-        break;
-      case ETradeState::ExitSignalDn:
-        {
-          // buy to close position (uses ask)
-          if ( ask > m_dblPrice_hi ) {
-            m_dblPrice_hi = ask;
-          }
-          else {
-            if ( ask < m_dblPrice_lo ) {
-              m_dblPrice_lo = ask;
-            }
-          }
-        }
-        break;
-      default:
-        break;
-    }
-
-    // track zig-zag against bollinger boundaries for profit potential
-    const auto upper( m_statsPrices.BBUpper() );
-    const auto lower( m_statsPrices.BBLower() );
-    switch ( m_eZigZag ) {
-      case EZigZag::init:
-        {
-          if ( 0.5 < ( upper - lower ) ) {
-            if ( upper < ask ) {
-              m_dtZigZag = dt;
-              m_dblZigHi = upper;
-              m_dblZigLo = lower;
-              m_eZigZag = EZigZag::trackupper;
+      // track maximum excursions for profit potential
+      switch ( m_pTrackOrder->State()() ) {
+        case ETradeState::Init:
+          break;
+        case ETradeState::ExitSignalUp:
+          {
+            // sell to close position (uses bid)
+            if ( bid > m_dblPrice_hi ) {
+              m_dblPrice_hi = bid;
             }
             else {
-              if ( lower > bid ) {
-                m_dtZigZag = dt;
-                m_dblZigHi = upper;
-                m_dblZigLo = lower;
-                m_eZigZag = EZigZag::tracklower;
+              if ( bid < m_dblPrice_lo ) {
+                m_dblPrice_lo = bid;
               }
             }
           }
-        }
-        break;
-      case EZigZag::trackupper:
-        if ( lower > bid ) {
-          // summarize & switch sides
-          m_nZigZags++;
-          m_dblSumZigZags += ( m_dblZigHi - m_dblZigLo );
-          m_ceTradeZigZag.Append( m_dtZigZag, m_dblZigHi );
-          m_dtZigZag = dt;
-          m_dblZigLo = bid; // new benchmark
-          m_eZigZag = EZigZag::tracklower;
-        }
-        else {
-          // extend upper
-          if ( ask > m_dblZigHi ) {
-            m_dtZigZag = dt;
-            m_dblZigHi = ask;
+          break;
+        case ETradeState::ExitSignalDn:
+          {
+            // buy to close position (uses ask)
+            if ( ask > m_dblPrice_hi ) {
+              m_dblPrice_hi = ask;
+            }
+            else {
+              if ( ask < m_dblPrice_lo ) {
+                m_dblPrice_lo = ask;
+              }
+            }
           }
-        }
-        break;
-      case EZigZag::tracklower:
-        if ( upper < ask ) {
-          // summarize & switch sides
-          m_nZigZags++;
-          m_dblSumZigZags += ( m_dblZigHi - m_dblZigLo );
-          m_ceTradeZigZag.Append( m_dtZigZag, m_dblZigLo );
-          m_dtZigZag = dt;
-          m_dblZigHi = ask; // new benchmark
-          m_eZigZag = EZigZag::trackupper;
-        }
-        else {
-          // extend lower
-          if ( bid < m_dblZigLo ) {
-            m_dtZigZag = dt;
-            m_dblZigLo = bid;
+          break;
+        default:
+          break;
+      }
+
+      // track zig-zag against bollinger boundaries for profit potential
+      const auto upper( m_statsPrices.BBUpper() );
+      const auto lower( m_statsPrices.BBLower() );
+      switch ( m_eZigZag ) {
+        case EZigZag::init:
+          {
+            if ( 0.5 < ( upper - lower ) ) {
+              if ( upper < ask ) {
+                m_dtZigZag = dt;
+                m_dblZigHi = upper;
+                m_dblZigLo = lower;
+                m_eZigZag = EZigZag::trackupper;
+              }
+              else {
+                if ( lower > bid ) {
+                  m_dtZigZag = dt;
+                  m_dblZigHi = upper;
+                  m_dblZigLo = lower;
+                  m_eZigZag = EZigZag::tracklower;
+                }
+              }
+            }
           }
-        }
-        break;
+          break;
+        case EZigZag::trackupper:
+          if ( lower > bid ) {
+            // summarize & switch sides
+            m_nZigZags++;
+            m_dblSumZigZags += ( m_dblZigHi - m_dblZigLo );
+            m_ceTradeZigZag.Append( m_dtZigZag, m_dblZigHi );
+            m_dtZigZag = dt;
+            m_dblZigLo = bid; // new benchmark
+            m_eZigZag = EZigZag::tracklower;
+          }
+          else {
+            // extend upper
+            if ( ask > m_dblZigHi ) {
+              m_dtZigZag = dt;
+              m_dblZigHi = ask;
+            }
+          }
+          break;
+        case EZigZag::tracklower:
+          if ( upper < ask ) {
+            // summarize & switch sides
+            m_nZigZags++;
+            m_dblSumZigZags += ( m_dblZigHi - m_dblZigLo );
+            m_ceTradeZigZag.Append( m_dtZigZag, m_dblZigLo );
+            m_dtZigZag = dt;
+            m_dblZigHi = ask; // new benchmark
+            m_eZigZag = EZigZag::trackupper;
+          }
+          else {
+            // extend lower
+            if ( bid < m_dblZigLo ) {
+              m_dtZigZag = dt;
+              m_dblZigLo = bid;
+            }
+          }
+          break;
+      }
+
+      // optional visual indicators
+      switch ( CurrentTimeFrame() ) {
+        case TimeFrame::RHTrading:
+        case TimeFrame::Cancelling:
+        case TimeFrame::GoingNeutral:
+        case TimeFrame::WaitForRHClose:
+          if ( m_flags.bEnableBidAskPrice ) {
+            m_ceAskPrice.Append( dt, ask );
+            m_ceBidPrice.Append( dt, bid );
+          }
+          if ( m_flags.bEnableBidAskVolume ) {
+            m_ceAskVolume.Append( dt, quote.AskSize() );
+            m_ceBidVolume.Append( dt, -quote.BidSize() );
+          }
+          if ( m_flags.bEnableImbalance ) {
+            m_dblQuoteImbalance = quote.Imbalance();
+            UpdateECross( m_ECross_imbalance, c_ImbalanceMarker, m_dblQuoteImbalance );
+            m_ceImbalance.Append( dt, m_dblQuoteImbalance );
+          }
+          break;
+        default:
+          break;
+      }
+
+      TimeTick( quote );
+
+      // provides a 1 sec pulse for checking the algorithm after tick activities
+      m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 );
+
     }
-
-    // optional visual indicators
-    switch ( CurrentTimeFrame() ) {
-      case TimeFrame::RHTrading:
-      case TimeFrame::Cancelling:
-      case TimeFrame::GoingNeutral:
-      case TimeFrame::WaitForRHClose:
-        if ( m_flags.bEnableBidAskPrice ) {
-          m_ceAskPrice.Append( dt, ask );
-          m_ceBidPrice.Append( dt, bid );
-        }
-        if ( m_flags.bEnableBidAskVolume ) {
-          m_ceAskVolume.Append( dt, quote.AskSize() );
-          m_ceBidVolume.Append( dt, -quote.BidSize() );
-        }
-        if ( m_flags.bEnableImbalance ) {
-          m_dblQuoteImbalance = quote.Imbalance();
-          UpdateECross( m_ECross_imbalance, c_ImbalanceMarker, m_dblQuoteImbalance );
-          m_ceImbalance.Append( dt, m_dblQuoteImbalance );
-        }
-        break;
-      default:
-        break;
-    }
-
-    TimeTick( quote );
-
-    // provides a 1 sec pulse for checking the algorithm after tick activities
-    m_bfQuotes01Sec.Add( dt, m_quote.Midpoint(), 1 );
 
   }
 }
@@ -1286,6 +1296,7 @@ void Strategy::HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_
   BOOST_LOG_TRIVIAL(info) << "max missed   loss: " << m_dblPrice_sum_max_loss << '/' << m_nMaxLoss << '=' << possible_loss;
   BOOST_LOG_TRIVIAL(info) << "              net: " << m_dblPrice_sum_max_profit - m_dblPrice_sum_max_loss;
   BOOST_LOG_TRIVIAL(info) << "zigzag: " << m_dblSumZigZags << '/' << m_nZigZags << '=' << m_dblSumZigZags / m_nZigZags;
+  BOOST_LOG_TRIVIAL(info) << "quote price: " << m_cntQuotePriceChanged << " changed, " << m_cntQuotePriceUnchanged << " unchanged";
 }
 
 /*

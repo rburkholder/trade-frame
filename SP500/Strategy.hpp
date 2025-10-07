@@ -137,6 +137,9 @@ private:
 
   Features_raw m_features;
 
+  uint64_t m_cntQuotePriceChanged;
+  uint64_t m_cntQuotePriceUnchanged;
+
   ou::tf::Quote m_quote;
   ou::tf::Trade m_trade;
 
