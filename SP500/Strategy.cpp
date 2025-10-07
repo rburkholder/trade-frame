@@ -204,9 +204,9 @@ void Strategy::ValidateAndStart() {
 
 void Strategy::SetupChart() {
 
-  m_cemPosOne.AddMark( +1.0, ou::Colour::Black, "+1" );
+  m_cemPosOne.AddMark( +1.0, ou::Colour::DarkSlateBlue, "+1" );
     m_cemZero.AddMark(  0.0, ou::Colour::Black, "zero" );
-  m_cemNegOne.AddMark( -1.0, ou::Colour::Black, "-1" );
+  m_cemNegOne.AddMark( -1.0, ou::Colour::DarkSlateBlue, "-1" );
 
   m_cemRegimMin.AddMark( c_regimeMinimum, ou::Colour::Red,   "min" );
 
@@ -276,11 +276,11 @@ void Strategy::SetupChart() {
 
     m_ceTickJ_sigmoid.SetName( "TickJ" );
     m_ceTickJ_sigmoid.SetColour( c_colourTickJ );
-    m_cdv.Add( EChartSlot::Ratio, &m_ceTickJ_sigmoid );
+    m_cdv.Add( EChartSlot::TickRegime, &m_ceTickJ_sigmoid );
 
     m_ceTickL_sigmoid.SetName( "TickL" );
     m_ceTickL_sigmoid.SetColour( c_colourTickL );
-    m_cdv.Add( EChartSlot::Ratio, &m_ceTickL_sigmoid );
+    m_cdv.Add( EChartSlot::TickRegime, &m_ceTickL_sigmoid );
 
     if ( m_flags.bEnableAdvDec ) {
       m_ceAdvDec_ratio.SetName( "AdvDec" );
@@ -289,9 +289,9 @@ void Strategy::SetupChart() {
     }
   }
 
-  //m_cdv.Add( EChartSlot::PriceBB, &m_cemPosOne );
+  m_cdv.Add( EChartSlot::Ratio, &m_cemPosOne );
   //m_cdv.Add( EChartSlot::Ratio, &m_cemZero );
-  //m_cdv.Add( EChartSlot::PriceBB, &m_cemNegOne );
+  m_cdv.Add( EChartSlot::Ratio, &m_cemNegOne );
   m_ceTradePrice_bb_ratio.SetName( "price / bb" );
   m_ceTradePrice_bb_ratio.SetColour( c_colourPrice );
   //m_cdv.Add( EChartSlot::PriceBB, &m_ceTradePrice_bb_ratio );
@@ -328,12 +328,12 @@ void Strategy::SetupChart() {
   m_ceTickJ.SetName( "TickJ" );
   m_ceTickJ.SetColour( c_colourTickJ );
   //m_cdv.Add( EChartSlot::TickStat, &m_ceTickJ );
-  m_cdv.Add( EChartSlot::Ratio, &m_ceTickJ );
+  m_cdv.Add( EChartSlot::TickRegime, &m_ceTickJ );
 
   m_ceTickL.SetName( "TickL" );
   m_ceTickL.SetColour( c_colourTickL );
   //m_cdv.Add( EChartSlot::TickStat, &m_ceTickL );
-  m_cdv.Add( EChartSlot::Ratio, &m_ceTickL );
+  m_cdv.Add( EChartSlot::TickRegime, &m_ceTickL );
 
   if ( m_flags.bEnableAdvDec ) {
     m_ceAdvDec.SetName( "AdvDec" );
@@ -357,11 +357,17 @@ void Strategy::SetupChart() {
     m_cdv.Add( EChartSlot::Imbalance, &m_ceImbalance );
   }
 
-  m_cdv.Add( EChartSlot::rtnPriceSD, &m_cemZero );
+  m_cdv.Add( EChartSlot::rtnPriceSDa, &m_cemZero );
 
-  m_ceTradeBBDiff.SetName( "price sd direction" );
-  m_ceTradeBBDiff.SetColour( ou::Colour::Purple );
-  m_cdv.Add( EChartSlot::rtnPriceSD, &m_ceTradeBBDiff );
+  m_ceTradeBBDiff_val.SetName( "price sd direction" );
+  m_ceTradeBBDiff_val.SetColour( ou::Colour::Purple );
+  m_cdv.Add( EChartSlot::rtnPriceSDa, &m_ceTradeBBDiff_val );
+
+  m_cdv.Add( EChartSlot::rtnPriceSDo, &m_cemZero );
+
+  m_ceTradeBBDiff_vol.SetName( "price sd direction" );
+  m_ceTradeBBDiff_vol.SetColour( ou::Colour::Purple );
+  m_cdv.Add( EChartSlot::rtnPriceSDo, &m_ceTradeBBDiff_vol );
 
   //m_cdv.Add( EChartSlot::rtnPriceMean, &m_cemPosOne );
   //m_cdv.Add( EChartSlot::rtnPriceMean, &m_cemZero );
@@ -689,7 +695,9 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
   // todo: consider using a 2 or 3 degree polynomial to smooth (similar to CurrencyTrader/CubicRegression.cpp)
   const double bb_offset( m_statsPrices.BBOffset() );
-  m_ceTradeBBDiff.Append( dt, ( bb_offset >= m_dblPrvSD ) ? 1.0 : -1.0 ); // track rise/fall rather than value
+  m_ceTradeBBDiff_vol.Append( dt, ( bb_offset >= m_dblPrvSD ) ? 1.0 : -1.0 ); // track rise/fall rather than value
+  //m_ceTradeBBDiff.Append( dt, bb_offset - m_dblPrvSD ); // track rise/fall rather than value
+  m_ceTradeBBDiff_val.Append( dt, bb_offset );
   m_dblPrvSD = bb_offset;
 
   const double bb_mean( m_statsPrices.MeanY() );

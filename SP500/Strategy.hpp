@@ -85,7 +85,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, TickVolume, QuoteVolume, PriceBB, rtnPrice, rtnPriceMean, rtnPriceSlope, rtnPriceSD, TickRegime, AdvDec, TickStat, Imbalance, Ratio, Predict, PredVec, PL };
+  enum EChartSlot { Price, TickVolume, QuoteVolume, PriceBB, rtnPrice, rtnPriceMean, rtnPriceSlope, rtnPriceSDa, rtnPriceSDo, TickRegime, AdvDec, TickStat, Imbalance, Ratio, Predict, PredVec, PL };
 
   const Flags& m_flags;
 
@@ -165,8 +165,8 @@ private:
 
   ou::ChartEntryIndicator m_ceTradeBBU;
   ou::ChartEntryIndicator m_ceTradeBBL;
-  ou::ChartEntryVolume m_ceTradeBBDiff;
-  //ou::ChartEntryIndicator m_ceTradeBBDiff;
+  ou::ChartEntryVolume    m_ceTradeBBDiff_vol;
+  ou::ChartEntryIndicator m_ceTradeBBDiff_val;
 
   ou::ChartEntryIndicator m_ceTradeZigZag;
 
