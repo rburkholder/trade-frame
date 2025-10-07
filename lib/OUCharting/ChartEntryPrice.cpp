@@ -35,17 +35,12 @@ ChartEntryPrice::ChartEntryPrice( ChartEntryPrice&& rhs )
 {}
 
 ChartEntryPrice::~ChartEntryPrice() {
-  ClearQueue();  // clear out prior to m_vDouble disappears.
+  //ClearQueue();  // clear out prior to m_vDouble disappears.
 }
 
 void ChartEntryPrice::Reserve( size_type nSize ) {
+  ChartEntryTime::Reserve( nSize );
   m_vDouble.reserve( nSize );
-}
-
-void ChartEntryPrice::Clear() {
-  ClearQueue();
-  m_vDouble.clear();
-  ChartEntryTime::Clear();
 }
 
 void ChartEntryPrice::Append( const ou::tf::Price& price) {
@@ -54,12 +49,6 @@ void ChartEntryPrice::Append( const ou::tf::Price& price) {
 
 void ChartEntryPrice::Append( const boost::posix_time::ptime &dt, double price ) {
   Append( ou::tf::Price( dt, price ) );
-}
-
-void ChartEntryPrice::ClearQueue() {
-  namespace ph = std::placeholders;
-  m_queue.Sync( std::bind( &ChartEntryPrice::Pop, this, ph::_1 ) );
-  ChartEntryTime::ClearQueue();
 }
 
 void ChartEntryPrice::Pop( const ou::tf::Price& price ) {
@@ -84,6 +73,18 @@ bool ChartEntryPrice::AddEntryToChart( XYChart *pXY, structChartAttributes *pAtt
     }
   }
   return bAdded;
+}
+
+void ChartEntryPrice::ClearQueue() {
+  ChartEntryTime::ClearQueue();
+  namespace ph = std::placeholders;
+  m_queue.Sync( std::bind( &ChartEntryPrice::Pop, this, ph::_1 ) );
+}
+
+void ChartEntryPrice::Clear() {
+  //ClearQueue();
+  m_vDouble.clear();
+  ChartEntryTime::Clear();
 }
 
 } // namespace ou

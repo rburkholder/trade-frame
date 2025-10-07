@@ -41,12 +41,11 @@ public:
   void Append( const ou::tf::Price& );
   void Append( const boost::posix_time::ptime &dt, double price );
   size_type Size() const { return m_vDouble.size(); }
-  virtual void Clear();
-  virtual void Reserve( size_type );
 
-  void ClearQueue();
+  virtual void Reserve( size_type ) override;
+  virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes ) override;
 
-  virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes );
+  virtual void Clear() override;
 
 protected:
 
@@ -55,6 +54,8 @@ protected:
   DoubleArray GetPrices() const {  // prices which are visible in viewport
     return DoubleArray( &m_vDouble[ IxStart() ], CntElements() );
   }
+
+  virtual void ClearQueue() override;
 
 private:
 

@@ -134,10 +134,7 @@ public:
 
   void Append( boost::posix_time::ptime dt ); // background append
 
-  virtual void Clear();
   virtual void Reserve( size_type );
-
-  virtual void ClearQueue();
 
   void SetViewPort( const range_t& );
   void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
@@ -147,6 +144,8 @@ public:
   boost::posix_time::ptime GetExtentEnd() const;
 
   static double Convert( boost::posix_time::ptime ); // convert to chart datetime format
+
+  virtual void Clear() override;
 
 protected:
 
@@ -168,6 +167,8 @@ protected:
   }
 
   size_type Size() const { return m_vDateTime.size(); }
+
+  virtual void ClearQueue();
 
 private:
 

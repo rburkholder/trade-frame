@@ -57,11 +57,6 @@ void ChartEntryBars::AppendBar( const ou::tf::Bar &bar ) {
   m_queueBars.Append( bar );
 }
 
-void ChartEntryBars::ClearQueue() {
-  namespace args = boost::phoenix::placeholders;
-  m_queueBars.Sync( boost::phoenix::bind( &ChartEntryBars::Pop, this, args::arg1 ) );
-}
-
 void ChartEntryBars::Pop( const ou::tf::Bar& bar ) {
   ChartEntryTime::AppendFg( bar.DateTime() );
   m_vOpen.push_back( bar.Open() );
@@ -112,8 +107,15 @@ bool ChartEntryBars::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttr
   return bAdded;
 }
 
+void ChartEntryBars::ClearQueue() {
+  namespace args = boost::phoenix::placeholders;
+  m_queueBars.Sync( boost::phoenix::bind( &ChartEntryBars::Pop, this, args::arg1 ) );
+  ChartEntryTime::ClearQueue();
+}
+
 void ChartEntryBars::Clear() {
-  ClearQueue();
+  ChartEntryTime::Clear();
+  //ClearQueue();
   m_vOpen.clear();
   m_vHigh.clear();
   m_vLow.clear();

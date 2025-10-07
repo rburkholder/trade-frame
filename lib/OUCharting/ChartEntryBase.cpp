@@ -70,7 +70,8 @@ ChartEntryTime::ChartEntryTime() :
 //}
 
 ChartEntryTime::~ChartEntryTime() {
-  Clear();
+  ClearQueue(); // run the overrides
+  Clear(); // run the overrides
 }
 
 ChartEntryTime::ChartEntryTime( ChartEntryTime&& rhs )

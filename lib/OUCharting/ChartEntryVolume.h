@@ -29,10 +29,12 @@ public:
   ChartEntryVolume(void);
   //ChartEntryVolume(size_type nSize);
   virtual ~ChartEntryVolume();
-  virtual void Reserve( size_type );
+
+  virtual void Reserve( size_type ) override;
+
   void Append( ptime dt, int volume );
   void Append( const ou::tf::Bar& bar );
-  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
+  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) override;
 
 protected:
 private:

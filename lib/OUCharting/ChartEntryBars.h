@@ -25,10 +25,11 @@ public:
   ChartEntryBars();
   //ChartEntryBars(size_type nSize);
   virtual ~ChartEntryBars();
-  virtual void Reserve( size_type );
+
+  virtual void Reserve( size_type ) override;
   void AppendBar( const ou::tf::Bar& bar ); // uses thread crossing buffer
-  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
-  virtual void Clear();
+  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) override;
+  virtual void Clear() override;
 
 //  template<typename Iterator>
 //  void AppendBars( Iterator begin, Iterator end ); // no thread crossing buffer, not implemented yet
@@ -54,7 +55,10 @@ protected:
     //return DoubleArray( &(*iter), static_cast<int>( m_vClose.size() ) );
     return DoubleArray( &m_vClose[ IxStart() ], CntElements() );
   }
-private:
+
+  virtual void ClearQueue() override;
+
+  private:
   //boost::lockfree::spsc_queue<ou::tf::Bar, boost::lockfree::capacity<lockfreesize> > m_lfBar;
 
   std::vector<double> m_vOpen;
@@ -64,7 +68,6 @@ private:
 
   ou::tf::Queue<ou::tf::Bar> m_queueBars;
 
-  void ClearQueue();
   void Pop( const ou::tf::Bar& bar );
 };
 
