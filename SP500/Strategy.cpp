@@ -97,6 +97,7 @@ Strategy::Strategy(
 , m_dblZigHi {}, m_dblZigLo {}
 , m_nZigZags {}, m_dblSumZigZags {}, m_eZigZag( EZigZag::init )
 , m_cntQuotePriceChanged {}, m_cntQuotePriceUnchanged {}
+, m_cntOffsetUp {}, m_cntOffsetDn {}
 {
   SetupChart();
 
@@ -705,8 +706,18 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
 
   // todo: consider using a 2 or 3 degree polynomial to smooth (similar to CurrencyTrader/CubicRegression.cpp)
   const double bb_offset( m_statsPrices.BBOffset() );
-  m_ceTradeBBDiff_vol.Append( dt, ( bb_offset >= m_dblPrvSD ) ? 1.0 : -1.0 ); // track rise/fall rather than value
+  if ( bb_offset >= m_dblPrvSD ) {  // track rise/fall rather than value
+    m_ceTradeBBDiff_vol.Append( dt, +1.0 );
+    m_cntOffsetUp++;
+    m_cntOffsetDn = 0;
+  }
+  else {
+    m_ceTradeBBDiff_vol.Append( dt, -1.0 );
+    m_cntOffsetUp = 0;
+    m_cntOffsetDn++;
+  }
   //m_ceTradeBBDiff.Append( dt, bb_offset - m_dblPrvSD ); // track rise/fall rather than value
+
   m_ceTradeBBDiff_val.Append( dt, bb_offset );
   m_dblPrvSD = bb_offset;
 

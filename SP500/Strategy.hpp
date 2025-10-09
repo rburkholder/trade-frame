@@ -222,6 +222,9 @@ private:
   ou::tf::Prices m_prices; // might use the underlying directly?
   ou::tf::TSSWStatsPrice m_statsPrices;
 
+  size_t m_cntOffsetUp;
+  size_t m_cntOffsetDn;
+
   double m_dblPrvPrice;
   double m_dblPrvSD;
 
