@@ -827,35 +827,6 @@ void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
   TimeTick( bar );
 }
 
-/*
-      switch ( m_TickRegime ) {
-        case ETickRegime::advance:
-          //if ( m_bTickRegimeIncreased ) {
-          //if ( ( 0.0 < m_statsReturns.MeanY() ) && ( 0.0 < m_statsReturns.Slope() ) ) {
-          if ( ( 0.0 < m_statsReturns.Slope() ) ) {
-            //BOOST_LOG_TRIVIAL(trace) << "ETickLo::UpOvr enter";
-            m_ceLongEntry.AddLabel( dt, price, "long" );
-            ++m_nEnterLong;
-            m_stateTrade = ETradeState::LongSubmitted;
-          }
-          break;
-        case ETickRegime::decline:
-          //if ( m_bTickRegimeIncreased ) {
-          //if ( ( 0.0 > m_statsReturns.MeanY() ) && ( 0.0 > m_statsReturns.Slope() ) ) {
-          if ( ( 0.0 > m_statsReturns.Slope() ) ) {
-            //BOOST_LOG_TRIVIAL(trace) << "ETickHi::DnOvr enter";
-            m_ceShortEntry.AddLabel( dt, price, "short" );
-            ++m_nEnterShort;
-            m_stateTrade = ETradeState::ShortSubmitted;
-          }
-          break;
-        case ETickRegime::congestion:
-          break;
-        case ETickRegime::diverge:
-          break;
-      }
-*/
-
 void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
 
   // run state machine here as the bollinger bands are updated only with incoming trades?
@@ -876,12 +847,12 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
     case ETradeState::Search:
       switch ( Search( trade ) ) {
         case ESearchResult::buy:
-          EnterLong( trade );
+          //EnterLong( trade );
           break;
         case ESearchResult::none:
           break;
         case ESearchResult::sell:
-          EnterShort( trade );
+          //EnterShort( trade );
           break;
       }
       break;
@@ -910,6 +881,33 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
       // todo: track unused states
       break;
   }
+}
+
+Strategy::ESearchResult Strategy::Search( const ou::tf::Trade& trade ) const {
+
+  ESearchResult sr( ESearchResult::none );
+
+  const rCross_t& rcp( m_crossing[ m_ixprvCrossing ] );
+  const ECross prvCross( rcp[ prc_norm ].cross );
+
+  const rCross_t& rcc( m_crossing[ m_ixcurCrossing ] );
+  const ECross curCross( rcc[ prc_norm ].cross );
+
+  switch ( curCross ) {
+    case ECross::upperlo:
+      if ( ( ECross::uppermk == prvCross ) || ( ECross::upperhi == prvCross ) ) {
+        sr = ESearchResult::sell;
+      }
+      break;
+    case ECross::lowerhi:
+      if ( ( ECross::lowermk == prvCross ) || ( ECross::lowerlo == prvCross ) ) {
+        sr = ESearchResult::buy;
+      }
+      break;
+    default:
+      break;
+  }
+  return sr;
 }
 
 void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
@@ -973,30 +971,42 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   */
 }
 
-Strategy::ESearchResult Strategy::Search( const ou::tf::Trade& trade ) const {
+Strategy::ESearchResult Strategy::Search( const ou::tf::Quote& quote ) const {
 
   ESearchResult sr( ESearchResult::none );
 
-  const rCross_t& rcp( m_crossing[ m_ixprvCrossing ] );
-  const ECross prvCross( rcp[ prc_norm ].cross );
+  /*
+  try market orders to get the ball rolling
+  later try limit orders to test probability of duration
+  later try quote volume analysis to track direction probability
+  use the paper to tie trades with quote changes
+  sometime try RL with LSTM or Fuzzy with LSTM
+  use fuzzy to define trending or sideways markets based upon ema distance?
+  accumulate distance metrics to define relative fuzziness as session progresses
+    session beginning may not be valid as few values are available
+    may need to use previous day's values as a guide
+    how much time is spent in each 4 or 5 percentiles
 
-  const rCross_t& rcc( m_crossing[ m_ixcurCrossing ] );
-  const ECross curCross( rcc[ prc_norm ].cross );
+  entry:
+    hi side:
+      if bid > ema13 && ema13 > ema29 && 0 < m_cntOffsetUp then buy
+    lo side:
+      if ask < ema13 && ema13 < ema29 && 0 < m_cntOffsetDn then sell
 
-  switch ( curCross ) {
-    case ECross::upperlo:
-      if ( ( ECross::uppermk == prvCross ) || ( ECross::upperhi == prvCross ) ) {
-        sr = ESearchResult::sell;
-      }
-      break;
-    case ECross::lowerhi:
-      if ( ( ECross::lowermk == prvCross ) || ( ECross::lowerlo == prvCross ) ) {
-        sr = ESearchResult::buy;
-      }
-      break;
-    default:
-      break;
-  }
+  exit:
+    hi side:
+      track if ask < ema13 && 0 < m_cntOffsetDn
+    lo side:
+      track if bid > ema13 && 0 < m_cntOffsetUp
+
+  note:
+    track ema13 on entry to test how much it moves, and use for stop/exit
+      rather than full retracing prior to exit
+    flat ema13 means counter trading / no movement, maybe use limits for entry/exit
+    successful trades will require an ema19 slope of such and such - can this be tracked?
+
+  */
+
   return sr;
 }
 

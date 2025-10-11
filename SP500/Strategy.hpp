@@ -346,6 +346,7 @@ private:
 
   enum class ESearchResult { none, sell, buy };
   ESearchResult Search( const ou::tf::Trade& ) const;
+  ESearchResult Search( const ou::tf::Quote& ) const;
 
   void EnterLong(  const ou::tf::Trade& );
   void EnterShort( const ou::tf::Trade& );
