@@ -250,9 +250,12 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
 
       //boost::posix_time::time_duration td( dtCursor.time_of_day() );
       //std::string sTime = boost::posix_time::to_simple_string( td );
-      std::string sDT = boost::posix_time::to_simple_string( dtCursor );
-      m_chartMaster.SetCrossHairTime( sDT );
-      m_pChartDataView->NotifyCursorDateTime( dtCursor );
+      if ( dtCursor.is_not_a_date_time() ) {}
+      else {
+        std::string sDT = boost::posix_time::to_simple_string( dtCursor );
+        m_chartMaster.SetCrossHairTime( sDT );
+        m_pChartDataView->NotifyCursorDateTime( dtCursor );
+      }
     }
 
   }
@@ -406,16 +409,11 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
 
       //boost::posix_time::time_duration td( dtCursor.time_of_day() );
       //std::string sTime = boost::posix_time::to_simple_string( td );
-      try {
+      if ( dtCursor.is_not_a_date_time() ) {}
+      else {
         const std::string sDT = boost::posix_time::to_simple_string( dtCursor );
         m_chartMaster.SetCrossHairTime( sDT );
         m_pChartDataView->NotifyCursorDateTime( dtCursor );
-      }
-      catch ( const boost::exception& e ) {
-        BOOST_LOG_TRIVIAL(error) << "WinChartview::HandleMouseWheel date calc problem";
-      }
-      catch ( ... ) {
-        BOOST_LOG_TRIVIAL(error) << "WinChartView::HandleMouseWheel unknown error on date calc";
       }
 
       DrawChart();
