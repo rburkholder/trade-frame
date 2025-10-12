@@ -18,6 +18,8 @@
  * Created on October 16, 2016, 5:53 PM
  */
 
+#include <boost/log/trivial.hpp>
+
 #include <boost/asio/post.hpp>
 
 #include <wx/bitmap.h>
@@ -404,9 +406,17 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
 
       //boost::posix_time::time_duration td( dtCursor.time_of_day() );
       //std::string sTime = boost::posix_time::to_simple_string( td );
-      std::string sDT = boost::posix_time::to_simple_string( dtCursor );
-      m_chartMaster.SetCrossHairTime( sDT );
-      m_pChartDataView->NotifyCursorDateTime( dtCursor );
+      try {
+        const std::string sDT = boost::posix_time::to_simple_string( dtCursor );
+        m_chartMaster.SetCrossHairTime( sDT );
+        m_pChartDataView->NotifyCursorDateTime( dtCursor );
+      }
+      catch ( const boost::exception& e ) {
+        BOOST_LOG_TRIVIAL(error) << "WinChartview::HandleMouseWheel date calc problem";
+      }
+      catch ( ... ) {
+        BOOST_LOG_TRIVIAL(error) << "WinChartView::HandleMouseWheel unknown error on date calc";
+      }
 
       DrawChart();
     }
