@@ -630,7 +630,7 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
     if ( std::isnan( mean ) || std::isinf( mean ) ) {}
     else {
       m_returns_mean.Append( ou::tf::Price( dt, mean ) );
-      const double bb_mean( m_statsReturns_mean.MeanY() );
+      const double bb_mean(   m_statsReturns_mean.MeanY() );
       const double bb_offset( m_statsReturns_mean.BBOffset() );
       const double normalized( ( mean - bb_mean ) / bb_offset );
       m_ceRtnPrice_mean.Append( dt, normalized );
@@ -644,7 +644,7 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
     if ( std::isnan( slope ) || std::isinf( slope ) ) {}
     else {
       m_returns_slope.Append( ou::tf::Price( dt, slope ) );
-      const double bb_mean( m_statsReturns_slope.MeanY() );
+      const double bb_mean(   m_statsReturns_slope.MeanY() );
       const double bb_offset( m_statsReturns_slope.BBOffset() );
       const double normalized( ( slope - bb_mean ) / bb_offset );
       m_ceRtnPrice_slope.Append( dt, normalized );
@@ -842,17 +842,17 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
 
   // todo split bb into three parts for hysteresis when supplying liquidity
   //   to be used by quote section
-
+/*
   switch ( m_pTrackOrder->State()() ) {
     case ETradeState::Search:
       switch ( Search( trade ) ) {
         case ESearchResult::buy:
-          //EnterLong( trade );
+          EnterLong( trade );
           break;
         case ESearchResult::none:
           break;
         case ESearchResult::sell:
-          //EnterShort( trade );
+          EnterShort( trade );
           break;
       }
       break;
@@ -881,6 +881,7 @@ void Strategy::HandleRHTrading( const ou::tf::Trade& trade ) {
       // todo: track unused states
       break;
   }
+*/
 }
 
 Strategy::ESearchResult Strategy::Search( const ou::tf::Trade& trade ) const {
@@ -919,19 +920,38 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   // how much is predicted by order book imbalance/change?
 
   /*
-  const auto dt( quote.DateTime() );
   static const double c_nd( 2.0 );
 
   const rCross_t& rcp( m_crossing[ m_ixprvCrossing ] );
   const rCross_t& rcc( m_crossing[ m_ixcurCrossing ] );
+*/
+
+  const auto dt( quote.DateTime() );
+
+  const auto ask( quote.Ask() );
+  const auto bid( quote.Bid() );
+
+  const auto ema13( m_features.dblEma013 );
+  const auto ema29( m_features.dblEma029 );
 
   switch ( m_pTrackOrder->State()() ) {
     case ETradeState::Search:
-      Search(
-        trade // will need to be quote, or convert to ou::tf::Price
-      , std::bind( &Strategy::EnterLong, this, std::placeholders::_1 )
-      , std::bind( &Strategy::EnterShort, this, std::placeholders::_1 )
-      );
+      if ( ( 0 < m_cntOffsetUp )
+        && ( ema13 > ema29 )
+        && ( ema13 < bid )
+      ) {
+        ou::tf::OrderArgs oa( dt, 100, bid );
+        m_pTrackOrder->EnterLongMkt( oa );
+      }
+      else {
+        if ( ( 0 < m_cntOffsetUp )
+          && ( ema13 < ema29 )
+          && ( ema13 > ask )
+        ) {
+          ou::tf::OrderArgs oa( dt, 100, ask );
+          m_pTrackOrder->EnterShortMkt( oa );
+        }
+      }
       break;
     case ETradeState::EntrySubmittedUp:
       if ( !m_bTickRegimeIncreased ) {
@@ -946,10 +966,18 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       }
       break;
     case ETradeState::ExitSignalUp:
-      UpdatePositionProgressUp( quote );
+      //UpdatePositionProgressUp( quote );
+      if ( ( 0 < m_cntOffsetDn ) && ( ema13 > ask ) ) {
+        ou::tf::OrderArgs oa( dt, 100, ask );
+        m_pTrackOrder->ExitLongMkt( oa );
+      }
       break;
     case ETradeState::ExitSignalDn:
-      UpdatePositionProgressDn( quote );
+      //UpdatePositionProgressDn( quote );
+      if ( ( 0 < m_cntOffsetDn ) && ( ema13 < bid ) ) {
+        ou::tf::OrderArgs oa( dt, 100, bid );
+        m_pTrackOrder->ExitShortMkt( oa );
+      }
       break;
     case ETradeState::ExitSubmitted:
       break;
@@ -968,7 +996,6 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       // todo: track unused states
       break;
   }
-  */
 }
 
 Strategy::ESearchResult Strategy::Search( const ou::tf::Quote& quote ) const {
@@ -982,6 +1009,7 @@ Strategy::ESearchResult Strategy::Search( const ou::tf::Quote& quote ) const {
   use the paper to tie trades with quote changes
   sometime try RL with LSTM or Fuzzy with LSTM
   use fuzzy to define trending or sideways markets based upon ema distance?
+    specifically look at sideways rather than direction change, drift, even if crossing should remain in-trade
   accumulate distance metrics to define relative fuzziness as session progresses
     session beginning may not be valid as few values are available
     may need to use previous day's values as a guide
