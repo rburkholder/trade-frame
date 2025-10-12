@@ -237,15 +237,8 @@ private:
   ou::tf::Prices m_returns_slope;
   ou::tf::TSSWStatsPrice m_statsReturns_slope;
 
-  double m_dblTickRegime;
-  ou::ChartEntryIndicator m_ceTickRegime;
   double m_dblPrvAdvDec;
   ou::ChartEntryIndicator m_ceRtnAdvDec;
-
-  bool m_bTickRegimeIncreased;
-  enum class ETickRegime { diverge, congestion, decline, advance };
-  ETickRegime m_TickRegime;
-  double CalcTickRegime();
 
   ou::ChartEntryIndicator m_ceProfitLoss;
 

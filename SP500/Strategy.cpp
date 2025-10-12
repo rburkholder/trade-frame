@@ -80,8 +80,6 @@ Strategy::Strategy(
 , m_bfQuotes01Sec(  1 )
 , m_dblMid {}
 , m_nEnterLong {}, m_nEnterShort {}
-, m_dblTickRegime {}, m_bTickRegimeIncreased( false )
-, m_TickRegime( ETickRegime::congestion )
 , m_dblPrvPrice {}, m_dblPrvAdvDec {}
 , m_dblPrvSD {}
 , m_statsPrices( m_prices, boost::posix_time::time_duration( 0, 0, c_window ) )
@@ -389,10 +387,6 @@ void Strategy::SetupChart() {
 
   m_cdv.Add( EChartSlot::TickRegime, &m_cemRegimMin );
   m_cdv.Add( EChartSlot::TickRegime, &m_cemZero );
-
-  m_ceTickRegime.SetName( "Tick Regime" );
-  m_ceTickRegime.SetColour( c_colourTickRegime );
-  m_cdv.Add( EChartSlot::TickRegime, &m_ceTickRegime );
 
   if ( m_flags.bEnablePrediction ) {
     m_cePrediction_scaled.SetName( "Predict" );
@@ -742,7 +736,6 @@ void Strategy::HandleTickJ( const ou::tf::Trade& tick ) {
     m_features.dblTickJ = price / 100.0;  // approx normalization
     m_ceTickJ.Append( dt, m_features.dblTickJ );
 
-    m_ceTickRegime.Append( dt, CalcTickRegime() );
   }
 }
 
@@ -754,36 +747,7 @@ void Strategy::HandleTickL( const ou::tf::Trade& tick ) {
     m_features.dblTickL = price / 200.0;  // approx normalization
     m_ceTickL.Append( dt, m_features.dblTickL );
 
-    m_ceTickRegime.Append( dt, CalcTickRegime() );
   }
-}
-
-double Strategy::CalcTickRegime() {
-  const double dblTickRegime = m_features.dblTickJ * m_features.dblTickL;
-  m_bTickRegimeIncreased = m_dblTickRegime < dblTickRegime;
-  if ( c_regimeMinimum >= dblTickRegime ) {
-    m_TickRegime = ETickRegime::congestion;
-  }
-  else {
-    if ( 0.0 <= m_features.dblTickJ ) {
-      if ( 0.0 <= m_features.dblTickL ) {
-        m_TickRegime = ETickRegime::advance;
-      }
-      else { // 0.0 > m_features.dblTickL
-        m_TickRegime = ETickRegime::diverge;
-      }
-    }
-    else { // 0.0 > m_features.dblTickJ
-      if ( 0.0 <= m_features.dblTickL ) {
-        m_TickRegime = ETickRegime::diverge;
-      }
-      else { // 0.0 > m_features.dblTickL
-        m_TickRegime = ETickRegime::decline;
-      }
-    }
-  }
-  m_dblTickRegime = dblTickRegime;
-  return dblTickRegime;
 }
 
 void Strategy::HandleAdv( const ou::tf::Trade& tick ) {
@@ -954,16 +918,8 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       }
       break;
     case ETradeState::EntrySubmittedUp:
-      if ( !m_bTickRegimeIncreased ) {
-        //BOOST_LOG_TRIVIAL(trace) << "ETickLo::Neutral exit";
-        //m_pTrackOrder->State().Set( ETradeState::Search );
-      }
       break;
     case ETradeState::EntrySubmittedDn:
-      if ( !m_bTickRegimeIncreased ) {
-        //BOOST_LOG_TRIVIAL(trace) << "ETickHi::Neutral exit";
-        //m_pTrackOrder->State().Set( ETradeState::Search );
-      }
       break;
     case ETradeState::ExitSignalUp:
       //UpdatePositionProgressUp( quote );
