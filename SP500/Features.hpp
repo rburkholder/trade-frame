@@ -74,10 +74,6 @@ struct Real {
 
 struct Features_scaled {
 
-  size_t distance; // how far into future
-
-  Real predicted;
-
   Real price;
 
   Real SDDirection;
@@ -92,7 +88,6 @@ struct Features_scaled {
   Real returns_slope;
 
   void Zero() {
-    predicted = 0.0;
     price = 0.0;
     SDDirection = 0.0;
     ema013 = 0.0;

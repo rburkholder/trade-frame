@@ -733,7 +733,6 @@ void Strategy::HandleTickJ( const ou::tf::Trade& tick ) {
 
     m_features.dblTickJ = price / 100.0;  // approx normalization
     m_ceTickJ.Append( dt, m_features.dblTickJ );
-
   }
 }
 
@@ -744,7 +743,6 @@ void Strategy::HandleTickL( const ou::tf::Trade& tick ) {
 
     m_features.dblTickL = price / 200.0;  // approx normalization
     m_ceTickL.Append( dt, m_features.dblTickL );
-
   }
 }
 
@@ -1228,10 +1226,9 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   }
 
   Features_scaled scaled; // receives scaled data
-  m_fForward( m_features, scaled ); // may call PredictionVector for a live strategy
-  const boost::posix_time::ptime dtPrediction( dt + boost::posix_time::time_duration( 0, 0, scaled.distance ) );
+  const ou::tf::Price result = m_fForward( m_features, scaled ); // may call PredictionVector for a live strategy
   if ( m_flags.bEnablePrediction ) {
-      m_cePrediction_scaled.Append( dtPrediction, scaled.predicted.dbl );
+      m_cePrediction_scaled.Append( result );
     //m_cePrediction_descaled.Append( dtPrediction, scaled.predicted.dbl );
   }
 

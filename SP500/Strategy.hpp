@@ -65,7 +65,7 @@ public:
   using fStart_t = std::function<void()>;
   using fStop_t = std::function<void()>;
 
-  using fForward_t = std::function<void( const Features_raw&, Features_scaled& )>;
+  using fForward_t = std::function<ou::tf::Price( const Features_raw&, Features_scaled& )>;
 
   Strategy(
     ou::ChartDataView&

@@ -292,14 +292,12 @@ void StrategyManager_impl::RunStrategy_predict_sim() {
     m_sim->SetOnSimulationComplete( MakeDelegate( this, &StrategyManager_impl::HandleSimComplete_predict ) );
     m_cdv_predict.SetNames( "SPY - predict", m_choices.m_sFileValidate );
     m_fSetChartDataView( ou::tf::WinChartView::EView::sim_trail, &m_cdv_predict );
-    const auto distance( m_model.PredictionDistance() ); // cache the static value
     BuildStrategy_sim(
       m_startDateUTC,
       m_cdv_predict,
-      [this,distance]( const Features_raw& raw, Features_scaled& scaled ) { // fForward_t
+      [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price { // fForward_t
         m_model.Append( raw, scaled );
-        scaled.distance = distance;
-        scaled.predicted = m_model.Predict();
+        return ou::tf::Price( raw.dt + boost::posix_time::time_duration( 0, 0, m_model.PredictionDistance() ), m_model.Predict() );
       } );
     m_pStrategy->Start();
   }
@@ -311,7 +309,6 @@ void StrategyManager_impl::RunStrategy_predict_live() {
 
   m_mapHdf5Instrument.clear();
 
-  const auto distance( m_model.PredictionDistance() ); // cache the static value
   //m_model.SetPredictionResult(
   //  [this,distance]( const Model::rPrediction_t& r ){
   //    m_pStrategy->PredictionVector( distance, r.size(), r.data() );
@@ -322,10 +319,9 @@ void StrategyManager_impl::RunStrategy_predict_live() {
   BuildStrategy_live(
     m_startDateUTC, // this may require adjusting
     m_cdv_predict,
-    [this,distance]( const Features_raw& raw, Features_scaled& scaled ) { // fForward_t
+    [this]( const Features_raw& raw, Features_scaled& scaled )->ou::tf::Price { // fForward_t
       m_model.Append( raw, scaled );
-      scaled.distance = distance;
-      scaled.predicted = m_model.Predict();
+      return ou::tf::Price( raw.dt + boost::posix_time::time_duration( 0, 0, m_model.PredictionDistance() ), m_model.Predict() );
     } );
   m_pStrategy->Start();
 
