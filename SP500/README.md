@@ -60,6 +60,8 @@ num_epochs=1000
 file_model_save=sp500_save.pt
 # load a file from a good training session (rename a saved file to protect from overwrite):
 file_model_load=sp500_load.pt
+flag_enable_bid_ask_price=true
+flag_enable_prediction=true
 ```
 
 Symbols and their contribution to signals:
