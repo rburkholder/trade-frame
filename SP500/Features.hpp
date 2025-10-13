@@ -29,32 +29,26 @@ struct Features_raw {
 
   double dblPrice;
 
+  double dblSDDirection;
+
   double dblTickJ;
   double dblTickL;
 
-  double dblAdv;
-  double dblDec;
-  double dblAdvDecRatio;
-
   double dblEma013;
   double dblEma029;
-  double dblEma050;
-  double dblEma200;
 
-  //double m_dblTrin;
+  double dblReturnsMean;
+  double dblReturnsSlope;
 
   Features_raw() // maybe not required
   : dblPrice {}
+  , dblSDDirection {}
   , dblTickJ {}
   , dblTickL {}
-  , dblAdv {}
-  , dblDec {}
-  , dblAdvDecRatio {}
   , dblEma013 {}
   , dblEma029 {}
-  , dblEma050 {}
-  , dblEma200 {}
-  //, m_dblTrin {}
+  , dblReturnsMean {}
+  , dblReturnsSlope {}
   {}
 
 };
@@ -80,33 +74,33 @@ struct Real {
 
 struct Features_scaled {
 
-  double range; // used to reverse the scale (slope)
-  double min;   // used to reverse the scale (offset)
+  size_t distance; // how far into future
 
-  Real price;
   Real predicted;
 
-  size_t distance; // how far into future
+  Real price;
+
+  Real SDDirection;
 
   Real ema013;
   Real ema029;
-  Real ema050;
-  Real ema200;
 
   Real tickJ;
   Real tickL;
-  Real AdvDec;
+
+  Real returns_mean;
+  Real returns_slope;
 
   void Zero() {
-    price = 0.0;
     predicted = 0.0;
+    price = 0.0;
+    SDDirection = 0.0;
     ema013 = 0.0;
     ema029 = 0.0;
-    ema050 = 0.0;
-    ema200 = 0.0;
     tickJ = 0.0;
     tickL = 0.0;
-    AdvDec = 0.0;
+    returns_mean = 0.0;
+    returns_slope = 0.0;
   }
 
 };

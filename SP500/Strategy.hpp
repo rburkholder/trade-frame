@@ -192,8 +192,6 @@ private:
 
   ou::ChartEntryIndicator m_ceEma013_ratio;
   ou::ChartEntryIndicator m_ceEma029_ratio;
-  ou::ChartEntryIndicator m_ceEma050_ratio;
-  ou::ChartEntryIndicator m_ceEma200_ratio;
   ou::ChartEntryIndicator m_ceTrade_ratio;
   ou::ChartEntryIndicator m_cePrediction_scaled;
   ou::ChartEntryIndicator m_cePrediction_descaled;
@@ -222,10 +220,15 @@ private:
   ou::tf::Prices m_prices; // might use the underlying directly?
   ou::tf::TSSWStatsPrice m_statsPrices;
 
+  double m_dblEma013;
+  double m_dblEma029;
+  double m_dblEma050;
+  double m_dblEma200;
+
   size_t m_cntOffsetUp;
   size_t m_cntOffsetDn;
 
-  double m_dblPrvPrice;
+  double m_dblPrvPrice; // calculating returns
   double m_dblPrvSD;
 
   ou::ChartEntryIndicator m_ceRtnPrice_mean;
@@ -237,8 +240,8 @@ private:
   ou::tf::Prices m_returns_slope;
   ou::tf::TSSWStatsPrice m_statsReturns_slope;
 
-  double m_dblPrvAdvDec;
-  ou::ChartEntryIndicator m_ceRtnAdvDec;
+  //double m_dblPrvAdvDec;
+  //ou::ChartEntryIndicator m_ceRtnAdvDec;
 
   ou::ChartEntryIndicator m_ceProfitLoss;
 

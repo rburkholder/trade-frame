@@ -91,7 +91,7 @@ namespace {
 }
 
 namespace {
-  struct maxmin {
+  struct maxmin { // not used, kept for reference
     double& max;
     double& min;
 
@@ -107,61 +107,49 @@ namespace {
       }
     }
   };
+
+  inline double ScaleTranslate( const double value ) {
+    return ( value * 0.5 ) + 0.5;
+  }
 }
 
 bool Model::Scale( const Features_raw& raw, Features_scaled& scaled ) {
 
   bool bScaled( true );
 
-  double max;
-  //double min;
-  maxmin mm( max, scaled.min, raw.dblEma200 );
-  mm.add( raw.dblEma050 );
-  mm.add( raw.dblEma029 );
-  mm.add( raw.dblEma013 );
-  // on purpose: no test on price
+  scaled.price = ScaleTranslate( raw.dblPrice );
 
-  if ( max > scaled.min ) {
+  scaled.SDDirection = ScaleTranslate( raw.dblSDDirection );
 
-    //const double range( max - scaled.min );
-    scaled.range = max - scaled.min;
+  scaled.ema029 = ScaleTranslate( raw.dblEma029 );
+  scaled.ema013 = ScaleTranslate( raw.dblEma013 );
 
-    // detrend timeseries to 0.0 - 1.0
-    scaled.ema200 = ( ( raw.dblEma200 - scaled.min ) / scaled.range );
-    scaled.ema050 = ( ( raw.dblEma050 - scaled.min ) / scaled.range );
-    scaled.ema029 = ( ( raw.dblEma029 - scaled.min ) / scaled.range );
-    scaled.ema013 = ( ( raw.dblEma013 - scaled.min ) / scaled.range );
+  const double sigmoidTickJ( bipolar_sigmoid<1>( raw.dblTickJ ) ); // even scaling top and bottom
+  scaled.tickJ = ScaleTranslate( sigmoidTickJ );
 
-    const double ratioPrice( ( ( raw.dblPrice - scaled.min ) / scaled.range ) * 2.0 - 1.0 ); // even scaling top and bottom
-    const double sigmoidPrice( bipolar_sigmoid<3>( ratioPrice ) );
-    scaled.price = ( sigmoidPrice * 0.5 + 0.5 ); // translate to 0.0 - 1.0
+  const double sigmoidTickL( bipolar_sigmoid<1>( raw.dblTickL ) ); // even scaling top and bottom
+  scaled.tickL = ScaleTranslate( sigmoidTickL );
 
-    const double sigmoidTickJ( bipolar_sigmoid<2>( raw.dblTickJ ) ); // even scaling top and bottom
-    scaled.tickJ = ( sigmoidTickJ * 0.5 + 0.5 ); // translate to 0.0 - 1.0
+  const double sigmoidReturnsMean( bipolar_sigmoid<1>( raw.dblReturnsMean ) );
+  scaled.returns_mean = ScaleTranslate( sigmoidReturnsMean );
 
-    const double sigmoidTickL( bipolar_sigmoid<2>( raw.dblTickL ) ); // even scaling top and bottom
-    scaled.tickL = ( sigmoidTickL * 0.5 + 0.5 ); // translate to 0.0 - 1.0
-
-    scaled.AdvDec = ( raw.dblAdvDecRatio * 0.5 + 0.5 ); // translate to 0.0 - 1.0
-
-  }
-  else {
-    scaled.Zero();
-    bScaled = false;
-  }
+  const double signmoidReturnsSlope( bipolar_sigmoid<1>( raw.dblReturnsSlope ) );
+  scaled.returns_slope = ScaleTranslate( signmoidReturnsSlope );
 
   return bScaled;
 
 }
 
 void Model::Append( const Features_raw& raw, Features_scaled& scaled ) {
+
   if ( Scale( raw, scaled ) ) {
 
     const fields_t<float> scaled_flt(
-      scaled.ema200.flt, scaled.ema050.flt, scaled.ema029.flt, scaled.ema013.flt
-    , scaled.price.flt
+      scaled.price.flt
+    , scaled.SDDirection.flt
+    , scaled.ema029.flt, scaled.ema013.flt
     , scaled.tickJ.flt, scaled.tickL.flt
-    //, 0.5 // dblAdvDec use neutral mid until multi-day series tackled
+    , scaled.returns_mean.flt, scaled.returns_slope.flt
     );
 
     m_vDataScaled.push_back( scaled_flt ); // will need to timestamp each entry

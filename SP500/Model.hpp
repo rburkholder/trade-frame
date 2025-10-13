@@ -63,8 +63,8 @@ private:
 
   torch::DeviceType m_torchDevice;
 
-  //enum EFeature { ixEma200 = 0, ixEma050, ixEma029, ixEma013, ixTrade, ixTickj, ixTickl, ixAdvdec, nInputFeature_ };
-  enum EFeature { ixEma200 = 0, ixEma050, ixEma029, ixEma013, ixTrade, ixTickj, ixTickl, nInputFeature_ };
+  // will be attempting to predict normalized value referenced at ixTrade
+  enum EFeature { ixTrade = 0, ixSDDirection, ixEma029, ixEma013, ixTickj, ixTickl, ixRtnMean, ixRtnSlp, nInputFeature_ };
 
   template<typename type>
   using rFields_t = type[ nInputFeature_ ];
@@ -77,17 +77,20 @@ private:
       std::memcpy( fields, rhs.fields, nInputFeature_ * sizeof( type ) );
     }
     // todo: how to bulid an initializer?
-    fields_t( const type v1, const type v2, const type v3, const type v4
-            , const type v5, const type v6, const type v7 /*, const type v8 */ )
-    {
-      fields[ ixEma200 ] = v1;
-      fields[ ixEma050 ] = v2;
-      fields[ ixEma029 ] = v3;
-      fields[ ixEma013 ] = v4;
-      fields[ ixTrade  ] = v5;
-      fields[ ixTickj  ] = v6;
-      fields[ ixTickl  ] = v7;
-      //fields[ ixAdvdec ] = v8;
+    fields_t( const type trade
+            , const type SDDirection
+            , const type ema029, const type ema013
+            , const type tickj, const type tickl
+            , const type rtn_mean, const type rtn_slope
+    ) {
+      fields[ ixEma029 ] = ema029;
+      fields[ ixEma013 ] = ema013;
+      fields[ ixTrade  ] = trade;
+      fields[ ixSDDirection ] = SDDirection;
+      fields[ ixTickj  ] = tickj;
+      fields[ ixTickl  ] = tickl;
+      fields[ ixRtnMean ] = rtn_mean;
+      fields[ ixRtnSlp ] = rtn_slope;
     }
   };
 

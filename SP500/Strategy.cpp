@@ -80,8 +80,9 @@ Strategy::Strategy(
 , m_bfQuotes01Sec(  1 )
 , m_dblMid {}
 , m_nEnterLong {}, m_nEnterShort {}
-, m_dblPrvPrice {}, m_dblPrvAdvDec {}
+, m_dblPrvPrice {}
 , m_dblPrvSD {}
+, m_dblEma013 {}, m_dblEma029 {}, m_dblEma050 {}, m_dblEma200 {}
 , m_statsPrices( m_prices, boost::posix_time::time_duration( 0, 0, c_window ) )
 , m_statsReturns( m_returns, boost::posix_time::time_duration( 0, 0, c_window ) )
 , m_statsReturns_mean( m_returns_mean, boost::posix_time::time_duration( 0, 0, c_window ) )
@@ -265,14 +266,6 @@ void Strategy::SetupChart() {
     m_ceEma029_ratio.SetName( "29s ema" );
     m_ceEma029_ratio.SetColour( c_colourEma29 );
     m_cdv.Add( EChartSlot::Ratio, &m_ceEma029_ratio );
-
-    m_ceEma050_ratio.SetName( "50s ema" );
-    m_ceEma050_ratio.SetColour( c_colourEma50 );
-    m_cdv.Add( EChartSlot::Ratio, &m_ceEma050_ratio );
-
-    m_ceEma200_ratio.SetName( "200s ema" );
-    m_ceEma200_ratio.SetColour( c_colourEma200 );
-    m_cdv.Add( EChartSlot::Ratio, &m_ceEma200_ratio );
 
     m_ceTickJ_sigmoid.SetName( "TickJ" );
     m_ceTickJ_sigmoid.SetColour( c_colourTickJ );
@@ -628,6 +621,7 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
       const double bb_offset( m_statsReturns_mean.BBOffset() );
       const double normalized( ( mean - bb_mean ) / bb_offset );
       m_ceRtnPrice_mean.Append( dt, normalized );
+      m_features.dblReturnsMean = normalized;
 
       CrossState& cs( rcs[ rtn_mean ] );
       ECross& ec( cs.cross );
@@ -642,6 +636,7 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
       const double bb_offset( m_statsReturns_slope.BBOffset() );
       const double normalized( ( slope - bb_mean ) / bb_offset );
       m_ceRtnPrice_slope.Append( dt, normalized );
+      m_features.dblReturnsSlope = normalized;
 
       CrossState& cs( rcs[ rtn_slope ] );
       ECross& ec( cs.cross );
@@ -704,12 +699,15 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
     m_ceTradeBBDiff_vol.Append( dt, +1.0 );
     m_cntOffsetUp++;
     m_cntOffsetDn = 0;
+    m_features.dblSDDirection = +1.0;
   }
   else {
     m_ceTradeBBDiff_vol.Append( dt, -1.0 );
     m_cntOffsetUp = 0;
     m_cntOffsetDn++;
+    m_features.dblSDDirection = -1.0;
   }
+
   //m_ceTradeBBDiff.Append( dt, bb_offset - m_dblPrvSD ); // track rise/fall rather than value
 
   m_ceTradeBBDiff_val.Append( dt, bb_offset );
@@ -753,8 +751,7 @@ void Strategy::HandleTickL( const ou::tf::Trade& tick ) {
 void Strategy::HandleAdv( const ou::tf::Trade& tick ) {
   if ( m_flags.bEnableAdvDec ) {
     if ( RHTrading() ) {
-      m_features.dblAdv = tick.Price();
-      CalcAdvDec( tick.DateTime() );
+      //CalcAdvDec( tick.DateTime() );
     }
   }
 }
@@ -762,26 +759,19 @@ void Strategy::HandleAdv( const ou::tf::Trade& tick ) {
 void Strategy::HandleDec( const ou::tf::Trade& tick ) {
   if ( m_flags.bEnableAdvDec ) {
     if ( RHTrading() ) {
-      m_features.dblDec = tick.Price();
-      CalcAdvDec( tick.DateTime() );
+      //CalcAdvDec( tick.DateTime() );
     }
   }
 }
 
 void Strategy::CalcAdvDec( boost::posix_time::ptime dt ) {
-  const double diff( m_features.dblAdv - m_features.dblDec );
-  const double sum( m_features.dblAdv + m_features.dblDec );
-  const double ratio( diff / sum );
-  m_features.dblAdvDecRatio = ratio;
-
-  m_ceAdvDec.Append( dt, diff - m_dblPrvAdvDec );
+  //m_ceAdvDec.Append( dt, diff - m_dblPrvAdvDec );
   //if ( ( 0.0 == m_dblPrvAdvDec ) ) {}
   //else {
   //  m_ceAdvDec.Append( dt, ratio );
   //}
-  m_dblPrvAdvDec = diff;
+  //m_dblPrvAdvDec = diff;
   //m_dblPrvAdvDec = ratio;
-
 }
 
 void Strategy::HandleBarQuotes01Sec( const ou::tf::Bar& bar ) {
@@ -895,8 +885,8 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   const auto ask( quote.Ask() );
   const auto bid( quote.Bid() );
 
-  const auto ema13( m_features.dblEma013 );
-  const auto ema29( m_features.dblEma029 );
+  const auto ema13( m_dblEma013 );
+  const auto ema29( m_dblEma029 );
 
   switch ( m_pTrackOrder->State()() ) {
     case ETradeState::Search:
@@ -1205,48 +1195,55 @@ void Strategy::UpdatePositionProgressDn( const ou::tf::Quote& quote ) {
   }
 }
 
+// TODO: migrate to 0.10 second interval, or for each return instead?
 void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
 
-  const boost::posix_time::ptime dt( bar.DateTime() );
+  const auto dt( bar.DateTime() );
+
   m_features.dt = dt;
 
   const double vwp( m_vwp() );
   const double price( 0.0 == vwp ? bar.Close() : vwp );
   const ou::tf::Price price_( bar.DateTime(), price );
 
-  m_features.dblPrice = price;
-
-  UpdateEma< 13>( price_, m_features.dblEma013, m_ceEma013 );
-  UpdateEma< 29>( price_, m_features.dblEma029, m_ceEma029 );
-  UpdateEma< 50>( price_, m_features.dblEma050, m_ceEma050 );
-  UpdateEma<200>( price_, m_features.dblEma200, m_ceEma200 );
+  UpdateEma< 13>( price_, m_dblEma013, m_ceEma013 );
+  UpdateEma< 29>( price_, m_dblEma029, m_ceEma029 );
+  UpdateEma< 50>( price_, m_dblEma050, m_ceEma050 );
+  UpdateEma<200>( price_, m_dblEma200, m_ceEma200 );
 
   const double bb_offset( m_statsPrices.BBOffset() );
-  const double bb_mean( m_statsPrices.MeanY() );
-  const double ema13_normalized( ( m_features.dblEma013 - bb_mean ) / bb_offset );
-  m_ceTradePrice_ema_bb_ratio.Append( dt, ema13_normalized );
+  const double bb_mean(   m_statsPrices.MeanY() );
+
+  if ( 0.0 == bb_offset ) {}
+  else {
+
+    m_features.dblPrice = ( price - bb_mean ) / bb_offset;
+
+    const double ema13_normalized( ( m_dblEma013 - bb_mean ) / bb_offset );
+    m_ceTradePrice_ema_bb_ratio.Append( dt, ema13_normalized );
+    m_features.dblEma013 = ema13_normalized;
+
+    const double ema29_normalized( ( m_dblEma029 - bb_mean ) / bb_offset );
+    m_features.dblEma029 = ema29_normalized;
+  }
 
   Features_scaled scaled; // receives scaled data
   m_fForward( m_features, scaled ); // may call PredictionVector for a live strategy
   const boost::posix_time::ptime dtPrediction( dt + boost::posix_time::time_duration( 0, 0, scaled.distance ) );
   if ( m_flags.bEnablePrediction ) {
-    m_cePrediction_scaled.Append( dtPrediction, scaled.predicted.dbl );
-    m_cePrediction_descaled.Append( dtPrediction, scaled.predicted.dbl * scaled.range + scaled.min );
+      m_cePrediction_scaled.Append( dtPrediction, scaled.predicted.dbl );
+    //m_cePrediction_descaled.Append( dtPrediction, scaled.predicted.dbl );
   }
 
   //BOOST_LOG_TRIVIAL(trace) << "Calc01SecIndicators " << dt << ',' << prediction.DateTime();
 
   m_ceTrade_ratio.Append( dt, scaled.price.dbl );
 
-  m_ceEma200_ratio.Append( dt, scaled.ema200.dbl );
-  m_ceEma050_ratio.Append( dt, scaled.ema050.dbl );
   m_ceEma029_ratio.Append( dt, scaled.ema029.dbl );
   m_ceEma013_ratio.Append( dt, scaled.ema013.dbl );
 
   m_ceTickJ_sigmoid.Append( dt, scaled.tickJ.dbl );
   m_ceTickL_sigmoid.Append( dt, scaled.tickL.dbl );
-
-  m_ceAdvDec_ratio.Append( dt, scaled.AdvDec.dbl );
 
 }
 
@@ -1302,6 +1299,7 @@ void Strategy::HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_
   BOOST_LOG_TRIVIAL(info) << "              net: " << m_dblPrice_sum_max_profit - m_dblPrice_sum_max_loss;
   BOOST_LOG_TRIVIAL(info) << "zigzag: " << m_dblSumZigZags << '/' << m_nZigZags << '=' << m_dblSumZigZags / m_nZigZags;
   BOOST_LOG_TRIVIAL(info) << "quote price: " << m_cntQuotePriceChanged << " changed, " << m_cntQuotePriceUnchanged << " unchanged";
+  BOOST_LOG_TRIVIAL(info) << "trade count: " << m_ceTradePrice.Size();
 }
 
 /*
