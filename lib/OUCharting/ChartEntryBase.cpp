@@ -119,37 +119,37 @@ void ChartEntryTime::AppendFg( boost::posix_time::ptime dt ) {
   try {
 
     if ( boost::posix_time::special_values::not_a_date_time == dt ) {
-      BOOST_LOG_TRIVIAL(debug) << m_sName << " ChartEntryTime::AppendFg not a date time?";
+      BOOST_LOG_TRIVIAL(debug) << '\'' << m_sName << '\'' << " ChartEntryTime::AppendFg not a date time?";
       bOk = false;
     }
 
     if ( boost::posix_time::special_values::max_date_time == dt ) {
-      BOOST_LOG_TRIVIAL(debug) << m_sName << " ChartEntryTime::AppendFg max date time?";
+      BOOST_LOG_TRIVIAL(debug) << '\'' << m_sName << '\'' << " ChartEntryTime::AppendFg max date time?";
       bOk = false;
     }
 
     if ( boost::posix_time::special_values::min_date_time == dt ) {
-      BOOST_LOG_TRIVIAL(debug) << m_sName << " ChartEntryTime::AppendFg min date time?";
+      BOOST_LOG_TRIVIAL(debug) << '\'' << m_sName << '\'' << " ChartEntryTime::AppendFg min date time?";
       bOk = false;
     }
 
     if ( boost::posix_time::special_values::neg_infin == dt ) {
-      BOOST_LOG_TRIVIAL(debug) << m_sName << " ChartEntryTime::AppendFg neg infin date time?";
+      BOOST_LOG_TRIVIAL(debug) << '\'' << m_sName << '\'' << " ChartEntryTime::AppendFg neg infin date time?";
       bOk = false;
     }
 
     if ( boost::posix_time::special_values::pos_infin == dt ) {
-      BOOST_LOG_TRIVIAL(debug) << m_sName << " ChartEntryTime::AppendFg pos infin date time?";
+      BOOST_LOG_TRIVIAL(debug) << '\'' << m_sName << '\'' << " ChartEntryTime::AppendFg pos infin date time?";
       bOk = false;
     }
 
     if ( boost::posix_time::special_values::not_special == dt ) {
-      BOOST_LOG_TRIVIAL(debug) << m_sName << " ChartEntryTime::AppendFg not special";
+      BOOST_LOG_TRIVIAL(debug) << '\'' << m_sName << '\'' << " ChartEntryTime::AppendFg not special";
       bOk = false;
     }
 
     if ( bOk ) {
-      //BOOST_LOG_TRIVIAL(debug) << m_sName << dt;
+      //BOOST_LOG_TRIVIAL(debug) << '\'' << m_sName << '\'' << dt;
 
       const double converted( Convert( dt ) );
 
@@ -168,7 +168,7 @@ void ChartEntryTime::AppendFg( boost::posix_time::ptime dt ) {
 
   }
   catch(...) {
-    BOOST_LOG_TRIVIAL(debug) << m_sName << " ChartEntryTime::AppendFg catch (bad datetime)";
+    BOOST_LOG_TRIVIAL(error) << '\'' << m_sName << '\'' << " ChartEntryTime::AppendFg catch (bad datetime)";
   }
 }
 
