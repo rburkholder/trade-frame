@@ -44,6 +44,9 @@ namespace {
   static const std::string sChoice_sFlagEnableImbalance( "flag_enable_imbalance" );
   static const std::string sChoice_sFlagEnablePrediction( "flag_enable_prediction" );
   static const std::string sChoice_sFlagEnableAdvDec( "flag_enable_advdec" );
+  static const std::string sChoice_sGPUDevice( "torch_device" );
+  static const std::string sChoice_sGPUInstance( "torch_instance" );
+
 
   template<typename T>
   bool parse( const std::string& sFileName, po::variables_map& vm, const std::string& name, bool bRequired, T& dest ) {
@@ -90,9 +93,10 @@ bool Load( const std::string& sFileName, Choices& choices ) {
 
   try {
 
+    int ix;
+
     po::options_description config( "SP500 config" );
     config.add_options()
-
     ( sChoice_Mode.c_str(), po::value<std::string>( &sMode ), "mode setting: view_training_data, view_validate_data, train/validate, train/golive" )
     ( sChoice_sFileTraining.c_str(), po::value<Choices::vFileTraining_t>( &choices.m_vFileTraining ), "training file" )
     ( sChoice_sFileValidate.c_str(), po::value<std::string>( &choices.m_sFileValidate )->default_value( "" ), "validation file" )
@@ -105,6 +109,8 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     ( sChoice_sFlagEnableImbalance.c_str(), po::value<bool>( &choices.m_flags.bEnableImbalance )->default_value( false ), "enable imbalance indicator" )
     ( sChoice_sFlagEnablePrediction.c_str(), po::value<bool>( &choices.m_flags.bEnablePrediction )->default_value( false ), "enable prediction" )
     ( sChoice_sFlagEnableAdvDec.c_str(), po::value<bool>( &choices.m_flags.bEnableAdvDec )->default_value( false ), "enable adv/dec" )
+    ( sChoice_sGPUDevice.c_str(), po::value<std::string>( &choices.m_sTorchDevice )->default_value( "cpu" ), "torch device name" )
+    ( sChoice_sGPUInstance.c_str(), po::value<int>( &ix )->default_value( 0 ), "torch device instance" )
     ;
     po::variables_map vm;
 
@@ -128,6 +134,10 @@ bool Load( const std::string& sFileName, Choices& choices ) {
       bOk &= parse<bool>( sFileName, vm, sChoice_sFlagEnableImbalance, false, choices.m_flags.bEnableImbalance );
       bOk &= parse<bool>( sFileName, vm, sChoice_sFlagEnablePrediction, false, choices.m_flags.bEnablePrediction );
       bOk &= parse<bool>( sFileName, vm, sChoice_sFlagEnableAdvDec, false, choices.m_flags.bEnableAdvDec );
+      bOk &= parse<std::string>( sFileName, vm, sChoice_sGPUDevice, false, choices.m_sTorchDevice );
+
+      bOk &= parse<int>( sFileName, vm, sChoice_sGPUInstance, false, ix );
+      choices.m_ixTorchDevice = ix; // todo: deal with overflow (int8_t is char, so parser treats it incorrectly)
     }
 
     if ( 100.0 > choices.m_hp.m_nEpochs ) {

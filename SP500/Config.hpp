@@ -24,6 +24,8 @@
 #include <string>
 #include <vector>
 
+#include <cstdint>
+
 #include "Flags.hpp"
 #include "HyperParameters.hpp"
 
@@ -48,6 +50,9 @@ struct Choices {
 
   Flags m_flags;
   HyperParameters m_hp;
+
+  std::string m_sTorchDevice;
+  std::int8_t m_ixTorchDevice;
 
 };
 

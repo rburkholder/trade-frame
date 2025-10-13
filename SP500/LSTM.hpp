@@ -30,7 +30,7 @@ public:
 
   LSTM( int input_size, int hidden_size, int num_layers, int output_size );
 
-  lstm_state_t init_states( torch::DeviceType device, int batch_size  );
+  lstm_state_t init_states( torch::Device device, int batch_size  );
 
   torch::Tensor forward( torch::Tensor x, lstm_state_t& state );
 

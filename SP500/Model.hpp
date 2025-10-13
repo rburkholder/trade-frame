@@ -27,7 +27,7 @@
 
 #include <c10/util/ArrayRef.h>
 
-#include <c10/core/DeviceType.h>
+#include "c10/core/Device.h"
 
 class LSTM;
 class Features_raw;
@@ -37,7 +37,7 @@ class HyperParameters;
 class Model {
 public:
 
-  Model();
+  Model( const std::string& sDevice, std::int8_t ixDevice );
   ~Model();
 
   void Append( const Features_raw&, Features_scaled& ); // training mode and prediction mode
@@ -61,7 +61,7 @@ public:
 protected:
 private:
 
-  torch::DeviceType m_torchDevice;
+  c10::Device m_torchDevice;
 
   // will be attempting to predict normalized value referenced at ixTrade
   enum EFeature { ixTrade = 0, ixSDDirection, ixEma029, ixEma013, ixTickj, ixTickl, ixRtnMean, ixRtnSlp, nInputFeature_ };

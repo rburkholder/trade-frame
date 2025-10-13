@@ -36,22 +36,28 @@ namespace {
 
 size_t Model::PredictionDistance() const { return c_secondsYOffset; }
 
-Model::Model()
+Model::Model( const std::string& sDevice, std::int8_t ixDevice )
 : m_ixDataScaled {}
 , m_fPredictionResult( nullptr )
+, m_torchDevice( torch::kCPU )
 {
+
+  torch::DeviceType torchDeviceType;
 
   int num_devices = 0;
   if ( torch::cuda::is_available() ) {
-    m_torchDevice = torch::kCUDA;
+    torchDeviceType = torch::kCUDA;
     num_devices = torch::cuda::device_count();
     BOOST_LOG_TRIVIAL(info) << "number of CUDA devices detected: " << num_devices;
-    // when > 1, then can use, as example ' .device(torch::kCUDA, 1 )'
+    // when > 1, then can use, as example ' .device( torch::kCUDA, 1 )'
   }
   else {
-    m_torchDevice = torch::kCPU;
+    torchDeviceType = torch::kCPU;
     BOOST_LOG_TRIVIAL(info) << "no CUDA devices detected, set device to CPU";
   }
+
+  m_torchDevice = torch::Device( sDevice );
+  m_torchDevice.set_index( ixDevice );
 
   torch::manual_seed( 1 );
   torch::cuda::manual_seed_all( 1 );
