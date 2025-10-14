@@ -52,6 +52,7 @@ public:
   void SetOnClick( fOnClick_t&& fOnClick ) { m_fOnClick = std::move( fOnClick ); }
   void SetOnBuildPopUp( fOnBuildPopUp_t&& fOnBuildPopUp ) { m_fOnBuildPopUp = std::move( fOnBuildPopUp ); }
   void SetOnDeleted( fOnDeleted_t&& fOnDeleted ) { m_fOnDeleted = std::move( fOnDeleted ); }
+  void SetToolTip( const std::string& );
 
   TreeItem* AppendChild( const std::string& );  // all tree build operations
   TreeItem* AppendChild( const std::string&, fOnClick_t&& );  // all tree build operations
@@ -84,6 +85,8 @@ private:
 
   TreeItem* m_ptiParent;
   wxTreeItemId m_idSelf;
+
+  std::string m_sToolTip;
 
   wxMenu* m_pMenuPopup;
 

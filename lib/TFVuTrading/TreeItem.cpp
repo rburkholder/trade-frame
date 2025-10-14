@@ -162,6 +162,10 @@ std::string TreeItem::GetText() const {
   return m_pTreeCtrl->GetItemText( m_idSelf );
 }
 
+void TreeItem::SetToolTip( const std::string& sToolTip ) {
+  m_sToolTip = sToolTip;
+}
+
 void TreeItem::Delete() {
   // everything should self delete
   m_pTreeCtrl->CallAfter(
@@ -260,6 +264,18 @@ void TreeItem::Bind( wxWindow* pWindow, wxTreeCtrl* pTree ) {
       assert( nullptr != pData );
       CustomItemData_Base* pCustom = dynamic_cast<CustomItemData_Base*>( pData );
       pCustom->GetTreeItem()->Deleted( event.GetItem() );
+    },
+    pTree->GetId()
+  );
+
+  pTree->Bind(
+    wxEVT_TREE_ITEM_GETTOOLTIP,
+    [pTree]( wxTreeEvent& event ){
+      wxTreeItemData* pData = pTree->GetItemData( event.GetItem() );
+      assert( nullptr != pData );
+      CustomItemData_Base* pCustom = dynamic_cast<CustomItemData_Base*>( pData );
+      const std::string& sToolTip( pCustom->GetTreeItem()->m_sToolTip );
+      event.SetToolTip( sToolTip.empty() ? pCustom->GetTreeItem()->GetText() : sToolTip );
     },
     pTree->GetId()
   );
