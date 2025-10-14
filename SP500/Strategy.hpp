@@ -85,7 +85,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, TickVolume, QuoteVolume, PriceBB, rtnPrice, rtnPriceMean, rtnPriceSlope, rtnPriceSDa, rtnPriceSDo, TickRegime, AdvDec, TickStat, Imbalance, Ratio, Predict, PredVec, PL };
+  enum EChartSlot { Price, TickVolume, QuoteVolume, rtnPriceSDa, rtnPriceSDo, TickStat, ScalTrans, Imbalance, Ratio, Predict, PredVec, PL };
 
   const Flags& m_flags;
 
@@ -157,9 +157,9 @@ private:
   ou::ChartDataView& m_cdv;
 
   ou::ChartEntryMark m_cemPosOne;
+  ou::ChartEntryMark m_cemPointFive;
   ou::ChartEntryMark m_cemZero;
   ou::ChartEntryMark m_cemNegOne;
-  ou::ChartEntryMark m_cemRegimMin;
 
   ou::ChartEntryIndicator m_ceTradePrice;
   ou::ChartEntryVolume    m_ceTradeVolume;
@@ -190,16 +190,10 @@ private:
   ou::ChartEntryMark m_cemImbalanceMarker;
   ou::ChartEntryIndicator m_ceImbalance;
 
-  ou::ChartEntryIndicator m_ceEma013_ratio;
-  ou::ChartEntryIndicator m_ceEma029_ratio;
   ou::ChartEntryIndicator m_ceTrade_ratio;
   ou::ChartEntryIndicator m_cePrediction_scaled;
   ou::ChartEntryIndicator m_cePrediction_descaled;
   ou::ChartEntryIndicator m_cePrediction_vector;
-
-  ou::ChartEntryIndicator m_ceTickJ_sigmoid;
-  ou::ChartEntryIndicator m_ceTickL_sigmoid;
-  ou::ChartEntryIndicator m_ceAdvDec_ratio;
 
   ou::ChartEntryShape m_ceLongEntry;
   ou::ChartEntryShape m_ceLongFill;
@@ -211,8 +205,6 @@ private:
   ou::ChartEntryIndicator m_ceTickJ;
   ou::ChartEntryIndicator m_ceTickL;
   //ou::ChartEntryIndicator m_ceTrin;
-
-  ou::ChartEntryVolume m_ceAdvDec;
 
   ou::tf::Prices m_returns;
   ou::tf::TSSWStatsPrice m_statsReturns;
