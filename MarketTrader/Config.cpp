@@ -32,6 +32,9 @@ namespace po = boost::program_options;
 namespace {
   static const std::string c_sDescription( "market_trader config file" );
 
+  static const std::string sValue_IbClientPort( "ib_client_port" );
+  static const std::string sValue_IbClientId(   "ib_client_id" );
+
   static const std::string sValue_Var_Directory_Config( "var_directory_config" );
   static const std::string sValue_Var_Directory_Lib(    "var_directory_lib" );
   static const std::string sValue_Var_Directory_Log(    "var_directory_log" );
@@ -66,6 +69,9 @@ bool Load( const std::string& sFileName, Values& values ) {
     po::options_description config( c_sDescription );
     config.add_options()
 
+      ( sValue_IbClientPort.c_str(), po::value<int>( &values.ib_client_port )->default_value( 7496 ), "IB Client Port" )
+      ( sValue_IbClientId.c_str(),   po::value<int>( &values.ib_client_id )->default_value( 9 ), "IB Client ID" )
+
       ( sValue_Var_Directory_Config.c_str(), po::value<std::string>( &values.sDirConfig )->default_value( "./config" ), "var directory config" )
       ( sValue_Var_Directory_Lib.c_str(),    po::value<std::string>( &values.sDirLib    )->default_value( "./lib" ),    "var directory lib" )
       ( sValue_Var_Directory_Log.c_str(),    po::value<std::string>( &values.sDirLog    )->default_value( "./log" ),    "var directory log" )
@@ -86,6 +92,9 @@ bool Load( const std::string& sFileName, Values& values ) {
     else {
       po::store( po::parse_config_file( ifs, config), vm );
 
+      bOk &= parse<int>( sFileName, vm, sValue_IbClientPort, values.ib_client_port );
+      bOk &= parse<int>( sFileName, vm, sValue_IbClientId, values.ib_client_id );
+
       bOk &= parse<std::string>( sFileName, vm, sValue_Var_Directory_Config, values.sDirConfig );
       bOk &= parse<std::string>( sFileName, vm, sValue_Var_Directory_Lib,    values.sDirLib );
       bOk &= parse<std::string>( sFileName, vm, sValue_Var_Directory_Log,    values.sDirLog );
@@ -93,6 +102,7 @@ bool Load( const std::string& sFileName, Values& values ) {
 
       bOk &= parse<std::string>( sFileName, vm, sValue_Telegram_Token, values.telegram.sToken );
       bOk &= parse<uint64_t>( sFileName, vm, sValue_Telegram_ChatId,   values.telegram.idChat );
+
     }
 
   }

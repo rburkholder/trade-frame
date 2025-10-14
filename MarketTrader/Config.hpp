@@ -22,6 +22,7 @@
 #pragma once
 
 #include <string>
+#include <cstdint>
 
 namespace config {
 
@@ -31,6 +32,9 @@ struct Telegram {
 };
 
 struct Values {
+
+  int ib_client_port;
+  int ib_client_id;
 
   std::string sDirConfig;
   std::string sDirLib; // used in lua apps, eg "lib/lua/extract.lua", how to use?

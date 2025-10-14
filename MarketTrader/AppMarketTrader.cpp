@@ -102,8 +102,9 @@ void AppMarketTrader::EnableProviders() {
   m_iqf->Connect();
 
   m_tws = ou::tf::ib::TWS::Factory();
-  //m_tws->SetClientId( m_choices.m_nIbInstance );
   m_tws->SetName( "ib01" );
+  m_tws->SetClientId( m_settings.ib_client_id );
+  m_tws->SetClientPort( m_settings.ib_client_port );
   m_exec = m_tws;
   m_tws->OnConnected.Add( MakeDelegate( this, &AppMarketTrader::ProviderConnected ) );
   m_tws->OnDisconnected.Add( MakeDelegate( this, &AppMarketTrader::ProviderDisconnected ) );
@@ -161,12 +162,12 @@ void AppMarketTrader::EnableTelegram() {
       //  }
       //);
 
-      //m_telegram_bot->SetCommand(
-      //  "help", "command list", false,
-      //  [this]( const std::string& sCmd ){
-      //    m_telegram_bot->SendMessage( "commands: /help, /status" );
-      //  }
-      //);
+      m_pTelegramBot->SetCommand(
+        "help", "command list", false,
+        [this]( const std::string& sCmd ){
+          m_pTelegramBot->SendMessage( "commands: /help, /status" );
+        }
+      );
 
       m_pTelegramBot->SetCommand(
         "events", "list latest events", true,
