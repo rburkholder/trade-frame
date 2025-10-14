@@ -462,6 +462,16 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
               m_mapInstrument.erase( iterInstrument );
             } );
         } );
+      pti->AppendMenuItem(
+        "symbol name",
+        [this,&instrument]( ou::tf::TreeItem* pti ){
+          BOOST_LOG_TRIVIAL(info)
+            << "instrument: "
+            << instrument.pInstrument->GetInstrumentName() << " - "
+            << instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF )
+          ;
+        }
+      );
     }
   );
 
