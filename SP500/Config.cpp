@@ -109,7 +109,7 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     ( sChoice_sFlagEnableImbalance.c_str(), po::value<bool>( &choices.m_flags.bEnableImbalance )->default_value( false ), "enable imbalance indicator" )
     ( sChoice_sFlagEnablePrediction.c_str(), po::value<bool>( &choices.m_flags.bEnablePrediction )->default_value( false ), "enable prediction" )
     ( sChoice_sFlagEnableAdvDec.c_str(), po::value<bool>( &choices.m_flags.bEnableAdvDec )->default_value( false ), "enable adv/dec" )
-    ( sChoice_sGPUDevice.c_str(), po::value<std::string>( &choices.m_sTorchDevice )->default_value( "cpu" ), "torch device name" )
+    ( sChoice_sGPUDevice.c_str(), po::value<std::string>( &choices.m_sTorchDevice )->default_value( "" ), "torch device name" )
     ( sChoice_sGPUInstance.c_str(), po::value<int>( &ix )->default_value( 0 ), "torch device instance" )
     ;
     po::variables_map vm;

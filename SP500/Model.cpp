@@ -58,8 +58,10 @@ Model::Model( const std::string& sDevice, std::int8_t ixDevice )
     BOOST_LOG_TRIVIAL(info) << "no CUDA devices detected, set device to CPU";
   }
 
-  m_torchDevice = torch::Device( sDevice );
-  m_torchDevice.set_index( ixDevice );
+  if ( 0 < sDevice.size() ) {
+    m_torchDevice = torch::Device( sDevice );
+    m_torchDevice.set_index( ixDevice );
+  }
 
   torch::manual_seed( 1 );
   torch::cuda::manual_seed_all( 1 );
