@@ -31,12 +31,26 @@
 #include "FileNotify.hpp"
 
 // TODO: convert to CRTP?
+// TODO: need to handle multiple scripts
+// TODO: need to handle multiple instances of same script:
+//         watch function, one instance per symbol
+//         initiated through telegram command to start watch on a symbol
+//       load library of scripts, quiesce until invoked by telegram command
+//       each script loads telegram with command set
+//       telegram mode by symbol?
+//       telegram can invoke by iqfeed symbol or generic symbol
+//  scripts:
+//    watch a symbol, alert on triggers
+//    trade on triggers, initiate options on triggers
+//    provide symbol list
+//    generate chart
+//    LuaStateTie renamed as quote/trade watch, can be generically used across scripts
 
 class Sol {
 public:
 
   Sol();
-  virtual ~Sol();
+  virtual ~Sol(); // inherited by LuaMarketTie
 
   void AddPath( const std::string& sPath );
   void DelPath( const std::string& sPath );

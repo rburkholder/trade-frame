@@ -186,7 +186,6 @@ void Sol::Delete( const std::filesystem::path& fsPath ) {
 }
 
 void Sol::Initialize( sol::state& ) {
-
 }
 
 void Sol::Attach( mapScript_t::iterator iterScript ) {
