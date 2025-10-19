@@ -69,7 +69,6 @@ public:
   void Clear();  // remove stuff in order to reuse.
 
   // can use not_a_date_time for one, the other, or both
-  void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
   void SetViewPort( const ViewPort_t& );
   ViewPort_t GetViewPort() const;
 

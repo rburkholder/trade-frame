@@ -134,22 +134,18 @@ void ChartDataView::Clear() {
 //  m_bClosed = true;
 //}
 
-void ChartDataView::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
+void ChartDataView::SetViewPort( const ViewPort_t& vp ) {
   std::scoped_lock<std::mutex> lock( m_mutex );
 
-  m_dtViewPortBegin = dtBegin;
-  m_dtViewPortEnd = dtEnd;
+  m_dtViewPortBegin = vp.dtBegin;
+  m_dtViewPortEnd = vp.dtEnd;
   // need to change DataArrays in each entry
   for ( vChartEntryCarrier_t::iterator iter = m_vChartEntryCarrier.begin(); m_vChartEntryCarrier.end() != iter; ++iter ) {
     ChartEntryTime* p( dynamic_cast<ChartEntryTime*>( iter->GetChartEntry() ) );
     if ( nullptr != p ) {
-      p->SetViewPort( dtBegin, dtEnd );
+      p->SetViewPort( vp );
     }
   }
-}
-
-void ChartDataView::SetViewPort( const ViewPort_t& vp ) {
-  SetViewPort( vp.dtBegin, vp.dtEnd );
 }
 
 ChartDataView::ViewPort_t ChartDataView::GetViewPort() const {
