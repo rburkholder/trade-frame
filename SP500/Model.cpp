@@ -32,16 +32,15 @@ namespace {
   static const size_t c_secondsYOffset( 32 ); // attempt prediction this far in the future
 
   static const int c_nOutputFeature( 1 );
-
-  static const double c_loss_target( 0.01 );
 }
 
 size_t Model::PredictionDistance() const { return c_secondsYOffset; }
 
-Model::Model( const std::string& sDevice, std::int8_t ixDevice )
+Model::Model( const std::string& sDevice, std::int8_t ixDevice, double dblLossTarget )
 : m_ixDataScaled {}
 , m_fPredictionResult( nullptr )
 , m_torchDevice( torch::kCPU )
+, m_dblLossTarget( dblLossTarget )
 {
 
   torch::DeviceType torchDeviceType;
@@ -393,8 +392,8 @@ void Model::Train_Perform( const HyperParameters& hp ) {
       BOOST_LOG_TRIVIAL(info) << "epoch " << ( 1 + epoch ) << '/' << num_epochs << " loss: " << loss.item<float>();
     }
 
-    if ( c_loss_target > loss.item<float>() ) {
-      BOOST_LOG_TRIVIAL(info) << "epoch " << ( 1 + epoch ) << '/' << num_epochs << " loss < " << c_loss_target << ": " << loss.item<float>();
+    if ( m_dblLossTarget > loss.item<float>() ) {
+      BOOST_LOG_TRIVIAL(info) << "epoch " << ( 1 + epoch ) << '/' << num_epochs << " loss < " << m_dblLossTarget << ": " << loss.item<float>();
       break;
     }
 

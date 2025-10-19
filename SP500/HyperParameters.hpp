@@ -25,5 +25,6 @@ struct HyperParameters {
 
   double m_dblLearningRate;
   int m_nEpochs;
+  double m_dblLossTarget;
 
 };

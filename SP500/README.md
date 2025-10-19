@@ -56,6 +56,7 @@ file_validate=collector-20250806.hdf5
 # rough testing:
 learning_rate=0.01
 num_epochs=1000
+loss_target=0.025
 # save to a file when tuning with training
 file_model_save=sp500_save.pt
 # load a file from a good training session (rename a saved file to protect from overwrite):

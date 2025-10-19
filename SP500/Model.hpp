@@ -37,7 +37,7 @@ class HyperParameters;
 class Model {
 public:
 
-  Model( const std::string& sDevice, std::int8_t ixDevice );
+  Model( const std::string& sDevice, std::int8_t ixDevice, double dblLossTarget );
   ~Model();
 
   void Append( const Features_raw&, Features_scaled& ); // training mode and prediction mode
@@ -60,6 +60,8 @@ public:
 
 protected:
 private:
+
+  double m_dblLossTarget;
 
   c10::Device m_torchDevice;
 

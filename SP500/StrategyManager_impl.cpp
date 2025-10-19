@@ -48,7 +48,7 @@ StrategyManager_impl::StrategyManager_impl(
 , m_fQueueTask( std::move( fQueueTask ) )
 , m_fSetChartDataView( std::move( fSetChartDataView ) )
 , m_fDone( std::move( fDone ) )
-, m_model( choices.m_sTorchDevice, choices.m_ixTorchDevice )
+, m_model( choices.m_sTorchDevice, choices.m_ixTorchDevice, choices.m_hp.m_dblLossTarget )
 {
 
   switch ( m_choices.eMode ) {
