@@ -534,6 +534,7 @@ void WinChartView::DrawChart() {
                   break;
               }
 
+              // todo: optimize this if the viewport hasn't changed
               //std::cout << "SetViewPort: " << m_vpDataViewVisual.dtBegin << " - " << m_vpDataViewVisual.dtEnd << std::endl;
               m_pChartDataView->SetViewPort( m_vpDataViewVisual );
 
