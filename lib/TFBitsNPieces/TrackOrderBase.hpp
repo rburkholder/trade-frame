@@ -162,7 +162,7 @@ protected:
 
 private:
 
-  fCancelled_t m_fCancelled;
+  fCancelled_t m_fCancelled; // called during ETradeState::Cancelling, on order cancel confirmation
 
   OrderArgs::fOrderCancelled_t m_fOrderCancelled;
   OrderArgs::fOrderFilled_t m_fOrderFilled;
