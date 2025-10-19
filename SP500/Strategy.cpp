@@ -33,8 +33,8 @@
 namespace {
   static const ou::Colour::EColour c_colourEma200( ou::Colour::OrangeRed );
   static const ou::Colour::EColour c_colourEma50(  ou::Colour::DarkMagenta );
-  static const ou::Colour::EColour c_colourEma29(  ou::Colour::DarkTurquoise );
-  static const ou::Colour::EColour c_colourEma13(  ou::Colour::Purple );
+  static const ou::Colour::EColour c_colourEma29(  ou::Colour::DarkCyan );
+  static const ou::Colour::EColour c_colourEma13(  ou::Colour::DarkTurquoise );
   static const ou::Colour::EColour c_colourPrice(  ou::Colour::DarkGreen );
   static const ou::Colour::EColour c_colourAsk(    ou::Colour::Blue );
   static const ou::Colour::EColour c_colourBid(    ou::Colour::Red );
