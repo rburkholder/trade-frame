@@ -114,7 +114,7 @@ public:
     : dtBegin( dtBegin_ ), dtEnd( dtEnd_ ) {}
     range_t( const range_t& rhs )
     : dtBegin( rhs.dtBegin ), dtEnd( rhs.dtEnd ) {}
-    range_t( range_t&& rhs )
+    range_t( const range_t&& rhs )
     : dtBegin( rhs.dtBegin ), dtEnd( rhs.dtEnd ) {}
     const range_t& operator=( const range_t& rhs ) {
       if ( &rhs != this ) {
@@ -137,7 +137,6 @@ public:
   virtual void Reserve( size_type );
 
   void SetViewPort( const range_t& );
-  void SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd );
 
   range_t GetExtents() const;
   boost::posix_time::ptime GetExtentBegin() const;

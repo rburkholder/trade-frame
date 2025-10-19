@@ -173,10 +173,6 @@ void ChartEntryTime::AppendFg( boost::posix_time::ptime dt ) {
 }
 
 // called from WinChartView::ThreadDrawChart1 -> ChartDataView::SetViewPort
-void ChartEntryTime::SetViewPort( boost::posix_time::ptime dtBegin, boost::posix_time::ptime dtEnd ) {
-  SetViewPort( range_t( dtBegin, dtEnd ) );
-}
-
 void ChartEntryTime::SetViewPort( const range_t& range ) {
 
   // record the viewport
