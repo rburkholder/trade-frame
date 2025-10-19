@@ -30,7 +30,7 @@ LSTM::LSTM( int input_size, int hidden_size, int num_layers, int output_size )
   train( true );  // training is true by default, set to false by call to eval()
 }
 
-LSTM::lstm_state_t LSTM::init_states( torch::Device device, int batch_size  ) {
+LSTM::lstm_state_t LSTM::init_states( c10::Device device, int batch_size  ) {
   //BOOST_LOG_TRIVIAL(debug) << "LSTM::init_state batch_size: " << batch_size;
   torch::Tensor hidden_state = torch::zeros( { lstm->options.num_layers(), batch_size, lstm->options.hidden_size() } ).to( device );
   torch::Tensor   cell_state = torch::zeros( { lstm->options.num_layers(), batch_size, lstm->options.hidden_size() } ).to( device );
