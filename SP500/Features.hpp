@@ -25,7 +25,7 @@
 
 struct Features_raw {
 
-  boost::posix_time::ptime dt;
+  boost::posix_time::ptime dt; // base for preidcted time steps
 
   double dblPrice;
 
