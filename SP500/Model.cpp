@@ -412,7 +412,7 @@ void Model::Save( const std::string& sFileName ) {
 
 void Model::Load( const std::string& sFileName ) {
   torch::serialize::InputArchive archive;
-  archive.load_from( sFileName );
+  archive.load_from( sFileName, m_torchDevice );
   m_pLSTM->load( archive );
   BOOST_LOG_TRIVIAL(info) << "load " << c10::str( *m_pLSTM );
 }
