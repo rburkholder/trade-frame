@@ -285,6 +285,9 @@ private:
   unsigned int m_nZigZags;
   double m_dblSumZigZags;
 
+  using mapVolumeAtPrice_t = std::map<double,ou::tf::Price::volume_t>;
+  mapVolumeAtPrice_t m_mapVolumeAtPrice;
+
   void UpdateECross( ECross&, const double mark, const double value ) const;
 
   template<unsigned int n>

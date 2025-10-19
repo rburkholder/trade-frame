@@ -628,6 +628,14 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   //}
   m_ceTradeVolume.Append( dt, volume );
 
+  mapVolumeAtPrice_t::iterator iterVolumeAtPrice = m_mapVolumeAtPrice.find( price );
+  if ( m_mapVolumeAtPrice.end() == iterVolumeAtPrice ) {
+    m_mapVolumeAtPrice.emplace( price, volume );
+  }
+  else {
+    iterVolumeAtPrice->second += volume;
+  }
+
   UpdatePriceReturn( dt, price );  // updates m_crossing, m_ixprvCrossing, m_ixcurCrossing
 
   m_prices.Append( dt_price );
@@ -1173,7 +1181,7 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   Features_scaled scaled; // receives scaled data
   const ou::tf::Price result = m_fForward( m_features, scaled ); // may call PredictionVector for a live strategy
   if ( m_flags.bEnablePrediction ) {
-      m_cePrediction_scaled.Append( result );
+    m_cePrediction_scaled.Append( result );
     //m_cePrediction_descaled.Append( dtPrediction, scaled.predicted.dbl );
   }
 
