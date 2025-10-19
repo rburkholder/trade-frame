@@ -474,8 +474,6 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
 
   m_pRootTreeItem->SortChildren();
 
-  //SizeTreeCtrl();
-
 }
 
 void InstrumentViews::AddTag( const TagSymbolMap::sTag_t& sTag, const TagSymbolMap::sSymbol_t& sSymbol ) {
