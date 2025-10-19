@@ -285,7 +285,19 @@ private:
   unsigned int m_nZigZags;
   double m_dblSumZigZags;
 
-  using mapVolumeAtPrice_t = std::map<double,ou::tf::Price::volume_t>;
+  struct volumes_t {
+    using volume_t = ou::tf::Price::volume_t;
+    volume_t at_ask;
+    volume_t at_bid;
+    volumes_t(): at_ask {}, at_bid {} {}
+    //volumes_t( volume_t bid, volume_t ask ): at_bid( bid ), at_ask( ask ) {}
+    //const volumes_t& operator+=( const volumes_t& v ) {
+    //  at_ask += v.at_ask;
+    //  at_bid += v.at_bid;
+    //  return *this;
+    //}
+  };
+  using mapVolumeAtPrice_t = std::map<double,volumes_t>;
   mapVolumeAtPrice_t m_mapVolumeAtPrice;
 
   void UpdateECross( ECross&, const double mark, const double value ) const;

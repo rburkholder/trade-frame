@@ -612,7 +612,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   const ou::tf::Price dt_price( dt, price );
 
   // needs to be constructed prior to the m_trade assignment
-  // const bool direction( m_quote.LeeReady( m_trade.Price(), trade.Price() ) );
+  const bool direction( m_quote.LeeReady( m_trade.Price(), trade.Price() ) );
 
   m_trade = trade;
 
@@ -620,21 +620,25 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   m_ceTradePrice.Append( dt_price );
 
   // more information might be available if this can be matched to walking the quotes/order book
-  //if ( direction ) {
-  //  m_ceTradeVolumeUp.Append( dt, volume );
-  //}
-  //else {
-  //  m_ceTradeVolumeDn.Append( dt, -volume );
-  //}
-  m_ceTradeVolume.Append( dt, volume );
-
   mapVolumeAtPrice_t::iterator iterVolumeAtPrice = m_mapVolumeAtPrice.find( price );
   if ( m_mapVolumeAtPrice.end() == iterVolumeAtPrice ) {
-    m_mapVolumeAtPrice.emplace( price, volume );
+    auto result = m_mapVolumeAtPrice.emplace( price, volumes_t() );
+    assert( result.second );
+    iterVolumeAtPrice = result.first;
+  }
+
+  volumes_t& v( iterVolumeAtPrice->second );
+
+  if ( direction ) {
+    v.at_ask += volume;
+    //m_ceTradeVolumeUp.Append( dt, volume );
   }
   else {
-    iterVolumeAtPrice->second += volume;
+    v.at_bid += volume;
+    //m_ceTradeVolumeDn.Append( dt, -volume );
   }
+
+  m_ceTradeVolume.Append( dt, volume );
 
   UpdatePriceReturn( dt, price );  // updates m_crossing, m_ixprvCrossing, m_ixcurCrossing
 
