@@ -94,18 +94,18 @@ bool AppMarketTrader::OnInit() {
 void AppMarketTrader::EnableProviders() {
 
   m_iqf = ou::tf::iqfeed::Provider::Factory();
+  m_data = m_iqf;
   //m_iqf->SetThreadCount( m_choices.nThreads );
   m_iqf->SetName( "iq01" );
-  m_data = m_iqf;
   m_iqf->OnConnected.Add( MakeDelegate( this, &AppMarketTrader::ProviderConnected ) );
   m_iqf->OnDisconnected.Add( MakeDelegate( this, &AppMarketTrader::ProviderDisconnected ) );
   m_iqf->Connect();
 
   m_tws = ou::tf::ib::TWS::Factory();
+  m_exec = m_tws;
   m_tws->SetName( "ib01" );
   m_tws->SetClientId( m_settings.ib_client_id );
   m_tws->SetClientPort( m_settings.ib_client_port );
-  m_exec = m_tws;
   m_tws->OnConnected.Add( MakeDelegate( this, &AppMarketTrader::ProviderConnected ) );
   m_tws->OnDisconnected.Add( MakeDelegate( this, &AppMarketTrader::ProviderDisconnected ) );
   m_tws->Connect();
