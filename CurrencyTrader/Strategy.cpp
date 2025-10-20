@@ -470,7 +470,10 @@ void Strategy::RunState( ou::tf::TrackCurrencyOrder& to ) {
         }
       }
       break;
-    case ETradeState::ExitSubmitted:
+    case ETradeState::ExitSubmittedUp:
+      // wait for execution
+      break;
+    case ETradeState::ExitSubmittedDn:
       // wait for execution
       break;
     case ETradeState::Cancelling:
@@ -654,7 +657,8 @@ void Strategy::CloseAndDone() {
       break;
     case ETradeState::EntrySubmittedUp:
     case ETradeState::EntrySubmittedDn:
-    case ETradeState::ExitSubmitted:
+    case ETradeState::ExitSubmittedUp:
+    case ETradeState::ExitSubmittedDn:
       m_to.Cancel(
         [this](){
           m_to.Close();

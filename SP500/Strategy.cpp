@@ -93,6 +93,8 @@ Strategy::Strategy(
 , m_nZigZags {}, m_dblSumZigZags {}, m_eZigZag( EZigZag::init )
 , m_cntQuotePriceChanged {}, m_cntQuotePriceUnchanged {}
 , m_cntOffsetUp {}, m_cntOffsetDn {}
+, m_nLongEntries {}, m_nLongFills {}, m_nLongEmas {}, m_nLongStops {}
+, m_nShortEntries {}, m_nShortFills {}, m_nShortEmas {}, m_nShortStops {}
 {
   SetupChart();
 
@@ -622,9 +624,9 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   // more information might be available if this can be matched to walking the quotes/order book
   mapVolumeAtPrice_t::iterator iterVolumeAtPrice = m_mapVolumeAtPrice.find( price );
   if ( m_mapVolumeAtPrice.end() == iterVolumeAtPrice ) {
-    auto result = m_mapVolumeAtPrice.emplace( price, volumes_t() );
-    assert( result.second );
-    iterVolumeAtPrice = result.first;
+    bool bResult;
+    std::tie( iterVolumeAtPrice, bResult ) = m_mapVolumeAtPrice.emplace( price, volumes_t() );
+    assert( bResult);
   }
 
   volumes_t& v( iterVolumeAtPrice->second );
@@ -843,22 +845,92 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   const auto ema13( m_dblEma013 );
   const auto ema29( m_dblEma029 );
 
+  static const int c_limit_entry_timeout( 3 );
+  static const int c_limit_exit_timeout( 33 );
+  static const double c_enter_buffer( 0.01 );
+  static const double c_profit_take( 0.05 );
+
+  // todo: count stops vs limit exits.
+
   switch ( m_pTrackOrder->State()() ) {
     case ETradeState::Search:
-      if ( ( 0 < m_cntOffsetUp )
-        && ( ema13 > ema29 )
-        && ( ema13 < bid )
-      ) {
-        ou::tf::OrderArgs oa( dt, 100, bid );
-        m_pTrackOrder->EnterLongMkt( oa );
+      // todo: don't enter when bollinger band is narrow and flat
+      // when moved in the correct distance of 0.03, bring up stop
+      // measure jitter and use as stop, but probably will be too tight
+      if ( ema13 < bid ) {
+        BOOST_LOG_TRIVIAL(trace) << "** Enter Long," << ema13 << '<' << bid << ',' << ask;
+        ou::tf::OrderArgs oa( dt, 100, bid, ask + c_enter_buffer, c_limit_entry_timeout );
+        oa.Set(
+          [](){ // fOrderCancelled_t
+            // auto returns to search?
+            BOOST_LOG_TRIVIAL(trace) << "** Enter Long, time based cancellation";
+          },
+          [this,dt]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ //fOrderFilled_t
+            // partial fills?
+            // set stop and max profit limit order (need to make braket order work in position, will it work for futures?)
+            BOOST_LOG_TRIVIAL(trace) << "** Submit Exit Long Limit," << price;
+            m_stopDelta = c_profit_take;
+            m_stopTrail = m_stopInitial = price - m_stopDelta; // maybe try the bollinger band
+            ou::tf::OrderArgs oa( dt, quantity, price + c_profit_take, price + c_profit_take );
+            oa.Set(
+              [this](){ // fOrderCancelled_t
+                if ( ETradeState::Cancelled == m_pTrackOrder->State()() ) { // ema crossing or stop
+                  BOOST_LOG_TRIVIAL(trace) << "** Exit Long, cancelled with cancel";
+                }
+                else { // limit time out
+                  BOOST_LOG_TRIVIAL(trace) << "** Exit Long, cancelled with limit timeout";
+                  m_pTrackOrder->State().Set( ETradeState::Search ); // this is not good, happens at day end
+                }
+              },
+              [this]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){
+                BOOST_LOG_TRIVIAL(trace) << "** Exit Long with fill";
+                m_pTrackOrder->State().Set( ETradeState::Search );
+                m_nLongFills++;
+              } );
+            m_pTrackOrder->ExitLongLmt( oa );
+            m_pTrackOrder->State().Set( ETradeState::ExitSignalUp, "ExitLongLmt", __LINE__  );
+          }
+        );
+        m_pTrackOrder->EnterLongLmt( oa );
+        m_nLongEntries++;
       }
       else {
-        if ( ( 0 < m_cntOffsetUp )
-          && ( ema13 < ema29 )
-          && ( ema13 > ask )
-        ) {
-          ou::tf::OrderArgs oa( dt, 100, ask );
-          m_pTrackOrder->EnterShortMkt( oa );
+        if ( ema13 > ask ) {
+          BOOST_LOG_TRIVIAL(trace) << "** Enter Short," << ema13 << '>' << ask << ',' << bid;
+          ou::tf::OrderArgs oa( dt, 100, ask, bid - c_enter_buffer, c_limit_entry_timeout );
+          oa.Set(
+            [](){ // fOrderCancelled_t
+              // auto returns to search?
+              BOOST_LOG_TRIVIAL(trace) << "** Enter Short, time based cancellation";
+            },
+            [this,dt]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ //fOrderFilled_t
+              // partial fills?
+              // set stop and max profit limit order (need to make braket order work in position, will it work for futures?)
+              BOOST_LOG_TRIVIAL(trace) << "** Submit Exit Short Limit," << price;
+              m_stopDelta = c_profit_take;
+              m_stopTrail = m_stopInitial = price + m_stopDelta; // maybe try the bollinger band
+              ou::tf::OrderArgs oa( dt, quantity, price - c_profit_take, price - c_profit_take );
+              oa.Set(
+                [this](){ // fOrderCancelled_t
+                  if ( ETradeState::Cancelled == m_pTrackOrder->State()() ) { // ema crossing or stop
+                    BOOST_LOG_TRIVIAL(trace) << "** Exit Short, cancelled with cancel";
+                  }
+                  else { // limit time out
+                    BOOST_LOG_TRIVIAL(trace) << "** Exit Short, cancelled with limit timeout";
+                    m_pTrackOrder->State().Set( ETradeState::Search ); // this is not good, happens at day end
+                  }
+                },
+                [this]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){
+                  BOOST_LOG_TRIVIAL(trace) << "** Exit Short with fill";
+                  m_pTrackOrder->State().Set( ETradeState::Search );
+                  m_nShortFills++;
+                } );
+              m_pTrackOrder->ExitShortLmt( oa );
+              m_pTrackOrder->State().Set( ETradeState::ExitSignalDn, "ExitShortLmt", __LINE__ );
+            }
+          );
+          m_pTrackOrder->EnterShortLmt( oa );
+          m_nShortEntries++;
         }
       }
       break;
@@ -867,20 +939,76 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     case ETradeState::EntrySubmittedDn:
       break;
     case ETradeState::ExitSignalUp:
-      //UpdatePositionProgressUp( quote );
-      if ( ( 0 < m_cntOffsetDn ) && ( ema13 > ask ) ) {
-        ou::tf::OrderArgs oa( dt, 100, ask );
-        m_pTrackOrder->ExitLongMkt( oa );
+      {
+        //UpdatePositionProgressUp( quote );
+        const double dblStop( bid - m_stopDelta );
+        if ( m_stopTrail < dblStop ) m_stopTrail = dblStop;
+
+        if ( 0 < m_cntOffsetDn ) {
+          if ( ema13 > ask ) {
+            BOOST_LOG_TRIVIAL(trace) << "** Exit Long,ema13," << ema13 << '>' << ask;
+            m_pTrackOrder->Cancel(
+              [this,dt,ask](){ // fCancelled_t
+                ou::tf::OrderArgs oa( dt, 100, ask );
+                m_pTrackOrder->ExitLongMkt( oa );
+                m_nLongEmas++;
+              } );
+          }
+          else {
+            if ( m_stopTrail > ask ) {
+              BOOST_LOG_TRIVIAL(trace) << "** Exit Long,stop," << m_stopInitial << '>' << ask;
+              m_pTrackOrder->Cancel( // fCancelled_t
+                [this,dt,ask](){
+                  ou::tf::OrderArgs oa( dt, 100, ask );
+                  m_pTrackOrder->ExitLongMkt( oa );
+                  m_nLongStops++;
+                } );
+            }
+          }
+        }
       }
       break;
     case ETradeState::ExitSignalDn:
-      //UpdatePositionProgressDn( quote );
-      if ( ( 0 < m_cntOffsetDn ) && ( ema13 < bid ) ) {
-        ou::tf::OrderArgs oa( dt, 100, bid );
-        m_pTrackOrder->ExitShortMkt( oa );
+      {
+        //UpdatePositionProgressDn( quote );
+        const double dblStop( ask + m_stopDelta );
+        if ( m_stopTrail > dblStop ) m_stopTrail = dblStop;
+
+        if ( 0 < m_cntOffsetDn ) {
+          if ( ema13 < bid ) {
+            BOOST_LOG_TRIVIAL(trace) << "** Exit Short,ema13," << ema13 << '<' << bid;
+            m_pTrackOrder->Cancel( // fCancelled_t
+              [this,dt,bid](){
+                ou::tf::OrderArgs oa( dt, 100, bid );
+                m_pTrackOrder->ExitShortMkt( oa );
+                m_nShortEmas++;
+              } );
+          }
+          else {
+            if ( m_stopTrail < bid ) {
+              BOOST_LOG_TRIVIAL(trace) << "** Exit Short,stop," << m_stopInitial << '<' << bid;
+              m_pTrackOrder->Cancel( // fCancelled_t
+                [this,dt,bid](){
+                  ou::tf::OrderArgs oa( dt, 100, bid );
+                  m_pTrackOrder->ExitShortMkt( oa );
+                  m_nShortStops++;
+                } );
+            }
+          }
+        }
       }
       break;
-    case ETradeState::ExitSubmitted:
+    case ETradeState::ExitSubmittedUp:
+      break;
+    case ETradeState::ExitSubmittedDn:
+      break;
+    case ETradeState::Cancelling:
+      // hold while waiting for order cancel confirmation
+      break;
+    case ETradeState::Cancelled:
+      //should be able to start search from here
+      BOOST_LOG_TRIVIAL(trace) << "** Cancel confirmed, start Search";
+      m_pTrackOrder->State().Set( ETradeState::Search );
       break;
     case ETradeState::EndOfDayCancel: // not in HandleRHTrading, set in one shot HandleCancel
       //BOOST_LOG_TRIVIAL(trace) << "eod cancel," << m_nEnterLong << ',' << m_nEnterShort;
@@ -1248,6 +1376,8 @@ void Strategy::HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_
   BOOST_LOG_TRIVIAL(info) << "zigzag: " << m_dblSumZigZags << '/' << m_nZigZags << '=' << m_dblSumZigZags / m_nZigZags;
   BOOST_LOG_TRIVIAL(info) << "quote price: " << m_cntQuotePriceChanged << " changed, " << m_cntQuotePriceUnchanged << " unchanged";
   BOOST_LOG_TRIVIAL(info) << "trade count: " << m_ceTradePrice.Size();
+  BOOST_LOG_TRIVIAL(info) << "long  " << m_nLongEntries << ',' << m_nLongFills << ',' << m_nLongEmas << ',' << m_nLongStops;
+  BOOST_LOG_TRIVIAL(info) << "short " << m_nShortEntries << ',' << m_nShortFills << ',' << m_nShortEmas << ',' << m_nShortStops;
 }
 
 /*

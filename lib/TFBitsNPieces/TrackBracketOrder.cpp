@@ -109,7 +109,7 @@ void TrackBracketOrder::HandleExitOrderFilled( const ou::tf::Order& order ) {
     case ou::tf::OrderSide::EOrderSide::Buy:
       //m_ceLongExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "LxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
       switch( m_stateTrade() ) {
-        case ETradeState::ExitSubmitted:
+        case ETradeState::ExitSubmittedUp:
           m_stateTrade.Set( ETradeState::Search, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
           break;
       }
@@ -117,7 +117,7 @@ void TrackBracketOrder::HandleExitOrderFilled( const ou::tf::Order& order ) {
     case ou::tf::OrderSide::EOrderSide::Sell:
       //m_ceShortExit.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "SxF-" + boost::lexical_cast<std::string>( order.GetOrderId() ) );
       switch( m_stateTrade() ) {
-        case ETradeState::ExitSubmitted:
+        case ETradeState::ExitSubmittedDn:
           m_stateTrade.Set( ETradeState::Search, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
           break;
       }
@@ -149,7 +149,7 @@ void TrackBracketOrder::ExitPosition( const ou::tf::Quote& quote ) {
         pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackBracketOrder::HandleExitOrderCancelled ) );
         pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackBracketOrder::HandleExitOrderFilled ) );
         m_ceExitSubmit.AddLabel( quote.DateTime(), dblMidPoint, "LxS2-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-        m_stateTrade.Set( ETradeState::ExitSubmitted, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
+        m_stateTrade.Set( ETradeState::ExitSubmittedUp, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
         m_pPosition->PlaceOrder( pOrder );
         ShowOrder( pOrder );
         break;
@@ -166,7 +166,7 @@ void TrackBracketOrder::ExitPosition( const ou::tf::Quote& quote ) {
         pOrder->OnOrderCancelled.Add( MakeDelegate( this, &TrackBracketOrder::HandleExitOrderCancelled ) );
         pOrder->OnOrderFilled.Add( MakeDelegate( this, &TrackBracketOrder::HandleExitOrderFilled ) );
         m_ceExitSubmit.AddLabel( quote.DateTime(), dblMidPoint, "SxS2-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
-        m_stateTrade.Set( ETradeState::ExitSubmitted, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
+        m_stateTrade.Set( ETradeState::ExitSubmittedDn, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
         m_pPosition->PlaceOrder( pOrder );
         ShowOrder( pOrder );
         break;

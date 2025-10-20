@@ -278,6 +278,15 @@ private:
   unsigned int m_nLoss; // based upon stop, not min/max
   unsigned int m_nMaxLoss;
 
+  unsigned int m_nLongEntries;
+  unsigned int m_nLongFills;
+  unsigned int m_nLongEmas;
+  unsigned int m_nLongStops;
+  unsigned int m_nShortEntries;
+  unsigned int m_nShortFills;
+  unsigned int m_nShortEmas;
+  unsigned int m_nShortStops;
+
   enum class EZigZag { init, tracklower, trackupper } m_eZigZag;
   boost::posix_time::ptime m_dtZigZag;
   double m_dblZigHi;

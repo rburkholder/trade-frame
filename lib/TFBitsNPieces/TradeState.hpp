@@ -32,7 +32,8 @@
     EntrySubmittedDn, /* order has been submitted, waiting for confirmation */ \
     ExitSignalUp,  /* position exists, looking for exit */                     \
     ExitSignalDn,  /* position exists, looking for exit */                     \
-    ExitSubmitted, /* wait for exit to complete */                             \
+    ExitSubmittedUp, /* from entry limit, or exit signal */                    \
+    ExitSubmittedDn, /* from entry limit, or exit signal */                    \
     Cancelling,                                                                \
     Cancelled,                                                                 \
     NoTrade, /* from the config file, no trading, might be a future */         \

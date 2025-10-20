@@ -171,7 +171,6 @@ void TrackOrderBase::EnterShortMkt( const OrderArgs& args ) { // enter with shor
 }
 
 void TrackOrderBase::ExitCommon( const OrderArgs& args, pOrder_t& pOrder ) {
-  m_stateTrade.Set( ETradeState::ExitSubmitted, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   Common( args, pOrder );
 }
 
@@ -181,6 +180,7 @@ void TrackOrderBase::ExitLongLmt( const OrderArgs& args ) { // exit short with l
   assert( pOrder );
   SetGoodTill( args, pOrder );
   m_ceExitSubmit.AddLabel( args.dt, args.signal, "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  m_stateTrade.Set( ETradeState::ExitSubmittedUp, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   ExitCommon( args, pOrder );
 }
 
@@ -189,6 +189,7 @@ void TrackOrderBase::ExitLongMkt( const OrderArgs& args ) { // exit short with l
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Sell, args.quantity );
   assert( pOrder );
   m_ceExitSubmit.AddLabel( args.dt, args.signal, "LxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  m_stateTrade.Set( ETradeState::ExitSubmittedUp, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   ExitCommon( args, pOrder );
 }
 
@@ -198,6 +199,7 @@ void TrackOrderBase::ExitShortLmt( const OrderArgs& args ) { // exit long with s
   assert( pOrder );
   SetGoodTill( args, pOrder );
   m_ceExitSubmit.AddLabel( args.dt, args.signal, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  m_stateTrade.Set( ETradeState::ExitSubmittedDn, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   ExitCommon( args, pOrder );
 }
 
@@ -206,6 +208,7 @@ void TrackOrderBase::ExitShortMkt( const OrderArgs& args ) { // exit long with s
   pOrder_t pOrder = m_pPosition->ConstructOrder( ou::tf::OrderType::Market, ou::tf::OrderSide::Buy, args.quantity );
   assert( pOrder );
   m_ceExitSubmit.AddLabel( args.dt, args.signal, "SxS1-" + boost::lexical_cast<std::string>( pOrder->GetOrderId() ) );
+  m_stateTrade.Set( ETradeState::ExitSubmittedDn, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
   ExitCommon( args, pOrder );
 }
 
@@ -213,6 +216,7 @@ void TrackOrderBase::HandleOrderCancelled( const ou::tf::Order& order ) {
   assert( m_pOrderPending );
   m_pOrderPending->OnOrderCancelled.Remove( MakeDelegate( this, &TrackOrderBase::HandleOrderCancelled ) );
   m_pOrderPending->OnOrderFilled.Remove( MakeDelegate( this, &TrackOrderBase::HandleOrderFilled ) );
+  m_pOrderPending.reset();
   switch ( m_stateTrade() ) {
     case ETradeState::EndOfDayCancel:
     case ETradeState::EndOfDayNeutral:
@@ -229,18 +233,24 @@ void TrackOrderBase::HandleOrderCancelled( const ou::tf::Order& order ) {
       m_stateTrade.Set( ETradeState::Search, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
       break;
     case ETradeState::Cancelling:
+      BOOST_LOG_TRIVIAL(info)
+        << m_pPosition->GetInstrument()->GetInstrumentName()
+        << " order " << order.GetOrderId() << " cancellation requested";
       if ( m_fCancelled ) {
         m_fCancelled();
         m_fCancelled = nullptr;
       }
-      m_stateTrade.Set( ETradeState::Cancelled, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
+      // need to change state elsewhere, may be calling code
+      //m_stateTrade.Set( ETradeState::Cancelled, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
       break;
-    case ETradeState::ExitSubmitted:
+    case ETradeState::ExitSubmittedUp:
+    case ETradeState::ExitSubmittedDn:
       //assert( false );  // TODO: need to figure out a plan to retry exit
-      BOOST_LOG_TRIVIAL(error)
-        << m_pPosition->GetInstrument()->GetInstrumentName()
-        << " order " << order.GetOrderId() << " exit cancelled - state machine needs fixes";
-      m_stateTrade.Set( ETradeState::Done, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
+      //BOOST_LOG_TRIVIAL(error)
+      //  << m_pPosition->GetInstrument()->GetInstrumentName()
+      //  << " order " << order.GetOrderId() << " exit cancelled - state machine needs fixes";
+      //m_stateTrade.Set( ETradeState::Done, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
+      // NOTE: transition to next state is handled by fCancelled_t or fOrderCancelled_t
       break;
     default:
       m_stateTrade.Set( ETradeState::Search, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
@@ -254,7 +264,6 @@ void TrackOrderBase::HandleOrderCancelled( const ou::tf::Order& order ) {
   m_fCancelled = nullptr;
   m_fOrderCancelled = nullptr;
   m_fOrderFilled = nullptr;
-  m_pOrderPending.reset();
 
   if ( fOrderCancelled ) {
     fOrderCancelled();
@@ -276,7 +285,7 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
       // TODO: confirm against gui
       BOOST_LOG_TRIVIAL(info)
         << m_pPosition->GetInstrument()->GetInstrumentName()
-        << ",order#=" << order.GetOrderId()
+        << ",order #" << order.GetOrderId()
         << ",buy,de,"
         << "," << quantity << "@" << price
         << "+" << commission
@@ -286,7 +295,7 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
       // TODO: confirm against gui
       BOOST_LOG_TRIVIAL(info)
         << m_pPosition->GetInstrument()->GetInstrumentName()
-        << ",order#=" << order.GetOrderId()
+        << ",order #" << order.GetOrderId()
         << ",sell,de,"
         << "," << quantity << "@" << price
         << "+" << commission
@@ -297,6 +306,9 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
   }
 
   switch ( m_stateTrade() ) {
+    case ETradeState::Search:
+      assert( false );
+      break;
     case ETradeState::EntrySubmittedUp:
       //m_ceEntryFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Entry Fill" );
       m_stateTrade.Set( ETradeState::ExitSignalUp, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
@@ -305,9 +317,19 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
       //m_ceEntryFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Entry Fill" );
       m_stateTrade.Set( ETradeState::ExitSignalDn, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
       break;
-    case ETradeState::ExitSubmitted:
+    case ETradeState::ExitSubmittedUp:
+    case ETradeState::ExitSubmittedDn:
+    case ETradeState::ExitSignalUp:
+    case ETradeState::ExitSignalDn:
       //m_ceExitFill.AddLabel( order.GetDateTimeOrderFilled(), order.GetAverageFillPrice(), "Exit Fill" );
       m_stateTrade.Set( ETradeState::Search, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
+      //BOOST_LOG_TRIVIAL(warning) << "ETradeState::ExitSubmitted has been disabled (2025/10/19)";
+      break;
+    case ETradeState::Cancelled:
+      BOOST_LOG_TRIVIAL(warning) << "ETradeState::Cancelled, but was filled, so will need to process order";
+      break;
+    case ETradeState::Cancelling:
+      BOOST_LOG_TRIVIAL(warning) << "ETradeState::Cancelling, but was filled, so will need to process order";
       break;
     case ETradeState::EndOfDayCancel:
     case ETradeState::EndOfDayNeutral:
@@ -338,6 +360,7 @@ void TrackOrderBase::HandleOrderFilled( const ou::tf::Order& order ) {
 void TrackOrderBase::Cancel( fCancelled_t&& fCancelled ) { // may need something if nothing to cancel
   assert( nullptr == m_fCancelled );
   if ( m_pPosition ) {
+    // will need to fine tune cancelling, will happen with a fill, or a confirmed cancel
     m_stateTrade.Set( ETradeState::Cancelling, m_pPosition->GetInstrument()->GetInstrumentName(), __FUNCTION__, __LINE__ );
     m_fCancelled = std::move( fCancelled );
     m_pPosition->CancelOrders();
