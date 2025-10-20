@@ -26,6 +26,7 @@
 #include "Features.hpp"
 #include "HyperParameters.hpp"
 
+
 namespace {
   static const size_t c_secondsSampleOffset( 23 );  // offset for each sample
   static const size_t c_secondsSequence( 224 ); // duration of sample sequence
@@ -43,23 +44,29 @@ Model::Model( const std::string& sDevice, std::int8_t ixDevice, double dblLossTa
 , m_dblLossTarget( dblLossTarget )
 {
 
-  torch::DeviceType torchDeviceType;
+  c10::Device torchDevice_default( torch::kCPU );
+  c10::Device torchDevice_config( torch::kCPU );
+  if ( 0 < sDevice.size() ) {
+    torchDevice_config = torch::Device( sDevice );
+    torchDevice_config.set_index( ixDevice );
+  }
 
-  int num_devices = 0;
-  if ( torch::cuda::is_available() ) {
-    torchDeviceType = torch::kCUDA;
-    num_devices = torch::cuda::device_count();
-    BOOST_LOG_TRIVIAL(info) << "number of CUDA devices detected: " << num_devices;
-    // when > 1, then can use, as example ' .device( torch::kCUDA, 1 )'
+  if ( torch::kCUDA == torchDevice_config.type() ) {
+    int num_devices = 0;
+    if ( torch::cuda::is_available() ) {
+      num_devices = torch::cuda::device_count();
+      BOOST_LOG_TRIVIAL(info) << "number of CUDA devices detected: " << num_devices;
+      // when > 1, then can use, as example ' .device( torch::kCUDA, 1 )'
+      m_torchDevice = torchDevice_config;
+    }
+    else {
+      BOOST_LOG_TRIVIAL(info) << "no CUDA devices detected, set device to CPU";
+      m_torchDevice = torchDevice_default;
+      //assert( false );
+    }
   }
   else {
-    torchDeviceType = torch::kCPU;
-    BOOST_LOG_TRIVIAL(info) << "no CUDA devices detected, set device to CPU";
-  }
-
-  if ( 0 < sDevice.size() ) {
-    m_torchDevice = torch::Device( sDevice );
-    m_torchDevice.set_index( ixDevice );
+    m_torchDevice = torchDevice_config;
   }
 
   torch::manual_seed( 1 );
