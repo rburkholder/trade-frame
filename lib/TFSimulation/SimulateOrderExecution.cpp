@@ -122,8 +122,6 @@ void OrderExecution::ProcessOrderQueues( const Quote &quote ) {
   //  return;
   //}
 
-  ProcessCancelQueue( quote );
-
   ProcessDelayQueue( quote );
 
   ProcessStopOrders( quote ); // places orders into market orders queue
@@ -133,6 +131,8 @@ void OrderExecution::ProcessOrderQueues( const Quote &quote ) {
   if ( !bProcessed ) {
     bProcessed = ProcessLimitOrders( quote );
   }
+
+  ProcessCancelQueue( quote );
 
 }
 
@@ -621,23 +621,34 @@ void OrderExecution::ProcessCancelQueue( const Quote& quote ) {
         }
       }
 
+      bool bPop( true );
       if ( bOrderFound ) {  // need an event for this, as it could be legitimate crossing execution prior to cancel
         if ( nullptr != OnOrderCancelled ) OnOrderCancelled( qco.nOrderId );
         MigrateActiveToArchive( qco.nOrderId );
       }
       else {
-        //std::cout << "no order found to cancel: " << co.nOrderId << std::endl;
-        // todo:  propogate this into the OrderManager
-        //   this actually means that cancel comes through, but order was actually processed
-        if ( nullptr != OnNoOrderFound ) OnNoOrderFound( qco.nOrderId );
-
-        // confirm that the order has already been processed
         mapOrderState_t::iterator iter = m_mapOrderState.find( qco.nOrderId );
-        assert( m_mapOrderState.end() != iter );
-        assert( OrderState::State::Archive == iter->second.state );
+        auto state( iter->second.state );
+        if ( OrderState::State::Delay == state ) {
+          bPop = false;
+          break; // skip for now
+        }
+        else {
+          //std::cout << "no order found to cancel: " << co.nOrderId << std::endl;
+          // todo:  propogate this into the OrderManager
+          //   this actually means that cancel comes through, but order was actually processed
+          if ( nullptr != OnNoOrderFound ) OnNoOrderFound( qco.nOrderId );
+
+          // confirm that the order has already been processed
+          assert( m_mapOrderState.end() != iter );
+          assert( OrderState::State::Archive == state );
+        }
       }
 
-      m_lCancelDelay.pop_front();  // remove from list
+      if ( bPop ) {
+        m_lCancelDelay.pop_front();  // remove from list
+      }
+
     }
   }
 
