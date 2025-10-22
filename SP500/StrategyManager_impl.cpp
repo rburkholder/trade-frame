@@ -302,6 +302,9 @@ void StrategyManager_impl::RunStrategy_predict_sim() {
       } );
     m_pStrategy->Start();
   }
+  else {
+    BOOST_LOG_TRIVIAL(error) << "model predict (sim): sim file not valid";
+  }
 }
 
 void StrategyManager_impl::RunStrategy_predict_live() {
