@@ -282,7 +282,7 @@ void StrategyManager_impl::RunStrategy_train() {
 
 void StrategyManager_impl::RunStrategy_predict_sim() {
   // run stratgy with built model in simulation mode
-  BOOST_LOG_TRIVIAL(info) << "model predict: started";
+  BOOST_LOG_TRIVIAL(info) << "model predict (sim): started";
 
   m_mapHdf5Instrument.clear();
   m_sSimulatorGroupDirectory.clear();
@@ -306,14 +306,14 @@ void StrategyManager_impl::RunStrategy_predict_sim() {
 
 void StrategyManager_impl::RunStrategy_predict_live() {
   // run stratgy with built model in live mode
-  BOOST_LOG_TRIVIAL(info) << "model in live environment: started";
+  BOOST_LOG_TRIVIAL(info) << "model predict (live): started";
 
   m_mapHdf5Instrument.clear();
 
-  //m_model.SetPredictionResult(
-  //  [this,distance]( const Model::rPrediction_t& r ){
-  //    m_pStrategy->PredictionVector( distance, r.size(), r.data() );
-  //  } );
+  m_model.SetPredictionResult(
+    [this]( const Model::rPrediction_t& r ){
+      m_pStrategy->PredictionVector( m_model.PredictionDistance(), r.size(), r.data() );
+    } );
 
   m_cdv_predict.SetNames( "SPY", "live" );
   m_fSetChartDataView( ou::tf::WinChartView::EView::live_trail, &m_cdv_predict );
