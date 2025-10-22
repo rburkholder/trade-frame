@@ -19,6 +19,9 @@
  * Created: July 4, 2025 11:32:42
  */
 
+// vscode argv.json
+// 	"disable-hardware-acceleration": true,
+
 #include <boost/log/trivial.hpp>
 
 #include "LSTM.hpp"
@@ -194,6 +197,7 @@ float Model::Predict() {
   torch::NoGradGuard no_grad;
 
   if ( c_secondsSequence <= m_vDataScaled.size() ) {
+
     const auto diff( m_vDataScaled.size() - m_ixDataScaled );
     assert( c_secondsSequence == diff );
 
@@ -207,16 +211,13 @@ float Model::Predict() {
     //BOOST_LOG_TRIVIAL(info) << "prediction sizes: " << prediction.sizes();
     //assert( prediction.is_contiguous() );
     if ( m_fPredictionResult ) {
-      assert( prediction.is_cuda() );
+      torch::Tensor prediction_cpu = prediction.to( torch::kCPU );
+      assert( prediction_cpu.is_contiguous() );
 
-      torch::Tensor cpu_tensor = prediction.to( torch::kCPU );
-      assert( prediction.is_cuda() );
-      assert( cpu_tensor.is_contiguous() );
-
-      const auto nElements( cpu_tensor.numel() );
+      const auto nElements( prediction_cpu.numel() );
       assert( c_secondsSequence == nElements );
 
-      float* pData = cpu_tensor.data_ptr<float>();
+      float* pData = prediction_cpu.data_ptr<float>();
       c10::ArrayRef<float> rView( pData, nElements );
 
       m_fPredictionResult( rView );
