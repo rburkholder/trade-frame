@@ -350,7 +350,7 @@ void Strategy::SetupChart() {
   m_cdv.Add( EChartSlot::Price, &m_ceShortFill );
   m_cdv.Add( EChartSlot::Price, &m_ceShortExit );
 
-  //m_cdv.Add( EChartSlot::PredVec, &m_cePrediction_vector );
+  m_cdv.Add( EChartSlot::PredVec, &m_cePrediction_vector );
 }
 
 void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
@@ -1325,13 +1325,13 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
 
 void Strategy::PredictionVector( const size_t distance, const size_t size, const float* r  ) {
   m_cePrediction_vector.Clear(); // will this clear prior to appending?
-  static const boost::posix_time::time_duration one_sec( 0, 0, 1 );
+  static const boost::posix_time::time_duration one_second( 0, 0, 1 );
   boost::posix_time::ptime dt( m_features.dt - boost::posix_time::time_duration( 0, 0, size - distance + 60 ) ); // 60 provides offset to see whole prediction
   size_t counter( size );
   while ( 0 < counter ) {
     m_cePrediction_vector.Append( dt, *r );
     ++r;
-    dt += one_sec;
+    dt += one_second;
     --counter;
   }
 }
