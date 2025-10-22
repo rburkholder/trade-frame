@@ -78,6 +78,7 @@ Strategy::Strategy(
 , m_nEnterLong {}, m_nEnterShort {}
 , m_dblPrvPrice {}
 , m_dblPrvSD {}
+, m_dblSDDirection_sum {}, m_dblSDDirection_cnt {}
 , m_dblEma013 {}, m_dblEma029 {}, m_dblEma050 {}, m_dblEma200 {}
 , m_statsPrices( m_prices, boost::posix_time::time_duration( 0, 0, c_window ) )
 , m_statsReturns( m_returns, boost::posix_time::time_duration( 0, 0, c_window ) )
@@ -661,13 +662,17 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
     m_ceTradeBBDiff_vol.Append( dt, +1.0 );
     m_cntOffsetUp++;
     m_cntOffsetDn = 0;
-    m_features.dblSDDirection = +1.0;
+    //m_features.dblSDDirection = +1.0;
+    m_dblSDDirection_sum += +1.0;
+    m_dblSDDirection_cnt++;
   }
   else {
     m_ceTradeBBDiff_vol.Append( dt, -1.0 );
     m_cntOffsetUp = 0;
     m_cntOffsetDn++;
-    m_features.dblSDDirection = -1.0;
+    //m_features.dblSDDirection = -1.0;
+    m_dblSDDirection_sum += -1.0;
+    m_dblSDDirection_cnt++;
   }
 
   //m_ceTradeBBDiff.Append( dt, bb_offset - m_dblPrvSD ); // track rise/fall rather than value
@@ -1296,6 +1301,14 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   UpdateEma< 29>( price_, m_dblEma029, m_ceEma029 );
   UpdateEma< 50>( price_, m_dblEma050, m_ceEma050 );
   UpdateEma<200>( price_, m_dblEma200, m_ceEma200 );
+
+  if ( 0.0 == m_dblSDDirection_cnt ) {
+    m_features.dblSDDirection = 0.0;
+  }
+  else {
+    m_features.dblSDDirection = m_dblSDDirection_sum / m_dblSDDirection_cnt;
+    m_dblSDDirection_sum = m_dblSDDirection_cnt = 0.0;
+  }
 
   const double bb_offset( m_statsPrices.BBOffset() );
   const double bb_mean(   m_statsPrices.MeanY() );

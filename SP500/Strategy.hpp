@@ -117,10 +117,10 @@ private:
     VolumeWeightedPrice()
     : m_dblSumVolumePrice {}, m_dblSumVolume {} {}
 
-    void Add( double price, ou::tf::Price::volume_t volume ) {
-      const double volume_( volume );
-      m_dblSumVolume += volume_;
-      m_dblSumVolumePrice += volume_ * price;
+    void Add( double price, ou::tf::Price::volume_t volume_ ) {
+      const double volume( volume_ );
+      m_dblSumVolume += volume;
+      m_dblSumVolumePrice += volume * price;
     }
 
     double operator()() {
@@ -222,6 +222,9 @@ private:
 
   double m_dblPrvPrice; // calculating returns
   double m_dblPrvSD;
+
+  double m_dblSDDirection_sum;
+  double m_dblSDDirection_cnt;
 
   ou::ChartEntryIndicator m_ceRtnPrice_mean;
   ou::ChartEntryIndicator m_ceRtnPrice_slope;
