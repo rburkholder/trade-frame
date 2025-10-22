@@ -165,6 +165,17 @@ bool Load( const std::string& sFileName, Choices& choices ) {
     bOk = false;
     BOOST_LOG_TRIVIAL(error) << sFileName << " unknown mode setting: " << sMode;
   }
+  else {
+    switch ( choices.eMode ) {
+      case config::Choices::EMode::load_then_run_live:
+      case config::Choices::EMode::train_then_run_live:
+        choices.m_flags.bEnablePredictionVectorView = true;
+        break;
+      default:
+        //choices.m_flags.bEnablePredictionVectorView = false; // false by default
+        break;
+    }
+  }
 
   return bOk;
 

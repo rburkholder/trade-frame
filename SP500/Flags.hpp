@@ -27,6 +27,7 @@ struct Flags {
   bool bEnableImbalance;
   bool bEnablePrediction;
   bool bEnableAdvDec;
+  bool bEnablePredictionVectorView;
 
   Flags()
   : bEnableBidAskPrice( false )
@@ -34,5 +35,6 @@ struct Flags {
   , bEnableImbalance( false )
   , bEnablePrediction( false )
   , bEnableAdvDec( false )
+  , bEnablePredictionVectorView( false )
   {}
 };
