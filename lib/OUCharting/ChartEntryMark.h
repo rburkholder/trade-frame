@@ -39,9 +39,12 @@ public:
 
   ChartEntryMark();
   virtual ~ChartEntryMark();
+
   void AddMark( double price, ou::Colour::EColour colour, const std::string &name ); // bg thread
   void AddMark( const Mark_t& mark ); // bg thread
+
   virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes );
+
   virtual void Clear();
 
 protected:
