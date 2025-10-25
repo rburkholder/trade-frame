@@ -510,13 +510,14 @@ void WinChartView::DrawChart() {
             [this](){
               std::scoped_lock<std::mutex> lock( m_mutexChartDataView );
 
-              static const boost::posix_time::time_duration one_sec( 0, 0, 1 ); // provide a border
+              static const boost::posix_time::time_duration one_second( 0, 0, 1 ); // provide a border
+              //static const boost::posix_time::time_duration thirty_odd_seconds( 0, 0, 35 ); // optional for ml prediction
 
               m_vpDataViewExtents = m_pChartDataView->GetExtents(); // TODO: obtain just end extent?
 
               switch ( m_stateView ) {
                 case EView::live_trail:
-                  m_vpDataViewVisual.dtEnd = ou::TimeSource::GlobalInstance().Internal() + one_sec; // works with real vs simulation time
+                  m_vpDataViewVisual.dtEnd = ou::TimeSource::GlobalInstance().Internal() + one_second; // works with real vs simulation time
                   m_vpDataViewVisual.dtBegin = m_vpDataViewVisual.dtEnd - m_tdViewPortWidth;
                   break;
                 case EView::live_review:
@@ -530,7 +531,7 @@ void WinChartView::DrawChart() {
                   }
                   break;
                 case EView::sim_trail:
-                  m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - m_tdViewPortWidth, m_vpDataViewExtents.dtEnd + one_sec );
+                  m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - m_tdViewPortWidth, m_vpDataViewExtents.dtEnd + one_second );
                   break;
               }
 
