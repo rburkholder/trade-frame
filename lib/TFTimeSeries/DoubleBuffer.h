@@ -158,6 +158,11 @@ public:
     m_qDatum.push( datum );
   }
 
+  void Append( datum_t&& datum ) {
+    std::scoped_lock<std::mutex> guard(m_mutex);
+    m_qDatum.emplace( std::move( datum ) );
+  }
+
   template<typename Function>
   void Sync( Function f ) {
     std::scoped_lock<std::mutex> guard(m_mutex);
