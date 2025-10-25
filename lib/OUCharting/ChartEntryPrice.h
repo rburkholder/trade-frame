@@ -49,7 +49,7 @@ public:
 
 protected:
 
-  void Pop( const ou::tf::Price& );
+  void Pop( const ou::tf::Price& ); // used by ChartEntryShape
 
   DoubleArray GetPrices() const {  // prices which are visible in viewport
     return DoubleArray( &m_vDouble[ IxStart() ], CntElements() );
