@@ -18,8 +18,6 @@
  * Created on May 6, 2017, 7:03 PM
  */
 
-#include <functional>
-
 #include "ChartEntryPrice.h"
 
 namespace ou { // One Unified

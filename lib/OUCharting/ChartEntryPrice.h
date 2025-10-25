@@ -67,6 +67,4 @@ private:
 
 } // namespace ou
 
-
 #endif /* CHARTENTRYPRICE_H */
-
