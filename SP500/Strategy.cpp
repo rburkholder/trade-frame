@@ -627,23 +627,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   m_ceTradePrice.Append( dt_price );
 
   // more information might be available if this can be matched to walking the quotes/order book
-  mapVolumeAtPrice_t::iterator iterVolumeAtPrice = m_mapVolumeAtPrice.find( price );
-  if ( m_mapVolumeAtPrice.end() == iterVolumeAtPrice ) {
-    bool bResult;
-    std::tie( iterVolumeAtPrice, bResult ) = m_mapVolumeAtPrice.emplace( price, volumes_t() );
-    assert( bResult);
-  }
-
-  volumes_t& v( iterVolumeAtPrice->second );
-
-  if ( direction ) {
-    v.at_ask += volume;
-    //m_ceTradeVolumeUp.Append( dt, volume );
-  }
-  else {
-    v.at_bid += volume;
-    //m_ceTradeVolumeDn.Append( dt, -volume );
-  }
+  m_ceVolumeAtPrice.Add( direction, trade );
 
   m_ceTradeVolume.Append( dt, volume );
 

@@ -13,6 +13,7 @@ set(
     ChartDVBasics.h
     ChartEntryBars.h
     ChartEntryBase.h
+    ChartEntryHistogram.hpp
     ChartEntryIndicator.h
     ChartEntryMark.h
     ChartEntryPrice.h
@@ -37,6 +38,7 @@ set(
     ChartDVBasics.cpp
     ChartEntryBars.cpp
     ChartEntryBase.cpp
+    ChartEntryHistogram.cpp
     ChartEntryIndicator.cpp
     ChartEntryMark.cpp
     ChartEntryPrice.cpp
