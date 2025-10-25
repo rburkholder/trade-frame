@@ -660,7 +660,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   // todo: consider using a 2 or 3 degree polynomial to smooth (similar to CurrencyTrader/CubicRegression.cpp)
   const double bb_offset( m_statsPrices.BBOffset() );
   if ( bb_offset >= m_dblPrvSD ) {  // track rise/fall rather than value
-    m_ceTradeBBDiff_vol.Append( dt, +1.0 );
+    //m_ceTradeBBDiff_vol.Append( dt, +1.0 );
     m_cntOffsetUp++;
     m_cntOffsetDn = 0;
     //m_features.dblSDDirection = +1.0;
@@ -668,7 +668,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
     m_dblSDDirection_cnt++;
   }
   else {
-    m_ceTradeBBDiff_vol.Append( dt, -1.0 );
+    //m_ceTradeBBDiff_vol.Append( dt, -1.0 );
     m_cntOffsetUp = 0;
     m_cntOffsetDn++;
     //m_features.dblSDDirection = -1.0;
@@ -1310,6 +1310,7 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
     m_features.dblSDDirection = m_dblSDDirection_sum / m_dblSDDirection_cnt;
     m_dblSDDirection_sum = m_dblSDDirection_cnt = 0.0;
   }
+  m_ceTradeBBDiff_vol.Append( dt, m_features.dblSDDirection );
 
   const double bb_offset( m_statsPrices.BBOffset() );
   const double bb_mean(   m_statsPrices.MeanY() );
