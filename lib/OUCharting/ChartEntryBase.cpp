@@ -108,7 +108,8 @@ double ChartEntryTime::Convert( boost::posix_time::ptime dt ) {
   return converted;
 }
 
-// runs in thread of main?  What does this do?
+// ChartMaster thread, drains cross thread queue into primary vectors
+// called by inheriting class to fill m_vDateTime from datum
 void ChartEntryTime::AppendFg( boost::posix_time::ptime dt ) {
 
   bool bOk( true );
@@ -116,8 +117,8 @@ void ChartEntryTime::AppendFg( boost::posix_time::ptime dt ) {
   // this is maybe done on the fly and not correct here.
   // lotsa extra stuff to track random breakage
   // end result, pOrder generation using non-available quote for datetime source
-  try {
-
+  try { // keep tests for troubleshooting
+/*
     if ( boost::posix_time::special_values::not_a_date_time == dt ) {
       BOOST_LOG_TRIVIAL(debug) << '\'' << m_sName << '\'' << " ChartEntryTime::AppendFg not a date time?";
       bOk = false;
@@ -147,7 +148,7 @@ void ChartEntryTime::AppendFg( boost::posix_time::ptime dt ) {
       BOOST_LOG_TRIVIAL(debug) << '\'' << m_sName << '\'' << " ChartEntryTime::AppendFg not special";
       bOk = false;
     }
-
+*/
     if ( bOk ) {
       //BOOST_LOG_TRIVIAL(debug) << '\'' << m_sName << '\'' << dt;
 
@@ -192,24 +193,24 @@ void ChartEntryTime::SetViewPort( const range_t& range ) {
   //   need to test for insertions like this?
   if ( 0 != m_vDateTime.size() ) {
 
-    vDateTime_t::const_iterator citerBegin( m_vDateTime.begin() );
+    vDateTime_t::const_iterator citerBgn( m_vDateTime.begin() );
     vDateTime_t::const_iterator citerEnd( m_vDateTime.end() );
     //const auto diff( citerEnd - citerBegin ); // created for diagnostic use
 
     if ( boost::posix_time::not_a_date_time != m_rangeViewPort.dtBegin ) {
-      citerBegin = std::lower_bound( m_vDateTime.begin(), m_vDateTime.end(), m_rangeViewPort.dtBegin );
+      citerBgn = std::lower_bound( m_vDateTime.cbegin(), m_vDateTime.cend(), m_rangeViewPort.dtBegin );
     }
 
-    if ( m_vDateTime.end() != citerBegin ) {
+    if ( m_vDateTime.cend() != citerBgn ) {
       if ( boost::posix_time::not_a_date_time != m_rangeViewPort.dtEnd ) {
-        citerEnd = std::upper_bound( citerBegin, m_vDateTime.cend(), m_rangeViewPort.dtEnd );
+        citerEnd = std::upper_bound( citerBgn, m_vDateTime.cend(), m_rangeViewPort.dtEnd );
       }
     }
 
-    SetIxStart( citerBegin - m_vDateTime.begin() );
-    SetCntElements( citerEnd - citerBegin );
+    SetIxStart( citerBgn - m_vDateTime.cbegin() );
+    SetCntElements( citerEnd - citerBgn );
 
-    if ( m_vDateTime.end() == citerBegin ) {
+    if ( m_vDateTime.end() == citerBgn ) {
       //std::stringstream ssbegin;
       //ssbegin << range.dtBegin << "," << range.dtEnd;
       //std::string sbegin = ssbegin.str();
