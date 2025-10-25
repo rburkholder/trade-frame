@@ -353,6 +353,7 @@ void Strategy::SetupChart() {
 
   if ( m_flags.bEnablePredictionVectorView ) {
     m_cdv.Add( EChartSlot::PredVec, &m_cePrediction_vector );
+    m_cdv.Add( EChartSlot::PredVec, &m_cemPointFive );
   }
 
 }
