@@ -163,11 +163,15 @@ void ChartMaster::ChartStructure() {
 
 void ChartMaster::ChartData( XYChart* pXY0 ) {
 
+  using vfPostLayout_t = std::vector<ChartEntryBase::structChartAttributes::fPostLayout_t>;
+  vfPostLayout_t vfPostLayout;
+
   // determine XAxis min/max while adding chart data
   double dblXBegin {};
   double dblXEnd {};
+
   m_pCdv->EachChartEntryCarrier(
-    [this,&dblXBegin,&dblXEnd]( ou::ChartEntryCarrier& carrier ){
+    [this,&dblXBegin,&dblXEnd,&vfPostLayout]( ou::ChartEntryCarrier& carrier ){
       size_t ixChart = carrier.GetActualChartId();
       ChartEntryBase::structChartAttributes attributes;
       if ( carrier.GetChartEntry()->AddEntryToChart( m_vSubCharts[ ixChart ].get(), attributes ) ) {
@@ -180,6 +184,9 @@ void ChartMaster::ChartData( XYChart* pXY0 ) {
           = ( 0 == dblXEnd )
           ? attributes.dblXMax
           : std::max<double>( dblXEnd,   attributes.dblXMax );
+        if ( nullptr != attributes.fPostLayout ) {
+          vfPostLayout.emplace_back( std::move( attributes.fPostLayout ) );
+        }
       }
     } );
 
@@ -188,6 +195,12 @@ void ChartMaster::ChartData( XYChart* pXY0 ) {
     pXY0->xAxis()->setDateScale( dblXBegin, dblXEnd, 0, 0 );
     m_bHasData = true;
     //std::cout << "setDateScale: " << dblXBegin << " - " << dblXEnd << std::endl;
+    if ( 0 < vfPostLayout.size() ) {
+      pXY0->layoutAxes();
+      for ( auto& fPostLayout: vfPostLayout ) {
+        fPostLayout();
+      }
+    }
   }
   else {
     m_bHasData = false;

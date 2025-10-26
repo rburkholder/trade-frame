@@ -47,11 +47,21 @@ public:
   using pChartEntryBase_t = std::shared_ptr<ChartEntryBase>;
 
   struct structChartAttributes {
-    double dblXMin;
+
+    //double dblYMax;
+    //double dblYMin;
+
     double dblXMax;
-    double dblYMin;
-    double dblYMax;
-    structChartAttributes() : dblXMin( 0 ), dblXMax( 0 ), dblYMin( 0 ), dblYMax( 0 ) {};
+    double dblXMin;
+
+    using fPostLayout_t = std::function<void()>;
+    fPostLayout_t fPostLayout;
+
+    structChartAttributes()
+    : dblXMin{}, dblXMax{}
+    //, dblYMin {}, dblYMax {}
+    , fPostLayout( nullptr )
+    {}
   };
 
   ChartEntryBase();
