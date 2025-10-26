@@ -44,10 +44,22 @@ public:
 protected:
 private:
 
-  ou::tf::Queue<ou::tf::Trade> m_queue;
+  struct queued_trade_t {
+    bool bDirection;
+    const ou::tf::Trade trade;
+    queued_trade_t( bool bDirection_, const ou::tf::Trade& trade_ )
+    : bDirection( bDirection_ ), trade( trade_ ) {}
+    //queued_trade_t( const queued_trade_t& rhs )
+    //: bDirection( rhs.bDirection ), trade( rhs.trade ) {}
+    queued_trade_t( queued_trade_t&& rhs )
+    : bDirection( rhs.bDirection ), trade( rhs.trade ) {}
+  };
+
+  ou::tf::Queue<queued_trade_t> m_queue;
+
+  using volume_t = ou::tf::Trade::volume_t;
 
   struct volumes_t {
-    using volume_t = ou::tf::Trade::volume_t;
     volume_t at_ask;
     volume_t at_bid;
     volumes_t(): at_ask {}, at_bid {} {}
@@ -61,6 +73,12 @@ private:
   using mapVolumeAtPrice_t = std::map<double,volumes_t>;
   mapVolumeAtPrice_t m_mapVolumeAtPrice;
 
+  volume_t m_volume_max;
+  volumes_t m_volumes_max;
+
+  void Pop( const queued_trade_t& );
+
+  virtual void ClearQueue() override;
 
 };
 

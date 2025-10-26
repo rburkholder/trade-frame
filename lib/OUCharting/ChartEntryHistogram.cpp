@@ -25,21 +25,29 @@ namespace ou { // One Unified
 
 ChartEntryHistogram::ChartEntryHistogram()
 : ChartEntryTime()
+, m_volume_max {}
 {}
 
 ChartEntryHistogram::ChartEntryHistogram( ChartEntryHistogram&& rhs )
 : ChartEntryTime( std::move( rhs ) )
+, m_queue( std::move( rhs.m_queue ) )
+, m_mapVolumeAtPrice( std::move( rhs.m_mapVolumeAtPrice ) )
+, m_volumes_max( rhs.m_volumes_max )
+, m_volume_max( rhs.m_volume_max )
 {
-  //, m_vDouble( std::move( rhs.m_vDouble ) )
-  //m_queue( std::move( rhs.m_queue ) );
 }
 
 ChartEntryHistogram::~ChartEntryHistogram() {}
 
 void ChartEntryHistogram::Add( bool direction, const ou::tf::Trade& trade ) {
+  m_queue.Append( queued_trade_t( direction, trade ) );
+}
 
-  const auto price( trade.Price() );
-  const auto volume( trade.Volume() );
+void ChartEntryHistogram::Pop( const queued_trade_t& q ) {
+
+  const bool direction( q.bDirection );
+  const auto price( q.trade.Price() );
+  const auto volume( q.trade.Volume() );
 
   mapVolumeAtPrice_t::iterator iterVolumeAtPrice = m_mapVolumeAtPrice.find( price );
   if ( m_mapVolumeAtPrice.end() == iterVolumeAtPrice ) {
@@ -52,18 +60,49 @@ void ChartEntryHistogram::Add( bool direction, const ou::tf::Trade& trade ) {
 
   if ( direction ) {
     v.at_ask += volume;
-    //m_ceTradeVolumeUp.Append( dt, volume );
+    if ( m_volumes_max.at_ask < v.at_ask ) m_volumes_max.at_ask = v.at_ask;
   }
   else {
     v.at_bid += volume;
-    //m_ceTradeVolumeDn.Append( dt, -volume );
+    if ( m_volumes_max.at_bid < v.at_bid ) m_volumes_max.at_bid = v.at_bid;
   }
+  const auto sum( v.at_ask + v.at_bid );
+  if ( m_volume_max < sum ) m_volume_max = sum;
 }
 
-void ChartEntryHistogram::Clear() {}
+void ChartEntryHistogram::ClearQueue() {
+  ChartEntryTime::ClearQueue();
+  namespace ph = std::placeholders;
+  m_queue.Sync( std::bind( &ChartEntryHistogram::Pop, this, ph::_1 ) );
+}
 
 bool ChartEntryHistogram::AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes ) {
-  return false;
+  bool bAdded( false );
+  ClearQueue();
+
+  // ToDo:
+  //   stage 1: generic historgram of full time range
+  //   stage 2: histogram of prices within visible chart
+
+  //DoubleArray daXData = ChartEntryTime::GetDateTimes();
+  //if ( 0 != daXData.len ) {
+    //LineLayer *ll = pXY->addLineLayer( this->GetPrices() );
+    //ll->setXData( daXData );
+    //pAttributes->dblXMin = daXData[0];
+    //pAttributes->dblXMax = daXData[ daXData.len - 1 ];
+    //DataSet *pds = ll->getDataSet(0);
+    //pds->setDataColor( m_eColour );
+    //pds->setDataName( GetName().c_str() );
+    //if ( 0 < )
+    bAdded = true;
+  //}
+  return bAdded;
+}
+
+void ChartEntryHistogram::Clear() {
+  m_queue.Clear();
+  m_mapVolumeAtPrice.clear();
+  //ChartEntryTime::Clear();
 }
 
 } // namespace ou
