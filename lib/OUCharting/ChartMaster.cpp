@@ -306,7 +306,7 @@ bool ChartMaster::DrawDynamicLayer() {
       m_xX = m_intCrossHairX - pChartFocus->getAbsOffsetX();
       m_dblX = pChartFocus->getXValue( m_xX );
       m_dblY = pChartFocus->getYValue( m_intCrossHairY - pChartFocus->getAbsOffsetY() );
-      std::string sValue = ( m_formatter % m_dblY ).str();
+      const std::string sValue = ( m_formatter % m_dblY ).str();
 
       // chartdir does not like taking a c_str() of anything, so need to perform a copy
       char sz[100];
