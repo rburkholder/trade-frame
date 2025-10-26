@@ -170,7 +170,7 @@ void ChartMaster::ChartData( XYChart* pXY0 ) {
     [this,&dblXBegin,&dblXEnd]( ou::ChartEntryCarrier& carrier ){
       size_t ixChart = carrier.GetActualChartId();
       ChartEntryBase::structChartAttributes attributes;
-      if ( carrier.GetChartEntry()->AddEntryToChart( m_vSubCharts[ ixChart ].get(), &attributes ) ) {
+      if ( carrier.GetChartEntry()->AddEntryToChart( m_vSubCharts[ ixChart ].get(), attributes ) ) {
         //std::cout << "  attribute " << ixChart << ',' << attributes.dblXMin << ',' << attributes.dblXMax << std::endl;
         dblXBegin
           = ( 0 == dblXBegin )

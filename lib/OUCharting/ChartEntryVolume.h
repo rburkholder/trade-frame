@@ -34,7 +34,7 @@ public:
 
   void Append( ptime dt, int volume );
   void Append( const ou::tf::Bar& bar );
-  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) override;
+  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes& ) override;
 
 protected:
 private:

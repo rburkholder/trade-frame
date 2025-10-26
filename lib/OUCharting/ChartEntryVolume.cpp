@@ -44,7 +44,7 @@ void ChartEntryVolume::Append( const ou::tf::Bar& bar ) {
   Append( bar.DateTime(), bar.Volume() );
 }
 
-bool ChartEntryVolume::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
+bool ChartEntryVolume::AddEntryToChart( XYChart *pXY, structChartAttributes& attributes ) {
   bool bAdded( false );
   ChartEntryPrice::ClearQueue();
   if ( 0 != ChartEntryPrice::Size() ) {
@@ -53,8 +53,8 @@ bool ChartEntryVolume::AddEntryToChart( XYChart *pXY, structChartAttributes *pAt
       BarLayer *bl = pXY->addBarLayer( this->GetPrices() );
 
       bl->setXData( daXData );
-      pAttributes->dblXMin = daXData[0];
-      pAttributes->dblXMax = daXData[ daXData.len - 1 ];
+      attributes.dblXMin = daXData[0];
+      attributes.dblXMax = daXData[ daXData.len - 1 ];
 
       DataSet *pds = bl->getDataSet(0);
       pds->setDataColor( m_eColour, 0xff000000, 0xff000000 );

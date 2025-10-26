@@ -37,7 +37,7 @@ public:
 
   void Add( bool direction, const ou::tf::Trade& );
 
-  virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes ) override;
+  virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes& ) override;
 
   virtual void Clear() override;
 

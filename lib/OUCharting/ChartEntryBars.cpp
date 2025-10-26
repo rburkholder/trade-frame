@@ -65,7 +65,7 @@ void ChartEntryBars::Pop( const ou::tf::Bar& bar ) {
   m_vClose.push_back( bar.Close() );
 }
 
-bool ChartEntryBars::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
+bool ChartEntryBars::AddEntryToChart( XYChart *pXY, structChartAttributes& attributes ) {
 
   bool bAdded( false );
 
@@ -93,8 +93,8 @@ bool ChartEntryBars::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttr
       candle->setLineWidth( 3 );
 
       candle->setXData( daXData );
-      pAttributes->dblXMin = daXData[0];
-      pAttributes->dblXMax = daXData[ daXData.len - 1 ];
+      attributes.dblXMin = daXData[0];
+      attributes.dblXMax = daXData[ daXData.len - 1 ];
       int count = candle->getDataSetCount();
       if ( 0 < count ) {
         DataSet* pds = candle->getDataSet(0);

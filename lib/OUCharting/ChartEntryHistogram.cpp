@@ -76,7 +76,7 @@ void ChartEntryHistogram::ClearQueue() {
   m_queue.Sync( std::bind( &ChartEntryHistogram::Pop, this, ph::_1 ) );
 }
 
-bool ChartEntryHistogram::AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes ) {
+bool ChartEntryHistogram::AddEntryToChart( XYChart* pXY, structChartAttributes& attributes ) {
   bool bAdded( false );
   ClearQueue();
 

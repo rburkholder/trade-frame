@@ -69,7 +69,7 @@ public:
   //void Clear( void );  // should call other registered distribution functions
   //void Reserve( size_type ); // should call other registered distribution functions
 
-  virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes ) { return false; }
+  virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes& ) { return false; }
 
   virtual void Clear() {
     m_ixStart = 0;

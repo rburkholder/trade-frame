@@ -43,7 +43,7 @@ public:
   size_type Size() const { return m_vDouble.size(); }
 
   virtual void Reserve( size_type ) override;
-  virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes ) override;
+  virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes& ) override;
 
   virtual void Clear() override;
 
