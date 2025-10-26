@@ -249,6 +249,8 @@ void Strategy::SetupChart() {
   m_ceEma200.SetColour( c_colourEma200 );
   m_cdv.Add( EChartSlot::Price, &m_ceEma200 );
 
+  m_cdv.Add( EChartSlot::Price, &m_ceVolumeAtPrice );
+
   m_cdv.Add( EChartSlot::Ratio, &m_cemZero );
 
   m_cdv.Add( EChartSlot::Ratio, &m_cemPosOne );
