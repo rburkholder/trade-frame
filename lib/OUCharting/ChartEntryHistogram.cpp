@@ -43,10 +43,18 @@ void ChartEntryHistogram::Add( bool direction, const ou::tf::Trade& trade ) {
   m_queue.Append( queued_trade_t( direction, trade ) );
 }
 
+/*
+  rounding to arbitrary digit count, not very fast
+  double round_up(double value, int decimal_places) {
+    const double multiplier = std::pow(10.0, decimal_places);
+    return std::ceil(value * multiplier) / multiplier;
+  }
+*/
+
 void ChartEntryHistogram::Pop( const queued_trade_t& q ) {
 
   const bool direction( q.bDirection );
-  const auto price( q.trade.Price() );
+  const auto price( std::round( q.trade.Price() * 100.0) / 100.0 );
   const auto volume( q.trade.Volume() );
 
   mapVolumeAtPrice_t::iterator iterVolumeAtPrice = m_mapVolumeAtPrice.find( price );
