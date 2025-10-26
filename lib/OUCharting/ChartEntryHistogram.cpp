@@ -85,18 +85,60 @@ bool ChartEntryHistogram::AddEntryToChart( XYChart* pXY, structChartAttributes& 
   //   stage 1: generic historgram of full time range
   //   stage 2: histogram of prices within visible chart
 
-  DoubleArray daXData = ChartEntryTime::GetViewPortDateTimes();
-  //if ( 0 != daXData.len ) {
-    //LineLayer *ll = pXY->addLineLayer( this->GetPrices() );
-    //ll->setXData( daXData );
-    //pAttributes->dblXMin = daXData[0];
-    //pAttributes->dblXMax = daXData[ daXData.len - 1 ];
-    //DataSet *pds = ll->getDataSet(0);
-    //pds->setDataColor( m_eColour );
-    //pds->setDataName( GetName().c_str() );
-    //if ( 0 < )
-    bAdded = true;
-  //}
+  attributes.fPostLayout =
+    [this,pXY](){
+      //DrawArea* da = pXY->getDrawArea();
+      //auto da_h = da->getHeight();
+      //auto da_w = da->getWidth();
+
+      PlotArea* pa = pXY->getPlotArea();
+
+      const auto pa_lx = pa->getLeftX();
+      const auto real_lx = pXY->getXValue( pa_lx );
+
+      const auto pa_rx = pa->getRightX();
+      const auto real_rx = pXY->getXValue( pa_rx );
+
+      const auto diff_x( real_rx - real_lx );
+
+      const auto pa_ty = pa->getTopY();
+      const auto price_hi = pXY->getYValue( pa_ty );
+
+      const auto pa_ly = pa->getBottomY();
+      const auto price_lo = pXY->getYValue( pa_ly );
+
+      const auto iterB = m_mapVolumeAtPrice.lower_bound( price_lo );
+      const auto iterE = m_mapVolumeAtPrice.lower_bound( price_hi );
+
+      struct pair {
+        double volume;
+        double price;
+        pair( double volume_, double price_ ): volume( volume_ ), price( price_ ) {}
+      };
+      std::vector<pair> vValue;
+
+      double volume_max {};
+
+      for ( auto iter = iterB; iter != iterE; iter++ ) {
+        const auto& [ key, value ] = *iter;
+        const double volumes = (double) ( value.at_ask + value.at_bid );
+        //const double ratio_vol = ( (double) sum ) / vol_max;
+        const auto y = pXY->getYCoor( key );
+        if ( volume_max < volumes ) volume_max = volumes;
+        vValue.push_back( pair( volumes, key ) );
+      }
+
+      for ( const pair& xy: vValue ) {
+        const double offset = 0.75 * diff_x * xy.volume / volume_max;
+        const auto offset_x = pXY->getXCoor( real_lx + offset );
+        if ( pa_lx != offset_x ) {
+          auto y = pXY->getYCoor( xy.price );
+          Line* line = pXY->addLine( pa_lx, y, offset_x, y );
+        }
+      }
+
+    };
+  bAdded = true;
   return bAdded;
 }
 
