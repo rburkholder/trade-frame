@@ -81,11 +81,11 @@ bool ChartEntryShape::AddEntryToChart( XYChart* pXY, structChartAttributes* pAtt
   ClearQueue();
 
   if ( 0 < ChartEntryPrice::Size() ) {
-    DoubleArray daXData = ChartEntryPrice::GetDateTimes();
+    const DoubleArray daXData = ChartEntryPrice::GetViewPortDateTimes();
     if ( 0 != daXData.len ) {
       ScatterLayer *layer
         = pXY->addScatterLayer(
-          GetDateTimes(), GetPrices(), NULL, m_rShapes[ (int)m_eShape ], 15, m_eColour, m_eColour );
+          daXData, GetPrices(), NULL, m_rShapes[ (int)m_eShape ], 15, m_eColour, m_eColour );
 
       layer->setXData( daXData );
       pAttributes->dblXMin = daXData[0];

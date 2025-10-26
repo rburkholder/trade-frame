@@ -77,6 +77,7 @@ void ChartEntryHistogram::ClearQueue() {
 }
 
 bool ChartEntryHistogram::AddEntryToChart( XYChart* pXY, structChartAttributes& attributes ) {
+
   bool bAdded( false );
   ClearQueue();
 
@@ -84,7 +85,7 @@ bool ChartEntryHistogram::AddEntryToChart( XYChart* pXY, structChartAttributes& 
   //   stage 1: generic historgram of full time range
   //   stage 2: histogram of prices within visible chart
 
-  //DoubleArray daXData = ChartEntryTime::GetDateTimes();
+  DoubleArray daXData = ChartEntryTime::GetViewPortDateTimes();
   //if ( 0 != daXData.len ) {
     //LineLayer *ll = pXY->addLineLayer( this->GetPrices() );
     //ll->setXData( daXData );

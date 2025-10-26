@@ -77,7 +77,7 @@ bool ChartEntryBars::AddEntryToChart( XYChart *pXY, structChartAttributes& attri
   ClearQueue();
 
   if ( 0 != ChartEntryTime::Size() ) {
-    DoubleArray daXData = ChartEntryTime::GetDateTimes();
+    const DoubleArray daXData = ChartEntryTime::GetViewPortDateTimes();
     // this should be replicated to the other Entry Types.
 
     if ( 0 != daXData.len ) {
@@ -86,7 +86,7 @@ bool ChartEntryBars::AddEntryToChart( XYChart *pXY, structChartAttributes& attri
         this->GetLow(),
         this->GetOpen(),
         this->GetClose(),
-  //      0x0000ff00, 0x00ff0000, 0xff000000
+        //0x0000ff00, 0x00ff0000, 0xff000000
         0x0000ff00, 0x00ff0000, 0xFFFF0001
         );
       //candle->setDataGap( 0 );

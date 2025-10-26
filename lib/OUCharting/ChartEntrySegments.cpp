@@ -17,24 +17,21 @@
 
 namespace ou { // One Unified
 
-ChartEntrySegments::ChartEntrySegments(void) 
+ChartEntrySegments::ChartEntrySegments()
 : ChartEntryPrice()
-{
-}
+{}
 
-ChartEntrySegments::~ChartEntrySegments(void) {
-}
+ChartEntrySegments::~ChartEntrySegments() {}
 
-bool ChartEntrySegments::AddEntryToChart(XYChart *pXY, structChartAttributes *pAttributes) {
-  
+bool ChartEntrySegments::AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes ) {
+
   ChartEntryPrice::ClearQueue();
-  
+
   bool bAdded( false );
   if ( 0 < ChartEntryPrice::Size() ) {
-    DoubleArray daXData = ChartEntryTime::GetDateTimes();
+    const DoubleArray daXData = ChartEntryTime::GetViewPortDateTimes();
     if ( 0 != daXData.len ) {
       LineLayer *layer = pXY->addLineLayer( GetPrices(), m_eColour, m_sName.c_str() );
-    
       layer->setXData( daXData );
       pAttributes->dblXMin = daXData[0];
       pAttributes->dblXMax = daXData[ daXData.len - 1 ];

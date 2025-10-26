@@ -163,7 +163,7 @@ protected:
   void AppendFg( boost::posix_time::ptime dt ); // foreground append
 
   // need to get to top of call hierarchy and only call when m_nElements is non-zero
-  DoubleArray GetDateTimes() const {
+  DoubleArray GetViewPortDateTimes() const {
     // 2017/05/06 this should be cleaned up:
 //    if ( ( 2 <= m_vChartTime.size() ) && ( 2 <= m_nElements ) ) {
 //      double diff = m_vChartTime[ m_ixStart + m_nElements - 1 ] - m_vChartTime[ m_ixStart ];

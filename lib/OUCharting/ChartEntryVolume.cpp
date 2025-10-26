@@ -48,7 +48,7 @@ bool ChartEntryVolume::AddEntryToChart( XYChart *pXY, structChartAttributes& att
   bool bAdded( false );
   ChartEntryPrice::ClearQueue();
   if ( 0 != ChartEntryPrice::Size() ) {
-    DoubleArray daXData = ChartEntryTime::GetDateTimes();
+    const DoubleArray daXData = ChartEntryTime::GetViewPortDateTimes();
     if ( 0 != daXData.len ) {
       BarLayer *bl = pXY->addBarLayer( this->GetPrices() );
 

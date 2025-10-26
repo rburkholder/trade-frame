@@ -58,7 +58,7 @@ bool ChartEntryPrice::AddEntryToChart( XYChart *pXY, structChartAttributes& attr
   bool bAdded( false );
   ClearQueue();
   if ( 0 != this->ChartEntryTime::Size() ) {
-    DoubleArray daXData = ChartEntryTime::GetDateTimes();
+    const DoubleArray daXData = ChartEntryTime::GetViewPortDateTimes();
     if ( 0 != daXData.len ) {
       LineLayer *ll = pXY->addLineLayer( this->GetPrices() );
       ll->setXData( daXData );
