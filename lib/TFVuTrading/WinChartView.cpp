@@ -535,7 +535,7 @@ void WinChartView::DrawChart() {
                   break;
               }
 
-              // todo: optimize this if the viewport hasn't changed
+              // todo: optimize this if the viewport hasn't changed, only update the dynamic layer
               //std::cout << "SetViewPort: " << m_vpDataViewVisual.dtBegin << " - " << m_vpDataViewVisual.dtEnd << std::endl;
               m_pChartDataView->SetViewPort( m_vpDataViewVisual );
 
