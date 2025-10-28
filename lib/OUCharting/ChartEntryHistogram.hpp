@@ -73,7 +73,6 @@ private:
   using mapVolumeAtPrice_t = std::map<double,volumes_t>;
   mapVolumeAtPrice_t m_mapVolumeAtPrice;
 
-  volume_t m_volume_max;
   volumes_t m_volumes_max;
 
   void Pop( const queued_trade_t& );

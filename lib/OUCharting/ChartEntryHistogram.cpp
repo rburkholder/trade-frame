@@ -25,7 +25,6 @@ namespace ou { // One Unified
 
 ChartEntryHistogram::ChartEntryHistogram()
 : ChartEntryTime()
-, m_volume_max {}
 {}
 
 ChartEntryHistogram::ChartEntryHistogram( ChartEntryHistogram&& rhs )
@@ -33,7 +32,6 @@ ChartEntryHistogram::ChartEntryHistogram( ChartEntryHistogram&& rhs )
 , m_queue( std::move( rhs.m_queue ) )
 , m_mapVolumeAtPrice( std::move( rhs.m_mapVolumeAtPrice ) )
 , m_volumes_max( rhs.m_volumes_max )
-, m_volume_max( rhs.m_volume_max )
 {
 }
 
@@ -75,7 +73,6 @@ void ChartEntryHistogram::Pop( const queued_trade_t& q ) {
     if ( m_volumes_max.at_bid < v.at_bid ) m_volumes_max.at_bid = v.at_bid;
   }
   const auto sum( v.at_ask + v.at_bid );
-  if ( m_volume_max < sum ) m_volume_max = sum;
 }
 
 void ChartEntryHistogram::ClearQueue() {
@@ -118,30 +115,75 @@ bool ChartEntryHistogram::AddEntryToChart( XYChart* pXY, structChartAttributes& 
       const auto iterB = m_mapVolumeAtPrice.lower_bound( price_lo );
       const auto iterE = m_mapVolumeAtPrice.lower_bound( price_hi );
 
-      struct pair {
+      struct volume_at_price {
         double volume;
+        double volume_ask;
+        double volume_bid;
         double price;
-        pair( double volume_, double price_ ): volume( volume_ ), price( price_ ) {}
+
+        volume_at_price( double volume_, double price_ )
+        : volume( volume_ ), price( price_ )
+        , volume_bid {}, volume_ask {}
+        {}
+
+        volume_at_price( double vol_bid, double vol_ask, double price_ )
+        : volume_bid( vol_bid ), volume_ask( vol_ask ), price( price_ )
+        , volume {}
+        {}
       };
-      std::vector<pair> vValue;
+
+      std::vector<volume_at_price> vVAP;
 
       double volume_max {};
 
+      static const bool bAggregate( true );
+
       for ( auto iter = iterB; iter != iterE; iter++ ) {
         const auto& [ key, value ] = *iter;
-        const double volumes = (double) ( value.at_ask + value.at_bid );
-        //const double ratio_vol = ( (double) sum ) / vol_max;
         const auto y = pXY->getYCoor( key );
-        if ( volume_max < volumes ) volume_max = volumes;
-        vValue.push_back( pair( volumes, key ) );
+        if ( bAggregate ) {
+          const double volumes = (double) ( value.at_ask + value.at_bid );
+          if ( volume_max < volumes ) volume_max = volumes;
+          vVAP.push_back( volume_at_price( volumes, key ) );
+        }
+        else {
+          const double ask( value.at_ask );
+          if ( volume_max < ask ) volume_max = ask;
+          const double bid( value.at_bid );
+          if ( volume_max < bid ) volume_max = bid;
+          vVAP.push_back( volume_at_price( bid, ask, key ) );
+        }
       }
 
-      for ( const pair& xy: vValue ) {
-        const double offset = 0.75 * diff_x * xy.volume / volume_max;
-        const auto offset_x = pXY->getXCoor( real_lx + offset );
-        if ( pa_lx != offset_x ) {
-          auto y = pXY->getYCoor( xy.price );
-          Line* line = pXY->addLine( pa_lx, y, offset_x, y );
+      for ( const volume_at_price& vap: vVAP ) {
+        if ( bAggregate ) {
+          const double offset = 0.75 * diff_x * vap.volume / volume_max;
+          const auto offset_x = pXY->getXCoor( real_lx + offset );
+          if ( pa_lx != offset_x ) {
+            auto y = pXY->getYCoor( vap.price );
+            Line* line = pXY->addLine( pa_lx, y, offset_x, y );
+            line->setColor( ou::Colour::Green );
+          }
+        }
+        else {
+          {
+            const double offset_ask = 0.75 * diff_x * vap.volume_ask / volume_max;
+            const auto offset_x_ask = pXY->getXCoor( real_lx + offset_ask );
+            if ( pa_lx != offset_x_ask ) {
+              auto y = pXY->getYCoor( vap.price + 0.003 );
+              Line* line = pXY->addLine( pa_lx, y, offset_x_ask, y );
+              line->setColor( ou::Colour::Red );
+            }
+          }
+          {
+            const double offset_bid = 0.75 * diff_x * vap.volume_bid / volume_max;
+            const auto offset_x_bid = pXY->getXCoor( real_lx + offset_bid );
+            if ( pa_lx != offset_x_bid ) {
+              auto y = pXY->getYCoor( vap.price - 0.003 );
+              Line* line = pXY->addLine( pa_lx, y, offset_x_bid, y );
+              line->setColor( ou::Colour::Blue );
+            }
+          }
         }
       }
 
