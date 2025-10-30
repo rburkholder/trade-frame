@@ -282,29 +282,30 @@ bool ChartMaster::DrawDynamicLayer() {
     XYChart* pChartFocus( nullptr );
 
     for ( int ix = 0; ix < n; ix++ ) {
+      // look for sub-chart with cursor focus
 
       pSubBaseChart = m_pChart->getChart( ix );
       XYChart* pSubChart = dynamic_cast<XYChart*>( pSubBaseChart );
       PlotArea* pArea = pSubChart->getPlotArea();
 
-      int pxChartTop = pSubChart->getAbsOffsetY() + pArea->getTopY();
+      int pxlChartTop = pSubChart->getAbsOffsetY() + pArea->getTopY();
 
       if ( 0 == ix ) {
         auto AbsOffsetX = pSubChart->getAbsOffsetX(); // offset to left side of chart
         // set based upon top chart:
-        top      = pxChartTop;
+        top      = pxlChartTop;
         m_xLeft  = AbsOffsetX + pArea->getLeftX();
         m_xRight = AbsOffsetX + pArea->getRightX();
       }
 
       bottom = pSubChart->getAbsOffsetY() + pArea->getBottomY();
 
-      if ( pxChartTop < m_intCrossHairY ) {
+      if ( pxlChartTop < m_intCrossHairY ) {
         pChartFocus = pSubChart;
         m_nChart = ix;
       }
 
-    } // end for ix
+    } // for ix of sub-chart
 
     if (
       ( top < m_intCrossHairY  ) &&
