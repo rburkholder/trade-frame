@@ -14,7 +14,7 @@
 #pragma once
 
 // for example, the zig zag indicator
-// also use for high and low indicators, keep redoing last segment so stretches to 
+// also use for high and low indicators, keep redoing last segment so stretches to
 //   right hand edge (optionally, perhaps in a super class)
 
 #include "ChartEntryPrice.h"
@@ -25,10 +25,10 @@ class ChartEntrySegments :
   public ChartEntryPrice {
 public:
   ChartEntrySegments(void);
-  virtual ~ChartEntrySegments(void);
-  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes *pAttributes );
+  virtual ~ChartEntrySegments();
+  virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes& ) override;
 protected:
-  
+
 private:
 };
 
