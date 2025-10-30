@@ -52,7 +52,7 @@ void ChartEntryMark::Pop( const Mark_t& mark ) {
   m_vName.push_back( mark.m_sName );
 }
 
-bool ChartEntryMark::AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes ) {
+bool ChartEntryMark::AddEntryToChart( XYChart* pXY, structChartAttributes& attributes ) {
 
   bool bAdded( false );
 

@@ -43,9 +43,9 @@ public:
   void AddMark( double price, ou::Colour::EColour colour, const std::string &name ); // bg thread
   void AddMark( const Mark_t& mark ); // bg thread
 
-  virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes );
+  virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes& ) override;
 
-  virtual void Clear();
+  virtual void Clear() override;
 
 protected:
   std::vector<double> m_vPrice;
