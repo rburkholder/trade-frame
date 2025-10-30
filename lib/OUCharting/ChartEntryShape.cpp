@@ -74,7 +74,7 @@ void ChartEntryShape::Pop( const Entry& entry ) {
   m_vpChar.push_back( entry.pLabel );
 }
 
-bool ChartEntryShape::AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes ) {
+bool ChartEntryShape::AddEntryToChart( XYChart* pXY, structChartAttributes& attributes ) {
 
   bool bAdded( false );
 
@@ -88,8 +88,8 @@ bool ChartEntryShape::AddEntryToChart( XYChart* pXY, structChartAttributes* pAtt
           daXData, GetPrices(), NULL, m_rShapes[ (int)m_eShape ], 15, m_eColour, m_eColour );
 
       layer->setXData( daXData );
-      pAttributes->dblXMin = daXData[0];
-      pAttributes->dblXMax = daXData[ daXData.len - 1 ];
+      attributes.dblXMin = daXData[0];
+      attributes.dblXMax = daXData[ daXData.len - 1 ];
 
       layer->addExtraField( GetLabels() );
       layer->setDataLabelFormat("{field0}");

@@ -31,11 +31,11 @@ public:
   ChartEntryShape( EShape eShape, ou::Colour::EColour colour );
   void SetShape( EShape shape ) { m_eShape = shape; };
   EShape GetShape() const { return m_eShape; };
-  virtual ~ChartEntryShape(void);
+  virtual ~ChartEntryShape();
   void AddLabel( const boost::posix_time::ptime &dt, double price, const std::string &sLabel );
-  virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes* pAttributes );
-  virtual void Clear();
-  void ClearQueue();
+  virtual bool AddEntryToChart( XYChart* pXY, structChartAttributes& ) override;
+  virtual void Clear() override;
+  virtual void ClearQueue() override;
 protected:
 
   struct Entry {
