@@ -73,6 +73,8 @@ private:
   wxFrame* m_pFrameDividendNotes;  // todo:  change to FrameControls
   ou::tf::PanelDividendNotes* m_pPanelDividendNotes;
 
+  ou::tf::FrameControls* m_pFrameWatchList;
+
   ou::tf::FrameControls* m_pFrameWinChartView_session;
   ou::tf::WinChartView* m_pWinChartView_session;
 
@@ -123,6 +125,8 @@ private:
     wxPoint point = m_pFrameDividendNotes->GetPosition();
     ar & point.x;
     ar & point.y;
+
+    ar & *m_pFrameWatchList;
 }
 
   template<typename Archive>
@@ -152,12 +156,17 @@ private:
       wxPoint point( x, y );
       m_pFrameDividendNotes->SetPosition( point );
     }
+
+    if ( 3 <= version ) {
+      ar & *m_pFrameWatchList;
+    }
+
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
-BOOST_CLASS_VERSION(AppOptionTrader, 2)
+BOOST_CLASS_VERSION(AppOptionTrader, 3)
 
 DECLARE_APP(AppOptionTrader)

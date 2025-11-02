@@ -61,6 +61,8 @@ bool AppOptionTrader::OnInit() {
   }
 
   m_pFrameMain = nullptr;
+
+  m_pFrameWatchList = nullptr;
   m_pFrameWinChartView_session = nullptr;
   m_pFrameWinChartView_daily = nullptr;
   m_pInstrumentViews = nullptr;
@@ -109,6 +111,10 @@ bool AppOptionTrader::OnInit() {
     m_pFrameWinChartView_daily->Attach( m_pWinChartView_daily );
     m_pFrameWinChartView_daily->Layout();
     m_pFrameWinChartView_daily->Show();
+
+    m_pFrameWatchList = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Watch List" );
+    m_pFrameWatchList->Layout();
+    m_pFrameWatchList->Show();
   }
 
   LoadState();
