@@ -59,12 +59,15 @@ public:
   using fTask_t = std::function<void()>;
   using fQueueTask_t = std::function<void( fTask_t&& )>;
   using fSetChartDataView_t = std::function<void( ou::tf::WinChartView::EView, ou::ChartDataView* )>;
+  using fUpdateDateTime_t = std::function<void( const boost::posix_time::ptime )>;
+  using fSetTimeSeriesModel_t = std::function<fUpdateDateTime_t( const ou::tf::Quotes&, const ou::tf::Trades& )>;
   using fDone_t = std::function<void()>;
 
   StrategyManager_impl(
     const config::Choices&
   , fQueueTask_t&&
   , fSetChartDataView_t&&
+  , fSetTimeSeriesModel_t&&
   , fDone_t&&
   );
   ~StrategyManager_impl();
@@ -80,6 +83,7 @@ private:
   ou::ChartDataView m_cdv_predict; // might reuse the first if Clear() works properly
 
   fSetChartDataView_t m_fSetChartDataView;
+  fSetTimeSeriesModel_t m_fSetTimeSeriesModel;
 
   fQueueTask_t m_fQueueTask;
   fDone_t m_fDone;

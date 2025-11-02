@@ -25,6 +25,8 @@
 
 #include <OUCharting/ChartDataView.h>
 
+#include <TFTimeSeries/TimeSeries.h>
+
 #include <TFVuTrading/WinChartView.h>
 
 // need to keep Torch stuff separate from wxWidgets stuff.  Includes negatively interact with each other.
@@ -41,9 +43,17 @@ public:
   using fTask_t = std::function<void()>;
   using fQueueTask_t = std::function<void( fTask_t&& )>;
   using fSetChartDataView_t = std::function<void( ou::tf::WinChartView::EView, ou::ChartDataView* )>;
+  using fUpdateDateTime_t = std::function<void( const boost::posix_time::ptime )>;
+  using fSetTimeSeriesModel_t = std::function<fUpdateDateTime_t( const ou::tf::Quotes&, const ou::tf::Trades& )>;
   using fDone_t = std::function<void()>;
 
-  StrategyManager( const config::Choices&, fQueueTask_t&&, fSetChartDataView_t&&, fDone_t&& );
+  StrategyManager(
+    const config::Choices&
+  , fQueueTask_t&&
+  , fSetChartDataView_t&&
+  , fSetTimeSeriesModel_t&&
+  , fDone_t&&
+  );
   ~StrategyManager();
 
 protected:

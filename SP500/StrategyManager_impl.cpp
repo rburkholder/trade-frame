@@ -42,11 +42,13 @@ StrategyManager_impl::StrategyManager_impl(
   const config::Choices& choices
 , fQueueTask_t&& fQueueTask
 , fSetChartDataView_t&& fSetChartDataView
+, fSetTimeSeriesModel_t&& fSetTimeSeriesModel
 , fDone_t&& fDone
 )
 : m_choices( choices )
 , m_fQueueTask( std::move( fQueueTask ) )
 , m_fSetChartDataView( std::move( fSetChartDataView ) )
+, m_fSetTimeSeriesModel( std::move( fSetTimeSeriesModel ) )
 , m_fDone( std::move( fDone ) )
 , m_model( choices.m_sTorchDevice, choices.m_ixTorchDevice, choices.m_hp.m_dblLossTarget )
 {
@@ -345,12 +347,13 @@ void StrategyManager_impl::BuildStrategy_sim( const boost::gregorian::date date,
       pWatch_t pWatch = std::make_shared<ou::tf::Watch>( iter->second, m_sim );
       f( pWatch );
     },
-    [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedPosition_t&& f ){ // fConstructPosition_t
+    [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedPosition_t&& fConstructedPosition ){ // fConstructPosition_t
       mapHdf5Instrument_t::iterator iter = m_mapHdf5Instrument.find( sIQFeedSymbolName );
       assert( m_mapHdf5Instrument.end() != iter );
       pWatch_t pWatch = std::make_shared<ou::tf::Watch>( iter->second, m_sim );
       pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_sim );
-      f( pPosition );
+      fConstructedPosition( pPosition );
+      m_pStrategy->SetCursorDateTimeCallBack( std::move( m_fSetTimeSeriesModel( pWatch->GetQuotes(), pWatch->GetTrades() ) ) );
     },
     [this](){ // fStart_t
       // does this cross into foreground thread?
@@ -388,15 +391,16 @@ void StrategyManager_impl::BuildStrategy_live( const boost::gregorian::date date
       }
       );
     },
-    [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedPosition_t&& fPosition ){ // fConstructPosition_t
+    [this]( const std::string& sIQFeedSymbolName, Strategy::fConstructedPosition_t&& fConstructedPosition ){ // fConstructPosition_t
       m_pComposeInstrument->Compose(
         sIQFeedSymbolName
-      , [this,fPosition_=std::move(fPosition)]( pInstrument_t pInstrument, bool bConstructed ){
+      , [this,fConstructedPosition=std::move(fConstructedPosition)]( pInstrument_t pInstrument, bool bConstructed ){
         assert( pInstrument );
         assert( bConstructed );  // todo: fix and register later when db is attached
         pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_iqf );
         pPosition_t pPosition = std::make_shared<ou::tf::Position>( pWatch, m_iqf );
-        fPosition_( pPosition );
+        fConstructedPosition( pPosition );
+        m_pStrategy->SetCursorDateTimeCallBack( std::move( m_fSetTimeSeriesModel( pWatch->GetQuotes(), pWatch->GetTrades() ) ) );
       }
       );
     },

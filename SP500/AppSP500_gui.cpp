@@ -39,8 +39,12 @@
 #include <wx/sizer.h>
 
 #include <TFVuTrading/FrameMain.h>
+#include <TFVuTrading/FrameControls.h>
 
 #include "AppSP500_gui.hpp"
+
+#include "TimeSeriesModel.hpp"
+#include "TimeSeriesView.hpp"
 
 namespace {
   static const std::string c_sVendorName( "One Unified Net Limited" );
@@ -138,6 +142,12 @@ bool AppSP500::OnInit() {
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppSP500::OnClose, this );  // start close of windows and controls
 
+  m_pFCTimeSeriesView = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Time Series Review" );
+  m_pTimeSeriesView = new TimeSeriesView( m_pFCTimeSeriesView );
+  m_pFCTimeSeriesView->Attach( m_pTimeSeriesView );
+  m_pFCTimeSeriesView->Layout();
+  m_pFCTimeSeriesView->Show();
+
   LoadState();
   m_pFrameMain->Layout();
   m_pFrameMain->Show( true ); // triggers the auto move
@@ -148,6 +158,14 @@ bool AppSP500::OnInit() {
   , [this]( ou::tf::WinChartView::EView state, ou::ChartDataView* pcdv ){ // fSetChartDataView_t
       m_pwcv->SetChartDataView( pcdv );
       m_pwcv->Set( state );
+    }
+  , [this](const ou::tf::Quotes& quotes, const ou::tf::Trades& trades)->StrategyManager::fUpdateDateTime_t { // fSetTimeSeriesModel_t
+      m_pTimeSeriesModel = std::make_unique<TimeSeriesModel>( quotes, trades );
+      assert( m_pTimeSeriesView );
+      m_pTimeSeriesModel->SetView( m_pTimeSeriesView );
+      StrategyManager::fUpdateDateTime_t
+        f = std::bind( &TimeSeriesModel::UpdateDateTime, m_pTimeSeriesModel.get(), std::placeholders::_1 );
+      return std::move( f );
     }
   , [](){} // fDone_t
   );
@@ -213,6 +231,7 @@ void AppSP500::OnClose( wxCloseEvent& event ) {
 int AppSP500::OnExit() {
   // Exit Steps: #4
 
+  m_pTimeSeriesModel.reset();
   m_pStrategyManager.reset();
 
   return wxAppConsole::OnExit();

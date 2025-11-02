@@ -25,18 +25,22 @@
 
 #include "TFTimeSeries/TimeSeries.h"
 
-class TimeSeriesModel: wxGridTableBase {
+class TimeSeriesModel
+: public wxGridTableBase {
 public:
 
   TimeSeriesModel( const ou::tf::Quotes&, const ou::tf::Trades& );
   virtual ~TimeSeriesModel();
 
-protected:
+  void UpdateDateTime( const boost::posix_time::ptime );
+
+  //virtual void SetView( wxGrid *grid ) override;
+  //virtual wxGrid* GetView() const override;
+
+  protected:
 
   virtual int GetNumberRows() override;
   virtual int GetNumberCols() override;
-  virtual void SetView( wxGrid *grid ) override;
-  //virtual wxGrid* GetView() const override;
   virtual bool CanHaveAttributes() override;
   virtual bool CanMeasureColUsingSameAttr( int col ) const override;
 

@@ -68,6 +68,8 @@ public:
 
   using fForward_t = std::function<ou::tf::Price( const Features_raw&, Features_scaled& )>;
 
+  using fDateTime_t = std::function<void( const boost::posix_time::ptime )>;
+
   Strategy(
     ou::ChartDataView&
   , const Flags& // needs to be non-transient
@@ -80,6 +82,8 @@ public:
   ~Strategy();
 
   void Start();
+
+  void SetCursorDateTimeCallBack( fDateTime_t&& );
 
   void PredictionVector( const size_t distance, const size_t size, const float* );
 

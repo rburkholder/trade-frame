@@ -25,8 +25,7 @@
 
 TimeSeriesView::TimeSeriesView()
 : wxGrid()
-{
-}
+{}
 
 TimeSeriesView::TimeSeriesView(
   wxWindow* parent, wxWindowID id,
@@ -55,7 +54,7 @@ bool TimeSeriesView::Create(
 
 void TimeSeriesView::CreateControls() {
   Bind( wxEVT_DESTROY, &TimeSeriesView::OnDestroy, this );
-  CreateGrid( 1, 7 );
+  CreateGrid( 0, 7 );
   SetColLabelValue( EColId::dt, wxString( "datetime" ) );
   SetColLabelValue( EColId::bid_vol, wxString( "bid vol" ) );
   SetColLabelValue( EColId::bid_prc, wxString( "bid prc" ) );

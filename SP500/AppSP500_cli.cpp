@@ -109,6 +109,9 @@ int main( int argc, char* argv[] ) {
       //m_pwcv->SetChartDataView( pcdv );
       //m_pwcv->Set( state );
     }
+  , [](const ou::tf::Quotes& quotes, const ou::tf::Trades& trades)->StrategyManager::fUpdateDateTime_t{ // fSetTimeSeriesModel_t
+      return nullptr;
+    }
   , [&m_pWork](){
     m_pWork.reset();
     }

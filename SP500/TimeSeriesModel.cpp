@@ -31,6 +31,11 @@ TimeSeriesModel::TimeSeriesModel( const ou::tf::Quotes& quotes, const ou::tf::Tr
 TimeSeriesModel::~TimeSeriesModel() {
 }
 
+void TimeSeriesModel::UpdateDateTime( const boost::posix_time::ptime dt ) {
+  const auto size = m_quotes.Size();
+  const auto iter = m_quotes.AtOrAfter( dt );
+}
+
 int TimeSeriesModel::GetNumberRows() {
   return 0;
 }
@@ -39,8 +44,8 @@ int TimeSeriesModel::GetNumberCols() {
   return 0;
 }
 
-void TimeSeriesModel::SetView( wxGrid *grid ) {
-}
+//void TimeSeriesModel::SetView( wxGrid *grid ) {
+//}
 
 //wxGrid* TimeSeriesModel::GetView() const {
 //}

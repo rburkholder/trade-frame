@@ -39,7 +39,15 @@
 #include "Config.hpp"
 #include "StrategyManager.hpp"
 
+namespace ou {
+namespace tf {
+  class FrameControls;
+}
+}
+
 class FrameMain;
+class TimeSeriesView;
+class TimeSeriesModel;
 
 class AppSP500:
   public wxApp
@@ -62,6 +70,11 @@ private:
 
   ou::tf::WinChartView* m_pwcv; // handles drawing the chart
 
+  ou::tf::FrameControls* m_pFCTimeSeriesView;
+  TimeSeriesView* m_pTimeSeriesView;
+  using pTimeSeriesModel_t = std::unique_ptr<TimeSeriesModel>;
+  pTimeSeriesModel_t m_pTimeSeriesModel;
+
   using pStrategyManager_t = std::unique_ptr<StrategyManager>;
   pStrategyManager_t m_pStrategyManager;
 
@@ -79,12 +92,18 @@ private:
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
+    ar & *m_pFCTimeSeriesView;
+    ar & *m_pTimeSeriesView;
     //ar & *m_pPanelFinancialChart;
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     ar & *m_pFrameMain;
+    if ( 4 <= version ) {
+      ar & *m_pFCTimeSeriesView;
+      ar & *m_pTimeSeriesView;
+    }
     if ( 2 <= version ) {
       //ar & *m_pPanelFinancialChart;
     }
@@ -94,6 +113,6 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(AppSP500, 3)
+BOOST_CLASS_VERSION(AppSP500, 4)
 
 DECLARE_APP(AppSP500)

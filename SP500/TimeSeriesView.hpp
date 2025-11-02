@@ -62,7 +62,7 @@ private:
     ID_Null=wxID_HIGHEST, ID_TIMSERIESVIEW
   };
 
-  enum EColId { dt, bid_vol, bid_prc, trd_vol, trd_prc, ask_vol, ask_prc };
+  enum EColId { dt, bid_vol, bid_prc, trd_vol, trd_prc, ask_vol, ask_prc, _col_id_count };
 
   void Init();
   void CreateControls();
@@ -74,12 +74,22 @@ private:
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
+    ar & EColId::_col_id_count;
+    for ( int ix = 0; ix < EColId::_col_id_count; ++ix ) {
+      ar & GetColSize( ix );
+    }
   }
 
   template<typename Archive>
   void load( Archive& ar, const unsigned int version ) {
     unsigned int nColumns;
+    ar & nColumns;
+    assert( EColId::_col_id_count == nColumns );
     unsigned int width;
+    for ( int ix = 0; ix < EColId::_col_id_count; ++ix ) {
+      ar & width;
+      SetColSize( ix, width );
+    }
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()

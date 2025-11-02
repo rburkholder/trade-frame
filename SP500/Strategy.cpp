@@ -98,9 +98,7 @@ Strategy::Strategy(
 , m_nShortEntries {}, m_nShortFills {}, m_nShortEmas {}, m_nShortStops {}
 {
   SetupChart();
-
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
-
 }
 
 Strategy::~Strategy() {
@@ -184,6 +182,10 @@ void Strategy::Start() {
 
 }
 
+void Strategy::SetCursorDateTimeCallBack( fDateTime_t&& fDateTime ) {
+  m_cdv.SetNotifyCursorDateTime( std::move( fDateTime ) );
+}
+
 void Strategy::ValidateAndStart() {
   bool bOkToStart( true );
   bOkToStart &= nullptr != m_pPosition.get();
@@ -192,16 +194,6 @@ void Strategy::ValidateAndStart() {
   bOkToStart &= nullptr != m_pAdv.get();
   bOkToStart &= nullptr != m_pDec.get();
   if ( bOkToStart ) {
-    m_cdv.SetNotifyCursorDateTime(
-      // change this to be set from caller when a graphical user element is available
-      // for displaying 'time & sales' datum from datetime supplied by cursor
-      [this]( const boost::posix_time::ptime dt ){
-        // arrives in gui thread
-        pWatch_t pWatch = m_pPosition->GetWatch();
-        const ou::tf::Quotes& quotes( pWatch->GetQuotes() );
-        const auto size = quotes.Size();
-        const auto iter = quotes.AtOrAfter( dt );
-      } );
     m_fStart();
   }
 }
