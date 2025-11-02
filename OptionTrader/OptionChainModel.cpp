@@ -128,71 +128,76 @@ bool OptionChainModel::HasValue ( const wxDataViewItem& item, unsigned col ) con
 }
 
 void OptionChainModel::GetValue( wxVariant& value, const wxDataViewItem& item, unsigned int	col	) const {
+
+  static const std::string fmtDecimal( "{:d}" );
+  static const std::string fmtFixed( "{:.{}f}" );
+
   const auto row( GetRow( item ) );
+
   const vRow2Entry_t::value_type& vt( m_vRow2Entry[ row ] );
   std::string response;
   switch ( col ) {
     case c_oi:
       if ( vt.options.call.pOption ) {
-        response = fmt::format( "{:d}", vt.options.call.pOption->GetSummary().nOpenInterest );
+        response = fmt::format( fmtDecimal, vt.options.call.pOption->GetSummary().nOpenInterest );
       }
       break;
     case c_iv:
       if ( vt.options.call.pOption ) {
-        response = fmt::format( "{:.{}f}", vt.options.call.pOption->LastGreek().ImpliedVolatility() * 100.0, 3 );
+        response = fmt::format( fmtFixed, vt.options.call.pOption->LastGreek().ImpliedVolatility() * 100.0, 3 );
       }
       break;
     case c_dlt:
       if ( vt.options.call.pOption ) {
-        response = fmt::format( "{:.{}f}", vt.options.call.pOption->LastGreek().Delta(), 3 );
+        response = fmt::format( fmtFixed, vt.options.call.pOption->LastGreek().Delta(), 3 );
       }
       break;
     case c_gma:
       if ( vt.options.call.pOption ) {
-        response = fmt::format( "{:.{}f}", vt.options.call.pOption->LastGreek().Gamma(), 4 );
+        response = fmt::format( fmtFixed, vt.options.call.pOption->LastGreek().Gamma(), 4 );
       }
       break;
     case c_bid: // call bid
       if ( vt.options.call.pOption ) {
-        response = fmt::format( "{:.{}f}", vt.options.call.pOption->LastQuote().Bid(), 2 );
+        response = fmt::format( fmtFixed, vt.options.call.pOption->LastQuote().Bid(), 2 );
       }
       break;
     case c_ask: // call ask
       if ( vt.options.call.pOption ) {
-        response = fmt::format( "{:.{}f}", vt.options.call.pOption->LastQuote().Ask(), 2 );
+        response = fmt::format( fmtFixed, vt.options.call.pOption->LastQuote().Ask(), 2 );
       }
       break;
     case strike:  // strike
-      response = fmt::format( "{:.{}f}", vt.strike, 2 );
+      response = fmt::format( fmtFixed, vt.strike, 2 );
       break;
     case p_bid: // put bid
       if ( vt.options.put.pOption ) {
-        response = fmt::format( "{:.{}f}", vt.options.put.pOption->LastQuote().Bid(), 2 );
+        response = fmt::format( fmtFixed, vt.options.put.pOption->LastQuote().Bid(), 2 );
       }
       break;
     case p_ask: // put ask
       if ( vt.options.put.pOption ) {
-        response = fmt::format( "{:.{}f}", vt.options.put.pOption->LastQuote().Ask(), 2 );
+        response = fmt::format( fmtFixed, vt.options.put.pOption->LastQuote().Ask(), 2 );
       }
       break;
     case p_dlt:
       if ( vt.options.put.pOption ) {
-        response = fmt::format( "{:.{}f}", vt.options.put.pOption->LastGreek().Delta(), 3 );
+        response = fmt::format( fmtFixed, vt.options.put.pOption->LastGreek().Delta(), 3 );
       }
       break;
     case p_gma:
       if ( vt.options.put.pOption ) {
-        response = fmt::format( "{:.{}f}", vt.options.put.pOption->LastGreek().Gamma(), 4 );
+        response = fmt::format( fmtFixed, vt.options.put.pOption->LastGreek().Gamma(), 4 );
       }
       break;
     case p_iv:
       if ( vt.options.put.pOption ) {
-        response = fmt::format( "{:.{}f}", vt.options.put.pOption->LastGreek().ImpliedVolatility() * 100.0, 3 );
+        response = fmt::format( fmtFixed, vt.options.put.pOption->LastGreek().ImpliedVolatility() * 100.0, 3 );
       }
       break;
     case p_oi:
       if ( vt.options.put.pOption ) {
-        response = fmt::format( "{:d}", vt.options.put.pOption->GetSummary().nOpenInterest );
+        response = fmt::format( fmtDecimal, vt.options.put.pOption->GetSummary().nOpenInterest );
       }
       break;
   }
