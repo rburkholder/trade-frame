@@ -95,12 +95,11 @@ void OptionChainView::OnDestroy( wxWindowDestroyEvent& event ) {
 }
 
 wxBitmap OptionChainView::GetBitmapResource( const wxString& name ) {
-    wxUnusedVar(name);
-    return wxNullBitmap;
+  wxUnusedVar(name);
+  return wxNullBitmap;
 }
 
 wxIcon OptionChainView::GetIconResource( const wxString& name ) {
-    wxUnusedVar(name);
-    return wxNullIcon;
+  wxUnusedVar(name);
+  return wxNullIcon;
 }
-
