@@ -195,8 +195,12 @@ void Strategy::ValidateAndStart() {
     m_cdv.SetNotifyCursorDateTime(
       // change this to be set from caller when a graphical user element is available
       // for displaying 'time & sales' datum from datetime supplied by cursor
-      []( const boost::posix_time::ptime dt ){
+      [this]( const boost::posix_time::ptime dt ){
         // arrives in gui thread
+        pWatch_t pWatch = m_pPosition->GetWatch();
+        const ou::tf::Quotes& quotes( pWatch->GetQuotes() );
+        const auto size = quotes.Size();
+        const auto iter = quotes.AtOrAfter( dt );
       } );
     m_fStart();
   }
