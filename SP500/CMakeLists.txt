@@ -61,8 +61,8 @@ set(
     Strategy.cpp
     StrategyManager.cpp
     StrategyManager_impl.cpp
-    TimeSeriesModel.hpp
-    TimeSeriesView.hpp
+    TimeSeriesModel.cpp
+    TimeSeriesView.cpp
     Torch.cpp
   )
 
