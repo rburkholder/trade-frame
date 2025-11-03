@@ -177,6 +177,9 @@ void InstrumentViews::HandleTimer( wxTimerEvent& event ) {
     int nRows = m_pOptionChainView->GetCountPerPage();
     m_pOptionChainModel->HandleTimer( dviTopItem, nRows );
   }
+  if ( m_pWatchOnStatusBar ) {
+    m_pStatusBar->SetStatusText( fmt::format( "{:.{}f}", m_pWatchOnStatusBar->Price(), 2 ), 4 );
+  }
 }
 
 void InstrumentViews::HandleTreeEventItemGetToolTip( wxTreeEvent& event ) {
@@ -391,6 +394,7 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
       }
 
       m_pStatusBar->SetStatusText( instrument.pInstrument->GetInstrumentName(), 1 );
+      m_pWatchOnStatusBar = std::make_unique<WatchOnStatusBar>( instrument.pWatch );
     },
     [this,&instrument]( ou::tf::TreeItem* pti ){ // fOnBuildPopup_t
       pti->NewMenu();

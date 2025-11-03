@@ -64,6 +64,7 @@ namespace option {
 class TreeItem;
 class WinChartView;
 class ComposeInstrument;
+class WatchOnStatusBar;
 
 class InstrumentViews
 : public wxPanel
@@ -245,6 +246,9 @@ private:
   OptionChainView* m_pOptionChainView; // only one OptionChainView required, should be able to simply swap models
   OptionChainModel* m_pOptionChainModel; // model switches out for each option chain, ensure retired prior to View
 
+  using pWatchOnStatusBar_t = std::unique_ptr<WatchOnStatusBar>;
+  pWatchOnStatusBar_t m_pWatchOnStatusBar;
+
   void Init();
   void CreateControls();
   void HandleTreeEventItemGetToolTip( wxTreeEvent& );
@@ -323,6 +327,34 @@ private:
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
+};
+
+class WatchOnStatusBar {
+  using pWatch_t = ou::tf::Watch::pWatch_t;
+public:
+  WatchOnStatusBar( pWatch_t pWatch )
+  : m_price {}
+  {
+    assert( pWatch );
+    m_pWatch = pWatch;
+    m_pWatch->OnTrade.Add( MakeDelegate( this, &WatchOnStatusBar::HandleTrade ) );
+    m_pWatch->StartWatch();
+  }
+  ~WatchOnStatusBar() {
+    if ( m_pWatch ) {
+      m_pWatch->StopWatch();
+      m_pWatch->OnTrade.Remove( MakeDelegate( this, &WatchOnStatusBar::HandleTrade ) );
+      m_pWatch.reset();
+    }
+  }
+  double Price() const { return m_price; }
+protected:
+private:
+  double m_price;
+  pWatch_t m_pWatch;
+  void HandleTrade( const ou::tf::Trade& trade ) {
+    m_price = trade.Price();
+  }
 };
 
 } // namespace tf
