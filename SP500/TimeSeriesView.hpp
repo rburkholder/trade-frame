@@ -62,8 +62,6 @@ private:
     ID_Null=wxID_HIGHEST, ID_TIMSERIESVIEW
   };
 
-  enum EColId { dt, bid_vol, bid_prc, trd_vol, trd_prc, ask_vol, ask_prc, _col_id_count };
-
   void Init();
   void CreateControls();
   void OnDestroy( wxWindowDestroyEvent& event );
@@ -74,8 +72,9 @@ private:
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-    ar & EColId::_col_id_count;
-    for ( int ix = 0; ix < EColId::_col_id_count; ++ix ) {
+    const unsigned int nColumns( GetNumberCols() );
+    ar & nColumns;
+    for ( int ix = 0; ix < nColumns; ++ix ) {
       ar & GetColSize( ix );
     }
   }
@@ -84,9 +83,8 @@ private:
   void load( Archive& ar, const unsigned int version ) {
     unsigned int nColumns;
     ar & nColumns;
-    assert( EColId::_col_id_count == nColumns );
     unsigned int width;
-    for ( int ix = 0; ix < EColId::_col_id_count; ++ix ) {
+    for ( int ix = 0; ix < nColumns; ++ix ) {
       ar & width;
       SetColSize( ix, width );
     }

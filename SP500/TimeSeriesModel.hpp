@@ -24,33 +24,50 @@
 #include <wx/grid.h>
 
 #include "TFTimeSeries/TimeSeries.h"
+#include "wx/generic/grid.h"
 
 class TimeSeriesModel
 : public wxGridTableBase {
 public:
 
-  TimeSeriesModel( const ou::tf::Quotes&, const ou::tf::Trades& );
+  TimeSeriesModel();
   virtual ~TimeSeriesModel();
+
+  void Set( const ou::tf::Quotes*, const ou::tf::Trades* );
 
   void UpdateDateTime( const boost::posix_time::ptime );
 
-  //virtual void SetView( wxGrid *grid ) override;
+  virtual void SetView( wxGrid * ) override;
   //virtual wxGrid* GetView() const override;
 
   protected:
 
   virtual int GetNumberRows() override;
   virtual int GetNumberCols() override;
-  virtual bool CanHaveAttributes() override;
-  virtual bool CanMeasureColUsingSameAttr( int col ) const override;
+  //virtual bool CanHaveAttributes() override;
+  //virtual bool CanMeasureColUsingSameAttr( int col ) const override;
 
   virtual bool IsEmptyCell( int row, int col ) override;
   virtual wxString GetValue( int row, int col ) override;
   virtual void SetValue( int row, int col, const wxString &value ) override;
 
+  virtual bool AppendRows( size_t numRows ) override;
+  virtual bool InsertRows( size_t pos, size_t numRows ) override;
+
+  virtual wxString GetColLabelValue( int col ) override;
+
+  virtual wxGridCellAttr* GetAttr( int row, int col, wxGridCellAttr::wxAttrKind ) override;
+
 private:
 
-  const ou::tf::Quotes& m_quotes;
-  const ou::tf::Trades& m_trades;
+  enum EColId { dt, bid_vol, bid_prc, trd_vol, trd_prc, ask_vol, ask_prc, _col_id_count };
+
+  const ou::tf::Quotes* m_pQuotes;
+  const ou::tf::Trades* m_pTrades;
+
+  wxGrid* m_pGrid;
+
+  bool m_bIteratorAvailable;
+  ou::tf::Quotes::const_iterator m_iterQuotes;
 
 };

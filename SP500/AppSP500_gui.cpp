@@ -143,7 +143,9 @@ bool AppSP500::OnInit() {
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppSP500::OnClose, this );  // start close of windows and controls
 
   m_pFCTimeSeriesView = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Time Series Review" );
+  m_pTimeSeriesModel = std::make_unique<TimeSeriesModel>();
   m_pTimeSeriesView = new TimeSeriesView( m_pFCTimeSeriesView );
+  m_pTimeSeriesView->SetTable( m_pTimeSeriesModel.get(), false, wxGrid::wxGridSelectRows );
   m_pFCTimeSeriesView->Attach( m_pTimeSeriesView );
   m_pFCTimeSeriesView->Layout();
   m_pFCTimeSeriesView->Show();
@@ -160,8 +162,7 @@ bool AppSP500::OnInit() {
       m_pwcv->Set( state );
     }
   , [this](const ou::tf::Quotes& quotes, const ou::tf::Trades& trades)->StrategyManager::fUpdateDateTime_t { // fSetTimeSeriesModel_t
-      m_pTimeSeriesModel = std::make_unique<TimeSeriesModel>( quotes, trades );
-      assert( m_pTimeSeriesView );
+      m_pTimeSeriesModel->Set( &quotes, &trades );
       m_pTimeSeriesModel->SetView( m_pTimeSeriesView );
       StrategyManager::fUpdateDateTime_t
         f = std::bind( &TimeSeriesModel::UpdateDateTime, m_pTimeSeriesModel.get(), std::placeholders::_1 );
