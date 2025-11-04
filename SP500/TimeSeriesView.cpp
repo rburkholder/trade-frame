@@ -54,6 +54,7 @@ bool TimeSeriesView::Create(
 
 void TimeSeriesView::CreateControls() {
   Bind( wxEVT_DESTROY, &TimeSeriesView::OnDestroy, this );
+  HideRowLabels();
   //CreateGrid( 0, 7 );
 }
 
