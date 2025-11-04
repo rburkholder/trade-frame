@@ -64,7 +64,7 @@ public:
 
 private:
 
-  enum EColId { dt, bid_vol, bid_prc, trd_vol, trd_prc, ask_vol, ask_prc, _col_id_count };
+  enum EColId { dt, bid_vol, bid_prc, trd_vol, trd_prc, ask_vol, ask_prc, imbalance, _col_id_count };
 
   const ou::tf::Quotes* m_pQuotes;
   const ou::tf::Trades* m_pTrades;

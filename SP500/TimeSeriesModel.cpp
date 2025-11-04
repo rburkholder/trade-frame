@@ -37,6 +37,7 @@ namespace {
   , "trd prc"
   , "ask vol"
   , "ask prc"
+  , "imbal"
   };
   static const std::string fmtVolume( "{}" );
   static const std::string fmtPrice( "{:.{}f}" );
@@ -174,15 +175,14 @@ wxString TimeSeriesModel::Datum( int col, const ou::tf::Quote& quote ) {
     case EColId::bid_prc:
       s = fmt::format( fmtPrice, quote.Bid(), 2 );
       break;
-    case EColId::trd_vol:
-      break;
-    case EColId::trd_prc:
-      break;
     case EColId::ask_vol:
       s = fmt::format( fmtVolume, quote.AskSize() );
       break;
     case EColId::ask_prc:
       s = fmt::format( fmtPrice, quote.Ask(), 2 );
+      break;
+    case EColId::imbalance:
+      s = fmt::format( fmtPrice, quote.Imbalance(), 4 );
       break;
     default:
       break;
@@ -196,19 +196,11 @@ wxString TimeSeriesModel::Datum( int col, const ou::tf::Trade& trade ) {
     case EColId::dt:
       s = boost::posix_time::to_iso_string( trade.DateTime() ) ;
       break;
-    case EColId::bid_vol:
-      break;
-    case EColId::bid_prc:
-      break;
     case EColId::trd_vol:
       s = fmt::format( fmtVolume, trade.Volume() );
       break;
     case EColId::trd_prc:
       s = fmt::format( fmtPrice, trade.Price(), 3 );
-      break;
-    case EColId::ask_vol:
-      break;
-    case EColId::ask_prc:
       break;
     default:
       break;
