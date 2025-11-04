@@ -29,7 +29,6 @@
 #include "TimeSeriesModel.hpp"
 
 namespace {
-  static const size_t c_nRows( 20 );
   static const char* rColumnLabels[] = {
     "dt"
   , "bid vol"
@@ -48,6 +47,7 @@ TimeSeriesModel::TimeSeriesModel()
 , m_pQuotes( nullptr )
 , m_pTrades( nullptr )
 , m_pGrid( nullptr )
+, m_nRows {}
 {
 }
 
@@ -65,7 +65,7 @@ void TimeSeriesModel::Set( const ou::tf::Quotes* pQuotes, const ou::tf::Trades* 
 // GetFirstFullyVisibleRow()
 // CalcCellsExposed (
 // GetDefaultRowSize ()
-// 	GetRowMinimalAcceptableHeight ()
+// GetRowMinimalAcceptableHeight ()
 
 void TimeSeriesModel::UpdateDateTime( const boost::posix_time::ptime dt ) {
   if ( m_pGrid ) {
@@ -78,7 +78,7 @@ void TimeSeriesModel::UpdateDateTime( const boost::posix_time::ptime dt ) {
       auto iterTrades = m_pTrades->AtOrAfter( dt );
 
       unsigned int ix {};
-      while ( ix < c_nRows ) {
+      while ( ix < m_nRows ) {
         if ( m_pQuotes->end() == iterQuotes ) break;
         if ( m_pTrades->end() == iterTrades ) break;
         if ( iterQuotes->DateTime() <= iterTrades->DateTime() ) {
@@ -93,15 +93,13 @@ void TimeSeriesModel::UpdateDateTime( const boost::posix_time::ptime dt ) {
       }
 
       m_pGrid->ClearGrid();
-      //m_pGrid->AutoSize();
-      //m_pGrid->ForceRefresh();
       m_pGrid->EndBatch();
     }
   }
 }
 
 int TimeSeriesModel::GetNumberRows() {
-  return c_nRows;
+  return m_nRows;
 }
 
 int TimeSeriesModel::GetNumberCols() {
@@ -113,6 +111,7 @@ wxString TimeSeriesModel::GetColLabelValue( int col ) {
 }
 
 bool TimeSeriesModel::AppendRows( size_t numRows ) {
+  m_nRows += numRows;
   if ( m_pGrid ) {
     wxGridTableMessage msg(
       this,
@@ -126,10 +125,26 @@ return true;
 
 // https://github.com/wxWidgets/wxWidgets/blob/master/src/generic/grid.cpp
 bool TimeSeriesModel::InsertRows( size_t pos, size_t numRows ) {
+  m_nRows += numRows;
   if ( m_pGrid ) {
     wxGridTableMessage msg(
       this,
       wxGRIDTABLE_NOTIFY_ROWS_INSERTED,
+      pos,
+      numRows
+    );
+    GetView()->ProcessTableMessage( msg );
+  }
+  return true;
+}
+
+bool TimeSeriesModel::DeleteRows( size_t pos, size_t numRows ) {
+  assert( m_nRows >= numRows );
+  m_nRows -= numRows;
+  if ( m_pGrid ) {
+    wxGridTableMessage msg(
+      this,
+      wxGRIDTABLE_NOTIFY_ROWS_DELETED,
       pos,
       numRows
     );
@@ -143,19 +158,8 @@ void TimeSeriesModel::SetView( wxGrid *pGrid ) {
   m_pGrid = pGrid;
 }
 
-//wxGrid* TimeSeriesModel::GetView() const {
-//}
-
-//bool TimeSeriesModel::CanHaveAttributes() {
-//  return false;
-//}
-
-//bool TimeSeriesModel::CanMeasureColUsingSameAttr( int col ) const {
-//  return false;
-//}
-
 bool TimeSeriesModel::IsEmptyCell( int row, int col ) {
-  return ( row >= c_nRows );
+  return ( row >= m_nRows );
 }
 
 wxString TimeSeriesModel::Datum( int col, const ou::tf::Quote& quote ) {

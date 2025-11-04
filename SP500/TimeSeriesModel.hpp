@@ -56,6 +56,7 @@ public:
 
   virtual bool AppendRows( size_t numRows ) override;
   virtual bool InsertRows( size_t pos, size_t numRows ) override;
+  virtual bool DeleteRows( size_t pos, size_t numRows ) override;
 
   virtual wxString GetColLabelValue( int col ) override;
 
@@ -69,6 +70,8 @@ private:
   const ou::tf::Trades* m_pTrades;
 
   wxGrid* m_pGrid;
+
+  size_t m_nRows;
 
   using variantDatum_t = std::variant<ou::tf::Quote, ou::tf::Trade>;
   using vDatum_t = std::vector<variantDatum_t>;

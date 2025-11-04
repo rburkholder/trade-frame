@@ -64,7 +64,8 @@ private:
 
   void Init();
   void CreateControls();
-  void OnDestroy( wxWindowDestroyEvent& event );
+  void OnSize( wxSizeEvent& );
+  void OnDestroy( wxWindowDestroyEvent& );
 
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );

@@ -53,13 +53,33 @@ bool TimeSeriesView::Create(
 }
 
 void TimeSeriesView::CreateControls() {
+  Bind( wxEVT_SIZE, &TimeSeriesView::OnSize, this );
   Bind( wxEVT_DESTROY, &TimeSeriesView::OnDestroy, this );
   HideRowLabels();
-  //CreateGrid( 0, 7 );
+}
+
+void TimeSeriesView::OnSize( wxSizeEvent& event ) {
+  const int height = event.GetSize().GetHeight();
+  if ( 0 < height ) {
+    if ( GetTable() ) {
+      const int nRows = height / GetDefaultRowSize();
+      const int nToChange = nRows - GetNumberRows();
+      if ( 0 == nToChange ) {}
+      else {
+        if ( 0 < nToChange ) {
+          GetTable()->AppendRows( nToChange );
+        }
+        else {
+          GetTable()->DeleteRows( 0, -nToChange );
+        }
+      }
+    }
+  }
 }
 
 void TimeSeriesView::OnDestroy( wxWindowDestroyEvent& event ) {
   assert( Unbind( wxEVT_DESTROY, &TimeSeriesView::OnDestroy, this ) );
+  assert( Unbind( wxEVT_SIZE, &TimeSeriesView::OnSize, this ) );
   event.Skip( true );  // auto followed by Destroy();
 }
 
