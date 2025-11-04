@@ -21,6 +21,9 @@
 
 #pragma once
 
+#include <vector>
+#include <variant>
+
 #include <wx/grid.h>
 
 #include "TFTimeSeries/TimeSeries.h"
@@ -67,7 +70,10 @@ private:
 
   wxGrid* m_pGrid;
 
-  bool m_bIteratorAvailable;
-  ou::tf::Quotes::const_iterator m_iterQuotes;
+  using variantDatum_t = std::variant<ou::tf::Quote, ou::tf::Trade>;
+  using vDatum_t = std::vector<variantDatum_t>;
+  vDatum_t m_vDatum;
 
+  wxString Datum( int col, const ou::tf::Quote& );
+  wxString Datum( int col, const ou::tf::Trade& );
 };

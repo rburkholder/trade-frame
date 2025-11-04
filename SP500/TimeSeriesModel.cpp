@@ -39,6 +39,8 @@ namespace {
   , "ask vol"
   , "ask prc"
   };
+  static const std::string fmtVolume( "{}" );
+  static const std::string fmtPrice( "{:.{}f}" );
 }
 
 TimeSeriesModel::TimeSeriesModel()
@@ -46,7 +48,6 @@ TimeSeriesModel::TimeSeriesModel()
 , m_pQuotes( nullptr )
 , m_pTrades( nullptr )
 , m_pGrid( nullptr )
-, m_bIteratorAvailable( false )
 {
 }
 
@@ -58,22 +59,49 @@ void TimeSeriesModel::Set( const ou::tf::Quotes* pQuotes, const ou::tf::Trades* 
   m_pTrades = pTrades;
 }
 
+// GoToCell()
+// IsVisible()
+// MakeCellVisible()
+// GetFirstFullyVisibleRow()
+// CalcCellsExposed (
+// GetDefaultRowSize ()
+// 	GetRowMinimalAcceptableHeight ()
+
 void TimeSeriesModel::UpdateDateTime( const boost::posix_time::ptime dt ) {
   if ( m_pGrid ) {
-    //const auto rows = m_pGrid->GetNumberRows();
-    m_pGrid->ClearGrid();
-    //m_pGrid->ForceRefresh();
     const auto size = m_pQuotes->Size();
-    auto iter = m_pQuotes->AtOrAfter( dt );
-    m_iterQuotes = iter;
-    m_bIteratorAvailable = true;
+    if ( 0 < size ) {
+      m_pGrid->BeginBatch();
+
+      m_vDatum.clear();
+      auto iterQuotes = m_pQuotes->AtOrAfter( dt );
+      auto iterTrades = m_pTrades->AtOrAfter( dt );
+
+      unsigned int ix {};
+      while ( ix < c_nRows ) {
+        if ( m_pQuotes->end() == iterQuotes ) break;
+        if ( m_pTrades->end() == iterTrades ) break;
+        if ( iterQuotes->DateTime() <= iterTrades->DateTime() ) {
+          m_vDatum.push_back( *iterQuotes );
+          ++iterQuotes;
+        }
+        else {
+          m_vDatum.push_back( *iterTrades );
+          ++ iterTrades;
+        }
+        ++ix;
+      }
+
+      m_pGrid->ClearGrid();
+      //m_pGrid->AutoSize();
+      //m_pGrid->ForceRefresh();
+      m_pGrid->EndBatch();
+    }
   }
 }
 
 int TimeSeriesModel::GetNumberRows() {
-  int nRows( c_nRows );
-  if ( m_pQuotes ) nRows = m_pQuotes->Size();
-  return nRows;
+  return c_nRows;
 }
 
 int TimeSeriesModel::GetNumberCols() {
@@ -130,37 +158,69 @@ bool TimeSeriesModel::IsEmptyCell( int row, int col ) {
   return ( row >= c_nRows );
 }
 
-wxString TimeSeriesModel::GetValue( int row, int col ) {
+wxString TimeSeriesModel::Datum( int col, const ou::tf::Quote& quote ) {
   wxString s;
-  if ( m_bIteratorAvailable ) {
-    ou::tf::Quotes::const_iterator iter = m_iterQuotes + row;
-    const ou::tf::Quote& quote( *iter );
-    switch ( col ) {
-      case EColId::dt:
-        s = boost::posix_time::to_iso_string( quote.DateTime() ) ;
-        break;
-      case EColId::bid_vol:
-        s = fmt::format( "{}", quote.BidSize() );
-        break;
-      case EColId::bid_prc:
-        s = fmt::format( "{:.{}f}", quote.Bid(), 2 );
-        break;
-      case EColId::trd_vol:
-        //s = fmt::format( "{}", quote.BidSize() );
-        break;
-      case EColId::trd_prc:
-        //s = fmt::format( "{}", quote.BidSize() );
-        break;
-      case EColId::ask_vol:
-         s = fmt::format( "{}", quote.AskSize() );
-       break;
-      case EColId::ask_prc:
-        s = fmt::format("{:.{}f}", quote.Ask(), 2 );
-        break;
-      default:
-        break;
-    }
+  switch ( col ) {
+    case EColId::dt:
+      s = boost::posix_time::to_iso_string( quote.DateTime() ) ;
+      break;
+    case EColId::bid_vol:
+      s = fmt::format( fmtVolume, quote.BidSize() );
+      break;
+    case EColId::bid_prc:
+      s = fmt::format( fmtPrice, quote.Bid(), 2 );
+      break;
+    case EColId::trd_vol:
+      break;
+    case EColId::trd_prc:
+      break;
+    case EColId::ask_vol:
+      s = fmt::format( fmtVolume, quote.AskSize() );
+      break;
+    case EColId::ask_prc:
+      s = fmt::format( fmtPrice, quote.Ask(), 2 );
+      break;
+    default:
+      break;
   }
+  return s;
+}
+
+wxString TimeSeriesModel::Datum( int col, const ou::tf::Trade& trade ) {
+  wxString s;
+  switch ( col ) {
+    case EColId::dt:
+      s = boost::posix_time::to_iso_string( trade.DateTime() ) ;
+      break;
+    case EColId::bid_vol:
+      break;
+    case EColId::bid_prc:
+      break;
+    case EColId::trd_vol:
+      s = fmt::format( fmtVolume, trade.Volume() );
+      break;
+    case EColId::trd_prc:
+      s = fmt::format( fmtPrice, trade.Price(), 3 );
+      break;
+    case EColId::ask_vol:
+      break;
+    case EColId::ask_prc:
+      break;
+    default:
+      break;
+  }
+  return s;
+}
+
+wxString TimeSeriesModel::GetValue( int row, int col ) {
+
+  wxString s;
+
+  if ( row < m_vDatum.size() ) {
+    const variantDatum_t datum( m_vDatum[ row ] );
+    std::visit( [this,col,&s]( auto&& arg ){ s = Datum( col, arg ); }, datum );
+  }
+
   return s;
 }
 
@@ -182,6 +242,11 @@ wxGridCellAttr* TimeSeriesModel::GetAttr( int row, int col, wxGridCellAttr::wxAt
         case EColId::ask_vol:
         case EColId::ask_prc:
           pAttr->SetTextColour( wxColour( 255, 0, 0 ) );
+          pAttr->SetAlignment( wxALIGN_RIGHT, wxALIGN_CENTER_VERTICAL );
+          break;
+        case EColId::trd_vol:
+        case EColId::trd_prc:
+          pAttr->SetTextColour( wxColour( 0, 255, 0 ) );
           pAttr->SetAlignment( wxALIGN_RIGHT, wxALIGN_CENTER_VERTICAL );
           break;
         case EColId::bid_vol:
