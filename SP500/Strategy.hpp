@@ -230,8 +230,8 @@ private:
   double m_dblPrvPrice; // calculating returns
   double m_dblPrvSD;
 
-  double m_dblSDDirection_sum;
-  double m_dblSDDirection_cnt;
+  //double m_dblSDDirection_sum;
+  //double m_dblSDDirection_cnt;
 
   ou::ChartEntryIndicator m_ceRtnPrice_mean;
   ou::ChartEntryIndicator m_ceRtnPrice_slope;
