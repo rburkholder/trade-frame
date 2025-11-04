@@ -22,7 +22,6 @@
 #pragma once
 
 #include <vector>
-#include <variant>
 
 #include <wx/grid.h>
 
@@ -73,10 +72,34 @@ private:
 
   size_t m_nRows;
 
-  using variantDatum_t = std::variant<ou::tf::Quote, ou::tf::Trade>;
-  using vDatum_t = std::vector<variantDatum_t>;
-  vDatum_t m_vDatum;
+  struct Row {
+    wxString sDateTime;
+    wxString sBidVol;
+    wxString sBidPrice;
+    wxString sTrdVol;
+    wxString sTrdPrice;
+    wxString sAskVol;
+    wxString sAskPrice;
+    wxString sImbalance;
+    wxColour colourTrdPrice;
+    wxColour colourImbalance;
+    Row() {};
+    Row( Row&& rhs )
+    : sDateTime( std::move( rhs.sDateTime ) )
+    , sBidVol( std::move( rhs.sBidVol ) )
+    , sBidPrice( std::move( rhs.sBidPrice ) )
+    , sTrdVol( std::move( rhs.sTrdVol ) )
+    , sTrdPrice( std::move( rhs.sTrdPrice ) )
+    , sAskVol( std::move( rhs.sAskVol ) )
+    , sAskPrice( std::move( rhs.sAskPrice ) )
+    , sImbalance( std::move( rhs.sImbalance ) )
+    , colourTrdPrice( rhs.colourTrdPrice )
+    , colourImbalance( rhs.colourImbalance )
+    {}
 
-  wxString Datum( int col, const ou::tf::Quote& );
-  wxString Datum( int col, const ou::tf::Trade& );
+  };
+
+  using vRow_t = std::vector<Row>;
+  vRow_t m_vRow;
+
 };

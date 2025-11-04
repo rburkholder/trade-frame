@@ -69,25 +69,67 @@ void TimeSeriesModel::Set( const ou::tf::Quotes* pQuotes, const ou::tf::Trades* 
 // GetRowMinimalAcceptableHeight ()
 
 void TimeSeriesModel::UpdateDateTime( const boost::posix_time::ptime dt ) {
+
+  static const wxColour colourBackgroundRed( 255,   0,   0, 30 );
+  static const wxColour colourBackgroundGrn(   0, 255,   0, 30 );
+  static const wxColour colourBackgroundBlu(   0,   0, 255, 30 );
+
   if ( m_pGrid ) {
     const auto size = m_pQuotes->Size();
     if ( 0 < size ) {
       m_pGrid->BeginBatch();
 
-      m_vDatum.clear();
+      m_vRow.clear();
       auto iterQuotes = m_pQuotes->AtOrAfter( dt );
       auto iterTrades = m_pTrades->AtOrAfter( dt );
+
+      bool bQuoteFound( false );
+      auto iterQuoteLast = m_pQuotes->end();
+      bool bTradeFound( false );
+      auto iterTradeLast = m_pTrades->end();
 
       unsigned int ix {};
       while ( ix < m_nRows ) {
         if ( m_pQuotes->end() == iterQuotes ) break;
         if ( m_pTrades->end() == iterTrades ) break;
         if ( iterQuotes->DateTime() <= iterTrades->DateTime() ) {
-          m_vDatum.push_back( *iterQuotes );
+          const ou::tf::Quote& quote( *iterQuotes );
+          Row row;
+          row.sDateTime = boost::posix_time::to_iso_string( quote.DateTime() );
+          row.sBidVol = fmt::format( fmtVolume, quote.BidSize() );
+          row.sBidPrice = fmt::format( fmtPrice, quote.Bid(), 2 );
+          row.sAskVol = fmt::format( fmtVolume, quote.AskSize() );
+          row.sAskPrice = fmt::format( fmtPrice, quote.Ask(), 2 );
+          auto imbalance = quote.Imbalance();
+          row.sImbalance = fmt::format( fmtPrice, imbalance, 3 );
+          if ( 0.0 == imbalance ) {}
+          else {
+            if ( 0.0 < imbalance ) {
+              row.colourImbalance = colourBackgroundBlu;
+            }
+            else {
+              row.colourImbalance = colourBackgroundRed;
+            }
+          }
+          m_vRow.emplace_back( std::move( row ) );
+          iterQuoteLast = iterQuotes;
+          bQuoteFound = true;
           ++iterQuotes;
         }
         else {
-          m_vDatum.push_back( *iterTrades );
+          const ou::tf::Trade& trade( *iterTrades );
+          const double price( trade.Price() );
+          Row row;
+          row.sDateTime = boost::posix_time::to_iso_string( trade.DateTime() );
+          row.sTrdVol = fmt::format( fmtVolume, trade.Volume() );
+          row.sTrdPrice = fmt::format( fmtPrice, price, 3 );
+          if ( bQuoteFound ) {
+            bool result = iterQuoteLast->LeeReady( bTradeFound ? iterTradeLast->Price() : price, price );
+            row.colourTrdPrice = result ? colourBackgroundGrn : colourBackgroundRed;
+          }
+          m_vRow.emplace_back( std::move( row ) );
+          iterTradeLast = iterTrades;
+          bTradeFound = true;
           ++ iterTrades;
         }
         ++ix;
@@ -163,58 +205,40 @@ bool TimeSeriesModel::IsEmptyCell( int row, int col ) {
   return ( row >= m_nRows );
 }
 
-wxString TimeSeriesModel::Datum( int col, const ou::tf::Quote& quote ) {
-  wxString s;
-  switch ( col ) {
-    case EColId::dt:
-      s = boost::posix_time::to_iso_string( quote.DateTime() ) ;
-      break;
-    case EColId::bid_vol:
-      s = fmt::format( fmtVolume, quote.BidSize() );
-      break;
-    case EColId::bid_prc:
-      s = fmt::format( fmtPrice, quote.Bid(), 2 );
-      break;
-    case EColId::ask_vol:
-      s = fmt::format( fmtVolume, quote.AskSize() );
-      break;
-    case EColId::ask_prc:
-      s = fmt::format( fmtPrice, quote.Ask(), 2 );
-      break;
-    case EColId::imbalance:
-      s = fmt::format( fmtPrice, quote.Imbalance(), 4 );
-      break;
-    default:
-      break;
-  }
-  return s;
-}
-
-wxString TimeSeriesModel::Datum( int col, const ou::tf::Trade& trade ) {
-  wxString s;
-  switch ( col ) {
-    case EColId::dt:
-      s = boost::posix_time::to_iso_string( trade.DateTime() ) ;
-      break;
-    case EColId::trd_vol:
-      s = fmt::format( fmtVolume, trade.Volume() );
-      break;
-    case EColId::trd_prc:
-      s = fmt::format( fmtPrice, trade.Price(), 3 );
-      break;
-    default:
-      break;
-  }
-  return s;
-}
-
-wxString TimeSeriesModel::GetValue( int row, int col ) {
+wxString TimeSeriesModel::GetValue( int ixRow, int ixCol ) {
 
   wxString s;
 
-  if ( row < m_vDatum.size() ) {
-    const variantDatum_t datum( m_vDatum[ row ] );
-    std::visit( [this,col,&s]( auto&& arg ){ s = Datum( col, arg ); }, datum );
+  if ( ixRow < m_vRow.size() ) {
+    const Row& row( m_vRow.at( ixRow ) );
+    switch ( ixCol ) {
+      case EColId::dt:
+        return row.sDateTime;
+        break;
+      case EColId::bid_vol:
+        return row.sBidVol;
+        break;
+      case EColId::bid_prc:
+        return row.sBidPrice;
+        break;
+      case EColId::trd_vol:
+        return row.sTrdVol;
+        break;
+      case EColId::trd_prc:
+        return row.sTrdPrice;
+        break;
+      case EColId::ask_vol:
+        return row.sAskVol;
+        break;
+      case EColId::ask_prc:
+        return row.sAskPrice;
+        break;
+      case EColId::imbalance:
+        return row.sImbalance;
+        break;
+      default:
+        break;
+    }
   }
 
   return s;
@@ -223,44 +247,52 @@ wxString TimeSeriesModel::GetValue( int row, int col ) {
 void TimeSeriesModel::SetValue( int row, int col, const wxString &value ) {
 }
 
-wxGridCellAttr* TimeSeriesModel::GetAttr( int row, int col, wxGridCellAttr::wxAttrKind kind ) {
+wxGridCellAttr* TimeSeriesModel::GetAttr( int ixRow, int ixCol, wxGridCellAttr::wxAttrKind kind ) {
 
   wxGridCellAttr* pAttr = new wxGridCellAttr();
 
-  switch ( kind ) {
-    case wxGridCellAttr::wxAttrKind::Any:
-    case wxGridCellAttr::wxAttrKind::Cell:
-    case wxGridCellAttr::wxAttrKind::Col:
-      switch ( col ) {
-        case EColId::dt:
-          pAttr->SetAlignment( wxALIGN_LEFT, wxALIGN_CENTER_VERTICAL );
-          break;
-        case EColId::ask_vol:
-        case EColId::ask_prc:
-          pAttr->SetTextColour( wxColour( 255, 0, 0 ) );
-          pAttr->SetAlignment( wxALIGN_RIGHT, wxALIGN_CENTER_VERTICAL );
-          break;
-        case EColId::trd_vol:
-        case EColId::trd_prc:
-          pAttr->SetTextColour( wxColour( 0, 255, 0 ) );
-          pAttr->SetAlignment( wxALIGN_RIGHT, wxALIGN_CENTER_VERTICAL );
-          break;
-        case EColId::bid_vol:
-        case EColId::bid_prc:
-          pAttr->SetTextColour( wxColour( 0, 0, 255 ) );
-          pAttr->SetAlignment( wxALIGN_RIGHT, wxALIGN_CENTER_VERTICAL );
-          break;
-        default:
-          pAttr->SetAlignment( wxALIGN_RIGHT, wxALIGN_CENTER_VERTICAL );
-          break;
-      }
-      break;
-    case wxGridCellAttr::wxAttrKind::Row:
-      break;
-    case wxGridCellAttr::wxAttrKind::Default:
-      break;
-    default:
-      break;
+  if ( ixRow < m_vRow.size() ) {
+    const Row& row( m_vRow.at( ixRow ) );
+    switch ( kind ) {
+      case wxGridCellAttr::wxAttrKind::Any:
+      case wxGridCellAttr::wxAttrKind::Cell:
+      case wxGridCellAttr::wxAttrKind::Col:
+        switch ( ixCol ) {
+          case EColId::dt:
+            pAttr->SetAlignment( wxALIGN_LEFT, wxALIGN_CENTER_VERTICAL );
+            break;
+          case EColId::ask_vol:
+          case EColId::ask_prc:
+            pAttr->SetTextColour( wxColour( 255, 0, 40 ) );
+            pAttr->SetAlignment( wxALIGN_RIGHT, wxALIGN_CENTER_VERTICAL );
+            break;
+          case EColId::trd_vol:
+          case EColId::trd_prc:
+            //pAttr->SetTextColour( wxColour( 0, 255, 40 ) );
+            pAttr->SetBackgroundColour( row.colourTrdPrice );
+            pAttr->SetAlignment( wxALIGN_RIGHT, wxALIGN_CENTER_VERTICAL );
+            break;
+          case EColId::bid_vol:
+          case EColId::bid_prc:
+            pAttr->SetTextColour( wxColour( 0, 40, 255 ) );
+            pAttr->SetAlignment( wxALIGN_RIGHT, wxALIGN_CENTER_VERTICAL );
+            break;
+          case EColId::imbalance:
+            pAttr->SetBackgroundColour( row.colourImbalance );
+            pAttr->SetAlignment( wxALIGN_RIGHT, wxALIGN_CENTER_VERTICAL );
+            break;
+          default:
+            pAttr->SetAlignment( wxALIGN_RIGHT, wxALIGN_CENTER_VERTICAL );
+            break;
+        }
+        break;
+      case wxGridCellAttr::wxAttrKind::Row:
+        break;
+      case wxGridCellAttr::wxAttrKind::Default:
+        break;
+      default:
+        break;
+    }
   }
 
   pAttr->SetReadOnly();
