@@ -24,6 +24,7 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 
 struct Features_raw {
+  // a change here requires a change in Model.hpp
 
   boost::posix_time::ptime dt; // base for preidcted time steps
 
@@ -40,7 +41,9 @@ struct Features_raw {
   double dblReturnsMean;
   double dblReturnsSlope;
 
-  Features_raw() // maybe not required
+  //double dblQuoteImbalance;
+
+  Features_raw()
   : dblPrice {}
   , dblSDDirection {}
   , dblTickJ {}
@@ -49,6 +52,7 @@ struct Features_raw {
   , dblEma029 {}
   , dblReturnsMean {}
   , dblReturnsSlope {}
+  //, dblQuoteImbalance {}
   {}
 
 };
@@ -87,6 +91,8 @@ struct Features_scaled {
   Real returns_mean;
   Real returns_slope;
 
+  //Real qoute_imbalance;
+
   void Zero() {
     price = 0.0;
     SDDirection = 0.0;
@@ -96,6 +102,7 @@ struct Features_scaled {
     tickL = 0.0;
     returns_mean = 0.0;
     returns_slope = 0.0;
+    //qoute_imbalance = 0.0;
   }
 
 };

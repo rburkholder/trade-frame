@@ -66,7 +66,14 @@ private:
   c10::Device m_torchDevice;
 
   // will be attempting to predict normalized value referenced at ixTrade
-  enum EFeature { ixTrade = 0, ixSDDirection, ixEma029, ixEma013, ixTickj, ixTickl, ixRtnMean, ixRtnSlp, nInputFeature_ };
+  enum EFeature {
+    ixTrade = 0
+  , ixSDDirection
+  , ixEma029, ixEma013
+  , ixTickj, ixTickl
+  , ixRtnMean, ixRtnSlp
+//  , ixQuoteImbalance
+  , nInputFeature_ };
 
   template<typename type>
   using rFields_t = type[ nInputFeature_ ];
@@ -84,6 +91,7 @@ private:
             , const type ema029, const type ema013
             , const type tickj, const type tickl
             , const type rtn_mean, const type rtn_slope
+//            , const type quote_imbalance
     ) {
       fields[ ixEma029 ] = ema029;
       fields[ ixEma013 ] = ema013;
@@ -93,6 +101,7 @@ private:
       fields[ ixTickl  ] = tickl;
       fields[ ixRtnMean ] = rtn_mean;
       fields[ ixRtnSlp ] = rtn_slope;
+//      fields[ ixQuoteImbalance ] = quote_imbalance;
     }
   };
 

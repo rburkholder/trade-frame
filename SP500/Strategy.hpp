@@ -140,6 +140,28 @@ private:
 
   VolumeWeightedPrice m_vwp;
 
+  struct AveragePerInterval {
+    double sum;
+    size_t count;
+    AveragePerInterval(): sum {}, count {} {}
+    AveragePerInterval( double value ): sum( value ), count( 1 ) {}
+    void Add( double value ) {
+      sum += value;
+      ++count;
+    }
+    double operator()() {
+      if ( 0 == count ) { return 0.0; }
+      else {
+        const double average( sum / count );
+        sum = 0.0;
+        count = 0;
+        return average;
+      }
+    }
+  };
+
+  AveragePerInterval m_apiQuoteImbalance;
+
   Features_raw m_features;
 
   uint64_t m_cntQuotePriceChanged;

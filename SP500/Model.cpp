@@ -169,6 +169,7 @@ void Model::Append( const Features_raw& raw, Features_scaled& scaled ) {
     , scaled.ema029.flt, scaled.ema013.flt
     , scaled.tickJ.flt, scaled.tickL.flt
     , scaled.returns_mean.flt, scaled.returns_slope.flt
+//    , scaled.qoute_imbalance.flt
     );
 
     m_vDataScaled.push_back( scaled_flt ); // will need to timestamp each entry
