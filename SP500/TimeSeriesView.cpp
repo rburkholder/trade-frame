@@ -56,6 +56,9 @@ void TimeSeriesView::CreateControls() {
   Bind( wxEVT_SIZE, &TimeSeriesView::OnSize, this );
   Bind( wxEVT_DESTROY, &TimeSeriesView::OnDestroy, this );
   HideRowLabels();
+  //const auto row_label_size( GetRowLabelSize() );
+  //const auto row_size( GetDefaultRowSize() );
+  SetDefaultRowSize( GetDefaultRowSize() - 8, true );
 }
 
 void TimeSeriesView::OnSize( wxSizeEvent& event ) {
