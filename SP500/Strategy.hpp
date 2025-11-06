@@ -143,12 +143,15 @@ private:
   struct AveragePerInterval {
     double sum;
     size_t count;
+
     AveragePerInterval(): sum {}, count {} {}
     AveragePerInterval( double value ): sum( value ), count( 1 ) {}
+
     void Add( double value ) {
       sum += value;
       ++count;
     }
+
     double operator()() {
       if ( 0 == count ) { return 0.0; }
       else {

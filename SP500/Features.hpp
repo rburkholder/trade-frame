@@ -41,7 +41,7 @@ struct Features_raw {
   double dblReturnsMean;
   double dblReturnsSlope;
 
-  //double dblQuoteImbalance;
+  double dblQuoteImbalance;
 
   Features_raw()
   : dblPrice {}
@@ -52,7 +52,7 @@ struct Features_raw {
   , dblEma029 {}
   , dblReturnsMean {}
   , dblReturnsSlope {}
-  //, dblQuoteImbalance {}
+  , dblQuoteImbalance {}
   {}
 
 };
@@ -91,7 +91,7 @@ struct Features_scaled {
   Real returns_mean;
   Real returns_slope;
 
-  //Real qoute_imbalance;
+  Real qoute_imbalance;
 
   void Zero() {
     price = 0.0;
@@ -102,7 +102,7 @@ struct Features_scaled {
     tickL = 0.0;
     returns_mean = 0.0;
     returns_slope = 0.0;
-    //qoute_imbalance = 0.0;
+    qoute_imbalance = 0.0;
   }
 
 };

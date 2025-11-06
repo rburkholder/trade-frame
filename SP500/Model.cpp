@@ -155,6 +155,8 @@ bool Model::Scale( const Features_raw& raw, Features_scaled& scaled ) {
   const double signmoidReturnsSlope( bipolar_sigmoid<1>( raw.dblReturnsSlope ) );
   scaled.returns_slope = ScaleTranslate( signmoidReturnsSlope );
 
+  scaled.qoute_imbalance = ScaleTranslate( raw.dblQuoteImbalance );
+
   return bScaled;
 
 }
@@ -169,7 +171,7 @@ void Model::Append( const Features_raw& raw, Features_scaled& scaled ) {
     , scaled.ema029.flt, scaled.ema013.flt
     , scaled.tickJ.flt, scaled.tickL.flt
     , scaled.returns_mean.flt, scaled.returns_slope.flt
-//    , scaled.qoute_imbalance.flt
+    , scaled.qoute_imbalance.flt
     );
 
     m_vDataScaled.push_back( scaled_flt ); // will need to timestamp each entry

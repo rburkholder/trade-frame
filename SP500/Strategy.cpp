@@ -363,7 +363,7 @@ void Strategy::HandleQuote( const ou::tf::Quote& quote ) {
 
     const double imbalance( quote.Imbalance() );
 
-    //m_apiQuoteImbalance.Add( imbalance );
+    m_apiQuoteImbalance.Add( imbalance );
 
     const auto dt( quote.DateTime() );
 
@@ -1279,7 +1279,7 @@ void Strategy::Calc01SecIndicators( const ou::tf::Bar& bar ) {
   const auto dt( bar.DateTime() );
 
   m_features.dt = dt;
-  //m_features.dblQuoteImbalance = m_apiQuoteImbalance();
+  m_features.dblQuoteImbalance = m_apiQuoteImbalance();
 
   const double vwp( m_vwp() );
   const double price( 0.0 == vwp ? bar.Close() : vwp );
