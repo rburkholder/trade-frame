@@ -90,7 +90,7 @@ public:
 protected:
 private:
 
-  enum EChartSlot { Price, TickVolume, QuoteVolume, rtnPriceSDa, rtnPriceSDo, TickStat, ScalTrans, Imbalance, Ratio, Predict, PredVec, PL };
+  enum EChartSlot { Price, TickVolume, Signal, QuoteVolume, rtnPriceSDa, rtnPriceSDo, TickStat, ScalTrans, Imbalance, Ratio, Predict, PredVec, PL };
 
   const Flags& m_flags;
 
@@ -162,6 +162,32 @@ private:
       }
     }
   };
+
+  struct Sources {
+    double tickJ;
+    double tickL;
+    double imbalance;
+    double bollinger;
+  };
+
+  struct Signals {
+    double trend_long;   // upper: low to high
+    double trend_short;  // lower: high to low
+    double trend_net;
+    double revert_long;  // lower: low to high
+    double revert_short; // upper: high to low
+    void Zero() {
+      trend_long = trend_short = 0.0;
+      revert_long = revert_short = 0.0;
+    }
+  };
+
+  Sources m_sources;
+  Signals m_signals;
+
+  ou::ChartEntryIndicator m_ceSignalLong;
+  ou::ChartEntryIndicator m_ceSignalResult;
+  ou::ChartEntryIndicator m_ceSignalShort;
 
   AveragePerInterval m_apiQuoteImbalance;
 
@@ -315,11 +341,9 @@ private:
 
   unsigned int m_nLongEntries;
   unsigned int m_nLongFills;
-  unsigned int m_nLongEmas;
   unsigned int m_nLongStops;
   unsigned int m_nShortEntries;
   unsigned int m_nShortFills;
-  unsigned int m_nShortEmas;
   unsigned int m_nShortStops;
 
   enum class EZigZag { init, tracklower, trackupper } m_eZigZag;
