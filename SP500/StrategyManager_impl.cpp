@@ -155,6 +155,8 @@ void StrategyManager_impl::BuildProvider_IQF() {
   //m_data = m_exec = m_sim;
   //m_sim->SetThreadCount( m_choices.nThreads );  // don't do this, will post across unsynchronized threads
 
+  m_iqf->EnableExecution( true ); // don't use this if m_tws put into mix as execution provider
+
   //BOOST_LOG_TRIVIAL(trace) << "BuildProvider_IQF - look at thread id"; // => is thread id of training process
   m_iqf->OnConnected.Add( MakeDelegate( this, &StrategyManager_impl::HandleIQFConnected ) );
   m_iqf->Connect();
