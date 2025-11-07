@@ -93,16 +93,4 @@ struct Features_scaled {
 
   Real qoute_imbalance;
 
-  void Zero() {
-    price = 0.0;
-    SDDirection = 0.0;
-    ema013 = 0.0;
-    ema029 = 0.0;
-    tickJ = 0.0;
-    tickL = 0.0;
-    returns_mean = 0.0;
-    returns_slope = 0.0;
-    qoute_imbalance = 0.0;
-  }
-
 };
