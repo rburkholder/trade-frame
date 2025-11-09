@@ -75,7 +75,7 @@ Strategy::Strategy(
 , m_ceLongExit( ou::ChartEntryShape::EShape::LongStop, ou::Colour::Blue )
 , m_bfQuotes01Sec(  1 )
 , m_dblMid {}
-, m_nEnterLong {}, m_nEnterShort {}
+, m_nEnterLong {}, m_nEnterShort {}, m_nEnterCancels {}
 , m_dblPrvPrice {}
 , m_dblPrvSD {}
 //, m_dblSDDirection_sum {}, m_dblSDDirection_cnt {}
@@ -96,6 +96,7 @@ Strategy::Strategy(
 , m_cntOffsetUp {}, m_cntOffsetDn {}
 , m_nLongEntries {}, m_nLongFills {}, m_nLongStops {}
 , m_nShortEntries {}, m_nShortFills {}, m_nShortStops {}
+, m_dblEntryPrice {}, m_dblEntryTarget {}, m_dblEntryStop {}
 {
   SetupChart();
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
@@ -897,47 +898,59 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   static const int c_limit_entry_timeout( 3 );
   static const int c_limit_exit_timeout( 33 );
   static const double c_enter_buffer( 0.01 );
-  static const double c_profit_take( 0.05 );
+  static const double c_min_offset( 0.06 );
 
   switch ( m_pTrackOrder->State()() ) {
     case ETradeState::Search:
       // todo: don't enter when bollinger band is narrow and flat
       // when moved in the correct distance of 0.03, bring up stop
       // measure jitter and use as stop, but probably will be too tight
-      if ( 0.0 < m_signals.trend_net ) {
-        BOOST_LOG_TRIVIAL(trace) << "** Enter Long," << ema13 << '<' << bid << ',' << ask;
-        ou::tf::OrderArgs oa( dt, 100, bid, ask + c_enter_buffer, c_limit_entry_timeout );
-        oa.Set(
-          [](){ // fOrderCancelled_t
-            // auto returns to search?
-            BOOST_LOG_TRIVIAL(trace) << "** Enter Long, time based cancellation";
-          },
-          [this,dt]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ //fOrderFilled_t
-            // partial fills?
-            // set stop and max profit limit order (need to make braket order work in position, will it work for futures?)
-            //m_pTrackOrder->State().Set( ETradeState::ExitSignalUp, "ExitLongLmt", __LINE__  );
-          }
-        );
-        m_pTrackOrder->EnterLongLmt( oa );
-        m_nLongEntries++;
-      }
-      else {
-        if ( 0.0 > m_signals.trend_net ) {
-          BOOST_LOG_TRIVIAL(trace) << "** Enter Short," << ema13 << '>' << ask << ',' << bid;
-          ou::tf::OrderArgs oa( dt, 100, ask, bid - c_enter_buffer, c_limit_entry_timeout );
+      if ( c_min_offset < bb_offset ) {
+        if ( 0.0 < m_signals.trend_net ) {
+          BOOST_LOG_TRIVIAL(trace) << "*** Enter Long," << ema13 << '<' << bid << ',' << ask << ',' << bb_offset;
+          ou::tf::OrderArgs oa( dt, 100, bid, ask + c_enter_buffer, c_limit_entry_timeout );
           oa.Set(
-            [](){ // fOrderCancelled_t
-              // auto returns to search?
-              BOOST_LOG_TRIVIAL(trace) << "** Enter Short, time based cancellation";
+            [this](){ // fOrderCancelled_t
+              BOOST_LOG_TRIVIAL(trace) << "* Enter Long, time based cancellation";
+              m_nEnterCancels++;
             },
-            [this,dt]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ //fOrderFilled_t
+            [this,dt,bb_offset]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ //fOrderFilled_t
+              m_dblEntryTarget = price + bb_offset;
+              m_dblEntryPrice = price;
+              m_dblEntryStop = price - bb_offset;
+              m_nLongFills++;
+              InitProgressUp( price );
               // partial fills?
               // set stop and max profit limit order (need to make braket order work in position, will it work for futures?)
-              //m_pTrackOrder->State().Set( ETradeState::ExitSignalDn, "ExitShortLmt", __LINE__ );
+              //m_pTrackOrder->State().Set( ETradeState::ExitSignalUp, "ExitLongLmt", __LINE__  );
             }
           );
-          m_pTrackOrder->EnterShortLmt( oa );
-          m_nShortEntries++;
+          m_pTrackOrder->EnterLongLmt( oa );
+          m_nLongEntries++;
+        }
+        else {
+          if ( 0.0 > m_signals.trend_net ) {
+            BOOST_LOG_TRIVIAL(trace) << "*** Enter Short," << ema13 << '>' << ask << ',' << bid << ',' << bb_offset;
+            ou::tf::OrderArgs oa( dt, 100, ask, bid - c_enter_buffer, c_limit_entry_timeout );
+            oa.Set(
+              [this](){ // fOrderCancelled_t
+                BOOST_LOG_TRIVIAL(trace) << "* Enter Short, time based cancellation";
+                m_nEnterCancels++;
+              },
+              [this,dt,bb_offset]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ //fOrderFilled_t
+                m_dblEntryStop = price + bb_offset;
+                m_dblEntryPrice = price;
+                m_dblEntryTarget = price - bb_offset;
+                m_nShortFills++;
+                InitProgressDn( price );
+                // partial fills?
+                // set stop and max profit limit order (need to make braket order work in position, will it work for futures?)
+                //m_pTrackOrder->State().Set( ETradeState::ExitSignalDn, "ExitShortLmt", __LINE__ );
+              }
+            );
+            m_pTrackOrder->EnterShortLmt( oa );
+            m_nShortEntries++;
+          }
         }
       }
       break;
@@ -946,26 +959,58 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     case ETradeState::EntrySubmittedDn:
       break;
     case ETradeState::ExitSignalUp:
-      {
-        //UpdatePositionProgressUp( quote );
-        if ( 0 < m_cntOffsetDn ) {
-          if ( 0.0 > m_signals.trend_net ) {
-            BOOST_LOG_TRIVIAL(trace) << "** Exit Long," << m_signals.trend_net;
-            ou::tf::OrderArgs oa( dt, 100, ask );
-            m_pTrackOrder->ExitLongMkt( oa );
-          }
+      //UpdatePositionProgressUp( quote );
+      if ( m_dblEntryTarget < bid ) {
+        BOOST_LOG_TRIVIAL(trace) << "** Exit Long @ profit," << m_signals.trend_net << ',' << m_dblEntryTarget;
+        ou::tf::OrderArgs oa( dt, 100, bid );
+        oa.Set(
+          [](){ // fOrderCancelled_t
+          },
+          [this]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ //fOrderFilled_t
+            TallyProgressUp( price );
+          } );
+        m_pTrackOrder->ExitLongMkt( oa );
+      }
+      else {
+        if ( m_dblEntryStop > ask ) {
+          BOOST_LOG_TRIVIAL(trace) << "** Exit Long @ loss," << m_signals.trend_net << ',' << m_dblEntryStop;
+          ou::tf::OrderArgs oa( dt, 100, ask );
+          oa.Set(
+            [](){ // fOrderCancelled_t
+            },
+            [this]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ //fOrderFilled_t
+              TallyProgressUp( price );
+            } );
+          m_pTrackOrder->ExitLongMkt( oa );
+          m_nLongStops++;
         }
       }
       break;
     case ETradeState::ExitSignalDn:
-      {
-        //UpdatePositionProgressDn( quote );
-        if ( 0 < m_cntOffsetDn ) {
-          if ( 0.0 < m_signals.trend_net ) {
-            BOOST_LOG_TRIVIAL(trace) << "** Exit Short," << m_signals.trend_net;
-            ou::tf::OrderArgs oa( dt, 100, bid );
-            m_pTrackOrder->ExitShortMkt( oa );
-          }
+      //UpdatePositionProgressDn( quote );
+      if ( m_dblEntryTarget > ask ) {
+        BOOST_LOG_TRIVIAL(trace) << "** Exit Short @ profit," << m_signals.trend_net << ',' << m_dblEntryTarget;
+        ou::tf::OrderArgs oa( dt, 100, ask );
+        oa.Set(
+          [](){ // fOrderCancelled_t
+          },
+          [this]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ //fOrderFilled_t
+            TallyProgressDn( price );
+          } );
+        m_pTrackOrder->ExitShortMkt( oa );
+      }
+      else {
+        if ( m_dblEntryStop < bid ) {
+          BOOST_LOG_TRIVIAL(trace) << "** Exit Long @ loss," << m_signals.trend_net << ',' << m_dblEntryStop;
+          ou::tf::OrderArgs oa( dt, 100, bid );
+          oa.Set(
+            [](){ // fOrderCancelled_t
+            },
+            [this]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ //fOrderFilled_t
+              TallyProgressDn( price );
+            } );
+          m_pTrackOrder->ExitShortMkt( oa );
+          m_nShortStops++;
         }
       }
       break;
@@ -995,6 +1040,58 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     default:
       // todo: track unused states
       break;
+  }
+}
+
+void Strategy::InitProgressUp( const double price ) {
+  ++m_nEnterLong;
+  m_dblPrice_hi = m_dblPrice_start = m_dblPrice_lo = price;
+}
+
+void Strategy::TallyProgressUp( const double price ) {
+  if ( m_dblPrice_start < price ) {
+    m_nWin++;
+    m_dblPrice_sum_win += ( price - m_dblPrice_start );
+  }
+  else {
+    m_nLoss++;
+    m_dblPrice_sum_loss += ( m_dblPrice_start - price );
+  }
+
+  if ( m_dblPrice_start < m_dblPrice_hi ) {
+    m_nMaxProfit++;
+    m_dblPrice_sum_max_profit += ( m_dblPrice_hi - m_dblPrice_start );
+  }
+
+  if ( m_dblPrice_start > m_dblPrice_lo ) {
+    m_nMaxLoss++;
+    m_dblPrice_sum_max_loss += ( m_dblPrice_start - m_dblPrice_lo );
+  }
+}
+
+void Strategy::InitProgressDn( const double price ) {
+  ++m_nEnterShort;
+  m_dblPrice_hi = m_dblPrice_start = m_dblPrice_lo = price;
+}
+
+void Strategy::TallyProgressDn( const double price ) {
+  if ( m_dblPrice_start > price ) {
+    m_nWin++;
+    m_dblPrice_sum_win += ( m_dblPrice_start - price );
+  }
+  else {
+    m_nLoss++;
+    m_dblPrice_sum_loss += ( price - m_dblPrice_start );
+  }
+
+  if ( m_dblPrice_start < m_dblPrice_hi ) {
+    m_nMaxLoss++;
+    m_dblPrice_sum_max_loss += ( m_dblPrice_hi - m_dblPrice_start );
+  }
+
+  if ( m_dblPrice_start > m_dblPrice_lo ) {
+    m_nMaxProfit++;
+    m_dblPrice_sum_max_profit += ( m_dblPrice_start - m_dblPrice_lo );
   }
 }
 
@@ -1052,7 +1149,7 @@ void Strategy::EnterLong( const ou::tf::Trade& trade ) {
   oa.Set(
     nullptr // fOrderCancelled_t
   , [this]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ // fOrderFilled_t
-      m_dblPrice_hi = m_dblPrice_start = m_dblPrice_lo = price;
+      InitProgressUp( price );
     } );
   m_pTrackOrder->EnterLongLmt( oa );
 }
@@ -1071,7 +1168,7 @@ void Strategy::EnterShort( const ou::tf::Trade& trade ) {
   oa.Set(
     nullptr // fOrderCancelled_t
   , [this]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ // fOrderFilled_t
-      m_dblPrice_hi = m_dblPrice_start = m_dblPrice_lo = price;
+      InitProgressDn( price );
     } );
   m_pTrackOrder->EnterShortLmt( oa );
 }
@@ -1120,24 +1217,7 @@ void Strategy::UpdatePositionProgressUp_order( ou::tf::OrderArgs& oa, bool reent
       // go back to search
     }
   , [this,reenter]( quantity_t quantity, double price, double commission ){ // fOrderFilled_t, long closed
-      if ( m_dblPrice_start < price ) {
-        m_nWin++;
-        m_dblPrice_sum_win += ( price - m_dblPrice_start );
-      }
-      else {
-        m_nLoss++;
-        m_dblPrice_sum_loss += ( m_dblPrice_start - price );
-      }
-
-      if ( m_dblPrice_start < m_dblPrice_hi ) {
-        m_nMaxProfit++;
-        m_dblPrice_sum_max_profit += ( m_dblPrice_hi - m_dblPrice_start );
-      }
-
-      if ( m_dblPrice_start > m_dblPrice_lo ) {
-        m_nMaxLoss++;
-        m_dblPrice_sum_max_loss += ( m_dblPrice_start - m_dblPrice_lo );
-      }
+      TallyProgressUp( price );
 
       if ( reenter ) {
         EnterShort( m_trade );
@@ -1191,24 +1271,7 @@ void Strategy::UpdatePositionProgressDn_order( ou::tf::OrderArgs& oa, bool reent
       // go back to search
     }
   , [this,reenter]( quantity_t quantity, double price, double commission ){ // fOrderFilled_t, short closed
-      if ( m_dblPrice_start > price ) {
-        m_nWin++;
-        m_dblPrice_sum_win += ( m_dblPrice_start - price );
-      }
-      else {
-        m_nLoss++;
-        m_dblPrice_sum_loss += ( price - m_dblPrice_start );
-      }
-
-      if ( m_dblPrice_start < m_dblPrice_hi ) {
-        m_nMaxLoss++;
-        m_dblPrice_sum_max_loss += ( m_dblPrice_hi - m_dblPrice_start );
-      }
-
-      if ( m_dblPrice_start > m_dblPrice_lo ) {
-        m_nMaxProfit++;
-        m_dblPrice_sum_max_profit += ( m_dblPrice_start - m_dblPrice_lo );
-      }
+      TallyProgressDn( price );
 
       if ( reenter ) {
         EnterLong( m_trade );
@@ -1344,7 +1407,7 @@ void Strategy::HandleGoNeutral( boost::gregorian::date, boost::posix_time::time_
 }
 
 void Strategy::HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_duration td ) {
-  BOOST_LOG_TRIVIAL(trace) << "HandleAtRHClose," << td << ',' << m_nEnterLong << ',' << m_nEnterShort;
+  BOOST_LOG_TRIVIAL(trace) << "HandleAtRHClose," << td << ",l=" << m_nEnterLong << ",s=" << m_nEnterShort << ",c=" << m_nEnterCancels;
   const double actual_profit( m_dblPrice_sum_win / m_nWin );
   BOOST_LOG_TRIVIAL(info) << "profit: " << m_dblPrice_sum_win << '/' << m_nWin << '=' << actual_profit;
   const double acutal_loss( m_dblPrice_sum_loss / m_nLoss );
@@ -1359,8 +1422,8 @@ void Strategy::HandleAtRHClose( boost::gregorian::date, boost::posix_time::time_
   BOOST_LOG_TRIVIAL(info) << "zigzag: " << m_dblSumZigZags << '/' << m_nZigZags << '=' << m_dblSumZigZags / m_nZigZags;
   BOOST_LOG_TRIVIAL(info) << "quote price: " << m_cntQuotePriceChanged << " changed, " << m_cntQuotePriceUnchanged << " unchanged";
   BOOST_LOG_TRIVIAL(info) << "trade count: " << m_ceTradePrice.Size();
-  BOOST_LOG_TRIVIAL(info) << "long  " << m_nLongEntries << ',' << m_nLongFills << ',' << m_nLongStops;
-  BOOST_LOG_TRIVIAL(info) << "short " << m_nShortEntries << ',' << m_nShortFills << ',' << m_nShortStops;
+  BOOST_LOG_TRIVIAL(info) << "long  " << m_nLongEntries  << ",fills=" << m_nLongFills  << ",stops=" << m_nLongStops;
+  BOOST_LOG_TRIVIAL(info) << "short " << m_nShortEntries << ",fills=" << m_nShortFills << ",stops=" << m_nShortStops;
 }
 
 /*

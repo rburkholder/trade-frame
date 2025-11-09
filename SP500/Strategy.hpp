@@ -203,10 +203,15 @@ private:
 
   size_t m_nEnterLong;
   size_t m_nEnterShort;
+  size_t m_nEnterCancels;
 
   double m_stopInitial;
   double m_stopDelta;
   double m_stopTrail;
+
+  double m_dblEntryPrice;
+  double m_dblEntryTarget;
+  double m_dblEntryStop;
 
   double m_dblQuoteImbalance;
 
@@ -377,6 +382,11 @@ private:
 
   void UpdatePositionProgressUp( const ou::tf::Quote& );
   void UpdatePositionProgressDn( const ou::tf::Quote& );
+
+  void InitProgressUp( const double );
+  void TallyProgressUp( const double );
+  void InitProgressDn( const double );
+  void TallyProgressDn( const double );
 
   void HandleQuote( const ou::tf::Quote& );
   void HandleTrade( const ou::tf::Trade& );
