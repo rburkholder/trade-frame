@@ -300,6 +300,8 @@ private:
 
   ou::tf::BarFactory m_bfQuotes01Sec;
 
+  enum class EMode { reversion_up, reversion_dn, neutral, trend_up, trend_dn };
+
   // use a sequence of ECross to maintain history and imply direction
   // use matrix with probabilities to suggest next state?
   // how much history is required? start with prv & cur
