@@ -100,7 +100,6 @@ class TrackOrderBase {
   friend TrackBracketOrder;
 public:
 
-
   using pPosition_t = ou::tf::Position::pPosition_t;
 
   using fCancelled_t = std::function<void()>; // may recurse back into TrackOrder
