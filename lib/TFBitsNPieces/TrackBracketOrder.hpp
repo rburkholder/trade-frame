@@ -27,7 +27,7 @@ namespace ou { // namespace oneunified
 namespace tf { // namespace tradeframe
 
 // unused, no tick for tracking stop, ... requires re-factoring
-// => could connect a HandleQuote to m_pWatch in m_pPosition
+// => could connect a HandleQuote to the m_pWatch from m_pPosition
 class TrackBracketOrder: public TrackOrderBase {
 public:
 
