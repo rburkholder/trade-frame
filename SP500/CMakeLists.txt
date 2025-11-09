@@ -43,6 +43,7 @@ set(
     HyperParameters.hpp
     LSTM.hpp
     Model.hpp
+    StateMachine_Order.hpp
     Strategy.hpp
     StrategyManager.hpp
     StrategyManager_impl.hpp
@@ -58,6 +59,7 @@ set(
     Features.cpp
     LSTM.cpp
     Model.cpp
+    StateMachine_Order.cpp
     Strategy.cpp
     StrategyManager.cpp
     StrategyManager_impl.cpp
