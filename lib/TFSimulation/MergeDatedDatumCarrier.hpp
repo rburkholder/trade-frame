@@ -23,6 +23,11 @@ using namespace fastdelegate;
 
 #include <TFTimeSeries/TimeSeries.h>
 
+// TODO:
+//   use std::variant to hold multiple dateddatum types
+//   use boost::heap to merge symbols with priority_queue on date?
+//     https://www.boost.org/doc/libs/1_89_0/doc/html/heap.html
+
 // Each carrier holds a TimeSeries.  The carrier holds an index to the current DatedDatum in each TimeSeries.
 // The current DatedDatum timestamp is maintained for the merge process to figure out which DatedDatum to
 // send into the merge process
