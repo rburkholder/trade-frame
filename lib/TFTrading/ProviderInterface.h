@@ -353,6 +353,7 @@ typename ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::GetSymbol( co
   typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( id );
   if ( m_mapSymbols.end() == iter ) {
+    std::cerr << "ProviderInterface<P,S>::pSymbol_t ProviderInterface<P,S>::GetSymbol: " << id << " not found" << std::endl;
     throw std::runtime_error( "GetSymbol did not find symbol " + id );
   }
   return iter->second;
@@ -376,6 +377,7 @@ void ProviderInterface<P,S>::RemoveQuoteHandler(pInstrument_cref pInstrument, qu
   typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
+    std::cerr << "ProviderInterface<P,S>::RemoveQuoteHandler: " << pInstrument->GetInstrumentName( ID() ) << " not found" << std::endl;
     assert( false );
   }
   else {
@@ -398,6 +400,7 @@ void ProviderInterface<P,S>::RemoveTradeHandler(pInstrument_cref pInstrument, tr
   typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
+    std::cerr << "ProviderInterface<P,S>::RemoveTradeHandler: " << pInstrument->GetInstrumentName( ID() ) << " not found" << std::endl;
     assert( false );
   }
   else {
@@ -418,6 +421,7 @@ void ProviderInterface<P,S>::RemoveOnOpenHandler(pInstrument_cref pInstrument, t
   typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
+    std::cerr << "ProviderInterface<P,S>::RemoveOnOpenHandler: " << pInstrument->GetInstrumentName( ID() ) << " not found" << std::endl;
     assert( false );
   }
   else {
@@ -438,6 +442,7 @@ void ProviderInterface<P,S>::RemoveDepthByMMHandler(pInstrument_cref pInstrument
   typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
+    std::cerr << "ProviderInterface<P,S>::RemoveDepthByMMHandler: " << pInstrument->GetInstrumentName( ID() ) << " not found" << std::endl;
     assert( false );
   }
   else {
@@ -460,6 +465,7 @@ void ProviderInterface<P,S>::RemoveDepthByOrderHandler(pInstrument_cref pInstrum
   typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
+    std::cerr << "ProviderInterface<P,S>::RemoveDepthByOrderHandler: " << pInstrument->GetInstrumentName( ID() ) << " not found" << std::endl;
     assert( false );
   }
   else {
@@ -482,6 +488,7 @@ void ProviderInterface<P,S>::RemoveGreekHandler(pInstrument_cref pInstrument, gr
   typename mapSymbols_t::iterator iter;
   iter = m_mapSymbols.find( pInstrument->GetInstrumentName( ID() ) );
   if ( m_mapSymbols.end() == iter ) {
+    std::cerr << "ProviderInterface<P,S>::RemoveGreekHandler: " << pInstrument->GetInstrumentName( ID() ) << " not found" << std::endl;
     assert( false );
   }
   else {
