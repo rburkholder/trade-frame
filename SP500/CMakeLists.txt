@@ -37,6 +37,7 @@ find_package(Boost ${TF_BOOST_VERSION} CONFIG REQUIRED COMPONENTS system date_ti
 set(
   file_h
     Config.hpp
+    CrossingEvent.hpp
     CubicRegression.hpp
     Features.hpp
     Flags.hpp
@@ -55,6 +56,7 @@ set(
 set(
   file_cpp
     Config.cpp
+    CrossingEvent.cpp
     CubicRegression.cpp
     Features.cpp
     LSTM.cpp

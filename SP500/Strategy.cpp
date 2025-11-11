@@ -97,6 +97,24 @@ Strategy::Strategy(
 , m_nLongEntries {}, m_nLongFills {}, m_nLongStops {}
 , m_nShortEntries {}, m_nShortFills {}, m_nShortStops {}
 , m_dblEntryPrice {}, m_dblEntryTarget {}, m_dblEntryStop {}
+, m_cevtSignalUpper(
+    +0.5, ou::tf::CrossingEvent::up_dn
+  , [](){} )
+, m_cevtSignalLower(
+    -0.5, ou::tf::CrossingEvent::dn_up
+  , [](){} )
+, m_cevtReturnsMeanUpper(
+    +1.0, ou::tf::CrossingEvent::up_dn
+  , [](){} )
+, m_cevtReturnsMeanLower(
+    -1.0, ou::tf::CrossingEvent::dn_up
+  , [](){} )
+, m_cevtReturnsSlopeUpper(
+    +1.0, ou::tf::CrossingEvent::up_dn
+  , [](){} )
+, m_cevtReturnsSlopeLower(
+    -1.0, ou::tf::CrossingEvent::dn_up
+  , [](){} )
 {
   SetupChart();
   m_bfQuotes01Sec.SetOnBarComplete( MakeDelegate( this, &Strategy::HandleBarQuotes01Sec ) );
@@ -319,7 +337,7 @@ void Strategy::SetupChart() {
   m_ceTradeBBDiff_vol.SetColour( ou::Colour::Purple );
   m_cdv.Add( EChartSlot::rtnPriceSDo, &m_ceTradeBBDiff_vol );
 
-  m_ceRtnPrice_mean.SetColour( ou::Colour::Blue );
+  m_ceRtnPrice_mean.SetColour( ou::Colour::Purple );
   m_ceRtnPrice_mean.SetName( "Returns - Mean" );
   m_cdv.Add( EChartSlot::Ratio, &m_ceRtnPrice_mean );
 
@@ -587,6 +605,8 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
       const double normalized( ( mean - bb_mean ) / bb_offset );
       m_ceRtnPrice_mean.Append( dt, normalized );
       m_features.dblReturnsMean = normalized;
+      m_cevtReturnsMeanUpper.Test( normalized );
+      m_cevtReturnsMeanLower.Test( normalized );
 
       CrossState& cs( rcs[ rtn_mean ] );
       ECross& ec( cs.cross );
@@ -602,6 +622,8 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
       const double normalized( ( slope - bb_mean ) / bb_offset );
       m_ceRtnPrice_slope.Append( dt, normalized );
       m_features.dblReturnsSlope = normalized;
+      m_cevtReturnsSlopeUpper.Test( normalized );
+      m_cevtReturnsSlopeLower.Test( normalized );
 
       CrossState& cs( rcs[ rtn_slope ] );
       ECross& ec( cs.cross );
@@ -892,6 +914,9 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   m_ceSignalLong.Append( dt, m_signals.trend_long );
   m_ceSignalResult.Append( dt, m_signals.trend_net );
   m_ceSignalShort.Append( dt, m_signals.trend_short );
+
+  m_cevtSignalUpper.Test( m_signals.trend_net );
+  m_cevtSignalLower.Test( m_signals.trend_net );
 
   // todo: count stops vs limit exits.
 

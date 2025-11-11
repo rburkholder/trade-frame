@@ -46,6 +46,7 @@
 
 #include "Flags.hpp"
 #include "Features.hpp"
+#include "CrossingEvent.hpp"
 
 class Strategy
 : public ou::tf::DailyTradeTimeFrame<Strategy>
@@ -331,6 +332,15 @@ private:
   rCross_t::size_type m_ixcurCrossing;
 
   ECross m_ECross_imbalance;
+
+  ou::tf::CrossingEvent m_cevtSignalUpper;
+  ou::tf::CrossingEvent m_cevtSignalLower;
+
+  ou::tf::CrossingEvent m_cevtReturnsMeanUpper;
+  ou::tf::CrossingEvent m_cevtReturnsMeanLower;
+
+  ou::tf::CrossingEvent m_cevtReturnsSlopeUpper;
+  ou::tf::CrossingEvent m_cevtReturnsSlopeLower;
 
   double m_dblPrice_hi;
   double m_dblPrice_start;
