@@ -342,6 +342,30 @@ private:
   ou::tf::CrossingEvent m_cevtReturnsSlopeUpper;
   ou::tf::CrossingEvent m_cevtReturnsSlopeLower;
 
+  enum ESignal {
+    SignalUpper, SignalLower
+  , ReturnsMeanUpper, ReturnsMeanLower
+  , ReturnsSlopeUpper, ReturnsSlopeLower
+  };
+  enum EDirection { up, sideways, down };
+
+  struct SignalEvaluation {
+    ESignal eSignal;
+    EDirection eDirection;
+    double signal;
+    double entry;
+    double exit;
+    double max;
+    double min;
+    bool profitable;
+    SignalEvaluation( ESignal esignal_, EDirection eDirection_, double signal_, double entry_ )
+    : eSignal( esignal_ ), eDirection( eDirection_ ), signal( signal_ ), entry( entry_ )
+    , exit {}, max {}, min {}, profitable( false )
+    {}
+  };
+  using vSignalEvaluation_t = std::vector<SignalEvaluation>;
+  vSignalEvaluation_t m_vSignalEvaluation;
+
   double m_dblPrice_hi;
   double m_dblPrice_start;
   double m_dblPrice_lo;
