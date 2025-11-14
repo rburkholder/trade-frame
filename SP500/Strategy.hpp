@@ -370,6 +370,10 @@ private:
   double m_dblPrice_start;
   double m_dblPrice_lo;
 
+  double m_normalizedPrice;
+  double m_normalizedReturnsMean;
+  double m_normalizedReturnsSlope;
+
   double m_dblPrice_sum_max_profit; // max possible profit during trade
   double m_dblPrice_sum_win; // actual profit, if any
   double m_dblPrice_sum_loss; // actual loss, if any

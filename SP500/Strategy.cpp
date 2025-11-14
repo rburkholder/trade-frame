@@ -97,6 +97,7 @@ Strategy::Strategy(
 , m_nLongEntries {}, m_nLongFills {}, m_nLongStops {}
 , m_nShortEntries {}, m_nShortFills {}, m_nShortStops {}
 , m_dblEntryPrice {}, m_dblEntryTarget {}, m_dblEntryStop {}
+, m_normalizedPrice {}, m_normalizedReturnsMean {}, m_normalizedReturnsSlope {}
 , m_cevtSignalUpper(
     +0.5, ou::tf::CrossingEvent::up_dn
   , [](){} )
@@ -607,6 +608,7 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
       m_features.dblReturnsMean = normalized;
       m_cevtReturnsMeanUpper.Test( normalized );
       m_cevtReturnsMeanLower.Test( normalized );
+      m_normalizedReturnsMean = normalized;
 
       CrossState& cs( rcs[ rtn_mean ] );
       ECross& ec( cs.cross );
@@ -624,6 +626,7 @@ void Strategy::UpdatePriceReturn( ou::tf::Price::dt_t dt, ou::tf::Price::price_t
       m_features.dblReturnsSlope = normalized;
       m_cevtReturnsSlopeUpper.Test( normalized );
       m_cevtReturnsSlopeLower.Test( normalized );
+      m_normalizedReturnsSlope = normalized;
 
       CrossState& cs( rcs[ rtn_slope ] );
       ECross& ec( cs.cross );
@@ -703,6 +706,7 @@ void Strategy::HandleTrade( const ou::tf::Trade& trade ) {
   const double bb_mean( m_statsPrices.MeanY() );
   const double price_normalized( ( price - bb_mean ) / bb_offset );
   m_ceTradePrice_bb_ratio.Append( dt, price_normalized );
+  m_normalizedPrice = price_normalized;
 
   rCross_t& rcs( m_crossing[ m_ixcurCrossing ] );
   CrossState& cs( rcs[ prc_norm ] );
@@ -923,59 +927,57 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   static const int c_limit_entry_timeout( 3 );
   static const int c_limit_exit_timeout( 33 );
   static const double c_enter_buffer( 0.01 );
-  static const double c_min_offset( 0.06 );
+  static const double c_min_offset( 0.05 );
 
   switch ( m_pTrackOrder->State()() ) {
     case ETradeState::Search:
       // todo: don't enter when bollinger band is narrow and flat
       // when moved in the correct distance of 0.03, bring up stop
       // measure jitter and use as stop, but probably will be too tight
-      if ( c_min_offset < bb_offset ) {
-        if ( 0.0 < m_signals.trend_net ) {
-          BOOST_LOG_TRIVIAL(trace) << "*** Enter Long," << ema13 << '<' << bid << ',' << ask << ',' << bb_offset;
-          ou::tf::OrderArgs oa( dt, 100, bid, ask + c_enter_buffer, c_limit_entry_timeout );
+      if ( ( 0.0 < m_normalizedPrice ) && ( 0.0 < m_normalizedReturnsMean ) && ( 0.0 < m_normalizedReturnsSlope ) ) {
+        BOOST_LOG_TRIVIAL(trace) << "*** Enter Long," << ema13 << '<' << bid << ',' << ask << ',' << bb_offset;
+        ou::tf::OrderArgs oa( dt, 100, bid, ask + c_enter_buffer, c_limit_entry_timeout );
+        oa.Set(
+          [this](){ // fOrderCancelled_t
+            BOOST_LOG_TRIVIAL(trace) << "* Enter Long, time based cancellation";
+            m_nEnterCancels++;
+          },
+          [this,dt,bb_offset]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ //fOrderFilled_t
+            m_dblEntryTarget = price + c_min_offset;
+            m_dblEntryPrice = price;
+            m_dblEntryStop = price - bb_offset;
+            m_nLongFills++;
+            InitProgressUp( price );
+            // partial fills?
+            // set stop and max profit limit order (need to make braket order work in position, will it work for futures?)
+            //m_pTrackOrder->State().Set( ETradeState::ExitSignalUp, "ExitLongLmt", __LINE__  );
+          }
+        );
+        m_pTrackOrder->EnterLongLmt( oa );
+        m_nLongEntries++;
+      }
+      else {
+        if ( ( 0.0 > m_normalizedPrice ) && ( 0.0 > m_normalizedReturnsMean ) && ( 0.0 > m_normalizedReturnsSlope ) ) {
+          BOOST_LOG_TRIVIAL(trace) << "*** Enter Short," << ema13 << '>' << ask << ',' << bid << ',' << bb_offset;
+          ou::tf::OrderArgs oa( dt, 100, ask, bid - c_enter_buffer, c_limit_entry_timeout );
           oa.Set(
             [this](){ // fOrderCancelled_t
-              BOOST_LOG_TRIVIAL(trace) << "* Enter Long, time based cancellation";
+              BOOST_LOG_TRIVIAL(trace) << "* Enter Short, time based cancellation";
               m_nEnterCancels++;
             },
             [this,dt,bb_offset]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ //fOrderFilled_t
-              m_dblEntryTarget = price + bb_offset;
+              m_dblEntryStop = price + bb_offset;
               m_dblEntryPrice = price;
-              m_dblEntryStop = price - bb_offset;
-              m_nLongFills++;
-              InitProgressUp( price );
+              m_dblEntryTarget = price - c_min_offset;
+              m_nShortFills++;
+              InitProgressDn( price );
               // partial fills?
               // set stop and max profit limit order (need to make braket order work in position, will it work for futures?)
-              //m_pTrackOrder->State().Set( ETradeState::ExitSignalUp, "ExitLongLmt", __LINE__  );
+              //m_pTrackOrder->State().Set( ETradeState::ExitSignalDn, "ExitShortLmt", __LINE__ );
             }
           );
-          m_pTrackOrder->EnterLongLmt( oa );
-          m_nLongEntries++;
-        }
-        else {
-          if ( 0.0 > m_signals.trend_net ) {
-            BOOST_LOG_TRIVIAL(trace) << "*** Enter Short," << ema13 << '>' << ask << ',' << bid << ',' << bb_offset;
-            ou::tf::OrderArgs oa( dt, 100, ask, bid - c_enter_buffer, c_limit_entry_timeout );
-            oa.Set(
-              [this](){ // fOrderCancelled_t
-                BOOST_LOG_TRIVIAL(trace) << "* Enter Short, time based cancellation";
-                m_nEnterCancels++;
-              },
-              [this,dt,bb_offset]( ou::tf::OrderArgs::quantity_t quantity, double price, double commission ){ //fOrderFilled_t
-                m_dblEntryStop = price + bb_offset;
-                m_dblEntryPrice = price;
-                m_dblEntryTarget = price - bb_offset;
-                m_nShortFills++;
-                InitProgressDn( price );
-                // partial fills?
-                // set stop and max profit limit order (need to make braket order work in position, will it work for futures?)
-                //m_pTrackOrder->State().Set( ETradeState::ExitSignalDn, "ExitShortLmt", __LINE__ );
-              }
-            );
-            m_pTrackOrder->EnterShortLmt( oa );
-            m_nShortEntries++;
-          }
+          m_pTrackOrder->EnterShortLmt( oa );
+          m_nShortEntries++;
         }
       }
       break;
@@ -985,7 +987,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       break;
     case ETradeState::ExitSignalUp:
       //UpdatePositionProgressUp( quote );
-      if ( m_dblEntryTarget < bid ) {
+      if ( 0.0 > m_normalizedPrice ) {
         BOOST_LOG_TRIVIAL(trace) << "** Exit Long @ profit," << m_signals.trend_net << ',' << m_dblEntryTarget;
         ou::tf::OrderArgs oa( dt, 100, bid );
         oa.Set(
@@ -997,6 +999,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
         m_pTrackOrder->ExitLongMkt( oa );
       }
       else {
+        // build trailing stop to reduce the loss
         if ( m_dblEntryStop > ask ) {
           BOOST_LOG_TRIVIAL(trace) << "** Exit Long @ loss," << m_signals.trend_net << ',' << m_dblEntryStop;
           ou::tf::OrderArgs oa( dt, 100, ask );
@@ -1013,7 +1016,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
       break;
     case ETradeState::ExitSignalDn:
       //UpdatePositionProgressDn( quote );
-      if ( m_dblEntryTarget > ask ) {
+      if ( 0.0 < m_normalizedPrice ) {
         BOOST_LOG_TRIVIAL(trace) << "** Exit Short @ profit," << m_signals.trend_net << ',' << m_dblEntryTarget;
         ou::tf::OrderArgs oa( dt, 100, ask );
         oa.Set(
@@ -1025,6 +1028,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
         m_pTrackOrder->ExitShortMkt( oa );
       }
       else {
+        // build trailing stop to reduce the loss
         if ( m_dblEntryStop < bid ) {
           BOOST_LOG_TRIVIAL(trace) << "** Exit Long @ loss," << m_signals.trend_net << ',' << m_dblEntryStop;
           ou::tf::OrderArgs oa( dt, 100, bid );
