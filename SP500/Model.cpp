@@ -29,7 +29,6 @@
 #include "Features.hpp"
 #include "HyperParameters.hpp"
 
-
 namespace {
   static const size_t c_secondsSampleOffset( 23 );  // offset for each sample
   static const size_t c_secondsSequence( 224 ); // duration of sample sequence
@@ -381,7 +380,9 @@ void Model::Train_Perform( const HyperParameters& hp ) {
   torch::nn::MSELoss criterion( torch::nn::MSELossOptions().reduction( torch::kMean ) ); // loss function
   criterion->to( m_torchDevice );
 
-  torch::optim::Adam optimizer( m_pLSTM->parameters(), learning_rate );
+  torch::optim::AdamOptions options( learning_rate );
+  //options.weight_decay( 1e-5 );  // regularization
+  torch::optim::Adam optimizer( m_pLSTM->parameters(), options );
 
   for ( size_t epoch = 0; epoch < num_epochs; ++epoch ) {
 
