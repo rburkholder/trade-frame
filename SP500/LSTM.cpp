@@ -21,8 +21,15 @@
 
  #include "LSTM.hpp"
 
+
+namespace {
+  // note dropout has no affect on 1==num_layers LSTM, if more than 1, common values are 0.3 to 0.5
+  //static const double c_dropout( 0.3 );
+  static const double c_dropout( 0.0 );
+}
+
 LSTM::LSTM( int input_size, int hidden_size, int num_layers, int output_size )
-: lstm( torch::nn::LSTMOptions( input_size, hidden_size ).num_layers( num_layers ).batch_first( true ) )
+: lstm( torch::nn::LSTMOptions( input_size, hidden_size ).num_layers( num_layers ).batch_first( true ).dropout( c_dropout ) )
 , linear( hidden_size, output_size )
 {
   register_module( "lstm", lstm );
