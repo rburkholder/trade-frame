@@ -39,9 +39,9 @@
 #include <TFInteractiveBrokers/IBTWS.h>
 #include <TFSimulation/SimulationProvider.hpp>
 
-#include "Model.hpp"
 #include "Config.hpp"
 #include "Strategy.hpp"
+#include "LSTMModel.hpp"
 
 namespace config {
   class Choices;

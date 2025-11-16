@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    Model.cpp
+ * File:    LSTMModel.cpp
  * Author:  raymond@burkholder.net
  * Project: SP500
  * Created: July 4, 2025 11:32:42
@@ -25,7 +25,7 @@
 #include <boost/log/trivial.hpp>
 
 #include "LSTM.hpp"
-#include "Model.hpp"
+#include "LSTMModel.hpp"
 #include "Features.hpp"
 #include "HyperParameters.hpp"
 

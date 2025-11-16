@@ -13,7 +13,7 @@
  ************************************************************************/
 
 /*
- * File:    Model.hpp
+ * File:    LSTMModel.hpp
  * Author:  raymond@burkholder.net
  * Project: SP500
  * Created: July 4, 2025 11:32:42

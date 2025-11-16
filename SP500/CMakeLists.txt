@@ -43,7 +43,7 @@ set(
     Flags.hpp
     HyperParameters.hpp
     LSTM.hpp
-    Model.hpp
+    LSTMModel.hpp
     StateMachine_Order.hpp
     Strategy.hpp
     StrategyManager.hpp
@@ -60,7 +60,7 @@ set(
     CubicRegression.cpp
     Features.cpp
     LSTM.cpp
-    Model.cpp
+    LSTMModel.cpp
     StateMachine_Order.cpp
     Strategy.cpp
     StrategyManager.cpp
