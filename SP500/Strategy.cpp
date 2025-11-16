@@ -927,7 +927,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
   static const int c_limit_entry_timeout( 3 );
   static const int c_limit_exit_timeout( 33 );
   static const double c_enter_buffer( 0.01 );
-  static const double c_min_offset( 0.05 );
+  static const double c_min_offset( 0.09 );
 
   switch ( m_pTrackOrder->State()() ) {
     case ETradeState::Search:
@@ -986,8 +986,7 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
     case ETradeState::EntrySubmittedDn:
       break;
     case ETradeState::ExitSignalUp:
-      //UpdatePositionProgressUp( quote );
-      if ( 0.0 > m_normalizedPrice ) {
+      if ( m_dblEntryTarget < bid ) {
         BOOST_LOG_TRIVIAL(trace) << "** Exit Long @ profit," << m_signals.trend_net << ',' << m_dblEntryTarget;
         ou::tf::OrderArgs oa( dt, 100, bid );
         oa.Set(
@@ -999,7 +998,6 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
         m_pTrackOrder->ExitLongMkt( oa );
       }
       else {
-        // build trailing stop to reduce the loss
         if ( m_dblEntryStop > ask ) {
           BOOST_LOG_TRIVIAL(trace) << "** Exit Long @ loss," << m_signals.trend_net << ',' << m_dblEntryStop;
           ou::tf::OrderArgs oa( dt, 100, ask );
@@ -1012,11 +1010,16 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
           m_pTrackOrder->ExitLongMkt( oa );
           m_nLongStops++;
         }
+        //else {
+        //  const double stop( ask - bb_offset ); // note bb_offset is changing
+        //  if ( m_dblEntryStop < stop ) {
+        //    m_dblEntryStop = stop;
+        //  }
+        //}
       }
       break;
     case ETradeState::ExitSignalDn:
-      //UpdatePositionProgressDn( quote );
-      if ( 0.0 < m_normalizedPrice ) {
+      if ( m_dblEntryTarget > ask ) {
         BOOST_LOG_TRIVIAL(trace) << "** Exit Short @ profit," << m_signals.trend_net << ',' << m_dblEntryTarget;
         ou::tf::OrderArgs oa( dt, 100, ask );
         oa.Set(
@@ -1028,7 +1031,6 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
         m_pTrackOrder->ExitShortMkt( oa );
       }
       else {
-        // build trailing stop to reduce the loss
         if ( m_dblEntryStop < bid ) {
           BOOST_LOG_TRIVIAL(trace) << "** Exit Long @ loss," << m_signals.trend_net << ',' << m_dblEntryStop;
           ou::tf::OrderArgs oa( dt, 100, bid );
@@ -1041,6 +1043,12 @@ void Strategy::HandleRHTrading( const ou::tf::Quote& quote ) {
           m_pTrackOrder->ExitShortMkt( oa );
           m_nShortStops++;
         }
+        //else {
+        //  const double stop( bid + bb_offset ); // note bb_offset is changing
+        //  if ( m_dblEntryStop > stop ) {
+        //    m_dblEntryStop = stop;
+        //  }
+        //}
       }
       break;
     case ETradeState::ExitSubmittedUp:
