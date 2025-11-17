@@ -19,8 +19,7 @@
  * Created: June 28, 2025 17:38:07
  */
 
- #include "LSTM.hpp"
-
+#include "LSTM.hpp"
 
 namespace {
   // note dropout has no affect on 1==num_layers LSTM, if more than 1, common values are 0.3 to 0.5
