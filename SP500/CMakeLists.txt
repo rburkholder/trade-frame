@@ -39,6 +39,8 @@ set(
     Config.hpp
     CrossingEvent.hpp
     CubicRegression.hpp
+    DQN_Model.hpp
+    DQN_Module.hpp
     Features.hpp
     Flags.hpp
     HyperParameters.hpp
@@ -58,6 +60,8 @@ set(
     Config.cpp
     CrossingEvent.cpp
     CubicRegression.cpp
+    DQN_Model.cpp
+    DQN_Module.cpp
     Features.cpp
     LSTM.cpp
     LSTMModel.cpp
