@@ -64,7 +64,7 @@ Current tag_invoke( json::value_to_tag<Current>, json::value const& jv ) {
 
 void Decode( const std::string& sMessage, Current& current ) {
 
-  json::error_code jec;
+  boost::system::error_code jec;
   json::value jv = json::parse( sMessage, jec );
   if ( jec.failed() ) {
     std::cout << "failed to parse current position" << std::endl;
@@ -76,7 +76,7 @@ void Decode( const std::string& sMessage, Current& current ) {
 
 void Decode( const std::string& sMessage, vCurrent_t& vMessage ) {
 
-  json::error_code jec;
+  boost::system::error_code jec;
   json::value jv = json::parse( sMessage, jec );
   if ( jec.failed() ) {
     std::cout << "failed to parse current positions" << std::endl;
