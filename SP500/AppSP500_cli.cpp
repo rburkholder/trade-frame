@@ -104,7 +104,7 @@ int main( int argc, char* argv[] ) {
   pStrategyManager_t m_pStrategyManager;
   m_pStrategyManager = std::make_unique<StrategyManager>(
     m_choices
-  , []( StrategyManager::fTask_t&& f ){ boost::asio::post( f );  } // fQueueTask_t
+  , [&m_context]( StrategyManager::fTask_t&& f ){ boost::asio::post( m_context, std::move( f ) );  } // fQueueTask_t
   , []( ou::tf::WinChartView::EView state, ou::ChartDataView* pcdv ){ // fSetChartDataView_t
       //m_pwcv->SetChartDataView( pcdv );
       //m_pwcv->Set( state );
