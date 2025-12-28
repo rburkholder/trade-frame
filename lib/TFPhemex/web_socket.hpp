@@ -26,6 +26,7 @@
 #include <atomic>
 #include <functional>
 
+#include <boost/asio/steady_timer.hpp>
 #include <boost/asio/io_context_strand.hpp>
 
 #include <boost/beast/ssl.hpp>
@@ -81,7 +82,7 @@ private:
   std::atomic_uint64_t m_id; // used for incrementing message id in messages
 
   bool m_bSendHeartBeat;
-  boost::asio::deadline_timer m_timer;
+  boost::asio::steady_timer m_timer;
 
   asio::io_context& m_srvc;
   asio::io_context::strand m_strand;

@@ -22,6 +22,7 @@
 #include <iostream>
 
 #include <boost/json.hpp>
+
 #include <boost/asio/strand.hpp>
 
 #include  <boost/beast/websocket/stream.hpp>
@@ -230,7 +231,7 @@ void web_socket::on_handshake( beast::error_code ec ) {
     });
 
   m_bSendHeartBeat = true;
-  m_timer.expires_from_now(boost::posix_time::seconds( nHeartBeatIntervalSeconds ));
+  m_timer.expires_after( boost::asio::chrono::seconds( nHeartBeatIntervalSeconds ) );
   m_timer.async_wait( std::bind( &web_socket::on_timer, this, std::placeholders::_1 ) );
 
   // TODO:
@@ -286,7 +287,7 @@ void web_socket::on_timer( const boost::system::error_code& ec ) {
           );
         } );
 
-      m_timer.expires_from_now(boost::posix_time::seconds( nHeartBeatIntervalSeconds ));
+      m_timer.expires_after( boost::asio::chrono::seconds( nHeartBeatIntervalSeconds ) );
       m_timer.async_wait( std::bind( &web_socket::on_timer, this, std::placeholders::_1 ) );
     }
   }
