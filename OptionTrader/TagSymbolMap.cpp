@@ -19,6 +19,8 @@
  * Created: July 27, 2025 11:24:02
  */
 
+#include <cassert>
+
 #include "TagSymbolMap.hpp"
 
 TagSymbolMap::TagSymbolMap() {}
