@@ -21,6 +21,7 @@
 
 #include <memory>
 #include <string>
+#include <iomanip>
 #include <sstream>
 
 #include <boost/log/trivial.hpp>
@@ -28,6 +29,7 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include <boost/asio/signal_set.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/asio/execution/context.hpp>
 #include <boost/asio/executor_work_guard.hpp>
 
@@ -100,12 +102,20 @@ int main( int argc, char* argv[] ) {
       ;
   }
 
-  // write data every 60 seconds
-  boost::asio::deadline_timer timerWrite( m_context );
-  timerWrite.expires_from_now( boost::posix_time::seconds( 60 ) );
+  // a number of conversion steps for ptime to time_t for expires_at
+  const std::time_t ttStop( boost::posix_time::to_time_t( dtStop ) );
 
-  boost::asio::deadline_timer timerStop( m_context );
-  timerStop.expires_at( dtStop );
+  const std::tm tmStop = *std::gmtime( &ttStop );
+  BOOST_LOG_TRIVIAL(info) << "dtStop=" << dtStop << ',' << "ttStop=" << std::put_time( &tmStop, "%Y-%m-%d %H:%M:%S" );;
+
+  const boost::asio::chrono::system_clock::time_point tpStop( boost::asio::chrono::system_clock::from_time_t( ttStop ) );
+
+  boost::asio::system_timer timerStop( m_context );
+  timerStop.expires_at( tpStop );
+
+  // write data every 60 seconds
+  boost::asio::steady_timer timerWrite( m_context );
+  timerWrite.expires_after( boost::asio::chrono::seconds( 60 ) );
 
   // https://www.boost.org/doc/libs/1_79_0/doc/html/boost_asio/reference/signal_set.html
   boost::asio::signal_set signals( m_context, SIGINT ); // SIGINT is called
@@ -143,7 +153,7 @@ int main( int argc, char* argv[] ) {
   fWrite_t fWrite = [&pProcess,&timerWrite,&fWrite]( const boost::system::error_code& error_code ){
     if ( 0 == error_code.value() ) {
       pProcess->Write();
-      timerWrite.expires_from_now( boost::posix_time::seconds( 60 ) );
+      timerWrite.expires_after( boost::asio::chrono::seconds( 60 ) );
       timerWrite.async_wait( fWrite );
     }
   };
