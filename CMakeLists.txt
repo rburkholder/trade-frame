@@ -16,7 +16,7 @@ set(CMAKE_CXX_COMPILER_ARCHITECTURE_ID "x64")
 
 set(WX_VERSION_MAJOR "3.2")
 # TF prefix prevents clash with similar names
-set(TF_BOOST_VERSION "1.81.0" )
+set(TF_BOOST_VERSION "1.90.0" )
 
 # look in /usr/local/lib/cmake/ for cmake 'find' entries
 # currently has vmime, boost, wt, telegram

@@ -17,7 +17,7 @@ set(BOOST_USE_STATIC_RUNTIME OFF)
 #set(Boost_DETAILED_FAILURE_MSG ON)
 set(BOOST_INCLUDEDIR "/usr/local/include/boost")
 
-#find_package(Boost ${TF_BOOST_VERSION} REQUIRED COMPONENTS system date_time program_options thread filesystem serialization regex log log_setup)
+#find_package(Boost ${TF_BOOST_VERSION} REQUIRED COMPONENTS date_time program_options thread filesystem serialization regex log log_setup)
 find_package(Boost ${TF_BOOST_VERSION} CONFIG REQUIRED COMPONENTS program_options serialization log log_setup thread filesystem json)
 
 #message("boost lib: ${Boost_LIBRARIES}")
