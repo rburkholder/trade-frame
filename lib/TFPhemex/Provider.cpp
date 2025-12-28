@@ -201,7 +201,7 @@ void Provider::GetProducts() {
     [this]( bool bStatus, const std::string& message ){
       if ( bStatus ) {
         try {
-          json::error_code jec;
+          boost::system::error_code jec;
           json::value jv = json::parse( message, jec );
           if ( jec.failed() ) {
             BOOST_LOG_TRIVIAL(error) << "provider/phemex failed to parse " << sRequestPath;
@@ -274,7 +274,7 @@ void Provider::DataGateWayUp() {
       ProviderInterfaceBase::OnDisconnected( 0 );
     },
     [this]( std::string&& sMessage){ // fMessage_t
-      json::error_code jec;
+      boost::system::error_code jec;
       json::value jv = json::parse( sMessage, jec );
       if ( jec.failed() ) {
         BOOST_LOG_TRIVIAL(error) << "provider/phemex failed to parse web_socket stream: " << sMessage;
