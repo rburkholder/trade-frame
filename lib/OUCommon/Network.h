@@ -16,13 +16,21 @@
 #include <string>
 #include <vector>
 #include <cassert>
+#include <iostream>
 
-#include <boost/asio.hpp>  // class outbound processing
+#include <boost/asio/post.hpp>
+#include <boost/asio/write.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ip/address.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/placeholders.hpp>
+#include <boost/asio/steady_timer.hpp>
+#include <boost/asio/executor_work_guard.hpp>
+
 #include <boost/array.hpp>
 #include <boost/thread.hpp>  // separate thread for asio run processing
 #include <boost/bind/bind.hpp>
 #include <boost/interprocess/detail/atomic.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <OUCommon/Debug.h>
 
@@ -133,10 +141,15 @@ private:
 
   boost::thread m_asioThread;
 
-  boost::asio::io_service m_io;
-  boost::asio::io_service::work* m_pwork;
+  boost::asio::io_context m_io_context;
+
+  using work_guard_t = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
+  using pWorkGuard_t = std::unique_ptr<work_guard_t>;
+  pWorkGuard_t m_pWorkGuard;
+
   boost::asio::ip::tcp::socket* m_psocket;
-  boost::asio::deadline_timer m_timer;
+
+  boost::asio::steady_timer m_timer;
 
   // variables used to sync for thread ending
   volatile boost::uint32_t m_cntActiveSends;  // number of active sends
@@ -183,7 +196,7 @@ Network<ownerT,charT>::Network()
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 ),
   m_cntLinesProcessed( 0 ),
   m_cntActiveSends( 0 ), m_lReadProgress( 0 ),
-  m_timer( m_io )
+  m_timer( m_io_context )
 {
   CommonConstruction();
 }
@@ -202,7 +215,7 @@ Network<ownerT,charT>::Network( const structConnection& connection )
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 ),
   m_cntLinesProcessed( 0 ),
   m_cntActiveSends( 0 ), m_lReadProgress( 0 ),
-  m_timer( m_io )
+  m_timer( m_io_context )
 
 {
   CommonConstruction();
@@ -222,7 +235,7 @@ Network<ownerT,charT>::Network( const ipaddress_t& sAddress, port_t nPort )
   m_cntSends( 0 ), m_cntBytesTransferred_send( 0 ),
   m_cntLinesProcessed( 0 ),
   m_cntActiveSends( 0 ), m_lReadProgress( 0 ),
-  m_timer( m_io )
+  m_timer( m_io_context )
 {
   CommonConstruction();
 }
@@ -235,7 +248,7 @@ template <typename ownerT, typename charT>
 void Network<ownerT,charT>::CommonConstruction() {
   m_pline = m_reposLineBuffers.CheckOutL();  // have a receiving line ready
   m_pline->clear();
-  m_pwork = new boost::asio::io_service::work(m_io);  // keep the asio service running
+  m_pWorkGuard = std::make_unique<work_guard_t>( boost::asio::make_work_guard( m_io_context ) );
   m_asioThread = boost::thread( boost::bind( &Network::AsioThread, this ) );
   m_stateNetwork = NS_DISCONNECTED;
 }
@@ -256,7 +269,7 @@ Network<ownerT,charT>::~Network() {
     assert( ( NS_DISCONNECTED == m_stateNetwork ) || ( NS_DISCONNECTING == m_stateNetwork ) );
   }
 
-  delete m_pwork;  // stop the asio service (let it run out of work, which at this point should be none)
+  m_pWorkGuard.reset();  // stop the asio service (let it run out of work, which at this point should be none)
 //  m_io.stop();  // kinda redundant
 
   m_asioThread.join();  // wait for i/o thread to cleanup and terminate
@@ -301,7 +314,7 @@ Network<ownerT,charT>::~Network() {
 template <typename ownerT, typename charT>
 void Network<ownerT,charT>::AsioThread() {
 
-  m_io.run();  // handles async socket
+  m_io_context.run();  // handles async socket
 
 #ifdef _DEBUG
   DEBUGOUT( "ASIO Thread Exit:  " << typeid( this ).name() << std::endl )
@@ -328,13 +341,13 @@ void Network<ownerT,charT>::Connect() {
   assert( 0 != m_Connection.nPort );
 
   // http://www.boost.org/doc/libs/1_40_0/doc/html/boost_asio/reference/basic_stream_socket/async_connect.html
-  m_psocket = new tcp::socket( m_io );
-  tcp::endpoint endpoint( boost::asio::ip::address::from_string( m_Connection.sAddress ), m_Connection.nPort );
+  m_psocket = new tcp::socket( m_io_context );
+  tcp::endpoint endpoint( boost::asio::ip::make_address( m_Connection.sAddress ), m_Connection.nPort );
   m_psocket->async_connect(
     endpoint,
     boost::bind<void>( &Network::OnConnectDone, this, boost::asio::placeholders::error )
     );
-  m_timer.expires_from_now( boost::posix_time::seconds( 2 ) );
+  m_timer.expires_after( boost::asio::chrono::seconds( 2 ) );
   m_timer.async_wait( boost::bind<void>( &Network::OnTimeOut, this ) );
 }
 
@@ -428,7 +441,7 @@ void Network<ownerT,charT>::OnNetDisconnecting() {
   }
   else {
     // wait for operations to complete, by posting a message to the io processing queue
-    m_io.post( boost::bind( &Network::OnNetDisconnecting, this ) );
+    boost::asio::post( m_io_context, boost::bind( &Network::OnNetDisconnecting, this ) );
   }
 }
 
