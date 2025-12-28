@@ -60,7 +60,7 @@ Asset::~Asset() {
 
 void Asset::Decode( const std::string& sMessage, Message& message ) {
 
-  json::error_code jec;
+  boost::system::error_code jec;
   json::value jv = json::parse( sMessage, jec );
   if ( jec.failed() ) {
     std::cout << "failed to parse Asset::Message" << std::endl;
@@ -72,7 +72,7 @@ void Asset::Decode( const std::string& sMessage, Message& message ) {
 
 void Asset::Decode( const std::string& sMessage, vMessage_t& vMessage ) {
 
-  json::error_code jec;
+  boost::system::error_code jec;
   json::value jv = json::parse( sMessage, jec );
   if ( jec.failed() ) {
     std::cout << "failed to parse vector of Asset::Message" << std::endl;
