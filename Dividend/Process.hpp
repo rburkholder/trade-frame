@@ -22,6 +22,7 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <condition_variable>
 
 #include <OUCommon/TimeSource.h>
 
