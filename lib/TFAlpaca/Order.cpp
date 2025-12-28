@@ -122,7 +122,7 @@ void Decode( boost::json::value const& jv, Status& status ) {
 
 void Decode( const std::string& sMessage, vOrderId_t& vOrderId ) {
 
-  json::error_code jec;
+  boost::system::error_code jec;
   json::value jv = json::parse( sMessage, jec );
   if ( jec.failed() ) {
     std::cout << "failed to parse current order id" << std::endl;
