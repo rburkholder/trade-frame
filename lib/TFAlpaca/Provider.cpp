@@ -166,7 +166,7 @@ void Provider::Assets() {
     [this]( bool bStatus, const std::string& message ){
       if ( bStatus ) {
 
-        json::error_code jec;
+        boost::system::error_code jec;
         json::value jv = json::parse( message, jec );
         if ( jec.failed() ) {
           BOOST_LOG_TRIVIAL(error) << "provder/alpaca failed to parse /v2/assets";
@@ -250,7 +250,7 @@ void Provider::Positions() {
     [this]( bool bStatus, const std::string& message ){
       if ( bStatus ) {
         //std::cout << "positions: " << message << std::endl;
-        json::error_code jec;
+        boost::system::error_code jec;
         json::value jv = json::parse( message, jec );
         if ( jec.failed() ) {
           BOOST_LOG_TRIVIAL(error) << "provider/alpaca failed to parse /v2/positions";
@@ -290,7 +290,7 @@ void Provider::TradeUpdates() {
     },
     [this]( std::string&& sMessage){ // fMessage_t
       //std::cout << "order update message: " << sMessage << std::endl;
-      json::error_code jec;
+      boost::system::error_code jec;
       json::value jv = json::parse( sMessage, jec );
       if ( jec.failed() ) {
         BOOST_LOG_TRIVIAL(error) << "provider/alpaca failed to parse web_socket stream: " << sMessage;
@@ -640,7 +640,7 @@ void Provider::PlaceOrder( pOrder_t pOrder ) {
 
         // std::cout << "place order result: " << s << std::endl;
 
-        json::error_code jec;
+        boost::system::error_code jec;
         json::value jv = json::parse( s, jec );
         if ( jec.failed() ) {
           BOOST_LOG_TRIVIAL(error) << "provider/alpaca - failed to parse order result: " << s;
