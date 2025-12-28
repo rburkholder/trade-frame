@@ -26,8 +26,9 @@
 #include <functional>
 #include <unordered_map>
 
-#include <boost/asio.hpp>
 #include <boost/thread.hpp>
+
+#include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
 
 #include <TFTimeSeries/DatedDatum.h>
