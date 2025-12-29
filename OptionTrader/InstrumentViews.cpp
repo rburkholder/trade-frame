@@ -138,8 +138,11 @@ void InstrumentViews::CreateControls() {
     }
   );
 
+  wxBoxSizer* sizer_OptionChain_OptionCombo = new wxBoxSizer( wxVERTICAL );
+  sizerTagSymbolGrid->Add( sizer_OptionChain_OptionCombo, 1, wxALL | wxEXPAND, 2 );
+
   m_pOptionChainView = new OptionChainView( itemPanel1 );
-  sizerTagSymbolGrid->Add( m_pOptionChainView, 1, wxALL | wxEXPAND, 2 );
+  sizer_OptionChain_OptionCombo->Add( m_pOptionChainView, 1, wxALL | wxEXPAND, 2 );
 
   wxBoxSizer* itemBoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
   itemBoxSizer1->Add(itemBoxSizer6, 0, wxGROW|wxALL, 0);
