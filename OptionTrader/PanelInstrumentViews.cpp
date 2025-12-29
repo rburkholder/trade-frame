@@ -40,7 +40,7 @@
 #include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/WinChartView.h>
 
-#include "InstrumentViews.hpp"
+#include "PanelInstrumentViews.hpp"
 #include "OptionChainModel.hpp"
 
 // todo:  2025/08/10
@@ -51,18 +51,18 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-InstrumentViews::InstrumentViews(): wxPanel() {
+PanelInstrumentViews::PanelInstrumentViews(): wxPanel() {
   Init();
 }
 
-InstrumentViews::InstrumentViews( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name )
+PanelInstrumentViews::PanelInstrumentViews( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name )
 : wxPanel()
 {
   Init();
   Create( parent, id, pos, size, style, name );
 }
 
-InstrumentViews::~InstrumentViews() {
+PanelInstrumentViews::~PanelInstrumentViews() {
   m_pOptionChainView = nullptr;
   m_pOptionChainModel = nullptr;
   m_mapInstrument.clear();
@@ -72,7 +72,7 @@ InstrumentViews::~InstrumentViews() {
   m_pOptionEngine.reset();
 }
 
-void InstrumentViews::Init() {
+void PanelInstrumentViews::Init() {
   m_pcurView = nullptr;
   m_pOptionChainView = nullptr;
   m_pOptionChainModel = nullptr;
@@ -82,7 +82,7 @@ void InstrumentViews::Init() {
   m_fBuildOption = nullptr;
 }
 
-bool InstrumentViews::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
+bool PanelInstrumentViews::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
 
     SetExtraStyle( wxWS_EX_VALIDATE_RECURSIVELY );
     wxPanel::Create( parent, id, pos, size, style );
@@ -95,9 +95,9 @@ bool InstrumentViews::Create( wxWindow* parent, wxWindowID id, const wxPoint& po
   return true;
 }
 
-void InstrumentViews::CreateControls() {
+void PanelInstrumentViews::CreateControls() {
 
-  InstrumentViews* itemPanel1 = this;
+  PanelInstrumentViews* itemPanel1 = this;
 
   wxBoxSizer* itemBoxSizer1 = new wxBoxSizer( wxVERTICAL );
   itemPanel1->SetSizer( itemBoxSizer1 );
@@ -112,14 +112,14 @@ void InstrumentViews::CreateControls() {
   );
   sizerTagSymbolGrid->Add( m_clbTags, 0, wxGROW|wxALL, 1 );
   m_clbTags->SetMinClientSize( wxSize( 150, -1 ) );
-  m_clbTags->Bind( wxEVT_CHECKLISTBOX, &InstrumentViews::HandleCheckListBoxEvent, this );
+  m_clbTags->Bind( wxEVT_CHECKLISTBOX, &PanelInstrumentViews::HandleCheckListBoxEvent, this );
 
   m_pTreeCtrl = new wxTreeCtrl( itemPanel1, ID_TREECTRL, wxDefaultPosition, wxDefaultSize,
     wxTR_NO_LINES | wxTR_HAS_BUTTONS /*| wxTR_LINES_AT_ROOT | wxTR_HIDE_ROOT*/ | wxTR_SINGLE /*| wxTR_TWIST_BUTTONS*/ );
   sizerTagSymbolGrid->Add( m_pTreeCtrl, 0, wxGROW|wxALL, 2 );
   ou::tf::TreeItem::Bind( this, m_pTreeCtrl );
-  m_pTreeCtrl->Bind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &InstrumentViews::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
-  m_pTreeCtrl->Bind( wxEVT_TREE_ITEM_EXPANDED, &InstrumentViews::HandleTreeEventItemExpanded, this, m_pTreeCtrl->GetId() );
+  m_pTreeCtrl->Bind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &PanelInstrumentViews::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() ); //wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP     wxEVT_TREE_ITEM_GETTOOLTIP
+  m_pTreeCtrl->Bind( wxEVT_TREE_ITEM_EXPANDED, &PanelInstrumentViews::HandleTreeEventItemExpanded, this, m_pTreeCtrl->GetId() );
   m_pTreeCtrl->ExpandAll();
 
   m_pRootTreeItem = new ou::tf::TreeItem( m_pTreeCtrl, "Symbols" );
@@ -158,7 +158,7 @@ void InstrumentViews::CreateControls() {
   m_pStatusBar->SetStatusText( _("symbol:"), 0 );
   m_pStatusBar->SetStatusText( _("price:"), 2 );
 
-  if ( InstrumentViews::ShowToolTips() ) {
+  if ( PanelInstrumentViews::ShowToolTips() ) {
     m_pTreeCtrl->SetToolTip(_( "Symbols / Actions" ) );
   }
 
@@ -167,14 +167,14 @@ void InstrumentViews::CreateControls() {
   Layout();
   GetParent()->Layout();
 
-  Bind( wxEVT_DESTROY, &InstrumentViews::OnDestroy, this );
+  Bind( wxEVT_DESTROY, &PanelInstrumentViews::OnDestroy, this );
 
   m_timerRefresh.SetOwner( this );
-  Bind( wxEVT_TIMER, &InstrumentViews::HandleTimer, this, m_timerRefresh.GetId() );
+  Bind( wxEVT_TIMER, &PanelInstrumentViews::HandleTimer, this, m_timerRefresh.GetId() );
   m_timerRefresh.Start( 500 );
 }
 
-void InstrumentViews::HandleTimer( wxTimerEvent& event ) {
+void PanelInstrumentViews::HandleTimer( wxTimerEvent& event ) {
   if ( ( nullptr != m_pOptionChainView ) && ( nullptr != m_pOptionChainModel ) ) {
     wxDataViewItem dviTopItem = m_pOptionChainView->GetTopItem();
     int nRows = m_pOptionChainView->GetCountPerPage();
@@ -185,17 +185,17 @@ void InstrumentViews::HandleTimer( wxTimerEvent& event ) {
   }
 }
 
-void InstrumentViews::HandleTreeEventItemGetToolTip( wxTreeEvent& event ) {
+void PanelInstrumentViews::HandleTreeEventItemGetToolTip( wxTreeEvent& event ) {
   event.SetToolTip( "to be fixed" );
   event.Skip();
 }
 
-void InstrumentViews::HandleTreeEventItemExpanded( wxTreeEvent& event ) {
+void PanelInstrumentViews::HandleTreeEventItemExpanded( wxTreeEvent& event ) {
   SizeTreeCtrl();
   event.Skip();
 }
 
-void InstrumentViews::Set(
+void PanelInstrumentViews::Set(
   pComposeInstrument_t& pComposeInstrument
 , fBuildWatch_t&& fBuildWatch
 , fBuildOption_t&& fBuildOption
@@ -234,7 +234,7 @@ void InstrumentViews::Set(
   }
 }
 
-void InstrumentViews::DialogSymbol() {
+void PanelInstrumentViews::DialogSymbol() {
 
   wxTextEntryDialog dialog( this, "Symbol Name:", "Add Symbol" );
   //dialog->ForceUpper(); // prints charters in reverse
@@ -247,7 +247,7 @@ void InstrumentViews::DialogSymbol() {
 
 }
 
-void InstrumentViews::BuildInstrument( const std::string& sIQFeedSymbolName ) {
+void PanelInstrumentViews::BuildInstrument( const std::string& sIQFeedSymbolName ) {
 
   // todo: tool tip shows real symbol name, map is user requested iqfeed symbol
 
@@ -276,7 +276,7 @@ void InstrumentViews::BuildInstrument( const std::string& sIQFeedSymbolName ) {
   }
 }
 
-void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
+void PanelInstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
 
   if ( pInstrument ) {
 
@@ -313,7 +313,7 @@ void InstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
 
 }
 
-void InstrumentViews::UpdateDividendNotes( Instrument& instrument ) {
+void PanelInstrumentViews::UpdateDividendNotes( Instrument& instrument ) {
 
   const std::string& sNameGeneric( instrument.pInstrument->GetInstrumentName() );
   const std::string& sNameIQFeed(  instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
@@ -365,7 +365,7 @@ void InstrumentViews::UpdateDividendNotes( Instrument& instrument ) {
   m_fUpdateDividendFields( fields, rTag );
 }
 
-void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
+void PanelInstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
 
   const std::string& sNameGeneric( instrument.pInstrument->GetInstrumentName() );
   const std::string& sNameIQFeed( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
@@ -483,7 +483,7 @@ void InstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
 
 }
 
-void InstrumentViews::AddTag( const TagSymbolMap::sTag_t& sTag, const TagSymbolMap::sSymbol_t& sSymbol ) {
+void PanelInstrumentViews::AddTag( const TagSymbolMap::sTag_t& sTag, const TagSymbolMap::sSymbol_t& sSymbol ) {
 
   m_TagSymbolMap.AddTag(
     sTag, sSymbol,
@@ -498,7 +498,7 @@ void InstrumentViews::AddTag( const TagSymbolMap::sTag_t& sTag, const TagSymbolM
 
 }
 
-void InstrumentViews::DelTag( const TagSymbolMap::sTag_t& sTag, const TagSymbolMap::sSymbol_t& sSymbol ) {
+void PanelInstrumentViews::DelTag( const TagSymbolMap::sTag_t& sTag, const TagSymbolMap::sSymbol_t& sSymbol ) {
 
   m_TagSymbolMap.DelTag(
     sTag, sSymbol,
@@ -512,7 +512,7 @@ void InstrumentViews::DelTag( const TagSymbolMap::sTag_t& sTag, const TagSymbolM
 
 }
 
-void InstrumentViews::BuildOptionChains( Instrument& instrumentUnderlying ) {
+void PanelInstrumentViews::BuildOptionChains( Instrument& instrumentUnderlying ) {
 
   const std::string& sNameGeneric( instrumentUnderlying.pInstrument->GetInstrumentName() );
   const std::string& sNameIQFeed(  instrumentUnderlying.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
@@ -578,7 +578,7 @@ void InstrumentViews::BuildOptionChains( Instrument& instrumentUnderlying ) {
 
 }
 
-void InstrumentViews::PresentOptionChains( Instrument& underlying ) {
+void PanelInstrumentViews::PresentOptionChains( Instrument& underlying ) {
   for ( mapChains_t::value_type& vtChain: underlying.mapChains ) {
     const std::string sExpiry( ou::tf::Instrument::BuildDate( vtChain.first ) );
 
@@ -633,7 +633,7 @@ void InstrumentViews::PresentOptionChains( Instrument& underlying ) {
 }
 
 // currently not used
-void InstrumentViews::OptionChainView_select() {
+void PanelInstrumentViews::OptionChainView_select() {
 
   if ( nullptr != m_pcurView ) { // todo: refactor this and the same below
     //BOOST_LOG_TRIVIAL(trace) << "chain hide2";
@@ -648,7 +648,7 @@ void InstrumentViews::OptionChainView_select() {
 
 }
 
-void InstrumentViews::BuildSessionBarModel( Instrument& instrument ) {
+void PanelInstrumentViews::BuildSessionBarModel( Instrument& instrument ) {
   const std::string& sIQFeedSymbolName( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
   m_pBarHistory->Set(
     [&instrument]( const ou::tf::Bar& bar ){ // fHistory_Bar_t
@@ -667,7 +667,7 @@ void InstrumentViews::BuildSessionBarModel( Instrument& instrument ) {
 // BuildSessionBarModel
 
 // note: makes use of sdm.IsWatching to be single entry here
-void InstrumentViews::BuildDailyBarModel( Instrument& instrument ) {
+void PanelInstrumentViews::BuildDailyBarModel( Instrument& instrument ) {
   const std::string& sIQFeedSymbolName( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
   //BOOST_LOG_TRIVIAL(info) << "BuildDailyBarModel " << sIQFeedSymbolName << " - " << sNameGeneric;
   m_pBarHistory->Set(
@@ -682,7 +682,7 @@ void InstrumentViews::BuildDailyBarModel( Instrument& instrument ) {
   m_pBarHistory->RequestNDaysOfBars( sIQFeedSymbolName, 30 * 60 /* 30 minutes */, 300 /* days */ ); // provides about 203 days
 }
 
-void InstrumentViews::SizeTreeCtrl() {
+void PanelInstrumentViews::SizeTreeCtrl() {
   //const wxSize sizeClient( m_pTreeCtrl->GetClientSize() );
   //const wxSize sizeCurrent( m_pTreeCtrl->GetSize() );
   const wxSize sizeBest( m_pTreeCtrl->GetBestSize() );
@@ -696,7 +696,7 @@ void InstrumentViews::SizeTreeCtrl() {
   GetParent()->Layout();
 }
 
-void InstrumentViews::HandleCheckListBoxEvent( wxCommandEvent& event ) {
+void PanelInstrumentViews::HandleCheckListBoxEvent( wxCommandEvent& event ) {
   auto id = event.GetSelection();
   bool b( m_clbTags->IsChecked( id ) );
   //std::cout << "selection " << id << ',' << b << std::endl;
@@ -704,7 +704,7 @@ void InstrumentViews::HandleCheckListBoxEvent( wxCommandEvent& event ) {
   event.Skip();
 }
 
-void InstrumentViews::FilterByTag() {
+void PanelInstrumentViews::FilterByTag() {
 
   m_pRootTreeItem->DeleteChildren();
 
@@ -744,15 +744,15 @@ void InstrumentViews::FilterByTag() {
   }
 }
 
-void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
+void PanelInstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
 
   //BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy top";
 
-  m_clbTags->Unbind( wxEVT_CHECKLISTBOX, &InstrumentViews::HandleCheckListBoxEvent, this );
+  m_clbTags->Unbind( wxEVT_CHECKLISTBOX, &PanelInstrumentViews::HandleCheckListBoxEvent, this );
 
   if ( m_timerRefresh.IsRunning() ) {
     m_timerRefresh.Stop();
-    Unbind( wxEVT_TIMER, &InstrumentViews::HandleTimer, this, m_timerRefresh.GetId() );
+    Unbind( wxEVT_TIMER, &PanelInstrumentViews::HandleTimer, this, m_timerRefresh.GetId() );
   }
 
   //BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy 1";
@@ -769,16 +769,16 @@ void InstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
   //BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy 2";
 
   //TreeItem::UnBind( this, m_pTree ); // to be fixed
-  m_pTreeCtrl->Unbind( wxEVT_TREE_ITEM_EXPANDED, &InstrumentViews::HandleTreeEventItemExpanded, this, m_pTreeCtrl->GetId() );
-  m_pTreeCtrl->Unbind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &InstrumentViews::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() );
+  m_pTreeCtrl->Unbind( wxEVT_TREE_ITEM_EXPANDED, &PanelInstrumentViews::HandleTreeEventItemExpanded, this, m_pTreeCtrl->GetId() );
+  m_pTreeCtrl->Unbind( wxEVT_COMMAND_TREE_ITEM_GETTOOLTIP, &PanelInstrumentViews::HandleTreeEventItemGetToolTip, this, m_pTreeCtrl->GetId() );
   m_pTreeCtrl->DeleteAllItems();  // time consuming with option chains
-  assert( Unbind( wxEVT_DESTROY, &InstrumentViews::OnDestroy, this ) );
+  assert( Unbind( wxEVT_DESTROY, &PanelInstrumentViews::OnDestroy, this ) );
   event.Skip( true );  // auto followed by Destroy();
 
   //BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy btm";
 }
 
-wxBitmap InstrumentViews::GetBitmapResource( const wxString& name ) {
+wxBitmap PanelInstrumentViews::GetBitmapResource( const wxString& name ) {
   wxUnusedVar(name);
   return wxNullBitmap;
 }

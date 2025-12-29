@@ -44,7 +44,7 @@ class FrameMain;
 namespace ou {
 namespace tf {
   class FrameControls;
-  class InstrumentViews;
+  class PanelInstrumentViews;
   class PanelDividendNotes;
   class WinChartView;
 namespace iqfeed {
@@ -68,7 +68,7 @@ private:
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
   FrameMain* m_pFrameMain;
-  ou::tf::InstrumentViews* m_pInstrumentViews;
+  ou::tf::PanelInstrumentViews* m_pInstrumentViews;
 
   wxFrame* m_pFrameDividendNotes;  // todo:  change to FrameControls
   ou::tf::PanelDividendNotes* m_pPanelDividendNotes;

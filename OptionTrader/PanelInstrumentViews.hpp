@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 /*
- * File:    InstrumentViews.hpp
+ * File:    PanelInstrumentViews.hpp
  * Author:  raymond@burkholder.net
  * Project: OptionTrader
  * Created: July 18, 2025 10:26:28
@@ -66,20 +66,20 @@ class WinChartView;
 class ComposeInstrument;
 class WatchOnStatusBar;
 
-class InstrumentViews
+class PanelInstrumentViews
 : public wxPanel
 {
   friend class boost::serialization::access;
 public:
 
-  InstrumentViews();
-  InstrumentViews(
+  PanelInstrumentViews();
+  PanelInstrumentViews(
     wxWindow* parent, wxWindowID id = SYMBOL_INSTRUMENTVIEWS_IDNAME,
     const wxPoint& pos = SYMBOL_INSTRUMENTVIEWS_POSITION,
     const wxSize& size = SYMBOL_INSTRUMENTVIEWS_SIZE,
     long style = SYMBOL_INSTRUMENTVIEWS_STYLE,
     const wxString& name = SYMBOL_INSTRUMENTVIEWS_TITLE );
-  virtual ~InstrumentViews();
+  virtual ~PanelInstrumentViews();
 
   bool Create( wxWindow* parent,
     wxWindowID id = SYMBOL_INSTRUMENTVIEWS_IDNAME,
@@ -360,4 +360,4 @@ private:
 } // namespace tf
 } // namespace ou
 
-BOOST_CLASS_VERSION(ou::tf::InstrumentViews, 5)
+BOOST_CLASS_VERSION(ou::tf::PanelInstrumentViews, 5)

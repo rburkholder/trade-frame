@@ -37,7 +37,7 @@
 #include <TFVuTrading/PanelDividendNotes.hpp>
 
 #include "AppOptionTrader.hpp"
-#include "InstrumentViews.hpp"
+#include "PanelInstrumentViews.hpp"
 
 namespace {
   static const std::string c_sAppTitle(        "Option Trader" );
@@ -77,7 +77,7 @@ bool AppOptionTrader::OnInit() {
   sizerFrame = new wxBoxSizer( wxHORIZONTAL );
   m_pFrameMain->SetSizer( sizerFrame );
 
-  m_pInstrumentViews = new ou::tf::InstrumentViews( m_pFrameMain );
+  m_pInstrumentViews = new ou::tf::PanelInstrumentViews( m_pFrameMain );
   sizerFrame->Add( m_pInstrumentViews, 1, wxALL | wxEXPAND, 0 );
 
   m_pFrameDividendNotes
