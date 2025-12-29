@@ -27,6 +27,7 @@ set(
     AppOptionTrader.hpp
     Common.hpp
     PanelInstrumentViews.hpp
+    PanelOptionCombo.hpp
     ManualDailyBarModel.hpp
     OptionChainModel.hpp
     OptionChainView.hpp
@@ -38,6 +39,7 @@ set(
   file_cpp
     AppOptionTrader.cpp
     PanelInstrumentViews.cpp
+    PanelOptionCombo.cpp
     ManualDailyBarModel.cpp
     OptionChainModel.cpp
     OptionChainView.cpp

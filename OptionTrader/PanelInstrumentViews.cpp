@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 /*
- * File:    InstrumentViews.vpp
+ * File:    PanelInstrumentViews.cpp
  * Author:  raymond@burkholder.net
  * Project: OptionTrader
  * Created: July 18, 2025 10:26:28
@@ -40,8 +40,9 @@
 #include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/WinChartView.h>
 
-#include "PanelInstrumentViews.hpp"
 #include "OptionChainModel.hpp"
+#include "PanelOptionCombo.hpp"
+#include "PanelInstrumentViews.hpp"
 
 // todo:  2025/08/10
 //   make use of revised ComposeInstrument to merge all options from all like futures together into one long map
@@ -143,6 +144,9 @@ void PanelInstrumentViews::CreateControls() {
 
   m_pOptionChainView = new OptionChainView( itemPanel1 );
   sizer_OptionChain_OptionCombo->Add( m_pOptionChainView, 1, wxALL | wxEXPAND, 2 );
+
+  m_pPanelOptionCombo = new PanelOptionCombo( itemPanel1 );
+  sizer_OptionChain_OptionCombo->Add( m_pPanelOptionCombo, 1, wxALL | wxEXPAND, 2 );
 
   wxBoxSizer* itemBoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
   itemBoxSizer1->Add(itemBoxSizer6, 0, wxGROW|wxALL, 0);

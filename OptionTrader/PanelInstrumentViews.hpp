@@ -54,6 +54,7 @@ class OptionChainModel;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
+
 namespace iqfeed {
   class BarHistory;
 }
@@ -65,6 +66,7 @@ class TreeItem;
 class WinChartView;
 class ComposeInstrument;
 class WatchOnStatusBar;
+class PanelOptionCombo;
 
 class PanelInstrumentViews
 : public wxPanel
@@ -130,6 +132,8 @@ private:
 
   wxTreeCtrl* m_pTreeCtrl;
   TreeItem* m_pRootTreeItem; // // root of custom tree items
+
+  PanelOptionCombo* m_pPanelOptionCombo;
 
   wxStatusBar* m_pStatusBar;
 
