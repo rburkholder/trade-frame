@@ -40,8 +40,10 @@
 #include <TFVuTrading/TreeItem.hpp>
 #include <TFVuTrading/WinChartView.h>
 
-#include "OptionChainModel.hpp"
 #include "OptionComboGridView.hpp"
+#include "OptionComboGridTable.hpp"
+
+#include "OptionChainModel.hpp"
 #include "PanelInstrumentViews.hpp"
 
 // todo:  2025/08/10
@@ -147,6 +149,9 @@ void PanelInstrumentViews::CreateControls() {
 
   m_pOptionComboGridView = new OptionComboGridView( itemPanel1 );
   sizer_OptionChain_OptionCombo->Add( m_pOptionComboGridView, 0, wxALL | wxEXPAND, 2 ); // 0 propportion, need to auto adjust as rows are added
+
+  m_pOptionComboGridTable = new OptionComboGridTable();
+  m_pOptionComboGridView->SetTable( m_pOptionComboGridTable );
 
   wxBoxSizer* itemBoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
   itemBoxSizer1->Add(itemBoxSizer6, 0, wxGROW|wxALL, 0);
@@ -769,6 +774,9 @@ void PanelInstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
     m_pOptionChainModel->DecRef();
     m_pOptionChainModel = nullptr;
   }
+
+  m_pOptionComboGridView->SetTable( nullptr );
+  delete m_pOptionComboGridTable;
 
   //BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy 2";
 

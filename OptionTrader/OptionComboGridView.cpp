@@ -12,7 +12,7 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 /*
- * File:    PanelOptionCombo.cpp
+ * File:    OptionComboGridView.cpp
  * Author:  raymond@burkholder.net
  * Project: OptionTrader
  * Created: December 28 2025 20:27:57
