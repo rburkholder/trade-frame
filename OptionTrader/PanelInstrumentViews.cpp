@@ -41,7 +41,7 @@
 #include <TFVuTrading/WinChartView.h>
 
 #include "OptionChainModel.hpp"
-#include "PanelOptionCombo.hpp"
+#include "OptionComboGridView.hpp"
 #include "PanelInstrumentViews.hpp"
 
 // todo:  2025/08/10
@@ -145,8 +145,8 @@ void PanelInstrumentViews::CreateControls() {
   m_pOptionChainView = new OptionChainView( itemPanel1 );
   sizer_OptionChain_OptionCombo->Add( m_pOptionChainView, 1, wxALL | wxEXPAND, 2 );
 
-  m_pPanelOptionCombo = new PanelOptionCombo( itemPanel1 );
-  sizer_OptionChain_OptionCombo->Add( m_pPanelOptionCombo, 1, wxALL | wxEXPAND, 2 );
+  m_pOptionComboGridView = new OptionComboGridView( itemPanel1 );
+  sizer_OptionChain_OptionCombo->Add( m_pOptionComboGridView, 0, wxALL | wxEXPAND, 2 ); // 0 propportion, need to auto adjust as rows are added
 
   wxBoxSizer* itemBoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
   itemBoxSizer1->Add(itemBoxSizer6, 0, wxGROW|wxALL, 0);

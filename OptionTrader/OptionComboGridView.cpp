@@ -20,32 +20,32 @@
 
 #include <wx/sizer.h>
 
-#include "PanelOptionCombo.hpp"
+#include "OptionComboGridView.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-PanelOptionCombo::PanelOptionCombo(): wxPanel() {
+OptionComboGridView::OptionComboGridView(): wxGrid() {
   Init();
 }
 
-PanelOptionCombo::PanelOptionCombo( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name )
-: wxPanel()
+OptionComboGridView::OptionComboGridView( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name )
+: wxGrid()
 {
   Init();
   Create( parent, id, pos, size, style, name );
 }
 
-PanelOptionCombo::~PanelOptionCombo() {
+OptionComboGridView::~OptionComboGridView() {
 }
 
-void PanelOptionCombo::Init() {
+void OptionComboGridView::Init() {
 }
 
-bool PanelOptionCombo::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
+bool OptionComboGridView::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
 
     SetExtraStyle( wxWS_EX_VALIDATE_RECURSIVELY );
-    wxPanel::Create( parent, id, pos, size, style );
+    wxGrid::Create( parent, id, pos, size, style );
 
     CreateControls();
     if ( GetSizer() ) {
@@ -55,9 +55,9 @@ bool PanelOptionCombo::Create( wxWindow* parent, wxWindowID id, const wxPoint& p
   return true;
 }
 
-void PanelOptionCombo::CreateControls() {
+void OptionComboGridView::CreateControls() {
 
-  PanelOptionCombo* itemPanel1 = this;
+  OptionComboGridView* itemPanel1 = this;
 
   //wxBoxSizer* itemBoxSizer1 = new wxBoxSizer( wxVERTICAL );
   //itemPanel1->SetSizer( itemBoxSizer1 );

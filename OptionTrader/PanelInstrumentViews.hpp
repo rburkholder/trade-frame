@@ -66,7 +66,7 @@ class TreeItem;
 class WinChartView;
 class ComposeInstrument;
 class WatchOnStatusBar;
-class PanelOptionCombo;
+class OptionComboGridView;
 
 class PanelInstrumentViews
 : public wxPanel
@@ -133,7 +133,7 @@ private:
   wxTreeCtrl* m_pTreeCtrl;
   TreeItem* m_pRootTreeItem; // // root of custom tree items
 
-  PanelOptionCombo* m_pPanelOptionCombo;
+  OptionComboGridView* m_pOptionComboGridView;
 
   wxStatusBar* m_pStatusBar;
 
