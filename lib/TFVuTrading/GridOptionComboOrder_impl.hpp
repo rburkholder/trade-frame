@@ -48,16 +48,19 @@
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-struct GridOptionComboOrder_impl: public wxGridTableBase {
-//public:
+class GridOptionComboOrder_impl
+: public wxGridTableBase {
+  friend GridOptionComboOrder;
+public:
+
   GridOptionComboOrder_impl( GridOptionComboOrder& );
   virtual ~GridOptionComboOrder_impl();
 
   void Add( ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sName );
 
-//protected:
+protected:
 
-//private:
+private:
 
   GridOptionComboOrder& m_grid;
 
