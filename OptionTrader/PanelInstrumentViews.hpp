@@ -64,10 +64,9 @@ namespace option {
 
 class TreeItem;
 class WinChartView;
-class ComposeInstrument;
 class WatchOnStatusBar;
-class OptionComboGridView;
-class OptionComboGridTable;
+class ComposeInstrument;
+class GridOptionComboOrder;
 
 class PanelInstrumentViews
 : public wxPanel
@@ -134,8 +133,10 @@ private:
   wxTreeCtrl* m_pTreeCtrl;
   TreeItem* m_pRootTreeItem; // // root of custom tree items
 
-  OptionComboGridView* m_pOptionComboGridView;
-  OptionComboGridTable* m_pOptionComboGridTable;
+  //OptionComboGridView* m_pOptionComboGridView;
+  //OptionComboGridTable* m_pOptionComboGridTable;
+
+  GridOptionComboOrder* m_pGridOptionComboOrder;
 
   wxStatusBar* m_pStatusBar;
 
