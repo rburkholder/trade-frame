@@ -78,9 +78,11 @@ void GridOptionComboOrder_impl::CreateControls() {
 void GridOptionComboOrder_impl::Add( ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sIQFeedName ) {
 
   bool bSymbolFound( false );
-  for (vOptionComboOrderRow_t::value_type& row: m_vOptionComboOrderRow ) {
+  for ( vOptionComboOrderRow_t::value_type& row: m_vOptionComboOrderRow ) {
     if ( OptionComboOrderRow::EType::item == row.m_type ) {
-      if ( boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetValue() == sIQFeedName ) {
+      if (
+        boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetValue() == sIQFeedName )
+      {
         boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).SetValue( side );
         boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).SetValue( quan );
         boost::fusion::at_c<COL_Price>( row.m_vModelCells ).SetValue( price );
@@ -95,8 +97,9 @@ void GridOptionComboOrder_impl::Add( ou::tf::OrderSide::EOrderSide side, int qua
   }
   else {
     bool bEmptyFilled( false );
-    for (vOptionComboOrderRow_t::value_type& row: m_vOptionComboOrderRow ) {
+    for ( vOptionComboOrderRow_t::value_type& row: m_vOptionComboOrderRow ) {
       if ( OptionComboOrderRow::EType::empty == row.m_type ) {
+
         row.m_type = OptionComboOrderRow::EType::item;
         boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).SetValue( side );
         boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).SetValue( quan );
