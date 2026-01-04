@@ -181,9 +181,9 @@ void PanelInstrumentViews::CreateControls() {
 
 void PanelInstrumentViews::HandleTimer( wxTimerEvent& event ) {
   if ( ( nullptr != m_pOptionChainView ) && ( nullptr != m_pOptionChainModel ) ) {
-    wxDataViewItem dviTopItem = m_pOptionChainView->GetTopItem();
-    int nRows = m_pOptionChainView->GetCountPerPage();
-    m_pOptionChainModel->HandleTimer( dviTopItem, nRows );
+    const int ixRow = m_pOptionChainView->GetFirstVisibleRow();
+    const int nRows = m_pOptionChainView->GetVisibleRowCount();
+    m_pOptionChainModel->HandleTimer( ixRow, nRows );
   }
   if ( m_pWatchOnStatusBar ) {
     m_pStatusBar->SetStatusText( fmt::format( "{:.{}f}", m_pWatchOnStatusBar->Price(), 2 ), 4 );
@@ -380,11 +380,12 @@ void PanelInstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
     [this,&instrument,&sNameGeneric,&sNameIQFeed]( ou::tf::TreeItem* pti ){ // fOnClick_t
 
       // stop current OptionChainModel
+      m_pOptionChainView->SetTable( nullptr, false );
       if ( nullptr != m_pOptionChainModel ) {
-        m_pOptionChainModel->DecRef();
+        //m_pOptionChainModel->DecRef();
+        delete m_pOptionChainModel;
         m_pOptionChainModel = nullptr;
       }
-      m_pOptionChainView->AssociateModel( m_pOptionChainModel );
 
       m_pWinChartView_session->SetLive_trail(); // todo: revert to this after testing
       //m_pWinChartView_session->SetLive_review();
@@ -590,8 +591,10 @@ void PanelInstrumentViews::PresentOptionChains( Instrument& underlying ) {
     ou::tf::TreeItem* ptiExpiry = underlying.pti->AppendChild(
       sExpiry
     , [this,&vtChain,&underlying]( ou::tf::TreeItem* pti ){ // fOnClick_t
+        m_pOptionChainView->SetTable( nullptr, false );
         if ( nullptr != m_pOptionChainModel ) {
-          m_pOptionChainModel->DecRef();
+          //m_pOptionChainModel->DecRef();
+          delete m_pOptionChainModel;
           m_pOptionChainModel = nullptr;
         }
         m_pOptionChainModel = new OptionChainModel(
@@ -613,9 +616,10 @@ void PanelInstrumentViews::PresentOptionChains( Instrument& underlying ) {
             }
           }
         );
-        wxDataViewItem item( m_pOptionChainModel->ClosestStrike( underlying.pWatch->LastQuote().Ask() ) );
-        m_pOptionChainView->AssociateModel( m_pOptionChainModel );
-        m_pOptionChainView->EnsureVisible( item );
+        //wxDataViewItem item( m_pOptionChainModel->ClosestStrike( underlying.pWatch->LastQuote().Ask() ) );
+        const int ixRow( m_pOptionChainModel->ClosestStrike( underlying.pWatch->LastQuote().Ask() ) );
+        m_pOptionChainView->SetTable( m_pOptionChainModel, false );
+        m_pOptionChainView->SetVisible( ixRow );
         m_pOptionChainView->Show();
         Layout();
         GetParent()->Layout();    }
@@ -764,10 +768,11 @@ void PanelInstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
 
   m_pcurView = nullptr;
   if ( nullptr != m_pOptionChainView ) {
-    m_pOptionChainView->AssociateModel( nullptr );
+    m_pOptionChainView->SetTable( nullptr );
   }
   if ( nullptr != m_pOptionChainModel ) {
-    m_pOptionChainModel->DecRef();
+    //m_pOptionChainModel->DecRef();
+    delete m_pOptionChainModel;
     m_pOptionChainModel = nullptr;
   }
 

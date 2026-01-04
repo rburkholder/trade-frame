@@ -18,16 +18,17 @@
  * Created: July 18, 2025 11:30:21
  */
 
-// todo: convert to wxgrid, has wider variety of cell & colour choices
+#include <wx/icon.h>
 
 #include "OptionChainView.hpp"
 
-OptionChainView::OptionChainView(): wxDataViewCtrl() {
+OptionChainView::OptionChainView()
+: wxGrid() {
   Init();
 }
 
 OptionChainView::OptionChainView( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name )
-: wxDataViewCtrl()
+: wxGrid()
 {
   Init();
   Create(parent, id, pos, size, style, name );
@@ -41,7 +42,7 @@ void OptionChainView::Init() {
 
 bool OptionChainView::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
 
-  wxDataViewCtrl::Create(parent, id, pos, size, style );
+  wxGrid::Create(parent, id, pos, size, style );
 
   CreateControls();
 
@@ -52,30 +53,24 @@ void OptionChainView::CreateControls() {
 
   Bind( wxEVT_DESTROY, &OptionChainView::OnDestroy, this );
 
-  auto fRendererRight = []()->wxDataViewTextRenderer*{
-    auto renderer = new wxDataViewTextRenderer();
-    renderer->SetAlignment( wxALIGN_RIGHT );
-    return renderer;
-  };
+  //auto fRendererRight = []()->wxDataViewTextRenderer*{
+  //  auto renderer = new wxDataViewTextRenderer();
+  //  renderer->SetAlignment( wxALIGN_RIGHT );
+  //  return renderer;
+  //};
+
+  SetDefaultColSize(50);
+  SetDefaultRowSize(20);
+  SetColLabelSize(22);
+  SetRowLabelSize(50);
+
+  EnableEditing( false );
+  DisableDragRowSize();
 
   {
     // Todo: add intrinsic value, premium value for call & put, include last price?
     // Todo: use trades to indicate possible trade opportunities, as they may represent knowlegeable actors
     //       check if they correspond to peaks/valleys in the underlying
-    assert( AppendColumn( new wxDataViewColumn( "c oi",   fRendererRight(), EChainColums::c_oi ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "c iv",   fRendererRight(), EChainColums::c_iv ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "c bid",  fRendererRight(), EChainColums::c_bid ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "c ask",  fRendererRight(), EChainColums::c_ask ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "c gma",  fRendererRight(), EChainColums::c_gma ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "c dlt",  fRendererRight(), EChainColums::c_dlt ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "strike", new wxDataViewTextRenderer(), EChainColums::strike ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "p dlt",  fRendererRight(), EChainColums::p_dlt ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "p gma",  fRendererRight(), EChainColums::p_gma ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "p bid",  fRendererRight(), EChainColums::p_bid ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "p ask",  fRendererRight(), EChainColums::p_ask ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "p iv",   fRendererRight(), EChainColums::p_iv ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "p oi",   fRendererRight(), EChainColums::p_oi ) ) );
-    assert( AppendColumn( new wxDataViewColumn( "",       fRendererRight(), EChainColums::empty ) ) );
   }
 
   // the following does not work, will need to use wxGrid to provide column & header colours
@@ -85,6 +80,31 @@ void OptionChainView::CreateControls() {
   //wxItemAttr attr2( attr1.GetTextColour(), attr1.GetBackgroundColour(), attr1.GetFont() );
   //attr2.SetBackgroundColour( cdb.Find( "RED" ) );
   //SetHeaderAttr( attr2 );
+}
+
+int OptionChainView::GetFirstVisibleRow() const {
+  return GetFirstFullyVisibleRow();
+}
+
+int OptionChainView::GetVisibleRowCount() const {
+  const int ixFirstRow( GetFirstFullyVisibleRow() );
+  int nRows {};
+  if ( -1 != ixFirstRow ) {
+    int ixRow( ixFirstRow );
+    const int cntRows( GetTable()->GetNumberRows() );
+    while (
+      ( IsVisible( ixRow, OptionChainModel::col_Strike, false ) )
+      && ( cntRows > ixRow )
+    ) {
+      nRows++;
+      ixRow++;
+    }
+  }
+  return nRows;
+}
+
+void OptionChainView::SetVisible( int ixRow ) {
+  MakeCellVisible( ixRow, OptionChainModel::col_Strike );  // nay need a col number
 }
 
 void OptionChainView::OnDestroy( wxWindowDestroyEvent& event ) {

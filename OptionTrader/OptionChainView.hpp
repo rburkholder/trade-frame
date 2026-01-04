@@ -23,18 +23,18 @@
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
-#include <wx/dataview.h>
+#include <wx/grid.h>
 
-#include "Common.hpp"
+#include "OptionChainModel.hpp"
 
-#define SYMBOL_OPTIONCHAINVIEW_STYLE wxTAB_TRAVERSAL | wxDV_SINGLE | wxDV_ROW_LINES
+#define SYMBOL_OPTIONCHAINVIEW_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_OPTIONCHAINVIEW_TITLE _("Option Chain")
 #define SYMBOL_OPTIONCHAINVIEW_IDNAME ID_OPTIONCHAINVIEW
 #define SYMBOL_OPTIONCHAINVIEW_SIZE wxSize(-1, -1)
 #define SYMBOL_OPTIONCHAINVIEW_POSITION wxDefaultPosition
 
 class OptionChainView
-: public wxDataViewCtrl
+: public wxGrid
 {
   friend class boost::serialization::access;
 public:
@@ -55,6 +55,11 @@ public:
     long style = SYMBOL_OPTIONCHAINVIEW_STYLE,
     const wxString& name = SYMBOL_OPTIONCHAINVIEW_TITLE );
 
+  int GetFirstVisibleRow() const;
+  int GetVisibleRowCount() const;
+
+  void SetVisible( int ixRow );
+
 protected:
 private:
 
@@ -72,10 +77,10 @@ private:
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-    ar & EChainColums::empty;
-    for ( unsigned int ix = 0; ix < EChainColums::empty; ++ix ) {
-      wxDataViewColumn* p = GetColumn( ix );
-      ar & ( p->GetWidth() );
+    ar & GRID_ARRAY_COL_COUNT;
+    for ( unsigned int ix = 0; ix < GRID_ARRAY_COL_COUNT; ++ix ) {
+      //ar & GetColSize( ix );
+      ar & 50;
     }
   }
 
@@ -87,8 +92,7 @@ private:
 
     for ( unsigned int ix = 0; ix < nColumns; ++ix ) {
       ar & width;
-      wxDataViewColumn* p = GetColumn( ix );
-      p->SetWidth( width );
+      //SetColSize( ix, width );
     }
   }
 

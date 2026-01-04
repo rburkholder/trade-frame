@@ -32,7 +32,7 @@ OptionChainModel::OptionChainModel(
 , fOptionEngineAction_t&& fOptionEngineStart
 , fOptionEngineAction_t&& fOptionEngineStop
 )
-: wxDataViewVirtualListModel( vt.second.Size() )
+: wxGridTableBase()
 , m_vt( vt )
 , m_fBuildOption( fBuildOption )
 , m_fOptionEngineStart( std::move( fOptionEngineStart ) )
@@ -55,11 +55,19 @@ OptionChainModel::~OptionChainModel() {
   m_vRow2Entry.clear();
 }
 
-void OptionChainModel::HandleTimer( wxDataViewItem dviTopItem, int nRows ) {
-  if ( 0 < nRows ) {
+void OptionChainModel::SetView( wxGrid *grid ) {
+  wxGridTableBase::SetView( grid );
+}
 
-    const int ixFirst( GetRow( dviTopItem ) );
-    const int ixLast_( ixFirst + nRows - 1 );
+wxGrid* OptionChainModel::GetView() const {
+  return wxGridTableBase::GetView();
+}
+
+void OptionChainModel::HandleTimer( int top_row, int visible_row_count ) {
+  if ( 0 < visible_row_count ) {
+
+    const int ixFirst( top_row );
+    const int ixLast_( ixFirst + visible_row_count - 1 );
     const int ixLast( std::min<int>( ixLast_, m_vRow2Entry.size() - 1 ) );
 
     if ( ( ixFirst != m_ixFirst ) || ( ixLast != m_ixLast ) ) {
@@ -84,14 +92,17 @@ void OptionChainModel::HandleTimer( wxDataViewItem dviTopItem, int nRows ) {
     // check for rows to update
     for ( int ix = m_ixFirst; ix <= m_ixLast; ++ix ) {
       if ( m_vRow2Entry[ ix ].Updated() ) {
-        RowChanged( ix );
+        wxGrid* grid( GetView() );
+        if ( grid ) {
+          grid->ForceRefresh();
+        }
       }
     }
 
   }
 }
 
-wxDataViewItem OptionChainModel::ClosestStrike( double price ) const {
+int OptionChainModel::ClosestStrike( double price ) const {
   const double strike = m_vt.second.Atm( price );
   // todo: brute force this for now, create a comparator later
   size_t ix {};
@@ -101,126 +112,202 @@ wxDataViewItem OptionChainModel::ClosestStrike( double price ) const {
     ++ix;
     ++iter;
   }
-  wxDataViewItem item = GetItem( ix );
-  return item;
+  //wxDataViewItem item = GetItem( ix );
+  return ix;
 }
 
-bool OptionChainModel::IsContainer( const wxDataViewItem& item ) const {
-  return false; // not called
-}
-
-bool OptionChainModel::IsEnabled( const wxDataViewItem& item, unsigned int col ) const {
-  const auto row( GetRow( item ) );
-  return row < m_vRow2Entry.size();  // is called
-}
-
-wxDataViewItem OptionChainModel::GetParent( const wxDataViewItem& item ) const {
-  return wxDataViewItem( nullptr ); // not called
-}
-
-unsigned int OptionChainModel::GetChildren( const wxDataViewItem& item, wxDataViewItemArray& children ) const {
-  return 0; // not called
-}
-
-bool OptionChainModel::HasValue ( const wxDataViewItem& item, unsigned col ) const {
-  const auto row( GetRow( item ) );
-  return row < m_vRow2Entry.size();  // is called
-}
-
-void OptionChainModel::GetValue( wxVariant& value, const wxDataViewItem& item, unsigned int	col	) const {
+wxString OptionChainModel::GetValue( int row, int col	) {
 
   static const std::string fmtDecimal( "{:d}" );
   static const std::string fmtFixed( "{:.{}f}" );
 
-  const auto row( GetRow( item ) );
-
   const vRow2Entry_t::value_type& vt( m_vRow2Entry[ row ] );
   std::string response;
   switch ( col ) {
-    case c_oi:
+    case col_CallOi:
       if ( vt.options.call.pOption ) {
         response = fmt::format( fmtDecimal, vt.options.call.pOption->GetSummary().nOpenInterest );
       }
       break;
-    case c_iv:
+    case col_CallIV:
       if ( vt.options.call.pOption ) {
         response = fmt::format( fmtFixed, vt.options.call.pOption->LastGreek().ImpliedVolatility() * 100.0, 3 );
       }
       break;
-    case c_dlt:
+    case col_CallDelta:
       if ( vt.options.call.pOption ) {
         response = fmt::format( fmtFixed, vt.options.call.pOption->LastGreek().Delta(), 3 );
       }
       break;
-    case c_gma:
+    case col_CallGamma:
       if ( vt.options.call.pOption ) {
         response = fmt::format( fmtFixed, vt.options.call.pOption->LastGreek().Gamma(), 4 );
       }
       break;
-    case c_bid: // call bid
+    case col_CallBid: // call bid
       if ( vt.options.call.pOption ) {
         response = fmt::format( fmtFixed, vt.options.call.pOption->LastQuote().Bid(), 2 );
       }
       break;
-    case c_ask: // call ask
+    case col_CallAsk: // call ask
       if ( vt.options.call.pOption ) {
         response = fmt::format( fmtFixed, vt.options.call.pOption->LastQuote().Ask(), 2 );
       }
       break;
-    case strike:  // strike
+    case col_Strike:  // strike
       response = fmt::format( fmtFixed, vt.strike, 2 );
       break;
-    case p_bid: // put bid
+    case col_PutBid: // put bid
       if ( vt.options.put.pOption ) {
         response = fmt::format( fmtFixed, vt.options.put.pOption->LastQuote().Bid(), 2 );
       }
       break;
-    case p_ask: // put ask
+    case col_PutAsk: // put ask
       if ( vt.options.put.pOption ) {
         response = fmt::format( fmtFixed, vt.options.put.pOption->LastQuote().Ask(), 2 );
       }
       break;
-    case p_dlt:
+    case col_PutDelta:
       if ( vt.options.put.pOption ) {
         response = fmt::format( fmtFixed, vt.options.put.pOption->LastGreek().Delta(), 3 );
       }
       break;
-    case p_gma:
+    case col_PutGamma:
       if ( vt.options.put.pOption ) {
         response = fmt::format( fmtFixed, vt.options.put.pOption->LastGreek().Gamma(), 4 );
       }
       break;
-    case p_iv:
+    case col_PutIV:
       if ( vt.options.put.pOption ) {
         response = fmt::format( fmtFixed, vt.options.put.pOption->LastGreek().ImpliedVolatility() * 100.0, 3 );
       }
       break;
-    case p_oi:
+    case col_PutOi:
       if ( vt.options.put.pOption ) {
         response = fmt::format( fmtDecimal, vt.options.put.pOption->GetSummary().nOpenInterest );
       }
       break;
   }
-  wxVariant placeholder(
-    response
-  , boost::lexical_cast<std::string>( col )
-  );
-  value = placeholder;
+
+  return response;
 }
 
-bool OptionChainModel::HasContainerColumns( const wxDataViewItem& item ) const {
-  return false; // not called
+int OptionChainModel::GetNumberRows() {
+  return m_vt.second.Size();
 }
 
-void OptionChainModel::GetValueByRow( wxVariant &variant, unsigned int row, unsigned int col ) const {
-  BOOST_LOG_TRIVIAL(trace) << "OptionChainModel GetValueByRow"; // not called
+int OptionChainModel::GetNumberCols() {
+  return GRID_ARRAY_COL_COUNT;
 }
 
-bool OptionChainModel::SetValueByRow( const wxVariant &variant, unsigned int row, unsigned int col ) {
-  BOOST_LOG_TRIVIAL(trace) << "OptionChainModel SetValueByRow"; // not called
+void OptionChainModel::SetValue( int row, int col, const wxString& ) {
+  assert( false );  // not sure if this is used
+}
+
+void OptionChainModel::Clear() {
+}
+
+bool OptionChainModel::IsEmptyCell( int row, int col ) {
   return false;
 }
 
-unsigned int OptionChainModel::GetCount() const {
-  return m_vt.second.Size();
+// https://github.com/wxWidgets/wxWidgets/blob/master/src/generic/grid.cpp
+// wxGridStringTable::InsertRows
+bool OptionChainModel::InsertRows( size_t pos, size_t numRows ) {
+  //return wxGridTableBase::InsertRows( pos, numRows ); // don't do this
+    if ( GetView() ) {
+      wxGridTableMessage msg(
+        this,
+        wxGRIDTABLE_NOTIFY_ROWS_INSERTED,
+        pos,
+        numRows
+      );
+      GetView()->ProcessTableMessage( msg );
+    }
+  return true;
 }
+
+bool OptionChainModel::AppendRows( size_t numRows ) {
+  if ( GetView() ) {
+    wxGridTableMessage msg(
+      this,
+      wxGRIDTABLE_NOTIFY_ROWS_APPENDED,
+      numRows
+    );
+    GetView()->ProcessTableMessage( msg );
+  }
+return true;
+}
+
+bool OptionChainModel::DeleteRows( size_t pos, size_t numRows ) {
+  return true;
+}
+
+bool OptionChainModel::InsertCols( size_t pos, size_t numCols ) {
+  return true;
+}
+
+bool OptionChainModel::AppendCols( size_t numCols ) {
+  return true;
+}
+
+bool OptionChainModel::DeleteCols( size_t pos, size_t numCols ) {
+  return true;
+}
+
+wxString OptionChainModel::GetColLabelValue( int col ) {
+
+  wxString s;
+
+  #define GRID_EMIT_SwitchGetColLabel( z, n, data ) \
+    case GRID_EXTRACT_COL_DETAILS(z, n, 0):  \
+      s = wxString( GRID_EXTRACT_COL_DETAILS(z, n, 1 ) ); \
+      break;
+
+  switch ( col ) {
+    BOOST_PP_REPEAT(BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SwitchGetColLabel, 0 )
+  }
+
+  return s;
+}
+
+wxGridCellAttr* OptionChainModel::GetAttr (int row, int col, wxGridCellAttr::wxAttrKind kind ) {
+
+  int align = wxALIGN_CENTER;
+
+  #define GRID_EMIT_SwitchGetColAlign( z, n, data ) \
+    case GRID_EXTRACT_COL_DETAILS(z, n, 0):  \
+      align = GRID_EXTRACT_COL_DETAILS(z, n, 2 ); \
+      break;
+
+  wxGridCellAttr* pAttr = new wxGridCellAttr();
+
+  switch ( kind ) {
+    case wxGridCellAttr::wxAttrKind::Any:
+    case wxGridCellAttr::wxAttrKind::Cell:
+    case wxGridCellAttr::wxAttrKind::Col:
+      switch ( col ) {
+        //case COL_Quan:
+        //case COL_Price:
+        //  switch ( col ) {
+        //    BOOST_PP_REPEAT(BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SwitchGetColAlign, 0 )
+        //  }
+        //  pAttr->SetReadOnly( false );
+        //  break;
+        default:
+          pAttr->SetReadOnly();
+          break;
+      }
+      break;
+    case wxGridCellAttr::wxAttrKind::Row:
+      break;
+    case wxGridCellAttr::wxAttrKind::Default:
+      break;
+  }
+
+  pAttr->SetAlignment( align, wxALIGN_CENTER_VERTICAL );
+
+  return pAttr;
+
+}
+

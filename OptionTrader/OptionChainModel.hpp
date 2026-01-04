@@ -22,13 +22,18 @@
 
 #include <vector>
 
-#include <wx/dataview.h>
+#include <wx/grid.h>
+
+#include <TFVuTrading/ModelCell_macros.h>
 
 #include "Common.hpp"
 
+class OptionChainView;
+
 class OptionChainModel
-: public wxDataViewVirtualListModel
+: public wxGridTableBase
 {
+  friend OptionChainView;
 public:
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
@@ -45,25 +50,41 @@ public:
   );
   ~OptionChainModel();
 
-  virtual bool IsContainer( const wxDataViewItem& item	) const;
-  virtual bool IsEnabled( const wxDataViewItem& item, unsigned int col ) const;
-  virtual bool HasValue ( const wxDataViewItem& item, unsigned col) const;
-  virtual wxDataViewItem GetParent( const wxDataViewItem& item ) const;
-  virtual unsigned int GetChildren( const wxDataViewItem& item, wxDataViewItemArray& children ) const;
-  virtual void GetValue( wxVariant& variant, const wxDataViewItem& item, unsigned int	col	) const;
-  virtual bool HasContainerColumns( const wxDataViewItem& item ) const;
+  void HandleTimer( int top_row, int visible_row_count );
 
-  virtual void GetValueByRow( wxVariant &variant, unsigned int row, unsigned int col ) const;
-  virtual bool SetValueByRow( const wxVariant &variant, unsigned int row, unsigned int col );
+  int ClosestStrike( double ) const;
 
-  unsigned int GetCount() const;
-
-  void HandleTimer( wxDataViewItem, int );
-
-  wxDataViewItem ClosestStrike( double ) const;
+  virtual void SetView ( wxGrid *grid ) override;
+  virtual wxGrid* GetView() const override;
 
 protected:
 private:
+
+  // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
+  #define GRID_ARRAY_PARAM_COUNT 5
+  #define GRID_ARRAY_COL_COUNT 13
+  #define GRID_ARRAY \
+    (GRID_ARRAY_COL_COUNT,  \
+      ( /* Col 0,         1,             2,        3,      4,          */ \
+        ( col_CallOi,    "c oi",   wxALIGN_RIGHT,   50, ModelCellInt    ), \
+        ( col_CallIV,    "c iv",   wxALIGN_RIGHT,   50, ModelCellDouble ), \
+        ( col_CallBid,   "c bid",  wxALIGN_RIGHT,   50, ModelCellDouble ), \
+        ( col_CallAsk,   "c ask",  wxALIGN_RIGHT,  120, ModelCellDouble ), \
+        ( col_CallGamma, "c gma",  wxALIGN_RIGHT,   50, ModelCellDouble ), \
+        ( col_CallDelta, "c dlt",  wxALIGN_RIGHT,   50, ModelCellDouble ), \
+        ( col_Strike,    "strike", wxALIGN_RIGHT,   50, ModelCellDouble ), \
+        ( col_PutDelta,  "p dlt",  wxALIGN_RIGHT,   50, ModelCellDouble ), \
+        ( col_PutGamma,  "p gma",  wxALIGN_RIGHT,   50, ModelCellDouble ), \
+        ( col_PutBid,    "p bid",  wxALIGN_RIGHT,   50, ModelCellDouble ), \
+        ( col_PutAsk,    "p ask",  wxALIGN_RIGHT,  120, ModelCellDouble ), \
+        ( col_PutIV,     "p iv",   wxALIGN_RIGHT,   50, ModelCellDouble ), \
+        ( col_PutOi,     "p oi",   wxALIGN_RIGHT,   50, ModelCellInt    ), \
+        ) \
+      )
+
+  enum EChainColums {
+    BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,GRID_EXTRACT_ENUM_LIST,0)
+  };
 
   mapChains_t::value_type& m_vt;
 
@@ -177,5 +198,26 @@ private:
 
   using vRow2Entry_t = std::vector<Strike>;
   vRow2Entry_t m_vRow2Entry;
+
+  virtual int GetNumberRows() override;
+  virtual int GetNumberCols() override;
+
+  virtual bool IsEmptyCell( int row, int col ) override;
+
+  virtual wxString GetValue( int row, int col	) override;
+  virtual void SetValue( int row, int col, const wxString& ) override;
+
+  virtual void Clear() override;
+
+  virtual bool InsertRows( size_t pos=0, size_t numRows=1 ) override;
+  virtual bool AppendRows( size_t numRows=1 ) override;
+  virtual bool DeleteRows( size_t pos=0, size_t numRows=1 ) override;
+
+  virtual bool InsertCols( size_t pos=0, size_t numCols=1 ) override;
+  virtual bool AppendCols( size_t numCols=1 ) override;
+  virtual bool DeleteCols( size_t pos=0, size_t numCols=1 ) override;
+
+  virtual wxGridCellAttr* GetAttr ( int row, int col, wxGridCellAttr::wxAttrKind kind ) override;
+  virtual wxString GetColLabelValue( int col ) override;
 
 };
