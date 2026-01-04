@@ -19,7 +19,6 @@
  */
 
 #include "OptionComboGridTable.hpp"
-#include "wx/generic/grid.h"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

@@ -69,6 +69,7 @@ private:
   void OnDestroy( wxWindowDestroyEvent& event );
 
   wxBitmap GetBitmapResource( const wxString& name );
+  wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };
 
   template<typename Archive>

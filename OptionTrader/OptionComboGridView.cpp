@@ -18,6 +18,7 @@
  * Created: December 28 2025 20:27:57
  */
 
+#include <wx/icon.h>
 #include <wx/sizer.h>
 
 #include "OptionComboGridView.hpp"
@@ -56,28 +57,26 @@ bool OptionComboGridView::Create( wxWindow* parent, wxWindowID id, const wxPoint
 }
 
 void OptionComboGridView::CreateControls() {
-
-  OptionComboGridView* itemPanel1 = this;
-
-  //wxBoxSizer* itemBoxSizer1 = new wxBoxSizer( wxVERTICAL );
-  //itemPanel1->SetSizer( itemBoxSizer1 );
-
-
-  //if ( PanelInstrumentViews::ShowToolTips() ) {
-  //  m_pTreeCtrl->SetToolTip(_( "Symbols / Actions" ) );
-  //}
-
-  //m_pOptionChainView->Show();
-
-  Layout();
-  GetParent()->Layout();
-
-  //Bind( wxEVT_DESTROY, &PanelInstrumentViews::OnDestroy, this );
-
-  //m_timerRefresh.SetOwner( this );
-  //Bind( wxEVT_TIMER, &PanelInstrumentViews::HandleTimer, this, m_timerRefresh.GetId() );
-  //m_timerRefresh.Start( 500 );
+  Bind( wxEVT_DESTROY, &OptionComboGridView::OnDestroy, this );
 }
+
+void OptionComboGridView::OnDestroy( wxWindowDestroyEvent& event ) {
+
+  assert( Unbind( wxEVT_DESTROY, &OptionComboGridView::OnDestroy, this ) );
+  event.Skip( true );  // auto followed by Destroy();
+
+}
+
+wxBitmap OptionComboGridView::GetBitmapResource( const wxString& name ) {
+  wxUnusedVar(name);
+  return wxNullBitmap;
+}
+
+wxIcon OptionComboGridView::GetIconResource( const wxString& name ) {
+  wxUnusedVar(name);
+  return wxNullIcon;
+}
+
 
 } // namespace tf
 } // namespace ou
