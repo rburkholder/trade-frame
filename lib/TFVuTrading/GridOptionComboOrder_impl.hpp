@@ -156,25 +156,25 @@ private:
   void ClearRows();
   void PlaceComboOrder();
 
-  virtual void SetView ( wxGrid *grid );
-  virtual wxGrid* GetView() const;
+  virtual void SetView ( wxGrid *grid ) override;
+  virtual wxGrid* GetView() const override;
 
-  virtual int GetNumberRows();
-  virtual int GetNumberCols();
-  virtual bool IsEmptyCell( int row, int col );
+  virtual int GetNumberRows() override;
+  virtual int GetNumberCols() override;
+  virtual bool IsEmptyCell( int row, int col ) override;
 
-  virtual bool InsertRows( size_t pos = 0, size_t numRows = 1 );
-  virtual bool AppendRows( size_t numRows = 1 );
+  virtual bool InsertRows( size_t pos = 0, size_t numRows = 1 ) override;
+  virtual bool AppendRows( size_t numRows = 1 ) override;
 
-  virtual wxString GetValue( int row, int col );
-  virtual void SetValue( int row, int col, const wxString &value );
+  virtual wxString GetValue( int row, int col ) override;
+  virtual void SetValue( int row, int col, const wxString &value ) override;
 
-  virtual wxGridCellAttr* GetAttr ( int row, int col, wxGridCellAttr::wxAttrKind kind );
+  virtual wxGridCellAttr* GetAttr ( int row, int col, wxGridCellAttr::wxAttrKind kind ) override;
 
   //virtual void SetValueAsDouble(int row, int col, double value);
   //virtual double GetValueAsDouble(int row, int col);
 
-  virtual wxString GetColLabelValue( int col );
+  virtual wxString GetColLabelValue( int col ) override;
 
   bool StartDragDrop( DragDropInstrument& );
 
