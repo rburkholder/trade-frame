@@ -33,6 +33,8 @@
 #define SYMBOL_OPTIONCHAINVIEW_SIZE wxSize(-1, -1)
 #define SYMBOL_OPTIONCHAINVIEW_POSITION wxDefaultPosition
 
+class wxMenu;
+
 class OptionChainView
 : public wxGrid
 {
@@ -67,9 +69,15 @@ private:
     ID_Null=wxID_HIGHEST, ID_OPTIONCHAINVIEW
   };
 
+  wxMenu* m_pMenuAssignWatch;
+
   void Init();
   void CreateControls();
   void OnDestroy( wxWindowDestroyEvent& event );
+
+  void OnGridCellLeftClick( wxGridEvent& );
+  void OnGridCellRightClick( wxGridEvent& );
+  void OnGridSelectCell( wxGridEvent& );
 
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );

@@ -116,6 +116,31 @@ int OptionChainModel::ClosestStrike( double price ) const {
   return ix;
 }
 
+void OptionChainModel::OptionSelected( int row, int col ) {
+
+  assert( m_vRow2Entry.size() > row );
+  Strike& strike( m_vRow2Entry[ row ] );
+
+  std::string name;
+
+  switch ( col ) {
+  case OptionChainModel::col_CallAsk:
+  case OptionChainModel::col_CallBid:
+    name = strike.options.call.sIQFeedSymbolName;
+    break;
+  case OptionChainModel::col_PutAsk:
+  case OptionChainModel::col_PutBid:
+    name = strike.options.put.sIQFeedSymbolName;
+    break;
+  default:
+    break;
+  }
+
+  BOOST_LOG_TRIVIAL(trace)
+    << "strike " << strike.strike << ": " << name
+    ;
+}
+
 wxString OptionChainModel::GetValue( int row, int col	) {
 
   static const std::string fmtDecimal( "{:d}" );

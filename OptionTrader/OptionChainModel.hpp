@@ -199,6 +199,8 @@ private:
   using vRow2Entry_t = std::vector<Strike>;
   vRow2Entry_t m_vRow2Entry;
 
+  void OptionSelected( int row, int col );
+
   virtual int GetNumberRows() override;
   virtual int GetNumberCols() override;
 
