@@ -43,6 +43,7 @@
 #include <TFVuTrading/GridOptionComboOrder.hpp>
 
 #include "OptionChainModel.hpp"
+#include "wx/generic/grid.h"
 #include "PanelInstrumentViews.hpp"
 
 // todo:  2025/08/10
@@ -629,7 +630,7 @@ void PanelInstrumentViews::PresentOptionChains( Instrument& underlying ) {
         );
         //wxDataViewItem item( m_pOptionChainModel->ClosestStrike( underlying.pWatch->LastQuote().Ask() ) );
         const int ixRow( m_pOptionChainModel->ClosestStrike( underlying.pWatch->LastQuote().Ask() ) );
-        m_pOptionChainView->SetTable( m_pOptionChainModel, false );
+        m_pOptionChainView->SetTable( m_pOptionChainModel, false, wxGrid::wxGridSelectRows );
         m_pOptionChainView->SetVisible( ixRow );
         m_pOptionChainView->Show();
         Layout();
