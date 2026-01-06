@@ -131,7 +131,7 @@ private:
   wxCheckListBox* m_clbTags;
 
   wxTreeCtrl* m_pTreeCtrl;
-  TreeItem* m_pRootTreeItem; // // root of custom tree items
+  TreeItem* m_pRootTreeItem; // root of custom tree items
 
   //OptionComboGridView* m_pOptionComboGridView;
   //OptionComboGridTable* m_pOptionComboGridTable;
