@@ -418,6 +418,17 @@ void PanelInstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
           }
         } );
       pti->AppendMenuItem(
+        "add to order",
+        [this,&instrument]( ou::tf::TreeItem* pti ){
+          // add instrument to order
+          //if ( 0 == instrument.mapChains.size() ) {
+          //  BuildOptionChains( instrument );
+          //}
+          //else {
+          //  PresentOptionChains( instrument );
+          //}
+        } );
+      pti->AppendMenuItem(
         "add tag",
         [this,&instrument]( ou::tf::TreeItem* pti ){
           wxTextEntryDialog dialog( this, "Tag Name:", "Add Tag" );
