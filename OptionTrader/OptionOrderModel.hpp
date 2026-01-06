@@ -68,8 +68,8 @@ public:
 
   void Add( ou::tf::OrderSide::EOrderSide side, int quan, const std::string& sName );
 
-  void Add( pWatch_t&, ou::tf::OrderSide::EOrderSide, int quantity );
-  void Add( pOption_t&, ou::tf::OrderSide::EOrderSide, int quantity );
+  void Add( pWatch_t&, ou::tf::OrderSide::EOrderSide, int quantity ); // underlying
+  void Add( pOption_t&, ou::tf::OrderSide::EOrderSide, int quantity ); // option
 
   using fOrderLeg_t = std::function<void(ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sIQFeedName)>;
   fOrderLeg_t FactoryAddComboOrderLeg();
@@ -115,20 +115,19 @@ private:
     enum EType { empty, summary, underlying, option } m_type; // todo: deprecate empty
 
     // one or the other depending upon EType
-    pWatch_t m_pWatch;
-    pOption_t m_pOption;
+    pWatch_t m_pWatch; // underlying
+    pOption_t m_pOption; // option
 
-    int m_nRow; // todo: use row id instead
     vModelCells_t m_vModelCells;
 
     OptionOrderRow()
-    : m_type( EType::empty ), m_nRow {}
+    : m_type( EType::empty )
     {
       Init();
     }
 
     OptionOrderRow( pWatch_t pWatch, ou::tf::OrderSide::EOrderSide side, int quantity )
-    : m_type( EType::underlying ), m_nRow {}
+    : m_type( EType::underlying )
     , m_pWatch( pWatch )
     {
       Init();
@@ -141,7 +140,7 @@ private:
     }
 
     OptionOrderRow( pOption_t pOption, ou::tf::OrderSide::EOrderSide side, int quantity )
-    : m_type( EType::underlying ), m_nRow {}
+    : m_type( EType::underlying )
     , m_pOption( pOption )
     {
       Init();
@@ -157,7 +156,7 @@ private:
     OptionOrderRow( const OptionOrderRow& rhs ) = delete;
 
     OptionOrderRow( OptionOrderRow&& rhs )
-    : m_type( rhs.m_type ), m_nRow( rhs.m_nRow )
+    : m_type( rhs.m_type )
     , m_pOption( std::move( rhs.m_pOption ) ), m_pWatch( std::move( rhs.m_pWatch ) )
     , m_vModelCells( std::move( rhs.m_vModelCells ) )
     {
@@ -184,7 +183,6 @@ private:
 
     void Init() {
       boost::fusion::fold( m_vModelCells, 0, ModelCell_ops::SetCol() );
-      //BOOST_PP_REPEAT(GRID_ARRAY_COL_COUNT,COL_ALIGNMENT,m_nRow) // performed elsewhere
       boost::fusion::at_c<COL_IV>( m_vModelCells ).SetPrecision( 3 );
       boost::fusion::at_c<COL_Delta>( m_vModelCells ).SetPrecision( 3 );
       boost::fusion::at_c<COL_Gamma>( m_vModelCells ).SetPrecision( 4 );
