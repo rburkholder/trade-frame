@@ -23,8 +23,6 @@
 
 #pragma once
 
-#include <functional>
-
 #include <wx/grid.h>
 
 #include <TFOptions/Option.h>
