@@ -24,6 +24,8 @@
 #include <wx/menu.h>
 
 #include "OptionChainView.hpp"
+#include "OptionChainModel.hpp"
+#include "OptionChainModel_impl.hpp"
 
 OptionChainView::OptionChainView()
 : wxGrid() {
@@ -106,16 +108,16 @@ void OptionChainView::OnGridCellRightClick( wxGridEvent& event ) { // zero based
   std::string sMessage;
 
   switch ( col ) {
-    case OptionChainModel::col_CallAsk:
+    case OptionChainModel_impl::col_CallAsk:
       sMessage = "buy call @ ask";
       break;
-    case OptionChainModel::col_CallBid:
+    case OptionChainModel_impl::col_CallBid:
       sMessage = "sell call @ bid";
       break;
-    case OptionChainModel::col_PutAsk:
+    case OptionChainModel_impl::col_PutAsk:
       sMessage = "buy put @ ask";
       break;
-    case OptionChainModel::col_PutBid:
+    case OptionChainModel_impl::col_PutBid:
       sMessage = "sell put @ bid";
       break;
     default:
@@ -181,7 +183,7 @@ int OptionChainView::GetVisibleRowCount() const {
     int ixRow( ixFirstRow );
     const int cntRows( GetTable()->GetNumberRows() );
     while (
-      ( IsVisible( ixRow, OptionChainModel::col_Strike, false ) )
+      ( IsVisible( ixRow, OptionChainModel_impl::col_Strike, false ) )
       && ( cntRows > ixRow )
     ) {
       nRows++;
@@ -192,7 +194,11 @@ int OptionChainView::GetVisibleRowCount() const {
 }
 
 void OptionChainView::SetVisible( int ixRow ) {
-  MakeCellVisible( ixRow, OptionChainModel::col_Strike );
+  MakeCellVisible( ixRow, OptionChainModel_impl::col_Strike );
+}
+
+int OptionChainView::GetColumnCount() const {
+  return GRID_ARRAY_COL_COUNT;
 }
 
 void OptionChainView::OnDestroy( wxWindowDestroyEvent& event ) {

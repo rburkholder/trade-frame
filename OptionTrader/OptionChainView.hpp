@@ -79,14 +79,16 @@ private:
   void OnGridCellRightClick( wxGridEvent& );
   void OnGridSelectCell( wxGridEvent& );
 
+  int GetColumnCount() const;
+
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-    ar & GRID_ARRAY_COL_COUNT;
-    for ( unsigned int ix = 0; ix < GRID_ARRAY_COL_COUNT; ++ix ) {
+    ar & GetColumnCount();
+    for ( unsigned int ix = 0; ix < GetColumnCount(); ++ix ) {
       //ar & GetColSize( ix );
       ar & 50;
     }

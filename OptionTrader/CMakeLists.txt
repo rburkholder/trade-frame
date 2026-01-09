@@ -29,6 +29,7 @@ set(
     PanelInstrumentViews.hpp
     ManualDailyBarModel.hpp
     OptionChainModel.hpp
+    OptionChainModel_impl.hpp
     OptionChainView.hpp
     OptionOrderModel.hpp
     OptionOrderModel_impl.hpp
@@ -43,6 +44,7 @@ set(
     PanelInstrumentViews.cpp
     ManualDailyBarModel.cpp
     OptionChainModel.cpp
+    OptionChainModel_impl.cpp
     OptionChainView.cpp
     OptionOrderModel.cpp
     OptionOrderModel_impl.cpp
