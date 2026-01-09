@@ -20,7 +20,7 @@
  */
 
 #include "OptionOrderView.hpp"
-#include "OptionOrderModel.hpp"
+#include "OptionOrderModel_impl.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -65,17 +65,18 @@ void OptionOrderView::CreateControls() {
   EnableEditing( false );
   DisableDragRowSize();
 
+  // commented out, too early, needs to come after grid drawn, or provide in the attributes
   // found in ModelCell_macros.h
-  #ifdef GRID_EMIT_SetColSettings
-  #undef GRID_EMIT_SetColSettings
-  #endif
+  //#ifdef GRID_EMIT_SetColSettings
+  //#undef GRID_EMIT_SetColSettings
+  //#endif
 
-  #define GRID_EMIT_SetColSettings( z, n, VAR ) \
-    /* m_grid.SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); */ \
-    SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
+  //#define GRID_EMIT_SetColSettings( z, n, VAR ) \
+  //  /* m_grid.SetColLabelValue( VAR, _T(GRID_EXTRACT_COL_DETAILS(z, n, 1) ) ); */ \
+  //  SetColSize( VAR++, GRID_EXTRACT_COL_DETAILS(z, n, 3) );
 
-  int ix( 0 );
-  BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
+  //int ix( 0 );
+  //BOOST_PP_REPEAT( BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SetColSettings, ix )
 
   //m_grid.SetTable( this, false, wxGrid::wxGridSelectCells );
 

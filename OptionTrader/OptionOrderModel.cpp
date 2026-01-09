@@ -19,263 +19,57 @@
  * Created: 2026/01/05 10:38:02
  */
 
-#include <boost/hana/fwd/size.hpp>
-
-#include <boost/hana/find.hpp>
-
-#include <boost/hana/find.hpp>
-#include <boost/hana/pair.hpp>
-#include <boost/hana/for_each.hpp>
-
-#include <boost/hana/map.hpp>
-#include <boost/hana/tuple.hpp>
-
-#include <boost/hana.hpp>
-
 #include "OptionOrderModel.hpp"
-
-
-
-namespace {
-  const int c_nDefaultRows( 1 ); // summary line only
-
-  // align can be wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
-  static const struct col_side  { std::string name; wxAlignment align; int width; ou::tf::ModelCellInt cell; } c_side { "OSide", wxALIGN_RIGHT, 50, ou::tf::ModelCellInt() };
-  static const struct col_quan  { std::string name; wxAlignment align; int width; ou::tf::ModelCellInt cell; } c_quan { "Quan", wxALIGN_RIGHT, 50, ou::tf::ModelCellInt() };
-  static const struct col_name  { std::string name; wxAlignment align; int width; ou::tf::ModelCellString cell; } c_name { "Name", wxALIGN_LEFT, 120, ou::tf::ModelCellString() };
-  static const struct col_last  { std::string name; wxAlignment align; int width; ou::tf::ModelCellDouble cell; } c_last { "Last", wxALIGN_RIGHT, 50, ou::tf::ModelCellDouble() };
-  static const struct col_bid   { std::string name; wxAlignment align; int width; ou::tf::ModelCellDouble cell; } c_bid { "Bid", wxALIGN_RIGHT, 50, ou::tf::ModelCellDouble() };
-  static const struct col_ask   { std::string name; wxAlignment align; int width; ou::tf::ModelCellDouble cell; } c_ask { "Ask", wxALIGN_RIGHT, 50, ou::tf::ModelCellDouble() };
-  static const struct col_delta { std::string name; wxAlignment align; int width; ou::tf::ModelCellDouble cell; } c_delta { "Delta", wxALIGN_RIGHT, 50, ou::tf::ModelCellDouble() };
-  static const struct col_gamma { std::string name; wxAlignment align; int width; ou::tf::ModelCellDouble cell; } c_gamma { "Gamma", wxALIGN_RIGHT, 50, ou::tf::ModelCellDouble() };
-  static const struct col_iv    { std::string name; wxAlignment align; int width; ou::tf::ModelCellDouble cell; } c_iv { "IV", wxALIGN_RIGHT, 50, ou::tf::ModelCellDouble() };
-
-  // the problem is that a map does not maintain this order
-  static const auto c_mapColumns = boost::hana::make_map(
-    boost::hana::make_pair( boost::hana::type_c<col_side>, c_side ),
-    boost::hana::make_pair( boost::hana::type_c<col_quan>, c_quan ),
-    boost::hana::make_pair( boost::hana::type_c<col_name>, c_name ),
-    boost::hana::make_pair( boost::hana::type_c<col_last>, c_last ),
-    boost::hana::make_pair( boost::hana::type_c<col_bid>, c_bid ),
-    boost::hana::make_pair( boost::hana::type_c<col_ask>, c_ask ),
-    boost::hana::make_pair( boost::hana::type_c<col_delta>, c_delta ),
-    boost::hana::make_pair( boost::hana::type_c<col_gamma>, c_gamma ),
-    boost::hana::make_pair( boost::hana::type_c<col_iv>, c_iv )
-  );
-
-  static const auto c_tupleColumns = boost::hana::make_tuple(
-    c_side, c_quan, c_name, c_last, c_bid, c_ask, c_delta, c_gamma, c_iv
-  );
-
-} // namespace
+#include "OptionOrderModel_impl.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 OptionOrderModel::OptionOrderModel()
 : wxGridTableBase()
+, m_pOptionOrderModel_impl( std::make_unique<OptionOrderModel_impl>( *this ) ) // conflicts with OptionChainModel, which needs to be overhauled as well
 {
-  m_vOptionOrderRow.reserve( 10 );
-
-  //boost::hana::tuple<col_CallOi, col_CallIV> columns {{wxALIGN_RIGHT }, { wxALIGN_RIGHT } };
-  //auto columns = boost::hana::make_tuple( col_CallOi {wxALIGN_RIGHT, "test1"}, col_CallIV {wxALIGN_LEFT, "test2"} );
-
-  static int size = boost::hana::size( c_mapColumns );
-
-  wxAlignment wxa = boost::hana::find( c_mapColumns, boost::hana::type_c<col_side> )->align;
-  auto& cell( boost::hana::find( c_mapColumns, boost::hana::type_c<col_side> )->cell );
-
-  boost::hana::for_each( c_mapColumns, []( const auto& pair ){
-    auto c = boost::hana::second( pair ).align;
-    auto d = boost::hana::second( pair ).name;
-    auto& e = boost::hana::second( pair ).cell;
-  } );
-
-  //BOOST_HANA_CONSTANT_CHECK( boost::hana::find(m, boost::hana::type_c<col_CallOi>) == boost::hana::nothing);
-  //BOOST_HANA_CONSTANT_CHECK( boost::hana::find(m, boost::hana::type_c<col_CallIV>) == boost::hana::nothing);
-
-  //auto c = columns[ boost::hana::type_c<col_CallIV> ];
-  //BOOST_HANA_CONSTANT_CHECK( boost::hana::find(columns, boost::hana::type_c<col_CallOi>) == boost::hana::nothing);
-
-  static int size_tuple = boost::hana::size( c_tupleColumns );
-
-  boost::hana::for_each( c_tupleColumns, []( const auto& x ){
-    auto n = x.name;
-    auto a = x.align;
-  } );
-
-  auto find = boost::hana::find( c_tupleColumns, boost::hana::type_c<col_side> );
-  BOOST_HANA_CONSTANT_CHECK( boost::hana::find(c_tupleColumns, boost::hana::type_c<col_side>) == boost::hana::nothing);
-
-
 }
 
 OptionOrderModel::~OptionOrderModel() {
+  m_pOptionOrderModel_impl.reset();
 }
 
 void OptionOrderModel::CreateControls() {
-
-  //m_grid.Bind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
-
-
-//  m_grid.Bind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionChain_impl::OnGridCellBeginDrag, this );  // this is the event we really want
-//  m_grid.Bind( wxEVT_MOTION, &GridOptionChain_impl::OnMouseMotion, this );  // already consumed by grid itself
-
-  assert( 1 ==c_nDefaultRows );
-  m_vOptionOrderRow.emplace_back( std::make_unique<OptionOrderRow>() );
-
-  //m_grid.AppendRows( c_nDefaultRows ); // cells labelled empty when no order or summary is present ( fifth row is summary stats)
-}
-
-void OptionOrderModel::Add( OptionOrderRow::EType type, const std::string& sName, ou::tf::OrderSide::EOrderSide side, int quantity, fAdd_t&& f ) {
-
-  assert( 0 < m_vOptionOrderRow.size() );
-
-  bool bSymbolFound( false );
-
-  for ( vOptionOrderRow_t::value_type& p: m_vOptionOrderRow ) {
-    OptionOrderRow& row( *p );
-    if ( type == row.m_type ) {
-      if (
-        boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetValue() == sName )
-      {
-        boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).SetValue( side );
-        boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).SetValue( quantity );
-        bSymbolFound = true;
-        break; // exit for
-      }
-    }
-  }
-
-  if ( bSymbolFound ) {}
-  else {
-
-    vOptionOrderRow_t::iterator last = m_vOptionOrderRow.end();
-    --last; // access the summary record
-
-    m_vOptionOrderRow.emplace( last, std::move( f() ) );
-  }
-
-  GetView()->ForceRefresh();
+  m_pOptionOrderModel_impl->CreateControls();
 }
 
 void OptionOrderModel::Add( pWatch_t& pWatch, ou::tf::OrderSide::EOrderSide side, int quantity ) {
-  const std::string& sName( pWatch->GetInstrumentName() );
-  Add(
-    OptionOrderRow::EType::underlying, sName, side, quantity,
-    [pWatch, side, quantity](){
-      return std::make_unique<OptionOrderRow>( pWatch, side, quantity );
-    } );
+  m_pOptionOrderModel_impl->Add( pWatch, side, quantity );
 }
 
 void OptionOrderModel::Add( pOption_t& pOption, ou::tf::OrderSide::EOrderSide side, int quantity ) {
-  const std::string& sName( pOption->GetInstrumentName() );
-  Add(
-    OptionOrderRow::EType::underlying, sName, side, quantity,
-    [pOption, side, quantity](){
-      return std::make_unique<OptionOrderRow>( pOption, side, quantity );
-    } );
+  m_pOptionOrderModel_impl->Add( pOption, side, quantity );
 }
 
 void OptionOrderModel::Refresh() {
-
-  OptionOrderRow& summary( *m_vOptionOrderRow.back() );
-
-  boost::fusion::at_c<COL_Quan>(  summary.m_vModelCells ).SetValue(   0 );
-  boost::fusion::at_c<COL_Last>(  summary.m_vModelCells ).SetValue( 0.0 );
-  boost::fusion::at_c<COL_Bid>(   summary.m_vModelCells ).SetValue( 0.0 ); // best - no spread - lower amount
-  boost::fusion::at_c<COL_Ask>(   summary.m_vModelCells ).SetValue( 0.0 ); // full - full spread - higher amount
-  boost::fusion::at_c<COL_Delta>( summary.m_vModelCells ).SetValue( 0.0 );
-  boost::fusion::at_c<COL_Gamma>( summary.m_vModelCells ).SetValue( 0.0 );
-  boost::fusion::at_c<COL_IV>(    summary.m_vModelCells ).SetValue( 0.0 );
-
-  int sumQuan_int {};
-  double sumQuan_dbl {};
-  double sumLast {};
-  double sumBid {};
-  double sumAsk {};
-  double sumDelta {};
-  double sumGamma {};
-  double sumIV {};
-
-  for ( vOptionOrderRow_t::value_type& p: m_vOptionOrderRow ) {
-    OptionOrderRow& item( *p );
-    if ( OptionOrderRow::EType::option == item.m_type ) {
-
-      double spread_none {};
-      double spread_full {};
-
-      int quan_int = boost::fusion::at_c<COL_Quan>( item.m_vModelCells ).GetValue();
-      double quan_dbl = quan_int;
-      sumQuan_int += quan_int;
-      sumQuan_dbl += quan_dbl;
-      boost::fusion::at_c<COL_Quan>( summary.m_vModelCells ).SetValue( sumQuan_int );
-
-      double multiplier {};
-      switch ( boost::fusion::at_c<COL_OrderSide>( item.m_vModelCells ).GetValue() ) {
-        case ou::tf::OrderSide::Buy:
-          multiplier = 1.0 * quan_dbl;
-          spread_full = boost::fusion::at_c<COL_Ask>( item.m_vModelCells ).GetValue();
-          spread_none = boost::fusion::at_c<COL_Bid>( item.m_vModelCells ).GetValue();
-          break;
-        case ou::tf::OrderSide::Sell:
-          multiplier = -1.0 * quan_dbl;
-          spread_full = boost::fusion::at_c<COL_Bid>( item.m_vModelCells ).GetValue();
-          spread_none = boost::fusion::at_c<COL_Ask>( item.m_vModelCells ).GetValue();
-          break;
-        default:
-          assert( false );
-          break;
-      }
-
-      // TODO: use bid ask to define spread
-      //double price = boost::fusion::at_c<COL_Price>( item.m_vModelCells ).GetValue();
-      //sumPrice += multiplier * price;
-      //boost::fusion::at_c<COL_Price>( summary.m_vModelCells ).SetValue( sumPrice );
-
-      sumBid += multiplier * spread_none;
-      //sumBid += quan_dbl * spread_none;
-      boost::fusion::at_c<COL_Bid>( summary.m_vModelCells ).SetValue( sumBid );
-
-      sumAsk += multiplier * spread_full;
-      //sumAsk += quan_dbl * spread_full;
-      boost::fusion::at_c<COL_Ask>( summary.m_vModelCells ).SetValue( sumAsk );
-
-      double delta = boost::fusion::at_c<COL_Delta>( item.m_vModelCells ).GetValue();
-      sumDelta += multiplier * delta;
-      boost::fusion::at_c<COL_Delta>( summary.m_vModelCells ).SetValue( sumDelta );
-
-      double gamma = boost::fusion::at_c<COL_Gamma>( item.m_vModelCells ).GetValue();
-      sumGamma += multiplier * gamma;
-      boost::fusion::at_c<COL_Gamma>( summary.m_vModelCells ).SetValue( sumGamma );
-
-      double iv = boost::fusion::at_c<COL_IV>( item.m_vModelCells ).GetValue();
-      sumIV += quan_dbl * iv;
-      boost::fusion::at_c<COL_IV>( summary.m_vModelCells ).SetValue( sumIV / sumQuan_dbl );
-
-    }
-  }
-
+  m_pOptionOrderModel_impl->Refresh();
 }
 
 void OptionOrderModel::SetView( wxGrid *grid ) {
+  m_pOptionOrderModel_impl->SetView( grid );
   wxGridTableBase::SetView( grid );
 }
 
-wxGrid* OptionOrderModel::GetView() const {
-  return wxGridTableBase::GetView();
-}
+//wxGrid* OptionOrderModel::GetView() const {
+//  return wxGridTableBase::GetView();
+//}
 
 int OptionOrderModel::GetNumberRows() {
-  return m_vOptionOrderRow.size();
+  return m_pOptionOrderModel_impl->GetNumberRows();
 }
 
 int OptionOrderModel::GetNumberCols() {
-  return GRID_ARRAY_COL_COUNT;
+  return m_pOptionOrderModel_impl->GetNumberCols();
 }
 
 bool OptionOrderModel::IsEmptyCell( int row, int col ) {
-  return false;
+  return m_pOptionOrderModel_impl->IsEmptyCell( row, col );
 }
 
 // https://github.com/wxWidgets/wxWidgets/blob/master/src/generic/grid.cpp
@@ -307,260 +101,39 @@ return true;
 }
 
 void OptionOrderModel::SetValue( int row, int col, const wxString &value ) {
-  assert( false );  // not sure if this is used
+  m_pOptionOrderModel_impl->SetValue( row, col, value );
 }
 
 wxString OptionOrderModel::GetValue( int ixRow, int ixCol ) {
-
-  assert( 0 <= ixRow );
-  assert( m_vOptionOrderRow.size() > ixRow );
-
-  wxString s;
-  OptionOrderRow& row( *m_vOptionOrderRow[ ixRow ] );
-
-  switch ( row.m_type ) {
-    case OptionOrderRow::EType::underlying:
-      switch ( ixCol ) {
-        case COL_OrderSide:
-          switch ( boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).GetValue() ) {
-            case ou::tf::OrderSide::Buy:
-              s = "Buy";
-              break;
-            case ou::tf::OrderSide::Sell:
-              s = "Sell";
-              break;
-            default:
-              assert( false );
-              break;
-          }
-          break;
-        case COL_Quan:
-          s = boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).GetText();
-          break;
-        case COL_Last:
-          s = boost::fusion::at_c<COL_Last>( row.m_vModelCells ).GetText();
-          break;
-        case COL_Name:
-          s = boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetText();
-          break;
-        case COL_Bid:
-          s = boost::fusion::at_c<COL_Bid>( row.m_vModelCells ).GetText();
-          break;
-        case COL_Ask:
-          s = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetText();
-          break;
-        default:
-          s = "n/a";
-          break;
-      }
-      break;
-    case OptionOrderRow::EType::option:
-      switch ( ixCol ) {
-        case COL_OrderSide:
-          switch ( boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).GetValue() ) {
-            case ou::tf::OrderSide::Buy:
-              s = "Buy";
-              break;
-            case ou::tf::OrderSide::Sell:
-              s = "Sell";
-              break;
-            default:
-              assert( false );
-              break;
-          }
-          break;
-        case COL_Quan:
-          s = boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).GetText();
-          break;
-        case COL_Last:
-          s = boost::fusion::at_c<COL_Last>( row.m_vModelCells ).GetText();
-          break;
-        case COL_Name:
-          s = boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetText();
-          break;
-        case COL_Bid:
-          s = boost::fusion::at_c<COL_Bid>( row.m_vModelCells ).GetText();
-          break;
-        case COL_Ask:
-          s = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetText();
-          break;
-        case COL_Delta:
-          s = boost::fusion::at_c<COL_Delta>( row.m_vModelCells ).GetText();
-          break;
-        case COL_Gamma:
-          s = boost::fusion::at_c<COL_Gamma>( row.m_vModelCells ).GetText();
-          break;
-        case COL_IV:
-          s = boost::fusion::at_c<COL_IV>( row.m_vModelCells ).GetText();
-          break;
-        default:
-          s = "n/a";
-          break;
-      }
-      break;
-    case OptionOrderRow::EType::summary:
-      assert( ( c_nDefaultRows - 1 ) == ixRow );
-      switch ( ixCol ) {
-        case COL_OrderSide:
-          // empty
-          break;
-        case COL_Quan:
-          s = boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).GetText();
-          break;
-        case COL_Last:
-          s = boost::fusion::at_c<COL_Last>( row.m_vModelCells ).GetText();
-          break;
-        case COL_Name:
-          // empty
-          break;
-        case COL_Bid:
-          s = boost::fusion::at_c<COL_Bid>( row.m_vModelCells ).GetText();
-          break;
-        case COL_Ask:
-          s = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetText();
-          break;
-        case COL_Delta:
-          s = boost::fusion::at_c<COL_Delta>( row.m_vModelCells ).GetText();
-          break;
-        case COL_Gamma:
-          s = boost::fusion::at_c<COL_Gamma>( row.m_vModelCells ).GetText();
-          break;
-        case COL_IV:
-          s = boost::fusion::at_c<COL_IV>( row.m_vModelCells ).GetText();
-          break;
-        default:
-          s = "n/a";
-          break;
-      }
-      break;
-  }
-
-  return s;
+  return m_pOptionOrderModel_impl->GetValue( ixRow, ixCol );
 }
 
 wxString OptionOrderModel::GetColLabelValue( int col ) {
-
-  wxString s;
-
-  #define GRID_EMIT_SwitchGetColLabel( z, n, data ) \
-    case GRID_EXTRACT_COL_DETAILS(z, n, 0):  \
-      s = wxString( GRID_EXTRACT_COL_DETAILS(z, n, 1 ) ); \
-      break;
-
-  switch ( col ) {
-    BOOST_PP_REPEAT(BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SwitchGetColLabel, 0 )
-  }
-
-  return s;
+  return m_pOptionOrderModel_impl->GetColLabelValue( col );
 }
 
 wxGridCellAttr* OptionOrderModel::GetAttr (int row, int col, wxGridCellAttr::wxAttrKind kind ) {
-
-  int align = wxALIGN_CENTER;
-
-  #define GRID_EMIT_SwitchGetColAlign( z, n, data ) \
-    case GRID_EXTRACT_COL_DETAILS(z, n, 0):  \
-      align = GRID_EXTRACT_COL_DETAILS(z, n, 2 ); \
-      break;
-
-  wxGridCellAttr* pAttr = new wxGridCellAttr();
-
-  switch ( kind ) {
-    case wxGridCellAttr::wxAttrKind::Any:
-    case wxGridCellAttr::wxAttrKind::Cell:
-    case wxGridCellAttr::wxAttrKind::Col:
-      switch ( col ) {
-        case COL_Quan:
-          switch ( col ) {
-            BOOST_PP_REPEAT(BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SwitchGetColAlign, 0 )
-          }
-          pAttr->SetReadOnly( false );
-          break;
-        default:
-          pAttr->SetReadOnly();
-          break;
-      }
-      break;
-    case wxGridCellAttr::wxAttrKind::Row:
-      break;
-    case wxGridCellAttr::wxAttrKind::Default:
-      break;
-  }
-
-  pAttr->SetAlignment( align, wxALIGN_CENTER_VERTICAL );
-
-  return pAttr;
-
+  return m_pOptionOrderModel_impl->GetAttr( row, col, kind );
 }
 
 void OptionOrderModel::Set( fGatherOrderLegs_t&& fGatherOrderLegs ) {
-  m_fGatherOrderLegs = std::move( fGatherOrderLegs );
-  assert( m_fGatherOrderLegs );
+  m_pOptionOrderModel_impl->Set( std::move( fGatherOrderLegs ) );
 }
 
-
 OptionOrderModel::fOrderLeg_t OptionOrderModel::FactoryAddComboOrderLeg() {
-  fOrderLeg_t f = [this](ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sName ){
-    //m_pimpl->Add( side, quan, price, sName );
-  };
-  return std::move( f );
+  return std::move( m_pOptionOrderModel_impl->FactoryAddComboOrderLeg() );
 }
 
 void OptionOrderModel::PlaceComboOrder() {
-  m_fGatherOrderLegs(
-    [this]( OptionOrderModel::fOrderLeg_t&& fOrderLeg ){
-      for ( vOptionOrderRow_t::value_type& p: m_vOptionOrderRow ) {
-        OptionOrderRow& row( *p );
-        switch (row.m_type ) {
-          case OptionOrderRow::EType::option:
-            {
-              int side = boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).GetValue();
-              double price {};
-              switch ( side ) {
-                case ou::tf::OrderSide::Buy:
-                  price = boost::fusion::at_c<COL_Bid>( row.m_vModelCells ).GetValue(); // start on low side
-                  break;
-                case ou::tf::OrderSide::Sell:
-                  price = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetValue(); // start on high side
-                  break;
-                default:
-                  assert( false );
-                  break;
-              }
-              fOrderLeg(
-                (ou::tf::OrderSide::EOrderSide) side,
-                boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).GetValue(),
-                price, //boost::fusion::at_c<COL_Price>( row.m_vModelCells ).GetValue(),
-                boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetValue()
-              );
-            }
-            break;
-          default:
-            break;
-        }
-      }
-    }
-  );
-  ClearRows();
+  m_pOptionOrderModel_impl->PlaceComboOrder();
 }
 
 void OptionOrderModel::ClearRows() {
-  vOptionOrderRow_t::iterator iter( m_vOptionOrderRow.begin() );
-  while ( OptionOrderRow::EType::summary != (*iter)->m_type ) {
-    m_vOptionOrderRow.erase( iter );
-    ++iter;
-  }
-
-  //m_grid.ForceRefresh();
+  m_pOptionOrderModel_impl->ClearRows();
 }
 
 void OptionOrderModel::DestroyControls() {
-
-  m_vOptionOrderRow.clear();
-
-// m_grid.Unbind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionOrder_impl::OnGridCellBeginDrag, this );
-// m_grid.Unbind( wxEVT_MOTION, &GridOptionOrder_impl::OnMouseMotion, this );
-// m_grid.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
+  m_pOptionOrderModel_impl->DestroyControls();
 }
 
 } // namespace tf

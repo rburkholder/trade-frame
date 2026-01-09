@@ -31,6 +31,7 @@ set(
     OptionChainModel.hpp
     OptionChainView.hpp
     OptionOrderModel.hpp
+    OptionOrderModel_impl.hpp
     OptionOrderView.hpp
     SessionBarModel.hpp
     TagSymbolMap.hpp
@@ -44,6 +45,7 @@ set(
     OptionChainModel.cpp
     OptionChainView.cpp
     OptionOrderModel.cpp
+    OptionOrderModel_impl.cpp
     OptionOrderView.cpp
     SessionBarModel.cpp
     TagSymbolMap.cpp
