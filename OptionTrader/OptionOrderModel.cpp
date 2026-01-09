@@ -27,7 +27,7 @@ namespace tf { // TradeFrame
 
 OptionOrderModel::OptionOrderModel()
 : wxGridTableBase()
-, m_pOptionOrderModel_impl( std::make_unique<OptionOrderModel_impl>( *this ) ) // conflicts with OptionChainModel, which needs to be overhauled as well
+, m_pOptionOrderModel_impl( std::make_unique<OptionOrderModel_impl>() ) // conflicts with OptionChainModel macros
 {
 }
 

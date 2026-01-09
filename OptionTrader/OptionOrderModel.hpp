@@ -70,7 +70,6 @@ private:
   void PlaceComboOrder();
 
   virtual void SetView ( wxGrid *grid ) override;
-  //virtual wxGrid* GetView() const override;
 
   virtual int GetNumberRows() override;
   virtual int GetNumberCols() override;

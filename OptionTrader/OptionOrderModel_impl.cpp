@@ -28,9 +28,8 @@ namespace {
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-OptionOrderModel_impl::OptionOrderModel_impl( OptionOrderModel& model )
-: m_OptionOrderModel( model )
-, m_pGrid( nullptr )
+OptionOrderModel_impl::OptionOrderModel_impl()
+: m_pGrid( nullptr )
 {
   m_vOptionOrderRow.reserve( 10 );
 }

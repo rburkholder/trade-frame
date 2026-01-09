@@ -61,7 +61,7 @@ public:
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pOption_t = ou::tf::option::Option::pOption_t;
 
-  OptionOrderModel_impl( OptionOrderModel& );
+  OptionOrderModel_impl();
   virtual ~OptionOrderModel_impl();
 
   void Add( pWatch_t&, ou::tf::OrderSide::EOrderSide, int quantity ); // underlying
@@ -77,8 +77,6 @@ public:
 protected:
 
 private:
-
-  OptionOrderModel& m_OptionOrderModel;
 
   wxGrid* m_pGrid;
 
@@ -223,7 +221,7 @@ private:
   wxString GetValue( int row, int col );
   void SetValue( int row, int col, const wxString &value );
 
-  wxGridCellAttr* GetAttr ( int row, int col, wxGridCellAttr::wxAttrKind kind );
+  wxGridCellAttr* GetAttr( int row, int col, wxGridCellAttr::wxAttrKind kind );
 
   wxString GetColLabelValue( int col );
 
