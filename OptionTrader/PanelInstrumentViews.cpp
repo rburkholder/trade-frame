@@ -42,6 +42,9 @@
 
 #include <TFVuTrading/GridOptionComboOrder.hpp>
 
+#include "OptionOrderView.hpp"
+#include "OptionOrderModel.hpp"
+
 #include "OptionChainModel.hpp"
 #include "PanelInstrumentViews.hpp"
 
@@ -146,8 +149,12 @@ void PanelInstrumentViews::CreateControls() {
   m_pOptionChainView = new OptionChainView( itemPanel1 );
   sizer_OptionChain_OptionCombo->Add( m_pOptionChainView, 1, wxALL | wxEXPAND, 2 );
 
-  m_pGridOptionComboOrder = new GridOptionComboOrder( itemPanel1 );
-  sizer_OptionChain_OptionCombo->Add( m_pGridOptionComboOrder, 0, wxALL | wxEXPAND, 2 ); // 0 propportion, need to auto adjust as rows are added
+  //m_pGridOptionComboOrder = new GridOptionComboOrder( itemPanel1 );
+  m_pOptionOrderView = new OptionOrderView( itemPanel1 );
+  sizer_OptionChain_OptionCombo->Add( m_pOptionOrderView, 0, wxALL | wxEXPAND, 2 ); // 0 propportion, need to auto adjust as rows are added
+
+  m_pOptionOrderModel = new OptionOrderModel();
+  m_pOptionOrderView->SetTable( m_pOptionOrderModel, false, wxGrid::wxGridSelectRows );
 
   wxBoxSizer* itemBoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
   itemBoxSizer1->Add(itemBoxSizer6, 0, wxGROW|wxALL, 0);

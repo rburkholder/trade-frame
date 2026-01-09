@@ -33,10 +33,10 @@
 #include <TFVuTrading/PanelDividendNotes.hpp>
 
 #include "Common.hpp"
+#include "TagSymbolMap.hpp"
 #include "OptionChainView.hpp"
 #include "SessionBarModel.hpp"
 #include "ManualDailyBarModel.hpp"
-#include "TagSymbolMap.hpp"
 
 #define SYMBOL_INSTRUMENTVIEWS_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_INSTRUMENTVIEWS_TITLE _("Instrument Views")
@@ -66,7 +66,10 @@ class TreeItem;
 class WinChartView;
 class WatchOnStatusBar;
 class ComposeInstrument;
-class GridOptionComboOrder;
+//class GridOptionComboOrder;
+
+class OptionOrderView;
+class OptionOrderModel;
 
 class PanelInstrumentViews
 : public wxPanel
@@ -136,7 +139,10 @@ private:
   //OptionComboGridView* m_pOptionComboGridView;
   //OptionComboGridTable* m_pOptionComboGridTable;
 
-  GridOptionComboOrder* m_pGridOptionComboOrder;
+  //GridOptionComboOrder* m_pGridOptionComboOrder;
+
+  OptionOrderView* m_pOptionOrderView;
+  OptionOrderModel* m_pOptionOrderModel;
 
   wxStatusBar* m_pStatusBar;
 
