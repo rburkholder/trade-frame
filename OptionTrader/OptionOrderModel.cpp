@@ -19,10 +19,54 @@
  * Created: 2026/01/05 10:38:02
  */
 
+#include <boost/hana/fwd/size.hpp>
+
+#include <boost/hana/find.hpp>
+
+#include <boost/hana/find.hpp>
+#include <boost/hana/pair.hpp>
+#include <boost/hana/for_each.hpp>
+
+#include <boost/hana/map.hpp>
+#include <boost/hana/tuple.hpp>
+
+#include <boost/hana.hpp>
+
 #include "OptionOrderModel.hpp"
+
+
 
 namespace {
   const int c_nDefaultRows( 1 ); // summary line only
+
+  // align can be wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
+  static const struct col_side  { std::string name; wxAlignment align; int width; ou::tf::ModelCellInt cell; } c_side { "OSide", wxALIGN_RIGHT, 50, ou::tf::ModelCellInt() };
+  static const struct col_quan  { std::string name; wxAlignment align; int width; ou::tf::ModelCellInt cell; } c_quan { "Quan", wxALIGN_RIGHT, 50, ou::tf::ModelCellInt() };
+  static const struct col_name  { std::string name; wxAlignment align; int width; ou::tf::ModelCellString cell; } c_name { "Name", wxALIGN_LEFT, 120, ou::tf::ModelCellString() };
+  static const struct col_last  { std::string name; wxAlignment align; int width; ou::tf::ModelCellDouble cell; } c_last { "Last", wxALIGN_RIGHT, 50, ou::tf::ModelCellDouble() };
+  static const struct col_bid   { std::string name; wxAlignment align; int width; ou::tf::ModelCellDouble cell; } c_bid { "Bid", wxALIGN_RIGHT, 50, ou::tf::ModelCellDouble() };
+  static const struct col_ask   { std::string name; wxAlignment align; int width; ou::tf::ModelCellDouble cell; } c_ask { "Ask", wxALIGN_RIGHT, 50, ou::tf::ModelCellDouble() };
+  static const struct col_delta { std::string name; wxAlignment align; int width; ou::tf::ModelCellDouble cell; } c_delta { "Delta", wxALIGN_RIGHT, 50, ou::tf::ModelCellDouble() };
+  static const struct col_gamma { std::string name; wxAlignment align; int width; ou::tf::ModelCellDouble cell; } c_gamma { "Gamma", wxALIGN_RIGHT, 50, ou::tf::ModelCellDouble() };
+  static const struct col_iv    { std::string name; wxAlignment align; int width; ou::tf::ModelCellDouble cell; } c_iv { "IV", wxALIGN_RIGHT, 50, ou::tf::ModelCellDouble() };
+
+  // the problem is that a map does not maintain this order
+  static const auto c_mapColumns = boost::hana::make_map(
+    boost::hana::make_pair( boost::hana::type_c<col_side>, c_side ),
+    boost::hana::make_pair( boost::hana::type_c<col_quan>, c_quan ),
+    boost::hana::make_pair( boost::hana::type_c<col_name>, c_name ),
+    boost::hana::make_pair( boost::hana::type_c<col_last>, c_last ),
+    boost::hana::make_pair( boost::hana::type_c<col_bid>, c_bid ),
+    boost::hana::make_pair( boost::hana::type_c<col_ask>, c_ask ),
+    boost::hana::make_pair( boost::hana::type_c<col_delta>, c_delta ),
+    boost::hana::make_pair( boost::hana::type_c<col_gamma>, c_gamma ),
+    boost::hana::make_pair( boost::hana::type_c<col_iv>, c_iv )
+  );
+
+  static const auto c_tupleColumns = boost::hana::make_tuple(
+    c_side, c_quan, c_name, c_last, c_bid, c_ask, c_delta, c_gamma, c_iv
+  );
+
 } // namespace
 
 namespace ou { // One Unified
@@ -32,6 +76,38 @@ OptionOrderModel::OptionOrderModel()
 : wxGridTableBase()
 {
   m_vOptionOrderRow.reserve( 10 );
+
+  //boost::hana::tuple<col_CallOi, col_CallIV> columns {{wxALIGN_RIGHT }, { wxALIGN_RIGHT } };
+  //auto columns = boost::hana::make_tuple( col_CallOi {wxALIGN_RIGHT, "test1"}, col_CallIV {wxALIGN_LEFT, "test2"} );
+
+  static int size = boost::hana::size( c_mapColumns );
+
+  wxAlignment wxa = boost::hana::find( c_mapColumns, boost::hana::type_c<col_side> )->align;
+  auto& cell( boost::hana::find( c_mapColumns, boost::hana::type_c<col_side> )->cell );
+
+  boost::hana::for_each( c_mapColumns, []( const auto& pair ){
+    auto c = boost::hana::second( pair ).align;
+    auto d = boost::hana::second( pair ).name;
+    auto& e = boost::hana::second( pair ).cell;
+  } );
+
+  //BOOST_HANA_CONSTANT_CHECK( boost::hana::find(m, boost::hana::type_c<col_CallOi>) == boost::hana::nothing);
+  //BOOST_HANA_CONSTANT_CHECK( boost::hana::find(m, boost::hana::type_c<col_CallIV>) == boost::hana::nothing);
+
+  //auto c = columns[ boost::hana::type_c<col_CallIV> ];
+  //BOOST_HANA_CONSTANT_CHECK( boost::hana::find(columns, boost::hana::type_c<col_CallOi>) == boost::hana::nothing);
+
+  static int size_tuple = boost::hana::size( c_tupleColumns );
+
+  boost::hana::for_each( c_tupleColumns, []( const auto& x ){
+    auto n = x.name;
+    auto a = x.align;
+  } );
+
+  auto find = boost::hana::find( c_tupleColumns, boost::hana::type_c<col_side> );
+  BOOST_HANA_CONSTANT_CHECK( boost::hana::find(c_tupleColumns, boost::hana::type_c<col_side>) == boost::hana::nothing);
+
+
 }
 
 OptionOrderModel::~OptionOrderModel() {
