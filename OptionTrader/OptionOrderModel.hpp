@@ -23,8 +23,6 @@
 
 #pragma once
 
-#include "OUCommon/FastDelegate.h"
-#include "TFTrading/TradingEnumerations.h"
 #include <vector>
 
 #include <boost/fusion/algorithm/iteration/fold.hpp>
@@ -65,8 +63,6 @@ public:
 
   OptionOrderModel();
   virtual ~OptionOrderModel();
-
-  void Add( ou::tf::OrderSide::EOrderSide side, int quan, const std::string& sName );
 
   void Add( pWatch_t&, ou::tf::OrderSide::EOrderSide, int quantity ); // underlying
   void Add( pOption_t&, ou::tf::OrderSide::EOrderSide, int quantity ); // option
@@ -112,7 +108,7 @@ private:
 
   struct OptionOrderRow {
 
-    enum EType { empty, summary, underlying, option } m_type; // todo: deprecate empty
+    enum EType { summary, underlying, option } m_type;
 
     // one or the other depending upon EType
     pWatch_t m_pWatch; // underlying
@@ -120,20 +116,16 @@ private:
 
     vModelCells_t m_vModelCells;
 
-    OptionOrderRow()
-    : m_type( EType::empty )
-    {
-      Init();
-    }
+    OptionOrderRow(): m_type( EType::summary ) {}
 
     OptionOrderRow( pWatch_t pWatch, ou::tf::OrderSide::EOrderSide side, int quantity )
     : m_type( EType::underlying )
     , m_pWatch( pWatch )
     {
       Init();
+      boost::fusion::at_c<COL_Name>( m_vModelCells ).SetValue( m_pWatch->GetInstrumentName() );
       boost::fusion::at_c<COL_OrderSide>( m_vModelCells ).SetValue( side );
       boost::fusion::at_c<COL_Quan>( m_vModelCells ).SetValue( quantity );
-      boost::fusion::at_c<COL_Name>( m_vModelCells ).SetValue( m_pWatch->GetInstrumentName() );
 
       m_pWatch->OnTrade.Add( MakeDelegate( this, &OptionOrderRow::UpdateTrade ) );
       m_pWatch->OnQuote.Add( MakeDelegate( this, &OptionOrderRow::UpdateQuote ) );
@@ -144,9 +136,9 @@ private:
     , m_pOption( pOption )
     {
       Init();
+      boost::fusion::at_c<COL_Name>( m_vModelCells ).SetValue( m_pOption->GetInstrumentName() );
       boost::fusion::at_c<COL_OrderSide>( m_vModelCells ).SetValue( side );
       boost::fusion::at_c<COL_Quan>( m_vModelCells ).SetValue( quantity );
-      boost::fusion::at_c<COL_Name>( m_vModelCells ).SetValue( m_pOption->GetInstrumentName() );
 
       m_pOption->OnTrade.Add( MakeDelegate( this, &OptionOrderRow::UpdateTrade ) );
       m_pOption->OnQuote.Add( MakeDelegate( this, &OptionOrderRow::UpdateQuote ) );
@@ -178,7 +170,6 @@ private:
         m_pOption->OnGreek.Remove( MakeDelegate( this, &OptionOrderRow::UpdateGreeks ) );
         m_pOption.reset();
       }
-      m_type = EType::empty;
     }
 
     void Init() {
@@ -204,8 +195,12 @@ private:
     }
   };
 
-  using vOptionOrderRow_t = std::vector<OptionOrderRow>;
+  using pOptionOrderRow_t = std::unique_ptr<OptionOrderRow>;
+  using vOptionOrderRow_t = std::vector<pOptionOrderRow_t>;
   vOptionOrderRow_t m_vOptionOrderRow;
+
+  using fAdd_t = std::function<pOptionOrderRow_t()>;
+  void Add( OptionOrderRow::EType, const std::string&, ou::tf::OrderSide::EOrderSide side, int quantity, fAdd_t&& );
 
   void CreateControls();
   void DestroyControls();

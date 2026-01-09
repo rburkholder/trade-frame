@@ -22,8 +22,8 @@
 #include "OptionOrderModel.hpp"
 
 namespace {
-  static const int c_nDefaultRows( 1 ); // summary line only
-}
+  const int c_nDefaultRows( 1 ); // summary line only
+} // namespace
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -31,6 +31,7 @@ namespace tf { // TradeFrame
 OptionOrderModel::OptionOrderModel()
 : wxGridTableBase()
 {
+  m_vOptionOrderRow.reserve( 10 );
 }
 
 OptionOrderModel::~OptionOrderModel() {
@@ -45,60 +46,64 @@ void OptionOrderModel::CreateControls() {
 //  m_grid.Bind( wxEVT_MOTION, &GridOptionChain_impl::OnMouseMotion, this );  // already consumed by grid itself
 
   assert( 1 ==c_nDefaultRows );
-  m_vOptionOrderRow.resize( c_nDefaultRows );
+  m_vOptionOrderRow.emplace_back( std::make_unique<OptionOrderRow>() );
+
   //m_grid.AppendRows( c_nDefaultRows ); // cells labelled empty when no order or summary is present ( fifth row is summary stats)
-
-  m_vOptionOrderRow[ c_nDefaultRows - 1 ].m_type = OptionOrderRow::EType::summary;
-
 }
 
-void OptionOrderModel::Add( ou::tf::OrderSide::EOrderSide side, int quan, const std::string& sIQFeedName ) {
+void OptionOrderModel::Add( OptionOrderRow::EType type, const std::string& sName, ou::tf::OrderSide::EOrderSide side, int quantity, fAdd_t&& f ) {
+
+  assert( 0 < m_vOptionOrderRow.size() );
 
   bool bSymbolFound( false );
-  for ( vOptionOrderRow_t::value_type& row: m_vOptionOrderRow ) {
-    if ( OptionOrderRow::EType::option == row.m_type ) {
+
+  for ( vOptionOrderRow_t::value_type& p: m_vOptionOrderRow ) {
+    OptionOrderRow& row( *p );
+    if ( type == row.m_type ) {
       if (
-        boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetValue() == sIQFeedName )
+        boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetValue() == sName )
       {
         boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).SetValue( side );
-        boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).SetValue( quan );
+        boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).SetValue( quantity );
         bSymbolFound = true;
         break; // exit for
       }
     }
   }
 
-  if ( bSymbolFound ) {
-    //m_grid.ForceRefresh();
-  }
+  if ( bSymbolFound ) {}
   else {
-    bool bEmptyFilled( false );
-    for ( vOptionOrderRow_t::value_type& row: m_vOptionOrderRow ) {
-      if ( OptionOrderRow::EType::empty == row.m_type ) {
 
-        row.m_type = OptionOrderRow::EType::option;
-        boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).SetValue( side );
-        boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).SetValue( quan );
-        boost::fusion::at_c<COL_Name>( row.m_vModelCells ).SetValue( sIQFeedName );
+    vOptionOrderRow_t::iterator last = m_vOptionOrderRow.end();
+    --last; // access the summary record
 
-        bEmptyFilled = true;
-        break; // exit for
-      }
-    }
-
-    if ( bEmptyFilled ) {
-      //m_grid.ForceRefresh();
-    }
-    else {
-      std::cout << "no empty slot found for " << sIQFeedName << std::endl;
-    }
+    m_vOptionOrderRow.emplace( last, std::move( f() ) );
   }
 
+  GetView()->ForceRefresh();
+}
+
+void OptionOrderModel::Add( pWatch_t& pWatch, ou::tf::OrderSide::EOrderSide side, int quantity ) {
+  const std::string& sName( pWatch->GetInstrumentName() );
+  Add(
+    OptionOrderRow::EType::underlying, sName, side, quantity,
+    [pWatch, side, quantity](){
+      return std::make_unique<OptionOrderRow>( pWatch, side, quantity );
+    } );
+}
+
+void OptionOrderModel::Add( pOption_t& pOption, ou::tf::OrderSide::EOrderSide side, int quantity ) {
+  const std::string& sName( pOption->GetInstrumentName() );
+  Add(
+    OptionOrderRow::EType::underlying, sName, side, quantity,
+    [pOption, side, quantity](){
+      return std::make_unique<OptionOrderRow>( pOption, side, quantity );
+    } );
 }
 
 void OptionOrderModel::Refresh() {
 
-  OptionOrderRow& summary( m_vOptionOrderRow[ c_nDefaultRows - 1] );
+  OptionOrderRow& summary( *m_vOptionOrderRow.back() );
 
   boost::fusion::at_c<COL_Quan>(  summary.m_vModelCells ).SetValue(   0 );
   boost::fusion::at_c<COL_Last>(  summary.m_vModelCells ).SetValue( 0.0 );
@@ -117,7 +122,8 @@ void OptionOrderModel::Refresh() {
   double sumGamma {};
   double sumIV {};
 
-  for ( vOptionOrderRow_t::value_type& item: m_vOptionOrderRow ) {
+  for ( vOptionOrderRow_t::value_type& p: m_vOptionOrderRow ) {
+    OptionOrderRow& item( *p );
     if ( OptionOrderRow::EType::option == item.m_type ) {
 
       double spread_none {};
@@ -185,8 +191,7 @@ wxGrid* OptionOrderModel::GetView() const {
 }
 
 int OptionOrderModel::GetNumberRows() {
-  //return m_mapOptionValueRow.size();
-  return 0;
+  return m_vOptionOrderRow.size();
 }
 
 int OptionOrderModel::GetNumberCols() {
@@ -194,7 +199,7 @@ int OptionOrderModel::GetNumberCols() {
 }
 
 bool OptionOrderModel::IsEmptyCell( int row, int col ) {
-  return ( OptionOrderRow::EType::empty == m_vOptionOrderRow[ row ].m_type );
+  return false;
 }
 
 // https://github.com/wxWidgets/wxWidgets/blob/master/src/generic/grid.cpp
@@ -235,10 +240,43 @@ wxString OptionOrderModel::GetValue( int ixRow, int ixCol ) {
   assert( m_vOptionOrderRow.size() > ixRow );
 
   wxString s;
-  OptionOrderRow& row( m_vOptionOrderRow[ ixRow ] );
+  OptionOrderRow& row( *m_vOptionOrderRow[ ixRow ] );
 
   switch ( row.m_type ) {
-    case OptionOrderRow::EType::empty:
+    case OptionOrderRow::EType::underlying:
+      switch ( ixCol ) {
+        case COL_OrderSide:
+          switch ( boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).GetValue() ) {
+            case ou::tf::OrderSide::Buy:
+              s = "Buy";
+              break;
+            case ou::tf::OrderSide::Sell:
+              s = "Sell";
+              break;
+            default:
+              assert( false );
+              break;
+          }
+          break;
+        case COL_Quan:
+          s = boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).GetText();
+          break;
+        case COL_Last:
+          s = boost::fusion::at_c<COL_Last>( row.m_vModelCells ).GetText();
+          break;
+        case COL_Name:
+          s = boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetText();
+          break;
+        case COL_Bid:
+          s = boost::fusion::at_c<COL_Bid>( row.m_vModelCells ).GetText();
+          break;
+        case COL_Ask:
+          s = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetText();
+          break;
+        default:
+          s = "n/a";
+          break;
+      }
       break;
     case OptionOrderRow::EType::option:
       switch ( ixCol ) {
@@ -395,7 +433,8 @@ OptionOrderModel::fOrderLeg_t OptionOrderModel::FactoryAddComboOrderLeg() {
 void OptionOrderModel::PlaceComboOrder() {
   m_fGatherOrderLegs(
     [this]( OptionOrderModel::fOrderLeg_t&& fOrderLeg ){
-      for ( vOptionOrderRow_t::value_type& row: m_vOptionOrderRow ) {
+      for ( vOptionOrderRow_t::value_type& p: m_vOptionOrderRow ) {
+        OptionOrderRow& row( *p );
         switch (row.m_type ) {
           case OptionOrderRow::EType::option:
             {
@@ -430,18 +469,10 @@ void OptionOrderModel::PlaceComboOrder() {
 }
 
 void OptionOrderModel::ClearRows() {
-  for ( vOptionOrderRow_t::value_type& row: m_vOptionOrderRow ) {
-    switch ( row.m_type ) {
-      case OptionOrderRow::EType::option:
-        //if ( m_grid.m_fOptionDelegates_Detach ) {
-        //}
-        row.m_type = OptionOrderRow::EType::empty;
-        break;
-      case OptionOrderRow::EType::empty:
-        break;
-      case OptionOrderRow::EType::summary:
-        break;
-    }
+  vOptionOrderRow_t::iterator iter( m_vOptionOrderRow.begin() );
+  while ( OptionOrderRow::EType::summary != (*iter)->m_type ) {
+    m_vOptionOrderRow.erase( iter );
+    ++iter;
   }
 
   //m_grid.ForceRefresh();
@@ -449,7 +480,7 @@ void OptionOrderModel::ClearRows() {
 
 void OptionOrderModel::DestroyControls() {
 
-  ClearRows();
+  m_vOptionOrderRow.clear();
 
 // m_grid.Unbind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionOrder_impl::OnGridCellBeginDrag, this );
 // m_grid.Unbind( wxEVT_MOTION, &GridOptionOrder_impl::OnMouseMotion, this );
