@@ -25,7 +25,6 @@
 
 #include <wx/grid.h>
 
-#include <TFTrading/Watch.h>
 #include <TFOptions/Option.h>
 
 namespace ou { // One Unified
