@@ -57,6 +57,10 @@ public:
     long style = SYMBOL_OPTIONCHAINVIEW_STYLE,
     const wxString& name = SYMBOL_OPTIONCHAINVIEW_TITLE );
 
+  using fAddOrder_t = std::function<void( pOption_t&, ou::tf::OrderSide::EOrderSide, int quantity )>;
+
+  void SetAddOrder( fAddOrder_t&& );
+
   int GetFirstVisibleRow() const;
   int GetVisibleRowCount() const;
 
@@ -70,6 +74,8 @@ private:
   };
 
   wxMenu* m_pMenuAssignWatch;
+
+  fAddOrder_t m_fAddOrder;
 
   void Init();
   void CreateControls();

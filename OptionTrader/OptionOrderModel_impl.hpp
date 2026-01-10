@@ -88,7 +88,7 @@ private:
   #define GRID_ARRAY \
     (GRID_ARRAY_COL_COUNT,  \
       ( /* Col 0,         1,            2,       3,      4,          */ \
-        (COL_OrderSide, "OSide", wxALIGN_RIGHT,  50, ModelCellInt    ), \
+        (COL_OrderSide, "Side",  wxALIGN_RIGHT,  50, ModelCellInt    ), \
         (COL_Quan,      "Quan",  wxALIGN_RIGHT,  50, ModelCellInt    ), \
         (COL_Name,      "Name",  wxALIGN_LEFT , 120, ModelCellString ), \
         (COL_Last,      "Last",  wxALIGN_RIGHT , 50, ModelCellDouble ), \
@@ -134,7 +134,7 @@ private:
     }
 
     OptionOrderRow( pOption_t pOption, ou::tf::OrderSide::EOrderSide side, int quantity )
-    : m_type( EType::underlying )
+    : m_type( EType::option )
     , m_pOption( pOption )
     {
       Init();
@@ -203,9 +203,6 @@ private:
 
   using fAdd_t = std::function<pOptionOrderRow_t()>;
   void Add( OptionOrderRow::EType, const std::string&, ou::tf::OrderSide::EOrderSide side, int quantity, fAdd_t&& );
-
-  void CreateControls();
-  void DestroyControls();
 
   void Refresh();
 

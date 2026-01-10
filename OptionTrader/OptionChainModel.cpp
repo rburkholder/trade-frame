@@ -18,8 +18,6 @@
  * Created: July 18, 2025 11:30:59
  */
 
-#include <string>
-
 #include <boost/log/trivial.hpp>
 
 #include <fmt/core.h>
@@ -57,8 +55,8 @@ int OptionChainModel::ClosestStrike( double price ) const {
   return m_pOptionChainModel_impl->ClosestStrike( price );
 }
 
-void OptionChainModel::OptionSelected( int row, int col ) {
-  m_pOptionChainModel_impl->OptionSelected( row, col );
+OptionChainModel::pOption_t OptionChainModel::GetOption( int row, int col ) {
+  return m_pOptionChainModel_impl->GetOption( row, col );
 }
 
 wxString OptionChainModel::GetValue( int row, int col	) {

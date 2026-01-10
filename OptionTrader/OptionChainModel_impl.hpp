@@ -201,7 +201,7 @@ private:
   using vRow2Entry_t = std::vector<Strike>;
   vRow2Entry_t m_vRow2Entry;
 
-  void OptionSelected( int row, int col );
+  pOption_t GetOption( int row, int col );
 
   int GetNumberRows();
   int GetNumberCols();

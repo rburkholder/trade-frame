@@ -61,9 +61,6 @@ private:
   using pOptionOrderModel_impl_t = std::unique_ptr<OptionOrderModel_impl>;
   pOptionOrderModel_impl_t m_pOptionOrderModel_impl;
 
-  void CreateControls();
-  void DestroyControls();
-
   void Refresh();
 
   void ClearRows();

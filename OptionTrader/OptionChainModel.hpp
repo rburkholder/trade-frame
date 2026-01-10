@@ -50,7 +50,7 @@ public:
 
   int ClosestStrike( double ) const;
 
-  void OptionSelected( int row, int col );
+  pOption_t GetOption( int row, int col );
 
 protected:
 private:

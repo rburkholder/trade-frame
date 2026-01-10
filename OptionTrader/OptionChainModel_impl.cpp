@@ -110,21 +110,24 @@ int OptionChainModel_impl::ClosestStrike( double price ) const {
   return ix;
 }
 
-void OptionChainModel_impl::OptionSelected( int row, int col ) {
+ OptionChainModel_impl::pOption_t OptionChainModel_impl::GetOption( int row, int col ) {
 
   assert( m_vRow2Entry.size() > row );
   Strike& strike( m_vRow2Entry[ row ] );
 
   std::string name;
+  pOption_t pOption;
 
   switch ( col ) {
   case OptionChainModel_impl::col_CallAsk:
   case OptionChainModel_impl::col_CallBid:
-    name = strike.options.call.sIQFeedSymbolName;
+    pOption = strike.options.call.pOption;
+    name = strike.options.call.pOption->GetInstrumentName();
     break;
   case OptionChainModel_impl::col_PutAsk:
   case OptionChainModel_impl::col_PutBid:
-    name = strike.options.put.sIQFeedSymbolName;
+    pOption = strike.options.put.pOption;
+    name = strike.options.put.pOption->GetInstrumentName();
     break;
   default:
     break;
@@ -133,6 +136,8 @@ void OptionChainModel_impl::OptionSelected( int row, int col ) {
   BOOST_LOG_TRIVIAL(trace)
     << "strike " << strike.strike << ": " << name
     ;
+
+  return pOption;
 }
 
 wxString OptionChainModel_impl::GetValue( int row, int col	) {

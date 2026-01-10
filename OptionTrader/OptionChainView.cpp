@@ -28,12 +28,15 @@
 #include "OptionChainModel_impl.hpp"
 
 OptionChainView::OptionChainView()
-: wxGrid() {
+: wxGrid()
+, m_fAddOrder( nullptr )
+{
   Init();
 }
 
 OptionChainView::OptionChainView( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name )
 : wxGrid()
+, m_fAddOrder( nullptr )
 {
   Init();
   Create(parent, id, pos, size, style, name );
@@ -94,6 +97,10 @@ void OptionChainView::CreateControls() {
   //SetHeaderAttr( attr2 );
 }
 
+void OptionChainView::SetAddOrder( fAddOrder_t&& fAddOrder ) {
+  m_fAddOrder = std::move( fAddOrder );
+}
+
 void OptionChainView::OnGridCellLeftClick( wxGridEvent& event ) { // zero based
   //BOOST_LOG_TRIVIAL(trace) << "Left Click " << event.GetRow() << ',' << event.GetCol();
   event.Skip();
@@ -106,19 +113,24 @@ void OptionChainView::OnGridCellRightClick( wxGridEvent& event ) { // zero based
   const auto col = event.GetCol();
 
   std::string sMessage;
+  ou::tf::OrderSide::EOrderSide side( ou::tf::OrderSide::Unknown );
 
   switch ( col ) {
     case OptionChainModel_impl::col_CallAsk:
       sMessage = "buy call @ ask";
+      side =  ou::tf::OrderSide::Buy;
       break;
     case OptionChainModel_impl::col_CallBid:
       sMessage = "sell call @ bid";
+      side =  ou::tf::OrderSide::Sell;
       break;
     case OptionChainModel_impl::col_PutAsk:
       sMessage = "buy put @ ask";
+      side =  ou::tf::OrderSide::Buy;
       break;
     case OptionChainModel_impl::col_PutBid:
       sMessage = "sell put @ bid";
+      side =  ou::tf::OrderSide::Sell;
       break;
     default:
       break;
@@ -135,10 +147,12 @@ void OptionChainView::OnGridCellRightClick( wxGridEvent& event ) { // zero based
     wxMenuItem* pMenuItemBuy = m_pMenuAssignWatch->Append( wxID_ANY, sMessage );
     m_pMenuAssignWatch->Bind(
       wxEVT_COMMAND_MENU_SELECTED,
-      [this, row, col ]( wxCommandEvent& event ){
+      [this, row, col, side ]( wxCommandEvent& event ){
         //BOOST_LOG_TRIVIAL(trace) << "menu" << ',' << row << ',' << col;
         OptionChainModel* p = reinterpret_cast<OptionChainModel*>( GetTable() );
-        p->OptionSelected( row, col );
+        pOption_t pOption = p->GetOption( row, col );
+        assert( m_fAddOrder );
+        m_fAddOrder( pOption, side, 1 );
       },
       pMenuItemBuy->GetId()
     );

@@ -35,10 +35,6 @@ OptionOrderModel::~OptionOrderModel() {
   m_pOptionOrderModel_impl.reset();
 }
 
-void OptionOrderModel::CreateControls() {
-  m_pOptionOrderModel_impl->CreateControls();
-}
-
 void OptionOrderModel::Add( pWatch_t& pWatch, ou::tf::OrderSide::EOrderSide side, int quantity ) {
   m_pOptionOrderModel_impl->Add( pWatch, side, quantity );
 }
@@ -130,10 +126,6 @@ void OptionOrderModel::PlaceComboOrder() {
 
 void OptionOrderModel::ClearRows() {
   m_pOptionOrderModel_impl->ClearRows();
-}
-
-void OptionOrderModel::DestroyControls() {
-  m_pOptionOrderModel_impl->DestroyControls();
 }
 
 } // namespace tf

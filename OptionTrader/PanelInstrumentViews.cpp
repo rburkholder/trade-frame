@@ -156,6 +156,11 @@ void PanelInstrumentViews::CreateControls() {
   m_pOptionOrderModel = new OptionOrderModel();
   m_pOptionOrderView->SetTable( m_pOptionOrderModel, false, wxGrid::wxGridSelectRows );
 
+  m_pOptionChainView->SetAddOrder(
+    [this]( pOption_t& pOption, ou::tf::OrderSide::EOrderSide side, int quantity ){
+      m_pOptionOrderModel->Add( pOption, side, quantity );
+    } );
+
   wxBoxSizer* itemBoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
   itemBoxSizer1->Add(itemBoxSizer6, 0, wxGROW|wxALL, 0);
 

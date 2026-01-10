@@ -13,10 +13,10 @@
  ************************************************************************/
 
 /*
- * File:    OptionOrderModel.cpp
+ * File:    OptionOrderModel_impl.cpp
  * Author:  raymond@burkholder.net
  * Project: OptionTrader
- * Created: 2026/01/05 10:38:02
+ * Created: 2026/01/08 19:56:36
  */
 
 #include "OptionOrderModel_impl.hpp"
@@ -30,30 +30,22 @@ namespace tf { // TradeFrame
 
 OptionOrderModel_impl::OptionOrderModel_impl()
 : m_pGrid( nullptr )
+, m_fGatherOrderLegs( nullptr )
 {
   m_vOptionOrderRow.reserve( 10 );
+  assert( 1 ==c_nDefaultRows );
+  m_vOptionOrderRow.emplace_back( std::make_unique<OptionOrderRow>() );
 }
 
 OptionOrderModel_impl::~OptionOrderModel_impl() {
-}
-
-void OptionOrderModel_impl::CreateControls() {
-
-  //m_grid.Bind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
-
-
-//  m_grid.Bind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionChain_impl::OnGridCellBeginDrag, this );  // this is the event we really want
-//  m_grid.Bind( wxEVT_MOTION, &GridOptionChain_impl::OnMouseMotion, this );  // already consumed by grid itself
-
-  assert( 1 ==c_nDefaultRows );
-  m_vOptionOrderRow.emplace_back( std::make_unique<OptionOrderRow>() );
-
-  //m_grid.AppendRows( c_nDefaultRows ); // cells labelled empty when no order or summary is present ( fifth row is summary stats)
+  m_vOptionOrderRow.clear();
+  m_pGrid = nullptr;
 }
 
 // private
 void OptionOrderModel_impl::Add( OptionOrderRow::EType type, const std::string& sName, ou::tf::OrderSide::EOrderSide side, int quantity, fAdd_t&& f ) {
 
+  m_fGatherOrderLegs = nullptr;
   assert( 0 < m_vOptionOrderRow.size() );
 
   bool bSymbolFound( false );
@@ -79,10 +71,15 @@ void OptionOrderModel_impl::Add( OptionOrderRow::EType type, const std::string& 
     --last; // access the summary record
 
     m_vOptionOrderRow.emplace( last, std::move( f() ) );
+
+    assert( m_pGrid );
+    m_pGrid->InsertRows( m_vOptionOrderRow.size() - 1, 1, false );
+
   }
 
   assert( m_pGrid );
   m_pGrid->ForceRefresh();
+  m_pGrid->GetParent()->Layout();
 }
 
 void OptionOrderModel_impl::Add( pWatch_t& pWatch, ou::tf::OrderSide::EOrderSide side, int quantity ) {
@@ -97,7 +94,7 @@ void OptionOrderModel_impl::Add( pWatch_t& pWatch, ou::tf::OrderSide::EOrderSide
 void OptionOrderModel_impl::Add( pOption_t& pOption, ou::tf::OrderSide::EOrderSide side, int quantity ) {
   const std::string& sName( pOption->GetInstrumentName() );
   Add(
-    OptionOrderRow::EType::underlying, sName, side, quantity,
+    OptionOrderRow::EType::option, sName, side, quantity,
     [pOption, side, quantity](){
       return std::make_unique<OptionOrderRow>( pOption, side, quantity );
     } );
@@ -184,7 +181,7 @@ void OptionOrderModel_impl::Refresh() {
 
 }
 
-void OptionOrderModel_impl::SetView( wxGrid *pGrid ) {
+void OptionOrderModel_impl::SetView( wxGrid* pGrid ) {
   m_pGrid = pGrid;
 }
 
@@ -293,7 +290,7 @@ wxString OptionOrderModel_impl::GetValue( int ixRow, int ixCol ) {
       }
       break;
     case OptionOrderRow::EType::summary:
-      assert( ( c_nDefaultRows - 1 ) == ixRow );
+      assert( ( m_vOptionOrderRow.size() - 1 ) == ixRow );
       switch ( ixCol ) {
         case COL_OrderSide:
           // empty
@@ -448,15 +445,6 @@ void OptionOrderModel_impl::ClearRows() {
   }
 
   //m_grid.ForceRefresh();
-}
-
-void OptionOrderModel_impl::DestroyControls() {
-
-  m_vOptionOrderRow.clear();
-
-// m_grid.Unbind( wxEVT_GRID_CELL_BEGIN_DRAG, &GridOptionOrder_impl::OnGridCellBeginDrag, this );
-// m_grid.Unbind( wxEVT_MOTION, &GridOptionOrder_impl::OnMouseMotion, this );
-// m_grid.Unbind( wxEVT_DESTROY, &GridOptionDetails_impl::OnDestroy, this );
 }
 
 } // namespace tf
