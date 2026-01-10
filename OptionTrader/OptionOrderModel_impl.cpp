@@ -359,7 +359,7 @@ wxGridCellAttr* OptionOrderModel_impl::GetAttr (int row, int col, wxGridCellAttr
   switch ( kind ) {
     case wxGridCellAttr::wxAttrKind::Any:
     case wxGridCellAttr::wxAttrKind::Cell:
-    case wxGridCellAttr::wxAttrKind::Col:
+    case wxGridCellAttr::wxAttrKind::Col: // Col type is never used
       switch ( col ) {
         BOOST_PP_REPEAT(BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SwitchGetColAlign, 0 )
       }
@@ -371,6 +371,7 @@ wxGridCellAttr* OptionOrderModel_impl::GetAttr (int row, int col, wxGridCellAttr
           pAttr->SetReadOnly();
           break;
       }
+      pAttr->SetAlignment( align, wxALIGN_CENTER_VERTICAL );
       break;
     case wxGridCellAttr::wxAttrKind::Row:
       assert( true );
@@ -379,8 +380,6 @@ wxGridCellAttr* OptionOrderModel_impl::GetAttr (int row, int col, wxGridCellAttr
       assert( true );
       break;
   }
-
-  pAttr->SetAlignment( align, wxALIGN_CENTER_VERTICAL );
 
   return pAttr;
 
