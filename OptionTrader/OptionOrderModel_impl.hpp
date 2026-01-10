@@ -88,7 +88,7 @@ private:
   #define GRID_ARRAY \
     (GRID_ARRAY_COL_COUNT,  \
       ( /* Col 0,         1,            2,       3,      4,          */ \
-        (COL_OrderSide, "Side",  wxALIGN_RIGHT,  50, ModelCellInt    ), \
+        (COL_OrderSide, "Side",  wxALIGN_CENTRE, 50, ModelCellInt    ), \
         (COL_Quan,      "Quan",  wxALIGN_RIGHT,  50, ModelCellInt    ), \
         (COL_Name,      "Name",  wxALIGN_LEFT , 120, ModelCellString ), \
         (COL_Last,      "Last",  wxALIGN_RIGHT , 50, ModelCellDouble ), \
