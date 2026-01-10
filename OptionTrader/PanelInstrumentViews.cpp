@@ -430,15 +430,14 @@ void PanelInstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
           }
         } );
       pti->AppendMenuItem(
-        "add to order",
+        "enter buy order",
         [this,&instrument]( ou::tf::TreeItem* pti ){
-          // add instrument to order
-          //if ( 0 == instrument.mapChains.size() ) {
-          //  BuildOptionChains( instrument );
-          //}
-          //else {
-          //  PresentOptionChains( instrument );
-          //}
+          m_pOptionOrderModel->Add( instrument.pWatch, ou::tf::OrderSide::Buy, 100 );
+        } );
+      pti->AppendMenuItem(
+        "enter sell order",
+        [this,&instrument]( ou::tf::TreeItem* pti ){
+          m_pOptionOrderModel->Add( instrument.pWatch, ou::tf::OrderSide::Sell, 100 );
         } );
       pti->AppendMenuItem(
         "add tag",
