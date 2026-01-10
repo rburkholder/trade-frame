@@ -267,11 +267,11 @@ wxGridCellAttr* OptionChainModel_impl::GetAttr (int row, int col, wxGridCellAttr
     case wxGridCellAttr::wxAttrKind::Cell:
     case wxGridCellAttr::wxAttrKind::Col:
       switch ( col ) {
+        BOOST_PP_REPEAT(BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SwitchGetColAlign, 0 )
+      }
+      switch ( col ) {
         //case COL_Quan:
         //case COL_Price:
-        //  switch ( col ) {
-        //    BOOST_PP_REPEAT(BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SwitchGetColAlign, 0 )
-        //  }
         //  pAttr->SetReadOnly( false );
         //  break;
         default:
