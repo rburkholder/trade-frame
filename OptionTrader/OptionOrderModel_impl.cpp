@@ -399,6 +399,19 @@ OptionOrderModel_impl::fOrderLeg_t OptionOrderModel_impl::FactoryAddComboOrderLe
   return std::move( f );
 }
 
+void OptionOrderModel_impl::DeleteOrder( size_t row ) {
+  if ( ( m_vOptionOrderRow.size() - 1 ) == row ) {
+    assert( false );  // can't delete summary line
+  }
+  else {
+    m_vOptionOrderRow.erase( m_vOptionOrderRow.begin() + row );
+    assert( m_pGrid );
+    m_pGrid->DeleteRows( row, 1, false );
+    m_pGrid->ForceRefresh();
+    m_pGrid->GetParent()->Layout();
+  }
+}
+
 void OptionOrderModel_impl::PlaceComboOrder() {
   m_fGatherOrderLegs(
     [this]( OptionOrderModel_impl::fOrderLeg_t&& fOrderLeg ){
@@ -434,10 +447,10 @@ void OptionOrderModel_impl::PlaceComboOrder() {
       }
     }
   );
-  ClearRows();
+  ClearCombo();
 }
 
-void OptionOrderModel_impl::ClearRows() {
+void OptionOrderModel_impl::ClearCombo() {
   vOptionOrderRow_t::iterator iter( m_vOptionOrderRow.begin() );
   while ( OptionOrderRow::EType::summary != (*iter)->m_type ) {
     m_vOptionOrderRow.erase( iter );

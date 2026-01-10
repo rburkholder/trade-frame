@@ -72,16 +72,19 @@ bool OptionOrderModel::IsEmptyCell( int row, int col ) {
 // wxGridStringTable::InsertRows
 bool OptionOrderModel::InsertRows( size_t pos, size_t numRows ) {
   //return wxGridTableBase::InsertRows( pos, numRows ); // don't do this
-    if ( GetView() ) {
-      wxGridTableMessage msg(
-        this,
-        wxGRIDTABLE_NOTIFY_ROWS_INSERTED,
-        pos,
-        numRows
-      );
-      GetView()->ProcessTableMessage( msg );
-    }
-  return true;
+  if ( GetView() ) {
+    wxGridTableMessage msg(
+      this,
+      wxGRIDTABLE_NOTIFY_ROWS_INSERTED,
+      pos,
+      numRows
+    );
+    GetView()->ProcessTableMessage( msg );
+    return true;
+  }
+  else {
+    return false;
+  }
 }
 
 bool OptionOrderModel::AppendRows( size_t numRows ) {
@@ -92,8 +95,27 @@ bool OptionOrderModel::AppendRows( size_t numRows ) {
       numRows
     );
     GetView()->ProcessTableMessage( msg );
+    return true;
   }
-return true;
+  else {
+    return false;
+  }
+}
+
+bool OptionOrderModel::DeleteRows( size_t pos, size_t numRows ) {
+  if ( GetView() ) {
+    wxGridTableMessage msg(
+      this,
+      wxGRIDTABLE_NOTIFY_ROWS_DELETED,
+      pos,
+      numRows
+    );
+    GetView()->ProcessTableMessage( msg );
+    return true;
+  }
+  else {
+    return false;
+  }
 }
 
 void OptionOrderModel::SetValue( int row, int col, const wxString &value ) {
@@ -120,12 +142,16 @@ OptionOrderModel::fOrderLeg_t OptionOrderModel::FactoryAddComboOrderLeg() {
   return std::move( m_pOptionOrderModel_impl->FactoryAddComboOrderLeg() );
 }
 
+void OptionOrderModel::DeleteOrder( size_t row ) {
+  m_pOptionOrderModel_impl->DeleteOrder( row );
+}
+
 void OptionOrderModel::PlaceComboOrder() {
   m_pOptionOrderModel_impl->PlaceComboOrder();
 }
 
-void OptionOrderModel::ClearRows() {
-  m_pOptionOrderModel_impl->ClearRows();
+void OptionOrderModel::ClearCombo() {
+  m_pOptionOrderModel_impl->ClearCombo();
 }
 
 } // namespace tf

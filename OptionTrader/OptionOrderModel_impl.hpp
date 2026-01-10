@@ -206,8 +206,9 @@ private:
 
   void Refresh();
 
-  void ClearRows();
+  void DeleteOrder( size_t row );
   void PlaceComboOrder();
+  void ClearCombo();
 
   void SetView ( wxGrid* );
 

@@ -53,6 +53,9 @@ public:
   using fGatherOrderLegs_t = std::function<void( fIterateLegs_t&& )>;
   void Set( fGatherOrderLegs_t&& );
 
+  void DeleteOrder( size_t row );
+  void PlaceComboOrder(); // used by OptionOrderView
+
 protected:
 
 private:
@@ -62,8 +65,7 @@ private:
 
   void Refresh();
 
-  void ClearRows();
-  void PlaceComboOrder();
+  void ClearCombo();
 
   virtual void SetView ( wxGrid *grid ) override;
 
@@ -73,6 +75,7 @@ private:
 
   virtual bool InsertRows( size_t pos = 0, size_t numRows = 1 ) override;
   virtual bool AppendRows( size_t numRows = 1 ) override;
+  virtual bool DeleteRows( size_t pos = 0, size_t numRows = 1 ) override;
 
   virtual wxString GetValue( int row, int col ) override;
   virtual void SetValue( int row, int col, const wxString &value ) override;

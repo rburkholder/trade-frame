@@ -118,21 +118,23 @@ void OptionOrderView::OnGridCellRightClick( wxGridEvent& event ) { // zero based
   OptionOrderModel* pOptionOrderModel = reinterpret_cast<OptionOrderModel*>( GetTable() );
   const int cntRow = pOptionOrderModel->GetRowsCount();
   if ( ( cntRow - 1 ) == event.GetRow() ) {
-    wxMenuItem* pMenuItemPlaceOrder = m_pMenuRightClick->Append( ID_MENUITEM_PlaceOrder, "place order" );
+    wxMenuItem* pMenuItemPlaceOrder = m_pMenuRightClick->Append( ID_MENUITEM_PlaceOrder, "place combo order" );
     m_pMenuRightClick->Bind(
       wxEVT_COMMAND_MENU_SELECTED,
-      [this]( wxCommandEvent& event ){
-        BOOST_LOG_TRIVIAL(trace) << "menu place order";
+      [pOptionOrderModel]( wxCommandEvent& event ){
+        BOOST_LOG_TRIVIAL(trace) << "menu place combo order";
+        pOptionOrderModel->PlaceComboOrder();
       },
       pMenuItemPlaceOrder->GetId()
     );
   }
   else {
-    wxMenuItem* pMenuItemDelete = m_pMenuRightClick->Append( ID_MENUITEM_Delete, "delete" );
+    wxMenuItem* pMenuItemDelete = m_pMenuRightClick->Append( ID_MENUITEM_Delete, "delete order" );
     m_pMenuRightClick->Bind(
       wxEVT_COMMAND_MENU_SELECTED,
-      [this]( wxCommandEvent& event ){
-        BOOST_LOG_TRIVIAL(trace) << "menu delete row";
+      [pOptionOrderModel, row=event.GetRow()]( wxCommandEvent& event ){
+        BOOST_LOG_TRIVIAL(trace) << "menu delete order " << row;
+        pOptionOrderModel->DeleteOrder( row );
       },
       pMenuItemDelete->GetId()
     );
