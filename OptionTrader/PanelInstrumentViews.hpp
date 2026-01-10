@@ -35,6 +35,7 @@
 #include "Common.hpp"
 #include "TagSymbolMap.hpp"
 #include "OptionChainView.hpp"
+#include "OptionOrderView.hpp"
 #include "SessionBarModel.hpp"
 #include "ManualDailyBarModel.hpp"
 
@@ -66,9 +67,7 @@ class TreeItem;
 class WinChartView;
 class WatchOnStatusBar;
 class ComposeInstrument;
-//class GridOptionComboOrder;
 
-class OptionOrderView;
 class OptionOrderModel;
 
 class PanelInstrumentViews
@@ -296,6 +295,7 @@ private:
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pOptionChainView;
+    ar & *m_pOptionOrderView;
 
     ar & m_TagSymbolMap;
 
@@ -311,6 +311,9 @@ private:
     assert( 5 <= version ); // ordering has been changed
 
     ar & *m_pOptionChainView;
+    if ( 6 <= version ) {
+      ar & *m_pOptionOrderView;
+    }
 
     ar & m_TagSymbolMap;
     wxArrayString rTag;
@@ -373,4 +376,4 @@ private:
 } // namespace tf
 } // namespace ou
 
-BOOST_CLASS_VERSION(ou::tf::PanelInstrumentViews, 5)
+BOOST_CLASS_VERSION(ou::tf::PanelInstrumentViews, 6)

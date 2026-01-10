@@ -153,6 +153,10 @@ void OptionOrderView::PlaceComboOrder() {
   //m_pimpl->PlaceComboOrder();
 }
 
+int OptionOrderView::GetColumnCount() const {
+  return GRID_ARRAY_COL_COUNT;
+}
+
 void OptionOrderView::OnDestroy( wxWindowDestroyEvent& event ) {
 
   //m_timerGuiRefresh.Stop();

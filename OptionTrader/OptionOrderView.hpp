@@ -23,6 +23,9 @@
 
 #pragma once
 
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/split_member.hpp>
+
 #include <wx/grid.h>
 
 #include <TFOptions/Option.h>
@@ -41,8 +44,10 @@ namespace tf { // TradeFrame
 class OptionOrderModel;  // Forward Declaration
 
 class OptionOrderView
-: public wxGrid {
-  friend OptionOrderModel;
+: public wxGrid
+{
+  friend class OptionOrderModel;
+  friend class boost::serialization::access;
 public:
 
   OptionOrderView();
@@ -84,11 +89,48 @@ private:
 
   void OnDestroy( wxWindowDestroyEvent& event );
 
+  int GetColumnCount() const;
+
   wxBitmap GetBitmapResource( const wxString& name );
   wxIcon GetIconResource( const wxString& name );
   static bool ShowToolTips() { return true; };
+
+  template<typename Archive>
+  void save( Archive& ar, const unsigned int version ) const {
+    unsigned int n{};
+    if ( GetTable() ) {
+      n = GetColumnCount();
+      ar & n;
+      for ( unsigned int ix = 0; ix < n; ++ix ) {
+        ar & GetColSize( ix );
+      }
+    }
+    else {
+      ar & n;
+    }
+  }
+
+  template<typename Archive>
+  void load( Archive& ar, const unsigned int version ) {
+    unsigned int nColumns;
+    unsigned int width;
+    ar & nColumns;
+    for ( unsigned int ix = 0; ix < nColumns; ++ix ) {
+      ar & width;
+      if ( GetTable() ) {
+        SetColSize( ix, width );
+      }
+      else {
+        // need to keep it for later
+      }
+    }
+  }
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
 } // namespace tf
 } // namespace ou
+
+BOOST_CLASS_VERSION(ou::tf::OptionOrderView, 1)

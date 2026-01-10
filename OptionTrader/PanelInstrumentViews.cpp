@@ -42,7 +42,6 @@
 
 #include <TFVuTrading/GridOptionComboOrder.hpp>
 
-#include "OptionOrderView.hpp"
 #include "OptionOrderModel.hpp"
 
 #include "OptionChainModel.hpp"
@@ -792,10 +791,21 @@ void PanelInstrumentViews::OnDestroy( wxWindowDestroyEvent& event ) {
   //BOOST_LOG_TRIVIAL(trace) << "InstrumentViews::OnDestroy 1";
 
   m_pcurView = nullptr;
-  if ( nullptr != m_pOptionChainView ) {
-    m_pOptionChainView->SetTable( nullptr );
+
+  if ( m_pOptionOrderView ) {
+    m_pOptionOrderView->SetTable( nullptr, false );
   }
-  if ( nullptr != m_pOptionChainModel ) {
+
+  if ( m_pOptionOrderModel ) {
+    delete m_pOptionOrderModel;
+    m_pOptionOrderModel = nullptr;
+  }
+
+  if ( m_pOptionChainView ) {
+    m_pOptionChainView->SetTable( nullptr, false  );
+  }
+
+  if ( m_pOptionChainModel ) {
     //m_pOptionChainModel->DecRef();
     delete m_pOptionChainModel;
     m_pOptionChainModel = nullptr;

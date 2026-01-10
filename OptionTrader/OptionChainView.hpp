@@ -94,10 +94,16 @@ private:
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-    ar & GetColumnCount();
-    for ( unsigned int ix = 0; ix < GetColumnCount(); ++ix ) {
-      //ar & GetColSize( ix );
-      ar & 50;
+    unsigned int n{};
+    if ( GetTable() ) {
+      n = GetColumnCount();
+      ar & n;
+      for ( unsigned int ix = 0; ix < n; ++ix ) {
+        ar & GetColSize( ix );
+      }
+    }
+    else {
+      ar & n;
     }
   }
 
@@ -106,10 +112,14 @@ private:
     unsigned int nColumns;
     unsigned int width;
     ar & nColumns;
-
     for ( unsigned int ix = 0; ix < nColumns; ++ix ) {
       ar & width;
-      //SetColSize( ix, width );
+      if ( GetTable() ) {
+        SetColSize( ix, width );
+      }
+      else {
+        // need to keep it for later
+      }
     }
   }
 
