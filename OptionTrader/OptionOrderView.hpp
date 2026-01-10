@@ -27,6 +27,8 @@
 
 #include <TFOptions/Option.h>
 
+class wxMenu;
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
@@ -73,7 +75,10 @@ private:
 
   enum {
     ID_Null=wxID_HIGHEST, ID_OPTIONORDERVIEW
+  , ID_MENUITEM_PlaceOrder, ID_MENUITEM_Delete
   };
+
+  wxMenu* m_pMenuRightClick;
 
   void OnGridCellRightClick( wxGridEvent& );
 

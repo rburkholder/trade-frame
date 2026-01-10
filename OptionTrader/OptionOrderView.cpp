@@ -19,19 +19,28 @@
  * Created: 2026/01/05 10:38:02
  */
 
+#include <boost/log/trivial.hpp>
+
+#include <wx/menu.h>
+
+#include "OptionOrderModel.hpp"
 #include "OptionOrderView.hpp"
 #include "OptionOrderModel_impl.hpp"
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
-OptionOrderView::OptionOrderView(): wxGrid() {
+OptionOrderView::OptionOrderView()
+: wxGrid()
+, m_pMenuRightClick( nullptr )
+{
   Init();
 }
 
 OptionOrderView::OptionOrderView(
   wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& sTitle )
-: wxGrid(  )
+: wxGrid()
+, m_pMenuRightClick( nullptr )
 {
   Init();
   Create(parent, id, pos, size, style, sTitle );
@@ -98,6 +107,39 @@ void OptionOrderView::Refresh() {
 }
 
 void OptionOrderView::OnGridCellRightClick( wxGridEvent& event ) { // zero based, pop up menu
+
+  if ( nullptr != m_pMenuRightClick ) {
+    delete m_pMenuRightClick;
+    m_pMenuRightClick = nullptr;
+  }
+
+  m_pMenuRightClick = new wxMenu();
+
+  OptionOrderModel* pOptionOrderModel = reinterpret_cast<OptionOrderModel*>( GetTable() );
+  const int cntRow = pOptionOrderModel->GetRowsCount();
+  if ( ( cntRow - 1 ) == event.GetRow() ) {
+    wxMenuItem* pMenuItemPlaceOrder = m_pMenuRightClick->Append( ID_MENUITEM_PlaceOrder, "place order" );
+    m_pMenuRightClick->Bind(
+      wxEVT_COMMAND_MENU_SELECTED,
+      [this]( wxCommandEvent& event ){
+        BOOST_LOG_TRIVIAL(trace) << "menu place order";
+      },
+      pMenuItemPlaceOrder->GetId()
+    );
+  }
+  else {
+    wxMenuItem* pMenuItemDelete = m_pMenuRightClick->Append( ID_MENUITEM_Delete, "delete" );
+    m_pMenuRightClick->Bind(
+      wxEVT_COMMAND_MENU_SELECTED,
+      [this]( wxCommandEvent& event ){
+        BOOST_LOG_TRIVIAL(trace) << "menu delete row";
+      },
+      pMenuItemDelete->GetId()
+    );
+  }
+
+  PopupMenu( m_pMenuRightClick );
+
   event.Skip();
 }
 
@@ -119,8 +161,12 @@ void OptionOrderView::OnDestroy( wxWindowDestroyEvent& event ) {
   //m_pimpl.reset();
 
   assert( Unbind( wxEVT_GRID_CELL_RIGHT_CLICK, &OptionOrderView::OnGridCellRightClick, this ) );
-
   assert( Unbind( wxEVT_DESTROY, &OptionOrderView::OnDestroy, this ) );
+
+  if ( m_pMenuRightClick ) {
+    delete m_pMenuRightClick;
+    m_pMenuRightClick = nullptr;
+  }
 
   event.Skip();  // auto followed by Destroy();
 }
