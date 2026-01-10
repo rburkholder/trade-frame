@@ -25,7 +25,7 @@
 
 #include <wx/grid.h>
 
-#include "OptionChainModel.hpp"
+#include <TFOptions/Option.h>
 
 #define SYMBOL_OPTIONCHAINVIEW_STYLE wxTAB_TRAVERSAL
 #define SYMBOL_OPTIONCHAINVIEW_TITLE _("Option Chain")
@@ -57,6 +57,7 @@ public:
     long style = SYMBOL_OPTIONCHAINVIEW_STYLE,
     const wxString& name = SYMBOL_OPTIONCHAINVIEW_TITLE );
 
+  using pOption_t = ou::tf::option::Option::pOption_t;
   using fAddOrder_t = std::function<void( pOption_t&, ou::tf::OrderSide::EOrderSide, int quantity )>;
 
   void SetAddOrder( fAddOrder_t&& );
