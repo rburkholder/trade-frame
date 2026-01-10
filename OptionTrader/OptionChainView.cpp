@@ -30,6 +30,7 @@
 OptionChainView::OptionChainView()
 : wxGrid()
 , m_fAddOrder( nullptr )
+, m_pMenuAssignWatch( nullptr )
 {
   Init();
 }
@@ -37,6 +38,7 @@ OptionChainView::OptionChainView()
 OptionChainView::OptionChainView( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name )
 : wxGrid()
 , m_fAddOrder( nullptr )
+, m_pMenuAssignWatch( nullptr )
 {
   Init();
   Create(parent, id, pos, size, style, name );
@@ -46,7 +48,6 @@ OptionChainView::~OptionChainView() {
 }
 
 void OptionChainView::Init() {
-  m_pMenuAssignWatch = nullptr;
 }
 
 bool OptionChainView::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name ) {
