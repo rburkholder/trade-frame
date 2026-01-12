@@ -269,6 +269,8 @@ wxGridCellAttr* OptionChainModel_impl::GetAttr (int row, int col, wxGridCellAttr
       switch ( col ) {
         BOOST_PP_REPEAT(BOOST_PP_ARRAY_SIZE( GRID_ARRAY ), GRID_EMIT_SwitchGetColAlign, 0 )
       }
+      pAttr->SetAlignment( align, wxALIGN_CENTER_VERTICAL );
+
       switch ( col ) {
         //case COL_Quan:
         //case COL_Price:
@@ -284,8 +286,6 @@ wxGridCellAttr* OptionChainModel_impl::GetAttr (int row, int col, wxGridCellAttr
     case wxGridCellAttr::wxAttrKind::Default:
       break;
   }
-
-  pAttr->SetAlignment( align, wxALIGN_CENTER_VERTICAL );
 
   return pAttr;
 
