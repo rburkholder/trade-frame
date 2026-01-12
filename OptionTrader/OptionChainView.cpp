@@ -216,6 +216,30 @@ int OptionChainView::GetColumnCount() const {
   return GRID_ARRAY_COL_COUNT;
 }
 
+bool OptionChainView::SetTable( wxGridTableBase* nxtTable, bool bTakeOwnerShip, wxGridSelectionModes mode ) {
+  auto oldTable = GetTable();
+  if ( oldTable ) {
+    m_vColSize.clear();
+    const auto cntT = oldTable->GetColsCount();
+    for ( int ix = 0; ix < cntT; ++ix ) {
+      m_vColSize.push_back( GetColSize( ix ) );
+    }
+  }
+
+  const bool result = wxGrid::SetTable( nxtTable, bTakeOwnerShip, mode );
+
+  if ( nxtTable ) {
+    const auto cntT = nxtTable->GetColsCount();
+    const auto cntV = m_vColSize.size();
+    for ( int ix = 0; ix < cntT; ++ix ) {
+      if ( cntV > ix ) {
+        SetColSize( ix, m_vColSize[ ix ] );
+      }
+    }
+  }
+  return result;
+}
+
 void OptionChainView::OnDestroy( wxWindowDestroyEvent& event ) {
 
   assert( Unbind( wxEVT_GRID_CELL_LEFT_CLICK, &OptionChainView::OnGridCellLeftClick, this ) );

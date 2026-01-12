@@ -67,6 +67,8 @@ public:
 
   void SetVisible( int ixRow );
 
+  bool SetTable( wxGridTableBase*, bool bTakeOwnerShip = false, wxGridSelectionModes mode = wxGridSelectCells );
+
 protected:
 private:
 
@@ -77,6 +79,9 @@ private:
   wxMenu* m_pMenuAssignWatch;
 
   fAddOrder_t m_fAddOrder;
+
+  using vColSize_t = std::vector<int>;
+  vColSize_t m_vColSize;
 
   void Init();
   void CreateControls();
@@ -94,16 +99,20 @@ private:
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-    unsigned int n{};
+    unsigned int nColumns {};
     if ( GetTable() ) {
-      n = GetColumnCount();
-      ar & n;
-      for ( unsigned int ix = 0; ix < n; ++ix ) {
+      nColumns = GetColumnCount();
+      ar & nColumns;
+      for ( unsigned int ix = 0; ix < nColumns; ++ix ) {
         ar & GetColSize( ix );
       }
     }
     else {
-      ar & n;
+      nColumns = m_vColSize.size();
+      ar & nColumns;
+      for ( int size: m_vColSize ) {
+        ar & size;
+      }
     }
   }
 
@@ -112,13 +121,11 @@ private:
     unsigned int nColumns;
     unsigned int width;
     ar & nColumns;
-    for ( unsigned int ix = 0; ix < nColumns; ++ix ) {
-      ar & width;
-      if ( GetTable() ) {
-        SetColSize( ix, width );
-      }
-      else {
-        // need to keep it for later
+    if ( 0 < nColumns ) {
+      m_vColSize.reserve( nColumns );
+      for ( int ix = 0; ix < nColumns; ++ix ) {
+        ar & width;
+        m_vColSize.push_back( width );
       }
     }
   }
