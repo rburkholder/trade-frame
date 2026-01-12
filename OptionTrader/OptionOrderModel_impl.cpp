@@ -104,13 +104,13 @@ void OptionOrderModel_impl::Refresh() {
 
   OptionOrderRow& summary( *m_vOptionOrderRow.back() );
 
-  boost::fusion::at_c<COL_Quan>(  summary.m_vModelCells ).SetValue(   0 );
-  boost::fusion::at_c<COL_Last>(  summary.m_vModelCells ).SetValue( 0.0 );
-  boost::fusion::at_c<COL_Bid>(   summary.m_vModelCells ).SetValue( 0.0 ); // best - no spread - lower amount
-  boost::fusion::at_c<COL_Ask>(   summary.m_vModelCells ).SetValue( 0.0 ); // full - full spread - higher amount
-  boost::fusion::at_c<COL_Delta>( summary.m_vModelCells ).SetValue( 0.0 );
-  boost::fusion::at_c<COL_Gamma>( summary.m_vModelCells ).SetValue( 0.0 );
-  boost::fusion::at_c<COL_IV>(    summary.m_vModelCells ).SetValue( 0.0 );
+  //boost::fusion::at_c<COL_Quan>(  summary.m_vModelCells ).SetValue(   0 );
+  boost::fusion::at_c<COL_Last>(  summary.m_vModelCells ).SetValue( 0.0 ); // should this be here?
+  //boost::fusion::at_c<COL_Bid>(   summary.m_vModelCells ).SetValue( 0.0 ); // best - no spread - lower amount
+  //boost::fusion::at_c<COL_Ask>(   summary.m_vModelCells ).SetValue( 0.0 ); // full - full spread - higher amount
+  //boost::fusion::at_c<COL_Delta>( summary.m_vModelCells ).SetValue( 0.0 );
+  //boost::fusion::at_c<COL_Gamma>( summary.m_vModelCells ).SetValue( 0.0 );
+  //boost::fusion::at_c<COL_IV>(    summary.m_vModelCells ).SetValue( 0.0 );
 
   int sumQuan_int {};
   double sumQuan_dbl {};
@@ -125,11 +125,11 @@ void OptionOrderModel_impl::Refresh() {
     OptionOrderRow& item( *p );
     if ( OptionOrderRow::EType::option == item.m_type ) {
 
-      double spread_none {};
       double spread_full {};
+      double spread_none {};
 
-      int quan_int = boost::fusion::at_c<COL_Quan>( item.m_vModelCells ).GetValue();
-      double quan_dbl = quan_int;
+      const int quan_int = boost::fusion::at_c<COL_Quan>( item.m_vModelCells ).GetValue();
+      const double quan_dbl = (double) quan_int;
       sumQuan_int += quan_int;
       sumQuan_dbl += quan_dbl;
       boost::fusion::at_c<COL_Quan>( summary.m_vModelCells ).SetValue( sumQuan_int );
@@ -143,8 +143,8 @@ void OptionOrderModel_impl::Refresh() {
           break;
         case ou::tf::OrderSide::Sell:
           multiplier = -1.0 * quan_dbl;
-          spread_full = boost::fusion::at_c<COL_Bid>( item.m_vModelCells ).GetValue();
           spread_none = boost::fusion::at_c<COL_Ask>( item.m_vModelCells ).GetValue();
+          spread_full = boost::fusion::at_c<COL_Bid>( item.m_vModelCells ).GetValue();
           break;
         default:
           assert( false );
@@ -156,28 +156,40 @@ void OptionOrderModel_impl::Refresh() {
       //sumPrice += multiplier * price;
       //boost::fusion::at_c<COL_Price>( summary.m_vModelCells ).SetValue( sumPrice );
 
-      sumBid += multiplier * spread_none;
-      //sumBid += quan_dbl * spread_none;
-      boost::fusion::at_c<COL_Bid>( summary.m_vModelCells ).SetValue( sumBid );
+      {
+        sumAsk += multiplier * spread_full;
+        //sumAsk += quan_dbl * spread_full;
+        boost::fusion::at_c<COL_Ask>( summary.m_vModelCells ).SetValue( sumAsk );
+      }
 
-      sumAsk += multiplier * spread_full;
-      //sumAsk += quan_dbl * spread_full;
-      boost::fusion::at_c<COL_Ask>( summary.m_vModelCells ).SetValue( sumAsk );
+      {
+        sumBid += multiplier * spread_none;
+        //sumBid += quan_dbl * spread_none;
+        boost::fusion::at_c<COL_Bid>( summary.m_vModelCells ).SetValue( sumBid );
+      }
 
-      double delta = boost::fusion::at_c<COL_Delta>( item.m_vModelCells ).GetValue();
-      sumDelta += multiplier * delta;
-      boost::fusion::at_c<COL_Delta>( summary.m_vModelCells ).SetValue( sumDelta );
+      {
+        const double delta = boost::fusion::at_c<COL_Delta>( item.m_vModelCells ).GetValue();
+        sumDelta += multiplier * delta;
+        boost::fusion::at_c<COL_Delta>( summary.m_vModelCells ).SetValue( sumDelta );
+      }
 
-      double gamma = boost::fusion::at_c<COL_Gamma>( item.m_vModelCells ).GetValue();
-      sumGamma += multiplier * gamma;
-      boost::fusion::at_c<COL_Gamma>( summary.m_vModelCells ).SetValue( sumGamma );
+      {
+        const double gamma = boost::fusion::at_c<COL_Gamma>( item.m_vModelCells ).GetValue();
+        sumGamma += multiplier * gamma;
+        boost::fusion::at_c<COL_Gamma>( summary.m_vModelCells ).SetValue( sumGamma );
+      }
 
-      double iv = boost::fusion::at_c<COL_IV>( item.m_vModelCells ).GetValue();
-      sumIV += quan_dbl * iv;
-      boost::fusion::at_c<COL_IV>( summary.m_vModelCells ).SetValue( sumIV / sumQuan_dbl );
+      {
+        const double iv = boost::fusion::at_c<COL_IV>( item.m_vModelCells ).GetValue();
+        sumIV += quan_dbl * iv;
+        boost::fusion::at_c<COL_IV>( summary.m_vModelCells ).SetValue( sumIV / sumQuan_dbl );
+      }
 
     }
   }
+
+  m_pGrid->ForceRefresh();
 
 }
 

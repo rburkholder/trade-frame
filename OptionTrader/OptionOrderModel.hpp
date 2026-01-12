@@ -56,14 +56,14 @@ public:
   void DeleteOrder( size_t row );
   void PlaceComboOrder(); // used by OptionOrderView
 
+  void Refresh();
+
 protected:
 
 private:
 
   using pOptionOrderModel_impl_t = std::unique_ptr<OptionOrderModel_impl>;
   pOptionOrderModel_impl_t m_pOptionOrderModel_impl;
-
-  void Refresh();
 
   void ClearCombo();
 

@@ -196,6 +196,9 @@ void PanelInstrumentViews::HandleTimer( wxTimerEvent& event ) {
     const int nRows = m_pOptionChainView->GetVisibleRowCount();
     m_pOptionChainModel->HandleTimer( ixRow, nRows );
   }
+  if ( m_pOptionOrderModel && m_pOptionOrderView ) {
+    m_pOptionOrderModel->Refresh();
+  }
   if ( m_pWatchOnStatusBar ) {
     m_pStatusBar->SetStatusText( fmt::format( "{:.{}f}", m_pWatchOnStatusBar->Price(), 2 ), 4 );
   }

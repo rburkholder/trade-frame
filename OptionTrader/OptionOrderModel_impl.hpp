@@ -118,7 +118,9 @@ private:
 
     vModelCells_t m_vModelCells;
 
-    OptionOrderRow(): m_type( EType::summary ) {}
+    OptionOrderRow(): m_type( EType::summary ) {
+      Init();
+    }
 
     OptionOrderRow( pWatch_t pWatch, ou::tf::OrderSide::EOrderSide side, int quantity )
     : m_type( EType::underlying )
