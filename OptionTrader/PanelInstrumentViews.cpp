@@ -433,13 +433,13 @@ void PanelInstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
         } );
       pti->AppendMenuItem(
         "enter buy order",
-        [this,&instrument]( ou::tf::TreeItem* pti ){
-          m_pOptionOrderModel->Add( instrument.pWatch, ou::tf::OrderSide::Buy, 100 );
+        [this,&instrument]( ou::tf::TreeItem* pti ){ // future is by 1, equity is by 100
+          m_pOptionOrderModel->Add( instrument.pWatch, ou::tf::OrderSide::Buy, 1 );
         } );
       pti->AppendMenuItem(
         "enter sell order",
-        [this,&instrument]( ou::tf::TreeItem* pti ){
-          m_pOptionOrderModel->Add( instrument.pWatch, ou::tf::OrderSide::Sell, 100 );
+        [this,&instrument]( ou::tf::TreeItem* pti ){ // future is by 1, equity is by 100
+          m_pOptionOrderModel->Add( instrument.pWatch, ou::tf::OrderSide::Sell, 1 );
         } );
       pti->AppendMenuItem(
         "add tag",

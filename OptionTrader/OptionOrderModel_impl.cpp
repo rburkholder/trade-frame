@@ -110,7 +110,7 @@ void OptionOrderModel_impl::Refresh() {
   //boost::fusion::at_c<COL_Ask>(   summary.m_vModelCells ).SetValue( 0.0 ); // full - full spread - higher amount
   //boost::fusion::at_c<COL_Delta>( summary.m_vModelCells ).SetValue( 0.0 );
   //boost::fusion::at_c<COL_Gamma>( summary.m_vModelCells ).SetValue( 0.0 );
-  //boost::fusion::at_c<COL_IV>(    summary.m_vModelCells ).SetValue( 0.0 );
+  boost::fusion::at_c<COL_IV>(    summary.m_vModelCells ).SetValue( 0.0 );
 
   int sumQuan_int {};
   double sumQuan_dbl {};
@@ -123,7 +123,9 @@ void OptionOrderModel_impl::Refresh() {
 
   for ( vOptionOrderRow_t::value_type& p: m_vOptionOrderRow ) {
     OptionOrderRow& item( *p );
-    if ( OptionOrderRow::EType::option == item.m_type ) {
+    if ( ( OptionOrderRow::EType::option == item.m_type )
+      || ( OptionOrderRow::EType::underlying == item.m_type )
+    ) {
 
       double spread_full {};
       double spread_none {};
@@ -151,20 +153,13 @@ void OptionOrderModel_impl::Refresh() {
           break;
       }
 
-      // TODO: use bid ask to define spread
-      //double price = boost::fusion::at_c<COL_Price>( item.m_vModelCells ).GetValue();
-      //sumPrice += multiplier * price;
-      //boost::fusion::at_c<COL_Price>( summary.m_vModelCells ).SetValue( sumPrice );
-
       {
         sumAsk += multiplier * spread_full;
-        //sumAsk += quan_dbl * spread_full;
         boost::fusion::at_c<COL_Ask>( summary.m_vModelCells ).SetValue( sumAsk );
       }
 
       {
         sumBid += multiplier * spread_none;
-        //sumBid += quan_dbl * spread_none;
         boost::fusion::at_c<COL_Bid>( summary.m_vModelCells ).SetValue( sumBid );
       }
 
@@ -174,18 +169,19 @@ void OptionOrderModel_impl::Refresh() {
         boost::fusion::at_c<COL_Delta>( summary.m_vModelCells ).SetValue( sumDelta );
       }
 
-      {
-        const double gamma = boost::fusion::at_c<COL_Gamma>( item.m_vModelCells ).GetValue();
-        sumGamma += multiplier * gamma;
-        boost::fusion::at_c<COL_Gamma>( summary.m_vModelCells ).SetValue( sumGamma );
-      }
+      if ( OptionOrderRow::EType::option == item.m_type ) {
+        {
+          const double gamma = boost::fusion::at_c<COL_Gamma>( item.m_vModelCells ).GetValue();
+          sumGamma += multiplier * gamma;
+          boost::fusion::at_c<COL_Gamma>( summary.m_vModelCells ).SetValue( sumGamma );
+        }
 
-      {
-        const double iv = boost::fusion::at_c<COL_IV>( item.m_vModelCells ).GetValue();
-        sumIV += quan_dbl * iv;
-        boost::fusion::at_c<COL_IV>( summary.m_vModelCells ).SetValue( sumIV / sumQuan_dbl );
+        {
+          //const double iv = boost::fusion::at_c<COL_IV>( item.m_vModelCells ).GetValue();
+          //sumIV += quan_dbl * iv;
+          //boost::fusion::at_c<COL_IV>( summary.m_vModelCells ).SetValue( sumIV / sumQuan_dbl );
+        }
       }
-
     }
   }
 
@@ -251,6 +247,9 @@ wxString OptionOrderModel_impl::GetValue( int ixRow, int ixCol ) {
           break;
         case COL_Ask:
           s = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetText();
+          break;
+        case COL_Delta:
+          s = boost::fusion::at_c<COL_Delta>( row.m_vModelCells ).GetText();
           break;
         default:
           s = "n/a";

@@ -130,6 +130,7 @@ private:
       boost::fusion::at_c<COL_Name>( m_vModelCells ).SetValue( m_pWatch->GetInstrumentName() );
       boost::fusion::at_c<COL_OrderSide>( m_vModelCells ).SetValue( side );
       boost::fusion::at_c<COL_Quan>( m_vModelCells ).SetValue( quantity );
+      boost::fusion::at_c<COL_Delta>( m_vModelCells ).SetValue( 1.0 );
 
       m_pWatch->OnTrade.Add( MakeDelegate( this, &OptionOrderRow::UpdateTrade ) );
       m_pWatch->OnQuote.Add( MakeDelegate( this, &OptionOrderRow::UpdateQuote ) );
@@ -184,7 +185,7 @@ private:
     }
 
     void UpdateGreeks( const ou::tf::Greek& greek ) {
-      boost::fusion::at_c<COL_IV>( m_vModelCells ).SetValue( greek.ImpliedVolatility() );
+      boost::fusion::at_c<COL_IV>( m_vModelCells ).SetValue( 100.0 * greek.ImpliedVolatility() );
       boost::fusion::at_c<COL_Delta>( m_vModelCells ).SetValue( greek.Delta() );
       boost::fusion::at_c<COL_Gamma>( m_vModelCells ).SetValue( greek.Gamma() );
     }
