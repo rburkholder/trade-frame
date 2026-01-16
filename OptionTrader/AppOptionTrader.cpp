@@ -38,6 +38,7 @@
 
 #include "AppOptionTrader.hpp"
 #include "PanelInstrumentViews.hpp"
+#include "TFInteractiveBrokers/IBTWS.h"
 
 namespace {
   static const std::string c_sAppTitle(        "Option Trader" );
@@ -136,16 +137,19 @@ void AppOptionTrader::HandleMenuActionSaveState() {
 }
 
 void AppOptionTrader::ConnectionsStart() {
+  // ensure both are constructed prior to connecting
   m_pIQFeed = ou::tf::iqfeed::Provider::Factory();
+  m_pIB = ou::tf::ib::TWS::Factory();
+
   m_pIQFeed->OnConnected.Add( MakeDelegate( this, &AppOptionTrader::HandleIQFeedConnected ) );
   m_pIQFeed->Connect();
+
+  m_pIB->OnConnected.Add( MakeDelegate( this, & AppOptionTrader::HandleIBConnected ));
+  m_pIB->Connect();
 }
 
 void AppOptionTrader::HandleIQFeedConnected( int ) {
   BOOST_LOG_TRIVIAL(info) << "connected: iqfeed";
-
-  // this needs to be placed after the providers are registered
-  m_db.Open( c_sDbName );
 
   m_fedrate.SetWatchOn( m_pIQFeed );
   m_pOptionEngine = std::make_unique<ou::tf::option::Engine>( m_fedrate );
@@ -153,17 +157,31 @@ void AppOptionTrader::HandleIQFeedConnected( int ) {
   m_pBarHistory = std::make_unique<ou::tf::iqfeed::BarHistory>(
     [this](){ // m_fConnected
       BOOST_LOG_TRIVIAL(info) << "connected: bar history";
-      SetComposeInstrument();
+      ConnecttionsStarted();
     }
   );
   m_pBarHistory->Connect();
+}
+
+void AppOptionTrader::HandleIBConnected( int ) {
+  BOOST_LOG_TRIVIAL(info) << "connected: ib";
+  ConnecttionsStarted();
+}
+
+void AppOptionTrader::ConnecttionsStarted() {
+  if ( m_pIQFeed->Connected() && m_pIB->Connected() ) {
+    // this needs to be placed after the providers are registered
+    m_db.Open( c_sDbName );
+    BOOST_LOG_TRIVIAL(info) << "connected: database";
+    SetComposeInstrument();
+  }
 }
 
 void AppOptionTrader::SetComposeInstrument() {
   m_pComposeInstrumentIQFeed = std::make_shared<ou::tf::ComposeInstrument>(
     m_pIQFeed,
     [this](){
-      CallAfter( // ensures m_pComposeInstrumentIQFeed is set properly prior to use
+      CallAfter( // ensures m_pComposeInstrument is set properly prior to use
         [this](){
           m_pInstrumentViews->Set(
             m_pComposeInstrumentIQFeed,
@@ -281,10 +299,13 @@ int AppOptionTrader::OnExit() {
 
   m_pComposeInstrumentIQFeed.reset();
 
+  m_db.Close(); // before or after providers?
+
   m_pIQFeed->Disconnect();
   m_pIQFeed.reset();
 
-  m_db.Close();
+  m_pIB->Disconnect();
+  m_pIB.reset();
 
   return wxAppConsole::OnExit();
 }

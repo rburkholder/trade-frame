@@ -31,6 +31,7 @@
 #include <TFTrading/ComposeInstrument.hpp>
 
 #include <TFIQFeed/Provider.h>
+#include <TFInteractiveBrokers/IBTWS.h>
 
 #include <TFOptions/Option.h>
 #include <TFOptions/Chains.h>
@@ -84,10 +85,14 @@ private:
   using pIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
   pIQFeed_t m_pIQFeed;
 
+  using pIB_t = ou::tf::ib::TWS::pProvider_t;
+  pIB_t m_pIB;
+
   ou::tf::DBOps m_db;
 
   using pComposeInstrument_t = std::shared_ptr<ou::tf::ComposeInstrument>;
   pComposeInstrument_t m_pComposeInstrumentIQFeed;
+  //pComposeInstrument_t m_pComposeInstrumentIQFeedIB;
 
   ou::tf::FedRateFromIQFeed m_fedrate;
   std::shared_ptr<ou::tf::option::Engine> m_pOptionEngine;
@@ -97,6 +102,9 @@ private:
 
   void ConnectionsStart();
   void HandleIQFeedConnected( int );
+  void HandleIBConnected( int );
+  void ConnecttionsStarted();
+
   void SetComposeInstrument();
 
   using fInstrumentOption_t = std::function<void(size_t, pInstrument_t /* option */)>; // needs to match CollectATM
