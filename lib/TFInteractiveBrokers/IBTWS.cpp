@@ -1378,13 +1378,14 @@ void TWS::nextValidId( OrderId orderId) {
   m_ss.str("");
   ou::tf::Order::idOrder_t id = OrderManager::GlobalInstance().CheckOrderId( orderId );
   if ( orderId > id ) {
-    m_ss << "old order id (" << id << "), new order id (" << orderId << ")";
+    //m_ss << "old order id (" << id << "), new order id (" << orderId << ")";
+    BOOST_LOG_TRIVIAL(info) << "IB old order id (" << id << "), new order id (" << orderId << ")";
   }
   else {
-    m_ss << "next order id (" << id << "), IB had (" << orderId << ")";
+    //m_ss << "next order id (" << id << "), IB had (" << orderId << ")";
+    BOOST_LOG_TRIVIAL(info) << "next order id (" << id << "), IB had (" << orderId << ")";
   }
-
-  std::cout << m_ss.str() << std::endl;
+  //std::cout << m_ss.str() << std::endl;
 }
 
 // called from contractDetails, info comes from IB
@@ -1736,9 +1737,9 @@ void TWS::updateAccountValue(const std::string& key, const std::string& val,
   }
   if ( "MaintMarginReq" == key ) bEmit = true;
   if ( "InitMarginReq" == key ) bEmit = true;
-//  if ( bEmit ) {
-  if ( false ) {
-    std::cout << "account value " << key << ", " << val << ", " << currency << ", " << accountName << std::endl;
+  if ( bEmit ) {
+  //if ( false ) {
+    BOOST_LOG_TRIVIAL(info) << "IB account: " << key << ", " << val << ", " << currency << ", " << accountName;
   }
   AccountValue av( key, val, currency, accountName );
   if ( 0 != OnAccountValueHandler ) OnAccountValueHandler( av );
@@ -1790,7 +1791,7 @@ double TWS::GetInterval( const double price, const int rule ) {
   double interval( 0.01 );
   mapMarketRule_t::const_iterator iter = m_mapMarketRule.find( rule );
   if ( m_mapMarketRule.end() == iter ) {
-    BOOST_LOG_TRIVIAL(info)
+    BOOST_LOG_TRIVIAL(warning)
       << "IB Price interval not found: " << rule
       << ", default to " << interval
       << " for price " << price
