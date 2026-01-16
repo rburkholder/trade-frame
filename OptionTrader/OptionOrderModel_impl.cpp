@@ -412,6 +412,7 @@ OptionOrderModel_impl::fOrderLeg_t OptionOrderModel_impl::FactoryAddComboOrderLe
 
 void OptionOrderModel_impl::DeleteOrder( size_t row ) {
   if ( ( m_vOptionOrderRow.size() - 1 ) == row ) {
+    //assert( OptionOrderRow::EType::summary == m_vOptionOrderRow.front()->m_type );
     assert( false );  // can't delete summary line
   }
   else {
@@ -458,17 +459,13 @@ void OptionOrderModel_impl::PlaceComboOrder() {
       }
     }
   );
-  ClearCombo();
+  ClearOrders();
 }
 
-void OptionOrderModel_impl::ClearCombo() {
-  vOptionOrderRow_t::iterator iter( m_vOptionOrderRow.begin() );
-  while ( OptionOrderRow::EType::summary != (*iter)->m_type ) {
-    m_vOptionOrderRow.erase( iter );
-    ++iter;
+void OptionOrderModel_impl::ClearOrders() {
+  while ( OptionOrderRow::EType::summary != m_vOptionOrderRow.front()->m_type ) {
+    DeleteOrder( 0 );
   }
-
-  //m_grid.ForceRefresh();
 }
 
 } // namespace tf

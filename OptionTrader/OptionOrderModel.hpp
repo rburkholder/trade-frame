@@ -54,6 +54,7 @@ public:
   void Set( fGatherOrderLegs_t&& );
 
   void DeleteOrder( size_t row );
+  void ClearOrders();
   void PlaceComboOrder(); // used by OptionOrderView
 
   void Refresh();
@@ -64,8 +65,6 @@ private:
 
   using pOptionOrderModel_impl_t = std::unique_ptr<OptionOrderModel_impl>;
   pOptionOrderModel_impl_t m_pOptionOrderModel_impl;
-
-  void ClearCombo();
 
   virtual void SetView ( wxGrid *grid ) override;
 

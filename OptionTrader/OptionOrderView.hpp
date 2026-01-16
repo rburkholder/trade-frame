@@ -80,7 +80,7 @@ private:
 
   enum {
     ID_Null=wxID_HIGHEST, ID_OPTIONORDERVIEW
-  , ID_MENUITEM_PlaceOrder, ID_MENUITEM_Delete
+  , ID_MENUITEM_PlaceOrder, ID_MENUITEM_DeleteOrder, ID_MENUITEM_ClearOrders
   };
 
   wxMenu* m_pMenuRightClick;

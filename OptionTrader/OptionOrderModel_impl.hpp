@@ -211,7 +211,7 @@ private:
 
   void DeleteOrder( size_t row );
   void PlaceComboOrder();
-  void ClearCombo();
+  void ClearOrders();
 
   void SetView ( wxGrid* );
 

@@ -150,8 +150,8 @@ void OptionOrderModel::PlaceComboOrder() {
   m_pOptionOrderModel_impl->PlaceComboOrder();
 }
 
-void OptionOrderModel::ClearCombo() {
-  m_pOptionOrderModel_impl->ClearCombo();
+void OptionOrderModel::ClearOrders() {
+  m_pOptionOrderModel_impl->ClearOrders();
 }
 
 } // namespace tf
