@@ -156,14 +156,6 @@ void OptionOrderView::OnGridCellRightClick( wxGridEvent& event ) { // zero based
   event.Skip();
 }
 
-void OptionOrderView::ClearOrders() {
-  //m_pimpl->ClearRows();
-}
-
-void OptionOrderView::PlaceComboOrder() {
-  //m_pimpl->PlaceComboOrder();
-}
-
 int OptionOrderView::GetColumnCount() const {
   return GRID_ARRAY_COL_COUNT;
 }

@@ -68,9 +68,6 @@ public:
 
   void Refresh();
 
-  void ClearOrders();
-  void PlaceComboOrder();
-
 protected:
 
   void Init();
