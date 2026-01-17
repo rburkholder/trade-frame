@@ -32,6 +32,7 @@
 #include <TFTrading/ComposeInstrument.hpp>
 
 #include <TFIQFeed/BarHistory.h>
+#include <TFIQFeed/MarketSymbol.cpp>
 #include <TFIQFeed/OptionChainQuery.h>
 
 #include <TFOptions/Chains.h>
@@ -157,6 +158,7 @@ void PanelInstrumentViews::CreateControls() {
 
   m_pOptionChainView->SetAddOrder(
     [this]( pOption_t& pOption, ou::tf::OrderSide::EOrderSide side, int quantity ){
+      RequestContractDetails( pOption->GetInstrument(), pOption->GetFundamentals() );
       m_pOptionOrderModel->Add( pOption, side, quantity );
     } );
 
@@ -215,7 +217,8 @@ void PanelInstrumentViews::HandleTreeEventItemExpanded( wxTreeEvent& event ) {
 }
 
 void PanelInstrumentViews::Set(
-  pComposeInstrument_t& pComposeInstrument
+  pIB_t& pIB
+, pComposeInstrument_t& pComposeInstrument
 , fBuildWatch_t&& fBuildWatch
 , fBuildOption_t&& fBuildOption
 , pOptionEngine_t& pOptionEngine
@@ -224,6 +227,8 @@ void PanelInstrumentViews::Set(
 , ou::tf::WinChartView* pWinChartView_daily
 , fUpdateDividendFields_t&& fUpdateDividendFields
 ) {
+
+  assert( pIB );
 
   assert( fBuildWatch );
   assert( fBuildOption );
@@ -434,12 +439,36 @@ void PanelInstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
       pti->AppendMenuItem(
         "enter buy order",
         [this,&instrument]( ou::tf::TreeItem* pti ){ // future is by 1, equity is by 100
-          m_pOptionOrderModel->Add( instrument.pWatch, ou::tf::OrderSide::Buy, 1 );
+          RequestContractDetails( instrument.pInstrument, instrument.pWatch->GetFundamentals() );
+          switch ( instrument.pInstrument->GetInstrumentType() ) {
+            case ou::tf::InstrumentType::EInstrumentType::Future:
+            case ou::tf::InstrumentType::EInstrumentType::FuturesOption:
+            case ou::tf::InstrumentType::EInstrumentType::Option:
+              m_pOptionOrderModel->Add( instrument.pWatch, ou::tf::OrderSide::Buy, 1 );
+              break;
+            case ou::tf::InstrumentType::EInstrumentType::Stock:
+              m_pOptionOrderModel->Add( instrument.pWatch, ou::tf::OrderSide::Buy, 100 );
+              break;
+            default:
+              assert( false );
+          }
         } );
       pti->AppendMenuItem(
         "enter sell order",
         [this,&instrument]( ou::tf::TreeItem* pti ){ // future is by 1, equity is by 100
-          m_pOptionOrderModel->Add( instrument.pWatch, ou::tf::OrderSide::Sell, 1 );
+          RequestContractDetails( instrument.pInstrument, instrument.pWatch->GetFundamentals() );
+          switch ( instrument.pInstrument->GetInstrumentType() ) {
+            case ou::tf::InstrumentType::EInstrumentType::Future:
+            case ou::tf::InstrumentType::EInstrumentType::FuturesOption:
+            case ou::tf::InstrumentType::EInstrumentType::Option:
+              m_pOptionOrderModel->Add( instrument.pWatch, ou::tf::OrderSide::Sell, 1 );
+              break;
+            case ou::tf::InstrumentType::EInstrumentType::Stock:
+              m_pOptionOrderModel->Add( instrument.pWatch, ou::tf::OrderSide::Sell, 100 );
+              break;
+            default:
+              assert( false );
+          }
         } );
       pti->AppendMenuItem(
         "add tag",
@@ -511,6 +540,32 @@ void PanelInstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
 
   m_pRootTreeItem->SortChildren();
 
+}
+
+void PanelInstrumentViews::RequestContractDetails( pInstrument_t pInstrument, const ou::tf::Watch::Fundamentals& fundamentals ) {
+  // lib/TFTrading/BuildInstrument.cpp
+
+  if ( 0 == pInstrument->GetContract() ) {
+    std::string sName;
+
+    switch ( pInstrument->GetInstrumentType() ) {
+      case InstrumentType::Option:
+        sName = ou::tf::iqfeed::MarketSymbol::OptionBaseName( fundamentals );
+        break;
+      default:
+        sName = ( 0 == fundamentals.sExchangeRoot.size() ) ? fundamentals.sSymbolName : fundamentals.sExchangeRoot;
+        break;
+    };
+
+    m_pIB->RequestContractDetails(
+      sName, pInstrument,
+      [this]( const ou::tf::ib::TWS::ContractDetails& details, pInstrument_t& pInstrument ){
+        assert( 0 != pInstrument->GetContract() );
+        m_pIB->Sync( pInstrument );
+      },
+      [](bool bStatus){
+      } );
+  }
 }
 
 void PanelInstrumentViews::AddTag( const TagSymbolMap::sTag_t& sTag, const TagSymbolMap::sSymbol_t& sSymbol ) {

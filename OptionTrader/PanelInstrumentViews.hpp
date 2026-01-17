@@ -30,6 +30,8 @@
 #include <wx/timer.h>
 #include <wx/checklst.h>
 
+#include <TFInteractiveBrokers/IBTWS.h>
+
 #include <TFVuTrading/PanelDividendNotes.hpp>
 
 #include "Common.hpp"
@@ -92,6 +94,8 @@ public:
     long style = SYMBOL_INSTRUMENTVIEWS_STYLE,
     const wxString& name = SYMBOL_INSTRUMENTVIEWS_TITLE );
 
+  using pIB_t = ou::tf::ib::TWS::pProvider_t;
+
   using pComposeInstrument_t = std::shared_ptr<ComposeInstrument>;
 
   using pInstrument_t = ou::tf::Instrument::pInstrument_t;
@@ -108,7 +112,8 @@ public:
   using fUpdateDividendFields_t = std::function<void( const ou::tf::PanelDividendNotes::Fields&, const wxArrayString& )>;
 
   void Set(
-    pComposeInstrument_t&
+    pIB_t&
+  , pComposeInstrument_t&
   , fBuildWatch_t&&
   , fBuildOption_t&&
   , pOptionEngine_t&
@@ -160,6 +165,8 @@ private:
 
   fBuildWatch_t m_fBuildWatch;
   fBuildOption_t m_fBuildOption;
+
+  pIB_t m_pIB;
 
   pOptionEngine_t m_pOptionEngine;
 
@@ -288,6 +295,8 @@ private:
   void DelTag( const TagSymbolMap::sTag_t&, const TagSymbolMap::sSymbol_t& );
   void FilterByTag();
   void HandleCheckListBoxEvent( wxCommandEvent& );
+
+  void RequestContractDetails( pInstrument_t, const ou::tf::Watch::Fundamentals& );
 
   wxBitmap GetBitmapResource( const wxString& name );
   static bool ShowToolTips() { return true; };

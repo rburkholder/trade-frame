@@ -184,6 +184,7 @@ void AppOptionTrader::SetComposeInstrument() {
       CallAfter( // ensures m_pComposeInstrument is set properly prior to use
         [this](){
           m_pInstrumentViews->Set(
+            m_pIB,
             m_pComposeInstrumentIQFeed,
             [this]( pInstrument_t pInstrument )->pWatch_t { // fBuildWatch_t
               pWatch_t pWatch = std::make_shared<ou::tf::Watch>( pInstrument, m_pIQFeed );
