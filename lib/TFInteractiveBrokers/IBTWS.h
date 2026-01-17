@@ -97,10 +97,10 @@ public:
   using fOnContractDetail_t = std::function<void(const ContractDetails&, pInstrument_t&)>;
   using fOnContractDetailDone_t = std::function<void(bool)>; // true if success, false if stuck in queue;
 
-  // primary use:
+  // primary instance:
   void RequestContractDetails( const std::string& sSymbolBaseName, pInstrument_t&,
                                                          fOnContractDetail_t&& fProcess, fOnContractDetailDone_t&& fDone );
-  // in use by /TFOptions/PopulateWithIBOptions.cpp:63:38
+  // in use by TFOptions/PopulateWithIBOptions.cpp:63:38
   void RequestContractDetails( const Contract& contract, fOnContractDetail_t&& fProcess, fOnContractDetailDone_t&& fDone );
 
   // in use by ComboTrading/ComboTrading.cpp:444:38, fix and move this to private
