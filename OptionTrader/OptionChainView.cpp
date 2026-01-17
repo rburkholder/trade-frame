@@ -144,7 +144,7 @@ void OptionChainView::OnGridCellRightClick( wxGridEvent& event ) { // zero based
 
   m_pMenuAssignWatch = new wxMenu();
 
-  if ( 0 < sMessage.size() ) {
+  if ( 0 < sMessage.size() ) { // add an option order
     wxMenuItem* pMenuItemBuy = m_pMenuAssignWatch->Append( wxID_ANY, sMessage );
     m_pMenuAssignWatch->Bind(
       wxEVT_COMMAND_MENU_SELECTED,
@@ -157,15 +157,6 @@ void OptionChainView::OnGridCellRightClick( wxGridEvent& event ) { // zero based
       },
       pMenuItemBuy->GetId()
     );
-
-    //wxMenuItem* pMenuItemSell = m_pMenuAssignWatch->Append( wxID_ANY, "Sell " + sType + "@" + sSide );
-    //m_pMenuAssignWatch->Bind(
-    //  wxEVT_COMMAND_MENU_SELECTED,
-    //  [this, row=event.GetRow(), col = event.GetCol() ]( wxCommandEvent& event ){
-    //    BOOST_LOG_TRIVIAL(trace) << "Menu Sell" << ',' << row << ',' << col;
-    //  },
-    //  pMenuItemSell->GetId()
-    //);
   }
   else {
     wxMenuItem* pMenuItemInfo = m_pMenuAssignWatch->Append( wxID_ANY, "Info" );
