@@ -39,6 +39,7 @@ public:
 
   using pWatch_t = ou::tf::Watch::pWatch_t;
   using pOption_t = ou::tf::option::Option::pOption_t;
+  using pInstrument_t = ou::tf::Instrument::pInstrument_t;
 
   OptionOrderModel();
   virtual ~OptionOrderModel();
@@ -46,9 +47,7 @@ public:
   void Add( pWatch_t&, ou::tf::OrderSide::EOrderSide, int quantity ); // underlying
   void Add( pOption_t&, ou::tf::OrderSide::EOrderSide, int quantity ); // option
 
-  using fOrderLeg_t = std::function<void(ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sIQFeedName)>;
-  fOrderLeg_t FactoryAddComboOrderLeg();
-
+  using fOrderLeg_t = std::function<void( pInstrument_t, ou::tf::OrderSide::EOrderSide side, int quan, double price)>;
   using fIterateLegs_t = std::function<void( fOrderLeg_t&& )>;
   using fGatherOrderLegs_t = std::function<void( fIterateLegs_t&& )>;
   void Set( fGatherOrderLegs_t&& );

@@ -402,14 +402,6 @@ void OptionOrderModel_impl::Set( fGatherOrderLegs_t&& fGatherOrderLegs ) {
   assert( m_fGatherOrderLegs );
 }
 
-
-OptionOrderModel_impl::fOrderLeg_t OptionOrderModel_impl::FactoryAddComboOrderLeg() {
-  fOrderLeg_t f = [this](ou::tf::OrderSide::EOrderSide side, int quan, double price, const std::string& sName ){
-    //m_pimpl->Add( side, quan, price, sName );
-  };
-  return std::move( f );
-}
-
 void OptionOrderModel_impl::DeleteOrder( size_t row ) {
   if ( ( m_vOptionOrderRow.size() - 1 ) == row ) {
     //assert( OptionOrderRow::EType::summary == m_vOptionOrderRow.front()->m_type );
@@ -425,41 +417,49 @@ void OptionOrderModel_impl::DeleteOrder( size_t row ) {
 }
 
 void OptionOrderModel_impl::PlaceComboOrder() {
-  m_fGatherOrderLegs(
-    [this]( OptionOrderModel_impl::fOrderLeg_t&& fOrderLeg ){
-      for ( vOptionOrderRow_t::value_type& p: m_vOptionOrderRow ) {
-        OptionOrderRow& row( *p );
-        switch (row.m_type ) {
-          case OptionOrderRow::EType::option:
-            {
-              int side = boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).GetValue();
-              double price {};
-              switch ( side ) {
-                case ou::tf::OrderSide::Buy:
-                  price = boost::fusion::at_c<COL_Bid>( row.m_vModelCells ).GetValue(); // start on low side
-                  break;
-                case ou::tf::OrderSide::Sell:
-                  price = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetValue(); // start on high side
-                  break;
-                default:
-                  assert( false );
-                  break;
-              }
-              fOrderLeg(
-                (ou::tf::OrderSide::EOrderSide) side,
-                boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).GetValue(),
-                price, //boost::fusion::at_c<COL_Price>( row.m_vModelCells ).GetValue(),
-                boost::fusion::at_c<COL_Name>( row.m_vModelCells ).GetValue()
-              );
+  if ( m_fGatherOrderLegs ) {
+    m_fGatherOrderLegs(
+      [this]( OptionOrderModel_impl::fOrderLeg_t&& fOrderLeg ){
+        for ( vOptionOrderRow_t::value_type& p: m_vOptionOrderRow ) {
+          OptionOrderRow& row( *p );
+          if ( OptionOrderRow::EType::summary == row.m_type ) {}
+          else {
+            pInstrument_t pInstrumet;
+            switch ( row.m_type ) {
+              case OptionOrderRow::EType::underlying:
+                pInstrumet = row.m_pWatch->GetInstrument();
+                break;
+              case OptionOrderRow::EType::option:
+                pInstrumet = row.m_pOption->GetInstrument();
+                break;
+              case OptionOrderRow::EType::summary:
+                break;
             }
-            break;
-          default:
-            break;
+            int side = boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).GetValue();
+            double price {};
+            switch ( side ) {
+              case ou::tf::OrderSide::Buy:
+                price = boost::fusion::at_c<COL_Bid>( row.m_vModelCells ).GetValue(); // start on low side
+                break;
+              case ou::tf::OrderSide::Sell:
+                price = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetValue(); // start on high side
+                break;
+              default:
+                assert( false );
+                break;
+            }
+            fOrderLeg(
+              pInstrumet,
+              (ou::tf::OrderSide::EOrderSide) side,
+              boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).GetValue(),
+              price //boost::fusion::at_c<COL_Price>( row.m_vModelCells ).GetValue()
+            );
+          }
         }
       }
-    }
-  );
-  ClearOrders();
+    );
+    ClearOrders();
+  }
 }
 
 void OptionOrderModel_impl::ClearOrders() {

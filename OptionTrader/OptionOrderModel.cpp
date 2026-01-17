@@ -138,10 +138,6 @@ void OptionOrderModel::Set( fGatherOrderLegs_t&& fGatherOrderLegs ) {
   m_pOptionOrderModel_impl->Set( std::move( fGatherOrderLegs ) );
 }
 
-OptionOrderModel::fOrderLeg_t OptionOrderModel::FactoryAddComboOrderLeg() {
-  return std::move( m_pOptionOrderModel_impl->FactoryAddComboOrderLeg() );
-}
-
 void OptionOrderModel::DeleteOrder( size_t row ) {
   m_pOptionOrderModel_impl->DeleteOrder( row );
 }
