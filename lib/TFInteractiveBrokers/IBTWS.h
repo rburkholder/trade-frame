@@ -39,6 +39,7 @@
 #include "client/Contract.h"
 #include "client/Execution.h"
 
+#include "Bag.hpp"
 #include "IBSymbol.h"  // has settings for IBString, which affects the following TWS includes.
 
 class EClientSocket;
@@ -89,6 +90,7 @@ public:
   void PlaceOrder( pOrder_t order );
   void PlaceComboOrder( pOrder_t pOrderEntry, pOrder_t pOrderStop );
   void PlaceBracketOrder( pOrder_t pOrderEntry, pOrder_t pOrderProfit, pOrder_t pOrderStop );
+  void PlaceBagOrder( const Bag& );
   void CancelOrder( pOrder_t order );
 
   static void ContractExpiryField( Contract& contract, boost::uint16_t nYear, boost::uint16_t nMonth );

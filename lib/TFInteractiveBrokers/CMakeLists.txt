@@ -10,6 +10,7 @@ add_subdirectory(client)
 
 set(
   file_h
+    Bag.hpp
     IBTWS.h
     IBSymbol.h
   )

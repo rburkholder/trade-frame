@@ -35,6 +35,7 @@
 #include <TFTrading/KeyTypes.h>
 #include <TFTrading/OrderManager.h>
 
+#include "client/TagValue.h"
 #include "client/OrderState.h"
 #include "client/EClientSocket.h"
 #include "client/CommissionReport.h"
@@ -724,6 +725,63 @@ void TWS::PlaceBracketOrder( pOrder_t pOrderEntry, pOrder_t pOrderProfit, pOrder
   PlaceOrder( pOrderProfit );        // limit
   pOrderStop->SetParentOrderId( pOrderEntry->GetOrderId() );
   PlaceOrder( pOrderStop );          // stop or trail
+}
+
+void TWS::PlaceBagOrder( const Bag& bag ) {
+
+  // https://www.interactivebrokers.com/campus/trading-lessons/python-complex-orders/
+
+  assert( 0 < bag.vOrder.size() );
+
+  ::Contract contract;
+  contract.symbol = bag.name;
+  contract.secType = "BAG";
+  contract.currency = "USD";
+  contract.exchange = "SMART";
+  contract.comboLegs = std::make_shared<Contract::ComboLegList>();
+
+  // definitions for reference
+  // typedef std::shared_ptr<ComboLeg> ComboLegSPtr;
+	// typedef std::vector<ComboLegSPtr> ComboLegList;
+	// typedef std::shared_ptr<ComboLegList> ComboLegListSPtr;
+
+  for ( auto& pOrder: bag.vOrder ) {
+    ou::tf::Order& order( *pOrder );
+    ComboLegSPtr leg = std::make_shared<ComboLeg>();
+    leg->conId = order.GetInstrument()->GetContract();
+    leg->ratio = order.GetQuanOrdered();
+    //leg->ratio = 1;
+    leg->action = order.GetOrderSideName();
+    //leg->exchange = "SMART";
+    switch ( pOrder->GetInstrument()->GetInstrumentType() ) {
+      case InstrumentType::Future:
+      case InstrumentType::FuturesOption:
+        leg->exchange = pOrder->GetInstrument()->GetExchangeName();
+        break;
+      default:
+        leg->exchange = "SMART";
+        break;
+    }
+    contract.comboLegs->push_back( leg );
+  }
+
+  ::Order order;
+  //order.orderId = bag.order_id;
+  order.orderId = 0;
+  order.action = ou::tf::OrderSide::Name[ bag.side ];
+  order.orderType = szOrderType[ bag.type ];
+  order.lmtPrice = bag.price;
+  order.auxPrice = 0;
+  order.totalQuantity = __bid64_from_uint32( bag.quantity );
+  order.tif = bag.tif;
+  order.outsideRth = bag.outside_rth;
+  order.transmit = true;
+
+  order.smartComboRoutingParams = std::make_shared<::TagValueList>();
+  order.smartComboRoutingParams->push_back( std::make_shared<::TagValue>( "NonGuaranteed", "1" ) );
+
+  m_pTWS->placeOrder( bag.order_id, contract, order );
+
 }
 
 void TWS::CancelOrder( pOrder_t pOrder ) {
