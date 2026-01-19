@@ -118,14 +118,23 @@ void OptionOrderView::OnGridCellRightClick( wxGridEvent& event ) { // zero based
   OptionOrderModel* pOptionOrderModel = reinterpret_cast<OptionOrderModel*>( GetTable() );
   const int cntRow = pOptionOrderModel->GetRowsCount();
   if ( ( cntRow - 1 ) == event.GetRow() ) {
-    wxMenuItem* pMenuItemPlaceOrder = m_pMenuRightClick->Append( ID_MENUITEM_PlaceOrder, "place basket order" );
+    wxMenuItem* pMenuItemBagOrderBuy = m_pMenuRightClick->Append( wxID_ANY, "bag order: buy" );
     m_pMenuRightClick->Bind(
       wxEVT_COMMAND_MENU_SELECTED,
       [pOptionOrderModel]( wxCommandEvent& event ){
-        BOOST_LOG_TRIVIAL(trace) << "menu item: place basket order";
-        pOptionOrderModel->PlaceComboOrder();
+        BOOST_LOG_TRIVIAL(trace) << "menu item: bag order - buy";
+        pOptionOrderModel->BagOrderBuy();
       },
-      pMenuItemPlaceOrder->GetId()
+      pMenuItemBagOrderBuy->GetId()
+    );
+    wxMenuItem* pMenuItemBagOrderSell = m_pMenuRightClick->Append( wxID_ANY, "bag order: sell" );
+    m_pMenuRightClick->Bind(
+      wxEVT_COMMAND_MENU_SELECTED,
+      [pOptionOrderModel]( wxCommandEvent& event ){
+        BOOST_LOG_TRIVIAL(trace) << "menu item: bag order - sell";
+        pOptionOrderModel->BagOrderSell();
+      },
+      pMenuItemBagOrderSell->GetId()
     );
   }
   else {

@@ -25,6 +25,8 @@
 
 #include <wx/grid.h>
 
+#include <TFInteractiveBrokers/Bag.hpp>
+
 #include <TFOptions/Option.h>
 
 namespace ou { // One Unified
@@ -47,14 +49,13 @@ public:
   void Add( pWatch_t&, ou::tf::OrderSide::EOrderSide, int quantity ); // underlying
   void Add( pOption_t&, ou::tf::OrderSide::EOrderSide, int quantity ); // option
 
-  using fOrderLeg_t = std::function<void( pInstrument_t, ou::tf::OrderSide::EOrderSide side, int quan, double price)>;
-  using fIterateLegs_t = std::function<void( fOrderLeg_t&& )>;
-  using fGatherOrderLegs_t = std::function<void( fIterateLegs_t&& )>;
-  void Set( fGatherOrderLegs_t&& );
+  using fPlaceBagOrder_t = std::function<void( const ou::tf::ib::Bag& )>;
+  void Set( fPlaceBagOrder_t&& );
 
   void DeleteOrder( size_t row );
   void ClearOrders();
-  void PlaceComboOrder(); // used by OptionOrderView
+  void BagOrderBuy();
+  void BagOrderSell();
 
   void Refresh();
 

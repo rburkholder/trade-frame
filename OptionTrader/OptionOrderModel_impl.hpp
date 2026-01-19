@@ -48,11 +48,12 @@
 #include <TFVuTrading/ModelCell_ops.h>
 #include <TFVuTrading/ModelCell_macros.h>
 
+#include "OptionOrderModel.hpp"
+
 namespace ou { // One Unified
 namespace tf { // TradeFrame
 
 class OptionOrderView;
-class OptionOrderModel;
 
 class OptionOrderModel_impl {
   friend OptionOrderModel;
@@ -68,10 +69,8 @@ public:
   void Add( pWatch_t&, ou::tf::OrderSide::EOrderSide, int quantity ); // underlying
   void Add( pOption_t&, ou::tf::OrderSide::EOrderSide, int quantity ); // option
 
-  using fOrderLeg_t = std::function<void(pInstrument_t,ou::tf::OrderSide::EOrderSide side, int quan, double price)>;
-  using fIterateLegs_t = std::function<void( fOrderLeg_t&& )>;
-  using fGatherOrderLegs_t = std::function<void( fIterateLegs_t&& )>;
-  void Set( fGatherOrderLegs_t&& );
+  using fPlaceBagOrder_t = OptionOrderModel::fPlaceBagOrder_t;
+  void Set( fPlaceBagOrder_t&& );
 
 protected:
 
@@ -79,7 +78,7 @@ private:
 
   wxGrid* m_pGrid;
 
-  fGatherOrderLegs_t m_fGatherOrderLegs;
+  fPlaceBagOrder_t m_fPlaceBagOrder;
 
   // for column 2, use wxALIGN_LEFT, wxALIGN_CENTRE or wxALIGN_RIGHT
   #define GRID_ARRAY_PARAM_COUNT 5
@@ -209,7 +208,9 @@ private:
   void Refresh();
 
   void DeleteOrder( size_t row );
-  void PlaceComboOrder();
+  void BagOrderBuy();
+  void BagOrderSell();
+  void BagOrder( ou::tf::ib::Bag& );
   void ClearOrders();
 
   void SetView ( wxGrid* );

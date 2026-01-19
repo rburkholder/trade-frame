@@ -19,6 +19,11 @@
  * Created: 2026/01/08 19:56:36
  */
 
+#include <boost/log/trivial.hpp>
+
+#include <TFTrading/Order.h>
+#include <TFTrading/OrderManager.h>
+
 #include "OptionOrderModel_impl.hpp"
 
 namespace {
@@ -30,7 +35,7 @@ namespace tf { // TradeFrame
 
 OptionOrderModel_impl::OptionOrderModel_impl()
 : m_pGrid( nullptr )
-, m_fGatherOrderLegs( nullptr )
+, m_fPlaceBagOrder( nullptr )
 {
   m_vOptionOrderRow.reserve( 10 );
   assert( 1 ==c_nDefaultRows );
@@ -38,6 +43,7 @@ OptionOrderModel_impl::OptionOrderModel_impl()
 }
 
 OptionOrderModel_impl::~OptionOrderModel_impl() {
+  m_fPlaceBagOrder = nullptr;
   m_vOptionOrderRow.clear();
   m_pGrid = nullptr;
 }
@@ -45,7 +51,6 @@ OptionOrderModel_impl::~OptionOrderModel_impl() {
 // private
 void OptionOrderModel_impl::Add( OptionOrderRow::EType type, const std::string& sName, ou::tf::OrderSide::EOrderSide side, int quantity, fAdd_t&& f ) {
 
-  m_fGatherOrderLegs = nullptr;
   assert( 0 < m_vOptionOrderRow.size() );
 
   bool bSymbolFound( false );
@@ -397,11 +402,6 @@ wxGridCellAttr* OptionOrderModel_impl::GetAttr (int row, int col, wxGridCellAttr
 
 }
 
-void OptionOrderModel_impl::Set( fGatherOrderLegs_t&& fGatherOrderLegs ) {
-  m_fGatherOrderLegs = std::move( fGatherOrderLegs );
-  assert( m_fGatherOrderLegs );
-}
-
 void OptionOrderModel_impl::DeleteOrder( size_t row ) {
   if ( ( m_vOptionOrderRow.size() - 1 ) == row ) {
     //assert( OptionOrderRow::EType::summary == m_vOptionOrderRow.front()->m_type );
@@ -416,50 +416,158 @@ void OptionOrderModel_impl::DeleteOrder( size_t row ) {
   }
 }
 
-void OptionOrderModel_impl::PlaceComboOrder() {
-  if ( m_fGatherOrderLegs ) {
-    m_fGatherOrderLegs(
-      [this]( OptionOrderModel_impl::fOrderLeg_t&& fOrderLeg ){
-        for ( vOptionOrderRow_t::value_type& p: m_vOptionOrderRow ) {
-          OptionOrderRow& row( *p );
-          if ( OptionOrderRow::EType::summary == row.m_type ) {}
+void OptionOrderModel_impl::Set( fPlaceBagOrder_t&& fPlaceBagOrder ) {
+  assert( fPlaceBagOrder );
+  m_fPlaceBagOrder = std::move( fPlaceBagOrder );
+}
+
+void OptionOrderModel_impl::BagOrderBuy() {
+  if ( 1 >= m_vOptionOrderRow.size() ) {
+    BOOST_LOG_TRIVIAL(warning) << "no orders present";
+  }
+  else {
+    ou::tf::ib::Bag bag;
+    bag.side = ou::tf::OrderSide::Buy;
+    BagOrder( bag );
+    assert( m_fPlaceBagOrder );
+    m_fPlaceBagOrder( bag );
+  }
+}
+
+void OptionOrderModel_impl::BagOrderSell() {
+  if ( 1 >= m_vOptionOrderRow.size() ) {
+    BOOST_LOG_TRIVIAL(warning) << "no orders present";
+  }
+  else {
+    ou::tf::ib::Bag bag;
+    bag.side = ou::tf::OrderSide::Sell;
+    BagOrder( bag );
+    assert( m_fPlaceBagOrder );
+    m_fPlaceBagOrder( bag );
+  }
+}
+
+void OptionOrderModel_impl::BagOrder( ou::tf::ib::Bag& bag ) {
+  assert( ou::tf::OrderSide::Unknown != bag.side );
+  for ( vOptionOrderRow_t::value_type& p: m_vOptionOrderRow ) {
+
+    OptionOrderRow& row( *p );
+
+    if ( OptionOrderRow::EType::summary == row.m_type ) {
+
+      bag.quantity = 1;
+
+      double priceBag {};
+      switch ( bag.side ) {
+        case ou::tf::OrderSide::Buy:
+          priceBag = boost::fusion::at_c<COL_Bid>( row.m_vModelCells ).GetValue(); // start on low side
+          break;
+        case ou::tf::OrderSide::Sell:
+          priceBag = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetValue(); // start on high side
+          break;
+        default:
+          assert( false );
+      }
+
+      bag.price = priceBag;
+      if ( 0.0 == bag.price ) {
+        bag.type = ou::tf::OrderType::Market;
+      }
+      else {
+        bag.type = ou::tf::OrderType::Limit;
+      }
+    }
+    else {
+      pInstrument_t pInstrument;
+      switch ( row.m_type ) {
+        case OptionOrderRow::EType::underlying:
+          pInstrument = row.m_pWatch->GetInstrument();
+          assert( 0 != pInstrument->GetContract() );
+          break;
+        case OptionOrderRow::EType::option:
+          pInstrument = row.m_pOption->GetInstrument();
+          assert( 0 != pInstrument->GetContract() );
+          break;
+        case OptionOrderRow::EType::summary:
+          assert( false );
+          break;
+      }
+
+      if ( 0 == bag.name.size() ) {
+        if ( row.m_pOption ) {
+          if ( 0 < row.m_pOption->GetFundamentals().sExchangeRoot.size() ) {
+            bag.name = row.m_pOption->GetFundamentals().sExchangeRoot;
+          }
           else {
-            pInstrument_t pInstrumet;
-            switch ( row.m_type ) {
-              case OptionOrderRow::EType::underlying:
-                pInstrumet = row.m_pWatch->GetInstrument();
-                break;
-              case OptionOrderRow::EType::option:
-                pInstrumet = row.m_pOption->GetInstrument();
-                break;
-              case OptionOrderRow::EType::summary:
-                break;
-            }
-            int side = boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).GetValue();
-            double price {};
-            switch ( side ) {
-              case ou::tf::OrderSide::Buy:
-                price = boost::fusion::at_c<COL_Bid>( row.m_vModelCells ).GetValue(); // start on low side
-                break;
-              case ou::tf::OrderSide::Sell:
-                price = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetValue(); // start on high side
-                break;
-              default:
-                assert( false );
-                break;
-            }
-            fOrderLeg(
-              pInstrumet,
-              (ou::tf::OrderSide::EOrderSide) side,
-              boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).GetValue(),
-              price //boost::fusion::at_c<COL_Price>( row.m_vModelCells ).GetValue()
-            );
+            bag.name = pInstrument->GetInstrumentName();
+          }
+        }
+        if ( row.m_pWatch ) {
+          if ( 0 < row.m_pWatch->GetFundamentals().sExchangeRoot.size() ) {
+            bag.name = row.m_pWatch->GetFundamentals().sExchangeRoot;
+          }
+          else {
+            bag.name = pInstrument->GetInstrumentName();
           }
         }
       }
-    );
-    ClearOrders();
+      else {
+        //bag.name += ',';
+      }
+      //bag.name += pInstrument->GetInstrumentName();
+
+      const int side = boost::fusion::at_c<COL_OrderSide>( row.m_vModelCells ).GetValue();
+
+      ou::tf::Order::pOrder_t pOrder = std::make_shared<ou::tf::Order>(
+        pInstrument
+      , ou::tf::OrderType::Market
+      , (ou::tf::OrderSide::EOrderSide) side
+      , boost::fusion::at_c<COL_Quan>( row.m_vModelCells ).GetValue()
+      );
+
+      double priceOrder {};
+      switch ( bag.side ) {
+        case ou::tf::OrderSide::Buy:
+          switch ( side ) {
+            case ou::tf::OrderSide::Buy:
+              priceOrder = boost::fusion::at_c<COL_Bid>( row.m_vModelCells ).GetValue(); // start on low side
+              break;
+            case ou::tf::OrderSide::Sell:
+              priceOrder = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetValue(); // start on high side
+              break;
+            default:
+              assert( false );
+              break;
+          }
+          break;
+        case ou::tf::OrderSide::Sell:
+          switch ( side ) {
+            case ou::tf::OrderSide::Buy:
+              priceOrder = boost::fusion::at_c<COL_Ask>( row.m_vModelCells ).GetValue(); // start on high side
+              break;
+            case ou::tf::OrderSide::Sell:
+              priceOrder = boost::fusion::at_c<COL_Bid>( row.m_vModelCells ).GetValue(); // start on low side
+              break;
+            default:
+              assert( false );
+              break;
+          }
+          break;
+        default:
+          assert( false );
+      }
+
+      BOOST_LOG_TRIVIAL(trace) << "order " << pOrder->GetQuanOrdered() << " " << pInstrument->GetInstrumentName() << " @ " << priceOrder;
+
+      bag.vOrder.push_back( pOrder );
+    }
   }
+
+  auto& front_order( bag.vOrder.front() );
+  ou::tf::OrderManager::GlobalInstance().SetOrderId( front_order );
+  bag.order_id = front_order->GetOrderId();
+
+  ClearOrders();
 }
 
 void OptionOrderModel_impl::ClearOrders() {

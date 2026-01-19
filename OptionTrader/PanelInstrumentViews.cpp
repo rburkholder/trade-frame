@@ -162,6 +162,12 @@ void PanelInstrumentViews::CreateControls() {
       m_pOptionOrderModel->Add( pOption, side, quantity );
     } );
 
+  m_pOptionOrderModel->Set(
+    [this]( const ou::tf::ib::Bag& bag ){
+      m_pIB->PlaceBagOrder( bag );
+    }
+  );
+
   wxBoxSizer* itemBoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
   itemBoxSizer1->Add(itemBoxSizer6, 0, wxGROW|wxALL, 0);
 
@@ -240,6 +246,8 @@ void PanelInstrumentViews::Set(
   assert( pWinChartView_daily );
 
   assert( fUpdateDividendFields );
+
+  m_pIB = pIB;
 
   m_fBuildWatch = std::move( fBuildWatch );
   m_fBuildOption = std::move( fBuildOption );
@@ -438,7 +446,7 @@ void PanelInstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
         } );
       pti->AppendMenuItem(
         "enter buy order",
-        [this,&instrument]( ou::tf::TreeItem* pti ){ // future is by 1, equity is by 100
+        [this,&instrument]( ou::tf::TreeItem* pti ){
           RequestContractDetails( instrument.pInstrument, instrument.pWatch->GetFundamentals() );
           switch ( instrument.pInstrument->GetInstrumentType() ) {
             case ou::tf::InstrumentType::EInstrumentType::Future:
@@ -455,7 +463,7 @@ void PanelInstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
         } );
       pti->AppendMenuItem(
         "enter sell order",
-        [this,&instrument]( ou::tf::TreeItem* pti ){ // future is by 1, equity is by 100
+        [this,&instrument]( ou::tf::TreeItem* pti ){
           RequestContractDetails( instrument.pInstrument, instrument.pWatch->GetFundamentals() );
           switch ( instrument.pInstrument->GetInstrumentType() ) {
             case ou::tf::InstrumentType::EInstrumentType::Future:

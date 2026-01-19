@@ -134,16 +134,20 @@ wxGridCellAttr* OptionOrderModel::GetAttr (int row, int col, wxGridCellAttr::wxA
   return m_pOptionOrderModel_impl->GetAttr( row, col, kind );
 }
 
-void OptionOrderModel::Set( fGatherOrderLegs_t&& fGatherOrderLegs ) {
-  m_pOptionOrderModel_impl->Set( std::move( fGatherOrderLegs ) );
+void OptionOrderModel::Set( fPlaceBagOrder_t&& fPlaceBagOrder ) {
+  m_pOptionOrderModel_impl->Set( std::move( fPlaceBagOrder ) );
 }
 
 void OptionOrderModel::DeleteOrder( size_t row ) {
   m_pOptionOrderModel_impl->DeleteOrder( row );
 }
 
-void OptionOrderModel::PlaceComboOrder() {
-  m_pOptionOrderModel_impl->PlaceComboOrder();
+void OptionOrderModel::BagOrderBuy() {
+  m_pOptionOrderModel_impl->BagOrderBuy();
+}
+
+void OptionOrderModel::BagOrderSell() {
+  m_pOptionOrderModel_impl->BagOrderSell();
 }
 
 void OptionOrderModel::ClearOrders() {
