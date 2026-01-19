@@ -17,8 +17,6 @@
 // At some point, make order manager responsible for constructing Order
 
 #include <map>
-#include <vector>
-#include <stdexcept>
 
 #include <OUCommon/Delegate.h>
 #include <OUCommon/ManagerBase.h>
@@ -87,6 +85,7 @@ public:
   void UpdateReference( idOrder_t nOrderId, const std::string& sReference );
 
   idOrder_t CheckOrderId( idOrder_t );  // used by ibtws to sync order ids
+  void SetOrderId( pOrder_t& pOrder ) { pOrder->SetOrderId( m_orderIds.GetNextId() ); } // bypasses some checks
 
   // need a query to find pending orders like GTC, etc
 
