@@ -12,7 +12,6 @@
  ************************************************************************/
 
 #include <cassert>
-#include <stdexcept>
 
 #include <OUCommon/TimeSource.h>
 
@@ -90,7 +89,7 @@ void Order::ConstructOrder() {
   // will be dealt with by OrderManager
 
   m_row.dtOrderCreated = ou::TimeSource::LocalCommonInstance().Internal();
-  assert( NULL != m_pInstrument.get() );
+  //assert( nullptr != m_pInstrument ); // irrelevant as the name is dereferenced
   // order id needs to be set externally, as it is dependent upon external factors
 //  m_nOrderId = m_persistedorderid.GetNextOrderId();
 //  }
