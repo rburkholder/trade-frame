@@ -144,12 +144,14 @@ void OptionOrderModel_impl::Refresh() {
       double multiplier {};
       switch ( boost::fusion::at_c<COL_OrderSide>( item.m_vModelCells ).GetValue() ) {
         case ou::tf::OrderSide::Buy:
-          multiplier = 1.0 * quan_dbl;
+          //multiplier = 1.0 * quan_dbl;
+          multiplier = 1.0;
           spread_full = boost::fusion::at_c<COL_Ask>( item.m_vModelCells ).GetValue();
           spread_none = boost::fusion::at_c<COL_Bid>( item.m_vModelCells ).GetValue();
           break;
         case ou::tf::OrderSide::Sell:
-          multiplier = -1.0 * quan_dbl;
+          //multiplier = -1.0 * quan_dbl;
+          multiplier = -1.0;
           spread_none = boost::fusion::at_c<COL_Ask>( item.m_vModelCells ).GetValue();
           spread_full = boost::fusion::at_c<COL_Bid>( item.m_vModelCells ).GetValue();
           break;
