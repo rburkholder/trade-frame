@@ -248,7 +248,7 @@ void AppIntervalTrader::HandleIBError( size_t e ) {
   std::cout << "HandleIBError: " << e << std::endl;
 }
 
-void AppIntervalTrader::StartPoll() {
+void AppIntervalTrader::StartPoll() { // this doesn't appear to be called, dead wood?
   if ( !m_bPolling ) {
     if ( m_bIQFeedConnected && m_bIBConnected ) {
 
@@ -258,8 +258,10 @@ void AppIntervalTrader::StartPoll() {
         m_dtInterval = m_dtInterval + boost::posix_time::time_duration( 0, 0, m_nIntervalSeconds );
       }
 
-      m_ptimerInterval = std::make_unique<boost::asio::deadline_timer>( m_context );
-      m_ptimerInterval->expires_at( m_dtInterval );
+      assert( false ); // doesn't appear to be used
+      // to fix, look at Collector/main.cpp line ~106
+      m_ptimerInterval = std::make_unique<boost::asio::system_timer>( m_context );
+      //m_ptimerInterval->expires_at( m_dtInterval );
       m_ptimerInterval->async_wait( std::bind( &AppIntervalTrader::HandlePoll, this, std::placeholders::_1 ) );
 
       m_bPolling = true;
@@ -338,7 +340,7 @@ void AppIntervalTrader::HandlePoll( const boost::system::error_code& error ) {
     }
 
     m_dtInterval = m_dtInterval + interval;
-    m_ptimerInterval->expires_at( m_dtInterval );
+    //m_ptimerInterval->expires_at( m_dtInterval );
     m_ptimerInterval->async_wait( std::bind( &AppIntervalTrader::HandlePoll, this, std::placeholders::_1 ) );
   }
 

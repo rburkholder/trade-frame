@@ -22,13 +22,12 @@
 #define APPINTERVALTRADER_H
 
 #include <thread>
-#include <functional>
 
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
 #include <boost/asio/io_context.hpp>
-#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio/system_timer.hpp>
 #include <boost/asio/executor_work_guard.hpp>
 
 #include <wx/wx.h>
@@ -78,7 +77,7 @@ private:
 
   std::thread m_thread;
   boost::asio::io_context m_context;
-  std::unique_ptr<boost::asio::deadline_timer> m_ptimerInterval;
+  std::unique_ptr<boost::asio::system_timer> m_ptimerInterval;
   std::unique_ptr<boost::asio::executor_work_guard<boost::asio::io_context::executor_type> > m_pWork;
 
   vInstance_t m_vInstance;
