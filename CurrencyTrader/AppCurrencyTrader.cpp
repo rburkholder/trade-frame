@@ -394,8 +394,17 @@ void AppCurrencyTrader::ConstructStrategyList() {
 
       if ( 0 == m_choices.m_sHdf5SimSet.size() ) {
 
-        auto dtReset = strategy.GetSoftwareReset() + boost::posix_time::time_duration( 0, 1, 0 );
-        pair.ptimerSoftwareReset = std::make_unique<boost::asio::deadline_timer>( m_io, dtReset );
+        const auto dtReset = strategy.GetSoftwareReset() + boost::posix_time::time_duration( 0, 1, 0 );
+
+        // refer to Collector/main.cpp or Network.h for fix examples
+        const std::time_t ttReset( boost::posix_time::to_time_t( dtReset ) );
+        const std::tm tmReset = *std::gmtime( &ttReset );
+
+        BOOST_LOG_TRIVIAL(info) << "dtReset=" << dtReset << ',' << "ttReset=" << std::put_time( &tmReset, "%Y-%m-%d %H:%M:%S" );;
+
+        const boost::asio::chrono::system_clock::time_point tpReset( boost::asio::chrono::system_clock::from_time_t( ttReset ) );
+
+        pair.ptimerSoftwareReset = std::make_unique<boost::asio::system_timer>( m_io );
         pair.ptimerSoftwareReset->async_wait(
           [name=ps.m_sName,dtReset]( const boost::system::error_code& error ){
             BOOST_LOG_TRIVIAL(info) << name << " sw reset trial timed out " << dtReset << ' ' << error.to_string(); // replace with appropriate action when confirmed accuracy
