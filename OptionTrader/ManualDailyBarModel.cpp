@@ -43,6 +43,7 @@ namespace {
 ManualDailyBarModel::ManualDailyBarModel()
 : m_type( ou::tf::InstrumentType::Unknown )
 , m_state( EState::wait_for_start )
+, m_bTrendLines( true )
 {
   m_cePriceBars.SetName( "Daily Bars" );
 
@@ -350,4 +351,23 @@ void ManualDailyBarModel::Pivots() {
       ;
   }
 
+}
+
+bool ManualDailyBarModel::ToggleTrendLines() {
+  m_bTrendLines = !m_bTrendLines;
+  if ( m_bTrendLines ) {
+    m_dvChart.Add( EChartSlot::Price, &m_ceEma007 );
+    m_dvChart.Add( EChartSlot::Price, &m_ceEma021 );
+    m_dvChart.Add( EChartSlot::Price, &m_ceEma050 );
+    m_dvChart.Add( EChartSlot::Price, &m_ceEma100 );
+    m_dvChart.Add( EChartSlot::Price, &m_ceEma200 );
+  }
+  else {
+    m_dvChart.Remove( EChartSlot::Price, &m_ceEma007 );
+    m_dvChart.Remove( EChartSlot::Price, &m_ceEma021 );
+    m_dvChart.Remove( EChartSlot::Price, &m_ceEma050 );
+    m_dvChart.Remove( EChartSlot::Price, &m_ceEma100 );
+    m_dvChart.Remove( EChartSlot::Price, &m_ceEma200 );
+  }
+  return m_bTrendLines;
 }

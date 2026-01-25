@@ -51,8 +51,12 @@ public:
 
   ou::ChartEntryMark& Statistics() { return m_ceStatistics; }
 
+  bool ToggleTrendLines();
+
 protected:
 private:
+
+  bool m_bTrendLines;
 
   // *** testing
   ou::tf::InstrumentType::EInstrumentType m_type;

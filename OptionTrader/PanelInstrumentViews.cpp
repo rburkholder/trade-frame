@@ -515,6 +515,11 @@ void PanelInstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
           }
         } );
       pti->AppendMenuItem(
+        "toggle trend lines",
+        [this,&instrument]( ou::tf::TreeItem* pti ){
+          instrument.mdbm.ToggleTrendLines();
+        });
+      pti->AppendMenuItem(
         "delete symbol",
         [this,&instrument]( ou::tf::TreeItem* pti ){
           const std::string& sNameIQFeed( instrument.pInstrument->GetInstrumentName( keytypes::eidProvider_t::EProviderIQF ) );
