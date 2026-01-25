@@ -27,10 +27,11 @@ namespace ou { // One Unified
 class ChartEntryCarrier { // used by ChartViewPort objects to chart data
 public:
   //ChartDataViewCarrier( void );
-  ChartEntryCarrier( size_t nChart, ChartEntryBase* pChartEntry );
-  ChartEntryCarrier( const ChartEntryCarrier& carrier );
-  ChartEntryCarrier( const ChartEntryCarrier&& carrier );
+  ChartEntryCarrier( size_t nChart, ChartEntryBase* );
+  ChartEntryCarrier( const ChartEntryCarrier& );
+  ChartEntryCarrier( ChartEntryCarrier&& );
   ~ChartEntryCarrier();
+  ChartEntryCarrier& operator=( const ChartEntryCarrier& );
   void SetActualChartId( size_t ix ) { m_nActualChart = ix; };
   size_t GetLogicalChartId() const { return m_nLogicalChart; };
   size_t GetActualChartId() const { return m_nActualChart; };

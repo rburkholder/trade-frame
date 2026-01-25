@@ -33,7 +33,7 @@ ChartEntryCarrier::ChartEntryCarrier( const ChartEntryCarrier& rhs )
 {
 }
 
-ChartEntryCarrier::ChartEntryCarrier( const ChartEntryCarrier&& rhs )
+ChartEntryCarrier::ChartEntryCarrier( ChartEntryCarrier&& rhs )
 : m_nLogicalChart( rhs.m_nLogicalChart ),
   m_nActualChart( rhs.m_nActualChart ),
   m_pChartEntry( std::move( rhs.m_pChartEntry ) )
@@ -44,6 +44,15 @@ ChartEntryCarrier::~ChartEntryCarrier() {
   m_nLogicalChart = 0;
   m_nActualChart = 0;
   m_pChartEntry = 0;
+}
+
+ChartEntryCarrier& ChartEntryCarrier::operator=( const ChartEntryCarrier& rhs ) {
+  if ( this != &rhs ) {
+    m_nLogicalChart = rhs.m_nLogicalChart;
+    m_nActualChart = rhs.m_nActualChart;
+    m_pChartEntry = rhs.m_pChartEntry;
+  }
+  return *this;
 }
 
 //
@@ -120,6 +129,7 @@ void ChartDataView::Remove( size_t nChart, ChartEntryBase* pEntry ) {
     m_mapCntChartIndexes.erase( iterChartLookup );
     UpdateActualChartId();
   }
+  m_vChartEntryCarrier.erase( iterChartEntryCarrier );
 }
 
 void ChartDataView::Clear() {
