@@ -141,9 +141,11 @@ void AppOptionTrader::ConnectionsStart() {
   m_pIQFeed = ou::tf::iqfeed::Provider::Factory();
   m_pIB = ou::tf::ib::TWS::Factory();
 
+  BOOST_LOG_TRIVIAL(info) << "connecting: iqfeed";
   m_pIQFeed->OnConnected.Add( MakeDelegate( this, &AppOptionTrader::HandleIQFeedConnected ) );
   m_pIQFeed->Connect();
 
+  BOOST_LOG_TRIVIAL(info) << "connecting: ib";
   m_pIB->OnConnected.Add( MakeDelegate( this, & AppOptionTrader::HandleIBConnected ));
   m_pIB->Connect();
 }
