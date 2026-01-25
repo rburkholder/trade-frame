@@ -395,10 +395,10 @@ void IQFeed<T>::OnNetworkLineBuffer( linebuffer_t* pBuffer ) {
         }
 
         if ( "SERVER DISCONNECTED" == msg->Field( 2 ) ) {
-          std::cout << "IQFeed status: disconnected" << std::endl;
+          //std::cout << "IQFeed status: disconnected" << std::endl;
         }
         if ( "SERVER CONNECTED" == msg->Field( 2 ) ) {
-          std::cout << "IQFeed status: connected" << std::endl;
+          //std::cout << "IQFeed status: connected" << std::endl;
         }
 
         if ( &IQFeed<T>::OnIQFeedSystemMessage != &T::OnIQFeedSystemMessage ) {
