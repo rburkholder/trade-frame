@@ -340,7 +340,8 @@ void AppIntervalSampler::CalcNextPoll() {
 }
 
 void AppIntervalSampler::SubmitPoll() {
-  m_ptimerInterval->expires_at( m_dtInterval );
+  assert( false );  // next statement needs fixing, see IntervalTrader
+  //m_ptimerInterval->expires_at( m_dtInterval );
   m_ptimerInterval->async_wait( std::bind( &AppIntervalSampler::HandlePoll, this, std::placeholders::_1 ) );
 }
 
@@ -408,7 +409,7 @@ void AppIntervalSampler::HandleIQFeedConnected( int e ) {  // cross thread event
       break;
   }
 
-  m_ptimerInterval = std::make_unique<boost::asio::deadline_timer>( m_context );
+  m_ptimerInterval = std::make_unique<boost::asio::system_timer>( m_context );
   SubmitPoll();
 
   std::cout << "vInstance=" << m_vInstance.size() << ",vSymbol=" << m_vSymbol.size() << std::endl;
