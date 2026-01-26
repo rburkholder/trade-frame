@@ -296,8 +296,17 @@ void PanelInstrumentViews::BuildInstrument( const std::string& sIQFeedSymbolName
       [this]( pInstrument_t pInstrument, bool bConstructed ){
         if ( pInstrument ) {
           if ( bConstructed ) {
-            ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
-            im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+            try {
+              ou::tf::InstrumentManager& im( ou::tf::InstrumentManager::GlobalInstance() );
+              im.Register( pInstrument );  // is a CallAfter required, or can this run in a thread?
+            }
+            catch ( const std::runtime_error& error ) {
+              BOOST_LOG_TRIVIAL(error)
+                << "BuildInstrument "
+                << pInstrument->GetInstrumentName()
+                << ',' << error.what()
+                ;
+            }
           }
           CallAfter(
             [this,p=pInstrument]() mutable { // mutable on p, compiler wants it constant
