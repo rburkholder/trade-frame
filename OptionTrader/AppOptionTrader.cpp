@@ -92,8 +92,6 @@ bool AppOptionTrader::OnInit() {
   m_pFrameDividendNotes->SetSizer( sizerFrameSymbolInfo );
   m_pPanelDividendNotes = new ou::tf::PanelDividendNotes( m_pFrameDividendNotes, wxID_ANY );
   sizerFrameSymbolInfo->Add( m_pPanelDividendNotes, 1, wxGROW|wxALL, 0 );
-  m_pFrameDividendNotes->Layout();
-  m_pFrameDividendNotes->Show();
 
   m_pFrameMain->Bind( wxEVT_CLOSE_WINDOW, &AppOptionTrader::OnClose, this );  // start close of windows and controls
 
@@ -106,18 +104,12 @@ bool AppOptionTrader::OnInit() {
     m_pFrameWinChartView_session = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Session Bars (1min)" );
     m_pWinChartView_session = new ou::tf::WinChartView( m_pFrameWinChartView_session );
     m_pFrameWinChartView_session->Attach( m_pWinChartView_session );
-    m_pFrameWinChartView_session->Layout();
-    m_pFrameWinChartView_session->Show();
 
     m_pFrameWinChartView_daily = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Daily Bars" );
     m_pWinChartView_daily = new ou::tf::WinChartView( m_pFrameWinChartView_daily );
     m_pFrameWinChartView_daily->Attach( m_pWinChartView_daily );
-    m_pFrameWinChartView_daily->Layout();
-    m_pFrameWinChartView_daily->Show();
 
     m_pFrameWatchList = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Watch List" );
-    m_pFrameWatchList->Layout();
-    m_pFrameWatchList->Show();
 
     m_pFrameDebug = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Debug" );
     m_pPanelDebug = new ou::tf::PanelDebug( m_pFrameDebug );
@@ -128,6 +120,18 @@ bool AppOptionTrader::OnInit() {
 
   m_pFrameMain->Layout();
   m_pFrameMain->Show(); // triggers the auto move
+
+  m_pFrameWinChartView_session->Layout();
+  m_pFrameWinChartView_session->Show();
+
+  m_pFrameDividendNotes->Layout();
+  m_pFrameDividendNotes->Show();
+
+  m_pFrameWinChartView_daily->Layout();
+  m_pFrameWinChartView_daily->Show();
+
+  m_pFrameWatchList->Layout();
+  m_pFrameWatchList->Show();
 
   m_pFrameDebug->Layout();
   m_pFrameDebug->Show();
