@@ -47,6 +47,7 @@ namespace tf {
   class FrameControls;
   class PanelInstrumentViews;
   class PanelDividendNotes;
+  class PanelDebug;
   class WinChartView;
 namespace iqfeed {
   class BarHistory;
@@ -75,12 +76,15 @@ private:
   ou::tf::PanelDividendNotes* m_pPanelDividendNotes;
 
   ou::tf::FrameControls* m_pFrameWatchList;
+  ou::tf::FrameControls* m_pFrameDebug;
 
   ou::tf::FrameControls* m_pFrameWinChartView_session;
   ou::tf::WinChartView* m_pWinChartView_session;
 
   ou::tf::FrameControls* m_pFrameWinChartView_daily;
   ou::tf::WinChartView* m_pWinChartView_daily;
+
+  ou::tf::PanelDebug* m_pPanelDebug;
 
   using pIQFeed_t = ou::tf::iqfeed::Provider::pProvider_t;
   pIQFeed_t m_pIQFeed;
@@ -135,6 +139,8 @@ private:
     ar & point.y;
 
     ar & *m_pFrameWatchList;
+    ar & *m_pFrameDebug;
+    ar & *m_pPanelDebug;
 }
 
   template<typename Archive>
@@ -169,12 +175,17 @@ private:
       ar & *m_pFrameWatchList;
     }
 
+    if ( 4 <= version ) {
+      ar & *m_pFrameDebug;
+      ar & *m_pPanelDebug;
+    }
+
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 };
 
-BOOST_CLASS_VERSION(AppOptionTrader, 3)
+BOOST_CLASS_VERSION(AppOptionTrader, 4)
 
 DECLARE_APP(AppOptionTrader)

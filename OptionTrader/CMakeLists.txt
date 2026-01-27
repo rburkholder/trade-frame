@@ -34,6 +34,7 @@ set(
     OptionOrderModel.hpp
     OptionOrderModel_impl.hpp
     OptionOrderView.hpp
+    PanelDebug.hpp
     SessionBarModel.hpp
     TagSymbolMap.hpp
   )
@@ -49,6 +50,7 @@ set(
     OptionOrderModel.cpp
     OptionOrderModel_impl.cpp
     OptionOrderView.cpp
+    PanelDebug.cpp
     SessionBarModel.cpp
     TagSymbolMap.cpp
   )

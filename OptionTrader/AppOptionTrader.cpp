@@ -37,6 +37,7 @@
 #include <TFVuTrading/PanelDividendNotes.hpp>
 
 #include "AppOptionTrader.hpp"
+#include "PanelDebug.hpp"
 #include "PanelInstrumentViews.hpp"
 #include "TFInteractiveBrokers/IBTWS.h"
 
@@ -62,7 +63,8 @@ bool AppOptionTrader::OnInit() {
   }
 
   m_pFrameMain = nullptr;
-
+  m_pPanelDebug = nullptr;
+  m_pFrameDebug = nullptr;
   m_pFrameWatchList = nullptr;
   m_pFrameWinChartView_session = nullptr;
   m_pFrameWinChartView_daily = nullptr;
@@ -116,12 +118,19 @@ bool AppOptionTrader::OnInit() {
     m_pFrameWatchList = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Watch List" );
     m_pFrameWatchList->Layout();
     m_pFrameWatchList->Show();
+
+    m_pFrameDebug = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Debug" );
+    m_pPanelDebug = new ou::tf::PanelDebug( m_pFrameDebug );
+    m_pFrameDebug->Attach( m_pPanelDebug );
   }
 
   LoadState();
 
   m_pFrameMain->Layout();
   m_pFrameMain->Show(); // triggers the auto move
+
+  m_pFrameDebug->Layout();
+  m_pFrameDebug->Show();
 
   ConnectionsStart();
 
