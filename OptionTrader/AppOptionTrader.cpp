@@ -218,6 +218,9 @@ void AppOptionTrader::SetComposeInstrument() {
               m_pFrameDividendNotes->SetTitle( "Symbol Info - " + fields.sSymbol );
               m_pPanelDividendNotes->SetFields( fields );
               m_pPanelDividendNotes->SetTags( rTag );
+            },
+            [this]( const std::string& key, const std::string& value ){
+              m_pPanelDebug->Update( key, value );
             }
           );
         } );

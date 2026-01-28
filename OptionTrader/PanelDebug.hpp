@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <map>
+
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_member.hpp>
 
@@ -30,6 +32,9 @@
 #define SYMBOL_PANELDEBUG_IDNAME ID_PANELDEBUG
 #define SYMBOL_PANELDEBUG_SIZE wxDefaultSize
 #define SYMBOL_PANELDEBUG_POSITION wxDefaultPosition
+
+class wxBoxSizer;
+class wxStaticText;
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame
@@ -56,6 +61,8 @@ public:
     long style = SYMBOL_PANELDEBUG_STYLE,
     const wxString& name = SYMBOL_PANELDEBUG_TITLE );
 
+  void Update( const std::string&, const std::string& );
+
 protected:
 private:
 
@@ -63,6 +70,11 @@ private:
     ID_Null=wxID_HIGHEST
   , ID_PANELDEBUG
   };
+
+  wxBoxSizer* m_pSizer;
+
+  using mapFields_t = std::map<std::string, std::pair<wxStaticText*,wxStaticText*> >;
+  mapFields_t m_mapFields;
 
   void Init();
   void CreateControls();

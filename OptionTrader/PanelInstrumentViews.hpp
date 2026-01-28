@@ -111,6 +111,8 @@ public:
 
   using fUpdateDividendFields_t = std::function<void( const ou::tf::PanelDividendNotes::Fields&, const wxArrayString& )>;
 
+  using fDebug_t = std::function<void(const std::string&,const std::string&)>;
+
   void Set(
     pIB_t&
   , pComposeInstrument_t&
@@ -121,6 +123,7 @@ public:
   , ou::tf::WinChartView* pWinChartView_session
   , ou::tf::WinChartView* pWinChartView_daily
   , fUpdateDividendFields_t&&
+  , fDebug_t&&
   );
 
 protected:

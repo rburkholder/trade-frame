@@ -232,6 +232,7 @@ void PanelInstrumentViews::Set(
 , ou::tf::WinChartView* pWinChartView_session
 , ou::tf::WinChartView* pWinChartView_daily
 , fUpdateDividendFields_t&& fUpdateDividendFields
+, fDebug_t&& fDebug
 ) {
 
   assert( pIB );
@@ -256,7 +257,16 @@ void PanelInstrumentViews::Set(
   m_pBarHistory = std::move( pBarHistory );
 
   m_pWinChartView_session = pWinChartView_session;
+  m_pWinChartView_session->SetDebug(
+    [fDebug](const std::string& key,const std::string& value ){
+      fDebug( key, value );
+    } );
+
   m_pWinChartView_daily = pWinChartView_daily;
+  m_pWinChartView_daily->SetDebug(
+    [fDebug](const std::string& key, const std::string& value ){
+      fDebug( key, value );
+    } );
 
   m_fUpdateDividendFields = std::move( fUpdateDividendFields );
 

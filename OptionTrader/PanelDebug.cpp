@@ -21,6 +21,7 @@
 #include <boost/log/trivial.hpp>
 
 #include <wx/sizer.h>
+#include <wx/stattext.h>
 
 #include "PanelDebug.hpp"
 
@@ -61,14 +62,29 @@ void PanelDebug::CreateControls() {
 
   PanelDebug* itemPanel1 = this;
 
-  wxBoxSizer* itemBoxSizer1 = new wxBoxSizer( wxVERTICAL );
-  itemPanel1->SetSizer( itemBoxSizer1 );
-
-  //Layout();
-  //GetParent()->Layout();
+  m_pSizer = new wxBoxSizer( wxVERTICAL );
+  itemPanel1->SetSizer( m_pSizer );
 
   Bind( wxEVT_DESTROY, &PanelDebug::OnDestroy, this );
 
+}
+
+void PanelDebug::Update( const std::string& key, const std::string& value ) {
+  mapFields_t::iterator iter = m_mapFields.find( key );
+  if ( m_mapFields.end() == iter ) {
+    wxBoxSizer* pSizer = new wxBoxSizer( wxHORIZONTAL );
+    m_pSizer->Add( pSizer, 0, wxGROW|wxALL, 0 );
+    wxStaticText* pTextKey = new wxStaticText( this, wxID_ANY, key + " = ", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT );
+    pSizer->Add( pTextKey, 0, wxALIGN_CENTER_VERTICAL|wxLEFT, 4 );
+    wxStaticText* pTextValue = new wxStaticText( this, wxID_ANY, value, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT );
+    pSizer->Add( pTextValue, 1, wxGROW|wxRIGHT, 4 );
+    m_mapFields.emplace( key, std::pair( pTextKey, pTextValue ) );
+  }
+  else {
+    iter->second.second->SetLabel( value );
+    // maybe, if blank, remove the key
+  }
+  Layout();
 }
 
 void PanelDebug::OnDestroy( wxWindowDestroyEvent& event ) {
