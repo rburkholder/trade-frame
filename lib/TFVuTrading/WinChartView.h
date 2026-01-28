@@ -77,6 +77,9 @@ public:
   void SetSim_review();
   void SetSim_trail();
 
+  using fDebug_t = std::function<void(const std::string&,const std::string&)>;
+  void SetDebug( fDebug_t&& f ) { m_fDebug = std::move( f ); }
+
 protected:
 
   enum {
@@ -99,6 +102,8 @@ private:
 
   using pwxBitmap_t = boost::shared_ptr<wxBitmap>;
   using ViewPort_t = ChartEntryTime::range_t;
+
+  fDebug_t m_fDebug;
 
   bool m_bSim; // default to false
   EView m_stateView; // default to live_trail

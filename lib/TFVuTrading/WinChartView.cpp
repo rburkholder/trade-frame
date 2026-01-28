@@ -62,6 +62,7 @@ void WinChartView::Init() {
 
   m_bInDrawChart = false;
   m_pChartDataView = nullptr;
+  m_fDebug = nullptr;
 
   m_tdViewPortWidth = boost::posix_time::time_duration( 0, 10, 0 );  // default viewport width to 10 minutes
 
@@ -159,6 +160,12 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
   if ( m_vpDataViewVisual.HasBoth() ) {
 
     assert ( m_vpDataViewVisual.dtBegin <= m_vpDataViewVisual.dtEnd );
+
+    //BOOST_LOG_TRIVIAL(trace) << "mouse motion visual: " << m_vpDataViewVisual.dtBegin << ',' << m_vpDataViewVisual.dtEnd;
+    if ( m_fDebug ) {
+      m_fDebug( "motion begin", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtBegin ) );
+      m_fDebug( "motion end  ", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
+    }
 
     //assert( m_vpDataViewVisual.dtBegin >= m_vpDataViewExtents.dtBegin );
     //assert( m_vpDataViewVisual.dtEnd <= m_vpDataViewExtents.dtEnd );
@@ -329,7 +336,6 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
 
   if ( xLeft < xRight ) { // needs inequality for tdCursorOld divisor
     // zoom in/out around cursor
-    // TODO: use this to provide date/time on cursor
 
     boost::posix_time::time_duration tdDeltaOld;
     boost::posix_time::time_duration tdDeltaNew;
@@ -337,10 +343,14 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
     boost::posix_time::time_duration tdCursorNew; // offset from left
     boost::posix_time::ptime dtCursor;
 
-    //std::cout << "mouse wheel visual: " << m_vpDataViewVisual.dtBegin << ',' << m_vpDataViewVisual.dtEnd << std::endl;
+    //BOOST_LOG_TRIVIAL(trace) << "mouse wheel visual: " << m_vpDataViewVisual.dtBegin << ',' << m_vpDataViewVisual.dtEnd;
+    if ( m_fDebug ) {
+      m_fDebug( "wheel begin", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtBegin ) );
+      m_fDebug( "wheel end  ", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
+    }
 
     bool bBegin = m_vpDataViewVisual.HasBegin();
-    bool bEnd = m_vpDataViewVisual.HasEnd();
+    bool   bEnd = m_vpDataViewVisual.HasEnd();
 
     if ( bBegin && bEnd ) {
 
@@ -411,6 +421,7 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
       //std::string sTime = boost::posix_time::to_simple_string( td );
       if ( dtCursor.is_not_a_date_time() ) {}
       else {
+        // Todo: check Year is out of valid range: 1400..9999"
         const std::string sDT = boost::posix_time::to_simple_string( dtCursor );
         m_chartMaster.SetCrossHairTime( sDT );
         m_pChartDataView->NotifyCursorDateTime( dtCursor );
@@ -511,13 +522,14 @@ void WinChartView::DrawChart() {
               std::scoped_lock<std::mutex> lock( m_mutexChartDataView );
 
               static const boost::posix_time::time_duration one_second( 0, 0, 1 ); // provide a border
-              //static const boost::posix_time::time_duration thirty_odd_seconds( 0, 0, 35 ); // optional for ml prediction
+              static const boost::posix_time::time_duration thirty_odd_seconds( 0, 0, 35 ); // optional for ml prediction
 
               m_vpDataViewExtents = m_pChartDataView->GetExtents(); // TODO: obtain just end extent?
 
               switch ( m_stateView ) {
                 case EView::live_trail:
-                  m_vpDataViewVisual.dtEnd = ou::TimeSource::GlobalInstance().Internal() + one_second; // works with real vs simulation time
+                  //m_vpDataViewVisual.dtEnd = ou::TimeSource::GlobalInstance().Internal() + one_second; // works with real vs simulation time
+                  m_vpDataViewVisual.dtEnd = ou::TimeSource::GlobalInstance().Internal() + thirty_odd_seconds; // works with real vs simulation time
                   m_vpDataViewVisual.dtBegin = m_vpDataViewVisual.dtEnd - m_tdViewPortWidth;
                   break;
                 case EView::live_review:
