@@ -220,7 +220,10 @@ void AppOptionTrader::SetComposeInstrument() {
               m_pPanelDividendNotes->SetTags( rTag );
             },
             [this]( const std::string& key, const std::string& value ){
-              m_pPanelDebug->Update( key, value );
+              CallAfter(
+                [this,key,value](){
+                  m_pPanelDebug->Update( key, value );
+                } );
             }
           );
         } );
