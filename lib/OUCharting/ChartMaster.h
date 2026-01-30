@@ -60,7 +60,7 @@ public:
   void GetWorldCoordX( int& nChart, double& dblX ) const { nChart = m_nChart; dblX = m_dblX; }
   void GetWorldCoordY( int& nChart, double& dblY ) const { nChart = m_nChart; dblY = m_dblY; }
   void GetX( int& left, int& x, int& right ) const {
-    left = m_xLeft;  x = m_xX; right = m_xRight;
+    left = m_xLeft; x = m_xX; right = m_xRight;
   }
 
 protected:

@@ -131,11 +131,15 @@ void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView ) {
   m_pChartDataView = pChartDataView; // TODO: need some additional tender loving care with this for the mutex
   if ( m_pChartDataView ) {
     m_vpDataViewVisual = m_vpDataViewExtents = m_pChartDataView->GetExtents(); // TODO: may not want this if to maintain continuity across charts
-    //std::cout << "chart assignment extents: " << m_vpDataViewExtents.dtBegin << ',' << m_vpDataViewExtents.dtEnd << std::endl;
-    //std::cout << "chart assignment visual: " << m_vpDataViewVisual.dtBegin << ',' << m_vpDataViewVisual.dtEnd << std::endl;
   }
   else { // nullptr
     m_vpDataViewVisual = m_vpDataViewExtents = ViewPort_t();
+  }
+  if ( m_fDebug ) {
+    m_fDebug( "assignment extents begin", boost::posix_time::to_iso_extended_string( m_vpDataViewExtents.dtBegin ) );
+    m_fDebug( "assignment extents end",   boost::posix_time::to_iso_extended_string( m_vpDataViewExtents.dtEnd ) );
+    m_fDebug( "assignment visual begin",  boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtBegin ) );
+    m_fDebug( "assignment visual end",    boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
   }
 }
 
@@ -164,7 +168,7 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
     //BOOST_LOG_TRIVIAL(trace) << "mouse motion visual: " << m_vpDataViewVisual.dtBegin << ',' << m_vpDataViewVisual.dtEnd;
     if ( m_fDebug ) {
       m_fDebug( "motion begin", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtBegin ) );
-      m_fDebug( "motion end  ", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
+      m_fDebug( "motion end", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
     }
 
     //assert( m_vpDataViewVisual.dtBegin >= m_vpDataViewExtents.dtBegin );
@@ -343,10 +347,9 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
     boost::posix_time::time_duration tdCursorNew; // offset from left
     boost::posix_time::ptime dtCursor;
 
-    //BOOST_LOG_TRIVIAL(trace) << "mouse wheel visual: " << m_vpDataViewVisual.dtBegin << ',' << m_vpDataViewVisual.dtEnd;
     if ( m_fDebug ) {
       m_fDebug( "wheel begin", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtBegin ) );
-      m_fDebug( "wheel end  ", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
+      m_fDebug( "wheel end", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
     }
 
     bool bBegin = m_vpDataViewVisual.HasBegin();
@@ -552,6 +555,13 @@ void WinChartView::DrawChart() {
               m_pChartDataView->SetViewPort( m_vpDataViewVisual );
 
               UpdateChartMaster();  // PROBLEM in lock 1
+
+              if ( m_fDebug ) {
+                m_fDebug( "drawchart extents begin", boost::posix_time::to_iso_extended_string( m_vpDataViewExtents.dtBegin ) );
+                m_fDebug( "drawchart extents end",   boost::posix_time::to_iso_extended_string( m_vpDataViewExtents.dtEnd ) );
+                m_fDebug( "drawchart visual begin",  boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtBegin ) );
+                m_fDebug( "drawchart visual end",    boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
+              }
 
               m_bInDrawChart = false;
             });
