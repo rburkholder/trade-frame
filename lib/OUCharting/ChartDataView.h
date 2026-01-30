@@ -97,6 +97,9 @@ public:
   void SetNotifyCursorDateTime( fCursorDateTime_t&& f ) { m_fCursorDateTime = std::move( f ); }
   void NotifyCursorDateTime( const boost::posix_time::ptime );
 
+  void SetDebug( bool bDebug ) { m_bDebug = bDebug; }
+  bool GetDebug() const { return m_bDebug; }
+
 protected:
 private:
 
@@ -113,6 +116,8 @@ private:
       return *this;
     };
   };
+
+  bool m_bDebug;
 
   std::string m_sName;
   std::string m_sDescription;

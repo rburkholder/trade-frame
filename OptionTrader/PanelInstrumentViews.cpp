@@ -436,6 +436,7 @@ void PanelInstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
       m_pWinChartView_session->SetLive_trail(); // todo: revert to this after testing
       //m_pWinChartView_session->SetLive_review();
       m_pWinChartView_session->SetChartDataView( instrument.sbm.GetChartDataView() );
+      instrument.sbm.GetChartDataView()->SetDebug( true );
 
       m_pWinChartView_daily->SetLive_review();
       m_pWinChartView_daily->SetChartDataView( instrument.mdbm.GetChartDataView() );

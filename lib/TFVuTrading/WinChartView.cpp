@@ -556,7 +556,7 @@ void WinChartView::DrawChart() {
 
               UpdateChartMaster();  // PROBLEM in lock 1
 
-              if ( m_fDebug ) {
+              if ( m_fDebug && m_pChartDataView->GetDebug() ) {
                 m_fDebug( "drawchart extents begin", boost::posix_time::to_iso_extended_string( m_vpDataViewExtents.dtBegin ) );
                 m_fDebug( "drawchart extents end",   boost::posix_time::to_iso_extended_string( m_vpDataViewExtents.dtEnd ) );
                 m_fDebug( "drawchart visual begin",  boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtBegin ) );

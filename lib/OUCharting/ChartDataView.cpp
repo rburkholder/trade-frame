@@ -63,6 +63,7 @@ ChartDataView::ChartDataView()
 : m_dtViewPortBegin( boost::posix_time::not_a_date_time )
 , m_dtViewPortEnd( boost::posix_time::not_a_date_time )
 , m_fCursorDateTime( nullptr )
+, m_bDebug( false )
 {
 }
 
