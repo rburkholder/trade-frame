@@ -27,8 +27,6 @@
 #include <wx/mstream.h>
 #include <wx/dcclient.h>
 
-#include <OUCommon/TimeSource.h>
-
 #include "WinChartView.h"
 
 namespace ou { // One Unified
@@ -524,15 +522,16 @@ void WinChartView::DrawChart() {
             [this](){
               std::scoped_lock<std::mutex> lock( m_mutexChartDataView );
 
-              static const boost::posix_time::time_duration one_second( 0, 0, 1 ); // provide a border
-              static const boost::posix_time::time_duration thirty_odd_seconds( 0, 0, 35 ); // optional for ml prediction
+              m_vpDataViewExtents = m_pChartDataView->GetExtents();
 
-              m_vpDataViewExtents = m_pChartDataView->GetExtents(); // TODO: obtain just end extent?
+              if ( m_fDebug && m_pChartDataView->GetDebug() ) {
+                m_fDebug( "drawchart extents begin", boost::posix_time::to_iso_extended_string( m_vpDataViewExtents.dtBegin ) );
+                m_fDebug( "drawchart extents end",   boost::posix_time::to_iso_extended_string( m_vpDataViewExtents.dtEnd ) );
+              }
 
               switch ( m_stateView ) {
                 case EView::live_trail:
-                  //m_vpDataViewVisual.dtEnd = ou::TimeSource::GlobalInstance().Internal() + one_second; // works with real vs simulation time
-                  m_vpDataViewVisual.dtEnd = ou::TimeSource::GlobalInstance().Internal() + thirty_odd_seconds; // works with real vs simulation time
+                  m_vpDataViewVisual.dtEnd = m_vpDataViewExtents.dtEnd;
                   m_vpDataViewVisual.dtBegin = m_vpDataViewVisual.dtEnd - m_tdViewPortWidth;
                   break;
                 case EView::live_review:
@@ -546,7 +545,7 @@ void WinChartView::DrawChart() {
                   }
                   break;
                 case EView::sim_trail:
-                  m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - m_tdViewPortWidth, m_vpDataViewExtents.dtEnd + one_second );
+                  m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - m_tdViewPortWidth, m_vpDataViewExtents.dtEnd );
                   break;
               }
 
@@ -557,8 +556,6 @@ void WinChartView::DrawChart() {
               UpdateChartMaster();  // PROBLEM in lock 1
 
               if ( m_fDebug && m_pChartDataView->GetDebug() ) {
-                m_fDebug( "drawchart extents begin", boost::posix_time::to_iso_extended_string( m_vpDataViewExtents.dtBegin ) );
-                m_fDebug( "drawchart extents end",   boost::posix_time::to_iso_extended_string( m_vpDataViewExtents.dtEnd ) );
                 m_fDebug( "drawchart visual begin",  boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtBegin ) );
                 m_fDebug( "drawchart visual end",    boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
               }
