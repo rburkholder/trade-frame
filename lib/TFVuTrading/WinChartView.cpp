@@ -120,18 +120,17 @@ void WinChartView::ThreadDrawChart() { // thread for initiating chart, work is p
   m_context.run(); // run while work is active
 }
 
-// called from PanelChartHdf5::LoadDataAndGenerateChart
-// called from PanelCharts::HandleInstrumentLiveChart
-// called from PanelFinancialChart::HandleTreeEventitemActivated
 void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView ) {
   std::scoped_lock<std::mutex> lock( m_mutexChartDataView );   // PROBLEM line 509 lock 487
   // TODO: need to sync with the gui refresh thread
   m_pChartDataView = pChartDataView; // TODO: need some additional tender loving care with this for the mutex
   if ( m_pChartDataView ) {
-    m_vpDataViewVisual = m_vpDataViewExtents = m_pChartDataView->GetExtents(); // TODO: may not want this if to maintain continuity across charts
+    //m_vpDataViewVisual = m_vpDataViewExtents = m_pChartDataView->GetExtents(); // TODO: may not want this if to maintain continuity across charts
+    m_vpDataViewExtents = m_pChartDataView->GetExtents();
   }
   else { // nullptr
-    m_vpDataViewVisual = m_vpDataViewExtents = ViewPort_t();
+    //m_vpDataViewVisual = m_vpDataViewExtents = ViewPort_t();
+    m_vpDataViewExtents = ViewPort_t();
   }
   if ( m_fDebug ) {
     m_fDebug( "assignment extents begin", boost::posix_time::to_iso_extended_string( m_vpDataViewExtents.dtBegin ) );
