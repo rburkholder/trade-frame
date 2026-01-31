@@ -207,6 +207,8 @@ ChartDataView::ViewPort_t ChartDataView::GetExtents_NoLock() const {
       }
       catch ( const std::bad_cast& ) {
         // just ignore classes without ChartEntryTime
+        // probably not necessary as dynamic_cast of pointer is nullptr
+        assert( false );
       }
       catch ( ... ) {
         assert( false );
