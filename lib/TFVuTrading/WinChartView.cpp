@@ -530,10 +530,6 @@ void WinChartView::DrawChart() {
               }
 
               switch ( m_stateView ) {
-                case EView::live_trail:
-                  m_vpDataViewVisual.dtEnd = m_vpDataViewExtents.dtEnd;
-                  m_vpDataViewVisual.dtBegin = m_vpDataViewVisual.dtEnd - m_tdViewPortWidth;
-                  break;
                 case EView::live_review:
                 case EView::sim_review:
                   // handle case when data loaded in background, ultimately extents will be available
@@ -544,6 +540,7 @@ void WinChartView::DrawChart() {
                     }
                   }
                   break;
+                case EView::live_trail:
                 case EView::sim_trail:
                   m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - m_tdViewPortWidth, m_vpDataViewExtents.dtEnd );
                   break;
