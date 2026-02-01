@@ -65,10 +65,14 @@ public:
   ou::ChartDataView* GetChartDataView() const { return m_pChartDataView; }
 
   enum class EView {
-    live_trail // original 'follow along' (live mode)
+  // first four set by caller
+    live_trail
   , live_review
   , sim_trail
   , sim_review
+  // last two internally generated
+  , review
+  , trail
   };
 
   void Set( EView );
@@ -76,6 +80,8 @@ public:
   void SetLive_review();
   void SetSim_review();
   void SetSim_trail();
+  void SetTrail();
+  void SetReview();
 
   using fDebug_t = std::function<void(const std::string&,const std::string&)>;
   void SetDebug( fDebug_t&& f ) { m_fDebug = std::move( f ); }
@@ -106,7 +112,7 @@ private:
   fDebug_t m_fDebug;
 
   bool m_bSim; // default to false
-  EView m_stateView; // default to live_trail
+  EView m_stateView;
 
   wxCoord m_coordXStart;
 

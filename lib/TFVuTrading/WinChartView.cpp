@@ -54,7 +54,7 @@ WinChartView::~WinChartView() {
 
 void WinChartView::Init() {
 
-  SetLive_trail();
+  SetTrail();
 
   m_stateMouse = EMouse::NothingSpecial;
 
@@ -481,6 +481,12 @@ void WinChartView::Set( EView state ) {
     case EView::sim_trail:
       SetSim_trail();
       break;
+    case EView::review:
+      SetReview();
+      break;
+    case EView::trail:
+      SetTrail();
+      break;
   }
 }
 
@@ -502,6 +508,16 @@ void WinChartView::SetSim_review() {
 void WinChartView::SetSim_trail() {
   m_bSim = true;
   m_stateView = EView::sim_trail;
+}
+
+void WinChartView::SetReview() {
+  m_bSim = false;
+  m_stateView = EView::review;
+}
+
+void WinChartView::SetTrail() {
+  m_bSim = false;
+  m_stateView = EView::trail;
 }
 
 // TODO: there may be an issue with cursor & no data, which locks up the gui
@@ -531,6 +547,7 @@ void WinChartView::DrawChart() {
               switch ( m_stateView ) {
                 case EView::live_review:
                 case EView::sim_review:
+                case EView::review:
                   // handle case when data loaded in background, ultimately extents will be available
                   if ( m_vpDataViewVisual.HasBoth() ) {}
                   else {
@@ -541,6 +558,7 @@ void WinChartView::DrawChart() {
                   break;
                 case EView::live_trail:
                 case EView::sim_trail:
+                case EView::trail:
                   m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - m_tdViewPortWidth, m_vpDataViewExtents.dtEnd );
                   break;
               }
