@@ -36,6 +36,7 @@
 
 #include "Common.hpp"
 #include "TagSymbolMap.hpp"
+#include "TickStreamModel.hpp"
 #include "OptionChainView.hpp"
 #include "OptionOrderView.hpp"
 #include "SessionBarModel.hpp"
@@ -121,6 +122,7 @@ public:
   , pOptionEngine_t&
   , pBarHistory_t&&
   , ou::tf::WinChartView* pWinChartView_session
+  , ou::tf::WinChartView* pWinChartView_stream
   , ou::tf::WinChartView* pWinChartView_daily
   , fUpdateDividendFields_t&&
   , fDebug_t&&
@@ -176,6 +178,7 @@ private:
   pBarHistory_t m_pBarHistory;
 
   ou::tf::WinChartView* m_pWinChartView_session;
+  ou::tf::WinChartView* m_pWinChartView_stream;
   ou::tf::WinChartView* m_pWinChartView_daily;
 
   fUpdateDividendFields_t m_fUpdateDividendFields;
@@ -223,18 +226,24 @@ private:
 
   struct Instrument {
 
+    using pTickStreamModel_t = std::unique_ptr<TickStreamModel>;
+
     ou::tf::TreeItem* pti;
     pInstrument_t pInstrument;
     pWatch_t pWatch;
     mapChains_t mapChains;
     SessionBarModel sbm;
     ManualDailyBarModel mdbm;
+    pTickStreamModel_t pTickStreamModel; // maybe convert the others to unique ptr as well
     DividendNotes notesDividend;
 
     Instrument()
     : pti( nullptr )
     {}
-    Instrument( Instrument&& rhs ) {}
+
+    Instrument( Instrument&& rhs )
+    : pTickStreamModel( std::move( rhs.pTickStreamModel ) )
+    {}
 
     void Set( pWatch_t pWatch_ ) {
       assert( !pWatch );
@@ -255,6 +264,7 @@ private:
       }
       mapChains.clear();
       pInstrument.reset();
+      pTickStreamModel.reset();
     }
   };
 

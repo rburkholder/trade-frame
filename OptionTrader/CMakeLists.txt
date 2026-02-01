@@ -37,6 +37,7 @@ set(
     PanelDebug.hpp
     SessionBarModel.hpp
     TagSymbolMap.hpp
+    TickStreamModel.hpp
   )
 
 set(
@@ -53,6 +54,7 @@ set(
     PanelDebug.cpp
     SessionBarModel.cpp
     TagSymbolMap.cpp
+    TickStreamModel.cpp
   )
 
 add_executable(

@@ -67,6 +67,7 @@ bool AppOptionTrader::OnInit() {
   m_pFrameDebug = nullptr;
   m_pFrameWatchList = nullptr;
   m_pFrameWinChartView_session = nullptr;
+  m_pFrameWinChartView_stream = nullptr;
   m_pFrameWinChartView_daily = nullptr;
   m_pInstrumentViews = nullptr;
 
@@ -105,6 +106,10 @@ bool AppOptionTrader::OnInit() {
     m_pWinChartView_session = new ou::tf::WinChartView( m_pFrameWinChartView_session );
     m_pFrameWinChartView_session->Attach( m_pWinChartView_session );
 
+    m_pFrameWinChartView_stream = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Streaming Tick/Quote" );
+    m_pWinChartView_stream = new ou::tf::WinChartView( m_pFrameWinChartView_stream );
+    m_pFrameWinChartView_stream->Attach( m_pWinChartView_stream );
+
     m_pFrameWinChartView_daily = new ou::tf::FrameControls( m_pFrameMain, wxID_ANY, "Daily Bars" );
     m_pWinChartView_daily = new ou::tf::WinChartView( m_pFrameWinChartView_daily );
     m_pFrameWinChartView_daily->Attach( m_pWinChartView_daily );
@@ -123,6 +128,9 @@ bool AppOptionTrader::OnInit() {
 
   m_pFrameWinChartView_session->Layout();
   m_pFrameWinChartView_session->Show();
+
+  m_pFrameWinChartView_stream->Layout();
+  m_pFrameWinChartView_stream->Show();
 
   m_pFrameDividendNotes->Layout();
   m_pFrameDividendNotes->Show();
@@ -213,6 +221,7 @@ void AppOptionTrader::SetComposeInstrument() {
             m_pOptionEngine,
             std::move( m_pBarHistory ),
             m_pWinChartView_session,
+            m_pWinChartView_stream,
             m_pWinChartView_daily,
             [this]( const ou::tf::PanelDividendNotes::Fields& fields, const wxArrayString& rTag ){
               m_pFrameDividendNotes->SetTitle( "Symbol Info - " + fields.sSymbol );

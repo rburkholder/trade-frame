@@ -230,6 +230,7 @@ void PanelInstrumentViews::Set(
 , pOptionEngine_t& pOptionEngine
 , pBarHistory_t&& pBarHistory
 , ou::tf::WinChartView* pWinChartView_session
+, ou::tf::WinChartView* pWinChartView_stream
 , ou::tf::WinChartView* pWinChartView_daily
 , fUpdateDividendFields_t&& fUpdateDividendFields
 , fDebug_t&& fDebug
@@ -244,6 +245,7 @@ void PanelInstrumentViews::Set(
   assert( pBarHistory );
 
   assert( pWinChartView_session );
+  assert( pWinChartView_stream );
   assert( pWinChartView_daily );
 
   assert( fUpdateDividendFields );
@@ -261,6 +263,8 @@ void PanelInstrumentViews::Set(
     [fDebug](const std::string& key,const std::string& value ){
       fDebug( key, value );
     } );
+
+  m_pWinChartView_stream = pWinChartView_stream;
 
   m_pWinChartView_daily = pWinChartView_daily;
   m_pWinChartView_daily->SetDebug(
@@ -438,6 +442,10 @@ void PanelInstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
       m_pWinChartView_session->SetChartDataView( instrument.sbm.GetChartDataView() );
       instrument.sbm.GetChartDataView()->SetDebug( true );
 
+      assert( !instrument.pTickStreamModel );
+      instrument.pTickStreamModel = std::make_unique<TickStreamModel>( instrument.pWatch );
+      m_pWinChartView_stream->SetChartDataView( instrument.pTickStreamModel->GetChartDataView() );
+
       m_pWinChartView_daily->SetLive_review();
       m_pWinChartView_daily->SetChartDataView( instrument.mdbm.GetChartDataView() );
 
@@ -549,6 +557,7 @@ void PanelInstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
             [this,&instrument,iterInstrument,&sNameIQFeed](){
               // todo: need to clear gui chains if exists
               m_pWinChartView_session->SetChartDataView( nullptr );
+              m_pWinChartView_stream->SetChartDataView( nullptr );
               m_pWinChartView_daily->SetChartDataView( nullptr );
               m_TagSymbolMap.DelTagsForSymbol(
                 sNameIQFeed,

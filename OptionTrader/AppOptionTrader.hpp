@@ -81,6 +81,9 @@ private:
   ou::tf::FrameControls* m_pFrameWinChartView_session;
   ou::tf::WinChartView* m_pWinChartView_session;
 
+  ou::tf::FrameControls* m_pFrameWinChartView_stream;
+  ou::tf::WinChartView* m_pWinChartView_stream;
+
   ou::tf::FrameControls* m_pFrameWinChartView_daily;
   ou::tf::WinChartView* m_pWinChartView_daily;
 
@@ -127,6 +130,7 @@ private:
   void save( Archive& ar, const unsigned int version ) const {
     ar & *m_pFrameMain;
     ar & *m_pFrameWinChartView_session;
+    ar & *m_pFrameWinChartView_stream;
     ar & *m_pFrameWinChartView_daily;
     ar & *m_pInstrumentViews;
 
@@ -150,6 +154,11 @@ private:
 
     assert( m_pFrameWinChartView_session );
     ar & *m_pFrameWinChartView_session;
+
+    if ( 5 <= version ) {
+      assert( m_pFrameWinChartView_stream );
+      ar & *m_pFrameWinChartView_stream;
+    }
 
     assert( m_pFrameWinChartView_daily );
     ar & *m_pFrameWinChartView_daily;
@@ -186,6 +195,6 @@ private:
 
 };
 
-BOOST_CLASS_VERSION(AppOptionTrader, 4)
+BOOST_CLASS_VERSION(AppOptionTrader, 5)
 
 DECLARE_APP(AppOptionTrader)
