@@ -156,7 +156,7 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
   }
 
   int xLeft, xX, xRight;
-  m_chartMaster.GetX( xLeft, xX, xRight );
+  m_chartMaster.GetX( xLeft, xX, xRight ); // todo:  adjust to leave something for leading/trailing bars?
 
   if ( m_vpDataViewVisual.HasBoth() ) {
 
@@ -178,30 +178,31 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
         }
         // fall into next state
       case EMouse::Drag:
-        // TODO: update chart for intermediate positions? or just change cursor?
         if ( m_coordXStart != xX ) {
-          int width = xRight - xLeft;
-          if ( 10 <= ( width ) ) {
+          const int width = xRight - xLeft;
+          if ( 10 <= width ) {
 
-            int distance {};
-            if ( xX > m_coordXStart ) {
-              distance = xX - m_coordXStart;
+            int xDistance {};
+            if ( xX >= m_coordXStart ) {
+              xDistance = xX - m_coordXStart;
             }
             else {
-              distance = m_coordXStart - xX;
+              xDistance = m_coordXStart - xX;
             }
 
-            boost::posix_time::time_duration tdMovement;
-            tdMovement  = m_tdViewPortWidth * distance;
-            tdMovement /= width;
+            boost::posix_time::time_duration tdDistance;
+            tdDistance  = m_tdViewPortWidth * xDistance;
+            tdDistance /= width;
 
-            if ( xX < m_coordXStart ) {
-              m_vpDataViewVisual.dtBegin += tdMovement;
-              m_vpDataViewVisual.dtEnd += tdMovement;
+            if ( xX < m_coordXStart ) { // cursor left, data fills on right, drops on left
 
-              if ( m_vpDataViewVisual.dtBegin < m_vpDataViewExtents.dtBegin ) {
+              m_vpDataViewVisual.dtBegin += tdDistance;
+              m_vpDataViewVisual.dtEnd += tdDistance;
+
+              if ( m_vpDataViewExtents.dtBegin > m_vpDataViewVisual.dtBegin ) {
                 m_vpDataViewVisual.dtBegin = m_vpDataViewExtents.dtBegin;
                 if ( m_vpDataViewVisual.dtBegin >= m_vpDataViewVisual.dtEnd ) {
+                  // is this reachable?
                   m_vpDataViewVisual.dtEnd = m_vpDataViewVisual.dtBegin + m_tdViewPortWidth;
                 }
               }
@@ -210,28 +211,36 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
                 m_vpDataViewVisual.dtEnd = m_vpDataViewExtents.dtEnd;
                 m_tdViewPortWidth = m_vpDataViewVisual.dtEnd - m_vpDataViewVisual.dtBegin;
                 //m_state = m_bSim ? EState::sim_trail : EState::live_trail;
+                m_stateView = EView::trail;
               }
 
               // Still having problems here
               assert ( m_vpDataViewVisual.dtBegin <= m_vpDataViewVisual.dtEnd );
 
             }
-            else {
-              m_vpDataViewVisual.dtBegin -= tdMovement;
-              m_vpDataViewVisual.dtEnd -= tdMovement;
+            else { // cursor right, data fill on left, drops on right
+
+              m_vpDataViewVisual.dtBegin -= tdDistance;
+              m_vpDataViewVisual.dtEnd -= tdDistance;
 
               if ( m_vpDataViewVisual.dtBegin < m_vpDataViewExtents.dtBegin ) {
                 m_vpDataViewVisual.dtBegin = m_vpDataViewExtents.dtBegin;
                 if ( m_vpDataViewVisual.dtBegin >= m_vpDataViewVisual.dtEnd ) {
+                  // is this reachable?
                   m_vpDataViewVisual.dtEnd = m_vpDataViewVisual.dtBegin + m_tdViewPortWidth;
                 }
               }
 
               if ( m_vpDataViewVisual.dtEnd < m_vpDataViewExtents.dtEnd ) {
-                //m_state = m_bSim ? EState::sim_review : EState::live_review;
-                //m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdNewWidth, m_vpDataViewExtents.dtEnd );
+                m_stateView = EView::review;
+              }
+              else {
+                m_vpDataViewVisual.dtEnd = m_vpDataViewExtents.dtEnd;
+                m_tdViewPortWidth = m_vpDataViewVisual.dtEnd - m_vpDataViewVisual.dtBegin;
+                m_stateView = EView::trail;
               }
 
+              // Still having problems here
               assert ( m_vpDataViewVisual.dtBegin <= m_vpDataViewVisual.dtEnd );
 
             }
