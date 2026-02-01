@@ -11,8 +11,6 @@
  * See the file LICENSE.txt for redistribution information.             *
  ************************************************************************/
 
-//#include "StdAfx.h"
-
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/bind/bind_member_function.hpp>
 
@@ -20,19 +18,10 @@
 
 namespace ou { // One Unified
 
-//
-// CChartEntryBars, volume portion of bar is in ChartEntryVolume.h
-//
-
 ChartEntryBars::ChartEntryBars()
 : ChartEntryTime()
 {
 }
-
-//ChartEntryBars::ChartEntryBars(size_type nSize)
-//: ChartEntryBaseWithTime(nSize)
-//{
-//}
 
 ChartEntryBars::~ChartEntryBars() {
   Clear();
@@ -48,12 +37,6 @@ void ChartEntryBars::Reserve( size_type nSize ) {
 
 
 void ChartEntryBars::AppendBar( const ou::tf::Bar &bar ) {
-//  if ( m_bUseThreadSafety ) {
-//    while ( !m_lfBar.push( bar ) ) {};
-//  }
-//  else {
-//    AppendBarPrivate( bar );
-//  }
   m_queueBars.Append( bar );
 }
 
@@ -68,11 +51,6 @@ void ChartEntryBars::Pop( const ou::tf::Bar& bar ) {
 bool ChartEntryBars::AddEntryToChart( XYChart *pXY, structChartAttributes& attributes ) {
 
   bool bAdded( false );
-
-  //ou::tf::Bar bar;
-  //while ( m_lfBar.pop( bar ) ) {
-//    AppendBarPrivate( bar );
-//  }
 
   ClearQueue();
 

@@ -23,7 +23,6 @@ class ChartEntryBars :
   public ChartEntryTime {
 public:
   ChartEntryBars();
-  //ChartEntryBars(size_type nSize);
   virtual ~ChartEntryBars();
 
   virtual void Reserve( size_type ) override;
@@ -31,13 +30,10 @@ public:
   virtual bool AddEntryToChart( XYChart *pXY, structChartAttributes& ) override;
   virtual void Clear() override;
 
-//  template<typename Iterator>
-//  void AppendBars( Iterator begin, Iterator end ); // no thread crossing buffer, not implemented yet
-
 protected:
   DoubleArray GetOpen() const {
-//    vdouble_t::const_iterator iter = m_vOpen.begin();
-//    return DoubleArray( &(*iter), static_cast<int>( m_vOpen.size() ) );
+    // vdouble_t::const_iterator iter = m_vOpen.begin();
+    // return DoubleArray( &(*iter), static_cast<int>( m_vOpen.size() ) );
     return DoubleArray( &m_vOpen[ IxStart() ], CntElements() );
   }
   DoubleArray GetHigh() const {
@@ -58,7 +54,7 @@ protected:
 
   virtual void ClearQueue() override;
 
-  private:
+private:
   //boost::lockfree::spsc_queue<ou::tf::Bar, boost::lockfree::capacity<lockfreesize> > m_lfBar;
 
   std::vector<double> m_vOpen;
@@ -70,14 +66,5 @@ protected:
 
   void Pop( const ou::tf::Bar& bar );
 };
-
-//template<typename Iterator>
-//void ChartEntryBars::AppendBars( Iterator begin, Iterator end ) {
-//  while ( begin != end ) {
-//    // not implemented yet
-//    ++begin;
-//  }
-//}
-
 
 } // namespace ou
