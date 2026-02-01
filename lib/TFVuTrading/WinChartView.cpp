@@ -254,7 +254,7 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
         break;
     }
 
-    if ( xLeft < xRight ) { // check for non-zer as well?
+    if ( xLeft < xRight ) { // check for non-zero as well?
       boost::posix_time::time_duration tdCursor;
       boost::posix_time::time_duration tdDelta;
 
@@ -336,6 +336,9 @@ void WinChartView::HandleMouseRightClick() {
 
 void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
 
+  static const int c_fractionSml( 10 );
+  static const int c_fractionBig( 12 );
+
   static const boost::posix_time::time_duration tdTenSeconds( 0, 0, 10 );
 
   //int delta = event.GetWheelDelta();
@@ -347,84 +350,83 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
   if ( xLeft < xRight ) { // needs inequality for tdCursorOld divisor
     // zoom in/out around cursor
 
-    boost::posix_time::time_duration tdDeltaOld;
-    boost::posix_time::time_duration tdDeltaNew;
+    boost::posix_time::time_duration tdWidthOld;
+    boost::posix_time::time_duration tdWidthNew;
     boost::posix_time::time_duration tdCursorOld; // offset from left
     boost::posix_time::time_duration tdCursorNew; // offset from left
-    boost::posix_time::ptime dtCursor;
 
     if ( m_fDebug ) {
       m_fDebug( "wheel begin", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtBegin ) );
       m_fDebug( "wheel end", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
     }
 
-    bool bBegin = m_vpDataViewVisual.HasBegin();
-    bool   bEnd = m_vpDataViewVisual.HasEnd();
-
-    if ( bBegin && bEnd ) {
+    if ( m_vpDataViewVisual.HasBoth() ) {
 
       //assert( m_vpDataViewVisual.dtBegin >= m_vpDataViewExtents.dtBegin );
       //assert( m_vpDataViewVisual.dtEnd <= m_vpDataViewExtents.dtEnd );
 
       assert ( m_vpDataViewVisual.dtBegin <= m_vpDataViewVisual.dtEnd );
 
-      tdDeltaOld = m_vpDataViewVisual.dtEnd - m_vpDataViewVisual.dtBegin;
+      tdWidthOld = m_vpDataViewVisual.dtEnd - m_vpDataViewVisual.dtBegin;
 
-      tdCursorOld = tdDeltaOld * ( xX - xLeft );
+      tdCursorOld = tdWidthOld * ( xX - xLeft ); // time offset from left
       tdCursorOld /= ( xRight - xLeft );
 
-      dtCursor =  m_vpDataViewVisual.dtBegin + tdCursorOld;
+      const boost::posix_time::ptime dtCursor =  m_vpDataViewVisual.dtBegin + tdCursorOld;
 
       if ( 0 > rotation ) { // expand width
 
-        tdDeltaNew = tdDeltaOld * 12;
-        tdDeltaNew /= 10;
+        tdWidthNew = tdWidthOld * c_fractionBig;
+        tdWidthNew /= c_fractionSml;
 
-        tdCursorNew = tdDeltaNew * ( xX - xLeft );
+        tdCursorNew = tdWidthNew * ( xX - xLeft );
         tdCursorNew /= ( xRight - xLeft );
 
         m_vpDataViewVisual.dtBegin = dtCursor - tdCursorNew;
-        m_vpDataViewVisual.dtEnd   = m_vpDataViewVisual.dtBegin + tdDeltaNew;
+        m_vpDataViewVisual.dtEnd   = m_vpDataViewVisual.dtBegin + tdWidthNew;
 
         if ( m_vpDataViewVisual.dtBegin < m_vpDataViewExtents.dtBegin ) {
           m_vpDataViewVisual.dtBegin = m_vpDataViewExtents.dtBegin;
           if ( m_vpDataViewVisual.dtBegin >= m_vpDataViewVisual.dtEnd ) {
-            m_vpDataViewVisual.dtEnd = m_vpDataViewVisual.dtBegin + tdDeltaNew;
+            m_vpDataViewVisual.dtEnd = m_vpDataViewVisual.dtBegin + tdWidthNew;
           }
         }
 
         if ( m_vpDataViewVisual.dtEnd >= m_vpDataViewExtents.dtEnd ) {
           //m_state = m_bSim ? EState::sim_trail : EState::live_trail;
-          m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdDeltaNew, m_vpDataViewExtents.dtEnd );
+          //m_vpDataViewVisual = ViewPort_t( m_vpDataViewExtents.dtEnd - tdWidthNew, m_vpDataViewExtents.dtEnd );
+          m_vpDataViewVisual.dtEnd = m_vpDataViewExtents.dtEnd;
+          m_stateView = EView::trail;
         }
 
         assert ( m_vpDataViewVisual.dtBegin <= m_vpDataViewVisual.dtEnd );
 
-        tdDeltaNew = m_vpDataViewVisual.dtEnd - m_vpDataViewVisual.dtBegin;
+        tdWidthNew = m_vpDataViewVisual.dtEnd - m_vpDataViewVisual.dtBegin;
 
       }
       else { // reduce width
 
-        tdDeltaNew = tdDeltaOld * 10;
-        tdDeltaNew /= 12;
+        tdWidthNew = tdWidthOld * c_fractionSml;
+        tdWidthNew /= c_fractionBig;
 
-        if ( tdDeltaNew < tdTenSeconds ) tdDeltaNew = tdTenSeconds;
+        if ( tdWidthNew < tdTenSeconds ) tdWidthNew = tdTenSeconds;
 
-        tdCursorNew = tdDeltaNew * ( xX - xLeft );
+        tdCursorNew = tdWidthNew * ( xX - xLeft );
         tdCursorNew /= ( xRight - xLeft );
 
         m_vpDataViewVisual.dtBegin = dtCursor - tdCursorNew;
-        m_vpDataViewVisual.dtEnd   = m_vpDataViewVisual.dtBegin + tdDeltaNew;
+        m_vpDataViewVisual.dtEnd   = m_vpDataViewVisual.dtBegin + tdWidthNew;
 
         assert ( m_vpDataViewVisual.dtBegin <= m_vpDataViewVisual.dtEnd );
 
         if ( m_vpDataViewVisual.dtEnd < m_vpDataViewExtents.dtEnd ) {
           //m_state = m_bSim ? EState::sim_review : EState::live_review;
+          m_stateView = EView::review;
         }
 
       }
 
-      m_tdViewPortWidth = tdDeltaNew;
+      m_tdViewPortWidth = tdWidthNew;
 
       //boost::posix_time::time_duration td( dtCursor.time_of_day() );
       //std::string sTime = boost::posix_time::to_simple_string( td );
