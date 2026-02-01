@@ -34,10 +34,13 @@ SessionBarModel::SessionBarModel()
   m_cePriceBars.SetName( "Trades" );
 
   m_bfPrice1Minute.SetOnBarComplete( MakeDelegate( this, &SessionBarModel::HandleBarCompletionPrice ) );
+  m_bfPrice1Minute.SetOnBarUpdated( MakeDelegate( this, &SessionBarModel::HandleBarUpdatedPrice ) );
 }
 
 SessionBarModel::~SessionBarModel() {
   StopWatch();
+  m_bfPrice1Minute.SetOnBarComplete( nullptr );
+  m_bfPrice1Minute.SetOnBarUpdated( nullptr );
 }
 
 void SessionBarModel::Set( pWatch_t& pWatch ) {
@@ -76,6 +79,12 @@ void SessionBarModel::HandleTrade( const ou::tf::Trade& trade ) {
 void SessionBarModel::HandleBarCompletionPrice( const ou::tf::Bar& bar ) {
   m_cePriceBars.AppendBar( bar );
   m_ceVolume.Append( bar );
+}
+
+void SessionBarModel::HandleBarUpdatedPrice( const ou::tf::Bar& bar ) {
+  // will need to architect this based on ChartEntryBars queuing model
+  //m_cePriceBars.AppendBar( bar );
+  //m_ceVolume.Append( bar );
 }
 
 void SessionBarModel::StartWatch() {

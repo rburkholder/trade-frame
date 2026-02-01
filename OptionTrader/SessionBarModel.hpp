@@ -74,5 +74,6 @@ private:
   void HandleTrade( const ou::tf::Trade& );
 
   void HandleBarCompletionPrice( const ou::tf::Bar& );
+  void HandleBarUpdatedPrice( const ou::tf::Bar& ); // not implemented
 
 };
