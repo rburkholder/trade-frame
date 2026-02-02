@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include <TFTimeSeries/DatedDatum.h>
+#include <map>
+
 #include <TFTimeSeries/DoubleBuffer.h>
-#include <boost-1_90/boost/date_time/posix_time/ptime.hpp>
 
 #include "ChartEntryBase.h"
 
