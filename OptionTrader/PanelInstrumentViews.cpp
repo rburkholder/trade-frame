@@ -359,6 +359,9 @@ void PanelInstrumentViews::AddInstrument( pInstrument_t& pInstrument ) {
       pWatch_t pWatch = m_fBuildWatch( pInstrument );
       instrument.Set( pWatch );
 
+      assert( !instrument.pTickStreamModel );
+      instrument.pTickStreamModel = std::make_unique<TickStreamModel>( instrument.pWatch );
+
       AddInstrumentToTree( instrument );
     }
   }
@@ -442,8 +445,7 @@ void PanelInstrumentViews::AddInstrumentToTree( Instrument& instrument ) {
       m_pWinChartView_session->SetChartDataView( instrument.sbm.GetChartDataView() );
       instrument.sbm.GetChartDataView()->SetDebug( true );
 
-      assert( !instrument.pTickStreamModel );
-      instrument.pTickStreamModel = std::make_unique<TickStreamModel>( instrument.pWatch );
+      assert( instrument.pTickStreamModel );
       m_pWinChartView_stream->SetChartDataView( instrument.pTickStreamModel->GetChartDataView() );
 
       m_pWinChartView_daily->SetLive_review();
