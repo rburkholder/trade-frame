@@ -45,7 +45,7 @@ public:
   bool IsWatching() const { return m_bWatchStarted; };
 
   void Set( pWatch_t& );
-  void Set( ou::ChartEntryMark& );
+  void Set( ou::ChartEntryMark& ); // pivots and ranges
 
   void OnHistoryBar( const ou::tf::Bar& );
   void OnHistoryDone();

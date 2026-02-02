@@ -25,8 +25,6 @@
 
 #include "SessionBarModel.hpp"
 
-// TODO: add pivots
-
 SessionBarModel::SessionBarModel()
 : m_bWatchStarted( false )
 , m_bfPrice1Minute( 60 )
