@@ -207,7 +207,10 @@ void ChartEntryTime::SetViewPort( const range_t& range ) {
       }
     }
 
+    //assert( citerBgn <= m_vDateTime.cbegin() );
     SetIxStart( citerBgn - m_vDateTime.cbegin() );
+
+    assert( citerEnd >= citerBgn );
     SetCntElements( citerEnd - citerBgn );
 
     if ( m_vDateTime.end() == citerBgn ) {

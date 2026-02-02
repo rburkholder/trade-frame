@@ -92,10 +92,10 @@ protected:
   std::string m_sName;
 
   size_t IxStart() const { return m_ixStart; }
-  int CntElements() const { return m_nElements; }
+  size_t CntElements() const { return m_nElements; }
 
   void SetIxStart( size_t n ) { m_ixStart = n; }
-  void SetCntElements( int n ) { m_nElements = n; }
+  void SetCntElements( size_t n ) { m_nElements = n; }
 
   void IncCntElements() { m_nElements++; }
 
@@ -104,7 +104,7 @@ protected:
 
 private:
   size_t m_ixStart; // starting point into viewport
-  int m_nElements;  // number of elements in the viewport
+  size_t m_nElements;  // number of elements in the viewport
 };
 
 // **********
