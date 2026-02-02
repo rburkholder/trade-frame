@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include "OUCharting/ChartEntryIndicator.h"
 #include <OUCharting/ChartDataView.h>
 
-#include <OUCharting/ChartEntryMark.h>
 #include <OUCharting/ChartEntryVolume.h>
+#include <OUCharting/ChartEntryIndicator.h>
+#include <OUCharting/ChartEntryHistogramV2.hpp>
 
 #include <TFTrading/Watch.h>
 
@@ -44,6 +44,8 @@ private:
 
   enum EChartSlot { Price, Volume };
 
+  double m_sizeTick;
+
   pWatch_t m_pWatch;
 
   ou::ChartDataView m_dvChart; // the data
@@ -52,6 +54,10 @@ private:
   ou::ChartEntryIndicator m_ceBid;
   ou::ChartEntryIndicator m_ceTrade;
   ou::ChartEntryVolume m_ceVolume;
+  ou::ChartEntryHistogram_v2 m_ceVolumeAtPrice;
+
+  ou::tf::Quote m_quote;
+  ou::tf::Trade m_trade;
 
   void HandleTrade( const ou::tf::Trade& );
   void HandleQuote( const ou::tf::Quote& );

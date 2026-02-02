@@ -37,7 +37,11 @@ TickStreamModel::TickStreamModel( pWatch_t& pWatch ) {
   m_dvChart.Add( EChartSlot::Price, &m_ceAsk );
   m_dvChart.Add( EChartSlot::Price, &m_ceTrade );
   m_dvChart.Add( EChartSlot::Price, &m_ceBid );
+  m_dvChart.Add( EChartSlot::Price, &m_ceVolumeAtPrice );
   m_dvChart.Add( EChartSlot::Volume, &m_ceVolume );
+
+  m_sizeTick = pWatch->GetInstrument()->GetMinTick();
+  assert( 0.0 < m_sizeTick );
 
   m_pWatch = pWatch;
   m_pWatch->OnTrade.Add( MakeDelegate( this, &TickStreamModel::HandleTrade ) );
@@ -53,11 +57,19 @@ TickStreamModel::~TickStreamModel() {
 }
 
 void TickStreamModel::HandleTrade( const ou::tf::Trade& trade ) {
+  // needs to be constructed prior to the m_trade assignment
+  const bool direction( m_quote.LeeReady( m_trade.Price(), trade.Price() ) );
+  m_trade = trade;
   m_ceTrade.Append( trade.DateTime(), trade.Price() );
   m_ceVolume.Append( trade.DateTime(), trade.Volume() );
+  const double rounded( std::round( trade.Price() / m_sizeTick ) * m_sizeTick );
+  m_ceVolumeAtPrice.Append(
+    ou::ChartEntryHistogram_v2::Datum( trade.DateTime(), rounded, trade.Volume(), direction )
+  );
 }
 
 void TickStreamModel::HandleQuote( const ou::tf::Quote& quote ) {
+  m_quote = quote;
   m_ceAsk.Append( quote.DateTime(), quote.Ask() );
   m_ceBid.Append( quote.DateTime(), quote.Bid() );
 }
