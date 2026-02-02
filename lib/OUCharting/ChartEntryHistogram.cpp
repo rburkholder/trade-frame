@@ -15,7 +15,7 @@
 /*
  * File:    ChartEntryHistogram.cpp
  * Author:  raymond@burkholder.net
- * Project: SP500
+ * Project: OUCharting
  * Created: October 25, 2025 09:44:03
  */
 
@@ -86,10 +86,6 @@ bool ChartEntryHistogram::AddEntryToChart( XYChart* pXY, structChartAttributes& 
   bool bAdded( false );
   ClearQueue();
 
-  // ToDo:
-  //   stage 1: generic historgram of full time range
-  //   stage 2: histogram of prices within visible chart
-
   attributes.fPostLayout =
     [this,pXY](){
       //DrawArea* da = pXY->getDrawArea();
@@ -132,6 +128,7 @@ bool ChartEntryHistogram::AddEntryToChart( XYChart* pXY, structChartAttributes& 
         {}
       };
 
+      // todo: remove the vector and use the map, similar to ChartEntryHistogramv2
       std::vector<volume_at_price> vVAP;
 
       double volume_max {};

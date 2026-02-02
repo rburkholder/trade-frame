@@ -15,7 +15,7 @@
 /*
  * File:    ChartEntryHistogram.hpp
  * Author:  raymond@burkholder.net
- * Project: SP500
+ * Project: OUCharting
  * Created: October 25, 2025 09:44:03
  */
 
@@ -25,6 +25,8 @@
 #include <TFTimeSeries/DoubleBuffer.h>
 
 #include "ChartEntryBase.h"
+
+// generic histogram of full time range
 
 namespace ou { // One Unified
 
