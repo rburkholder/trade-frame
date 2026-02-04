@@ -132,12 +132,12 @@ void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView ) {
     //m_vpDataViewVisual = m_vpDataViewExtents = ViewPort_t();
     m_vpDataViewExtents = ViewPort_t();
   }
-  if ( m_fDebug ) {
-    m_fDebug( "assignment extents begin", boost::posix_time::to_iso_extended_string( m_vpDataViewExtents.dtBegin ) );
-    m_fDebug( "assignment extents end",   boost::posix_time::to_iso_extended_string( m_vpDataViewExtents.dtEnd ) );
-    m_fDebug( "assignment visual begin",  boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtBegin ) );
-    m_fDebug( "assignment visual end",    boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
-  }
+  //if ( m_fDebug ) {
+  //  m_fDebug( "assignment extents begin", boost::posix_time::to_iso_extended_string( m_vpDataViewExtents.dtBegin ) );
+  //  m_fDebug( "assignment extents end",   boost::posix_time::to_iso_extended_string( m_vpDataViewExtents.dtEnd ) );
+  //  m_fDebug( "assignment visual begin",  boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtBegin ) );
+  //  m_fDebug( "assignment visual end",    boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
+  //}
 }
 
 void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
@@ -163,10 +163,10 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
     assert ( m_vpDataViewVisual.dtBegin <= m_vpDataViewVisual.dtEnd );
 
     //BOOST_LOG_TRIVIAL(trace) << "mouse motion visual: " << m_vpDataViewVisual.dtBegin << ',' << m_vpDataViewVisual.dtEnd;
-    if ( m_fDebug ) {
-      m_fDebug( "motion begin", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtBegin ) );
-      m_fDebug( "motion end", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
-    }
+    //if ( m_fDebug ) {
+    //  m_fDebug( "motion begin", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtBegin ) );
+    //  m_fDebug( "motion end", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
+    //}
 
     //assert( m_vpDataViewVisual.dtBegin >= m_vpDataViewExtents.dtBegin );
     //assert( m_vpDataViewVisual.dtEnd <= m_vpDataViewExtents.dtEnd );
@@ -355,10 +355,10 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
     boost::posix_time::time_duration tdCursorOld; // offset from left
     boost::posix_time::time_duration tdCursorNew; // offset from left
 
-    if ( m_fDebug ) {
-      m_fDebug( "wheel begin", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtBegin ) );
-      m_fDebug( "wheel end", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
-    }
+    //if ( m_fDebug ) {
+    //  m_fDebug( "wheel begin", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtBegin ) );
+    //  m_fDebug( "wheel end", boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
+    //}
 
     if ( m_vpDataViewVisual.HasBoth() ) {
 
