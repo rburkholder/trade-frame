@@ -186,11 +186,11 @@ int OptionChainView::GetVisibleRowCount() const {
   const int ixFirstRow( GetFirstFullyVisibleRow() );
   int nRows {};
   if ( -1 != ixFirstRow ) {
-    int ixRow( ixFirstRow );
     const int cntRows( GetTable()->GetNumberRows() );
+    int ixRow( ixFirstRow );
     while (
-      ( IsVisible( ixRow, OptionChainModel_impl::col_Strike, false ) )
-      && ( cntRows > ixRow )
+         ( cntRows > ixRow )
+      && ( IsVisible( ixRow, OptionChainModel_impl::col_Strike, false ) )
     ) {
       nRows++;
       ixRow++;
