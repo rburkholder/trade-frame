@@ -110,6 +110,7 @@ private:
   void ConnectionsStart();
   void HandleIQFeedConnected( int );
   void HandleIBConnected( int );
+  void HandleIBError( size_t );
   void ConnecttionsStarted();
 
   void SetComposeInstrument();

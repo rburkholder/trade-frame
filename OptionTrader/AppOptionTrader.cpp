@@ -167,7 +167,8 @@ void AppOptionTrader::ConnectionsStart() {
   m_pIQFeed->Connect();
 
   BOOST_LOG_TRIVIAL(info) << "connecting: ib";
-  m_pIB->OnConnected.Add( MakeDelegate( this, & AppOptionTrader::HandleIBConnected ));
+  m_pIB->OnConnected.Add( MakeDelegate( this, &AppOptionTrader::HandleIBConnected ));
+  m_pIB->OnError.Add( MakeDelegate( this, &AppOptionTrader::HandleIBError ) );
   m_pIB->Connect();
 }
 
@@ -184,6 +185,11 @@ void AppOptionTrader::HandleIQFeedConnected( int ) {
     }
   );
   m_pBarHistory->Connect();
+}
+
+void AppOptionTrader::HandleIBError( size_t e ) {
+  BOOST_LOG_TRIVIAL(error) << "error: ib (" << e << "), exiting";
+  wxApp::Exit();
 }
 
 void AppOptionTrader::HandleIBConnected( int ) {
