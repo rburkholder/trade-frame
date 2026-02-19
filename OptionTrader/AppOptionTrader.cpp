@@ -161,6 +161,7 @@ void AppOptionTrader::ConnectionsStart() {
   // ensure both are constructed prior to connecting
   m_pIQFeed = ou::tf::iqfeed::Provider::Factory();
   m_pIB = ou::tf::ib::TWS::Factory();
+  m_pIB->SetClientPort( 7497 ); // default to simulation port
 
   BOOST_LOG_TRIVIAL(info) << "connecting: iqfeed";
   m_pIQFeed->OnConnected.Add( MakeDelegate( this, &AppOptionTrader::HandleIQFeedConnected ) );
