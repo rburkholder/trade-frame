@@ -1077,7 +1077,7 @@ void TWS::error(const int id, const int errorCode, const std::string& errorStrin
       break;
     default:
       BOOST_LOG_TRIVIAL(error) << "IB error (3): " << id << ", " << errorCode << ", " << errorString;
-      OnError( 3 );
+      OnError( errorCode );
       break;
   }
 }

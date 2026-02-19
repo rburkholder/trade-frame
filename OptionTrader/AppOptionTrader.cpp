@@ -189,8 +189,14 @@ void AppOptionTrader::HandleIQFeedConnected( int ) {
 }
 
 void AppOptionTrader::HandleIBError( size_t e ) {
-  BOOST_LOG_TRIVIAL(error) << "error: ib (" << e << "), exiting";
-  wxApp::Exit();
+  switch ( e ) {
+    case 502:
+      BOOST_LOG_TRIVIAL(error) << "error: ib (" << e << "), exiting";
+      wxApp::Exit();
+      break;
+    default:
+      break;
+  }
 }
 
 void AppOptionTrader::HandleIBConnected( int ) {
