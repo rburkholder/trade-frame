@@ -398,6 +398,8 @@ wxGridCellAttr* OptionOrderModel_impl::GetAttr (int row, int col, wxGridCellAttr
     case wxGridCellAttr::wxAttrKind::Default:
       assert( true );
       break;
+    default:
+      break;
   }
 
   return pAttr;
