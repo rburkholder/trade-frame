@@ -1798,7 +1798,7 @@ void TWS::updateAccountValue(const std::string& key, const std::string& val,
   if ( "InitMarginReq" == key ) bEmit = true;
   if ( bEmit ) {
   //if ( false ) {
-    BOOST_LOG_TRIVIAL(info) << "IB account: " << key << ", " << val << ", " << currency << ", " << accountName;
+    BOOST_LOG_TRIVIAL(info) << "IB account " << accountName << ' ' << key << ": " << val << " " << currency;
   }
   AccountValue av( key, val, currency, accountName );
   if ( 0 != OnAccountValueHandler ) OnAccountValueHandler( av );
