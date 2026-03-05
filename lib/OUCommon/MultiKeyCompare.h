@@ -39,19 +39,17 @@ struct MultiKeyCompare {
     return ( !(this < rhs) && !(rhs < this) );
   }
 
-  const Key1& GetKey1( void ) const { return key1; };
-  const Key2& GetKey2( void ) const { return key2; };
+  const Key1& GetKey1() const { return key1; };
+  const Key2& GetKey2() const { return key2; };
+
+  friend std::ostream& operator<<( std::ostream& os, const MultiKeyCompare& mkc ) {
+    return os << mkc.key1 << "," << mkc.key2;
+  }
 
 private:
-  friend std::ostream& operator<<( std::ostream&, const MultiKeyCompare<Key1, Key2>& );  // 2015/02/21 rebuild and notice warning here
   Key1 key1;
   Key2 key2;
 };
-
-template<typename Key>
-std::ostream& operator<<( std::ostream& os, const Key& key ) {
-  return os << key.key1 << "," << key.key2;
-}
 
 } // namespace ou
 
