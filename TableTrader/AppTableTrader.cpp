@@ -25,13 +25,13 @@
 #include <Wt/WTimer.h>
 #include <Wt/WAnchor.h>
 #include <Wt/WLineEdit.h>
-//#include <Wt/WTextArea.h>
 #include <Wt/WGroupBox.h>
 #include <Wt/WComboBox.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WButtonGroup.h>
 #include <Wt/WRadioButton.h>
 #include <Wt/WSelectionBox.h>
+#include <Wt/WPasswordEdit.h>
 #include <Wt/WContainerWidget.h>
 
 #include "AppTableTrader.hpp"
@@ -277,8 +277,7 @@ void AppTableTrader::Page_Login( Wt::WContainerWidget* pcw ) {
 
       Wt::WContainerWidget* pContainerLoginPassword = pContainerFields->addWidget( std::make_unique<Wt::WContainerWidget>() );
       Wt::WLabel* pLabelPassWord = pContainerLoginPassword->addWidget( std::make_unique<Wt::WLabel>( "Password: " ) );
-      Wt::WLineEdit* pEditPassWord = pContainerLoginPassword->addWidget( std::make_unique<Wt::WLineEdit>() );
-      pEditPassWord->setEchoMode( Wt::EchoMode::Password );
+      Wt::WPasswordEdit* pEditPassWord = pContainerLoginPassword->addWidget( std::make_unique<Wt::WPasswordEdit>() );
       pLabelPassWord->setBuddy( pEditPassWord );
 
     Wt::WContainerWidget* pContainerButtons = pContainerLoginFrame->addWidget( std::make_unique<Wt::WContainerWidget>() );
