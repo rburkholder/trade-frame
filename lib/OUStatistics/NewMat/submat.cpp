@@ -1,8 +1,4 @@
-/// \ingroup newmat
-///@{
-
-/// \file submat.cpp
-/// Submatrix manipulation.
+//$$ submat.cpp                         submatrices
 
 // Copyright (C) 1991,2,3,4: R B Davies
 
@@ -24,64 +20,125 @@ namespace NEWMAT {
 
 /****************************** submatrices *********************************/
 
-GetSubMatrix BaseMatrix::submatrix(int first_row, int last_row, int first_col,
+#ifdef TEMPS_DESTROYED_QUICKLY
+GetSubMatrix& BaseMatrix::SubMatrix(int first_row, int last_row, int first_col,
    int last_col) const
+#else
+GetSubMatrix BaseMatrix::SubMatrix(int first_row, int last_row, int first_col,
+   int last_col) const
+#endif
 {
    REPORT
-   Tracer tr("submatrix");
+   Tracer tr("SubMatrix");
    int a = first_row - 1; int b = last_row - first_row + 1;
    int c = first_col - 1; int d = last_col - first_col + 1;
    if (a<0 || b<0 || c<0 || d<0) Throw(SubMatrixDimensionException());
                              // allow zero rows or columns
+#ifdef TEMPS_DESTROYED_QUICKLY
+   GetSubMatrix* x = new GetSubMatrix(this, a, b, c, d, false);
+   MatrixErrorNoSpace(x);
+   return *x;
+#else
    return GetSubMatrix(this, a, b, c, d, false);
+#endif
 }
 
-GetSubMatrix BaseMatrix::sym_submatrix(int first_row, int last_row) const
+#ifdef TEMPS_DESTROYED_QUICKLY
+GetSubMatrix& BaseMatrix::SymSubMatrix(int first_row, int last_row) const
+#else
+GetSubMatrix BaseMatrix::SymSubMatrix(int first_row, int last_row) const
+#endif
 {
    REPORT
-   Tracer tr("sym_submatrix");
+   Tracer tr("SubMatrix(symmetric)");
    int a = first_row - 1; int b = last_row - first_row + 1;
    if (a<0 || b<0) Throw(SubMatrixDimensionException());
                              // allow zero rows or columns
+#ifdef TEMPS_DESTROYED_QUICKLY
+   GetSubMatrix* x = new GetSubMatrix(this, a, b, a, b, true);
+   MatrixErrorNoSpace(x);
+   return *x;
+#else
    return GetSubMatrix( this, a, b, a, b, true);
+#endif
 }
 
-GetSubMatrix BaseMatrix::row(int first_row) const
+#ifdef TEMPS_DESTROYED_QUICKLY
+GetSubMatrix& BaseMatrix::Row(int first_row) const
+#else
+GetSubMatrix BaseMatrix::Row(int first_row) const
+#endif
 {
    REPORT
    Tracer tr("SubMatrix(row)");
    int a = first_row - 1;
    if (a<0) Throw(SubMatrixDimensionException());
+#ifdef TEMPS_DESTROYED_QUICKLY
+   GetSubMatrix* x = new GetSubMatrix(this, a, 1, 0, -1, false);
+   MatrixErrorNoSpace(x);
+   return *x;
+#else
    return GetSubMatrix(this, a, 1, 0, -1, false);
+#endif
 }
 
-GetSubMatrix BaseMatrix::rows(int first_row, int last_row) const
+#ifdef TEMPS_DESTROYED_QUICKLY
+GetSubMatrix& BaseMatrix::Rows(int first_row, int last_row) const
+#else
+GetSubMatrix BaseMatrix::Rows(int first_row, int last_row) const
+#endif
 {
    REPORT
    Tracer tr("SubMatrix(rows)");
    int a = first_row - 1; int b = last_row - first_row + 1;
    if (a<0 || b<0) Throw(SubMatrixDimensionException());
                              // allow zero rows or columns
+#ifdef TEMPS_DESTROYED_QUICKLY
+   GetSubMatrix* x = new GetSubMatrix(this, a, b, 0, -1, false);
+   MatrixErrorNoSpace(x);
+   return *x;
+#else
    return GetSubMatrix(this, a, b, 0, -1, false);
+#endif
 }
 
-GetSubMatrix BaseMatrix::column(int first_col) const
+#ifdef TEMPS_DESTROYED_QUICKLY
+GetSubMatrix& BaseMatrix::Column(int first_col) const
+#else
+GetSubMatrix BaseMatrix::Column(int first_col) const
+#endif
 {
    REPORT
    Tracer tr("SubMatrix(column)");
    int c = first_col - 1;
    if (c<0) Throw(SubMatrixDimensionException());
+#ifdef TEMPS_DESTROYED_QUICKLY
+   GetSubMatrix* x = new GetSubMatrix(this, 0, -1, c, 1, false);
+   MatrixErrorNoSpace(x);
+   return *x;
+#else
    return GetSubMatrix(this, 0, -1, c, 1, false);
+#endif
 }
 
-GetSubMatrix BaseMatrix::columns(int first_col, int last_col) const
+#ifdef TEMPS_DESTROYED_QUICKLY
+GetSubMatrix& BaseMatrix::Columns(int first_col, int last_col) const
+#else
+GetSubMatrix BaseMatrix::Columns(int first_col, int last_col) const
+#endif
 {
    REPORT
    Tracer tr("SubMatrix(columns)");
    int c = first_col - 1; int d = last_col - first_col + 1;
    if (c<0 || d<0) Throw(SubMatrixDimensionException());
                              // allow zero rows or columns
+#ifdef TEMPS_DESTROYED_QUICKLY
+   GetSubMatrix* x = new GetSubMatrix(this, 0, -1, c, d, false);
+   MatrixErrorNoSpace(x);
+   return *x;
+#else
    return GetSubMatrix(this, 0, -1, c, d, false);
+#endif
 }
 
 void GetSubMatrix::SetUpLHS()
@@ -118,11 +175,17 @@ void GetSubMatrix::operator<<(const BaseMatrix& bmx)
          sub.Copy(mrx); mr.Next(); mrx.Next();
       }
       gmx->tDelete();
+#ifdef TEMPS_DESTROYED_QUICKLY
+      delete this;
+#endif
    }
 
    CatchAll
    {
       if (gmx) gmx->tDelete();
+#ifdef TEMPS_DESTROYED_QUICKLY
+      delete this;
+#endif
       ReThrow;
    }
 }
@@ -139,8 +202,8 @@ void GetSubMatrix::operator=(const BaseMatrix& bmx)
          Throw(IncompatibleDimensionsException());
       LoadAndStoreFlag lasf =
          (  row_skip == col_skip
-            && gm->type().is_symmetric()
-            && gmx->type().is_symmetric() )
+            && gm->Type().IsSymmetric()
+            && gmx->Type().IsSymmetric() )
         ? LoadOnEntry+DirectPart
         : LoadOnEntry;
       MatrixRow mrx(gmx, lasf);
@@ -153,19 +216,25 @@ void GetSubMatrix::operator=(const BaseMatrix& bmx)
          sub.CopyCheck(mrx); mr.Next(); mrx.Next();
       }
       gmx->tDelete();
+#ifdef TEMPS_DESTROYED_QUICKLY
+      delete this;
+#endif
    }
 
    CatchAll
    {
       if (gmx) gmx->tDelete();
+#ifdef TEMPS_DESTROYED_QUICKLY
+      delete this;
+#endif
       ReThrow;
    }
 }
 
-void GetSubMatrix::operator<<(const double* r)
+void GetSubMatrix::operator<<(const Real* r)
 {
    REPORT
-   Tracer tr("SubMatrix(<<double*)");
+   Tracer tr("SubMatrix(<<Real*)");
    SetUpLHS();
    if (row_skip+row_number > gm->Nrows() || col_skip+col_number > gm->Ncols())
       Throw(SubMatrixDimensionException());
@@ -177,40 +246,9 @@ void GetSubMatrix::operator<<(const double* r)
       mr.SubRowCol(sub, col_skip, col_number);   // put values in sub
       sub.Copy(r); mr.Next();
    }
-}
-
-void GetSubMatrix::operator<<(const float* r)
-{
-   REPORT
-   Tracer tr("SubMatrix(<<float*)");
-   SetUpLHS();
-   if (row_skip+row_number > gm->Nrows() || col_skip+col_number > gm->Ncols())
-      Throw(SubMatrixDimensionException());
-   MatrixRow mr(gm, LoadOnEntry+StoreOnExit+DirectPart, row_skip);
-                                  // do need LoadOnEntry
-   MatrixRowCol sub; int i = row_number;
-   while (i--)
-   {
-      mr.SubRowCol(sub, col_skip, col_number);   // put values in sub
-      sub.Copy(r); mr.Next();
-   }
-}
-
-void GetSubMatrix::operator<<(const int* r)
-{
-   REPORT
-   Tracer tr("SubMatrix(<<int*)");
-   SetUpLHS();
-   if (row_skip+row_number > gm->Nrows() || col_skip+col_number > gm->Ncols())
-      Throw(SubMatrixDimensionException());
-   MatrixRow mr(gm, LoadOnEntry+StoreOnExit+DirectPart, row_skip);
-                                  // do need LoadOnEntry
-   MatrixRowCol sub; int i = row_number;
-   while (i--)
-   {
-      mr.SubRowCol(sub, col_skip, col_number);   // put values in sub
-      sub.Copy(r); mr.Next();
-   }
+#ifdef TEMPS_DESTROYED_QUICKLY
+   delete this;
+#endif
 }
 
 void GetSubMatrix::operator=(Real r)
@@ -226,9 +264,12 @@ void GetSubMatrix::operator=(Real r)
       mr.SubRowCol(sub, col_skip, col_number);   // put values in sub
       sub.Copy(r); mr.Next();
    }
+#ifdef TEMPS_DESTROYED_QUICKLY
+   delete this;
+#endif
 }
 
-void GetSubMatrix::inject(const GeneralMatrix& gmx)
+void GetSubMatrix::Inject(const GeneralMatrix& gmx)
 {
    REPORT
    Tracer tr("SubMatrix(inject)");
@@ -244,6 +285,9 @@ void GetSubMatrix::inject(const GeneralMatrix& gmx)
       mr.SubRowCol(sub, col_skip, col_number);   // put values in sub
       sub.Inject(mrx); mr.Next(); mrx.Next();
    }
+#ifdef TEMPS_DESTROYED_QUICKLY
+   delete this;
+#endif
 }
 
 void GetSubMatrix::operator+=(const BaseMatrix& bmx)
@@ -256,9 +300,6 @@ void GetSubMatrix::operator+=(const BaseMatrix& bmx)
       SetUpLHS(); gmx = ((BaseMatrix&)bmx).Evaluate();
       if (row_number != gmx->Nrows() || col_number != gmx->Ncols())
          Throw(IncompatibleDimensionsException());
-      if (gm->type().is_symmetric() && 
-         ( ! gmx->type().is_symmetric() || row_skip != col_skip) )
-         Throw(ProgramException("Illegal operation on symmetric"));
       MatrixRow mrx(gmx, LoadOnEntry);
       MatrixRow mr(gm, LoadOnEntry+StoreOnExit+DirectPart, row_skip);
                                      // do need LoadOnEntry
@@ -270,43 +311,17 @@ void GetSubMatrix::operator+=(const BaseMatrix& bmx)
          sub.Add(mrx); mr.Next(); mrx.Next();
       }
       gmx->tDelete();
+#ifdef TEMPS_DESTROYED_QUICKLY
+      delete this;
+#endif
    }
 
    CatchAll
    {
       if (gmx) gmx->tDelete();
-      ReThrow;
-   }
-}
-
-void GetSubMatrix::SP_eq(const BaseMatrix& bmx)
-{
-   REPORT
-   Tracer tr("SubMatrix(SP_eq)"); GeneralMatrix* gmx = 0;
-   // MatrixConversionCheck mcc;         // Check for loss of info
-   Try
-   {
-      SetUpLHS(); gmx = ((BaseMatrix&)bmx).Evaluate();
-      if (row_number != gmx->Nrows() || col_number != gmx->Ncols())
-         Throw(IncompatibleDimensionsException());
-      if (gm->type().is_symmetric() && 
-         ( ! gmx->type().is_symmetric() || row_skip != col_skip) )
-         Throw(ProgramException("Illegal operation on symmetric"));
-      MatrixRow mrx(gmx, LoadOnEntry);
-      MatrixRow mr(gm, LoadOnEntry+StoreOnExit+DirectPart, row_skip);
-                                     // do need LoadOnEntry
-      MatrixRowCol sub; int i = row_number;
-      while (i--)
-      {
-         mr.SubRowCol(sub, col_skip, col_number);   // put values in sub
-         sub.Multiply(mrx); mr.Next(); mrx.Next();
-      }
-      gmx->tDelete();
-   }
-
-   CatchAll
-   {
-      if (gmx) gmx->tDelete();
+#ifdef TEMPS_DESTROYED_QUICKLY
+      delete this;
+#endif
       ReThrow;
    }
 }
@@ -321,9 +336,6 @@ void GetSubMatrix::operator-=(const BaseMatrix& bmx)
       SetUpLHS(); gmx = ((BaseMatrix&)bmx).Evaluate();
       if (row_number != gmx->Nrows() || col_number != gmx->Ncols())
          Throw(IncompatibleDimensionsException());
-      if (gm->type().is_symmetric() && 
-         ( ! gmx->type().is_symmetric() || row_skip != col_skip) )
-         Throw(ProgramException("Illegal operation on symmetric"));
       MatrixRow mrx(gmx, LoadOnEntry);
       MatrixRow mr(gm, LoadOnEntry+StoreOnExit+DirectPart, row_skip);
                                      // do need LoadOnEntry
@@ -335,11 +347,17 @@ void GetSubMatrix::operator-=(const BaseMatrix& bmx)
          sub.Sub(mrx); mr.Next(); mrx.Next();
       }
       gmx->tDelete();
+#ifdef TEMPS_DESTROYED_QUICKLY
+      delete this;
+#endif
    }
 
    CatchAll
    {
       if (gmx) gmx->tDelete();
+#ifdef TEMPS_DESTROYED_QUICKLY
+      delete this;
+#endif
       ReThrow;
    }
 }
@@ -361,10 +379,16 @@ void GetSubMatrix::operator+=(Real r)
          sub.Check();                               // check for loss of info
          sub.Add(r); mr.Next();
       }
+#ifdef TEMPS_DESTROYED_QUICKLY
+      delete this;
+#endif
    }
 
    CatchAll
    {
+#ifdef TEMPS_DESTROYED_QUICKLY
+      delete this;
+#endif
       ReThrow;
    }
 }
@@ -385,10 +409,16 @@ void GetSubMatrix::operator*=(Real r)
          mr.SubRowCol(sub, col_skip, col_number);   // put values in sub
          sub.Multiply(r); mr.Next();
       }
+#ifdef TEMPS_DESTROYED_QUICKLY
+      delete this;
+#endif
    }
 
    CatchAll
    {
+#ifdef TEMPS_DESTROYED_QUICKLY
+      delete this;
+#endif
       ReThrow;
    }
 }
@@ -396,6 +426,4 @@ void GetSubMatrix::operator*=(Real r)
 #ifdef use_namespace
 }
 #endif
-
-///@}
 

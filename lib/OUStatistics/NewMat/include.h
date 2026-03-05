@@ -40,12 +40,9 @@
 
 //#define use_float_h                   // use float.h for precision data
 
-
 //#define HAS_INT64                     // if unsigned _int64 is recognised
                                         // used by newran03
-
-//#define set_unix_options              // set if running UNIX or LINUX
-
+                                        
 // comment out next line if Exception causes a problem
 #define TypeDefException
 
@@ -64,21 +61,9 @@
    #define ios_format_flags ios::fmtflags
 #endif
 
-// for Intel C++ for Windows
-#if defined __ICL
-   #define _STANDARD_                   // use standard library
-   #define ios_format_flags ios::fmtflags
-#endif
-
 // for Microsoft Visual C++ 7 and above (and Intel simulating these)
 #if defined _MSC_VER && _MSC_VER >= 1300
    #define _STANDARD_                   // use standard library
-#endif
-
-// for Borland Builder C++ 2006 and above
-#if defined __BCPLUSPLUS__ && __BCPLUSPLUS__ >= 0x0570
-   #define _STANDARD_                   // use standard library
-   #define ios_format_flags ios::fmtflags
 #endif
 
 

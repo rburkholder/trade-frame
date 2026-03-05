@@ -12,16 +12,12 @@
 
 // Copyright (C) 1993,4,6: R B Davies
 
-// bypass C4996 20140802
-#ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-
 
 #define WANT_STREAM                    // include.h will get stream fns
 #define WANT_STRING
 
 #include "include.h"                   // include standard files
+
 
 #include "myexcept.h"                  // for exception handling
 
@@ -235,6 +231,12 @@ void Terminate()
    exit(1);
 }
 
+void Exit(const char* c)
+{
+    cout << "\n\nExit called\n";
+    cout << c << "\n";
+    exit(1);
+}
 
 
 #ifdef DO_FREE_CHECK

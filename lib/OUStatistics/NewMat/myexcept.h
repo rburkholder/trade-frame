@@ -58,6 +58,8 @@ namespace RBD_COMMON {
 
 void Terminate();
 
+void Exit(const char* c);
+
 
 //********** classes for setting up exceptions and reporting ************//
 
@@ -74,7 +76,6 @@ public:
    static void PrintTrace();             // for printing trace
    static void AddTrace();               // insert trace in exception record
    static Tracer* last;                  // points to Tracer list
-   static void clear() {}                // for compatibility
    friend class BaseException;
 };
 
@@ -93,7 +94,6 @@ public:
    BaseException(const char* a_what = 0);
    static const char* what() { return what_error; }
                                          // for getting error message
-   static void clear() {}                // for compatibility
 };
 
 #ifdef TypeDefException

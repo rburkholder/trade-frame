@@ -1,13 +1,6 @@
-/// \ingroup newmat
-///@{
-
-/// \file newmat4.cpp
-/// Constructors, resize, basic utilities, SimpleIntArray.
-
+//$$ newmat4.cpp       Constructors, ReSize, basic utilities
 
 // Copyright (C) 1991,2,3,4,8,9: R B Davies
-
-//#define WANT_STREAM
 
 #include "include.h"
 
@@ -38,12 +31,12 @@ static int tristore(int n)                    // elements in triangular matrix
 // **************************** constructors ***************************/
 
 GeneralMatrix::GeneralMatrix()
-{ store=0; storage=0; nrows_val=0; ncols_val=0; tag_val=-1; }
+{ store=0; storage=0; nrows=0; ncols=0; tag=-1; }
 
 GeneralMatrix::GeneralMatrix(ArrayLengthSpecifier s)
 {
    REPORT
-   storage=s.Value(); tag_val=-1;
+   storage=s.Value(); tag=-1;
    if (storage)
    {
       store = new Real [storage]; MatrixErrorNoSpace(store);
@@ -53,26 +46,22 @@ GeneralMatrix::GeneralMatrix(ArrayLengthSpecifier s)
 }
 
 Matrix::Matrix(int m, int n) : GeneralMatrix(m*n)
-{ REPORT nrows_val=m; ncols_val=n; }
-
-SquareMatrix::SquareMatrix(ArrayLengthSpecifier n)
-   : Matrix(n.Value(),n.Value())
-{ REPORT }
+{ REPORT nrows=m; ncols=n; }
 
 SymmetricMatrix::SymmetricMatrix(ArrayLengthSpecifier n)
    : GeneralMatrix(tristore(n.Value()))
-{ REPORT nrows_val=n.Value(); ncols_val=n.Value(); }
+{ REPORT nrows=n.Value(); ncols=n.Value(); }
 
 UpperTriangularMatrix::UpperTriangularMatrix(ArrayLengthSpecifier n)
    : GeneralMatrix(tristore(n.Value()))
-{ REPORT nrows_val=n.Value(); ncols_val=n.Value(); }
+{ REPORT nrows=n.Value(); ncols=n.Value(); }
 
 LowerTriangularMatrix::LowerTriangularMatrix(ArrayLengthSpecifier n)
    : GeneralMatrix(tristore(n.Value()))
-{ REPORT nrows_val=n.Value(); ncols_val=n.Value(); }
+{ REPORT nrows=n.Value(); ncols=n.Value(); }
 
 DiagonalMatrix::DiagonalMatrix(ArrayLengthSpecifier m) : GeneralMatrix(m)
-{ REPORT nrows_val=m.Value(); ncols_val=m.Value(); }
+{ REPORT nrows=m.Value(); ncols=m.Value(); }
 
 Matrix::Matrix(const BaseMatrix& M)
 {
@@ -82,33 +71,9 @@ Matrix::Matrix(const BaseMatrix& M)
    GetMatrix(gmx);
 }
 
-SquareMatrix::SquareMatrix(const BaseMatrix& M) : Matrix(M)
-{
-   REPORT
-   if (ncols_val != nrows_val)
-   {
-      Tracer tr("SquareMatrix");
-      Throw(NotSquareException(*this));
-   }
-}
-
-
-SquareMatrix::SquareMatrix(const Matrix& gm)
-{
-   REPORT
-   if (gm.ncols_val != gm.nrows_val)
-   {
-      Tracer tr("SquareMatrix(Matrix)");
-      Throw(NotSquareException(gm));
-   }
-   GetMatrix(&gm);
-}
-
-
 RowVector::RowVector(const BaseMatrix& M) : Matrix(M)
 {
-   REPORT
-   if (nrows_val!=1)
+   if (nrows!=1)
    {
       Tracer tr("RowVector");
       Throw(VectorException(*this));
@@ -117,8 +82,7 @@ RowVector::RowVector(const BaseMatrix& M) : Matrix(M)
 
 ColumnVector::ColumnVector(const BaseMatrix& M) : Matrix(M)
 {
-   REPORT
-   if (ncols_val!=1)
+   if (ncols!=1)
    {
       Tracer tr("ColumnVector");
       Throw(VectorException(*this));
@@ -179,97 +143,72 @@ CroutMatrix::CroutMatrix(const BaseMatrix& m)
    REPORT
    Tracer tr("CroutMatrix");
    indx = 0;                     // in case of exception at next line
-   GeneralMatrix* gm = ((BaseMatrix&)m).Evaluate();
-   if (gm->nrows_val!=gm->ncols_val)
-      { gm->tDelete(); Throw(NotSquareException(*gm)); }
-   if (gm->type() == MatrixType::Ct)
-      { REPORT  ((CroutMatrix*)gm)->get_aux(*this); GetMatrix(gm); }
-   else
-   {
-      REPORT
-      GeneralMatrix* gm1 = gm->Evaluate(MatrixType::Rt);
-      GetMatrix(gm1);
-      d=true; sing=false;
-      indx=new int [nrows_val]; MatrixErrorNoSpace(indx);
-      MONITOR_INT_NEW("Index (CroutMat)",nrows_val,indx)
-      ludcmp();
-   }
-}
-
-// could we use SetParameters instead of this
-void CroutMatrix::get_aux(CroutMatrix& X)
-{
-   X.d = d; X.sing = sing;
-   if (tag_val == 0 || tag_val == 1) // reuse the array 
-      { REPORT  X.indx = indx; indx = 0; d = true; sing = true; return; }
-   else if (nrows_val == 0)
-      { REPORT indx = 0; d = true; sing = true; return; }
-   else                              // copy the array
-   { 
-      REPORT
-      Tracer tr("CroutMatrix::get_aux");
-      int *ix = new int [nrows_val]; MatrixErrorNoSpace(ix);
-      MONITOR_INT_NEW("Index (CM::get_aux)", nrows_val, ix)
-      int n = nrows_val; int* i = ix; int* j = indx;
-      while(n--) *i++ = *j++;
-      X.indx = ix;
-   }
-}
-
-CroutMatrix::CroutMatrix(const CroutMatrix& gm) : GeneralMatrix()
-{
-   REPORT
-   Tracer tr("CroutMatrix(const CroutMatrix&)");
-   ((CroutMatrix&)gm).get_aux(*this);
-   GetMatrix(&gm);
+   GeneralMatrix* gm = ((BaseMatrix&)m).Evaluate(MatrixType::Rt);
+   GetMatrix(gm);
+   if (nrows!=ncols) { CleanUp(); Throw(NotSquareException(*gm)); }
+   d=true; sing=false;
+   indx=new int [nrows]; MatrixErrorNoSpace(indx);
+   MONITOR_INT_NEW("Index (CroutMat)",nrows,indx)
+   ludcmp();
 }
 
 CroutMatrix::~CroutMatrix()
 {
-   MONITOR_INT_DELETE("Index (CroutMat)",nrows_val,indx)
+   MONITOR_INT_DELETE("Index (CroutMat)",nrows,indx)
    delete [] indx;
 }
 
-//ReturnMatrix::ReturnMatrix(GeneralMatrix& gmx)
+//ReturnMatrixX::ReturnMatrixX(GeneralMatrix& gmx)
 //{
 //   REPORT
 //   gm = gmx.Image(); gm->ReleaseAndDelete();
 //}
 
+#ifndef TEMPS_DESTROYED_QUICKLY_R
 
-GeneralMatrix::operator ReturnMatrix() const
+GeneralMatrix::operator ReturnMatrixX() const
 {
    REPORT
    GeneralMatrix* gm = Image(); gm->ReleaseAndDelete();
-   return ReturnMatrix(gm);
+   return ReturnMatrixX(gm);
 }
 
+#else
 
-
-ReturnMatrix GeneralMatrix::for_return() const
+GeneralMatrix::operator ReturnMatrixX&() const
 {
    REPORT
    GeneralMatrix* gm = Image(); gm->ReleaseAndDelete();
-   return ReturnMatrix(gm);
+   ReturnMatrixX* x = new ReturnMatrixX(gm);
+   MatrixErrorNoSpace(x); return *x;
 }
-
-// ************ Constructors for use with NR in C++ interface ***********
-
-#ifdef SETUP_C_SUBSCRIPTS
-
-Matrix::Matrix(Real a, int m, int n) : GeneralMatrix(m * n)
-   { REPORT nrows_val=m; ncols_val=n; operator=(a); }
-   
-Matrix::Matrix(const Real* a, int m, int n) : GeneralMatrix(m * n)
-   { REPORT nrows_val=m; ncols_val=n; *this << a; }
 
 #endif
 
+#ifndef TEMPS_DESTROYED_QUICKLY_R
 
+ReturnMatrixX GeneralMatrix::ForReturn() const
+{
+   REPORT
+   GeneralMatrix* gm = Image(); gm->ReleaseAndDelete();
+   return ReturnMatrixX(gm);
+}
 
-// ************************** resize matrices ***************************/
+#else
 
-void GeneralMatrix::resize(int nr, int nc, int s)
+ReturnMatrixX& GeneralMatrix::ForReturn() const
+{
+   REPORT
+   GeneralMatrix* gm = Image(); gm->ReleaseAndDelete();
+   ReturnMatrixX* x = new ReturnMatrixX(gm);
+   MatrixErrorNoSpace(x); return *x;
+}
+
+#endif
+
+// ************************** ReSize matrices ***************************/
+
+void GeneralMatrix::ReSize(int nr, int nc, int s)
 {
    REPORT
    if (store)
@@ -277,7 +216,7 @@ void GeneralMatrix::resize(int nr, int nc, int s)
       MONITOR_REAL_DELETE("Free (ReDimensi)",storage,store)
       delete [] store;
    }
-   storage=s; nrows_val=nr; ncols_val=nc; tag_val=-1;
+   storage=s; nrows=nr; ncols=nc; tag=-1;
    if (s)
    {
       store = new Real [storage]; MatrixErrorNoSpace(store);
@@ -286,339 +225,132 @@ void GeneralMatrix::resize(int nr, int nc, int s)
    else store = 0;
 }
 
-void Matrix::resize(int nr, int nc)
-{ REPORT GeneralMatrix::resize(nr,nc,nr*nc); }
+void Matrix::ReSize(int nr, int nc)
+{ REPORT GeneralMatrix::ReSize(nr,nc,nr*nc); }
 
-void SquareMatrix::resize(int n)
-{ REPORT GeneralMatrix::resize(n,n,n*n); }
+void SymmetricMatrix::ReSize(int nr)
+{ REPORT GeneralMatrix::ReSize(nr,nr,tristore(nr)); }
 
-void SquareMatrix::resize(int nr, int nc)
+void UpperTriangularMatrix::ReSize(int nr)
+{ REPORT GeneralMatrix::ReSize(nr,nr,tristore(nr)); }
+
+void LowerTriangularMatrix::ReSize(int nr)
+{ REPORT GeneralMatrix::ReSize(nr,nr,tristore(nr)); }
+
+void DiagonalMatrix::ReSize(int nr)
+{ REPORT GeneralMatrix::ReSize(nr,nr,nr); }
+
+void RowVector::ReSize(int nc)
+{ REPORT GeneralMatrix::ReSize(1,nc,nc); }
+
+void ColumnVector::ReSize(int nr)
+{ REPORT GeneralMatrix::ReSize(nr,1,nr); }
+
+void RowVector::ReSize(int nr, int nc)
 {
-   REPORT
-   Tracer tr("SquareMatrix::resize");
-   if (nc != nr) Throw(NotSquareException(*this));
-   GeneralMatrix::resize(nr,nc,nr*nc);
-}
-
-void SymmetricMatrix::resize(int nr)
-{ REPORT GeneralMatrix::resize(nr,nr,tristore(nr)); }
-
-void UpperTriangularMatrix::resize(int nr)
-{ REPORT GeneralMatrix::resize(nr,nr,tristore(nr)); }
-
-void LowerTriangularMatrix::resize(int nr)
-{ REPORT GeneralMatrix::resize(nr,nr,tristore(nr)); }
-
-void DiagonalMatrix::resize(int nr)
-{ REPORT GeneralMatrix::resize(nr,nr,nr); }
-
-void RowVector::resize(int nc)
-{ REPORT GeneralMatrix::resize(1,nc,nc); }
-
-void ColumnVector::resize(int nr)
-{ REPORT GeneralMatrix::resize(nr,1,nr); }
-
-void RowVector::resize(int nr, int nc)
-{
-   Tracer tr("RowVector::resize");
+   Tracer tr("RowVector::ReSize");
    if (nr != 1) Throw(VectorException(*this));
-   REPORT GeneralMatrix::resize(1,nc,nc);
+   REPORT GeneralMatrix::ReSize(1,nc,nc);
 }
 
-void ColumnVector::resize(int nr, int nc)
+void ColumnVector::ReSize(int nr, int nc)
 {
-   Tracer tr("ColumnVector::resize");
+   Tracer tr("ColumnVector::ReSize");
    if (nc != 1) Throw(VectorException(*this));
-   REPORT GeneralMatrix::resize(nr,1,nr);
+   REPORT GeneralMatrix::ReSize(nr,1,nr);
 }
 
-void IdentityMatrix::resize(int nr)
-{ REPORT GeneralMatrix::resize(nr,nr,1); *store = 1; }
+void IdentityMatrix::ReSize(int nr)
+{ REPORT GeneralMatrix::ReSize(nr,nr,1); *store = 1; }
 
 
-void Matrix::resize(const GeneralMatrix& A)
-{ REPORT  resize(A.Nrows(), A.Ncols()); }
+void Matrix::ReSize(const GeneralMatrix& A)
+{ REPORT  ReSize(A.Nrows(), A.Ncols()); }
 
-void SquareMatrix::resize(const GeneralMatrix& A)
+void nricMatrix::ReSize(const GeneralMatrix& A)
+{ REPORT  ReSize(A.Nrows(), A.Ncols()); }
+
+void ColumnVector::ReSize(const GeneralMatrix& A)
+{ REPORT  ReSize(A.Nrows(), A.Ncols()); }
+
+void RowVector::ReSize(const GeneralMatrix& A)
+{ REPORT  ReSize(A.Nrows(), A.Ncols()); }
+
+void SymmetricMatrix::ReSize(const GeneralMatrix& A)
 {
    REPORT
    int n = A.Nrows();
    if (n != A.Ncols())
    {
-      Tracer tr("SquareMatrix::resize(GM)");
+      Tracer tr("SymmetricMatrix::ReSize(GM)");
       Throw(NotSquareException(*this));
    }
-   resize(n);
+   ReSize(n);
 }
 
-void nricMatrix::resize(const GeneralMatrix& A)
-{ REPORT  resize(A.Nrows(), A.Ncols()); }
-
-void ColumnVector::resize(const GeneralMatrix& A)
-{ REPORT  resize(A.Nrows(), A.Ncols()); }
-
-void RowVector::resize(const GeneralMatrix& A)
-{ REPORT  resize(A.Nrows(), A.Ncols()); }
-
-void SymmetricMatrix::resize(const GeneralMatrix& A)
+void DiagonalMatrix::ReSize(const GeneralMatrix& A)
 {
    REPORT
    int n = A.Nrows();
    if (n != A.Ncols())
    {
-      Tracer tr("SymmetricMatrix::resize(GM)");
+      Tracer tr("DiagonalMatrix::ReSize(GM)");
       Throw(NotSquareException(*this));
    }
-   resize(n);
+   ReSize(n);
 }
 
-void DiagonalMatrix::resize(const GeneralMatrix& A)
+void UpperTriangularMatrix::ReSize(const GeneralMatrix& A)
 {
    REPORT
    int n = A.Nrows();
    if (n != A.Ncols())
    {
-      Tracer tr("DiagonalMatrix::resize(GM)");
+      Tracer tr("UpperTriangularMatrix::ReSize(GM)");
       Throw(NotSquareException(*this));
    }
-   resize(n);
+   ReSize(n);
 }
 
-void UpperTriangularMatrix::resize(const GeneralMatrix& A)
+void LowerTriangularMatrix::ReSize(const GeneralMatrix& A)
 {
    REPORT
    int n = A.Nrows();
    if (n != A.Ncols())
    {
-      Tracer tr("UpperTriangularMatrix::resize(GM)");
+      Tracer tr("LowerTriangularMatrix::ReSize(GM)");
       Throw(NotSquareException(*this));
    }
-   resize(n);
+   ReSize(n);
 }
 
-void LowerTriangularMatrix::resize(const GeneralMatrix& A)
+void IdentityMatrix::ReSize(const GeneralMatrix& A)
 {
    REPORT
    int n = A.Nrows();
    if (n != A.Ncols())
    {
-      Tracer tr("LowerTriangularMatrix::resize(GM)");
+      Tracer tr("IdentityMatrix::ReSize(GM)");
       Throw(NotSquareException(*this));
    }
-   resize(n);
+   ReSize(n);
 }
 
-void IdentityMatrix::resize(const GeneralMatrix& A)
+void GeneralMatrix::ReSize(const GeneralMatrix&)
 {
    REPORT
-   int n = A.Nrows();
-   if (n != A.Ncols())
-   {
-      Tracer tr("IdentityMatrix::resize(GM)");
-      Throw(NotSquareException(*this));
-   }
-   resize(n);
+   Tracer tr("GeneralMatrix::ReSize(GM)");
+   Throw(NotDefinedException("ReSize", "this type of matrix"));
 }
 
-void GeneralMatrix::resize(const GeneralMatrix&)
-{
-   REPORT
-   Tracer tr("GeneralMatrix::resize(GM)");
-   Throw(NotDefinedException("resize", "this type of matrix"));
-}
+void GeneralMatrix::ReSizeForAdd(const GeneralMatrix& A, const GeneralMatrix&)
+{ REPORT ReSize(A); }
 
-//*********************** resize_keep *******************************
-
-void Matrix::resize_keep(int nr, int nc)
-{
-   Tracer tr("Matrix::resize_keep");
-   if (nr == nrows_val && nc == ncols_val) { REPORT return; }
-   
-   if (nr <= nrows_val && nc <= ncols_val)
-   {
-      REPORT
-      Matrix X = submatrix(1,nr,1,nc);
-      swap(X);
-   }
-   else if (nr >= nrows_val && nc >= ncols_val)
-   {
-      REPORT
-      Matrix X(nr, nc); X = 0;
-      X.submatrix(1,nrows_val,1,ncols_val) = *this;
-      swap(X);
-   }
-   else
-   {
-      REPORT
-      Matrix X(nr, nc); X = 0;
-      if (nr > nrows_val) nr = nrows_val;
-      if (nc > ncols_val) nc = ncols_val;
-      X.submatrix(1,nr,1,nc) = submatrix(1,nr,1,nc);
-      swap(X);
-   }
-} 
-
-void SquareMatrix::resize_keep(int nr)
-{
-   Tracer tr("SquareMatrix::resize_keep");
-   if (nr < nrows_val)
-   {
-      REPORT
-      SquareMatrix X = sym_submatrix(1,nr);
-      swap(X);
-   }
-   else if (nr > nrows_val)
-   {
-      REPORT
-      SquareMatrix X(nr); X = 0;
-      X.sym_submatrix(1,nrows_val) = *this;
-      swap(X);
-   }
-}
-
-void SquareMatrix::resize_keep(int nr, int nc)
-{
-   Tracer tr("SquareMatrix::resize_keep 2");
-   REPORT
-   if (nr != nc) Throw(NotSquareException(*this));
-   resize_keep(nr);
-}
- 
-
-void SymmetricMatrix::resize_keep(int nr)
-{
-   Tracer tr("SymmetricMatrix::resize_keep");
-   if (nr < nrows_val)
-   {
-      REPORT
-      SymmetricMatrix X = sym_submatrix(1,nr);
-      swap(X);
-   }
-   else if (nr > nrows_val)
-   {
-      REPORT
-      SymmetricMatrix X(nr); X = 0;
-      X.sym_submatrix(1,nrows_val) = *this;
-      swap(X);
-   }
-} 
-
-void UpperTriangularMatrix::resize_keep(int nr)
-{
-   Tracer tr("UpperTriangularMatrix::resize_keep");
-   if (nr < nrows_val)
-   {
-      REPORT
-      UpperTriangularMatrix X = sym_submatrix(1,nr);
-      swap(X);
-   }
-   else if (nr > nrows_val)
-   {
-      REPORT
-      UpperTriangularMatrix X(nr); X = 0;
-      X.sym_submatrix(1,nrows_val) = *this;
-      swap(X);
-   }
-} 
-
-void LowerTriangularMatrix::resize_keep(int nr)
-{
-   Tracer tr("LowerTriangularMatrix::resize_keep");
-   if (nr < nrows_val)
-   {
-      REPORT
-      LowerTriangularMatrix X = sym_submatrix(1,nr);
-      swap(X);
-   }
-   else if (nr > nrows_val)
-   {
-      REPORT
-      LowerTriangularMatrix X(nr); X = 0;
-      X.sym_submatrix(1,nrows_val) = *this;
-      swap(X);
-   }
-} 
-
-void DiagonalMatrix::resize_keep(int nr)
-{
-   Tracer tr("DiagonalMatrix::resize_keep");
-   if (nr < nrows_val)
-   {
-      REPORT
-      DiagonalMatrix X = sym_submatrix(1,nr);
-      swap(X);
-   }
-   else if (nr > nrows_val)
-   {
-      REPORT
-      DiagonalMatrix X(nr); X = 0;
-      X.sym_submatrix(1,nrows_val) = *this;
-      swap(X);
-   }
-} 
-
-void RowVector::resize_keep(int nc)
-{
-   Tracer tr("RowVector::resize_keep");
-   if (nc < ncols_val)
-   {
-      REPORT
-      RowVector X = columns(1,nc);
-      swap(X);
-   }
-   else if (nc > ncols_val)
-   {
-      REPORT
-      RowVector X(nc); X = 0;
-      X.columns(1,ncols_val) = *this;
-      swap(X);
-   }
-}
-
-void RowVector::resize_keep(int nr, int nc)
-{
-   Tracer tr("RowVector::resize_keep 2");
-   REPORT
-   if (nr != 1) Throw(VectorException(*this));
-   resize_keep(nc);
-}
-
-void ColumnVector::resize_keep(int nr)
-{
-   Tracer tr("ColumnVector::resize_keep");
-   if (nr < nrows_val)
-   {
-      REPORT
-      ColumnVector X = rows(1,nr);
-      swap(X);
-   }
-   else if (nr > nrows_val)
-   {
-      REPORT
-      ColumnVector X(nr); X = 0;
-      X.rows(1,nrows_val) = *this;
-      swap(X);
-   }
-} 
-
-void ColumnVector::resize_keep(int nr, int nc)
-{
-   Tracer tr("ColumnVector::resize_keep 2");
-   REPORT
-   if (nc != 1) Throw(VectorException(*this));
-   resize_keep(nr);
-}
+void GeneralMatrix::ReSizeForSP(const GeneralMatrix& A, const GeneralMatrix&)
+{ REPORT ReSize(A); }
 
 
-/*
-void GeneralMatrix::resizeForAdd(const GeneralMatrix& A, const GeneralMatrix&)
-{ REPORT resize(A); }
-
-void GeneralMatrix::resizeForSP(const GeneralMatrix& A, const GeneralMatrix&)
-{ REPORT resize(A); }
-
-
-// ************************* SameStorageType ******************************
+// ************************* SameStorageType ******************************/
 
 // SameStorageType checks A and B have same storage type including bandwidth
 // It does not check same dimensions since we assume this is already done
@@ -626,9 +358,9 @@ void GeneralMatrix::resizeForSP(const GeneralMatrix& A, const GeneralMatrix&)
 bool GeneralMatrix::SameStorageType(const GeneralMatrix& A) const
 {
    REPORT
-   return type() == A.type();
+   return Type() == A.Type();
 }
-*/
+
 
 // ******************* manipulate types, storage **************************/
 
@@ -647,56 +379,52 @@ int ShiftedMatrix::search(const BaseMatrix* s) const
 int NegatedMatrix::search(const BaseMatrix* s) const
 { REPORT return bm->search(s); }
 
-int ReturnMatrix::search(const BaseMatrix* s) const
+int ReturnMatrixX::search(const BaseMatrix* s) const
 { REPORT return (s==gm) ? 1 : 0; }
 
-MatrixType Matrix::type() const { return MatrixType::Rt; }
-MatrixType SquareMatrix::type() const { return MatrixType::Sq; }
-MatrixType SymmetricMatrix::type() const { return MatrixType::Sm; }
-MatrixType UpperTriangularMatrix::type() const { return MatrixType::UT; }
-MatrixType LowerTriangularMatrix::type() const { return MatrixType::LT; }
-MatrixType DiagonalMatrix::type() const { return MatrixType::Dg; }
-MatrixType RowVector::type() const { return MatrixType::RV; }
-MatrixType ColumnVector::type() const { return MatrixType::CV; }
-MatrixType CroutMatrix::type() const { return MatrixType::Ct; }
-MatrixType BandMatrix::type() const { return MatrixType::BM; }
-MatrixType UpperBandMatrix::type() const { return MatrixType::UB; }
-MatrixType LowerBandMatrix::type() const { return MatrixType::LB; }
-MatrixType SymmetricBandMatrix::type() const { return MatrixType::SB; }
+MatrixType Matrix::Type() const { return MatrixType::Rt; }
+MatrixType SymmetricMatrix::Type() const { return MatrixType::Sm; }
+MatrixType UpperTriangularMatrix::Type() const { return MatrixType::UT; }
+MatrixType LowerTriangularMatrix::Type() const { return MatrixType::LT; }
+MatrixType DiagonalMatrix::Type() const { return MatrixType::Dg; }
+MatrixType RowVector::Type() const { return MatrixType::RV; }
+MatrixType ColumnVector::Type() const { return MatrixType::CV; }
+MatrixType CroutMatrix::Type() const { return MatrixType::Ct; }
+MatrixType BandMatrix::Type() const { return MatrixType::BM; }
+MatrixType UpperBandMatrix::Type() const { return MatrixType::UB; }
+MatrixType LowerBandMatrix::Type() const { return MatrixType::LB; }
+MatrixType SymmetricBandMatrix::Type() const { return MatrixType::SB; }
 
-MatrixType IdentityMatrix::type() const { return MatrixType::Id; }
-
+MatrixType IdentityMatrix::Type() const { return MatrixType::Id; }
 
 
-MatrixBandWidth BaseMatrix::bandwidth() const { REPORT return -1; }
-MatrixBandWidth DiagonalMatrix::bandwidth() const { REPORT return 0; }
-MatrixBandWidth IdentityMatrix::bandwidth() const { REPORT return 0; }
 
-MatrixBandWidth UpperTriangularMatrix::bandwidth() const
+MatrixBandWidth BaseMatrix::BandWidth() const { REPORT return -1; }
+MatrixBandWidth DiagonalMatrix::BandWidth() const { REPORT return 0; }
+MatrixBandWidth IdentityMatrix::BandWidth() const { REPORT return 0; }
+
+MatrixBandWidth UpperTriangularMatrix::BandWidth() const
    { REPORT return MatrixBandWidth(0,-1); }
 
-MatrixBandWidth LowerTriangularMatrix::bandwidth() const
+MatrixBandWidth LowerTriangularMatrix::BandWidth() const
    { REPORT return MatrixBandWidth(-1,0); }
 
-MatrixBandWidth BandMatrix::bandwidth() const
-   { REPORT return MatrixBandWidth(lower_val,upper_val); }
+MatrixBandWidth BandMatrix::BandWidth() const
+   { REPORT return MatrixBandWidth(lower,upper); }
 
-MatrixBandWidth BandLUMatrix::bandwidth() const
-   { REPORT return MatrixBandWidth(m1,m2); }
-   
-MatrixBandWidth GenericMatrix::bandwidth()const
-   { REPORT return gm->bandwidth(); }
+MatrixBandWidth GenericMatrix::BandWidth()const
+   { REPORT return gm->BandWidth(); }
 
-MatrixBandWidth AddedMatrix::bandwidth() const
-   { REPORT return gm1->bandwidth() + gm2->bandwidth(); }
+MatrixBandWidth AddedMatrix::BandWidth() const
+   { REPORT return gm1->BandWidth() + gm2->BandWidth(); }
 
-MatrixBandWidth SPMatrix::bandwidth() const
-   { REPORT return gm1->bandwidth().minimum(gm2->bandwidth()); }
+MatrixBandWidth SPMatrix::BandWidth() const
+   { REPORT return gm1->BandWidth().minimum(gm2->BandWidth()); }
 
-MatrixBandWidth KPMatrix::bandwidth() const
+MatrixBandWidth KPMatrix::BandWidth() const
 {
    int lower, upper;
-   MatrixBandWidth bw1 = gm1->bandwidth(), bw2 = gm2->bandwidth();
+   MatrixBandWidth bw1 = gm1->BandWidth(), bw2 = gm2->BandWidth();
    if (bw1.Lower() < 0)
    {
       if (bw2.Lower() < 0) { REPORT lower = -1; }
@@ -722,52 +450,52 @@ MatrixBandWidth KPMatrix::bandwidth() const
    return MatrixBandWidth(lower, upper);
 }
 
-MatrixBandWidth MultipliedMatrix::bandwidth() const
-{ REPORT return gm1->bandwidth() * gm2->bandwidth(); }
+MatrixBandWidth MultipliedMatrix::BandWidth() const
+{ REPORT return gm1->BandWidth() * gm2->BandWidth(); }
 
-MatrixBandWidth ConcatenatedMatrix::bandwidth() const { REPORT return -1; }
+MatrixBandWidth ConcatenatedMatrix::BandWidth() const { REPORT return -1; }
 
-MatrixBandWidth SolvedMatrix::bandwidth() const
+MatrixBandWidth SolvedMatrix::BandWidth() const
 {
-   if (+gm1->type() & MatrixType::Diagonal)
-      { REPORT return gm2->bandwidth(); }
+   if (+gm1->Type() & MatrixType::Diagonal)
+      { REPORT return gm2->BandWidth(); }
    else { REPORT return -1; }
 }
 
-MatrixBandWidth ScaledMatrix::bandwidth() const
-   { REPORT return gm->bandwidth(); }
+MatrixBandWidth ScaledMatrix::BandWidth() const
+   { REPORT return gm->BandWidth(); }
 
-MatrixBandWidth NegatedMatrix::bandwidth() const
-   { REPORT return gm->bandwidth(); }
+MatrixBandWidth NegatedMatrix::BandWidth() const
+   { REPORT return gm->BandWidth(); }
 
-MatrixBandWidth TransposedMatrix::bandwidth() const
-   { REPORT return gm->bandwidth().t(); }
+MatrixBandWidth TransposedMatrix::BandWidth() const
+   { REPORT return gm->BandWidth().t(); }
 
-MatrixBandWidth InvertedMatrix::bandwidth() const
+MatrixBandWidth InvertedMatrix::BandWidth() const
 {
-   if (+gm->type() & MatrixType::Diagonal)
+   if (+gm->Type() & MatrixType::Diagonal)
       { REPORT return MatrixBandWidth(0,0); }
    else { REPORT return -1; }
 }
 
-MatrixBandWidth RowedMatrix::bandwidth() const { REPORT return -1; }
-MatrixBandWidth ColedMatrix::bandwidth() const { REPORT return -1; }
-MatrixBandWidth DiagedMatrix::bandwidth() const { REPORT return 0; }
-MatrixBandWidth MatedMatrix::bandwidth() const { REPORT return -1; }
-MatrixBandWidth ReturnMatrix::bandwidth() const
-   { REPORT return gm->bandwidth(); }
+MatrixBandWidth RowedMatrix::BandWidth() const { REPORT return -1; }
+MatrixBandWidth ColedMatrix::BandWidth() const { REPORT return -1; }
+MatrixBandWidth DiagedMatrix::BandWidth() const { REPORT return 0; }
+MatrixBandWidth MatedMatrix::BandWidth() const { REPORT return -1; }
+MatrixBandWidth ReturnMatrixX::BandWidth() const
+   { REPORT return gm->BandWidth(); }
 
-MatrixBandWidth GetSubMatrix::bandwidth() const
+MatrixBandWidth GetSubMatrix::BandWidth() const
 {
 
    if (row_skip==col_skip && row_number==col_number)
-      { REPORT return gm->bandwidth(); }
+      { REPORT return gm->BandWidth(); }
    else { REPORT return MatrixBandWidth(-1); }
 }
 
 // ********************** the memory managment tools **********************/
 
-//  Rules regarding tDelete, reuse, GetStore, BorrowStore
+//  Rules regarding tDelete, reuse, GetStore
 //    All matrices processed during expression evaluation must be subject
 //    to exactly one of reuse(), tDelete(), GetStore() or BorrowStore().
 //    If reuse returns true the matrix must be reused.
@@ -775,36 +503,27 @@ MatrixBandWidth GetSubMatrix::bandwidth() const
 //    gm->Evaluate obeys rules
 //    bm->Evaluate obeys rules for matrices in bm structure
 
-//  Meaning of tag_val
-//    tag_val = -1          memory cannot be reused (default situation)
-//    tag_val = -2          memory has been borrowed from another matrix
-//                               (don't change values)
-//    tag_val = i > 0       delete or reuse memory after i operations
-//    tag_val = 0           like value 1 but matrix was created by new
-//                               so delete it
-
 void GeneralMatrix::tDelete()
 {
-   if (tag_val<0)
+   if (tag<0)
    {
-      if (tag_val<-1) { REPORT store = 0; delete this; return; }  // borrowed
-      else { REPORT return; }   // not a temporary matrix - leave alone
+      if (tag<-1) { REPORT store=0; delete this; return; }  // borrowed
+      else { REPORT return; }
    }
-   if (tag_val==1)
+   if (tag==1)
    {
       if (store)
       {
          REPORT  MONITOR_REAL_DELETE("Free   (tDelete)",storage,store)
          delete [] store;
       }
-      MiniCleanUp(); return;                           // CleanUp
+      store=0; CleanUp(); tag=-1; return;
    }
-   if (tag_val==0) { REPORT delete this; return; }
-
-   REPORT tag_val--; return;
+   if (tag==0) { REPORT delete this; return; }
+   REPORT tag--; return;
 }
 
-void newmat_block_copy(int n, Real* from, Real* to)
+static void BlockCopy(int n, Real* from, Real* to)
 {
    REPORT
    int i = (n >> 3);
@@ -818,68 +537,68 @@ void newmat_block_copy(int n, Real* from, Real* to)
 
 bool GeneralMatrix::reuse()
 {
-   if (tag_val < -1)                 // borrowed storage
+   if (tag<-1)
    {
       if (storage)
       {
          REPORT
          Real* s = new Real [storage]; MatrixErrorNoSpace(s);
          MONITOR_REAL_NEW("Make     (reuse)",storage,s)
-         newmat_block_copy(storage, store, s); store = s;
+         BlockCopy(storage, store, s); store=s;
       }
-      else { REPORT MiniCleanUp(); }                // CleanUp
-      tag_val = 0; return true;
+      else { REPORT store = 0; CleanUp(); }
+      tag=0; return true;
    }
-   if (tag_val < 0 ) { REPORT return false; }
-   if (tag_val <= 1 )  { REPORT return true; }
-   REPORT tag_val--; return false;
+   if (tag<0) { REPORT return false; }
+   if (tag<=1)  { REPORT return true; }
+   REPORT tag--; return false;
 }
 
 Real* GeneralMatrix::GetStore()
 {
-   if (tag_val<0 || tag_val>1)
+   if (tag<0 || tag>1)
    {
       Real* s;
       if (storage)
       {
          s = new Real [storage]; MatrixErrorNoSpace(s);
          MONITOR_REAL_NEW("Make  (GetStore)",storage,s)
-         newmat_block_copy(storage, store, s);
+         BlockCopy(storage, store, s);
       }
       else s = 0;
-      if (tag_val > 1) { REPORT tag_val--; }
-      else if (tag_val < -1) { REPORT store = 0; delete this; } // borrowed store
+      if (tag>1) { REPORT tag--; }
+      else if (tag < -1) { REPORT store=0; delete this; } // borrowed store
       else { REPORT }
       return s;
    }
-   Real* s = store;                             // cleanup - done later
-   if (tag_val==0) { REPORT store = 0; delete this; }
-   else { REPORT  MiniCleanUp(); }
+   Real* s=store; store=0;
+   if (tag==0) { REPORT delete this; }
+   else { REPORT CleanUp(); tag=-1; }
    return s;
 }
 
 void GeneralMatrix::GetMatrix(const GeneralMatrix* gmx)
 {
-   REPORT  tag_val=-1; nrows_val=gmx->Nrows(); ncols_val=gmx->Ncols();
+   REPORT  tag=-1; nrows=gmx->Nrows(); ncols=gmx->Ncols();
    storage=gmx->storage; SetParameters(gmx);
    store=((GeneralMatrix*)gmx)->GetStore();
 }
 
 GeneralMatrix* GeneralMatrix::BorrowStore(GeneralMatrix* gmx, MatrixType mt)
 // Copy storage of *this to storage of *gmx. Then convert to type mt.
-// If mt == 0 just let *gmx point to storage of *this if tag_val==-1.
+// If mt == 0 just let *gmx point to storage of *this if tag==-1.
 {
    if (!mt)
    {
-      if (tag_val == -1) { REPORT gmx->tag_val = -2; gmx->store = store; }
-      else { REPORT gmx->tag_val = 0; gmx->store = GetStore(); }
+      if (tag == -1) { REPORT gmx->tag = -2; gmx->store = store; }
+      else { REPORT gmx->tag = 0; gmx->store = GetStore(); }
    }
-   else if (Compare(gmx->type(),mt))
-   { REPORT  gmx->tag_val = 0; gmx->store = GetStore(); }
+   else if (Compare(gmx->Type(),mt))
+   { REPORT  gmx->tag = 0; gmx->store = GetStore(); }
    else
    {
-      REPORT gmx->tag_val = -2; gmx->store = store;
-      gmx = gmx->Evaluate(mt); gmx->tag_val = 0; tDelete();
+      REPORT gmx->tag = -2; gmx->store = store;
+      gmx = gmx->Evaluate(mt); gmx->tag = 0; tDelete();
    }
 
    return gmx;
@@ -899,7 +618,7 @@ void GeneralMatrix::Eq(const BaseMatrix& X, MatrixType mt)
       if (store)
       {
          MONITOR_REAL_DELETE("Free (operator=)",storage,store)
-         REPORT delete [] store; storage = 0; store = 0;
+         REPORT delete [] store; storage=0; store = 0;
       }
    }
    else { REPORT Release(counter); }
@@ -915,31 +634,13 @@ void GeneralMatrix::Eq(const BaseMatrix& X, MatrixType mt)
       if (store)
       {
          MONITOR_REAL_DELETE("Free (operator=)",storage,store)
-         REPORT delete [] store; storage = 0; store = 0;
+         REPORT delete [] store; storage=0; store = 0;
       }
       GetMatrix(gmx);
    }
    else { REPORT }
    Protect();
 #endif
-}
-
-// version with no conversion
-void GeneralMatrix::Eq(const GeneralMatrix& X)
-{
-   GeneralMatrix* gmx = (GeneralMatrix*)&X;
-   if (gmx!=this)
-   {
-      REPORT
-      if (store)
-      {
-         MONITOR_REAL_DELETE("Free (operator=)",storage,store)
-         REPORT delete [] store; storage = 0; store = 0;
-      }
-      GetMatrix(gmx);
-   }
-   else { REPORT }
-   Protect();
 }
 
 // version to work with operator<<
@@ -954,7 +655,7 @@ void GeneralMatrix::Eq2(const BaseMatrix& X, MatrixType mt)
 // a cut down version of Eq for use with += etc.
 // we know BaseMatrix points to two GeneralMatrix objects,
 // the first being this (may be the same).
-// we know tag_val has been set correctly in each.
+// we know tag has been set correctly in each.
 {
    GeneralMatrix* gmx = ((BaseMatrix&)X).Evaluate(mt);
    if (gmx!=this) { REPORT GetMatrix(gmx); }  // simplify GetMatrix ?
@@ -962,16 +663,16 @@ void GeneralMatrix::Eq2(const BaseMatrix& X, MatrixType mt)
    Protect();
 }
 
-void GeneralMatrix::inject(const GeneralMatrix& X)
+void GeneralMatrix::Inject(const GeneralMatrix& X)
 // copy stored values of X; otherwise leave els of *this unchanged
 {
    REPORT
-   Tracer tr("inject");
-   if (nrows_val != X.nrows_val || ncols_val != X.ncols_val)
+   Tracer tr("Inject");
+   if (nrows != X.nrows || ncols != X.ncols)
       Throw(IncompatibleDimensionsException());
    MatrixRow mr((GeneralMatrix*)&X, LoadOnEntry);
    MatrixRow mrx(this, LoadOnEntry+StoreOnExit+DirectPart);
-   int i=nrows_val;
+   int i=nrows;
    while (i--) { mrx.Inject(mr); mrx.Next(); mr.Next(); }
 }
 
@@ -992,13 +693,6 @@ GeneralMatrix* Matrix::Image() const
 {
    REPORT
    GeneralMatrix* gm = new Matrix(*this); MatrixErrorNoSpace(gm);
-   return gm;
-}
-
-GeneralMatrix* SquareMatrix::Image() const
-{
-   REPORT
-   GeneralMatrix* gm = new SquareMatrix(*this); MatrixErrorNoSpace(gm);
    return gm;
 }
 
@@ -1044,6 +738,34 @@ GeneralMatrix* ColumnVector::Image() const
    return gm;
 }
 
+GeneralMatrix* BandMatrix::Image() const
+{
+   REPORT
+   GeneralMatrix* gm = new BandMatrix(*this); MatrixErrorNoSpace(gm);
+   return gm;
+}
+
+GeneralMatrix* UpperBandMatrix::Image() const
+{
+   REPORT
+   GeneralMatrix* gm = new UpperBandMatrix(*this); MatrixErrorNoSpace(gm);
+   return gm;
+}
+
+GeneralMatrix* LowerBandMatrix::Image() const
+{
+   REPORT
+   GeneralMatrix* gm = new LowerBandMatrix(*this); MatrixErrorNoSpace(gm);
+   return gm;
+}
+
+GeneralMatrix* SymmetricBandMatrix::Image() const
+{
+   REPORT
+   GeneralMatrix* gm = new SymmetricBandMatrix(*this); MatrixErrorNoSpace(gm);
+   return gm;
+}
+
 GeneralMatrix* nricMatrix::Image() const
 {
    REPORT
@@ -1055,13 +777,6 @@ GeneralMatrix* IdentityMatrix::Image() const
 {
    REPORT
    GeneralMatrix* gm = new IdentityMatrix(*this); MatrixErrorNoSpace(gm);
-   return gm;
-}
-
-GeneralMatrix* CroutMatrix::Image() const
-{
-   REPORT
-   GeneralMatrix* gm = new CroutMatrix(*this); MatrixErrorNoSpace(gm);
    return gm;
 }
 
@@ -1078,22 +793,20 @@ GeneralMatrix* GeneralMatrix::Image() const
 
 void nricMatrix::MakeRowPointer()
 {
-   REPORT
-   if (nrows_val > 0)
+   if (nrows > 0)
    {
-      row_pointer = new Real* [nrows_val]; MatrixErrorNoSpace(row_pointer);
-      Real* s = Store() - 1; int i = nrows_val; Real** rp = row_pointer;
-      if (i) for (;;) { *rp++ = s; if (!(--i)) break; s+=ncols_val; }
+      row_pointer = new Real* [nrows]; MatrixErrorNoSpace(row_pointer);
+      Real* s = Store() - 1; int i = nrows; Real** rp = row_pointer;
+      if (i) for (;;) { *rp++ = s; if (!(--i)) break; s+=ncols; }
    }
    else row_pointer = 0;
 }
 
 void nricMatrix::DeleteRowPointer()
-   { REPORT if (nrows_val) delete [] row_pointer; }
+{ if (nrows) delete [] row_pointer; }
 
 void GeneralMatrix::CheckStore() const
 {
-   REPORT
    if (!store)
       Throw(ProgramException("NRIC accessing matrix with unset dimensions"));
 }
@@ -1101,58 +814,38 @@ void GeneralMatrix::CheckStore() const
 
 // *************************** CleanUp routines *****************************/
 
-void GeneralMatrix::cleanup()
+void GeneralMatrix::CleanUp()
 {
    // set matrix dimensions to zero, delete storage
    REPORT
    if (store && storage)
    {
-      MONITOR_REAL_DELETE("Free (cleanup)    ",storage,store)
+      MONITOR_REAL_DELETE("Free (CleanUp)    ",storage,store)
       REPORT delete [] store;
    }
-   store=0; storage=0; nrows_val=0; ncols_val=0; tag_val = -1;
+   store=0; storage=0; nrows=0; ncols=0;
 }
 
-void nricMatrix::cleanup()
-   { REPORT DeleteRowPointer(); GeneralMatrix::cleanup(); }
+void nricMatrix::CleanUp()
+{ DeleteRowPointer(); GeneralMatrix::CleanUp(); }
 
-void nricMatrix::MiniCleanUp()
-   { REPORT DeleteRowPointer(); GeneralMatrix::MiniCleanUp(); }
+void RowVector::CleanUp()
+{ GeneralMatrix::CleanUp(); nrows=1; }
 
-void RowVector::cleanup()
-   { REPORT GeneralMatrix::cleanup(); nrows_val=1; }
+void ColumnVector::CleanUp()
+{ GeneralMatrix::CleanUp(); ncols=1; }
 
-void ColumnVector::cleanup()
-   { REPORT GeneralMatrix::cleanup(); ncols_val=1; }
-
-void CroutMatrix::cleanup()
+void CroutMatrix::CleanUp()
 {
-   REPORT
-   if (nrows_val) delete [] indx;
-   GeneralMatrix::cleanup();
+   if (nrows) delete [] indx;
+   GeneralMatrix::CleanUp();
 }
 
-void CroutMatrix::MiniCleanUp()
+void BandLUMatrix::CleanUp()
 {
-   REPORT
-   if (nrows_val) delete [] indx;
-   GeneralMatrix::MiniCleanUp();
-}
-
-void BandLUMatrix::cleanup()
-{
-   REPORT
-   if (nrows_val) delete [] indx;
+   if (nrows) delete [] indx;
    if (storage2) delete [] store2;
-   GeneralMatrix::cleanup();
-}
-
-void BandLUMatrix::MiniCleanUp()
-{
-   REPORT
-   if (nrows_val) delete [] indx;
-   if (storage2) delete [] store2;
-   GeneralMatrix::MiniCleanUp();
+   GeneralMatrix::CleanUp();
 }
 
 // ************************ simple integer array class ***********************
@@ -1199,19 +892,19 @@ void SimpleIntArray::operator=(int ai)
    { REPORT  for (int i = 0; i < n; i++) a[i] = ai; }
 
 // set the elements equal to those of another array.
-// now allow length to be changed
+// check the arrays are of the same length
 
 void SimpleIntArray::operator=(const SimpleIntArray& b)
 {
    REPORT
-   if (b.n != n) resize(b.n);
+   if (b.n != n) Throw(Logic_error("array lengths differ in copy"));
    for (int i = 0; i < n; i++) a[i] = b.a[i];
 }
 
 // construct a new array equal to an existing array
 // check that space is available
 
-SimpleIntArray::SimpleIntArray(const SimpleIntArray& b) : Janitor(), n(b.n)
+SimpleIntArray::SimpleIntArray(const SimpleIntArray& b) : n(b.n)
 {
    if (n == 0) { REPORT  a = 0; }
    else
@@ -1225,28 +918,21 @@ SimpleIntArray::SimpleIntArray(const SimpleIntArray& b) : Janitor(), n(b.n)
 // change the size of an array; optionally copy data from old array to
 // new array
 
-void SimpleIntArray::resize(int n1, bool keep)
+void SimpleIntArray::ReSize(int n1, bool keep)
 {
    if (n1 == n) { REPORT  return; }
    else if (n1 == 0) { REPORT  n = 0; delete [] a; a = 0; }
    else if (n == 0)
-   {
-      REPORT
-      a = new int [n1]; if (!a) Throw(Bad_alloc());
-      n = n1;
-      if (keep) operator=(0);
-   }
+      { REPORT  a = new int [n1]; if (!a) Throw(Bad_alloc()); n = n1; }
    else
    {
       int* a1 = a;
       if (keep)
       {
          REPORT
-         int i;
          a = new int [n1]; if (!a) Throw(Bad_alloc());
          if (n > n1) n = n1;
-         else for (i = n; i < n1; i++) a[i] = 0;
-         for (i = 0; i < n; i++) a[i] = a1[i];
+         for (int i = 0; i < n; i++) a[i] = a1[i];
          n = n1; delete [] a1;
       }
       else
@@ -1257,131 +943,8 @@ void SimpleIntArray::resize(int n1, bool keep)
    }
 }
 
-//************************** swap values ********************************
-
-// swap values
-
-void GeneralMatrix::swap(GeneralMatrix& gm)
-{
-   REPORT
-   int t;
-   t = tag_val; tag_val = gm.tag_val; gm.tag_val = t;
-   t = nrows_val; nrows_val = gm.nrows_val; gm.nrows_val = t;
-   t = ncols_val; ncols_val = gm.ncols_val; gm.ncols_val = t;
-   t = storage; storage = gm.storage; gm.storage = t;
-   Real* s = store; store = gm.store; gm.store = s;
-}
-   
-void nricMatrix::swap(nricMatrix& gm)
-{
-   REPORT
-   GeneralMatrix::swap((GeneralMatrix&)gm);
-   Real** rp = row_pointer; row_pointer = gm.row_pointer; gm.row_pointer = rp;
-}
-
-void CroutMatrix::swap(CroutMatrix& gm)
-{
-   REPORT
-   GeneralMatrix::swap((GeneralMatrix&)gm);
-   int* i = indx; indx = gm.indx; gm.indx = i;
-   bool b;
-   b = d; d = gm.d; gm.d = b;
-   b = sing; sing = gm.sing; gm.sing = b;
-}
-
-void BandMatrix::swap(BandMatrix& gm)
-{
-   REPORT
-   GeneralMatrix::swap((GeneralMatrix&)gm);
-   int i;
-   i = lower_val; lower_val = gm.lower_val; gm.lower_val = i;
-   i = upper_val; upper_val = gm.upper_val; gm.upper_val = i;
-}
-
-void SymmetricBandMatrix::swap(SymmetricBandMatrix& gm)
-{
-   REPORT
-   GeneralMatrix::swap((GeneralMatrix&)gm);
-   int i;
-   i = lower_val; lower_val = gm.lower_val; gm.lower_val = i;
-}
-
-void BandLUMatrix::swap(BandLUMatrix& gm)
-{
-   REPORT
-   GeneralMatrix::swap((GeneralMatrix&)gm);
-   int* i = indx; indx = gm.indx; gm.indx = i;
-   bool b;
-   b = d; d = gm.d; gm.d = b;
-   b = sing; sing = gm.sing; gm.sing = b;
-   int m;
-   m = storage2; storage2 = gm.storage2; gm.storage2 = m;
-   m = m1; m1 = gm.m1; gm.m1 = m;
-   m = m2; m2 = gm.m2; gm.m2 = m;
-   Real* s = store2; store2 = gm.store2; gm.store2 = s;
-}
-
-void GenericMatrix::swap(GenericMatrix& x)
-{
-   REPORT
-   GeneralMatrix* tgm = gm; gm = x.gm; x.gm = tgm;
-}
-
-// ********************** C subscript classes ****************************
-
-RealStarStar::RealStarStar(Matrix& A)
-{
-   REPORT
-   Tracer tr("RealStarStar");
-   int n = A.ncols();
-   int m = A.nrows();
-   a = new Real*[m];
-   MatrixErrorNoSpace(a);
-   Real* d = A.data();
-   for (int i = 0; i < m; ++i) a[i] = d + i * n;
-} 
-
-ConstRealStarStar::ConstRealStarStar(const Matrix& A)
-{
-   REPORT
-   Tracer tr("ConstRealStarStar");
-   int n = A.ncols();
-   int m = A.nrows();
-   a = new const Real*[m];
-   MatrixErrorNoSpace(a);
-   const Real* d = A.data();
-   for (int i = 0; i < m; ++i) a[i] = d + i * n;
-} 
-
-
 
 #ifdef use_namespace
 }
 #endif
 
-
-/// \fn GeneralMatrix::SimpleAddOK(const GeneralMatrix* gm)
-/// Can we add two matrices with simple vector add.
-/// SimpleAddOK shows when we can add two matrices by a simple vector add
-/// and when we can add one matrix into another
-///
-/// *gm must be the same type as *this
-/// - return 0 if simple add is OK
-/// - return 1 if we can add into *gm only
-/// - return 2 if we can add into *this only
-/// - return 3 if we can't add either way
-///
-/// Also applies to subtract;
-/// for SP this will still be valid if we swap 1 and 2
-///
-/// For types Matrix, DiagonalMatrix, UpperTriangularMatrix,
-/// LowerTriangularMatrix, SymmetricMatrix etc return 0.
-/// For band matrices we will need to check bandwidths.
-
-
-
-
-
-
-
-///@}

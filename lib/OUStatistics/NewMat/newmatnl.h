@@ -1,8 +1,4 @@
-/// \ingroup newmat
-///@{
-
-/// \file newmatnl.h
-/// Header file for non-linear optimisation
+//$$ newmatnl.h           definition file for non-linear optimisation
 
 // Copyright (C) 1993,4,5: R B Davies
 
@@ -323,5 +319,4 @@ private:
 
 
 
-///@}
 

@@ -1,8 +1,4 @@
-/// \ingroup newmat
-///@{
-
-/// \file newmat9.cpp
-/// Output.
+//$$ newmat9.cpp         Input and output
 
 // Copyright (C) 1991,2,3,4: R B Davies
 
@@ -43,8 +39,7 @@ ostream& operator<<(ostream& s, const GeneralMatrix& X)
 {
    MatrixRow mr((GeneralMatrix*)&X, LoadOnEntry);
    int w = s.width();  int nr = X.Nrows();  ios_format_flags f = s.flags();
-   if (f & ios::scientific) s.setf(ios::scientific, ios::floatfield);
-   else s.setf(ios::fixed, ios::floatfield);
+   s.setf(ios::fixed, ios::floatfield);
    for (int i=1; i<=nr; i++)
    {
       int skip = mr.skip;  int storage = mr.storage;
@@ -79,4 +74,3 @@ Omanip_width setw(int i) { return Omanip_width(i); }
 #endif
 
 
-///@}

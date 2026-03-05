@@ -1,8 +1,4 @@
-/// \ingroup newmat
-///@{
-
-/// \file newmat3.cpp
-/// Get and restore rows and columns.
+//$$ newmat3.cpp        Matrix get and restore rows and columns
 
 // Copyright (C) 1991,2,3,4: R B Davies
 
@@ -87,7 +83,7 @@ void GeneralMatrix::NextRow(MatrixRowCol& mrc)
    REPORT
    if (+(mrc.cw*StoreOnExit)) { REPORT this->RestoreRow(mrc); }
    mrc.rowcol++;
-   if (mrc.rowcol<nrows_val) { REPORT this->GetRow(mrc); }
+   if (mrc.rowcol<nrows) { REPORT this->GetRow(mrc); }
    else { REPORT mrc.cw -= StoreOnExit; }
 }
 
@@ -96,7 +92,7 @@ void GeneralMatrix::NextCol(MatrixRowCol& mrc)
    REPORT                                                // 423
    if (+(mrc.cw*StoreOnExit)) { REPORT this->RestoreCol(mrc); }
    mrc.rowcol++;
-   if (mrc.rowcol<ncols_val) { REPORT this->GetCol(mrc); }
+   if (mrc.rowcol<ncols) { REPORT this->GetCol(mrc); }
    else { REPORT mrc.cw -= StoreOnExit; }
 }
 
@@ -105,7 +101,7 @@ void GeneralMatrix::NextCol(MatrixColX& mrc)
    REPORT                                                // 423
    if (+(mrc.cw*StoreOnExit)) { REPORT this->RestoreCol(mrc); }
    mrc.rowcol++;
-   if (mrc.rowcol<ncols_val) { REPORT this->GetCol(mrc); }
+   if (mrc.rowcol<ncols) { REPORT this->GetCol(mrc); }
    else { REPORT mrc.cw -= StoreOnExit; }
 }
 
@@ -115,16 +111,15 @@ void GeneralMatrix::NextCol(MatrixColX& mrc)
 void Matrix::GetRow(MatrixRowCol& mrc)
 {
    REPORT
-   mrc.skip=0; mrc.storage=mrc.length=ncols_val;
-   mrc.data=store+mrc.rowcol*ncols_val;
+   mrc.skip=0; mrc.storage=mrc.length=ncols; mrc.data=store+mrc.rowcol*ncols;
 }
 
 
 void Matrix::GetCol(MatrixRowCol& mrc)
 {
    REPORT
-   mrc.skip=0; mrc.storage=mrc.length=nrows_val;
-   if ( ncols_val==1 && !(mrc.cw*StoreHere) )      // ColumnVector
+   mrc.skip=0; mrc.storage=mrc.length=nrows;
+   if ( ncols==1 && !(mrc.cw*StoreHere) )      // ColumnVector
       { REPORT mrc.data=store; }
    else
    {
@@ -132,18 +127,18 @@ void Matrix::GetCol(MatrixRowCol& mrc)
       if ( !(mrc.cw*(HaveStore+StoreHere)) )
       {
          REPORT
-         ColCopy = new Real [nrows_val]; MatrixErrorNoSpace(ColCopy);
-         MONITOR_REAL_NEW("Make (MatGetCol)",nrows_val,ColCopy)
+         ColCopy = new Real [nrows]; MatrixErrorNoSpace(ColCopy);
+         MONITOR_REAL_NEW("Make (MatGetCol)",nrows,ColCopy)
          mrc.data = ColCopy; mrc.cw += HaveStore;
       }
       else { REPORT ColCopy = mrc.data; }
       if (+(mrc.cw*LoadOnEntry))
       {
          REPORT
-         Real* Mstore = store+mrc.rowcol; int i=nrows_val;
-         //while (i--) { *ColCopy++ = *Mstore; Mstore+=ncols_val; }
+         Real* Mstore = store+mrc.rowcol; int i=nrows;
+         //while (i--) { *ColCopy++ = *Mstore; Mstore+=ncols; }
          if (i) for (;;)
-            { *ColCopy++ = *Mstore; if (!(--i)) break; Mstore+=ncols_val; }
+            { *ColCopy++ = *Mstore; if (!(--i)) break; Mstore+=ncols; }
       }
    }
 }
@@ -151,14 +146,14 @@ void Matrix::GetCol(MatrixRowCol& mrc)
 void Matrix::GetCol(MatrixColX& mrc)
 {
    REPORT
-   mrc.skip=0; mrc.storage=nrows_val; mrc.length=nrows_val;
+   mrc.skip=0; mrc.storage=nrows; mrc.length=nrows;
    if (+(mrc.cw*LoadOnEntry))
    {
       REPORT  Real* ColCopy = mrc.data;
-      Real* Mstore = store+mrc.rowcol; int i=nrows_val;
-      //while (i--) { *ColCopy++ = *Mstore; Mstore+=ncols_val; }
+      Real* Mstore = store+mrc.rowcol; int i=nrows;
+      //while (i--) { *ColCopy++ = *Mstore; Mstore+=ncols; }
       if (i) for (;;)
-          { *ColCopy++ = *Mstore; if (!(--i)) break; Mstore+=ncols_val; }
+          { *ColCopy++ = *Mstore; if (!(--i)) break; Mstore+=ncols; }
    }
 }
 
@@ -169,21 +164,21 @@ void Matrix::RestoreCol(MatrixRowCol& mrc)
    if (+(mrc.cw*HaveStore))
    {
       REPORT                                // 426
-      Real* Mstore = store+mrc.rowcol; int i=nrows_val;
+      Real* Mstore = store+mrc.rowcol; int i=nrows;
       Real* Cstore = mrc.data;
-      // while (i--) { *Mstore = *Cstore++; Mstore+=ncols_val; }
+      // while (i--) { *Mstore = *Cstore++; Mstore+=ncols; }
       if (i) for (;;)
-          { *Mstore = *Cstore++; if (!(--i)) break; Mstore+=ncols_val; }
+          { *Mstore = *Cstore++; if (!(--i)) break; Mstore+=ncols; }
    }
 }
 
 void Matrix::RestoreCol(MatrixColX& mrc)
 {
    REPORT
-   Real* Mstore = store+mrc.rowcol; int i=nrows_val; Real* Cstore = mrc.data;
-   // while (i--) { *Mstore = *Cstore++; Mstore+=ncols_val; }
+   Real* Mstore = store+mrc.rowcol; int i=nrows; Real* Cstore = mrc.data;
+   // while (i--) { *Mstore = *Cstore++; Mstore+=ncols; }
    if (i) for (;;)
-      { *Mstore = *Cstore++; if (!(--i)) break; Mstore+=ncols_val; }
+      { *Mstore = *Cstore++; if (!(--i)) break; Mstore+=ncols; }
 }
 
 void Matrix::NextRow(MatrixRowCol& mrc) { REPORT mrc.IncrMat(); }  // 1808
@@ -193,16 +188,16 @@ void Matrix::NextCol(MatrixRowCol& mrc)
    REPORT                                        // 632
    if (+(mrc.cw*StoreOnExit)) { REPORT RestoreCol(mrc); }
    mrc.rowcol++;
-   if (mrc.rowcol<ncols_val)
+   if (mrc.rowcol<ncols)
    {
       if (+(mrc.cw*LoadOnEntry))
       {
          REPORT
          Real* ColCopy = mrc.data;
-         Real* Mstore = store+mrc.rowcol; int i=nrows_val;
-         //while (i--) { *ColCopy++ = *Mstore; Mstore+=ncols_val; }
+         Real* Mstore = store+mrc.rowcol; int i=nrows;
+         //while (i--) { *ColCopy++ = *Mstore; Mstore+=ncols; }
          if (i) for (;;)
-            { *ColCopy++ = *Mstore; if (!(--i)) break; Mstore+=ncols_val; }
+            { *ColCopy++ = *Mstore; if (!(--i)) break; Mstore+=ncols; }
       }
    }
    else { REPORT mrc.cw -= StoreOnExit; }
@@ -213,16 +208,16 @@ void Matrix::NextCol(MatrixColX& mrc)
    REPORT
    if (+(mrc.cw*StoreOnExit)) { REPORT RestoreCol(mrc); }
    mrc.rowcol++;
-   if (mrc.rowcol<ncols_val)
+   if (mrc.rowcol<ncols)
    {
       if (+(mrc.cw*LoadOnEntry))
       {
          REPORT
          Real* ColCopy = mrc.data;
-         Real* Mstore = store+mrc.rowcol; int i=nrows_val;
-         // while (i--) { *ColCopy++ = *Mstore; Mstore+=ncols_val; }
+         Real* Mstore = store+mrc.rowcol; int i=nrows;
+         // while (i--) { *ColCopy++ = *Mstore; Mstore+=ncols; }
          if (i) for (;;)
-            { *ColCopy++ = *Mstore; if (!(--i)) break; Mstore+=ncols_val; }
+            { *ColCopy++ = *Mstore; if (!(--i)) break; Mstore+=ncols; }
       }
    }
    else { REPORT mrc.cw -= StoreOnExit; }
@@ -234,13 +229,13 @@ void DiagonalMatrix::GetRow(MatrixRowCol& mrc)
 {
    REPORT
    mrc.skip=mrc.rowcol; mrc.storage=1;
-   mrc.data=store+mrc.skip; mrc.length=ncols_val;
+   mrc.data=store+mrc.skip; mrc.length=ncols;
 }
 
 void DiagonalMatrix::GetCol(MatrixRowCol& mrc)
 {
    REPORT
-   mrc.skip=mrc.rowcol; mrc.storage=1; mrc.length=nrows_val;
+   mrc.skip=mrc.rowcol; mrc.storage=1; mrc.length=nrows;
    if (+(mrc.cw*StoreHere))              // should not happen
       Throw(InternalException("DiagonalMatrix::GetCol(MatrixRowCol&)"));
    else  { REPORT mrc.data=store+mrc.skip; }
@@ -250,13 +245,13 @@ void DiagonalMatrix::GetCol(MatrixRowCol& mrc)
 void DiagonalMatrix::GetCol(MatrixColX& mrc)
 {
    REPORT
-   mrc.skip=mrc.rowcol; mrc.storage=1; mrc.length=nrows_val;
+   mrc.skip=mrc.rowcol; mrc.storage=1; mrc.length=nrows;
    mrc.data = mrc.store+mrc.skip;
    *(mrc.data)=*(store+mrc.skip);
 }
 
 void DiagonalMatrix::NextRow(MatrixRowCol& mrc) { REPORT mrc.IncrDiag(); }
-                        // 800
+						      // 800
 
 void DiagonalMatrix::NextCol(MatrixRowCol& mrc) { REPORT mrc.IncrDiag(); }
                         // not accessed
@@ -268,7 +263,7 @@ void DiagonalMatrix::NextCol(MatrixColX& mrc)
       { REPORT *(store+mrc.rowcol)=*(mrc.data); }
    mrc.IncrDiag();
    int t1 = +(mrc.cw*LoadOnEntry);
-   if (t1 && mrc.rowcol < ncols_val)
+   if (t1 && mrc.rowcol < ncols)
       { REPORT *(mrc.data)=*(store+mrc.rowcol); }
 }
 
@@ -277,8 +272,8 @@ void DiagonalMatrix::NextCol(MatrixColX& mrc)
 void UpperTriangularMatrix::GetRow(MatrixRowCol& mrc)
 {
    REPORT
-   int row = mrc.rowcol; mrc.skip=row; mrc.length=ncols_val;
-   mrc.storage=ncols_val-row; mrc.data=store+(row*(2*ncols_val-row+1))/2;
+   int row = mrc.rowcol; mrc.skip=row; mrc.length=ncols;
+   mrc.storage=ncols-row; mrc.data=store+(row*(2*ncols-row+1))/2;
 }
 
 
@@ -286,19 +281,19 @@ void UpperTriangularMatrix::GetCol(MatrixRowCol& mrc)
 {
    REPORT
    mrc.skip=0; int i=mrc.rowcol+1; mrc.storage=i;
-   mrc.length=nrows_val; Real* ColCopy;
+   mrc.length=nrows; Real* ColCopy;
    if ( !(mrc.cw*(StoreHere+HaveStore)) )
    {
       REPORT                                              // not accessed
-      ColCopy = new Real [nrows_val]; MatrixErrorNoSpace(ColCopy);
-      MONITOR_REAL_NEW("Make (UT GetCol)",nrows_val,ColCopy)
+      ColCopy = new Real [nrows]; MatrixErrorNoSpace(ColCopy);
+      MONITOR_REAL_NEW("Make (UT GetCol)",nrows,ColCopy)
       mrc.data = ColCopy; mrc.cw += HaveStore;
    }
    else { REPORT ColCopy = mrc.data; }
    if (+(mrc.cw*LoadOnEntry))
    {
       REPORT
-      Real* Mstore = store+mrc.rowcol; int j = ncols_val;
+      Real* Mstore = store+mrc.rowcol; int j = ncols;
       // while (i--) { *ColCopy++ = *Mstore; Mstore += --j; }
       if (i) for (;;)
          { *ColCopy++ = *Mstore; if (!(--i)) break; Mstore += --j; }
@@ -309,12 +304,12 @@ void UpperTriangularMatrix::GetCol(MatrixColX& mrc)
 {
    REPORT
    mrc.skip=0; int i=mrc.rowcol+1; mrc.storage=i;
-   mrc.length=nrows_val;
+   mrc.length=nrows;
    if (+(mrc.cw*LoadOnEntry))
    {
       REPORT
       Real* ColCopy = mrc.data;
-      Real* Mstore = store+mrc.rowcol; int j = ncols_val;
+      Real* Mstore = store+mrc.rowcol; int j = ncols;
       // while (i--) { *ColCopy++ = *Mstore; Mstore += --j; }
       if (i) for (;;)
          { *ColCopy++ = *Mstore; if (!(--i)) break; Mstore += --j; }
@@ -324,7 +319,7 @@ void UpperTriangularMatrix::GetCol(MatrixColX& mrc)
 void UpperTriangularMatrix::RestoreCol(MatrixRowCol& mrc)
 {
   REPORT
-  Real* Mstore = store+mrc.rowcol; int i=mrc.rowcol+1; int j = ncols_val;
+  Real* Mstore = store+mrc.rowcol; int i=mrc.rowcol+1; int j = ncols;
   Real* Cstore = mrc.data;
   // while (i--) { *Mstore = *Cstore++; Mstore += --j; }
   if (i) for (;;)
@@ -339,22 +334,22 @@ void UpperTriangularMatrix::NextRow(MatrixRowCol& mrc) { REPORT mrc.IncrUT(); }
 void LowerTriangularMatrix::GetRow(MatrixRowCol& mrc)
 {
    REPORT
-   int row=mrc.rowcol; mrc.skip=0; mrc.storage=row+1; mrc.length=ncols_val;
+   int row=mrc.rowcol; mrc.skip=0; mrc.storage=row+1; mrc.length=ncols;
    mrc.data=store+(row*(row+1))/2;
 }
 
 void LowerTriangularMatrix::GetCol(MatrixRowCol& mrc)
 {
    REPORT
-   int col=mrc.rowcol; mrc.skip=col; mrc.length=nrows_val;
-   int i=nrows_val-col; mrc.storage=i; Real* ColCopy;
+   int col=mrc.rowcol; mrc.skip=col; mrc.length=nrows;
+   int i=nrows-col; mrc.storage=i; Real* ColCopy;
    if ( +(mrc.cw*(StoreHere+HaveStore)) )
       { REPORT  ColCopy = mrc.data; }
    else
    {
       REPORT                                            // not accessed
-      ColCopy = new Real [nrows_val]; MatrixErrorNoSpace(ColCopy);
-      MONITOR_REAL_NEW("Make (LT GetCol)",nrows_val,ColCopy)
+      ColCopy = new Real [nrows]; MatrixErrorNoSpace(ColCopy);
+      MONITOR_REAL_NEW("Make (LT GetCol)",nrows,ColCopy)
       mrc.cw += HaveStore; mrc.data = ColCopy;
    }
 
@@ -371,8 +366,8 @@ void LowerTriangularMatrix::GetCol(MatrixRowCol& mrc)
 void LowerTriangularMatrix::GetCol(MatrixColX& mrc)
 {
    REPORT
-   int col=mrc.rowcol; mrc.skip=col; mrc.length=nrows_val;
-   int i=nrows_val-col; mrc.storage=i; mrc.data = mrc.store + col;
+   int col=mrc.rowcol; mrc.skip=col; mrc.length=nrows;
+   int i=nrows-col; mrc.storage=i; mrc.data = mrc.store + col;
 
    if (+(mrc.cw*LoadOnEntry))
    {
@@ -388,7 +383,7 @@ void LowerTriangularMatrix::RestoreCol(MatrixRowCol& mrc)
 {
    REPORT
    int col=mrc.rowcol; Real* Cstore = mrc.data;
-   Real* Mstore = store+(col*(col+3))/2; int i=nrows_val-col;
+   Real* Mstore = store+(col*(col+3))/2; int i=nrows-col;
    //while (i--) { *Mstore = *Cstore++; Mstore += ++col; }
    if (i) for (;;)
       { *Mstore = *Cstore++; if (!(--i)) break; Mstore += ++col; }
@@ -402,7 +397,7 @@ void LowerTriangularMatrix::NextRow(MatrixRowCol& mrc) { REPORT mrc.IncrLT(); }
 void SymmetricMatrix::GetRow(MatrixRowCol& mrc)
 {
    REPORT                                                //571
-   mrc.skip=0; int row=mrc.rowcol; mrc.length=ncols_val;
+   mrc.skip=0; int row=mrc.rowcol; mrc.length=ncols;
    if (+(mrc.cw*DirectPart))
       { REPORT mrc.storage=row+1; mrc.data=store+(row*(row+1))/2; }
    else
@@ -410,12 +405,12 @@ void SymmetricMatrix::GetRow(MatrixRowCol& mrc)
       // do not allow StoreOnExit and !DirectPart
       if (+(mrc.cw*StoreOnExit))
          Throw(InternalException("SymmetricMatrix::GetRow(MatrixRowCol&)"));
-      mrc.storage=ncols_val; Real* RowCopy;
+      mrc.storage=ncols; Real* RowCopy;
       if (!(mrc.cw*HaveStore))
       {
          REPORT
-         RowCopy = new Real [ncols_val]; MatrixErrorNoSpace(RowCopy);
-         MONITOR_REAL_NEW("Make (SymGetRow)",ncols_val,RowCopy)
+         RowCopy = new Real [ncols]; MatrixErrorNoSpace(RowCopy);
+         MONITOR_REAL_NEW("Make (SymGetRow)",ncols,RowCopy)
          mrc.cw += HaveStore; mrc.data = RowCopy;
       }
       else { REPORT RowCopy = mrc.data; }
@@ -424,7 +419,7 @@ void SymmetricMatrix::GetRow(MatrixRowCol& mrc)
          REPORT                                         // 544
          Real* Mstore = store+(row*(row+1))/2; int i = row;
          while (i--) *RowCopy++ = *Mstore++;
-         i = ncols_val-row;
+         i = ncols-row;
          // while (i--) { *RowCopy++ = *Mstore; Mstore += ++row; }
          if (i) for (;;)
             { *RowCopy++ = *Mstore; if (!(--i)) break; Mstore += ++row; }
@@ -438,7 +433,7 @@ void SymmetricMatrix::GetCol(MatrixRowCol& mrc)
    if (+(mrc.cw*StoreHere))
       Throw(InternalException("SymmetricMatrix::GetCol(MatrixRowCol&)"));
 
-   int col=mrc.rowcol; mrc.length=nrows_val;
+   int col=mrc.rowcol; mrc.length=nrows;
    REPORT
    mrc.skip=0;
    if (+(mrc.cw*DirectPart))    // actually get row ??
@@ -449,13 +444,13 @@ void SymmetricMatrix::GetCol(MatrixRowCol& mrc)
       if (+(mrc.cw*StoreOnExit))
          Throw(InternalException("SymmetricMatrix::GetCol(MatrixRowCol&)"));
 
-      mrc.storage=ncols_val; Real* ColCopy;
+      mrc.storage=ncols; Real* ColCopy;
       if ( +(mrc.cw*HaveStore)) { REPORT ColCopy = mrc.data; }
       else
       {
          REPORT                                      // not accessed
-         ColCopy = new Real [ncols_val]; MatrixErrorNoSpace(ColCopy);
-         MONITOR_REAL_NEW("Make (SymGetCol)",ncols_val,ColCopy)
+         ColCopy = new Real [ncols]; MatrixErrorNoSpace(ColCopy);
+         MONITOR_REAL_NEW("Make (SymGetCol)",ncols,ColCopy)
          mrc.cw += HaveStore; mrc.data = ColCopy;
       }
       if (+(mrc.cw*LoadOnEntry))
@@ -463,7 +458,7 @@ void SymmetricMatrix::GetCol(MatrixRowCol& mrc)
          REPORT
          Real* Mstore = store+(col*(col+1))/2; int i = col;
          while (i--) *ColCopy++ = *Mstore++;
-         i = ncols_val-col;
+         i = ncols-col;
          // while (i--) { *ColCopy++ = *Mstore; Mstore += ++col; }
          if (i) for (;;)
             { *ColCopy++ = *Mstore; if (!(--i)) break; Mstore += ++col; }
@@ -473,11 +468,11 @@ void SymmetricMatrix::GetCol(MatrixRowCol& mrc)
 
 void SymmetricMatrix::GetCol(MatrixColX& mrc)
 {
-   int col=mrc.rowcol; mrc.length=nrows_val;
+   int col=mrc.rowcol; mrc.length=nrows;
    if (+(mrc.cw*DirectPart))
    {
       REPORT
-      mrc.skip=col; int i=nrows_val-col; mrc.storage=i;
+      mrc.skip=col; int i=nrows-col; mrc.storage=i;
       mrc.data = mrc.store+col;
       if (+(mrc.cw*LoadOnEntry))
       {
@@ -496,14 +491,14 @@ void SymmetricMatrix::GetCol(MatrixColX& mrc)
       if (+(mrc.cw*StoreOnExit))
          Throw(InternalException("SymmetricMatrix::GetCol(MatrixColX&)"));
 
-      mrc.skip=0; mrc.storage=ncols_val;
+      mrc.skip=0; mrc.storage=ncols;
       if (+(mrc.cw*LoadOnEntry))
       {
          REPORT
          Real* ColCopy = mrc.data;
          Real* Mstore = store+(col*(col+1))/2; int i = col;
          while (i--) *ColCopy++ = *Mstore++;
-         i = ncols_val-col;
+         i = ncols-col;
          // while (i--) { *ColCopy++ = *Mstore; Mstore += ++col; }
          if (i) for (;;)
             { *ColCopy++ = *Mstore; if (!(--i)) break; Mstore += ++col; }
@@ -518,7 +513,7 @@ void SymmetricMatrix::RestoreCol(MatrixColX& mrc)
    REPORT
    // Really do restore column
    int col=mrc.rowcol; Real* Cstore = mrc.data;
-   Real* Mstore = store+(col*(col+3))/2; int i = nrows_val-col;
+   Real* Mstore = store+(col*(col+3))/2; int i = nrows-col;
    // while (i--) { *Mstore = *Cstore++; Mstore+= ++col; }
    if (i) for (;;)
       { *Mstore = *Cstore++; if (!(--i)) break; Mstore+= ++col; }
@@ -534,15 +529,14 @@ void RowVector::GetCol(MatrixRowCol& mrc)
    if (+(mrc.cw*StoreHere))
       Throw(InternalException("RowVector::GetCol(MatrixRowCol&)"));
 
-   mrc.skip=0; mrc.storage=1; mrc.length=nrows_val;
-   mrc.data = store+mrc.rowcol;
+   mrc.skip=0; mrc.storage=1; mrc.length=nrows; mrc.data = store+mrc.rowcol;
 
 }
 
 void RowVector::GetCol(MatrixColX& mrc)
 {
    REPORT
-   mrc.skip=0; mrc.storage=1; mrc.length=nrows_val;
+   mrc.skip=0; mrc.storage=1; mrc.length=nrows;
    if (mrc.cw >= LoadOnEntry)
       { REPORT *(mrc.data) = *(store+mrc.rowcol); }
 
@@ -556,7 +550,7 @@ void RowVector::NextCol(MatrixColX& mrc)
    if (+(mrc.cw*StoreOnExit)) { REPORT *(store+mrc.rowcol)=*(mrc.data); }
 
    mrc.rowcol++;
-   if (mrc.rowcol < ncols_val)
+   if (mrc.rowcol < ncols)
    {
       if (+(mrc.cw*LoadOnEntry)) { REPORT *(mrc.data)=*(store+mrc.rowcol); }
    }
@@ -572,11 +566,11 @@ void RowVector::RestoreCol(MatrixColX& mrc)
 void BandMatrix::GetRow(MatrixRowCol& mrc)
 {
    REPORT
-   int r = mrc.rowcol; int w = lower_val+1+upper_val; mrc.length=ncols_val;
-   int s = r-lower_val;
+   int r = mrc.rowcol; int w = lower+1+upper; mrc.length=ncols;
+   int s = r-lower;
    if (s<0) { mrc.data = store+(r*w-s); w += s; s = 0; }
    else mrc.data = store+r*w;
-   mrc.skip = s; s += w-ncols_val; if (s>0) w -= s; mrc.storage = w;
+   mrc.skip = s; s += w-ncols; if (s>0) w -= s; mrc.storage = w;
 }
 
 // should make special versions of this for upper and lower band matrices
@@ -585,19 +579,19 @@ void BandMatrix::NextRow(MatrixRowCol& mrc)
 {
    REPORT
    int r = ++mrc.rowcol;
-   if (r<=lower_val) { mrc.storage++; mrc.data += lower_val+upper_val; }
-   else  { mrc.skip++; mrc.data += lower_val+upper_val+1; }
-   if (r>=ncols_val-upper_val) mrc.storage--;
+   if (r<=lower) { mrc.storage++; mrc.data += lower+upper; }
+   else  { mrc.skip++; mrc.data += lower+upper+1; }
+   if (r>=ncols-upper) mrc.storage--;
 }
 
 void BandMatrix::GetCol(MatrixRowCol& mrc)
 {
    REPORT
-   int c = mrc.rowcol; int n = lower_val+upper_val; int w = n+1;
-   mrc.length=nrows_val; Real* ColCopy;
-   int b; int s = c-upper_val;
-   if (s<=0) { w += s; s = 0; b = c+lower_val; } else b = s*w+n;
-   mrc.skip = s; s += w-nrows_val; if (s>0) w -= s; mrc.storage = w;
+   int c = mrc.rowcol; int n = lower+upper; int w = n+1;
+   mrc.length=nrows; Real* ColCopy;
+   int b; int s = c-upper;
+   if (s<=0) { w += s; s = 0; b = c+lower; } else b = s*w+n;
+   mrc.skip = s; s += w-nrows; if (s>0) w -= s; mrc.storage = w;
    if ( +(mrc.cw*(StoreHere+HaveStore)) )
       { REPORT ColCopy = mrc.data; }
    else
@@ -621,10 +615,10 @@ void BandMatrix::GetCol(MatrixRowCol& mrc)
 void BandMatrix::GetCol(MatrixColX& mrc)
 {
    REPORT
-   int c = mrc.rowcol; int n = lower_val+upper_val; int w = n+1;
-   mrc.length=nrows_val; int b; int s = c-upper_val;
-   if (s<=0) { w += s; s = 0; b = c+lower_val; } else b = s*w+n;
-   mrc.skip = s; s += w-nrows_val; if (s>0) w -= s; mrc.storage = w;
+   int c = mrc.rowcol; int n = lower+upper; int w = n+1;
+   mrc.length=nrows; int b; int s = c-upper;
+   if (s<=0) { w += s; s = 0; b = c+lower; } else b = s*w+n;
+   mrc.skip = s; s += w-nrows; if (s>0) w -= s; mrc.storage = w;
    mrc.data = mrc.store+mrc.skip;
 
    if (+(mrc.cw*LoadOnEntry))
@@ -640,8 +634,8 @@ void BandMatrix::GetCol(MatrixColX& mrc)
 void BandMatrix::RestoreCol(MatrixRowCol& mrc)
 {
    REPORT
-   int c = mrc.rowcol; int n = lower_val+upper_val; int s = c-upper_val;
-   Real* Mstore = store + ((s<=0) ? c+lower_val : s*n+s+n);
+   int c = mrc.rowcol; int n = lower+upper; int s = c-upper;
+   Real* Mstore = store + ((s<=0) ? c+lower : s*n+s+n);
    Real* Cstore = mrc.data;
    int w = mrc.storage;
    // while (w--) { *Mstore = *Cstore++; Mstore += n; }
@@ -654,8 +648,8 @@ void BandMatrix::RestoreCol(MatrixRowCol& mrc)
 void SymmetricBandMatrix::GetRow(MatrixRowCol& mrc)
 {
    REPORT
-   int r=mrc.rowcol; int s = r-lower_val; int w1 = lower_val+1; int o = r*w1;
-   mrc.length = ncols_val;
+   int r=mrc.rowcol; int s = r-lower; int w1 = lower+1; int o = r*w1;
+   mrc.length = ncols;
    if (s<0) { w1 += s; o -= s; s = 0; }
    mrc.skip = s;
 
@@ -666,24 +660,25 @@ void SymmetricBandMatrix::GetRow(MatrixRowCol& mrc)
       // do not allow StoreOnExit and !DirectPart
       if (+(mrc.cw*StoreOnExit))
          Throw(InternalException("SymmetricBandMatrix::GetRow(MatrixRowCol&)"));
-      int w = w1+lower_val; s += w-ncols_val; Real* RowCopy;
-      if (s>0) w -= s; mrc.storage = w; int w2 = w-w1;
+      int w = w1+lower; s += w-ncols; Real* RowCopy;
+      if (s>0) w -= s;
+      mrc.storage = w; int w2 = w-w1;
       if (!(mrc.cw*HaveStore))
       {
          REPORT
-         RowCopy = new Real [2*lower_val+1]; MatrixErrorNoSpace(RowCopy);
-         MONITOR_REAL_NEW("Make (SmBGetRow)",2*lower_val+1,RowCopy)
+         RowCopy = new Real [2*lower+1]; MatrixErrorNoSpace(RowCopy);
+         MONITOR_REAL_NEW("Make (SmBGetRow)",2*lower+1,RowCopy)
          mrc.cw += HaveStore; mrc.data = RowCopy;
       }
       else { REPORT  RowCopy = mrc.data; }
 
-      if (+(mrc.cw*LoadOnEntry) && ncols_val > 0)
+      if (+(mrc.cw*LoadOnEntry))
       {
-         REPORT
+	      REPORT
          Real* Mstore = store+o;
          while (w1--) *RowCopy++ = *Mstore++;
          Mstore--;
-         while (w2--) { Mstore += lower_val; *RowCopy++ = *Mstore; }
+         while (w2--) { Mstore += lower; *RowCopy++ = *Mstore; }
       }
    }
 }
@@ -694,9 +689,9 @@ void SymmetricBandMatrix::GetCol(MatrixRowCol& mrc)
    if (+(mrc.cw*StoreHere))
       Throw(InternalException("SymmetricBandMatrix::GetCol(MatrixRowCol&)"));
 
-   int c=mrc.rowcol; int w1 = lower_val+1; mrc.length=nrows_val;
+   int c=mrc.rowcol; int w1 = lower+1; mrc.length=nrows;
    REPORT
-   int s = c-lower_val; int o = c*w1;
+   int s = c-lower; int o = c*w1;
    if (s<0) { w1 += s; o -= s; s = 0; }
    mrc.skip = s;
 
@@ -707,14 +702,15 @@ void SymmetricBandMatrix::GetCol(MatrixRowCol& mrc)
       // do not allow StoreOnExit and !DirectPart
       if (+(mrc.cw*StoreOnExit))
          Throw(InternalException("SymmetricBandMatrix::GetCol(MatrixRowCol&)"));
-      int w = w1+lower_val; s += w-ncols_val; Real* ColCopy;
-      if (s>0) w -= s; mrc.storage = w; int w2 = w-w1;
+      int w = w1+lower; s += w-ncols; Real* ColCopy;
+      if (s>0) w -= s;
+      mrc.storage = w; int w2 = w-w1;
 
       if ( +(mrc.cw*HaveStore) ) { REPORT ColCopy = mrc.data; }
       else
       {
-         REPORT ColCopy = new Real [2*lower_val+1]; MatrixErrorNoSpace(ColCopy);
-         MONITOR_REAL_NEW("Make (SmBGetCol)",2*lower_val+1,ColCopy)
+         REPORT ColCopy = new Real [2*lower+1]; MatrixErrorNoSpace(ColCopy);
+         MONITOR_REAL_NEW("Make (SmBGetCol)",2*lower+1,ColCopy)
          mrc.cw += HaveStore; mrc.data = ColCopy;
       }
 
@@ -724,19 +720,19 @@ void SymmetricBandMatrix::GetCol(MatrixRowCol& mrc)
          Real* Mstore = store+o;
          while (w1--) *ColCopy++ = *Mstore++;
          Mstore--;
-         while (w2--) { Mstore += lower_val; *ColCopy++ = *Mstore; }
+         while (w2--) { Mstore += lower; *ColCopy++ = *Mstore; }
       }
    }
 }
 
 void SymmetricBandMatrix::GetCol(MatrixColX& mrc)
 {
-   int c=mrc.rowcol; int w1 = lower_val+1; mrc.length=nrows_val;
+   int c=mrc.rowcol; int w1 = lower+1; mrc.length=nrows;
    if (+(mrc.cw*DirectPart))
    {
       REPORT
-      int b = c*w1+lower_val;
-      mrc.skip = c; c += w1-nrows_val; w1 -= c; mrc.storage = w1;
+      int b = c*w1+lower;
+      mrc.skip = c; c += w1-nrows; w1 -= c; mrc.storage = w1;
       Real* ColCopy = mrc.data = mrc.store+mrc.skip;
       if (+(mrc.cw*LoadOnEntry))
       {
@@ -744,7 +740,7 @@ void SymmetricBandMatrix::GetCol(MatrixColX& mrc)
          Real* Mstore = store+b;
          // while (w1--) { *ColCopy++ = *Mstore; Mstore += lower; }
          if (w1) for (;;)
-            { *ColCopy++ = *Mstore; if (!(--w1)) break; Mstore += lower_val; }
+            { *ColCopy++ = *Mstore; if (!(--w1)) break; Mstore += lower; }
       }
    }
    else
@@ -753,12 +749,13 @@ void SymmetricBandMatrix::GetCol(MatrixColX& mrc)
       // do not allow StoreOnExit and !DirectPart
       if (+(mrc.cw*StoreOnExit))
          Throw(InternalException("SymmetricBandMatrix::GetCol(MatrixColX&)"));
-      int s = c-lower_val; int o = c*w1;
+      int s = c-lower; int o = c*w1;
       if (s<0) { w1 += s; o -= s; s = 0; }
       mrc.skip = s;
 
-      int w = w1+lower_val; s += w-ncols_val;
-      if (s>0) w -= s; mrc.storage = w; int w2 = w-w1;
+      int w = w1+lower; s += w-ncols;
+      if (s>0) w -= s;
+      mrc.storage = w; int w2 = w-w1;
 
       Real* ColCopy = mrc.data = mrc.store+mrc.skip;
 
@@ -768,7 +765,7 @@ void SymmetricBandMatrix::GetCol(MatrixColX& mrc)
          Real* Mstore = store+o;
          while (w1--) *ColCopy++ = *Mstore++;
          Mstore--;
-         while (w2--) { Mstore += lower_val; *ColCopy++ = *Mstore; }
+         while (w2--) { Mstore += lower; *ColCopy++ = *Mstore; }
       }
 
    }
@@ -778,11 +775,11 @@ void SymmetricBandMatrix::RestoreCol(MatrixColX& mrc)
 {
    REPORT
    int c = mrc.rowcol;
-   Real* Mstore = store + c*lower_val+c+lower_val;
+   Real* Mstore = store + c*lower+c+lower;
    Real* Cstore = mrc.data; int w = mrc.storage;
-   // while (w--) { *Mstore = *Cstore++; Mstore += lower_val; }
+   // while (w--) { *Mstore = *Cstore++; Mstore += lower; }
    if (w) for (;;)
-      { *Mstore = *Cstore++; if (!(--w)) break; Mstore += lower_val; }
+      { *Mstore = *Cstore++; if (!(--w)) break; Mstore += lower; }
 }
 
 // routines for identity matrix
@@ -790,13 +787,13 @@ void SymmetricBandMatrix::RestoreCol(MatrixColX& mrc)
 void IdentityMatrix::GetRow(MatrixRowCol& mrc)
 {
    REPORT
-   mrc.skip=mrc.rowcol; mrc.storage=1; mrc.data=store; mrc.length=ncols_val;
+   mrc.skip=mrc.rowcol; mrc.storage=1; mrc.data=store; mrc.length=ncols;
 }
 
 void IdentityMatrix::GetCol(MatrixRowCol& mrc)
 {
    REPORT
-   mrc.skip=mrc.rowcol; mrc.storage=1; mrc.length=nrows_val;
+   mrc.skip=mrc.rowcol; mrc.storage=1; mrc.length=nrows;
    if (+(mrc.cw*StoreHere))              // should not happen
       Throw(InternalException("IdentityMatrix::GetCol(MatrixRowCol&)"));
    else  { REPORT mrc.data=store; }
@@ -805,7 +802,7 @@ void IdentityMatrix::GetCol(MatrixRowCol& mrc)
 void IdentityMatrix::GetCol(MatrixColX& mrc)
 {
    REPORT
-   mrc.skip=mrc.rowcol; mrc.storage=1; mrc.length=nrows_val;
+   mrc.skip=mrc.rowcol; mrc.storage=1; mrc.length=nrows;
    mrc.data = mrc.store+mrc.skip; *(mrc.data)=*store;
 }
 
@@ -819,7 +816,7 @@ void IdentityMatrix::NextCol(MatrixColX& mrc)
    if (+(mrc.cw*StoreOnExit)) { REPORT *store=*(mrc.data); }
    mrc.IncrDiag();            // must increase mrc.data so need IncrDiag
    int t1 = +(mrc.cw*LoadOnEntry);
-   if (t1 && mrc.rowcol < ncols_val) { REPORT *(mrc.data)=*store; }
+   if (t1 && mrc.rowcol < ncols) { REPORT *(mrc.data)=*store; }
 }
 
 
@@ -846,4 +843,3 @@ MatrixColX::~MatrixColX() { if (+(cw*StoreOnExit)) gm->RestoreCol(*this); }
 }
 #endif
 
-///@}

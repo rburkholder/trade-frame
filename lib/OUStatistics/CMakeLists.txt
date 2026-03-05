@@ -8,6 +8,7 @@ PROJECT(OUStatistics)
 set(
   file_h
     ADF.h
+    NewMat/boolean.h
     NewMat/controlw.h
     NewMat/include.h
     NewMat/myexcept.h

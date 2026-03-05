@@ -1,8 +1,4 @@
-/// \ingroup newmat
-///@{
-
-/// \file newmatrm.h
-/// Rectangular matrix operations.
+//$$newmatrm.h                            rectangular matrix operations
 
 // Copyright (C) 1991,2,3,4: R B Davies
 
@@ -13,12 +9,12 @@
 namespace NEWMAT {
 #endif
 
+// operations on rectangular matrices
 
 class RectMatrixCol;
 
-/// Access rows and columns of a rectangular matrix.
-/// \internal
 class RectMatrixRowCol
+// a class for accessing rows and columns of rectangular matrices
 {
 protected:
 #ifdef use_namespace              // to make namespace work
@@ -49,8 +45,6 @@ public:
    FREE_CHECK(RectMatrixRowCol)
 };
 
-/// Access rows of a rectangular matrix.
-/// \internal
 class RectMatrixRow : public RectMatrixRowCol
 {
 public:
@@ -66,8 +60,6 @@ public:
    FREE_CHECK(RectMatrixRow)
 };
 
-/// Access columns of a rectangular matrix.
-/// \internal
 class RectMatrixCol : public RectMatrixRowCol
 {
 public:
@@ -84,8 +76,6 @@ public:
    FREE_CHECK(RectMatrixCol)
 };
 
-/// Access diagonal of a rectangular matrix.
-/// \internal
 class RectMatrixDiag : public RectMatrixRowCol
 {
 public:
@@ -96,8 +86,6 @@ public:
    void UpDiag() { store--; n++; }
    FREE_CHECK(RectMatrixDiag)
 };
-
-
 
 
 inline RectMatrixRow::RectMatrixRow
@@ -119,27 +107,6 @@ inline Real sign(Real x, Real y)
    { return (y>=0) ? x : -x; }                    // assume x >=0
 
 
-// Misc numerical things
-
-Real pythag(Real f, Real g, Real& c, Real& s);
-
-inline void GivensRotation(Real cGivens, Real sGivens, Real& x, Real& y)
-{
-   // allow for possibility &x = &y
-   Real tmp0 = cGivens * x + sGivens * y;
-   Real tmp1 = -sGivens * x + cGivens * y;
-   x = tmp0; y = tmp1;
-}
-   
-inline void GivensRotationR(Real cGivens, Real sGivens, Real& x, Real& y)
-{
-   // also change sign of y
-   // allow for possibility &x = &y
-   Real tmp0 = cGivens * x + sGivens * y;
-   Real tmp1 = sGivens * x - cGivens * y;
-   x = tmp0; y = tmp1;
-}   
-
 
 
 
@@ -153,4 +120,3 @@ inline void GivensRotationR(Real cGivens, Real sGivens, Real& x, Real& y)
 // body file: newmatrm.cpp
 
 
-///@}

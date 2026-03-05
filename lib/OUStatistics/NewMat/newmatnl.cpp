@@ -1,8 +1,4 @@
-/// \ingroup newmat
-///@{
-
-/// \file newmatnl.cpp
-/// Non-linear optimisation.
+//$$ newmatnl.cpp         Non-linear optimisation
 
 // Copyright (C) 1993,4,5,6: R B Davies
 
@@ -54,7 +50,7 @@ void FindMaximum2::Fit(ColumnVector& Theta, int n_it)
 	 z = 1.0 / sqrt(d1);
 	 H3 = H1 * z; K = (H3 - HP) * g; HP = H3;
 	 g = 0.0;                     // de-activate to use curved projection
-	 if ( g == 0.0 ) K1 = 0.0; else K1 = K * 0.2 + K1 * 0.6;
+	 if (g==0.0) K1 = 0.0; else K1 = K * 0.2 + K1 * 0.6;
 	 // (K - K1) * alpha + K1 * (1 - alpha)
 	 //     = K * alpha + K1 * (1 - 2 * alpha)
 	 K = K1 * d1; g = z;
@@ -134,7 +130,7 @@ void NonLinearLeastSquares::Value
    (const ColumnVector& Parameters, bool, Real& v, bool& oorg)
 {
    Tracer tr("NonLinearLeastSquares::Value");
-   Y.resize(n_obs); X.resize(n_obs,n_param);
+   Y.ReSize(n_obs); X.ReSize(n_obs,n_param);
    // put the fitted values in Y, the derivatives in X.
    Pred.Set(Parameters);
    if (!Pred.IsValid()) { oorg=true; return; }
@@ -146,8 +142,7 @@ void NonLinearLeastSquares::Value
    if (!Pred.IsValid()) { oorg=true; return; }  // check afterwards as well
    Y = *DataPointer - Y; Real ssq = Y.SumSquare();
    errorvar =  ssq / (n_obs - n_param);
-   cout << endl;
-   cout << setw(15) << setprecision(10) << " " << errorvar;
+   cout << "\n" << setw(15) << setprecision(10) << " " << errorvar;
    Derivs = Y.t() * X;          // get the derivative and stash it
    oorg = false; v = -0.5 * ssq;
 }
@@ -174,7 +169,7 @@ void NonLinearLeastSquares::Fit(const ColumnVector& Data,
    n_param = Parameters.Nrows(); n_obs = Data.Nrows();
    DataPointer = &Data;
    FindMaximum2::Fit(Parameters, Lim);
-   cout << "\nConverged" << endl;
+   cout << "\nConverged\n";
 }
 
 void NonLinearLeastSquares::MakeCovariance()
@@ -196,7 +191,7 @@ void NonLinearLeastSquares::GetCorrelations(SymmetricMatrix& Corr)
 
 void NonLinearLeastSquares::GetHatDiagonal(DiagonalMatrix& Hat) const
 {
-   Hat.resize(n_obs);
+   Hat.ReSize(n_obs);
    for (int i = 1; i<=n_obs; i++) Hat(i) = X.Row(i).SumSquare();
 }
 
@@ -210,8 +205,7 @@ void MLE_D_FI::Value
    if (!LL.IsValid(Parameters,wg)) { oorg=true; return; }
    v = LL.LogLikelihood();
    if (!LL.IsValid()) { oorg=true; return; }     // check validity again
-   cout << endl;
-   cout << setw(20) << setprecision(10) << v;
+   cout << "\n" << setw(20) << setprecision(10) << v;
    oorg = false;
    Derivs = LL.Derivatives();                    // Get derivatives
 }
@@ -235,7 +229,7 @@ void MLE_D_FI::Fit(ColumnVector& Parameters)
 {
    Tracer tr("MLE_D_FI::Fit");
    FindMaximum2::Fit(Parameters,Lim);
-   cout << "\nConverged" << endl;
+   cout << "\nConverged\n";
 }
   
 void MLE_D_FI::MakeCovariance()
@@ -262,5 +256,3 @@ void MLE_D_FI::GetCorrelations(SymmetricMatrix& Corr)
 }
 #endif
 
-
-///@}
