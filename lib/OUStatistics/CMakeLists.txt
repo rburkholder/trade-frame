@@ -5,6 +5,7 @@ PROJECT(OUStatistics)
 #set(CMAKE_EXE_LINKER_FLAGS "--trace --verbose")
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
+
 set(
   file_h
     ADF.h
@@ -40,6 +41,8 @@ set(
     NewMat/newmatrm.cpp
     NewMat/submat.cpp
   )
+
+add_compile_definitions(use_namespace)
 
 add_library(
   ${PROJECT_NAME} STATIC
