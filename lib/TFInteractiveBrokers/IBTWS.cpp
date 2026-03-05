@@ -1634,6 +1634,8 @@ void TWS::BuildInstrumentFromContractDetails( const ContractDetails& details, pI
       assert( 0 == pInstrument.get() );  // maybe incorrect at some time in the future
       pInstrument = Instrument::pInstrument_t( new Instrument( sLocalSymbol, it, sExchange ) );
       break;
+    default:
+      assert( false );
   }
 
   if ( nullptr == pInstrument )
