@@ -15,11 +15,10 @@
 
 #pragma once
 
-#include <string>
 #include <map>
 
-#include <OUCommon/MultiKeyCompare.h>
 #include <OUCommon/ManagerBase.h>
+#include <OUCommon/MultiKeyCompare.h>
 
 #include "KeyTypes.h"
 
@@ -43,14 +42,14 @@ public:
   typedef CashAccount::pCashAccount_t pCashAccount_t;
   typedef CashTransaction::pCashTransaction_t pCashTransaction_t;
 
-  CashManager(void);
-  ~CashManager(void);
+  CashManager();
+  ~CashManager();
 
   pCashAccount_t ConstructCashAccount( const idAccount_t& idAccount, const idCurrency_t& idCurrency );
   pCashAccount_t GetCashAccount( const idAccount_t& idAccount, const idCurrency_t& idCurrency );
   void DeleteAccount( const idAccount_t& idAccount, const idCurrency_t& idCurrency );
 
-//  pCashTransaction_t AddCashTransaction( 
+//  pCashTransaction_t AddCashTransaction(
 //    const idAccount_t& idAccount, const idCurrency_t& idCurrency, money_t mnyCredit, money_t mnyDebit, const std::string& sCode, const std::string& sDescription );
 
   void AttachToSession( ou::db::Session* pSession );
@@ -59,10 +58,10 @@ public:
 protected:
 private:
 
-  typedef ou::MultiKeyCompare<idAccount_t, idCurrency_t> key_t;
-  typedef std::pair<key_t, pCashAccount_t> pairCashAccount_t;
-  typedef std::map<key_t, pCashAccount_t> mapCashAccount_t;
-  typedef mapCashAccount_t::iterator iterCashAccount_t;
+  using key_t = ou::MultiKeyCompare<idAccount_t, idCurrency_t>;
+  using pairCashAccount_t = std::pair<key_t, pCashAccount_t>;
+  using mapCashAccount_t = std::map<key_t, pCashAccount_t>;
+  using iterCashAccount_t = mapCashAccount_t::iterator;
   mapCashAccount_t mapCashAccount;
 
   void HandleRegisterTables( ou::db::Session& session );

@@ -13,8 +13,6 @@
 
 // Started 20130407
 
-#include "stdafx.h"
-
 #include "CashManager.h"
 
 namespace ou { // One Unified
