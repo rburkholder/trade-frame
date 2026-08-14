@@ -25,7 +25,7 @@
 
 #include <boost/log/trivial.hpp>
 
-#include <OUCommon/KeyWordMatch.h>
+#include <OUCommon/KeyWordMatch.hpp>
 
 #include <TFTimeSeries/DatedDatum.h>
 #include <TFTimeSeries/TimeSeries.h>

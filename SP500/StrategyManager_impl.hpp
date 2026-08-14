@@ -26,7 +26,7 @@
 
 #include <unordered_map>
 
-#include <OUCommon/KeyWordMatch.h>
+#include <OUCommon/KeyWordMatch.hpp>
 
 #include <OUCharting/ChartDataView.h>
 

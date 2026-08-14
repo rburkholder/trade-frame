@@ -18,7 +18,7 @@
 #include <sstream>
 
 #include <OUCommon/Debug.h>
-#include <OUCommon/Network.h>
+#include <OUCommon/Network.hpp>
 #include <OUCommon/ReusableBuffers.h>
 
 #include "Messages.h"

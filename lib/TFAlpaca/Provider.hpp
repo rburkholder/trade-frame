@@ -28,7 +28,7 @@
 
 #include <boost/asio/ssl.hpp>
 
-#include <OUCommon/KeyWordMatch.h>
+#include <OUCommon/KeyWordMatch.hpp>
 
 #include <TFTrading/ProviderInterface.h>
 

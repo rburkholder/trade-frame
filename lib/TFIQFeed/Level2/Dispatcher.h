@@ -23,7 +23,7 @@
 
 #include <string>
 
-#include <OUCommon/Network.h>
+#include <OUCommon/Network.hpp>
 
 #include <TFIQFeed/Level2/MsgOrderClear.h>
 #include <TFIQFeed/Level2/MsgOrderArrival.h>

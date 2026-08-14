@@ -25,8 +25,8 @@
 #include <string>
 #include <functional>
 
-#include <OUCommon/Network.h>
-#include <OUCommon/KeyWordMatch.h>
+#include <OUCommon/Network.hpp>
+#include <OUCommon/KeyWordMatch.hpp>
 
 #include "SecurityType.h"
 

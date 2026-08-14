@@ -27,7 +27,7 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-#include <OUCommon/KeyWordMatch.h>
+#include <OUCommon/KeyWordMatch.hpp>
 
 #include "Config.hpp"
 

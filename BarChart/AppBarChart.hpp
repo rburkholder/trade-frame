@@ -38,7 +38,7 @@
 #include <wx/app.h>
 #include <wx/frame.h>
 
-#include <OUCommon/KeyWordMatch.h>
+#include <OUCommon/KeyWordMatch.hpp>
 
 #include <OUCharting/ChartDataView.h>
 #include <OUCharting/ChartEntryIndicator.h>

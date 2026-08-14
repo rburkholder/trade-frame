@@ -36,7 +36,7 @@ namespace posix_time = boost::posix_time;
 #include <boost/phoenix/core.hpp>
 
 #include <OUCommon/ReusableBuffers.h>
-#include <OUCommon/Network.h>
+#include <OUCommon/Network.hpp>
 
 namespace qi = boost::spirit::qi;
 

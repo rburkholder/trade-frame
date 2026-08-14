@@ -30,13 +30,13 @@ set(
     Decimal.h
     Delegate.h
     FastDelegate.h
-    KeyWordMatch.h
+    KeyWordMatch.hpp
 #    Log.h
     ManagerBase.h
     MinHeap.h
     MSWindows.h
     MultiKeyCompare.h
-    Network.h
+    Network.hpp
     ReadCodeListCommon.h
     ReadNaicsToSicCodeList.h
     ReadSicCodeList.h

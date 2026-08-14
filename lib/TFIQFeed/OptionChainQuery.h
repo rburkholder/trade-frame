@@ -18,7 +18,7 @@
 #include <vector>
 #include <functional>
 
-#include <OUCommon/Network.h>
+#include <OUCommon/Network.hpp>
 
 namespace ou { // One Unified
 namespace tf { // TradeFrame

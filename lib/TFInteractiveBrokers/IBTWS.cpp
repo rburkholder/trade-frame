@@ -30,7 +30,7 @@
 
 #include <OUCommon/TimeSource.h>
 
-#include <OUCommon/KeyWordMatch.h>
+#include <OUCommon/KeyWordMatch.hpp>
 
 #include <TFTrading/KeyTypes.h>
 #include <TFTrading/OrderManager.h>

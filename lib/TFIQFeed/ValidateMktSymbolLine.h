@@ -22,7 +22,7 @@
 #include <OUCommon/FastDelegate.h>
 using namespace fastdelegate;
 
-#include <OUCommon/KeyWordMatch.h>
+#include <OUCommon/KeyWordMatch.hpp>
 
 #include "SecurityType.h"
 #include "ParseOptionSymbol.h"
