@@ -21,9 +21,6 @@ find_package(Boost ${TF_BOOST_VERSION} CONFIG REQUIRED COMPONENTS date_time prog
 
 #message("boost lib: ${Boost_LIBRARIES}")
 
-# lua/sol2 define:
-set(SOL_ALL_SAFETIES_ON 1)
-
 set(
   file_h
     AppMarketTrader.hpp
@@ -61,6 +58,9 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC wxUSE_GUI )
 target_compile_definitions(${PROJECT_NAME} PUBLIC -D_FILE_OFFSET_BITS=64 )
 target_compile_definitions(${PROJECT_NAME} PUBLIC -DWXUSINGDLL )
 target_compile_definitions(${PROJECT_NAME} PUBLIC -D__WXGTK__ )
+
+target_compile_definitions( ${PROJECT_NAME} PUBLIC SOL_LUAJIT=1 )
+target_compile_definitions( ${PROJECT_NAME} PUBLIC SOL_ALL_SAFETIES_ON=1 )
 
 target_include_directories(
   ${PROJECT_NAME} PUBLIC
