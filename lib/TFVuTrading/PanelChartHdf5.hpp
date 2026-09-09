@@ -85,6 +85,8 @@ private:
 
   CustomItemData_Hdf5::EDatumType m_eLatestDatumType;
 
+  void ClearChartDataView();
+
   size_t LoadDataAndGenerateChart( CustomItemData_Hdf5::EDatumType, const std::string& sPath );
 
   void IterateObjects();

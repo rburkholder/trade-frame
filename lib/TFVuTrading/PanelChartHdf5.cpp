@@ -80,6 +80,7 @@ void PanelChartHdf5::CreateControls() {
 }
 
 void PanelChartHdf5::SetFileName( const std::string& sPathName ) {
+  ClearChartDataView();
   m_pdm = std::make_unique<ou::tf::HDF5DataManager>( ou::tf::HDF5DataManager::RO, sPathName );
   DeleteTree();
   IterateObjects();
@@ -185,12 +186,16 @@ void PanelChartHdf5::HandleTreeEventItemActivated( TreeItem* pti ) {
 
 }
 
-size_t PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData_Hdf5::EDatumType edt, const std::string& sPath ) {
-
+void PanelChartHdf5::ClearChartDataView() {
   if ( nullptr != m_pChartDataView ) {
     SetChartDataView( nullptr );
     m_pChartDataView.reset();
   }
+}
+
+size_t PanelChartHdf5::LoadDataAndGenerateChart( CustomItemData_Hdf5::EDatumType edt, const std::string& sPath ) {
+
+  ClearChartDataView();
   m_pChartDataView = std::make_shared<ou::ChartDataView>();
 
   size_t cntSeriesElements {};
