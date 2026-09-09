@@ -269,9 +269,11 @@ void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
       //std::string sTime = boost::posix_time::to_simple_string( td );
       if ( dtCursor.is_not_a_date_time() ) {}
       else {
-        std::string sDT = boost::posix_time::to_simple_string( dtCursor );
-        m_chartMaster.SetCrossHairTime( sDT );
-        m_pChartDataView->NotifyCursorDateTime( dtCursor );
+        if ( m_pChartDataView ) {
+          std::string sDT = boost::posix_time::to_simple_string( dtCursor );
+          m_chartMaster.SetCrossHairTime( sDT );
+          m_pChartDataView->NotifyCursorDateTime( dtCursor );
+        }
       }
     }
 
@@ -433,9 +435,11 @@ void WinChartView::HandleMouseWheel( wxMouseEvent& event ) {
       if ( dtCursor.is_not_a_date_time() ) {}
       else {
         // Todo: check Year is out of valid range: 1400..9999"
-        const std::string sDT = boost::posix_time::to_simple_string( dtCursor );
-        m_chartMaster.SetCrossHairTime( sDT );
-        m_pChartDataView->NotifyCursorDateTime( dtCursor );
+        if ( m_pChartDataView ) {
+          const std::string sDT = boost::posix_time::to_simple_string( dtCursor );
+          m_chartMaster.SetCrossHairTime( sDT );
+          m_pChartDataView->NotifyCursorDateTime( dtCursor );
+        }
       }
 
       DrawChart();
