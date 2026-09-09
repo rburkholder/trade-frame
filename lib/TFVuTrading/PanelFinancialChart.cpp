@@ -36,6 +36,7 @@ PanelFinancialChart::PanelFinancialChart( wxWindow* parent, wxWindowID id, const
 PanelFinancialChart::~PanelFinancialChart() {
   m_pWinChartView->SetChartDataView( nullptr );
   m_pChartDataView = nullptr;
+  m_pWinChartView = nullptr; // destroyed when splitter window destroyed
 }
 
 bool PanelFinancialChart::Create( wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style ) {
