@@ -125,8 +125,20 @@ void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView ) {
   // TODO: need to sync with the gui refresh thread
   m_pChartDataView = pChartDataView; // TODO: need some additional tender loving care with this for the mutex
   if ( m_pChartDataView ) {
-    //m_vpDataViewVisual = m_vpDataViewExtents = m_pChartDataView->GetExtents(); // TODO: may not want this if to maintain continuity across charts
     m_vpDataViewExtents = m_pChartDataView->GetExtents();
+    // if previous and current chart time frames do not overlap, reset the timeframes
+    if ( m_vpDataViewExtents.HasBoth() && m_vpDataViewExtents.HasBoth() ) {
+      if ( ( m_vpDataViewExtents.dtEnd < m_vpDataViewVisual.dtBegin )
+        || ( m_vpDataViewExtents.dtBegin > m_vpDataViewVisual.dtEnd ) ) {
+        m_vpDataViewVisual = m_vpDataViewExtents;
+      }
+      else {
+        // keep current DataViewVisual
+      }
+    }
+    else {
+      m_vpDataViewVisual = m_vpDataViewExtents; // reset if nothing
+    }
   }
   else { // nullptr
     //m_vpDataViewVisual = m_vpDataViewExtents = ViewPort_t();
