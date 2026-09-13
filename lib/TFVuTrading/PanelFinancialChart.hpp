@@ -81,7 +81,7 @@ protected:
 
   template<typename Archive>
   void save( Archive& ar, const unsigned int version ) const {
-    double d( m_pSplitter->GetSashGravity() );
+    double d( m_pSplitter->GetSashPosition() );
     ar & d;
   }
 
@@ -89,7 +89,7 @@ protected:
   void load( Archive& ar, const unsigned int version ) {
     double d;
     ar & d;
-    m_pSplitter->SetSashGravity( d );
+    m_pSplitter->SetSashPosition( d );
   }
 
   BOOST_SERIALIZATION_SPLIT_MEMBER()
