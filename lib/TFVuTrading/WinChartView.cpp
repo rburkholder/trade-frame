@@ -136,7 +136,7 @@ void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView ) {
         if ( m_vpDataViewExtents.dtEnd < m_vpDataViewVisual.dtBegin ) {
           // new data is prior to visual
           const auto diff1 = m_vpDataViewVisual.dtBegin - m_vpDataViewExtents.dtBegin;
-          const auto diff2 = boost::posix_time::hours( 0 + 24 * ( diff1.hours() / 24 ) );
+          const auto diff2 = boost::posix_time::hours( 24 * ( diff1.hours() / 24 ) );
           m_vpDataViewVisual = ViewPort_t( m_vpDataViewVisual.dtBegin - diff2, m_vpDataViewVisual.dtEnd - diff2 );
           //BOOST_LOG_TRIVIAL(debug) << "  m_vpDataViewVisual:  " << m_vpDataViewVisual.dtBegin << ',' << m_vpDataViewVisual.dtEnd << " new1";
           if ( ( m_vpDataViewExtents.dtEnd < m_vpDataViewVisual.dtBegin )
@@ -147,8 +147,8 @@ void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView ) {
         else {
           if ( m_vpDataViewExtents.dtBegin > m_vpDataViewVisual.dtEnd ) {
             // new data is after visual
-            const auto diff1 = m_vpDataViewExtents.dtBegin - m_vpDataViewVisual.dtBegin;
-            const auto diff2 = boost::posix_time::hours( 24 + 24 * ( diff1.hours() / 24 ) );
+            const auto diff1 = m_vpDataViewExtents.dtEnd - m_vpDataViewVisual.dtEnd;
+            const auto diff2 = boost::posix_time::hours( 24 * ( diff1.hours() / 24 ) );
             m_vpDataViewVisual = ViewPort_t( m_vpDataViewVisual.dtBegin + diff2, m_vpDataViewVisual.dtEnd + diff2 );
             //BOOST_LOG_TRIVIAL(debug) << "  m_vpDataViewVisual:  " << m_vpDataViewVisual.dtBegin << ',' << m_vpDataViewVisual.dtEnd << " new2";
             if ( ( m_vpDataViewExtents.dtEnd < m_vpDataViewVisual.dtBegin )
