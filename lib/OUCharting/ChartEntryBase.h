@@ -97,7 +97,7 @@ protected:
   void SetIxStart( size_t n ) { m_ixStart = n; }
   void SetCntElements( size_t n ) { m_nElements = n; }
 
-  void IncCntElements() { m_nElements++; }
+  void IncCntElements() { ++m_nElements; }
 
   //bool m_bUseThreadSafety;
   //static const unsigned int lockfreesize = 4096;
@@ -149,6 +149,7 @@ public:
   void SetViewPort( const range_t& );
 
   range_t GetExtents() const;
+  range_t GetRefeshedExtents();
   boost::posix_time::ptime GetExtentBegin() const;
   boost::posix_time::ptime GetExtentEnd() const;
 

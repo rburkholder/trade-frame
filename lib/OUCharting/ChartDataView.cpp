@@ -13,6 +13,9 @@
 
 #include <algorithm>
 
+//#include <boost/log/trivial.hpp>
+//#include <boost/date_time/posix_time/posix_time_io.hpp>
+
 #include "ChartDataView.h"
 
 namespace ou { // One Unified
@@ -161,6 +164,36 @@ void ChartDataView::SetViewPort( const ViewPort_t& vp ) {
 
 ChartDataView::ViewPort_t ChartDataView::GetViewPort() const {
   return ViewPort_t( m_dtViewPortBegin, m_dtViewPortEnd );
+}
+
+ChartDataView::ViewPort_t ChartDataView::GetRefreshedExtents() {
+  {
+    std::scoped_lock<std::mutex> lock( m_mutex );
+    ViewPort_t view;
+    std::for_each(
+      m_vChartEntryCarrier.begin(), m_vChartEntryCarrier.end(),
+      [&view]( ChartEntryCarrier& cec ){
+        try {
+          ChartEntryTime* p = dynamic_cast<ChartEntryTime*>( cec.GetChartEntry() );
+          if ( p ) {
+            ViewPort_t extent = p->GetRefeshedExtents();
+          }
+        }
+        catch ( const std::bad_cast& ) {
+          // just ignore classes without ChartEntryTime
+          // probably not necessary as dynamic_cast of pointer is nullptr
+          assert( false );
+        }
+        catch ( ... ) {
+          assert( false );
+        }
+      });
+    //return view;
+  }
+
+  auto extents = GetExtents();
+  //BOOST_LOG_TRIVIAL(debug) << "  extents2: " << extents.dtBegin << ',' << extents.dtEnd;
+  return extents;
 }
 
 ChartDataView::ViewPort_t ChartDataView::GetExtents() {

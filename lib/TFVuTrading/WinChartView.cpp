@@ -125,19 +125,50 @@ void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView ) {
   // TODO: need to sync with the gui refresh thread
   m_pChartDataView = pChartDataView; // TODO: need some additional tender loving care with this for the mutex
   if ( m_pChartDataView ) {
-    m_vpDataViewExtents = m_pChartDataView->GetExtents();
+    m_vpDataViewExtents = m_pChartDataView->GetRefreshedExtents();
     // if previous and current chart time frames do not overlap, reset the timeframes
-    if ( m_vpDataViewExtents.HasBoth() && m_vpDataViewExtents.HasBoth() ) {
-      if ( ( m_vpDataViewExtents.dtEnd < m_vpDataViewVisual.dtBegin )
-        || ( m_vpDataViewExtents.dtBegin > m_vpDataViewVisual.dtEnd ) ) {
-        m_vpDataViewVisual = m_vpDataViewExtents;
+    //BOOST_LOG_TRIVIAL(debug) << "  m_vpDataViewExtents: " << m_vpDataViewExtents.dtBegin << ',' << m_vpDataViewExtents.dtEnd;
+    //BOOST_LOG_TRIVIAL(debug) << "  m_vpDataViewVisual:  " << m_vpDataViewVisual.dtBegin << ',' << m_vpDataViewVisual.dtEnd;
+    if ( m_vpDataViewExtents.HasBoth() ) {
+      if ( m_vpDataViewVisual.HasBoth() ) {
+        //auto dateExtentsBegin = m_vpDataViewExtents.dtBegin.date();
+        //auto dateVisualBegin = m_vpDataViewVisual.dtBegin.date();
+        if ( m_vpDataViewExtents.dtEnd < m_vpDataViewVisual.dtBegin ) {
+          // new data is prior to visual
+          const auto diff1 = m_vpDataViewVisual.dtBegin - m_vpDataViewExtents.dtBegin;
+          const auto diff2 = boost::posix_time::hours( 0 + 24 * ( diff1.hours() / 24 ) );
+          m_vpDataViewVisual = ViewPort_t( m_vpDataViewVisual.dtBegin - diff2, m_vpDataViewVisual.dtEnd - diff2 );
+          //BOOST_LOG_TRIVIAL(debug) << "  m_vpDataViewVisual:  " << m_vpDataViewVisual.dtBegin << ',' << m_vpDataViewVisual.dtEnd << " new1";
+          if ( ( m_vpDataViewExtents.dtEnd < m_vpDataViewVisual.dtBegin )
+            || ( m_vpDataViewExtents.dtBegin > m_vpDataViewVisual.dtEnd ) ) {
+              m_vpDataViewVisual = m_vpDataViewExtents;
+          }
+        }
+        else {
+          if ( m_vpDataViewExtents.dtBegin > m_vpDataViewVisual.dtEnd ) {
+            // new data is after visual
+            const auto diff1 = m_vpDataViewExtents.dtBegin - m_vpDataViewVisual.dtBegin;
+            const auto diff2 = boost::posix_time::hours( 24 + 24 * ( diff1.hours() / 24 ) );
+            m_vpDataViewVisual = ViewPort_t( m_vpDataViewVisual.dtBegin + diff2, m_vpDataViewVisual.dtEnd + diff2 );
+            //BOOST_LOG_TRIVIAL(debug) << "  m_vpDataViewVisual:  " << m_vpDataViewVisual.dtBegin << ',' << m_vpDataViewVisual.dtEnd << " new2";
+            if ( ( m_vpDataViewExtents.dtEnd < m_vpDataViewVisual.dtBegin )
+              || ( m_vpDataViewExtents.dtBegin > m_vpDataViewVisual.dtEnd ) ) {
+                m_vpDataViewVisual = m_vpDataViewExtents;
+            }
+          }
+          else {
+            // there is overlap, so leave visual alone
+          }
+        }
       }
       else {
-        // keep current DataViewVisual
+        // no visual so prep it
+        m_vpDataViewVisual = m_vpDataViewExtents;
       }
     }
     else {
-      m_vpDataViewVisual = m_vpDataViewExtents; // reset if nothing
+      // no data
+      m_vpDataViewVisual = m_vpDataViewExtents;
     }
   }
   else { // nullptr
@@ -150,6 +181,7 @@ void WinChartView::SetChartDataView( ou::ChartDataView* pChartDataView ) {
   //  m_fDebug( "assignment visual begin",  boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtBegin ) );
   //  m_fDebug( "assignment visual end",    boost::posix_time::to_iso_extended_string( m_vpDataViewVisual.dtEnd ) );
   //}
+  //BOOST_LOG_TRIVIAL(debug) << "  m_vpDataViewVisual:  " << m_vpDataViewVisual.dtBegin << ',' << m_vpDataViewVisual.dtEnd << " end";
 }
 
 void WinChartView::HandleMouseMotion( wxMouseEvent& event ) {
@@ -564,6 +596,7 @@ void WinChartView::DrawChart() {
             [this](){
               std::scoped_lock<std::mutex> lock( m_mutexChartDataView );
 
+              // high cost call, see if GetExtents() can be cached
               m_vpDataViewExtents = m_pChartDataView->GetExtents();
 
               if ( m_fDebug && m_pChartDataView->GetDebug() ) {

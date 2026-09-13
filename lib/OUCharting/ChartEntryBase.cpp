@@ -14,7 +14,7 @@
 #include <algorithm>
 
 #include <boost/log/trivial.hpp>
-#include <boost/date_time/posix_time/posix_time_io.hpp>
+//#include <boost/date_time/posix_time/posix_time_io.hpp>
 
 #include "ChartEntryBase.h"
 
@@ -223,6 +223,13 @@ void ChartEntryTime::SetViewPort( const range_t& range ) {
       //SetCntElements( iterEnd - iterBegin );
     }
   }
+}
+
+ChartEntryTime::range_t ChartEntryTime::GetRefeshedExtents() {
+  ClearQueue();
+  auto extents = GetExtents();
+  //BOOST_LOG_TRIVIAL(debug) << "  extents: " << extents.dtBegin << ',' << extents.dtEnd;
+  return extents;
 }
 
 ChartEntryTime::range_t ChartEntryTime::GetExtents() const {

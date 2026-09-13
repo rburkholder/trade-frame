@@ -81,6 +81,7 @@ public:
   const std::string& GetDescription() const { return m_sDescription; };
 
   ViewPort_t GetExtents();
+  ViewPort_t GetRefreshedExtents();
   boost::posix_time::ptime GetExtentBegin();
   boost::posix_time::ptime GetExtentEnd();
 
