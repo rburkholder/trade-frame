@@ -8,11 +8,11 @@ This is a:
 
 A primary goal of this solution is to provide a means of tracking an [Option Combo Order](lib/TFTrading/Order_Combo.hpp) through the birth to death life-cycle.  It is easy to enter into a option combo with Interactive Brokers with their user interface, but there does not seem to be an effective way to keep the legs grouped for tracking overall profit/loss.
 
-This library provides a means of ![Tracking](lib/TFOptionCombos/Tracker.h) a ![Combo](lib/TFOptionCombos/Combo.h) ![Leg](lib/TFOptionCombos/Leg.h) with a ![Position](lib/TFTrading/Position.h).  Positions can be grouped together to form ![Portfolios](lib/TFTrading/Portfolio.h).  Portfolios representing Combos can be grouped together to represent the overall profit/loss of a trading Portfolio.
+This library provides a means of [Tracking](lib/TFOptionCombos/Tracker.h) a [Combo](lib/TFOptionCombos/Combo.hpp) [Leg](lib/TFOptionCombos/Leg.h) with a [Position](lib/TFTrading/Position.h).  Positions can be grouped together to form [Portfolios](lib/TFTrading/Portfolio.h).  Portfolios representing Combos can be grouped together to represent the overall profit/loss of a trading Portfolio.
 
-Positions are composed of a ![Watch](lib/TFTrading/Watch.h) class to record bid/ask/tick of ![Instruments](lib/TFTrading/Instrument.h).
+Positions are composed of a [Watch](lib/TFTrading/Watch.h) class to record bid/ask/tick of [Instruments](lib/TFTrading/Instrument.h).
 
-![Options](lib/TFOptions/Option.h) inherit from the Watch class to provide ![Greeks](lib/TFTimeSeries/DatedDatum.h), which are computed in real time with an ![Option Engine](lib/TFOptions/Engine.h).
+[Options](lib/TFOptions/Option.h) inherit from the Watch class to provide [Greeks](lib/TFTimeSeries/DatedDatum.h), which are computed in real time with an [Option Engine](lib/TFOptions/Engine.hpp).
 
 A [Simulation Interface](lib/TFSimulation/SimulationInterface.hpp) is provided for testing strategies off-line.  The simulator will accept [Orders](lib/TFTrading/Order.h) of type Market and Limit assuming bid/ask data has been captured from the exchange during a live session.  A 50ms - 100ms delay queue has been implemented to better simulate round-trip and slippage effects of order submission.
 
@@ -22,7 +22,7 @@ Picture from the ComboTrading project showing an instrument list, with a chart f
 
 ![Option Greeks Timeline](notes/pictures/qgc-20180925-c-1195_2018-08-16_12-55-40.png)
 
-More pictures under ![ComboTrading](ComboTrading)
+More pictures under [ComboTrading](ComboTrading)
 
 ## Template
 
@@ -166,34 +166,34 @@ to port back to Windows.  There are various Windows based artifacts in various d
 
 The lib directory has a series of libraries I use throughout the various projects/applications.  Primary libraries include:
 
-* ![TFTimeSeries](lib/TFTimeSeries) - manage trades, quotes, greeks, ![level II order book](lib/TFIQFeed/Level2)
-* ![TFSimulation](lib/TFSimulation) - simulation engine
-* ![TFIQFeed](lib/TFIQFeed) - engine to talk to DTNIQ Feed for Level1 & Level2 data (ask me for a referral)
-* ![TFInteractiveBrokers](lib/TFInteractiveBrokers) - engine to talk to IB
-* ![TFIndicators](lib/TFIndicators) - some indicators
-* ![TFHDF5TimeSeries](lib/TFHDF5TimeSeries) - wraps the HDF5 library for storing time series
-* ![TFOptions](lib/TFOptions) - options calculations
-* ![TFTrading](lib/TFTrading) - manages orders, executions, portfolios, positions, accounts,
-* ![TFVuTrading](lib/TFVuTrading) - provides a number of forms, panels, and related user-interface elements
-* ![OUCharting](lib/OUCharting) - wrapper around ChartDirector for plots and charts
-* ![OUSQL](lib/OUSQL) - which is an ORM wrapper around a sqlite database for maintaining trading records
+* [TFTimeSeries](lib/TFTimeSeries) - manage trades, quotes, greeks, [level II order book](lib/TFIQFeed/Level2)
+* [TFSimulation](lib/TFSimulation) - simulation engine
+* [TFIQFeed](lib/TFIQFeed) - engine to talk to DTNIQ Feed for Level1 & Level2 data (ask me for a referral)
+* [TFInteractiveBrokers](lib/TFInteractiveBrokers) - engine to talk to IB
+* [TFIndicators](lib/TFIndicators) - some indicators
+* [TFHDF5TimeSeries](lib/TFHDF5TimeSeries) - wraps the HDF5 library for storing time series
+* [TFOptions](lib/TFOptions) - options calculations
+* [TFTrading](lib/TFTrading) - manages orders, executions, portfolios, positions, accounts,
+* [TFVuTrading](lib/TFVuTrading) - provides a number of forms, panels, and related user-interface elements
+* [OUCharting](lib/OUCharting) - wrapper around ChartDirector for plots and charts
+* [OUSQL](lib/OUSQL) - which is an ORM wrapper around a sqlite database for maintaining trading records
 
 These are some of the currently supported applications:
 
-* ![AutoTrade](AutoTrade/README.md) - code as template for automated trading - start of some ML based work
-* ![BarChart](BarChart/README.md) - tag instruments by interest and review last 200 daily bars
-* ![BasketTrading](BasketTrading/README.md) - a work in progress for trading futures based options combinations
-* ![Collector](Collector/README.md) - stream real time bid/ask/tick data to disk for use in backtesting and training
-* ![ComboTrading](ComboTrading/README.md) - basics of trading multiple securities, such as various options strategies
-* ![CurrencyTrader](CurrencyTrader/README.md) - exploratory code for understanding currency trading concepts
-* ![Dividend](Dividend/README.md) - console app to query IQFeed for possible dividend based equity investments
-* ![DepthOfMarket](DepthOfMarket/README.md) - use a level II ladder to trade futures
-* ![Hdf5Chart](Hdf5Chart/README.md) - view the contents of the hdf5 data set
-* ![IndicatorTrading](IndicatorTrading/README.md) - view and trade with futures level II data
-* ![IQFeedMarketSymbols](IQFeedMarketSymbols/README.md) - automatically download and decompress the latest mkt_symbol.txt file from dtn/iqfeed
-* ![IQFeedGetHistory](IQFeedGetHistory/README.md) - load up with historical data for looking for trading ideas
-* ![LiveChart](LiveChart/README.md) - view instruments in real time
-* ![SP500](SP500/README.md) - Backtest SPY symbol with support of ticks_ratio using libtorch LSTM based model to train/predict on Collector data
+* [AutoTrade](AutoTrade/README.md) - code as template for automated trading - start of some ML based work
+* [BarChart](BarChart/README.md) - tag instruments by interest and review last 200 daily bars
+* [BasketTrading](BasketTrading/README.md) - a work in progress for trading futures based options combinations
+* [Collector](Collector/README.md) - stream real time bid/ask/tick data to disk for use in backtesting and training
+* [ComboTrading](ComboTrading/README.md) - basics of trading multiple securities, such as various options strategies
+* [CurrencyTrader](CurrencyTrader/README.md) - exploratory code for understanding currency trading concepts
+* [Dividend](Dividend/README.md) - console app to query IQFeed for possible dividend based equity investments
+* [DepthOfMarket](DepthOfMarket/README.md) - use a level II ladder to trade futures
+* [Hdf5Chart](Hdf5Chart/README.md) - view the contents of the hdf5 data set
+* [IndicatorTrading](IndicatorTrading/README.md) - view and trade with futures level II data
+* [IQFeedMarketSymbols](IQFeedMarketSymbols/README.md) - automatically download and decompress the latest mkt_symbol.txt file from dtn/iqfeed
+* [IQFeedGetHistory](IQFeedGetHistory/README.md) - load up with historical data for looking for trading ideas
+* [LiveChart](LiveChart/README.md) - view instruments in real time
+* [SP500](SP500/README.md) - Backtest SPY symbol with support of ticks_ratio using libtorch LSTM based model to train/predict on Collector data
 
 Sample code, not supported:
 
