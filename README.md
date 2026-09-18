@@ -43,10 +43,12 @@ See the referenced URL for the variety of instructions across CPU releases.
 Scripts are library version specific.  Build notes are as of 2021/11/22.
 There are some wxWidget requirements for using a GTK variation of video drivers (I've used Nvidia and Radeon cards successfully).
 
+2026/09/17 modified to use boost 1.92, wxWidgets 3.2.11
+
 You'll need to have about 10G drive space free to build the project, the related libraries,
 as well as the installs (from my libs-build repository).
 
-Debian Bookworm is used as the platform.  The library installer is specific to this distribution.
+Debian is used as the platform.  The library installer is specific to this distribution.
 The installer may or may not work with other distributions or flavours.
 
 DTN/IQFeed requires Wine to run.  Starting with the 6.2 release of IQFeed, wine32 is no longer required.
