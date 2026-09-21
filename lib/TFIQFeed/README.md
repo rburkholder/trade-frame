@@ -31,3 +31,38 @@ There's currently no accessor exposing `m_mapTradeCondition` back out of `IQFeed
 `SymbolList`, which is public) - raised in #4 and left out for now pending a concrete use case, since the
 right shape (a lookup-by-id method vs. exposing the map directly, and how short/long names get used)
 depends on that use case.
+
+### Commonly-seen codes and why they matter for bar-building
+
+The live table above is the source of truth, but a few codes come up often enough in practice to be
+worth naming directly - reported from field experience with the feed, not from this codebase, so treat
+the specific hex/decimal values as a starting point to confirm against your own connection's table
+rather than a guarantee:
+
+A trade's condition field can carry more than one flag concatenated as pairs of hex digits - e.g. a raw
+`3D87` splits into `3D` (61 decimal, Intramarket Sweep) and `87` (135 decimal, Odd Lot Trade).
+
+| Hex | Decimal | Condition | Typical impact on OHLC bar-building |
+|---|---|---|---|
+| `87` | 135 | Odd Lot Trade | Small-size execution; usually excluded from standard historical bars. |
+| `89` | 137 | Qualified Contingent Trade (QCT) | Can produce artificial price spikes; usually excluded from OHLC calculation. |
+| `44` | 68 | Stock Option Trade | Often tied to a multi-leg execution package rather than a standalone print. |
+| `06` | 6 | Cash Trade | Same-day clearing execution. |
+| - | - | Average Price Trade | Price is calculated over a period rather than at a single moment; can distort real-time order-flow tracking if treated as a normal print. |
+
+This is exactly the kind of thing that shows up as unexplained spikes or odd lots polluting an OHLC bar
+or a chart if a consumer of this library isn't filtering on the condition field at all - background
+reading on the practical symptom: [Too many spikes with IQFeed data](https://forum.amibroker.com/t/too-many-spike-with-iqfeed-data/16973),
+[IQFeed plugin bad-tick filter](https://forum.amibroker.com/t/iqfeed-plugin-7-xx-with-bad-tick-filter/40778).
+
+Two reasonable filtering strategies, depending on what a consumer of this library actually wants:
+
+- **Standard/default filtering** - mirrors IQFeed's own historical-bar generation: drop all "Other"-type
+  trades, including odd lots, before bar-building.
+- **Advanced/custom filtering** - keep odd lots (useful for microstructure analysis) but still drop
+  Average Price and QCT trades, since those are the two most likely to produce a spurious vertical spike
+  on a chart.
+
+Either way, the filtering decision belongs in the consumer of `CTradeConditions`/`sTradeConditions`, not
+in this library - matching the same "IQFeed's table is the source of truth, trade-frame just carries the
+code through" design as the rest of this section.
