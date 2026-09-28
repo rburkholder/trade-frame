@@ -89,12 +89,26 @@ public:
   std::string CentralBankers( const std::string& currency ) const { return Url( "/central_bankers/" + Lower( currency ) ); }
 
   // optional query parameters, eg start_date / end_date as YYYY-MM-DD
+  // list endpoints return 20 rows by default, at most 100 per request, newest first;
+  //   page with limit / offset, following pagination.next_offset while pagination.has_more
   using params_t = std::map<std::string, std::string>;
   std::string Announcements( const std::string& currency, const std::string& indicator, const params_t& params ) const {
     return Url( "/announcements/" + Lower( currency ) + "/" + indicator, params );
   }
   std::string Forex( const std::string& base, const std::string& quote, const params_t& params ) const {
     return Url( "/forex/" + Lower( base ) + "/" + Lower( quote ), params );
+  }
+  std::string Predictions( const std::string& currency, const std::string& indicator, const params_t& params ) const {
+    return Url( "/predictions/" + Lower( currency ) + "/" + indicator, params );
+  }
+  std::string Cot( const std::string& currency, const params_t& params ) const {
+    return Url( "/cot/" + Lower( currency ), params );
+  }
+  std::string Commodity( const std::string& indicator, const params_t& params ) const {
+    return Url( "/commodities/" + indicator, params );
+  }
+  static params_t Page( unsigned int limit, unsigned int offset ) {
+    return { { "limit", std::to_string( limit ) }, { "offset", std::to_string( offset ) } };
   }
 
 private:
