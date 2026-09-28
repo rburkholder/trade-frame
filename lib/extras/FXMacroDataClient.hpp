@@ -86,7 +86,6 @@ public:
   std::string RiskSentiment() const { return Url( "/risk_sentiment" ); }
   std::string News( const std::string& currency ) const { return Url( "/news/" + Lower( currency ) ); }
   std::string PressReleases( const std::string& currency ) const { return Url( "/press-releases/" + Lower( currency ) ); }
-  std::string CentralBankers( const std::string& currency ) const { return Url( "/central_bankers/" + Lower( currency ) ); }
 
   // optional query parameters, eg start_date / end_date as YYYY-MM-DD
   // list endpoints return 20 rows by default, at most 100 per request, newest first;
