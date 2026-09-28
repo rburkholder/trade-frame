@@ -5,6 +5,7 @@ project(trade-frame-libs)
 
 add_subdirectory(DEA)
 add_subdirectory(ExcelFormat)
+add_subdirectory(extras)
 #add_subdirectory(OUAuth)
 #add_subdirectory(OUBerkeleyDb)
 add_subdirectory(OUCharting)
