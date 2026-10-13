@@ -148,8 +148,8 @@ public:
 
   void SetViewPort( const range_t& );
 
-  range_t GetExtents() const;
-  range_t GetRefeshedExtents();
+  const range_t GetExtents() const;
+  const range_t GetRefeshedExtents();
   boost::posix_time::ptime GetExtentBegin() const;
   boost::posix_time::ptime GetExtentEnd() const;
 

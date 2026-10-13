@@ -225,14 +225,14 @@ void ChartEntryTime::SetViewPort( const range_t& range ) {
   }
 }
 
-ChartEntryTime::range_t ChartEntryTime::GetRefeshedExtents() {
+const ChartEntryTime::range_t ChartEntryTime::GetRefeshedExtents() {
   ClearQueue();
-  auto extents = GetExtents();
+  const auto extents = GetExtents();
   //BOOST_LOG_TRIVIAL(debug) << "  extents: " << extents.dtBegin << ',' << extents.dtEnd;
   return extents;
 }
 
-ChartEntryTime::range_t ChartEntryTime::GetExtents() const {
+const ChartEntryTime::range_t ChartEntryTime::GetExtents() const {
   if ( 0 == m_vDateTime.size() ) {
     return range_t( boost::posix_time::not_a_date_time, boost::posix_time::not_a_date_time );
   }
