@@ -27,7 +27,7 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include <wx/menu.h>
 #include <wx/sizer.h>

@@ -21,7 +21,7 @@
 
 #include <boost/log/trivial.hpp>
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include "OptionChainModel_impl.hpp"
 

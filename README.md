@@ -55,7 +55,7 @@ DTN/IQFeed requires Wine to run.  Starting with the 6.2 release of IQFeed, wine3
 An x64-only installation of wine may generate some wine32 messages and errors, but they can be ignored.
 
 
-```
+```bash
 # run with bash
 # git for latest code, wine for IQFeed daemon
 sudo apt-get update && sudo apt-get install git wine64 wget ttf-mscorefonts-installer
@@ -65,6 +65,16 @@ wine64 iqfeed_client_6_2_0_25.exe
 # interactive brokers TWS for linux
 wget https://download2.interactivebrokers.com/installers/tws/stable/tws-stable-linux-x64.sh
 sh tws-stable-linux-x64.sh
+
+### build fmt
+git clone --depth=1 https://github.com/fmtlib/fmt.git
+pushd fmt
+mkdir build
+cd build
+cmake -D FMT_TEST=FALSE ..
+make
+sudo make install
+popd
 
 # install and build initial environment and libraries
 git clone https://github.com/rburkholder/libs-build.git

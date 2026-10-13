@@ -21,7 +21,7 @@
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include <wx/sizer.h>
 #include <wx/textdlg.h>

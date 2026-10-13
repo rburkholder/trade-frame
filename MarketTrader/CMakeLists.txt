@@ -94,7 +94,7 @@ target_link_libraries(
       TFTimeSeries
       libou_telegram.a
       luajit-5.1
-      fmt
+      fmt.a
       dl
       z
       curl

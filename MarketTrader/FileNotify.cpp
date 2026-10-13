@@ -20,15 +20,14 @@
  * Based on:Apparition
  */
 
-#include <cerrno>
-#include <stdexcept>
 #include <unistd.h>
-
 #include <sys/inotify.h>
 
-#include <assert.h>
+#include <cerrno>
+#include <cassert>
+#include <stdexcept>
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>

@@ -19,7 +19,7 @@
  * Created: May 12, 2024 14:37:24
  */
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include <wx/sizer.h>
 #include <wx/stattext.h>

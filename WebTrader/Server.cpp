@@ -21,7 +21,7 @@
 
 #include <sstream>
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
